@@ -1,0 +1,30 @@
+###################################################################
+################### USERS #########################################
+###################################################################
+create table users
+(
+    Id int PRIMARY KEY AUTO_INCREMENT,
+    Name varchar(128) NOT NULL,
+    Nickname varchar(128) NOT NULL UNIQUE,
+    Birthday date NOT NULL,
+    Registration date NOT NULL,
+    Level int NOT NULL,
+    Avatar varchar(1024),
+    Form text(16384)
+)
+
+
+###################################################################
+################### COURSES #######################################
+###################################################################
+create table courses
+(
+    Id int PRIMARY KEY AUTO_INCREMENT,
+    Name varchar(128) NOT NULL,
+    Difficulty varchar(128) NOT NULL,
+    Sort int NOT NULL,
+    CreationDate date NOT NULL,
+    DifficultyColor varchar(64),
+    Description varchar(2048),
+    ImgSrc varchar(1024)
+)
