@@ -3,7 +3,7 @@ import { Form, Button } from 'react-bootstrap'
 import { useSelector, useDispatch } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
 import { ServerAPI_POST } from '../../libs/ServerAPI'
-import { resetForm, setValidated, setMessage, setNickname, setPassword1, setPassword2, setName, setBirthday } from '../../redux/slices/registerSlice'
+import { resetRegisterForm, setRegisterValidated, setRegisterMessage, setRegisterNickname, setRegisterPassword1, setRegisterPassword2, setRegisterName, setRegisterBirthday } from '../../redux/slices/registerSlice'
 
 const RegisterPage = () => {
 	const navigate = useNavigate()
@@ -11,7 +11,7 @@ const RegisterPage = () => {
 	const dispatch = useDispatch()
 
 	useEffect(() => { 
-		dispatch(resetForm()) // eslint-disable-next-line
+		dispatch(resetRegisterForm()) // eslint-disable-next-line
 	}, [])
 
 	const handleSubmit = (event) => {
@@ -19,7 +19,7 @@ const RegisterPage = () => {
 		event.stopPropagation()
 		if (!(event.currentTarget.checkValidity() === false)) {
 			ServerAPI_POST({
-				url: "/register",
+				url: "/api/register",
 				body: {
 					nickname: register.nickname,
 					name: register.name,
@@ -28,26 +28,26 @@ const RegisterPage = () => {
 					birthday: register.birthday
 				},
 				onDataReceived: (data) => {
-					dispatch(resetForm())
+					dispatch(resetRegisterForm())
 					navigate("/")
 				},
 				handleStatus: (res) => {
 					if (res.status === 422) {
 						console.log(res)
-						dispatch(setMessage(res.data.message))
+						dispatch(setRegisterMessage(res.data.message))
 					}
 				}
 			})
 		}
 
-		dispatch(setValidated())
+		dispatch(setRegisterValidated())
 	}
 
-	const handleChangeNickname  = (e) => { dispatch(setNickname (e.target.value)) }
-	const handleChangeName  	= (e) => { dispatch(setName 	(e.target.value)) }
-	const handleChangePassword1 = (e) => { dispatch(setPassword1(e.target.value)) }
-	const handleChangePassword2 = (e) => { dispatch(setPassword2(e.target.value)) }
-	const handleChangeBirthday	= (e) => { dispatch(setBirthday (e.target.value)) }
+	const handleChangeNickname  = (e) => { dispatch(setRegisterNickname (e.target.value)) }
+	const handleChangeName  	= (e) => { dispatch(setRegisterName 	(e.target.value)) }
+	const handleChangePassword1 = (e) => { dispatch(setRegisterPassword1(e.target.value)) }
+	const handleChangePassword2 = (e) => { dispatch(setRegisterPassword2(e.target.value)) }
+	const handleChangeBirthday	= (e) => { dispatch(setRegisterBirthday (e.target.value)) }
 
 	return (
 		<div className='w-100 mx-auto'>

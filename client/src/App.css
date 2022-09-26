@@ -44,3 +44,23 @@
     transform: rotate(360deg);
   }
 }
+
+a.a-card, a.a-card:link, a.a-card:visited, a.a-card:focus, a.a-card:hover, a.a-card:active {
+	outline: none;
+	text-decoration: none;
+	color: #000000;
+}
+
+img.profile {
+	max-width: 96px;
+	max-height: 96px;
+	float: left;
+}
+
+.drillingCardImg {
+	height : 50vh;
+}
+
+.testBorder {
+	border: #000000 solid 1px;
+}

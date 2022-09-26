@@ -10,27 +10,27 @@ const getStrFromParams = (rawParams) => {
 
 // TODO: handle server no response 
 const ServerAPI = ({url, method, urlParams, body, onDataReceived, handleStatus, handleServerError, headers}) => {
-	console.log("SAPI", IP, url, getStrFromParams(urlParams))
+	//console.log("SAPI", IP, url, getStrFromParams(urlParams))
 	fetch(IP + url + getStrFromParams(urlParams), {
 		method : method,
 		headers : headers,
 		body : body && JSON.stringify(body)
 	}).then(response => {
-		console.log("get promise")
+		//console.log("get promise")
 		const promise = response.json()
 		if (promise !== undefined)
 		{
 			promise.then((data) => {
 				if (response.ok) {
-					console.log("handle data")
+					//console.log("handle data")
 					onDataReceived && onDataReceived(data)
 				}
 				else {
-					console.log("handle status")
+					//console.log("handle status")
 					handleStatus && handleStatus({isOk: response.ok, status: response.status, data: data && data})
 				}
 			}).catch((err) => {
-				console.log("promise error")
+				//console.log("promise error")
 				console.log(err);
 			})
 		}
@@ -40,7 +40,7 @@ const ServerAPI = ({url, method, urlParams, body, onDataReceived, handleStatus, 
 			console.log(err);
 		})*/
 	}).catch((err) => {
-		console.log("handle server error")
+		//console.log("handle server error")
 		console.log(err)
 		handleServerError && handleServerError()
 	})

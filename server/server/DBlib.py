@@ -1,3 +1,4 @@
+from time import sleep
 import mysql.connector
 from mysql.connector import Error
 
@@ -10,7 +11,7 @@ class DataBase:
 		self.connection = self.CreateConnection()
 	
 
-	def CreateConnection(self,):
+	def CreateConnection(self):
 		connection = None
 		try:
 			connection = mysql.connector.connect(
@@ -19,24 +20,29 @@ class DataBase:
 				passwd = self.user_password,
 				database = self.db_name
 			)
-			print("Connection to MySQL DB successful")
+			print("[INFO] Connection to MySQL DB successful")
 		except Error as e:
-			print(f"The error '{e}' occurred")
+			print(f"[ERROR] Connection error: {e}")
 
 		return connection
 
 
 	def GetCursor(self):
-		try:
-			cursor = self.connection.cursor()
-			return cursor
-		except Error as e:
-			print("ERRRROR!!!")
-			print(f"The error '{e}' occurred")
-			if (e.errno == -1):
-				connection = self.CreateConnection()
-				if (connection):
+		while True:
+			try:
+				if (self.connection == None):
+					raise ValueError("Connection is None")
+				cursor = self.connection.cursor()
+				return cursor
+			except Error as e:
+				print(f"[ERROR] Cursor error: {e}")
+				if (e.errno == -1):
+					connection = self.CreateConnection()
 					self.connection = connection
+			except:
+				print("[ERROR] Cursor error: Connection is None")
+				self.connection = self.CreateConnection()
+			sleep(2)
 
 
 	def CreateDatabase(self, db_name):
@@ -54,7 +60,6 @@ class DataBase:
 		try:
 			cursor.execute(query)
 			self.connection.commit()
-			print("Query(E) executed successfully")
 		except Error as e:
 			print(f"The error '{e}' occurred")
 
@@ -94,9 +99,12 @@ class DataBase:
 		self.ExecuteQuery(update_elements)
 
 
-	def GetTableElements(self, tableName, where = None, start = -1, count = 65536):
-		select_elements = f"SELECT * FROM {tableName} " + (f"WHERE {where} " if where != None else "") + "LIMIT " + (f"{start}, " if start >= 0 else "") + f"{count}"
-		print(select_elements)
+	def GetTableElements(self, tableName, where = None, start = -1, count = 65536, tableElements = None):
+		whereStr = f"WHERE {where} " if where != None else ""
+		limitStr = "LIMIT " + (f"{start}, " if start >= 0 else "") + f"{count}"
+		elementsStr = tableElements if tableElements != None else "*" 
+		select_elements = "SELECT " + elementsStr + f" FROM {tableName} " + whereStr + limitStr
+		print("GetTableElements", select_elements)
 		return self.ExecuteReadQuery(select_elements)
 	
 
@@ -109,13 +117,50 @@ class DataBase:
 		return self.ExecuteReadQuery("DESCRIBE " + tableName)
 
 
-	def GetTableJson(self, tableName, where = None, start = -1, count = 65536):
-		DBData = self.GetTableElements(tableName, where = where, start = start, count = count)
-		DBColData = self.GetTableElementsNames(tableName)
+	def MacroAllTableElements(self):
+		return "ALL"
+
+	def GetJsonFromNamesAndData(self, names, data):
 		result = []
-		for data in DBData:
+		for element in data:
 			line = {}
-			for field, name in zip(data, DBColData):
-				line.update({name[0] : field})
+			for field, name in zip(element, names):
+				line.update({name : str(field) if field else field})
 			result.append(line)
 		return result
+
+	def GetTableJson(self, tableName, where = None, start = -1, count = 65536, tableElements = None):
+		DBData = self.GetTableElements(tableName, where = where, start = start, count = count, tableElements=tableElements)
+		DBColData = []
+		for name in tableName.split(","):
+			columns = self.GetTableElementsNames(name)
+			for column in columns:
+				DBColData.append(column[0])
+#		DBColData = self.GetTableElementsNames(tableName)
+		return self.GetJsonFromNamesAndData(DBColData, DBData)
+
+	def GetTablesJson(self, tables, where = None, start = -1, count = 65536):
+		fromArr = []		# FROM
+		columnArr = []		# Column names for json format
+		selectArr = []		# SELECT
+		print(tables)
+		for name, info in tables.items():
+			print(name, info)
+			fromArr.append(name)
+			if info.get("elements"):
+				if info["elements"] == self.MacroAllTableElements():	# Select all elements form table
+					columns = self.GetTableElementsNames(name)
+					for column in columns:
+						columnArr.append(column[0])
+					selectArr.append(f"{name}.*")
+				elif type(info["elements"]) is list:					# Select some elements form table
+					for column in info["elements"]:
+						columnArr.append(column)
+						selectArr.append(f"{name}.{column}")
+
+		selectStr = ", ".join(selectArr)
+		fromStr = ", ".join(fromArr)
+		data = self.GetTableElements(fromStr, where = where, start = start, count = count, tableElements=selectStr)
+
+		return self.GetJsonFromNamesAndData(columnArr, data)
+			

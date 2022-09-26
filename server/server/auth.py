@@ -1,4 +1,4 @@
-from flask import current_app, request, abort, jsonify, make_response
+from flask import current_app, request, abort
 from flask_login import current_user, login_user, login_required, logout_user
 from . import login_manager, RL, DB
 from .RedisUser import RedisUser
@@ -8,20 +8,34 @@ import datetime
 
 @login_manager.user_loader
 def load_user(user_id):
+	print("GetUserFromDB")
 	if user_id is not None:
 		print("user id not None")
 		return RedisUser().FromDB(user_id)
 	print("user id is None")
 	return None
 
+def getCurrentUserData():
+	data = {}
+	if (current_user.get_id() != None):
+		data = {
+			"name"     : current_user.GetName(),
+			"nickname" : current_user.GetNickname(),
+			"level"    : current_user.GetLevel(),
+			"avatar"   : current_user.GetAvatar(),
+			"form"     : current_user.GetForm()
+		}
 
-@current_app.route("/islogin", methods=["GET"])
+	return data
+
+@current_app.route("/api/islogin", methods=["GET"])
 def islogin():
 	print(current_user.get_id())
-	return { "isAuth" : current_user.get_id() != None }
+	data = getCurrentUserData()
+	return { "isAuth" : current_user.get_id() != None, "userData" : data }
 
 
-@current_app.route("/login", methods=["POST"])
+@current_app.route("/api/login", methods=["POST"])
 def login():
 	if not request.json:
 		abort(400)
@@ -38,12 +52,12 @@ def login():
 				print("Password")
 				#cookieDuration = datetime.timedelta(seconds = 10)
 				print("login user: ", login_user(user, remember=True))
-				return jsonify({ "isAuth" : True })
+				return { "isAuth" : current_user.get_id() != None, "userData": getCurrentUserData() }
 
-	return make_response(jsonify({ "message" : "Wrong nickname or password!" }), 422)
+	return { "message" : "Wrong nickname or password!" }, 422
 
 
-@current_app.route("/register", methods=["POST"])
+@current_app.route("/api/register", methods=["POST"])
 def register():
 	if not request.json:
 		abort(400)
@@ -62,10 +76,10 @@ def register():
 
 	if not (nickname or password1 or password2 or name or birthday):
 		print("Пожалуйста, заполните все поля")
-		return (make_response(jsonify({ "message" : "Пожалуйста, заполните все поля" }), 422))
+		return { "message" : "Пожалуйста, заполните все поля" }, 422
 	elif password1 != password2:
 		print("Пароли не совпадают: ", nickname)
-		return (make_response(jsonify({ "message" : "Пароли не совпадают" }), 422))
+		return { "message" : "Пароли не совпадают" }, 422
 	else:
 		user = RedisUser().FromDB(nickname)
 		if user.IsExists():
@@ -85,11 +99,11 @@ def register():
 	userData = DB.GetTableJson("users", f"nickname='{nickname}'")[0]
 	print("userData", userData)
 
-	return make_response({ "userData" : userData }, 201)
+	return { "userData" : userData }, 201
 
 
-@current_app.route("/logout", methods=["POST"])
+@current_app.route("/api/logout", methods=["POST"])
 @login_required
 def logout():
 	logout_user()
-	return jsonify({ "message" : "User Logout!" })
+	return { "message" : "User Logout!" }

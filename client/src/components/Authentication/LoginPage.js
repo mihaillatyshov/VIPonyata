@@ -2,16 +2,16 @@ import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Form, Button } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
-import { resetForm, setNickname, setPassword, setValidated } from '../../redux/slices/loginSlice'
+import { resetLoginForm, setLoginNickname, setLoginPassword, setLoginValidated } from '../../redux/slices/loginSlice'
 import { ServerAPI_POST } from '../../libs/ServerAPI'
-import { setIsAuth } from '../../redux/slices/userSlice'
+import { setUserData } from '../../redux/slices/userSlice'
 
 const LoginPage = () => {
 	const login = useSelector((state) => state.login)
 	const dispatch = useDispatch()
 
 	useEffect(() => {
-		dispatch(resetForm()) // eslint-disable-next-line
+		dispatch(resetLoginForm()) // eslint-disable-next-line
 	}, [])
 
 	const handleSubmit = (event) => {
@@ -19,23 +19,23 @@ const LoginPage = () => {
 		event.stopPropagation()
 		if (!(event.currentTarget.checkValidity() === false)) {
 			ServerAPI_POST({
-				url: "/login",
+				url: "/api/login",
 				body: {
 					nickname: login.nickname,
 					password: login.password
 				},
 				onDataReceived: (data) => {
-					dispatch(setIsAuth(data.isAuth))
-					dispatch(resetForm())
+					dispatch(setUserData(data))
+					dispatch(resetLoginForm())
 				}
 			})
 		}
 
-		dispatch(setValidated())
+		dispatch(setLoginValidated())
 	}
 
-	const handleChangeNickname = (e) => { dispatch(setNickname(e.target.value)) }
-	const handleChangePassword = (e) => { dispatch(setPassword(e.target.value)) }
+	const handleChangeNickname = (e) => { dispatch(setLoginNickname(e.target.value)) }
+	const handleChangePassword = (e) => { dispatch(setLoginPassword(e.target.value)) }
 
 	return (
 		<div className='w-100 mx-auto'>

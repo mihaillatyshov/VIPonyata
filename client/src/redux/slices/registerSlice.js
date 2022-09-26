@@ -14,36 +14,35 @@ export const registerSlice = createSlice({
 	name: 'register',
 	initialState: initialState,
 	reducers: {
-		resetForm: (state) => { // eslint-disable-next-line
+		resetRegisterForm: (state) => { // eslint-disable-next-line
 			Object.keys(initialState).map(val => {
 				state[val] = initialState[val]
 			})
 		},
-		setValidated: (state) => {
+		setRegisterValidated: (state) => {
 			state.validated = true
 		},
-		setMessage: (state, action) => {
+		setRegisterMessage: (state, action) => {
 			state.message = action.payload
 		},
-		setNickname: (state, action) => {
+		setRegisterNickname: (state, action) => {
 			state.nickname = action.payload
 		},
-		setPassword1: (state, action) => {
+		seRegisterPassword1: (state, action) => {
 			state.password1 = action.payload
 		},
-		setPassword2: (state, action) => {
+		setRegisterPassword2: (state, action) => {
 			state.password2 = action.payload
 		},
-		setName: (state, action) => {
+		setRegisterName: (state, action) => {
 			state.name = action.payload
 		},
-		setBirthday: (state, action) => {
+		setRegisterBirthday: (state, action) => {
 			state.birthday = action.payload
 		},
 	},
 })
 
-// Action creators are generated for each case reducer function
-export const { resetForm, setValidated, setMessage, setNickname, setPassword1, setPassword2, setName, setBirthday } = registerSlice.actions
+export const { resetRegisterForm, setRegisterValidated, setRegisterMessage, setRegisterNickname, setRegisterPassword1, setRegisterPassword2, setRegisterName, setRegisterBirthday } = registerSlice.actions
 
 export default registerSlice.reducer

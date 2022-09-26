@@ -6,7 +6,7 @@ from .DBlib import DataBase
 
 DB = DataBase("localhost", "mihail", "dbnfvbys5", "japan")
 RL = RedisLogin(host="localhost")
-login_manager = LoginManager()
+login_manager = LoginManager() 
 
 def createApp():
 	"""Construct the core app object."""

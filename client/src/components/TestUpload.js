@@ -6,7 +6,7 @@ const TestUpload = () => {
 	let filepath = undefined
 
 	const handleUploadImage = (e) => {
-		e.preventDefault();
+		e.preventDefault()
 		console.log('startHandle')
 		console.log(filepath)
 
@@ -17,7 +17,7 @@ const TestUpload = () => {
 		data.append('file', filepath)
 		console.log(data)
 		
-		fetch('/upload', {
+		fetch('/api/upload', {
 			method: 'POST',
 			body: data,
 		}).then(response => {
@@ -49,7 +49,7 @@ const TestUpload = () => {
 			</div>
 			<img src={imageURL} alt="img" />
 			<br />
-			<img src={"http://localhost:3000/img/38UNp4Gt-d8.jpg"} alt="img" />
+			<img src={"/img/38UNp4Gt-d8.jpg"} alt="img" />
 
 			<Link to="/"> Main </Link>
 		</div>

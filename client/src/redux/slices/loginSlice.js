@@ -10,24 +10,23 @@ export const loginSlice = createSlice({
 	name: 'login',
 	initialState: initialState,
 	reducers: {
-		resetForm: (state) => { // eslint-disable-next-line
+		resetLoginForm: (state) => { // eslint-disable-next-line
 			Object.keys(initialState).map(val => {
 				state[val] = initialState[val]
 			})
 		},
-		setValidated: (state) => {
+		setLoginValidated: (state) => {
 			state.validated = true
 		},
-		setNickname: (state, action) => {
+		setLoginNickname: (state, action) => {
 			state.nickname = action.payload
 		},
-		setPassword: (state, action) => {
+		setLoginPassword: (state, action) => {
 			state.password = action.payload
 		},
 	},
 })
 
-// Action creators are generated for each case reducer function
-export const { resetForm, setValidated, setNickname, setPassword } = loginSlice.actions
+export const { resetLoginForm, setLoginValidated, setLoginNickname, setLoginPassword } = loginSlice.actions
 
 export default loginSlice.reducer

@@ -7,16 +7,13 @@ export const userSlice = createSlice({
 		data: undefined
 	},
 	reducers: {
-		setIsAuth: (state, action) => {
-			state.isAuth = action.payload
-		},
-		setName: (state, action) => {
-			state.data = { name: action.payload }
-		},
+		setUserData: (state, action) => {
+			state.isAuth = action.payload.isAuth
+			state.data = action.payload.userData
+		}
 	},
 })
 
-// Action creators are generated for each case reducer function
-export const { setIsAuth, setName } = userSlice.actions
+export const { setUserData } = userSlice.actions
 
 export default userSlice.reducer

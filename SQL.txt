@@ -8,6 +8,7 @@ create table users
     Nickname varchar(128) NOT NULL UNIQUE,
     Birthday date NOT NULL,
     Registration date NOT NULL,
+    Theme varchar(128),
     Level int NOT NULL,
     Avatar varchar(1024),
     Form text(16384)
@@ -27,4 +28,96 @@ create table courses
     DifficultyColor varchar(64),
     Description varchar(2048),
     ImgSrc varchar(1024)
+)
+
+create table usercourses
+(
+    Id int PRIMARY KEY AUTO_INCREMENT,
+    UserId int NOT NULL,
+    foreign key (UserId) references japan.users(Id),
+    CourseId int NOT NULL,
+    foreign key (CourseId) references japan.courses(Id)
+)
+
+
+###################################################################
+################### LESSONS #######################################
+###################################################################
+create table lessons
+(
+    Id int PRIMARY KEY AUTO_INCREMENT,
+    Name varchar(128) NOT NULL,
+    Number int NOT NULL,
+    CreationDate date NOT NULL,
+    Description varchar(2048),
+    CourseId int NOT NULL,
+    foreign key (CourseId) references japan.courses(Id)
+)
+
+create table userlessons
+(
+    Id int PRIMARY KEY AUTO_INCREMENT,
+    Deadline date,
+    UserId int NOT NULL,
+    foreign key (UserId) references japan.users(Id),
+    LessonId int NOT NULL,
+    foreign key (LessonId) references japan.lessons(Id)
+)
+
+
+###################################################################
+################### DICTIONARY ####################################
+###################################################################
+create table dictionary
+(
+    Id int PRIMARY KEY AUTO_INCREMENT,
+    CharJP varchar(128),
+    WordJP varchar(128),
+    RU varchar(128) NOT NULL,
+    ImgSrc varchar(1024)
+)
+
+
+###################################################################
+################### DRILLINGS #####################################
+###################################################################
+create table drillings
+(
+    Id int PRIMARY KEY AUTO_INCREMENT,
+    Description varchar(2048),
+    TimeLimit time,
+    LessonId int NOT NULL,
+    foreign key (LessonId) references japan.lessons(Id)
+)
+
+create table drillingcard
+(
+    Id int PRIMARY KEY AUTO_INCREMENT,
+    Sentence varchar(256) NOT NULL,
+    Answer varchar(256) NOT NULL,
+    DrillingId int NOT NULL,
+    foreign key (DrillingId) references japan.drillings(Id),
+    DictionaryId int NOT NULL,
+    foreign key (DictionaryId) references japan.dictionary(Id)
+)
+
+create table drillingfindpair
+(
+    Id int PRIMARY KEY AUTO_INCREMENT,
+    RU varchar(2048) NOT NULL,
+    JP varchar(2048) NOT NULL,
+    DrillingId int NOT NULL,
+    foreign key (DrillingId) references japan.drillings(Id)
+)
+
+create table donedrillings
+(
+    Id int PRIMARY KEY AUTO_INCREMENT,
+    TryNumber int NOT NULL,
+    StartTime datetime NOT NULL,
+    EndTime datetime,
+    UserId int NOT NULL,
+    foreign key (UserId) references japan.users(Id),
+    DrillingId int NOT NULL,
+    foreign key (DrillingId) references japan.drillings(Id)
 )
