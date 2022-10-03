@@ -8,6 +8,10 @@ import StudentDrillingCard from './Types/StudentDrillingCard';
 import StudentDrillingFindPair from './Types/StudentDrillingFindPair';
 import NavigateToElement from '../NavigateToElement';
 import StudentDrillingTimeRemaining from './StudentDrillingTimeRemaining';
+import StudentDrillingScramble from './Types/StudentDrillingScramble';
+import { LogInfo } from '../../libs/Logger';
+import StudentDrillingTranslate from './Types/StudentDrillingTranslate';
+import StudentDrillingSpace from './Types/StudentDrillingSpace';
 
 const StudentDrillingPage = () => {
 	const { id } = useParams()
@@ -20,6 +24,7 @@ const StudentDrillingPage = () => {
 		ServerAPI_GET({
 			url: `/api/drilling/${id}`,
 			onDataReceived: (data) => {
+				LogInfo(data)
 				dispatch(setDrillingInfo(data.drilling))
 				dispatch(setDrillingItems(data.items))
 			},
@@ -36,12 +41,21 @@ const StudentDrillingPage = () => {
 				drilling.info ? (drilling.info.try && (
 					<div>
 						<div> {drilling.info.Description} {drilling.info.TimeLimit} {drilling.info.try.StartTime} </div>
-						<StudentDrillingTimeRemaining />
-						<StudentDrillingNav items={drilling.items}/>
+						{
+							drilling.info.Deadline ? (
+								<StudentDrillingTimeRemaining />
+							) : (
+								<div> </div>
+							)
+						}
+						< StudentDrillingNav items={drilling.items} />
 						<Routes>
-							<Route path="/drillingcard/:cardId" element={ <StudentDrillingCard cards={ drilling.items.drillingcard } /> } />
-							<Route path="/drillingcard" element={ <NavigateToElement to="../drillingcard/0" /> } />
-							<Route path="/drillingfindpair" element={ <StudentDrillingFindPair pairs={ drilling.items.drillingfindpair } /> } />
+							<Route path="/drillingcard" element={<NavigateToElement to="../drillingcard/0" />} />
+							<Route path="/drillingcard/:cardId" element={<StudentDrillingCard cards={drilling.items.drillingcard} />} />
+							<Route path="/drillingfindpair" element={<StudentDrillingFindPair pairs={drilling.items.drillingfindpair} />} />
+							<Route path="/drillingscramble" element={<StudentDrillingScramble scrambles={drilling.items.drillingscramble} />} />
+							<Route path="/drillingtranslate" element={<StudentDrillingTranslate words={drilling.items.drillingtranslate} />} />
+							<Route path="/drillingspace" element={<StudentDrillingSpace spaces={drilling.items.drillingspace} />} />
 						</Routes>
 						<div>
 							tasks block

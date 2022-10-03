@@ -1,5 +1,7 @@
-from datetime import datetime
+from calendar import c
+from datetime import datetime, timedelta
 import random
+import hashlib
 import threading
 import os
 from flask import current_app, request, session, jsonify
@@ -10,6 +12,13 @@ from . import DB
 
 def GetSingleItem(DBRes):
 	return DBRes[0] if DBRes else None
+
+
+def StrToTimedelta(string):
+	hms = string.split(":")
+	return timedelta(hours=int(hms[0]), minutes=int(hms[1]), seconds=int(hms[2]))
+
+print("MD5", hashlib.md5("JP1".encode()).hexdigest())
 
 
 def DrillingEndTimeHandler(doneDrillingId):
@@ -25,10 +34,14 @@ def TimeToInt(time):
 	return time.second + time.minute * 60 + time.hour * 60 * 60
 
 
+def CalcTasksDeadline(timeLimit, timeStart):
+	return datetime.strptime(timeStart, '%Y-%m-%d %H:%M:%S') + StrToTimedelta(timeLimit)
+
+
 def CalcTasksTimeRemaining(timeLimit, timeStart):
-	print(timeLimit, timeStart)
-	timeRemaining = (timeLimit - (datetime.now() - timeStart))
-	return TimeToInt(timeRemaining if timeRemaining.year >= timeLimit.year else datetime.min)
+	timeNow = datetime.now()
+	endTime = CalcTasksDeadline(timeLimit, timeStart)
+	return (endTime - timeNow).seconds if endTime > timeNow else 0
 
 
 def OnRestartServerCheckTasksTimers():
@@ -37,11 +50,9 @@ def OnRestartServerCheckTasksTimers():
 		where=f"drillings.Id = donedrillings.DrillingId AND drillings.TimeLimit IS NOT NULL AND donedrillings.EndTime IS NULL")
 	print(drillings)
 	for drilling in drillings:
-		timeRemaining = CalcTasksTimeRemaining(
-			datetime.strptime(drilling["TimeLimit"], '%H:%M:%S'), 
-			datetime.strptime(drilling["StartTime"], '%Y-%m-%d %H:%M:%S'))
+		timeRemaining = CalcTasksTimeRemaining(drilling["TimeLimit"], drilling["StartTime"])
 		print(timeRemaining)
-		threading.Timer(timeRemaining, DrillingEndTimeHandler, args = { drilling["Id"] }).start()
+		threading.Timer(CalcTasksTimeRemaining(drilling["TimeLimit"], drilling["StartTime"]), DrillingEndTimeHandler, args = { drilling["Id"] }).start()
 		print(drilling["TimeLimit"], drilling["StartTime"], drilling["Id"])
 	print("[ END ]: OnRestartServerCheckTasksTimers")
 
@@ -162,7 +173,6 @@ def createNewDrillingTry(id):
 
 		if doneDrillings and doneDrillings[-1].get("EndTime") == None:
 			print("==== 1 ===============================")
-			print("==== ban ===============================")
 			print(doneDrillings[-1])
 			return { "result" : "Already Exists" }
 
@@ -173,14 +183,10 @@ def createNewDrillingTry(id):
 			"UserId" : current_user.GetDBIndex(), 
 			"DrillingId" : id 
 		})
-		#### TODO if have time limit, start timer to end it
 		if (drilling["TimeLimit"]) : 
 			print("========= Timer Start ===============================")
 			doneDrilling = DB.GetTableJson("donedrillings", where=f"DrillingId='{id}' ORDER BY TryNumber")[-1]
-			timeLimit = datetime.strptime(drilling["TimeLimit"], '%H:%M:%S').time()
-			print("Time Limit: ", timeLimit)
-			print("Time Limit: ", TimeToInt(timeLimit))
-			threading.Timer(TimeToInt(timeLimit), DrillingEndTimeHandler, args = { doneDrilling["Id"] }).start()
+			threading.Timer(StrToTimedelta(drilling["TimeLimit"]).seconds, DrillingEndTimeHandler, args = { doneDrilling["Id"] }).start()
 		return { "result" : f"Created!" }
 
 
@@ -200,43 +206,74 @@ def getDrillingById(id):
 		if doneDrilling:
 			drilling["try"] = doneDrilling
 			if drilling["TimeLimit"]:
-				drilling["TimeRemaining"] = CalcTasksTimeRemaining(
-					datetime.strptime(drilling["TimeLimit"], '%H:%M:%S'), 
-					datetime.strptime(doneDrilling["StartTime"], '%Y-%m-%d %H:%M:%S'))
+				drilling["Deadline"] = str(CalcTasksDeadline(drilling["TimeLimit"], doneDrilling["StartTime"]))
 			else:
-				drilling["TimeRemaining"] = None
+				drilling["Deadline"] = None
 
+			print("================= Drilling =================")
 			tasks = {}
-			tasksTypes = DB.GetTableJson("drillingtaskstypes")
-			print(tasksTypes)
-			for taskType in tasksTypes:
-				taskData = DB.GetTableJson(taskType["Name"], where=f"DrillingId='{id}'")
+			wordsRU = []
+			wordsJP = []
+			# Drilling Card
+			tasks["drillingcard"] = DB.GetTableJson("drillingcard", where=f"DrillingId='{id}'")
+			print("Drilling card:", tasks["drillingcard"])
+			if tasks["drillingcard"]:
+				# Get Words from dictionary
+				for card in tasks['drillingcard']:
+					card["Word"] = GetSingleItem(DB.GetTableJson("dictionary", where=f"Id='{card['DictionaryId']}'"))
+					wordsRU.append(card["Word"]["RU"])
+					wordsJP.append(card["Word"]["WordJP"])
+				print("Words RU:", wordsRU)
+				print("Words JP:", wordsJP)
 
-				# Drilling Card
-				if taskType["Name"] == "drillingcard":
-					for task in taskData:
-						task["Word"] = GetSingleItem(DB.GetTableJson("dictionary", where=f"Id='{task['DictionaryId']}'"))
+				tasksNames = drilling["Tasks"].split(",")
 
-				# Drilling Card
-				if taskType["Name"] == "drillingfindpair":
-					taskData = GetSingleItem(taskData)
-					if taskData:
-						taskData["RU"] = taskData.pop("RU").split("\|/") 
-						random.shuffle(taskData["RU"])
-						taskData["JP"] = taskData.pop("JP").split("\|/")
-						random.shuffle(taskData["JP"])
+				# Drilling Find Pair
+				if "drillingfindpair" in tasksNames:
+					shuffleWordsRU = wordsRU.copy()
+					random.shuffle(shuffleWordsRU)
+					shuffleWordsJP = wordsJP.copy()
+					random.shuffle(shuffleWordsJP)
+					answers = { "WordsRU" : [], "WordsJP" : [] }
+					for word in shuffleWordsRU:
+						answers["WordsRU"].append(shuffleWordsRU.index(word))
+						answers["WordsJP"].append(shuffleWordsJP.index(wordsJP[wordsRU.index(word)]))
+					print(answers)
+					tasks["drillingfindpair"] = { "WordsRU" : shuffleWordsRU, "WordsJP" : shuffleWordsJP, "answers" : answers }
 
-				# Set task data in json with all tasks
-				tasks[taskType["Name"]] = taskData
-			return { "drilling" : drilling, "items" : tasks }
+				# Drilling Scramble
+				if "drillingscramble" in tasksNames:
+					shuffleWordsJP = wordsJP.copy()
+					random.shuffle(shuffleWordsJP)
+					chars = []
+					for word in shuffleWordsJP:
+						chars.append(list(word))
+						random.shuffle(chars[-1])
+					print("SWJP", shuffleWordsJP)
+					print("Chars", chars)
+					tasks["drillingscramble"] = { "words" : shuffleWordsJP, "chars" : chars }
+
+				# Drilling Translate
+				if "drillingtranslate" in tasksNames:
+					tasks["drillingtranslate"] = { "WordsJP" : wordsJP, "WordsRU" : wordsRU }
+
+				# Drilling Space
+				if "drillingspace" in tasksNames:
+					spaceWords = []
+					for i in range(len(wordsJP)):
+						word = wordsJP[i]
+						if len(word) == 1:
+							spaceWords.append({ "WordJP" : word, "WordRU" : wordsRU[i], "WordStart" : "", "WordEnd" : "", "Spaces" : 1 })
+						elif len(word) == 2:
+							spaceWords.append({ "WordJP" : word, "WordRU" : wordsRU[i], "WordStart" : "", "WordEnd" : word[-1], "Spaces" : 2 })
+						else:
+							spaceWords.append({ "WordJP" : word, "WordRU" : wordsRU[i], "WordStart" : word[1], "WordEnd" : word[-1], "Spaces" : len(word) - 2 })
+							
+
+					tasks["drillingspace"] = { "Words" : spaceWords }
 
 
+				return { "drilling" : drilling, "items" : tasks }
 
 	return { "drilling" : None, "items" : None }, 403
-#		drillingTasksTypes = DB.GetTableJson("drillingtaskstypes")
-#			print(drillingTasksTypes)
-#			drilling = {}
-#			for tasksType in drillingTasksTypes:
-#				tasks = DB.GetTableJson(tasksType["Name"])
-#				drilling.update({ tasksType["Name"] : tasks })
 			

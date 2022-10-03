@@ -1,30 +1,29 @@
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
+import useTimer from '../../libs/useTimer'
 import { decDrillingTimeRemaining } from '../../redux/slices/drillingSlice'
 
 const StudentDrillingTimeRemaining = () => {
 	const navigate = useNavigate()
 	const dispatch = useDispatch()
 	const drilling = useSelector((state) => state.drilling)
+	const timer = useTimer(drilling.info.Deadline)
 
-	const intToHMS = (value) => {
-		var hours = Math.floor(value / 3600)
-		var minutes = Math.floor((value - (hours * 3600)) / 60)
-		var seconds = value - (hours * 3600) - (minutes * 60)
-
-		if (minutes < 10) minutes = "0" + minutes
-		if (seconds < 10) seconds = "0" + seconds
-		return hours + ':' + minutes + ':' + seconds
+	const getHMS = (value) => {
+		return `${value}`.padStart(2, "0")
 	}
 
 	useEffect(() => {
-		if (drilling.info.TimeRemaining === 0)
+		if (drilling.info.Deadline)
 		{
-			navigate(`/lessons/${drilling.info.LessonId}`)
-			console.log("WATCHER")
+			const deadlineData = new Date(drilling.info.Deadline)
+			if (deadlineData.getTime() <= Date.now()) {
+				navigate(`/lessons/${drilling.info.LessonId}`)
+				console.log("WATCHER")
+			}
 		}
-	}, [drilling.info.TimeRemaining])
+	}, [timer])
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -35,9 +34,7 @@ const StudentDrillingTimeRemaining = () => {
 
 	return (
 		<div> 
-			{
-				drilling.info.TimeRemaining && intToHMS(drilling.info.TimeRemaining)
-			}
+			{ getHMS(timer.hours) }:{ getHMS(timer.minutes) }:{ getHMS(timer.seconds) } 
 		</div>
 	)
 }

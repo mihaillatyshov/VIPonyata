@@ -64,3 +64,16 @@ img.profile {
 .testBorder {
 	border: #000000 solid 1px;
 }
+
+div.findPairSelected {
+	background: rgb(255, 255, 0);
+}
+
+div.findPairCorrect {
+	background: rgb(0, 255, 0);
+}
+
+button.scrambleItem {
+	width: 3em;
+	height: 3em;
+}

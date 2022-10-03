@@ -9,14 +9,27 @@ const StudentDrillingCard = ({ cards }) => {
 	const { cardId } = useParams()
 	const navigate = useNavigate()
 	const dispatch = useDispatch()
-	const card = useSelector((state) => state.drilling.selectedItem)
+	const item = useSelector((state) => state.drilling.selectedItem)
+	const taskTypeName = "drillingcard"
+	var synth = window.speechSynthesis;
+
+	const sayJP = (sentence) => {
+		const voices = synth.getVoices()
+		LogInfo(voices)
+		const result = voices.filter(voice => voice.lang === "ja-JP")
+		LogInfo(result)
+		var utterance = new SpeechSynthesisUtterance(sentence);
+		utterance.lang = "ja-JP";
+		//utterance.voice = result2[0];
+		speechSynthesis.speak(utterance);
+	}
 
 	const checkItem = () => {
-		if (card)
+		if (item)
 		{
-			if (card.type === "drillingcard") 
+			if (item.type === taskTypeName) 
 			{
-				if (card.number === cardId)
+				if (item.number === cardId)
 				{
 					return true
 				}
@@ -26,12 +39,12 @@ const StudentDrillingCard = ({ cards }) => {
 	}
 
 	useEffect(() => {
-		LogInfo("setDrillingSelectedItem card", cardId)
+		LogInfo("setDrillingSelectedItem Card", cardId)
 		if (cards)
 		{
 			if (cardId < cards.length && cardId >= 0)
 			{
-				dispatch(setDrillingSelectedItem({...cards[cardId], type : "drillingcard", isOpen : false, number : cardId }))
+				dispatch(setDrillingSelectedItem({...cards[cardId], type : taskTypeName, isOpen : false, number : cardId }))
 			}
 		}
 	}, [cardId])
@@ -44,7 +57,7 @@ const StudentDrillingCard = ({ cards }) => {
 	}
 
 	const handleChangeIsOpen = () => {
-		dispatch(setDrillingSelectedItemField({ isOpen : !card.isOpen }))
+		dispatch(setDrillingSelectedItemField({ isOpen : !item.isOpen }))
 	}
 
 	return (
@@ -54,16 +67,20 @@ const StudentDrillingCard = ({ cards }) => {
 					<div>
 						<div>
 							<div className="drillingCardImg">
-								<img src={card.Word.ImgSrc ? card.Word.ImgSrc : ""} />
+								<img src={item.Word.ImgSrc ? item.Word.ImgSrc : ""} />
 							</div>
 							<div>
-								{ card.Word.WordJP } { card.Word.RU }
+								{ item.Word.WordJP } { item.Word.RU }
 							</div>
 							<div>
 								<Button variant="success" onClick={handleChangeIsOpen}> Показать подсказку </Button>
-									{ card.isOpen ? card.Answer : card.Sentence}
+									{ item.isOpen ? item.Answer : item.Sentence}
+								<Button variant="success" onClick={()=>sayJP(item.Sentence)}> Say </Button>
+
 							</div>
-							
+							<div>
+								<Button variant="success" onClick={()=>sayJP(item.Word.WordJP)}> Say </Button>
+							</div>
 						</div>
 					</div>
 				)

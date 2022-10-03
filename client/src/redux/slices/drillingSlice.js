@@ -28,8 +28,7 @@ export const drillingSlice = createSlice({
 		},
 		setDrillingSelectedItemField : (state, action) => {
 			for (const key in action.payload)
-				if (key === "isOpen")
-					state.selectedItem.isOpen = action.payload[key]
+				state.selectedItem[key] = action.payload[key]
 		} 
 	},
 })
