@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react'
-import { Form, Button } from 'react-bootstrap'
-import { useSelector, useDispatch } from 'react-redux'
-import { Link, useNavigate } from 'react-router-dom'
-import { ServerAPI_POST } from '../../libs/ServerAPI'
-import { resetRegisterForm, setRegisterValidated, setRegisterMessage, setRegisterNickname, setRegisterPassword1, setRegisterPassword2, setRegisterName, setRegisterBirthday } from '../../redux/slices/registerSlice'
+import React, { useEffect } from "react"
+import { Form, Button } from "react-bootstrap"
+import { useSelector, useDispatch } from "react-redux"
+import { Link, useNavigate } from "react-router-dom"
+import { ServerAPI_POST } from "libs/ServerAPI"
+import { resetRegisterForm, setRegisterValidated, setRegisterMessage, setRegisterNickname, setRegisterPassword1, setRegisterPassword2, setRegisterName, setRegisterBirthday } from "../../redux/slices/registerSlice"
 
 const RegisterPage = () => {
 	const navigate = useNavigate()
@@ -50,7 +50,7 @@ const RegisterPage = () => {
 	const handleChangeBirthday	= (e) => { dispatch(setRegisterBirthday (e.target.value)) }
 
 	return (
-		<div className='w-100 mx-auto'>
+		<div className="w-100 mx-auto">
 			<Form className="login_form_margin text-center mx-auto w-50" noValidate validated={register.validated} onSubmit={handleSubmit}>
 				<Form.Group className="mt-4">
 					<Form.Label> Имя </Form.Label>

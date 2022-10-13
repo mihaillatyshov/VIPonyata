@@ -123,10 +123,12 @@ class DataBase:
 	def GetJsonFromNamesAndData(self, names, data):
 		result = []
 		print("GetJsonFromNamesAndData")
+		if not data:
+			return result
 		for element in data:
 			line = {}
 			for field, name in zip(element, names):
-				print(name, type(field))
+				#print(name, type(field))
 				line.update({name : str(field) if field else field})
 			result.append(line)
 		return result

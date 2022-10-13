@@ -1,12 +1,9 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { ServerAPI_POST } from '../../libs/ServerAPI'
-import { useDispatch } from 'react-redux'
-import { Button } from 'react-bootstrap'
-import { setUserData } from '../../redux/slices/userSlice'
-import StudentProfile from '../Authentication/StudentProfile'
-import StudentDictionary from '../Dictionary/StudentDictionary'
-import StudentCorsesBlock from '../Courses/StudentCorsesBlock'
+import React from "react"
+import { ServerAPI_POST } from "libs/ServerAPI"
+import { useDispatch } from "react-redux"
+import { setUserData } from "redux/slices/userSlice"
+import StudentCorsesBlock from "components/Courses/StudentCorsesBlock"
+import style from "./StyleMainPage.module.css"
 
 const StudentMainPage = () => {
 	const dispatch = useDispatch()
@@ -23,18 +20,19 @@ const StudentMainPage = () => {
 
 	return (
 		<div className="container">
-			<div className="row justify-content-center mt-4">
-				<StudentProfile />
-				<StudentDictionary />
-				<div className="col-auto mx-2" style={{ minWidth: "300px", border: "solid 1px" }}>
-					Notifications and etc
+			<div className="row">
+				<div className={"col-auto " + style.mainTitle}>
+					Мои путешествия
 				</div>
 			</div>
 			<StudentCorsesBlock />
-			<div className='mt-4'>
-				<Link to="/upload"> Upload </Link>
-				<Button type="button" onClick={handleLogout}> Logout </Button>
-			</div>
+			{
+			// <div className="mt-4">
+			// 	MOVE IT IN PROFILE!!!
+			// 	<Link to="/upload"> Upload </Link>
+			// 	<Button type="button" onClick={handleLogout}> Logout </Button>
+			// </div>
+			}
 		</div>
 	)
 }

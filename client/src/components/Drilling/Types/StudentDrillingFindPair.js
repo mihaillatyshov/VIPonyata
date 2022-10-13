@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react'
-import { Card } from 'react-bootstrap'
-import { useDispatch, useSelector } from 'react-redux'
-import { LogInfo, LogWarn } from '../../../libs/Logger'
-import { setDrillingSelectedItem, setDrillingSelectedItemField } from '../../../redux/slices/drillingSlice'
+import React, { useEffect } from "react"
+import { Card } from "react-bootstrap"
+import { useDispatch, useSelector } from "react-redux"
+import { LogInfo, LogWarn } from "libs/Logger"
+import { setDrillingSelectedItem, setDrillingSelectedItemField } from "redux/slices/drillingSlice"
 //import MD5 from "crypto-js/md5";
 
 const StudentDrillingFindPair = ({ pairs }) => {

@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux';
-import { LogInfo } from '../../../libs/Logger';
-import { setDrillingSelectedItem, setDrillingSelectedItemField } from '../../../redux/slices/drillingSlice';
+import React, { useEffect } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { LogInfo } from "libs/Logger"
+import { setDrillingSelectedItem, setDrillingSelectedItemField } from "redux/slices/drillingSlice"
 
 const StudentDrillingListen = ({ words }) => {
 	const dispatch = useDispatch()

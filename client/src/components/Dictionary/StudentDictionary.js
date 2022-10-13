@@ -1,8 +1,8 @@
-import React from 'react'
+import React from "react"
 
 const StudentDictionary = () => {
 	return (
-		<div className="col-auto mx-auto" style={{ border: "solid 1px" }}>
+		<div className="col-auto" style={{ border: "solid 1px" }}>
 			StudentDictionary
 		</div>
 	)

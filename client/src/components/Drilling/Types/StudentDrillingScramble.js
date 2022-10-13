@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux';
-import { LogInfo } from '../../../libs/Logger';
-import { setDrillingSelectedItem, setDrillingSelectedItemField } from '../../../redux/slices/drillingSlice';
-import { Button } from 'react-bootstrap';
+import React, { useEffect } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { LogInfo } from "libs/Logger"
+import { setDrillingSelectedItem, setDrillingSelectedItemField } from "redux/slices/drillingSlice"
+import { Button } from "react-bootstrap"
 
 const StudentDrillingScramble = ({ scrambles }) => {
 	const dispatch = useDispatch()

@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import LoadingPage from './LoadingPage'
+import React, { useEffect } from "react"
+import { useNavigate } from "react-router-dom"
+import LoadingPage from "./LoadingPage"
 
 const NavigateHome = () => {
 	const navigate = useNavigate()

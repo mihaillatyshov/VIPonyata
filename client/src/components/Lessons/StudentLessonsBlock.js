@@ -1,6 +1,6 @@
-import React from 'react'
-import { useSelector } from 'react-redux'
-import LessonCard from './LessonCard'
+import React from "react"
+import { useSelector } from "react-redux"
+import LessonCard from "./LessonCard"
 
 const StudentLessonsBlock = () => {
 	const lessons = useSelector((state) => state.lessons)
@@ -12,7 +12,7 @@ const StudentLessonsBlock = () => {
 					<div> Loading... </div>
 				) : (
 					lessons.items.length > 0 ? (
-						<div className="row justify-content-center mt-4">
+						<>
 							{
 								lessons.items.map(lesson => {
 									return (
@@ -20,7 +20,7 @@ const StudentLessonsBlock = () => {
 									)
 								})
 							}
-						</div>
+						</>
 					) : (
 						<div>
 							No Items

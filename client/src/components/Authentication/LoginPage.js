@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { Form, Button } from 'react-bootstrap'
-import { Link } from 'react-router-dom'
-import { resetLoginForm, setLoginNickname, setLoginPassword, setLoginValidated } from '../../redux/slices/loginSlice'
-import { ServerAPI_POST } from '../../libs/ServerAPI'
-import { setUserData } from '../../redux/slices/userSlice'
+import React, { useEffect } from "react"
+import { useSelector, useDispatch } from "react-redux"
+import { Form, Button } from "react-bootstrap"
+import { Link } from "react-router-dom"
+import { resetLoginForm, setLoginNickname, setLoginPassword, setLoginValidated } from "redux/slices/loginSlice"
+import { ServerAPI_POST } from "libs/ServerAPI"
+import { setUserData } from "redux/slices/userSlice"
 
 const LoginPage = () => {
 	const login = useSelector((state) => state.login)
@@ -38,7 +38,7 @@ const LoginPage = () => {
 	const handleChangePassword = (e) => { dispatch(setLoginPassword(e.target.value)) }
 
 	return (
-		<div className='w-100 mx-auto'>
+		<div className="w-100 mx-auto">
 			<Form className="login_form_margin text-center mx-auto w-50" noValidate validated={login.validated} onSubmit={handleSubmit}>
 				<Form.Group className="mt-4">
 					<Form.Label> Никнейм </Form.Label>

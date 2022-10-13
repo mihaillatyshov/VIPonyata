@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { ServerAPI_GET } from '../../libs/ServerAPI'
-import { setCourses } from '../../redux/slices/coursesSlice'
-import CourseCard from './CourseCard'
+import React, { useEffect } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { ServerAPI_GET } from "libs/ServerAPI"
+import { setCourses } from "redux/slices/coursesSlice"
+import CourseCard from "./CourseCard"
 
 const StudentCorsesBlock = () => {
 	const courses = useSelector((state) => state.courses)
@@ -26,7 +26,7 @@ const StudentCorsesBlock = () => {
 					<div> Loading... </div>
 				) : (
 					courses.items.length > 0 ? (
-						<div className="row justify-content-center mt-4">
+						<div className="row justify-content-center">
 							{
 								courses.items.map(course => {
 									return (

@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react'
-import { Button } from 'react-bootstrap';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
-import { LogError, LogInfo, LogWarn } from '../../../libs/Logger';
-import { setDrillingSelectedItem, setDrillingSelectedItemField } from '../../../redux/slices/drillingSlice';
+import React, { useEffect } from "react"
+import { Button } from "react-bootstrap"
+import { useDispatch, useSelector } from "react-redux"
+import { useNavigate, useParams } from "react-router-dom"
+import { LogInfo, LogWarn, LogError } from "libs/Logger"
+import { setDrillingSelectedItem, setDrillingSelectedItemField } from "redux/slices/drillingSlice"
 
 const StudentDrillingCard = ({ cards }) => {
 	const { cardId } = useParams()

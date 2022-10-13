@@ -1,18 +1,20 @@
-import './App.css'
-import LoginPage from './components/Authentication/LoginPage'
-import { ServerAPI_GET } from './libs/ServerAPI'
-import { useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { setUserData } from './redux/slices/userSlice'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import LoadingPage from './components/LoadingPage'
-import StudentMainPage from './components/MainPage/StudentMainPage'
-import RegisterPage from './components/Authentication/RegisterPage'
-import TestUpload from './components/TestUpload'
-import NavigateHome from './components/NavigateHome'
-import StudentCoursePage from './components/Courses/StudentCoursePage'
-import StudentLessonPage from './components/Lessons/StudentLessonPage'
-import StudentDrillingPage from './components/Drilling/StudentDrillingPage'
+import "./App.css"
+import "./RoundBlock.css"
+import LoginPage from "./components/Authentication/LoginPage"
+import { ServerAPI_GET } from "./libs/ServerAPI"
+import { useEffect } from "react"
+import { useSelector, useDispatch } from "react-redux"
+import { setUserData } from "./redux/slices/userSlice"
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import LoadingPage from "./components/LoadingPage"
+import StudentMainPage from "./components/MainPage/StudentMainPage"
+import RegisterPage from "./components/Authentication/RegisterPage"
+import TestUpload from "./components/TestUpload"
+import NavigateHome from "./components/NavigateHome"
+import StudentCoursePage from "./components/Courses/StudentCoursePage"
+import StudentLessonPage from "./components/Lessons/StudentLessonPage"
+import StudentDrillingPage from "./components/Drilling/StudentDrillingPage"
+import NavBar from "./components/NavBar"
 
 // eslint-disable-next-line	
 const App = () => {
@@ -24,8 +26,8 @@ const App = () => {
 			url: "/api/islogin",
 			onDataReceived: (data) => {
 				dispatch(setUserData(data))
-			} 
-		}) 
+			}
+		})
 	}, [])
 
 	const getTeacherStudentRoute = (teacher, student) => {
@@ -55,19 +57,31 @@ const App = () => {
 		}
 	}
 
-
+	const StyleVioled = {
+		"--css-var-bg": "#E1D8E8",
+		"--css-var-block": "#BFACE0",
+		"--css-var-title": "#A084CA",
+		"--css-var-other": "#A084CA",
+	}
 
 	return (
-		<BrowserRouter>
-			<Routes>
-				<Route path="/" element={ getRoute(<StudentMainPage />, <StudentMainPage />, <LoginPage />) } />
-				<Route path="/courses/:id" element={ getRoute(<StudentCoursePage/>, <StudentCoursePage />, <NavigateHome />) } />
-				<Route path="/lessons/:id" element={ getRoute(<StudentLessonPage/>, <StudentLessonPage />, <NavigateHome />) } />
-				<Route path="/drilling/:id/*" element={ getRoute(<StudentDrillingPage/>, <StudentDrillingPage />, <NavigateHome />) } />
-				<Route path="/register" element={ <RegisterPage /> } />
-				<Route path="/upload" element={ <TestUpload /> } />
-			</Routes>
-		</BrowserRouter>
+		<div style={StyleVioled} className="App">
+			{ 
+				user.isAuth !== undefined && (
+					<NavBar />
+				)
+			}
+			<BrowserRouter>
+				<Routes>
+					<Route path="/" element={getRoute(<StudentMainPage />, <StudentMainPage />, <LoginPage />)} />
+					<Route path="/courses/:id" element={getRoute(<StudentCoursePage />, <StudentCoursePage />, <NavigateHome />)} />
+					<Route path="/lessons/:id" element={getRoute(<StudentLessonPage />, <StudentLessonPage />, <NavigateHome />)} />
+					<Route path="/drilling/:id/*" element={getRoute(<StudentDrillingPage />, <StudentDrillingPage />, <NavigateHome />)} />
+					<Route path="/register" element={<RegisterPage />} />
+					<Route path="/upload" element={<TestUpload />} />
+				</Routes>
+			</BrowserRouter>
+		</div>
 	)
 }
 

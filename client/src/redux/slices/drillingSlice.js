@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice } from "@reduxjs/toolkit"
 
 const initialState = {
 	info: undefined,
@@ -7,21 +7,18 @@ const initialState = {
 }
 
 export const drillingSlice = createSlice({
-	name: 'drilling',
+	name: "drilling",
 	initialState: initialState,
 	reducers: {
 		setDrillingInfo: (state, action) => {
 			state.info = action.payload
 		},
+		setDrillingEndByTime: (state) => {
+			state.info.tries[state.info.tries.length - 1].EndTime = state.info.Deadline
+			state.info.Deadline = undefined
+		},
 		setDrillingItems: (state, action) => {
 			state.items = action.payload
-		},
-		decDrillingTimeRemaining: (state) => {
-			if (state.info) {
-				if (state.info.TimeRemaining) {
-					state.info.TimeRemaining -= 1
-				}
-			}
 		},
 		setDrillingSelectedItem : (state, action) => {
 			state.selectedItem = action.payload
@@ -29,10 +26,13 @@ export const drillingSlice = createSlice({
 		setDrillingSelectedItemField : (state, action) => {
 			for (const key in action.payload)
 				state.selectedItem[key] = action.payload[key]
-		} 
+		},
+		addDrillingDoneTash : (state, action) => {
+			state.info.DoneTasks[action.payload.name] = action.payload.percent
+		}
 	},
 })
 
-export const { setDrillingInfo, decDrillingTimeRemaining, setDrillingItems, setDrillingSelectedItem, setDrillingSelectedItemField } = drillingSlice.actions
+export const { setDrillingInfo, setDrillingEndByTime, decDrillingTimeRemaining, setDrillingItems, setDrillingSelectedItem, setDrillingSelectedItemField } = drillingSlice.actions
 
 export default drillingSlice.reducer

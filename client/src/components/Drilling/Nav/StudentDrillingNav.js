@@ -1,9 +1,8 @@
-import React, { useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useEffect } from "react"
+import { Link } from "react-router-dom"
 
 const StudentDrillingNav = ({ items }) => {
 	useEffect(() => {
-		console.log("UseEffect Nav", items)
 		for (const item in items) {
 			console.log("items", item)
 		}

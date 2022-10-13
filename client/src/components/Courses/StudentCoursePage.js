@@ -1,16 +1,18 @@
-import React, { useEffect } from 'react'
-import { useDispatch } from 'react-redux'
-import { useNavigate, useParams } from 'react-router-dom'
-import { ServerAPI_GET } from '../../libs/ServerAPI'
-import { setSelectedCourse } from '../../redux/slices/coursesSlice'
-import { setLessons } from '../../redux/slices/lessonsSlice'
-import StudentLessonsBlock from '../Lessons/StudentLessonsBlock'
+import React, { useEffect } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { useNavigate, useParams } from "react-router-dom"
+import { ServerAPI_GET } from "libs/ServerAPI"
+import { setSelectedCourse } from "redux/slices/coursesSlice"
+import { setLessons } from "redux/slices/lessonsSlice"
+import StudentLessonsBlock from "components/Lessons/StudentLessonsBlock"
+import style from "./StyleCourses.module.css"
 
 
 const StudentCoursePage = () => {
 	const { id } = useParams()
 	const navigate = useNavigate()
 	const dispatch = useDispatch()
+	const course = useSelector((state) => state.courses.selected)
 
 	useEffect(() => {
 		dispatch(setSelectedCourse(undefined))
@@ -31,8 +33,12 @@ const StudentCoursePage = () => {
 	}, [])
 
 	return (
-		<div>
-			<div>Course Info</div>
+		<div className="container">
+			<div className="row">
+				<div className={"col-auto " + style.mainTitle}>
+					{course && course.Name}
+				</div>
+			</div>
 			<StudentLessonsBlock />
 		</div>
 	)

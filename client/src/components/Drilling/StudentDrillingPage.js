@@ -1,17 +1,19 @@
-import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux';
-import { Route, Routes, useNavigate, useParams } from 'react-router-dom';
-import { ServerAPI_GET } from '../../libs/ServerAPI';
-import { decDrillingTimeRemaining, setDrillingInfo, setDrillingItems } from '../../redux/slices/drillingSlice';
-import StudentDrillingNav from './Nav/StudentDrillingNav';
-import StudentDrillingCard from './Types/StudentDrillingCard';
-import StudentDrillingFindPair from './Types/StudentDrillingFindPair';
-import NavigateToElement from '../NavigateToElement';
-import StudentDrillingTimeRemaining from './StudentDrillingTimeRemaining';
-import StudentDrillingScramble from './Types/StudentDrillingScramble';
-import { LogInfo } from '../../libs/Logger';
-import StudentDrillingTranslate from './Types/StudentDrillingTranslate';
-import StudentDrillingSpace from './Types/StudentDrillingSpace';
+import React, { useEffect } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { Route, Routes, useNavigate, useParams } from "react-router-dom"
+import { Button } from "react-bootstrap"
+import { LogInfo } from "libs/Logger"
+import { ServerAPI_GET, ServerAPI_POST } from "libs/ServerAPI"
+import { setDrillingInfo, setDrillingItems } from "redux/slices/drillingSlice"
+import NavigateToElement from "components/NavigateToElement"
+import StudentDrillingNav from "./Nav/StudentDrillingNav"
+import StudentDrillingCard from "./Types/StudentDrillingCard"
+import StudentDrillingFindPair from "./Types/StudentDrillingFindPair"
+import StudentDrillingTimeRemaining from "./StudentDrillingTimeRemaining"
+import StudentDrillingScramble from "./Types/StudentDrillingScramble"
+import StudentDrillingTranslate from "./Types/StudentDrillingTranslate"
+import StudentDrillingSpace from "./Types/StudentDrillingSpace"
+import StudentDrillingProgress from "./StudentDrillingProgress"
 
 const StudentDrillingPage = () => {
 	const { id } = useParams()
@@ -35,15 +37,31 @@ const StudentDrillingPage = () => {
 		})
 	}, [])
 
+	const onBackToLesson = () => {
+		navigate(`/lessons/${drilling.info.LessonId}`)
+	}
+
+	const onEndDrilling = () => {
+		ServerAPI_POST({
+			url: `/api/drilling/${id}/endtry`,
+			onDataReceived: () => {
+				onBackToLesson()
+			}
+		})
+	}
+
 	return (
 		<div>
 			{
 				drilling.info ? (drilling.info.try && (
 					<div>
+						<StudentDrillingProgress percent={Object.keys(drilling.info.try.DoneTasks).length / drilling.info.TasksCount}/>
+						<Button onClick={onBackToLesson} > Вернуться к уроку </Button>
+						<Button onClick={onEndDrilling} > Завершить дриллинг </Button>
 						<div> {drilling.info.Description} {drilling.info.TimeLimit} {drilling.info.try.StartTime} </div>
 						{
 							drilling.info.Deadline ? (
-								<StudentDrillingTimeRemaining />
+								<StudentDrillingTimeRemaining deadline={drilling.info.Deadline} onDeadline={() => navigate(`/lessons/${drilling.info.LessonId}`)} />
 							) : (
 								<div> </div>
 							)

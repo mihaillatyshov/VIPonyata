@@ -1,31 +1,27 @@
+*,
+*:before,
+*:after {
+	box-sizing: border-box;
+}
+
+html {
+	min-width: 100%;
+	min-height: 100%;
+}
+
+body {
+	min-height: 100%;
+}
+
 .App {
-  text-align: center;
+	background-color: var(--css-var-bg);
+	min-height: 100vh;
+	padding: 10px;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
+.mainNavBar {
+	padding-bottom: 5px;
+	border-bottom: 1px solid black;
 }
 
 .win_height {
@@ -36,16 +32,12 @@
 	margin-top: 20vh;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-a.a-card, a.a-card:link, a.a-card:visited, a.a-card:focus, a.a-card:hover, a.a-card:active {
+a.a-link,
+a.a-link:link,
+a.a-link:visited,
+a.a-link:focus,
+a.a-link:hover,
+a.a-link:active {
 	outline: none;
 	text-decoration: none;
 	color: #000000;
@@ -58,7 +50,7 @@ img.profile {
 }
 
 .drillingCardImg {
-	height : 50vh;
+	height: 50vh;
 }
 
 .testBorder {

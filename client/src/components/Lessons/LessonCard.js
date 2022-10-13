@@ -1,19 +1,24 @@
-import React from 'react'
-import { Card } from 'react-bootstrap'
-import { Link } from 'react-router-dom'
+import React from "react"
+import { Link } from "react-router-dom"
+import style from "./StyleLessons.module.css"
 
-const LessonCard = ({lesson}) => {
+const LessonCard = ({ lesson }) => {
 	return (
-		<Link to={`/lessons/${lesson.Id}`} className="col-auto a-card">
-			<Card style={{ width: '18rem', height: '100%' }}>
-				<Card.Img variant="top" src="" />
-				<Card.Body>
-					<Card.Title> {lesson.Name} </Card.Title>
-					<Card.Subtitle className="mb-2 text-muted"> {lesson.Difficulty} </Card.Subtitle>
-					<Card.Text> {lesson.Description} </Card.Text>
-				</Card.Body>
-			</Card>
-		</Link>
+		<div className="row justify-content-center">
+			<Link to={`/lessons/${lesson.Id}`} className={"col a-link " + style.linkLesson}>
+				<div className={style.cardLesson}>
+					{false && <img src="" />}
+					<div>
+						<div> {lesson.Name} </div>
+						<div className="mb-2 text-muted"> D {lesson.Difficulty} </div>
+						<div> DE {lesson.Description} </div>
+					</div>
+				</div>
+			</Link>
+			<div className={"col-auto " + style.skillLesson}>
+				Some Block
+			</div>
+		</div>
 	)
 }
 

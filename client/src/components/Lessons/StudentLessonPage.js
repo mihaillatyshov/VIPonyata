@@ -1,11 +1,12 @@
-import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ServerAPI_GET } from '../../libs/ServerAPI';
-import { setSelectedCourse } from '../../redux/slices/coursesSlice';
-import { setDrillingInfo } from '../../redux/slices/drillingSlice';
-import { setSelectedLesson } from '../../redux/slices/lessonsSlice';
-import StudentDrillingBlock from '../Drilling/StudentDrillingBlock';
+import React, { useEffect } from "react"
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
+import { LogError, LogInfo } from "libs/Logger";
+import { ServerAPI_GET } from "libs/ServerAPI";
+import { setDrillingInfo } from "redux/slices/drillingSlice";
+import { setSelectedLesson } from "redux/slices/lessonsSlice";
+import StudentDrillingBlock from "components/Drilling/StudentDrillingBlock";
+import style from "./StyleLessons.module.css"
 
 const StudentLessonPage = () => {
 	const { id } = useParams()
@@ -22,6 +23,7 @@ const StudentLessonPage = () => {
 		ServerAPI_GET({
 			url: `/api/lessons/${id}`,
 			onDataReceived: (data) => {
+				LogInfo(data)
 				dispatch(setSelectedLesson(data.lesson))
 				dispatch(setDrillingInfo(data.items.drilling))
 			},
@@ -33,7 +35,7 @@ const StudentLessonPage = () => {
 	}, [])
 
 	return (
-		<div>
+		<div className="container">
 			{
 				lesson === undefined ? (
 					<p> Loading... </p>
@@ -42,7 +44,13 @@ const StudentLessonPage = () => {
 						<div> {lesson.Name} </div>
 						<div> {lesson.Description} </div>
 						{
-							drilling.info && ( <StudentDrillingBlock drilling={drilling} /> ) 
+							drilling && drilling.info && ( <StudentDrillingBlock drilling={drilling} /> ) 
+						}
+						{
+							assessment && assessment.info && ( <StudentDrillingBlock drilling={drilling} /> ) 
+						}
+						{
+							hieroglyph && hieroglyph.info && ( <StudentDrillingBlock drilling={drilling} /> ) 
 						}
 					</div>
 				)

@@ -108,6 +108,7 @@ create table donedrillings
     TryNumber int NOT NULL,
     StartTime datetime NOT NULL,
     EndTime datetime,
+    DoneTasks varchar(2048) NOT NULL,
     UserId int NOT NULL,
     foreign key (UserId) references japan.users(Id),
     DrillingId int NOT NULL,

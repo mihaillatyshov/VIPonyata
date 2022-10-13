@@ -85,7 +85,10 @@ def fileUpload():
 def UpdeteTimersOnRestart():
 	pass
 
-
+#################################################################################
+####   Courses   ################################################################
+#################################################################################
+# Get Courses
 @current_app.route("/api/courses", methods=["GET"])
 @login_required
 def getAllCourses():
@@ -103,7 +106,7 @@ def getAllCourses():
 	return { "items": courses }
 
 
-
+# Get Lessons by Course Id
 @current_app.route("/api/courses/<id>", methods=["GET"])
 @login_required
 def getCourseById(id):
@@ -126,6 +129,10 @@ def getCourseById(id):
 	return { "course" : None, "items" : None }, 403
 
 
+#################################################################################
+####   Lessons   ################################################################
+#################################################################################
+# Get Lesson activities
 @current_app.route("/api/lessons/<id>", methods=["GET"])
 @login_required
 def getLessonById(id):
@@ -147,9 +154,14 @@ def getLessonById(id):
 		where=f"lessons.Id = userlessons.LessonId AND lessons.Id = '{id}' AND userlessons.UserId = '{current_user.GetDBIndex()}'"))
 	if lesson:
 		drilling = GetSingleItem(DB.GetTableJson("drillings", where=f"LessonId = '{lesson['Id']}'"))
-		doneDrillings = DB.GetTableJson("donedrillings", where=f"DrillingId='{drilling['Id']}' ORDER BY TryNumber") if drilling else None
-		if drilling: drilling["tries"] = doneDrillings
-
+		if drilling: 
+			doneDrillings = DB.GetTableJson("donedrillings", where=f"DrillingId='{drilling['Id']}' ORDER BY TryNumber") if drilling else None
+			drilling["tries"] = doneDrillings
+			
+			if drilling["TimeLimit"] and doneDrillings and doneDrillings[-1].get("EndTime") == None:
+				drilling["Deadline"] = str(CalcTasksDeadline(drilling["TimeLimit"], doneDrillings[-1]["StartTime"]))
+			else:
+				drilling["Deadline"] = None
 
 		#assesment = GetSingleItem(DB.GetTablesJson( { "assesments" : { "elements" : "ALL" }, "lessons" : { } }, where=f"assesments.LessonId = '{lesson['Id']}'"))
 		#hieroglyph = GetSingleItem(DB.GetTablesJson( { "hieroglyphs" : { "elements" : "ALL" }, "lessons" : { } }, where=f"hieroglyphs.LessonId = '{lesson['Id']}'"))
@@ -159,6 +171,10 @@ def getLessonById(id):
 	return { "lesson" : None, "items" : None }, 403
 
 
+#################################################################################
+####   Drilling   ###############################################################
+#################################################################################
+# Create new Drilling
 @current_app.route("/api/drilling/<id>/newtry", methods=["POST"])
 @login_required
 def createNewDrillingTry(id):
@@ -172,11 +188,8 @@ def createNewDrillingTry(id):
 		length = len(doneDrillings) if doneDrillings else 0
 
 		if doneDrillings and doneDrillings[-1].get("EndTime") == None:
-			print("==== 1 ===============================")
-			print(doneDrillings[-1])
-			return { "result" : "Already Exists" }
+			return { "result" : "Already Exists" }, 409
 
-		print("==== 2 ===============================")
 		DB.AddTableElement("donedrillings", { 
 			"TryNumber" : length + 1 , 
 			"StartTime" : datetime.now(), 
@@ -188,6 +201,45 @@ def createNewDrillingTry(id):
 			doneDrilling = DB.GetTableJson("donedrillings", where=f"DrillingId='{id}' ORDER BY TryNumber")[-1]
 			threading.Timer(StrToTimedelta(drilling["TimeLimit"]).seconds, DrillingEndTimeHandler, args = { doneDrilling["Id"] }).start()
 		return { "result" : f"Created!" }
+	
+	return { "result" : "You have no access to this lesson!"}, 403 
+
+
+@current_app.route("/api/drilling/<id>/continuetry", methods=["POST"])
+@login_required
+def continueDrillingTry(id):
+	if not current_user.IsStudent():
+		return { "result" : "You are not student!" }, 403
+
+	drilling = GetSingleItem(DB.GetTablesJson({ "drillings" : { "elements" : "ALL" }, "userlessons" : { } }, 
+		where=f"drillings.Id = '{id}' AND drillings.LessonId = userlessons.LessonId AND userlessons.UserId = '{current_user.GetDBIndex()}'"))
+	if drilling: # Check if user have access to this lesson
+		doneDrillings = DB.GetTableJson("donedrillings", where=f"DrillingId='{id}' ORDER BY TryNumber")
+
+		if doneDrillings and doneDrillings[-1].get("EndTime") == None:
+			return { "result" : "Already Exists" }
+	
+	return { "result" : "You have no access to this lesson!"}, 403 
+
+
+@current_app.route("/api/drilling/<id>/endtry", methods=["POST"])
+@login_required
+def endDrillingTry(id):
+	if not current_user.IsStudent():
+		return { "result" : "You are not student!" }, 403
+
+	drilling = GetSingleItem(DB.GetTablesJson({ "drillings" : { "elements" : "ALL" }, "userlessons" : { } }, 
+		where=f"drillings.Id = '{id}' AND drillings.LessonId = userlessons.LessonId AND userlessons.UserId = '{current_user.GetDBIndex()}'"))
+	if drilling: # Check if user have access to this lesson
+		doneDrillings = DB.GetTableJson("donedrillings", where=f"DrillingId='{id}' ORDER BY TryNumber")
+
+		if doneDrillings and doneDrillings[-1].get("EndTime") == None:
+			DrillingEndTimeHandler(doneDrillings[-1]["Id"])
+			return { "result" : "Closed" }
+	
+		return { "result" : "Already closed"}
+	
+	return { "result" : "You have no access to this lesson!"}, 403 
 
 
 @current_app.route("/api/drilling/<id>", methods=["GET"])
@@ -205,6 +257,8 @@ def getDrillingById(id):
 		doneDrilling = GetSingleItem(DB.GetTableJson("donedrillings", where=f"DrillingId='{id}' AND EndTime IS NULL"))
 		if doneDrilling:
 			drilling["try"] = doneDrilling
+			drilling["try"]["DoneTasks"] = dict(lambda x: dict(x.split(":")), drilling["try"]["DoneTasks"].split(",")) if drilling["try"]["DoneTasks"] else {}
+
 			if drilling["TimeLimit"]:
 				drilling["Deadline"] = str(CalcTasksDeadline(drilling["TimeLimit"], doneDrilling["StartTime"]))
 			else:
@@ -218,13 +272,14 @@ def getDrillingById(id):
 			tasks["drillingcard"] = DB.GetTableJson("drillingcard", where=f"DrillingId='{id}'")
 			print("Drilling card:", tasks["drillingcard"])
 			if tasks["drillingcard"]:
+				tasksCount = 1
 				# Get Words from dictionary
 				for card in tasks['drillingcard']:
 					card["Word"] = GetSingleItem(DB.GetTableJson("dictionary", where=f"Id='{card['DictionaryId']}'"))
 					wordsRU.append(card["Word"]["RU"])
 					wordsJP.append(card["Word"]["WordJP"])
-				print("Words RU:", wordsRU)
-				print("Words JP:", wordsJP)
+				#print("Words RU:", wordsRU)
+				#print("Words JP:", wordsJP)
 
 				tasksNames = drilling["Tasks"].split(",")
 
@@ -238,8 +293,9 @@ def getDrillingById(id):
 					for word in shuffleWordsRU:
 						answers["WordsRU"].append(shuffleWordsRU.index(word))
 						answers["WordsJP"].append(shuffleWordsJP.index(wordsJP[wordsRU.index(word)]))
-					print(answers)
+					#print(answers)
 					tasks["drillingfindpair"] = { "WordsRU" : shuffleWordsRU, "WordsJP" : shuffleWordsJP, "answers" : answers }
+					tasksCount += 1
 
 				# Drilling Scramble
 				if "drillingscramble" in tasksNames:
@@ -249,13 +305,15 @@ def getDrillingById(id):
 					for word in shuffleWordsJP:
 						chars.append(list(word))
 						random.shuffle(chars[-1])
-					print("SWJP", shuffleWordsJP)
-					print("Chars", chars)
+					#print("SWJP", shuffleWordsJP)
+					#print("Chars", chars)
 					tasks["drillingscramble"] = { "words" : shuffleWordsJP, "chars" : chars }
+					tasksCount += 1
 
 				# Drilling Translate
 				if "drillingtranslate" in tasksNames:
 					tasks["drillingtranslate"] = { "WordsJP" : wordsJP, "WordsRU" : wordsRU }
+					tasksCount += 1
 
 				# Drilling Space
 				if "drillingspace" in tasksNames:
@@ -268,12 +326,12 @@ def getDrillingById(id):
 							spaceWords.append({ "WordJP" : word, "WordRU" : wordsRU[i], "WordStart" : "", "WordEnd" : word[-1], "Spaces" : 2 })
 						else:
 							spaceWords.append({ "WordJP" : word, "WordRU" : wordsRU[i], "WordStart" : word[1], "WordEnd" : word[-1], "Spaces" : len(word) - 2 })
-							
-
 					tasks["drillingspace"] = { "Words" : spaceWords }
+					tasksCount += 1
 
+				drilling["TasksCount"] = str(tasksCount)
 
-				return { "drilling" : drilling, "items" : tasks }
+			return { "drilling" : drilling, "items" : tasks }
 
 	return { "drilling" : None, "items" : None }, 403
 			
