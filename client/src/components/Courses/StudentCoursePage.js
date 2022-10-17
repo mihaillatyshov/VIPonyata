@@ -1,47 +1,43 @@
-import React, { useEffect } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import { useNavigate, useParams } from "react-router-dom"
-import { ServerAPI_GET } from "libs/ServerAPI"
-import { setSelectedCourse } from "redux/slices/coursesSlice"
-import { setLessons } from "redux/slices/lessonsSlice"
-import StudentLessonsBlock from "components/Lessons/StudentLessonsBlock"
-import style from "./StyleCourses.module.css"
-
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
+import { ServerAPI_GET } from "libs/ServerAPI";
+import { setSelectedCourse } from "redux/slices/coursesSlice";
+import { setLessons } from "redux/slices/lessonsSlice";
+import StudentLessonsBlock from "components/Lessons/StudentLessonsBlock";
+import style from "./StyleCourses.module.css";
 
 const StudentCoursePage = () => {
-	const { id } = useParams()
-	const navigate = useNavigate()
-	const dispatch = useDispatch()
-	const course = useSelector((state) => state.courses.selected)
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const course = useSelector((state) => state.courses.selected);
 
-	useEffect(() => {
-		dispatch(setSelectedCourse(undefined))
-		dispatch(setLessons(undefined))
-		ServerAPI_GET({
-			url: `/api/courses/${id}`,
-			onDataReceived: (data) => {
-				console.log(data)
-				dispatch(setSelectedCourse(data.course))
-				dispatch(setLessons(data.items))
-			},
-			handleStatus: (res) => {
-				console.log(res.status)
-				if (res.status === 403)
-					navigate("/")
-			}
-		})
-	}, [])
+    useEffect(() => {
+        dispatch(setSelectedCourse(undefined));
+        dispatch(setLessons(undefined));
+        ServerAPI_GET({
+            url: `/api/courses/${id}`,
+            onDataReceived: (data) => {
+                console.log(data);
+                dispatch(setSelectedCourse(data.course));
+                dispatch(setLessons(data.items));
+            },
+            handleStatus: (res) => {
+                console.log(res.status);
+                if (res.status === 403) navigate("/");
+            },
+        });
+    }, []);
 
-	return (
-		<div className="container">
-			<div className="row">
-				<div className={"col-auto " + style.mainTitle}>
-					{course && course.Name}
-				</div>
-			</div>
-			<StudentLessonsBlock />
-		</div>
-	)
-}
+    return (
+        <div className="container">
+            <div className="row">
+                <div className={"col-auto " + style.mainTitle}>{course && course.Name}</div>
+            </div>
+            <StudentLessonsBlock />
+        </div>
+    );
+};
 
-export default StudentCoursePage
+export default StudentCoursePage;

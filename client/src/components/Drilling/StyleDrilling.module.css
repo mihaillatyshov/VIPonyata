@@ -1,0 +1,38 @@
+.drillingCard {
+	background-color: var(--css-var-block);
+	margin: 10px auto 40px auto;
+	min-height: 100%;
+	padding: 10px;
+	width:fit-content;
+}
+
+div.drillingCardDiv {
+	height: 300px;
+}
+
+div.drillingCardImgDiv {
+	width: 300px;
+	min-width: 300px;
+	max-width: 600px;
+	height: 300px;
+}
+
+.drillingCardImg {
+	max-width: 300px;
+	max-height: 300px;
+}
+
+.drillingCardWords {
+	margin-bottom: 40px;
+}
+
+.drillingCardSentence {
+}
+
+.drillingCardLimit {
+	min-height: 340px;
+}
+
+.clearFloat {
+	clear: both;
+}

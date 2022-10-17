@@ -1,9 +1,7 @@
-import React from "react"
+import React from "react";
 
 const StudentAssessmentBlock = ({ assessment }) => {
-	return (
-		<div>StudentAssessmentBlock</div>
-	)
-}
+    return <div>StudentAssessmentBlock</div>;
+};
 
-export default StudentAssessmentBlock
+export default StudentAssessmentBlock;

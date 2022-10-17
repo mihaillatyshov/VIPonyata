@@ -75,9 +75,6 @@ const StudentDrillingPage = () => {
 							<Route path="/drillingtranslate" element={<StudentDrillingTranslate words={drilling.items.drillingtranslate} />} />
 							<Route path="/drillingspace" element={<StudentDrillingSpace spaces={drilling.items.drillingspace} />} />
 						</Routes>
-						<div>
-							tasks block
-						</div>
 					</div>
 				)) : (
 					<div> Loading... </div>

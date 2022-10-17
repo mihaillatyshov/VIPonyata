@@ -1,19 +1,19 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-	info: undefined,
-}
+    info: undefined,
+};
 
 export const hieroglyphSlice = createSlice({
-	name: 'hieroglyph',
-	initialState: initialState,
-	reducers: {
-		setHieroglyphInfo: (state, action) => {
-			state.info = action.payload
-		}		
-	},
-})
+    name: "hieroglyph",
+    initialState: initialState,
+    reducers: {
+        setHieroglyphInfo: (state, action) => {
+            state.info = action.payload;
+        },
+    },
+});
 
-export const { setHieroglyphInfo } = hieroglyphSlice.actions
+export const { setHieroglyphInfo } = hieroglyphSlice.actions;
 
-export default hieroglyphSlice.reducer
+export default hieroglyphSlice.reducer;
