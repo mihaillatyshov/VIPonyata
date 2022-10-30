@@ -4,8 +4,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ServerAPI_GET } from "libs/ServerAPI";
 import { setSelectedCourse } from "redux/slices/coursesSlice";
 import { setLessons } from "redux/slices/lessonsSlice";
-import StudentLessonsBlock from "components/Lessons/StudentLessonsBlock";
+import StudentLessonsBlock from "components/Courses/Lessons/StudentLessonsBlock";
 import style from "./StyleCourses.module.css";
+import { LogInfo } from "libs/Logger";
 
 const StudentCoursePage = () => {
     const { id } = useParams();
@@ -19,15 +20,16 @@ const StudentCoursePage = () => {
         ServerAPI_GET({
             url: `/api/courses/${id}`,
             onDataReceived: (data) => {
-                console.log(data);
+                LogInfo(data);
                 dispatch(setSelectedCourse(data.course));
                 dispatch(setLessons(data.items));
             },
             handleStatus: (res) => {
-                console.log(res.status);
+                LogInfo(res.status);
                 if (res.status === 403) navigate("/");
             },
         });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

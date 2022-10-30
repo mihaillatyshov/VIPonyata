@@ -7,7 +7,7 @@ const LessonCard = ({ lesson }) => {
         <div className="row justify-content-center">
             <Link to={`/lessons/${lesson.Id}`} className={"col a-link " + style.linkLesson}>
                 <div className={style.cardLesson}>
-                    {false && <img src="" />}
+                    {false && <img src="" alt="" />}
                     <div>
                         <div> {lesson.Name} </div>
                         <div className="mb-2 text-muted"> D {lesson.Difficulty} </div>

@@ -12,9 +12,9 @@ import RegisterPage from "./components/Authentication/RegisterPage";
 import TestUpload from "./components/TestUpload";
 import NavigateHome from "./components/NavigateHome";
 import StudentCoursePage from "./components/Courses/StudentCoursePage";
-import StudentLessonPage from "./components/Lessons/StudentLessonPage";
-import StudentDrillingPage from "./components/Drilling/StudentDrillingPage";
 import NavBar from "./components/NavBar";
+import StudentDrillingPage from "components/Courses/Lessons/DAH/Drilling/StudentDrillingPage";
+import StudentLessonPage from "components/Courses/Lessons/StudentLessonPage";
 
 // eslint-disable-next-line
 const App = () => {

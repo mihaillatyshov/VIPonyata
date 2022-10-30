@@ -1,0 +1,19 @@
+.navItem {
+    border: 1px solid #000000;
+    border-radius: 8px;
+    padding: 20px 10px 10px 10px;
+    width: 100px;
+    height: 100px;
+    position: relative;
+}
+
+.navBadge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 5px 10px;
+    background-color: #ff0000;
+    border-radius: 50%;
+    width: 1.5rem;
+    height: 1.5rem;
+}

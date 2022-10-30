@@ -272,7 +272,6 @@ def getDrillingById(id):
 			tasks["drillingcard"] = DB.GetTableJson("drillingcard", where=f"DrillingId='{id}'")
 			print("Drilling card:", tasks["drillingcard"])
 			if tasks["drillingcard"]:
-				tasksCount = 1
 				# Get Words from dictionary
 				for card in tasks['drillingcard']:
 					card["Word"] = GetSingleItem(DB.GetTableJson("dictionary", where=f"Id='{card['DictionaryId']}'"))
@@ -295,7 +294,6 @@ def getDrillingById(id):
 						answers["WordsJP"].append(shuffleWordsJP.index(wordsJP[wordsRU.index(word)]))
 					#print(answers)
 					tasks["drillingfindpair"] = { "WordsRU" : shuffleWordsRU, "WordsJP" : shuffleWordsJP, "answers" : answers }
-					tasksCount += 1
 
 				# Drilling Scramble
 				if "drillingscramble" in tasksNames:
@@ -308,12 +306,10 @@ def getDrillingById(id):
 					#print("SWJP", shuffleWordsJP)
 					#print("Chars", chars)
 					tasks["drillingscramble"] = { "words" : shuffleWordsJP, "chars" : chars }
-					tasksCount += 1
 
 				# Drilling Translate
 				if "drillingtranslate" in tasksNames:
 					tasks["drillingtranslate"] = { "WordsJP" : wordsJP, "WordsRU" : wordsRU }
-					tasksCount += 1
 
 				# Drilling Space
 				if "drillingspace" in tasksNames:
@@ -325,11 +321,8 @@ def getDrillingById(id):
 						elif len(word) == 2:
 							spaceWords.append({ "WordJP" : word, "WordRU" : wordsRU[i], "WordStart" : "", "WordEnd" : word[-1], "Spaces" : 2 })
 						else:
-							spaceWords.append({ "WordJP" : word, "WordRU" : wordsRU[i], "WordStart" : word[1], "WordEnd" : word[-1], "Spaces" : len(word) - 2 })
+							spaceWords.append({ "WordJP" : word, "WordRU" : wordsRU[i], "WordStart" : word[0], "WordEnd" : word[-1], "Spaces" : len(word) - 2 })
 					tasks["drillingspace"] = { "Words" : spaceWords }
-					tasksCount += 1
-
-				drilling["TasksCount"] = str(tasksCount)
 
 			return { "drilling" : drilling, "items" : tasks }
 

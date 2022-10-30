@@ -17,6 +17,9 @@ export const drillingSlice = createSlice({
             state.info.tries[state.info.tries.length - 1].EndTime = state.info.Deadline;
             state.info.Deadline = undefined;
         },
+        setDrillingDoneTask: (state, action) => {
+            state.info.try.DoneTasks = action.payload;
+        },
         setDrillingItems: (state, action) => {
             state.items = action.payload;
         },
@@ -35,6 +38,7 @@ export const drillingSlice = createSlice({
 export const {
     setDrillingInfo,
     setDrillingEndByTime,
+    setDrillingDoneTask,
     decDrillingTimeRemaining,
     setDrillingItems,
     setDrillingSelectedItem,

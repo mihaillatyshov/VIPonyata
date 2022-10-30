@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { LogInfo } from "./Logger";
 
 const SECOND = 1_000;
 const MINUTE = SECOND * 60;
@@ -18,11 +17,10 @@ export default function useTimer({ deadline, interval = SECOND / 2, onDeadline =
             setTimespan(new Date(deadline) - Date.now());
         }, interval);
 
-        LogInfo(deadline, interval, onDeadline);
-
         return () => {
             clearInterval(intervalId);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [deadline, interval]);
 
     const getVV = (value) => {

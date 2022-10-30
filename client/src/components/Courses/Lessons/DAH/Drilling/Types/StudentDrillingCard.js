@@ -2,11 +2,11 @@ import React, { useEffect } from "react";
 import { Button } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import { LogInfo, LogWarn, LogError } from "libs/Logger";
+import { LogInfo } from "libs/Logger";
 import { setDrillingSelectedItem, setDrillingSelectedItemField } from "redux/slices/drillingSlice";
 import style from "../StyleDrilling.module.css";
 
-const StudentDrillingCard = ({ cards }) => {
+const StudentDrillingCard = ({ cards, goToNextTaskCallback }) => {
     const { cardId } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -37,10 +37,8 @@ const StudentDrillingCard = ({ cards }) => {
     };
 
     const isFirstCard = () => {
-        return item.number === 0;
+        return item.number === "0";
     };
-
-    const isLastCard = () => {};
 
     useEffect(() => {
         LogInfo("setDrillingSelectedItem Card", cardId);
@@ -51,9 +49,13 @@ const StudentDrillingCard = ({ cards }) => {
                 );
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [cardId]);
 
     const handleButtonNavigate = (newId) => {
+        if (newId === cards.length) {
+            goToNextTaskCallback(taskTypeName, 0);
+        }
         if (newId < cards.length && newId >= 0) {
             navigate(`../drillingcard/${newId}`);
         }
@@ -105,20 +107,32 @@ const StudentDrillingCard = ({ cards }) => {
                     </div>
                     <div className="col-auto">
                         <div className={style.drillingCardImgDiv}>
-                            <img src={item.Word.ImgSrc ? item.Word.ImgSrc : ""} className={style.drillingCardImg} />
+                            <img
+                                src={item.Word.ImgSrc ? item.Word.ImgSrc : ""}
+                                className={style.drillingCardImg}
+                                alt=""
+                            />
                         </div>
                     </div>
                 </div>
             )}
             <div className={style.clearFloat}></div>
-            <Button type="button" onClick={() => handleButtonNavigate(parseInt(cardId) - 1)}>
-                {" "}
-                Предыдущая карточка{" "}
-            </Button>
-            <Button type="button" onClick={() => handleButtonNavigate(parseInt(cardId) + 1)}>
-                {" "}
-                Следующая карточка{" "}
-            </Button>
+            {checkItem() && (
+                <div>
+                    <Button
+                        type="button"
+                        onClick={() => handleButtonNavigate(parseInt(cardId) - 1)}
+                        disabled={isFirstCard() ? true : null}
+                    >
+                        {" "}
+                        Предыдущая карточка{" "}
+                    </Button>
+                    <Button type="button" onClick={() => handleButtonNavigate(parseInt(cardId) + 1)}>
+                        {" "}
+                        Следующая карточка{" "}
+                    </Button>
+                </div>
+            )}
         </div>
     );
 };

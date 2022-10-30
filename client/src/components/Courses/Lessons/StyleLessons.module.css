@@ -3,7 +3,7 @@ div.cardLesson {
 }
 
 div.skillLesson {
-	margin: 40px 25px 40px 25px;
+	margin: 40px 25px 0 25px;
 	min-width: 150px;
 	border: 4px dotted #000000;
 }

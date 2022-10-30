@@ -5,8 +5,8 @@ import { LogError, LogInfo } from "libs/Logger";
 import { ServerAPI_GET } from "libs/ServerAPI";
 import { setDrillingInfo } from "redux/slices/drillingSlice";
 import { setSelectedLesson } from "redux/slices/lessonsSlice";
-import StudentDrillingBlock from "components/Drilling/StudentDrillingBlock";
 import style from "./StyleLessons.module.css";
+import StudentDrillingBlock from "./DAH/Drilling/StudentDrillingBlock";
 
 const StudentLessonPage = () => {
     const { id } = useParams();
@@ -31,6 +31,7 @@ const StudentLessonPage = () => {
                 if (res.status === 403) navigate("/");
             },
         });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
