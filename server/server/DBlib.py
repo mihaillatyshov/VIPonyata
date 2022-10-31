@@ -122,8 +122,9 @@ class DataBase:
 
 	def GetJsonFromNamesAndData(self, names, data):
 		result = []
-		print("GetJsonFromNamesAndData")
+		print("GetJsonFromNamesAndData", names, data)
 		if not data:
+			print("return1 GetJsonFromNamesAndData")
 			return result
 		for element in data:
 			line = {}
@@ -131,6 +132,8 @@ class DataBase:
 				#print(name, type(field))
 				line.update({name : str(field) if field else field})
 			result.append(line)
+
+		print("return2 GetJsonFromNamesAndData")
 		return result
 
 	def GetTableJson(self, tableName, where = None, start = -1, count = 65536, tableElements = None):
