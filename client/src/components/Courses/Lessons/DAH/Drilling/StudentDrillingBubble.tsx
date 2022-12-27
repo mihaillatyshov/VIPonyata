@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { ServerAPI_POST } from "libs/ServerAPI";
 import { setDrillingEndByTime } from "redux/slices/drillingSlice";
 import StudentDrillingTimeRemaining from "./StudentDrillingTimeRemaining";
+import { LogInfo } from "libs/Logger";
 
 type StudentDrillingBubbleProps = {
     drilling: any;
@@ -13,6 +14,8 @@ type StudentDrillingBubbleProps = {
 const StudentDrillingBubble = ({ drilling }: StudentDrillingBubbleProps) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
+
+    LogInfo("SDBP drilling", drilling, drilling.info);
 
     const isInProgress = () => {
         if (drilling.info.tries && drilling.info.tries.length !== 0) {

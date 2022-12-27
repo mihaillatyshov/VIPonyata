@@ -12,8 +12,15 @@
     top: 0;
     right: 0;
     margin: 5px 10px;
-    background-color: #ff0000;
     border-radius: 50%;
     width: 1.5rem;
     height: 1.5rem;
+}
+
+.navBadgeZero {
+    background-color: #00ff00;
+}
+
+.navBadgeOther {
+    background-color: #ff0000;
 }

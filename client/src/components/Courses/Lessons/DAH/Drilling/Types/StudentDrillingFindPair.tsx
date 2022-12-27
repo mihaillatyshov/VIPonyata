@@ -18,7 +18,6 @@ const StudentDrillingFindPair = ({ inData, goToNextTaskCallback }: StudentDrilli
 
     const isInDoneFields = (id: number, type: string) => {
         for (const field of item.doneFields) {
-            //LogInfo("Fileld:", field, field[type], id)
             if (field[type] === id) {
                 return true;
             }

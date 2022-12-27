@@ -26,7 +26,10 @@ const StudentLessonPage = () => {
             onDataReceived: (data) => {
                 LogInfo(data);
                 dispatch(setSelectedLesson(data.lesson));
-                dispatch(setDrillingInfo(data.items.drilling));
+                if (Object.keys(data.items.drilling).length !== 0) {
+                    LogInfo("SetDrillingData");
+                    dispatch(setDrillingInfo(data.items.drilling));
+                }
             },
             handleStatus: (res) => {
                 if (res.status === 403) navigate("/");

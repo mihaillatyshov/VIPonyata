@@ -1,7 +1,28 @@
 import React from "react";
+import { ServerAPI_POST } from "libs/ServerAPI";
+import { Button } from "react-bootstrap";
 
-const DrillingHub = () => {
-    return <div>DrillingHub</div>;
+type DrillingHubProps = {
+    id: string | undefined;
+    onBackToLesson: () => void;
+};
+
+const DrillingHub = ({ id, onBackToLesson }: DrillingHubProps) => {
+    const onEndDrilling = () => {
+        ServerAPI_POST({
+            url: `/api/drilling/${id}/endtry`,
+            onDataReceived: () => {
+                onBackToLesson();
+            },
+        });
+    };
+
+    return (
+        <div>
+            DrillingHub
+            <Button onClick={onEndDrilling}> Завершить дриллинг </Button>
+        </div>
+    );
 };
 
 export default DrillingHub;

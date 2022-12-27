@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import { Button } from "react-bootstrap";
 import { LogInfo } from "libs/Logger";
-import { ServerAPI_GET, ServerAPI_POST } from "libs/ServerAPI";
+import { ServerAPI_GET } from "libs/ServerAPI";
 import { selectDrilling, setDrillingDoneTask, setDrillingInfo, setDrillingItems } from "redux/slices/drillingSlice";
 import NavigateToElement from "components/NavigateToElement";
 import StudentDrillingNav from "./Nav/StudentDrillingNav";
@@ -24,6 +24,25 @@ const StudentDrillingPage = () => {
     const dispatch = useAppDispatch();
     const drilling = useAppSelector(selectDrilling);
 
+    const navToUndoneTask = (doneTasks: any) => {
+        for (const taskName of Object.keys(drilling.items)) {
+            LogInfo("for", taskName);
+            if (Object.keys(doneTasks).includes(taskName)) {
+                LogInfo("in", taskName, Object.keys(doneTasks));
+                continue;
+            }
+            navigate(taskName);
+            break;
+        }
+
+        // TODO Send to server what task is done
+
+        if (Object.keys(doneTasks).length === Object.keys(drilling.items).length) {
+            LogInfo("Navigate");
+            navigate("");
+        }
+    };
+
     useEffect(() => {
         dispatch(setDrillingInfo(undefined));
         ServerAPI_GET({
@@ -32,6 +51,7 @@ const StudentDrillingPage = () => {
                 LogInfo(data);
                 dispatch(setDrillingInfo(data.drilling));
                 dispatch(setDrillingItems(data.items));
+                navToUndoneTask({});
             },
             handleStatus: (res) => {
                 if (res.status === 403) navigate("/");
@@ -51,35 +71,11 @@ const StudentDrillingPage = () => {
         // TODO Go to NextTask
         LogInfo("NDT", Object.keys(newDoneTasks));
         LogInfo("DI", Object.keys(drilling.items));
-        for (const taskName of Object.keys(drilling.items)) {
-            LogInfo("for", taskName);
-            if (Object.keys(newDoneTasks).includes(taskName)) {
-                LogInfo("in", taskName, Object.keys(newDoneTasks));
-                continue;
-            }
-            navigate(taskName);
-            break;
-        }
-
-        // TODO Send to server what task is done
-
-        if (Object.keys(newDoneTasks).length === Object.keys(drilling.items).length) {
-            LogInfo("Navigate");
-            navigate("");
-        }
+        navToUndoneTask(newDoneTasks);
     };
 
     const onBackToLesson = () => {
         navigate(`/lessons/${drilling.info.LessonId}`);
-    };
-
-    const onEndDrilling = () => {
-        ServerAPI_POST({
-            url: `/api/drilling/${id}/endtry`,
-            onDataReceived: () => {
-                onBackToLesson();
-            },
-        });
     };
 
     return (
@@ -95,7 +91,6 @@ const StudentDrillingPage = () => {
                             }
                         />
                         <Button onClick={onBackToLesson}> Вернуться к уроку </Button>
-                        <Button onClick={onEndDrilling}> Завершить дриллинг </Button>
                         <div>
                             {" "}
                             {drilling.info.Description} {drilling.info.TimeLimit} {drilling.info.try.StartTime}{" "}
@@ -108,9 +103,9 @@ const StudentDrillingPage = () => {
                         ) : (
                             <div> </div>
                         )}
-                        <StudentDrillingNav items={drilling.items} />
+                        <StudentDrillingNav items={drilling.items} doneTasks={drilling.info.try.DoneTasks} />
                         <Routes>
-                            <Route path="/" element={<DrillingHub />} />
+                            <Route path="/" element={<DrillingHub id={id} onBackToLesson={onBackToLesson} />} />
                             <Route path="/drillingcard" element={<NavigateToElement to="../drillingcard/0" />} />
                             <Route
                                 path="/drillingcard/:cardId"

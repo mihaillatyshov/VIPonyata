@@ -18,6 +18,7 @@ import StudentLessonPage from "./components/Courses/Lessons/StudentLessonPage";
 import { useAppDispatch, useAppSelector } from "./redux/hooks";
 import { Button } from "react-bootstrap";
 import styleThemes from "./themes/StyleThemes.module.css";
+import { LogInfo } from "libs/Logger";
 
 // eslint-disable-next-line
 const App = () => {
@@ -28,6 +29,7 @@ const App = () => {
         ServerAPI_GET({
             url: "/api/islogin",
             onDataReceived: (data) => {
+                LogInfo(data);
                 dispatch(setUserData(data));
             },
         });

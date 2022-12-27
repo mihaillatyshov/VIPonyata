@@ -1,13 +1,22 @@
+import { LogInfo } from "libs/Logger";
 import React from "react";
 import StudentDrillingNavItem from "./StudentDrillingNavItem";
 
 type StudentDrillingNavProps = {
     items: any;
+    doneTasks: any;
 };
 
-const StudentDrillingNav = ({ items }: StudentDrillingNavProps) => {
+const StudentDrillingNav = ({ items, doneTasks }: StudentDrillingNavProps) => {
     const createItem = (taskName: string, name: string, to: string, imgSrc: string) => {
-        return { [taskName]: { to: to, name: name, img: imgSrc } };
+        return {
+            [taskName]: {
+                to: to,
+                name: name,
+                img: imgSrc,
+                mistakeCount: doneTasks[taskName],
+            },
+        };
     };
 
     const itemsData = {
@@ -17,6 +26,8 @@ const StudentDrillingNav = ({ items }: StudentDrillingNavProps) => {
         ...createItem("drillingspace", "Space", "drillingspace", "/img/DAH/DH/nav/space.png"),
         ...createItem("drillingtranslate", "Translate", "drillingtranslate", "/img/DAH/DH/nav/translate.png"),
     };
+
+    LogInfo(items);
 
     return (
         <div className="container mx-0">

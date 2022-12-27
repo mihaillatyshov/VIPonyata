@@ -1,5 +1,6 @@
-from server import createApp
 from flask_cors import CORS
+
+from server import createApp
 
 app = createApp()
 CORS(app)

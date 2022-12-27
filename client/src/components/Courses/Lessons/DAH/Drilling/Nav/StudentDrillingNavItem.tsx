@@ -1,3 +1,4 @@
+import { LogInfo } from "libs/Logger";
 import React from "react";
 import { Link } from "react-router-dom";
 import style from "./StyleDrillingNav.module.css";
@@ -6,9 +7,11 @@ export type StudentDrillingNavItemProps = {
     to: string;
     name: string;
     img: string;
+    mistakeCount: number | undefined;
 };
 
-const StudentDrillingNavItem = ({ to, name, img }: StudentDrillingNavItemProps) => {
+const StudentDrillingNavItem = ({ to, name, img, mistakeCount }: StudentDrillingNavItemProps) => {
+    LogInfo(mistakeCount);
     return (
         <div className="col-auto text-center">
             <div className={style.navItem}>
@@ -18,7 +21,15 @@ const StudentDrillingNavItem = ({ to, name, img }: StudentDrillingNavItemProps) 
                     </div>
                     <div>{name}</div>
                 </Link>
-                <div className={style.navBadge}>4</div>
+                {mistakeCount !== undefined ? (
+                    mistakeCount > 0 ? (
+                        <div className={`${style.navBadge} ${style.navBadgeOther}`}>{mistakeCount}</div>
+                    ) : (
+                        <div className={`${style.navBadge} ${style.navBadgeZero}`}>{mistakeCount}</div>
+                    )
+                ) : (
+                    <></>
+                )}
             </div>
         </div>
     );

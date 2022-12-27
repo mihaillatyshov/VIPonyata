@@ -6,6 +6,7 @@ create table users
     Id int PRIMARY KEY AUTO_INCREMENT,
     Name varchar(128) NOT NULL,
     Nickname varchar(128) NOT NULL UNIQUE,
+    Password varchar(512) NOT NULL,
     Birthday date NOT NULL,
     Registration date NOT NULL,
     Theme varchar(128),
