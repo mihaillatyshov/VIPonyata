@@ -1,3 +1,10 @@
+MariaDB [(none)]> CREATE DATABASE test_db;
+MariaDB [(none)]> CREATE USER 'test_user'@'localhost' IDENTIFIED BY 'StrongPassword';
+MariaDB [(none)]> GRANT ALL PRIVILEGES ON test_db.* TO 'test_user'@'localhost';
+MariaDB [(none)]> FLUSH PRIVILEGES;
+MariaDB [(none)]> QUIT;
+
+
 ###################################################################
 ################### USERS #########################################
 ###################################################################

@@ -3,60 +3,65 @@ from datetime import datetime
 from .DBqueriesUtils import *
 
 
+@ObjectListToDictList
 def GetAvailableCourses(userId: int) -> list:
-    return DB.GetTablesJson({
-        "courses": {"elements": "ALL"},
-        "usercourses": {}},
-        where=f"courses.Id = usercourses.CourseId AND usercourses.UserId = '{userId}'")
+    return DBsession.query(Course).join(Course.users).filter(User.id == userId).all()
 
 
-def GetCourseById(courseId: int, userId: int) -> dict:
-    return GetSingleItem(DB.GetTablesJson({
-        "courses": {"elements": "ALL"},
-        "usercourses": {}},
-        where=f"courses.Id = usercourses.CourseId AND courses.Id = '{courseId}' AND usercourses.UserId = '{userId}'"))
+@GetDictFromSingleItem
+def GetCourseById(courseId: int, userId: int):
+    return DBsession.query(Course).filter_by(id=courseId).filter_by(user_id=userId).one_or_none()
 
 
 def GetLessonsByCourseId(courseId: int, userId: int) -> list:
-    return DB.GetTablesJson(
-        {"lessons": {"elements": "ALL"},
-         "userlessons": {}},
-        where=f"lessons.Id = userlessons.LessonId AND lessons.CourseId = '{courseId}' AND userlessons.UserId = '{userId}'")
+    return DBsession.query(Lesson).filter_by(course_id=courseId).filter_by(user_id=userId).all()
 
 
-def GetLessonById(lessonId: int, userId: int) -> dict:
-    return GetSingleItem(DB.GetTablesJson({
-        "lessons": {"elements": "ALL"},
-        "userlessons": {}},
-        where=f"lessons.Id = userlessons.LessonId AND lessons.Id = '{lessonId}' AND userlessons.UserId = '{userId}'"))
+@GetDictFromSingleItem
+def GetLessonById(lessonId: int, userId: int):
+    return DBsession.query(Lesson).filter_by(lesson_id=lessonId).filter_by(user_id=userId).all()
 
 
-def GetDrillingByLessonId(lessonId: int, userId: int) -> dict:
-    return GetSingleItem(DB.GetTableJson("drillings", where=f"LessonId = '{lessonId}'"))
+@GetDictFromSingleItem
+def GetDrillingByLessonId(lessonId: int, userId: int):
+    return DBsession.query(Drilling).join(
+        Drilling.lesson).filter(
+        Lesson.id == lessonId).join(
+        Lesson.users).filter(
+        User.id == userId).one_or_none()
 
 
-def GetDrillingById(drillingId: int, userId: int) -> dict:
-    return GetSingleItem(DB.GetTablesJson({
-        "drillings": {"elements": "ALL"},
-        "userlessons": {}},
-        where=f"drillings.Id = '{drillingId}' AND drillings.LessonId = userlessons.LessonId AND userlessons.UserId = '{userId}'"))
+@GetDictFromSingleItem
+def GetDrillingById(drillingId: int, userId: int):
+    return DBsession.query(Drilling).filter_by(
+        id=drillingId).join(
+        Drilling.lesson).join(
+        Lesson.users).filter(
+        User.id == userId).one_or_none()
 
 
 def GetDoneDrillingsByDrillingId(drillingId: int, userId: int) -> list:
-    return DB.GetTableJson("donedrillings", where=f"DrillingId='{drillingId}' AND UserId='{userId}' ORDER BY TryNumber")
+    return DBsession.query(DoneDrilling).join(
+        DoneDrilling.drilling).filter(
+        Drilling.id == drillingId).join(
+        Drilling.lesson).join(
+        Lesson.users).filter(
+        User.id == userId).all()
 
 
 def AddNewDoneDrilling(tryNumber: int, drillingId: int, userId: int):
-    DB.AddTableElement("donedrillings", {
-        "TryNumber": tryNumber,
-        "StartTime": datetime.now(),
-        "UserId": userId,
-        "DrillingId": drillingId})
+    DBsession.add(
+        DoneDrilling(
+            try_number=tryNumber, start_datetime=datetime.now(),
+            user_id=userId, drilling_id=drillingId))
+    DBsession.commit()
 
 
-def GetAssessmentByLessonId(lessonId: int, userId: int) -> dict:
-    return GetSingleItem(DB.GetTableJson("assessment", where=f"LessonId = '{lessonId}'"))
+# @GetDictFromSingleItem
+# def GetAssessmentByLessonId(lessonId: int, userId: int):
+#    return GetSingleItem(DB.GetTableJson("assessment", where=f"LessonId = '{lessonId}'"))
 
 
-def GetHieroglyphByLessonId(lessonId: int, userId: int) -> dict:
-    return GetSingleItem(DB.GetTableJson("hieroglyph", where=f"LessonId = '{lessonId}'"))
+# @GetDictFromSingleItem
+# def GetHieroglyphByLessonId(lessonId: int, userId: int):
+#    return GetSingleItem(DB.GetTableJson("hieroglyph", where=f"LessonId = '{lessonId}'"))

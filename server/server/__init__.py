@@ -1,11 +1,9 @@
 from flask import Flask
 from flask_login import LoginManager
 
-from .DBlib import DataBase
-from .RedisLogin import RedisLogin
+from .DBlib import CreateSession
 
-DB = DataBase("localhost", "mihail", "dbnfvbys5", "japan")
-RL = RedisLogin(host="localhost")
+DBsession = CreateSession("mysql+mysqlconnector", "mihail", "dbnfvbys5", "localhost", "japan")
 login_manager = LoginManager()
 
 

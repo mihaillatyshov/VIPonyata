@@ -34,6 +34,10 @@ const LoginPage = () => {
                     dispatch(setUserData(data));
                     dispatch(resetLoginForm());
                 },
+                handleStatus(data) {
+                    if (data.status === 400) {
+                    }
+                },
             });
         }
 

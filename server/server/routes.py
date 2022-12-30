@@ -8,14 +8,14 @@ from flask import current_app, jsonify, request, session
 from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
 
-from . import DB
+from . import DBsession
 from .queries import OtherDBqueries as DBQO
 from .queries import StudentDBqueries as DBQS
 from .queries import TeacherDBqueries as DBQT
 
 
 def GetCurrentUserId() -> int:
-    return current_user.get_id()  # type: ignore
+    return current_user.GetId()  # type: ignore
 
 
 def GetCurrentUserIsTeacher() -> bool:

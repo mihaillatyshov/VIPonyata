@@ -4,8 +4,10 @@ from flask import abort, current_app, request
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from . import DB, RL, login_manager
-from .User import User
+from . import DBsession, login_manager
+from .FlaskUser import FlaskUser
+from .DBlib import User
+from .log_lib import LogI
 
 
 @login_manager.user_loader
@@ -13,7 +15,7 @@ def load_user(user_id):
     print("GetUserFromDB")
     if user_id is not None:
         print("user id not None")
-        return User().FromDB(user_id)
+        return FlaskUser().FromDB(user_id)
     print("user id is None")
     return None
 
@@ -22,7 +24,7 @@ def getCurrentUserData() -> dict:
     data = {}
     if (current_user.get_id() != None):                 # type: ignore
         data = {
-            "id": current_user.get_id(),                # type: ignore
+            "id": current_user.GetId(),                 # type: ignore
             "name": current_user.GetName(),             # type: ignore
             "nickname": current_user.GetNickname(),     # type: ignore
             "level": current_user.GetLevel(),           # type: ignore
@@ -52,7 +54,7 @@ def login():
 
     if nickname and password:
         print("Data ok")
-        user = User().FromDB(nickname)
+        user = FlaskUser().FromDB(nickname)
         if user.IsExists():
             print("Exist")
             if check_password_hash(user.GetPassword(), password):
@@ -67,44 +69,43 @@ def register():
     if not request.json:
         abort(400)
 
+    name = request.json.get("name")
     nickname = request.json.get("nickname")
     password1 = request.json.get("password1")
     password2 = request.json.get("password2")
-    name = request.json.get("name")
     birthday = request.json.get("birthday")
-    print("Login:")
-    print(nickname)
-    print(password1)
-    print(password2)
-    print(name)
-    print(birthday)
+    LogI("Login:")
+    LogI("name:", name)
+    LogI("nickname:", nickname)
+    LogI("password1:", password1)
+    LogI("password2:", password2)
+    LogI("birthday", birthday)
 
     if not (nickname or password1 or password2 or name or birthday):
-        print("Пожалуйста, заполните все поля")
+        LogI("Пожалуйста, заполните все поля")
         return {"message": "Пожалуйста, заполните все поля"}, 422
     elif password1 != password2:
-        print("Пароли не совпадают: ", nickname)
+        LogI("Пароли не совпадают: ", nickname)
         return {"message": "Пароли не совпадают"}, 422
     else:
-        user = User().FromDB(nickname)
+        user = FlaskUser().FromDB(nickname)
         if user.IsExists():
-            print("Этот никнейм уже занят")
+            LogI("Этот никнейм уже занят")
             return {"message": "Этот никнейм уже занят!"}, 422
 
         hashPwd = generate_password_hash(password1)
-        RL.AddUser(nickname, {"password": hashPwd, })
-        DB.AddTableElement("users", {
-            "Name": name,
-            "Nickname": nickname,
-            "Birthday": birthday,
-            "Registration": str(datetime.datetime.now().date()),
-            "Level": 0,
-        })
+        newUser = User(name=name, nickname=nickname, password=hashPwd, birthday=birthday, level=0)
+        DBsession.add(newUser)
+        DBsession.commit()
 
-    userData = DB.GetTableJson("users", f"nickname='{nickname}'")[0]
-    print("userData", userData)
+    # = DBsession.query(User).filter_by(nickname=nickname).one_or_none()
 
-    return {"userData": userData}, 201
+    if newUserData := FlaskUser().FromDB(nickname).data:
+        LogI("userData", newUserData)
+        if newUser:
+            return {"userData": newUserData}, 201
+
+    return {"message": "Не удалось создать пользователя!"}, 422
 
 
 @current_app.route("/api/logout", methods=["POST"])
