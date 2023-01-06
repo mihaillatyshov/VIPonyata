@@ -9,8 +9,8 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 const StudentDrillingFindPair = ({ inData, goToNextTaskCallback }: StudentDrillingTaskProps) => {
     const dispatch = useAppDispatch();
     const item = useAppSelector(selectDrilling).selectedItem;
-    const strWordsRU = "WordsRU";
-    const strWordsJP = "WordsJP";
+    const strWordsRU = "words_ru";
+    const strWordsJP = "words_jp";
 
     const deselectField = () => {
         dispatch(setDrillingSelectedItemField({ selectedField: { id: -1, type: "None" } }));
@@ -77,7 +77,7 @@ const StudentDrillingFindPair = ({ inData, goToNextTaskCallback }: StudentDrilli
 
     return (
         <StudentDrillingTaskInterface
-            taskTypeName="drillingfindpair"
+            taskTypeName="findpair"
             newObjectData={{
                 selectedField: { id: -1, type: "None" },
                 doneFields: [],

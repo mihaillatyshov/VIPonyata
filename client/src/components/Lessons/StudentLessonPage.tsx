@@ -4,7 +4,7 @@ import { LogInfo } from "libs/Logger";
 import { ServerAPI_GET } from "libs/ServerAPI";
 import { selectDrilling, setDrillingInfo } from "redux/slices/drillingSlice";
 import { selectLessons, setSelectedLesson } from "redux/slices/lessonsSlice";
-import StudentDrillingBubble from "./DAH/Drilling/StudentDrillingBubble";
+import StudentDrillingBubble from "../DAH/Lexis/Drilling/StudentDrillingBubble";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { selectAssessment } from "redux/slices/assessmentSlice";
 import { selectHieroglyph } from "redux/slices/hieroglyphSlice";
@@ -38,19 +38,19 @@ const StudentLessonPage = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    if (lesson === undefined) {
+        return <p> Loading... </p>;
+    }
+
     return (
         <div className="container">
-            {lesson === undefined ? (
-                <p> Loading... </p>
-            ) : (
-                <div>
-                    <div> {lesson.Name} </div>
-                    <div> {lesson.Description} </div>
-                    {drilling && drilling.info && <StudentDrillingBubble drilling={drilling} />}
-                    {assessment && assessment.info && <StudentDrillingBubble drilling={drilling} />}
-                    {hieroglyph && hieroglyph.info && <StudentDrillingBubble drilling={drilling} />}
-                </div>
-            )}
+            <div>
+                <div> {lesson.name} </div>
+                <div> {lesson.description} </div>
+                {drilling && drilling.info && <StudentDrillingBubble drilling={drilling} />}
+                {assessment && assessment.info && <StudentDrillingBubble drilling={drilling} />}
+                {hieroglyph && hieroglyph.info && <StudentDrillingBubble drilling={drilling} />}
+            </div>
         </div>
     );
 };

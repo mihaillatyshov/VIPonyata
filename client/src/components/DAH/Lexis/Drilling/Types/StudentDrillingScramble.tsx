@@ -51,7 +51,7 @@ const StudentDrillingScramble = ({ inData, goToNextTaskCallback }: StudentDrilli
 
     return (
         <StudentDrillingTaskInterface
-            taskTypeName="drillingscramble"
+            taskTypeName="scramble"
             newObjectData={{
                 ...setNewWord(0),
             }}
@@ -62,37 +62,35 @@ const StudentDrillingScramble = ({ inData, goToNextTaskCallback }: StudentDrilli
             maincontent={() => {
                 return (
                     <div>
+                        <div> {item.nowId} </div>
                         <div>
-                            <div> {item.nowId} </div>
-                            <div>
-                                {item.doneWord.map((word: string, key: number) => (
-                                    <Button
-                                        className="scrambleItem"
-                                        key={key}
-                                        variant="outline-dark"
-                                        onClick={() => doneWordClick(key)}
-                                    >
-                                        {" "}
-                                        {word}{" "}
-                                    </Button>
-                                ))}
-                            </div>
-                            <div>
-                                {item.usedChars.map((char: string, key: number) => (
-                                    <Button
-                                        className="scrambleItem"
-                                        key={key}
-                                        variant="outline-dark"
-                                        onClick={() => usedCharsClick(key)}
-                                    >
-                                        {" "}
-                                        {char}{" "}
-                                    </Button>
-                                ))}
-                            </div>
-                            <div> {inData.words[item.wordId]} </div>
-                            <div> {item.message} </div>
+                            {item.doneWord.map((word: string, key: number) => (
+                                <Button
+                                    className="scrambleItem"
+                                    key={key}
+                                    variant="outline-dark"
+                                    onClick={() => doneWordClick(key)}
+                                >
+                                    {" "}
+                                    {word}{" "}
+                                </Button>
+                            ))}
                         </div>
+                        <div>
+                            {item.usedChars.map((char: string, key: number) => (
+                                <Button
+                                    className="scrambleItem"
+                                    key={key}
+                                    variant="outline-dark"
+                                    onClick={() => usedCharsClick(key)}
+                                >
+                                    {" "}
+                                    {char}{" "}
+                                </Button>
+                            ))}
+                        </div>
+                        <div> {inData.words[item.wordId]} </div>
+                        <div> {item.message} </div>
                     </div>
                 );
             }}

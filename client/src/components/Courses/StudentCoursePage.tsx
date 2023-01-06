@@ -6,7 +6,7 @@ import { setLessons } from "redux/slices/lessonsSlice";
 import style from "./StyleCourses.module.css";
 import { LogInfo } from "libs/Logger";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import StudentLessonsList from "components/Courses/Lessons/StudentLessonsList";
+import StudentLessonsList from "components/Lessons/StudentLessonsList";
 
 const StudentCoursePage = () => {
     const { id } = useParams();
@@ -35,7 +35,7 @@ const StudentCoursePage = () => {
     return (
         <div className="container">
             <div className="row">
-                <div className={"col-auto " + style.mainTitle}>{course && course.Name}</div>
+                <div className={"col-auto " + style.mainTitle}>{course && course.name}</div>
             </div>
             <StudentLessonsList />
         </div>

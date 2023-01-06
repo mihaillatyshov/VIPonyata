@@ -39,7 +39,7 @@ class User(Base):
     lessons = relationship('Lesson', secondary=a_users_lessons, backref='user')
 
     def __repr__(self):
-        return f"User: (id={self.id}; nickname={self.nickname}; level={self.level})"
+        return f"<User: (id={self.id}; nickname={self.nickname}; level={self.level})>"
 
 
 class Course(Base):
@@ -60,7 +60,7 @@ class Course(Base):
     lessons = relationship("Lesson")
 
     def __repr__(self):
-        return f"Course: (id={self.id}; name={self.name})"
+        return f"<Course: (id={self.id}; name={self.name})>"
 
 
 class Lesson(Base):
@@ -81,7 +81,7 @@ class Lesson(Base):
     drilling = relationship("Drilling")
 
     def __repr__(self):
-        return f"Lesson: (id={self.id}; name={self.name})"
+        return f"<Lesson: (id={self.id}; name={self.name})>"
 
 
 class Dictionary(Base):
@@ -93,8 +93,10 @@ class Dictionary(Base):
     ru = Column(String(128))
     img = Column(String(1024))
 
+    drilling_card = relationship("DrillingCard")
+
     def __repr__(self):
-        return f"Dictionary: (id={self.id}; char_jp={self.char_jp}; word_jp={self.char_jp}; ru={self.ru})"
+        return f"<Dictionary: (id={self.id}; char_jp={self.char_jp}; word_jp={self.char_jp}; ru={self.ru})>"
 
 
 class Drilling(Base):
@@ -110,6 +112,16 @@ class Drilling(Base):
 
     cards = relationship("DrillingCard")
 
+    tries = []
+    deadline = None
+    now_try = None
+
+    def __json__(self):
+        data = {"tries": self.tries, "time_limit": self.time_limit, "deadline": self.deadline, "try": self.now_try}
+        for column in self.__table__.columns:
+            data[column.name] = getattr(self, column.name)
+        return data
+
 
 class DrillingCard(Base):
     __tablename__ = "drilling_cards"
@@ -119,9 +131,16 @@ class DrillingCard(Base):
     answer = Column(String(256), nullable=False)
 
     drilling_id = Column(Integer, ForeignKey("drillings.id"))
+    drilling = relationship("Drilling")
 
     dictionary_id = Column(Integer, ForeignKey("dictionary.id"))
     dictionary = relationship("Dictionary")
+
+    def __json__(self):
+        data = {"word": self.dictionary}
+        for column in self.__table__.columns:
+            data[column.name] = getattr(self, column.name)
+        return data
 
 
 class DoneDrilling(Base):
@@ -130,13 +149,29 @@ class DoneDrilling(Base):
 
     try_number = Column(Integer, nullable=False)
     start_datetime = Column(DateTime, nullable=False)
-    end_datetime = Column(DateTime, nullable=False)
+    end_datetime = Column(DateTime)
     done_tasks = Column(String(2048))
 
     user_id = Column(Integer, ForeignKey("users.id"))
 
     drilling_id = Column(Integer, ForeignKey("drillings.id"))
-    drilling = relationship("Drilling")
+    drilling = relationship("Drilling")\
+
+
+    def getDoneTasksDict(self) -> dict:
+        res = {}
+        if self.done_tasks:
+            for task in self.done_tasks.split(","):
+                key, val = task.split(":")
+                res[key] = val
+        return res
+
+    def __json__(self):
+        data = {}
+        for column in self.__table__.columns:
+            data[column.name] = getattr(self, column.name)
+        data["done_tasks"] = self.getDoneTasksDict()
+        return data
 
 
 def CreateSession(url, username, password, host, database):
@@ -154,6 +189,3 @@ def CreateSession(url, username, password, host, database):
     Base.metadata.create_all(engine)
 
     return session
-
-
-DBsession = CreateSession("mysql+mysqlconnector", "mihail", "dbnfvbys5", "localhost", "japan")

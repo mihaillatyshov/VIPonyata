@@ -1,12 +1,12 @@
 import React from "react";
 import { ProgressBar } from "react-bootstrap";
 
-type StudentDrillingProgressProps = {
+type StudentProgressProps = {
     percent: number;
 };
 
-const StudentDrillingProgress = ({ percent }: StudentDrillingProgressProps) => {
+const StudentProgress = ({ percent }: StudentProgressProps) => {
     return <ProgressBar variant="success" now={percent} />;
 };
 
-export default StudentDrillingProgress;
+export default StudentProgress;

@@ -1,29 +1,38 @@
 from datetime import datetime
 
+from ..DBlib import (Course, Dictionary, DoneDrilling, Drilling, DrillingCard,
+                     Lesson, User)
+from ..log_lib import LogI
 from .DBqueriesUtils import *
 
 
-@ObjectListToDictList
-def GetAvailableCourses(userId: int) -> list:
-    return DBsession.query(Course).join(Course.users).filter(User.id == userId).all()
+def GetAvailableCourses(userId: int) -> list[Course]:
+    return DBsession.query(Course).join(Course.users).filter(User.id == userId).order_by(Course.sort).all()
 
 
-@GetDictFromSingleItem
-def GetCourseById(courseId: int, userId: int):
-    return DBsession.query(Course).filter_by(id=courseId).filter_by(user_id=userId).one_or_none()
+def GetCourseById(courseId: int, userId: int) -> Course | None:
+    return DBsession.query(Course).filter(
+        Course.id == courseId).join(
+        Course.users).filter(
+        User.id == userId).one_or_none()
 
 
-def GetLessonsByCourseId(courseId: int, userId: int) -> list:
-    return DBsession.query(Lesson).filter_by(course_id=courseId).filter_by(user_id=userId).all()
+def GetLessonsByCourseId(courseId: int, userId: int) -> list[Lesson]:
+    return DBsession.query(Lesson).filter(
+        Lesson.course_id == courseId).join(
+        Lesson.users).filter(
+        User.id == userId).order_by(
+        Lesson.number).all()
 
 
-@GetDictFromSingleItem
-def GetLessonById(lessonId: int, userId: int):
-    return DBsession.query(Lesson).filter_by(lesson_id=lessonId).filter_by(user_id=userId).all()
+def GetLessonById(lessonId: int, userId: int) -> Lesson:
+    return DBsession.query(Lesson).filter(
+        Lesson.id == lessonId).join(
+        Lesson.users).filter(
+        User.id == userId).one_or_none()
 
 
-@GetDictFromSingleItem
-def GetDrillingByLessonId(lessonId: int, userId: int):
+def GetDrillingByLessonId(lessonId: int, userId: int) -> Drilling:
     return DBsession.query(Drilling).join(
         Drilling.lesson).filter(
         Lesson.id == lessonId).join(
@@ -31,8 +40,7 @@ def GetDrillingByLessonId(lessonId: int, userId: int):
         User.id == userId).one_or_none()
 
 
-@GetDictFromSingleItem
-def GetDrillingById(drillingId: int, userId: int):
+def GetDrillingById(drillingId: int, userId: int) -> Drilling:
     return DBsession.query(Drilling).filter_by(
         id=drillingId).join(
         Drilling.lesson).join(
@@ -40,21 +48,52 @@ def GetDrillingById(drillingId: int, userId: int):
         User.id == userId).one_or_none()
 
 
-def GetDoneDrillingsByDrillingId(drillingId: int, userId: int) -> list:
+def GetDoneDrillingsByDrillingId(drillingId: int, userId: int) -> list[DoneDrilling]:
     return DBsession.query(DoneDrilling).join(
         DoneDrilling.drilling).filter(
         Drilling.id == drillingId).join(
         Drilling.lesson).join(
         Lesson.users).filter(
-        User.id == userId).all()
+        User.id == userId).order_by(
+        DoneDrilling.try_number).all()
 
 
-def AddNewDoneDrilling(tryNumber: int, drillingId: int, userId: int):
-    DBsession.add(
-        DoneDrilling(
-            try_number=tryNumber, start_datetime=datetime.now(),
-            user_id=userId, drilling_id=drillingId))
+def AddNewDoneDrilling(tryNumber: int, drillingId: int, userId: int) -> DoneDrilling | None:
+    LogI("AddNewDoneDrilling:", tryNumber, drillingId, userId)
+    newDoneDrilling = DoneDrilling(
+        try_number=tryNumber, start_datetime=datetime.now(),
+        user_id=userId, drilling_id=drillingId)
+    DBsession.add(newDoneDrilling)
     DBsession.commit()
+    return newDoneDrilling
+
+
+def GetUnfinishedDoneDrillingsByDrillingId(drillingId: int, userId: int) -> DoneDrilling | None:
+    return DBsession.query(DoneDrilling).filter(
+        DoneDrilling.end_datetime == None).join(
+        DoneDrilling.drilling).filter(
+        Drilling.id == drillingId).join(
+        Drilling.lesson).join(
+        Lesson.users).filter(
+        User.id == userId).one_or_none()
+
+
+def SetDoneTaskInDoneDrilling(doneDrillingId: int, doneTasks: str) -> None:
+    doneDrilling = DBsession.query(DoneDrilling).filter(DoneDrilling.id == doneDrillingId).one_or_none()
+    if doneDrilling:
+        doneDrilling.done_tasks = doneTasks
+        DBsession.add(doneDrilling)
+        DBsession.commit()
+
+
+def GetDrillingCardsByDrillingId(drillingId: int) -> list[DrillingCard]:
+    return DBsession.query(DrillingCard).join(DrillingCard.drilling).filter(Drilling.id == drillingId).all()
+
+
+def GetDictionaryByDrillingCardId(drillingCardId: int) -> Dictionary:
+    return DBsession.query(Dictionary).join(
+        Dictionary.drilling_card).filter(
+        DrillingCard.id == drillingCardId).one_or_none()
 
 
 # @GetDictFromSingleItem

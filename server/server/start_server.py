@@ -1,0 +1,18 @@
+from flask import Flask
+
+from . import base_blueprint, CustomJSONEncoder, login_manager, routes
+
+
+def createApp():
+    app = Flask(__name__)
+    app.secret_key = "my super duper puper secret key!"  # TODO add some env var
+    app.json_encoder = CustomJSONEncoder
+    # app.config.from_object('config.Config')
+
+    login_manager.init_app(app)
+
+    app.register_blueprint(base_blueprint)
+
+    routes.on_start_app()
+
+    return app

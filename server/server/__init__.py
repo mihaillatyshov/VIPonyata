@@ -1,23 +1,27 @@
-from flask import Flask
+from datetime import datetime, time, timedelta
+
+from flask import Blueprint, json
 from flask_login import LoginManager
+from sqlalchemy.ext.declarative import DeclarativeMeta
 
 from .DBlib import CreateSession
 
 DBsession = CreateSession("mysql+mysqlconnector", "mihail", "dbnfvbys5", "localhost", "japan")
 login_manager = LoginManager()
 
+base_blueprint = Blueprint("base", __name__, url_prefix="/api")
 
-def createApp():
-    """Construct the core app object."""
-    app = Flask(__name__)
-    app.secret_key = "my super duper puper secret key!"
-    # Application Configuration
-    # app.config.from_object('config.Config')
 
-    # Initialize Plugins
-    login_manager.init_app(app)
+class CustomJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj.__class__, DeclarativeMeta):
+            if hasattr(obj, '__json__'):
+                return obj.__json__()
+            data = {}
+            for column in obj.__table__.columns:
+                data[column.name] = getattr(obj, column.name)
+            return data
+        if type(obj) == timedelta or type(obj) == time or type(obj) == datetime:
+            return str(obj)
 
-    with app.app_context():
-        from . import auth, routes
-
-    return app
+        return json.JSONEncoder.default(self, obj)

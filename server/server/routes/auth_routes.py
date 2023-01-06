@@ -1,13 +1,15 @@
 import datetime
 
-from flask import abort, current_app, request
+from flask import Blueprint, abort, current_app, request
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from . import DBsession, login_manager
-from .FlaskUser import FlaskUser
-from .DBlib import User
-from .log_lib import LogI
+from .. import DBsession, base_blueprint, login_manager
+from ..DBlib import User
+from ..FlaskUser import FlaskUser
+from ..log_lib import LogI
+
+auth_bp = Blueprint("auth", __name__)
 
 
 @login_manager.user_loader
@@ -35,13 +37,13 @@ def getCurrentUserData() -> dict:
     return data
 
 
-@current_app.route("/api/islogin", methods=["GET"])
+@auth_bp.route("/islogin", methods=["GET"])
 def islogin():
     data = getCurrentUserData()
     return {"isAuth": True if data else None, "userData": data}
 
 
-@current_app.route("/api/login", methods=["POST"])
+@auth_bp.route("/login", methods=["POST"])
 def login():
     print(request.data)
     if not request.json:
@@ -58,13 +60,13 @@ def login():
         if user.IsExists():
             print("Exist")
             if check_password_hash(user.GetPassword(), password):
-                print("login user: ", login_user(user, remember=True))
+                # print("login user: ", login_user(user, remember=True))
                 return {"isAuth": login_user(user, remember=True), "userData": getCurrentUserData()}
 
     return {"message": "Wrong nickname or password!"}, 422
 
 
-@current_app.route("/api/register", methods=["POST"])
+@auth_bp.route("/register", methods=["POST"])
 def register():
     if not request.json:
         abort(400)
@@ -108,7 +110,7 @@ def register():
     return {"message": "Не удалось создать пользователя!"}, 422
 
 
-@current_app.route("/api/logout", methods=["POST"])
+@auth_bp.route("/logout", methods=["POST"])
 @login_required
 def logout():
     logout_user()

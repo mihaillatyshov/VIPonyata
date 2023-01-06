@@ -8,13 +8,13 @@ type CourseCardProps = {
 
 const CourseCard = ({ course }: CourseCardProps) => {
     return (
-        <Link to={`/courses/${course.Id}`} className={"col-auto a-link " + style.linkCourse}>
+        <Link to={`/courses/${course.id}`} className={"col-auto a-link " + style.linkCourse}>
             <div className={style.cardCourse}>
                 {false && <img src="" alt="" />}
                 <div>
-                    <div> {course.Name} </div>
-                    <div className="mb-2 text-muted"> {course.Difficulty} </div>
-                    <div> {course.Description} </div>
+                    <div> {course.name} </div>
+                    <div className="mb-2 text-muted"> {course.difficulty} </div>
+                    <div> {course.description} </div>
                 </div>
             </div>
         </Link>

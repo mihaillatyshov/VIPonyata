@@ -4,7 +4,7 @@ import { selectCourses, setCourses } from "redux/slices/coursesSlice";
 import CourseCard from "./CourseCard";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 
-const StudentCorsesList = () => {
+const StudentCoursesList = () => {
     const courses = useAppSelector(selectCourses);
     const dispatch = useAppDispatch();
 
@@ -20,21 +20,20 @@ const StudentCorsesList = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    if (courses.items === undefined) {
+        return <div> Loading... </div>;
+    }
+    if (courses.items.length === 0) {
+        return <div>No Items</div>;
+    }
+
     return (
-        <>
-            {courses.items === undefined ? (
-                <div> Loading... </div>
-            ) : courses.items.length > 0 ? (
-                <div className="row justify-content-center">
-                    {courses.items.map((course) => {
-                        return <CourseCard course={course} key={course.Id} />;
-                    })}
-                </div>
-            ) : (
-                <div>No Items</div>
-            )}
-        </>
+        <div className="row justify-content-center">
+            {courses.items.map((course) => {
+                return <CourseCard course={course} key={course.id} />;
+            })}
+        </div>
     );
 };
 
-export default StudentCorsesList;
+export default StudentCoursesList;

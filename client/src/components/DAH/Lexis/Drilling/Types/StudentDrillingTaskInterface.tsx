@@ -63,9 +63,13 @@ const StudentDrillingTaskInterface = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [item]);
 
+    if (!checkItem(item, taskTypeName)) {
+        return <div> Loading . . . </div>;
+    }
+
     return (
         <div>
-            {checkItem(item, taskTypeName) ? <div>{maincontent()}</div> : <div> </div>}
+            {maincontent()}
             <Button onClick={() => goToNextTaskCallback(taskTypeName, item.mistakeCount)}>Test Task Done</Button>
         </div>
     );

@@ -1,14 +1,25 @@
-from DBlib import (Course, DBsession, Dictionary, Drilling, DrillingCard,
+from datetime import datetime, time
+
+from DBlib import (Course, CreateSession, Dictionary, Drilling, DrillingCard,
                    Lesson, User)
 from log_lib import LogI
+from werkzeug.security import generate_password_hash
 
-if user := DBsession.query(User).filter_by(nickname="lm").one_or_none():
+DBsession = CreateSession("mysql+mysqlconnector", "mihail", "dbnfvbys5", "localhost", "japan")
+
+hashPwd = generate_password_hash("dbnfvbys")
+user = User(name="Mihail", nickname="lm", password=hashPwd, birthday=datetime.now(), level=0)
+userTeacher = User(name="Mary", nickname="mary", password=hashPwd, birthday=datetime.now(), level=1)
+DBsession.add_all([user, userTeacher])
+DBsession.commit()
+
+if user:
     LogI(user)
-    LogI("Start createing test data")
+    LogI("Start creating test data")
 
     dictionary = [
-        Dictionary(char_jp="かぞく", word_jp="家族", ru="семья", img="img/dictionary/dsa.png"),
-        Dictionary(char_jp="しまい", word_jp="姉妹", ru="сестры")
+        Dictionary(char_jp="家族", word_jp="かぞく", ru="семья", img="/img/dictionary/dsa.png"),
+        Dictionary(char_jp="姉妹", word_jp="しまい", ru="сестры")
     ]
     DBsession.add_all(dictionary)
     DBsession.commit()
@@ -47,9 +58,11 @@ if user := DBsession.query(User).filter_by(nickname="lm").one_or_none():
 
         drillings = [
             Drilling(description="Drilling with limit", lesson_id=lessons[0].id,
-                     tasks="drillingfindpair,drillingscramble"),
+                     tasks="findpair,scramble", time_limit=time(minute=10)),
             Drilling(description="Drilling with NO limit", lesson_id=lessons[1].id,
-                     tasks="drillingfindpair,drillingscramble,drillingtranslate,drillingspace")
+                     tasks="findpair,scramble,translate,space"),
+            Drilling(description="Drilling with limit", lesson_id=lessons[2].id,
+                     tasks="findpair,scramble", time_limit=time(second=20)),
         ]
         DBsession.add_all(drillings)
         DBsession.commit()

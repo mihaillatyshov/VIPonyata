@@ -19,8 +19,8 @@ const DrillingHub = ({ id, onBackToLesson }: DrillingHubProps) => {
 
     return (
         <div>
-            DrillingHub
-            <Button onClick={onEndDrilling}> Завершить дриллинг </Button>
+            Hub
+            <Button onClick={onEndDrilling}> Завершить </Button>
         </div>
     );
 };

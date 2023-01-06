@@ -13,7 +13,7 @@ const StudentDrillingTranslate = ({ inData, goToNextTaskCallback }: StudentDrill
         return {
             wordId: id,
             inputText: "",
-            wordJP: inData.WordsJP[id % inData.WordsJP.length],
+            wordJP: inData.words_jp[id % inData.words_jp.length],
         };
     };
 
@@ -22,28 +22,26 @@ const StudentDrillingTranslate = ({ inData, goToNextTaskCallback }: StudentDrill
     };
 
     const nextWord = () => {
-        LogInfo(inData.WordsRU, item.inputText.trim());
-        if (inData.WordsRU[item.wordId] === item.inputText.trim())
+        LogInfo(inData.words_ru, item.inputText.trim());
+        if (inData.words_ru[item.wordId] === item.inputText.trim())
             dispatch(setDrillingSelectedItemField({ ...getObjectData(item.wordId + 1) }));
     };
 
     return (
         <StudentDrillingTaskInterface
-            taskTypeName="drillingtranslate"
+            taskTypeName="translate"
             newObjectData={{ ...getObjectData(0) }}
             goToNextTaskCallback={goToNextTaskCallback}
             isTaskDone={() => {
-                return item.wordId === inData.WordsJP.length;
+                return item.wordId === inData.words_jp.length;
             }}
             maincontent={() => {
                 return (
                     <div>
+                        <div>{item.wordJP}</div>
                         <div>
-                            <div>{item.wordJP}</div>
-                            <div>
-                                <input type="text" value={item.inputText} onChange={handleTextChange} />
-                                <Button onClick={nextWord}> Next </Button>
-                            </div>
+                            <input type="text" value={item.inputText} onChange={handleTextChange} />
+                            <Button onClick={nextWord}> Next </Button>
                         </div>
                     </div>
                 );

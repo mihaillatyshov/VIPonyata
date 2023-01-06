@@ -21,11 +21,11 @@ export const drillingSlice = createSlice({
             state.info = action.payload;
         },
         setDrillingEndByTime: (state) => {
-            state.info.tries[state.info.tries.length - 1].EndTime = state.info.Deadline;
-            state.info.Deadline = undefined;
+            state.info.tries[state.info.tries.length - 1].end_datetime = state.info.deadline;
+            state.info.deadline = undefined;
         },
         setDrillingDoneTask: (state, action) => {
-            state.info.try.DoneTasks = action.payload;
+            state.info.try.done_tasks = action.payload;
         },
         setDrillingItems: (state, action) => {
             state.items = action.payload;
@@ -37,7 +37,7 @@ export const drillingSlice = createSlice({
             for (const key in action.payload) state.selectedItem[key] = action.payload[key];
         },
         addDrillingDoneTash: (state, action) => {
-            state.info.DoneTasks[action.payload.name] = action.payload.percent;
+            state.info.done_tasks[action.payload.name] = action.payload.percent;
         },
     },
 });
