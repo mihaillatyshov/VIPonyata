@@ -4,7 +4,7 @@ from ..DBlib import DoneDrilling, Drilling
 from .DBqueriesUtils import *
 
 
-def GetCheckTasksTimersDrillings() -> list:
+def GetCheckTasksTimersDrillings() -> list[DoneDrilling]:
     return DBsession.query(DoneDrilling).filter(
         DoneDrilling.end_datetime == None).join(
         DoneDrilling.drilling).filter(
