@@ -12,17 +12,29 @@ import StudentDrillingTranslate from "./Types/StudentDrillingTranslate";
 import StudentDrillingSpace from "./Types/StudentDrillingSpace";
 import StudentProgress from "components/DAH/StudentProgress";
 import StudentDrillingFindPair from "./Types/StudentDrillingFindPair";
-import DrillingHub from "./DrillingHub";
+import StudentLexisHub from "../StudentLexisHub";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import StudentTimeRemaining from "components/DAH/StudentTimeRemaining";
 
 export type GoToNextTaskCallbackType = (taskTypeName: string, percent: number) => void;
 
-const StudentDrillingPage = () => {
+type StudentLexisPageProps = {
+    name: "drilling" | "hieroglyph";
+    lexis: any;
+    setLexisInfoCallback: (info: any) => void;
+    setLexisItemsCallback: (items: any) => void;
+    setLexisDoneTaskCallback: (doneTasks: any) => void;
+};
+
+const StudentLexisPage = ({
+    name,
+    lexis,
+    setLexisInfoCallback,
+    setLexisItemsCallback,
+    setLexisDoneTaskCallback,
+}: StudentLexisPageProps) => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const dispatch = useAppDispatch();
-    const drilling = useAppSelector(selectDrilling);
 
     const goToUndoneTask = (items: any, doneTasks: any) => {
         LogInfo("goToUndoneTask", items);
@@ -38,7 +50,7 @@ const StudentDrillingPage = () => {
 
         if (Object.keys(doneTasks).length) {
             ServerAPI_POST({
-                url: `/api/drilling/${id}/newdonetask`,
+                url: `/api/${name}/${id}/newdonetask`,
                 body: { done_tasks: doneTasks },
             });
         }
@@ -50,84 +62,91 @@ const StudentDrillingPage = () => {
     };
 
     useEffect(() => {
-        dispatch(setDrillingInfo(undefined));
+        setLexisInfoCallback(undefined);
         ServerAPI_GET({
-            url: `/api/drilling/${id}`,
+            url: `/api/${name}/${id}`,
             onDataReceived: (data) => {
-                LogInfo("Drill page data: ", data);
-                dispatch(setDrillingInfo(data.drilling));
-                dispatch(setDrillingItems(data.items));
-                goToUndoneTask(data.items, data.drilling.try.done_tasks);
+                LogInfo(`Lexis(${name}) page data: `, data);
+                setLexisInfoCallback(data[name]);
+                setLexisItemsCallback(data.items);
+                goToUndoneTask(data.items, data[name].try.done_tasks);
             },
             handleStatus: (res) => {
-                if (res.status === 403) navigate("/");
+                if (res.status === 404) navigate("/");
+                if (res.status === 403) navigate(`/lessons/${res.data.lesson_id}`);
             },
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const goToNextTaskHandle = (taskTypeName: string, percent: number) => {
-        if (drilling.items === undefined) return;
+        if (lexis.items === undefined) return;
 
         LogInfo("Go to next Task Handle", taskTypeName, percent);
-        const newDoneTasks = Object.assign(structuredClone(drilling.info.try.done_tasks), { [taskTypeName]: percent });
+        const newDoneTasks = Object.assign(structuredClone(lexis.info.try.done_tasks), { [taskTypeName]: percent });
         LogInfo(newDoneTasks);
-        dispatch(setDrillingDoneTask(newDoneTasks));
+        setLexisDoneTaskCallback(newDoneTasks);
 
         LogInfo("NDT", Object.keys(newDoneTasks));
-        LogInfo("DI", Object.keys(drilling.items));
-        goToUndoneTask(drilling.items, newDoneTasks);
+        LogInfo("DI", Object.keys(lexis.items));
+        goToUndoneTask(lexis.items, newDoneTasks);
     };
 
     const onBackToLesson = () => {
-        navigate(`/lessons/${drilling.info.lesson_id}`);
+        navigate(`/lessons/${lexis.info.lesson_id}`);
     };
 
     const drawDeadlineComponent = () => {
-        if (drilling.info.deadline) {
+        if (lexis.info.deadline) {
             return (
                 <StudentTimeRemaining
-                    deadline={drilling.info.deadline}
-                    onDeadline={() => navigate(`/lessons/${drilling.info.lesson_id}`)}
+                    deadline={lexis.info.deadline}
+                    onDeadline={() => navigate(`/lessons/${lexis.info.lesson_id}`)}
                 />
             );
         }
     };
 
-    if (drilling.info === undefined) {
-        return <div> Loading... </div>;
-    }
-
-    if (drilling.info.try === undefined || drilling.info.try === null || drilling.items === undefined) {
+    if (
+        lexis.info === undefined ||
+        lexis.info.try === undefined ||
+        lexis.info.try === null ||
+        lexis.items === undefined
+    ) {
         return <div> Loading... </div>;
     }
 
     return (
         <div>
             <StudentProgress
-                percent={(Object.keys(drilling.info.try.done_tasks).length / Object.keys(drilling.items).length) * 100}
+                percent={(Object.keys(lexis.info.try.done_tasks).length / Object.keys(lexis.items).length) * 100}
             />
             <Button onClick={onBackToLesson}> Вернуться к уроку </Button>
             <div>
-                {drilling.info.description} {drilling.info.time_limit} {drilling.info.try.start_datetime}
+                {lexis.info.description} {lexis.info.time_limit} {lexis.info.try.start_datetime}
             </div>
             {drawDeadlineComponent()}
-            <StudentLexisNav items={drilling.items} doneTasks={drilling.info.try.done_tasks} />
+            <StudentLexisNav items={lexis.items} doneTasks={lexis.info.try.done_tasks} />
 
             <Routes>
-                <Route path="/" element={<DrillingHub id={id} onBackToLesson={onBackToLesson} />} />
+                <Route path="/" element={<StudentLexisHub id={id} name={name} onBackToLesson={onBackToLesson} />} />
                 <Route path="/card" element={<NavigateToElement to="../card/0" />} />
                 <Route
                     path="/card/:cardId"
                     element={
-                        <StudentDrillingCard inData={drilling.items.card} goToNextTaskCallback={goToNextTaskHandle} />
+                        <StudentDrillingCard
+                            name={name}
+                            inData={lexis.items.card}
+                            goToNextTaskCallback={goToNextTaskHandle}
+                        />
                     }
                 />
                 <Route
                     path="/findpair"
                     element={
                         <StudentDrillingFindPair
-                            inData={drilling.items.findpair}
+                            name={name}
+                            inData={lexis.items.findpair}
                             goToNextTaskCallback={goToNextTaskHandle}
                         />
                     }
@@ -136,7 +155,8 @@ const StudentDrillingPage = () => {
                     path="/scramble"
                     element={
                         <StudentDrillingScramble
-                            inData={drilling.items.scramble}
+                            name={name}
+                            inData={lexis.items.scramble}
                             goToNextTaskCallback={goToNextTaskHandle}
                         />
                     }
@@ -145,7 +165,8 @@ const StudentDrillingPage = () => {
                     path="/translate"
                     element={
                         <StudentDrillingTranslate
-                            inData={drilling.items.translate}
+                            name={name}
+                            inData={lexis.items.translate}
                             goToNextTaskCallback={goToNextTaskHandle}
                         />
                     }
@@ -153,11 +174,42 @@ const StudentDrillingPage = () => {
                 <Route
                     path="/space"
                     element={
-                        <StudentDrillingSpace inData={drilling.items.space} goToNextTaskCallback={goToNextTaskHandle} />
+                        <StudentDrillingSpace
+                            name={name}
+                            inData={lexis.items.space}
+                            goToNextTaskCallback={goToNextTaskHandle}
+                        />
                     }
                 />
             </Routes>
         </div>
+    );
+};
+
+const StudentDrillingPage = () => {
+    const dispatch = useAppDispatch();
+    const drilling = useAppSelector(selectDrilling);
+
+    const setDrillingInfoHandler = (info: any) => {
+        dispatch(setDrillingInfo(info));
+    };
+
+    const setDrillingItemsHandler = (items: any) => {
+        dispatch(setDrillingItems(items));
+    };
+
+    const setDrillingDoneTaskHandler = (doneTasks: any) => {
+        dispatch(setDrillingDoneTask(doneTasks));
+    };
+
+    return (
+        <StudentLexisPage
+            name="drilling"
+            lexis={drilling}
+            setLexisInfoCallback={setDrillingInfoHandler}
+            setLexisItemsCallback={setDrillingItemsHandler}
+            setLexisDoneTaskCallback={setDrillingDoneTaskHandler}
+        />
     );
 };
 

@@ -1,3 +1,6 @@
+from server.log_lib import LogE
+
+
 class InvalidAPIUsage(Exception):
     status_code: int = 400
 
@@ -8,6 +11,8 @@ class InvalidAPIUsage(Exception):
             self.status_code = status_code
         self.payload = payload
 
+        LogE(self.message, f"\n            status: {self.status_code}")
+
     def to_dict(self):
         res = dict(self.payload or ())
         res["message"] = self.message
@@ -17,3 +22,18 @@ class InvalidAPIUsage(Exception):
 class InvalidRequestJson(InvalidAPIUsage):
     def __init__(self):
         super().__init__("No json in request!", 400)
+
+
+class CourseNotFoundException(InvalidAPIUsage):
+    def __init__(self):
+        super().__init__("Course not found!", 404)
+
+
+class LessonNotFoundException(InvalidAPIUsage):
+    def __init__(self):
+        super().__init__("Lesson not found!", 404)
+
+
+class DrillingNotFoundException(InvalidAPIUsage):
+    def __init__(self):
+        super().__init__("Drilling not found!", 404)

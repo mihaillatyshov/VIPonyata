@@ -5,7 +5,7 @@ import { Button } from "react-bootstrap";
 import StudentDrillingTaskInterface, { StudentDrillingTaskProps } from "./StudentDrillingTaskInterface";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 
-const StudentDrillingTranslate = ({ inData, goToNextTaskCallback }: StudentDrillingTaskProps) => {
+const StudentDrillingTranslate = ({ name, inData, goToNextTaskCallback }: StudentDrillingTaskProps) => {
     const dispatch = useAppDispatch();
     const item = useAppSelector(selectDrilling).selectedItem;
 
@@ -29,6 +29,7 @@ const StudentDrillingTranslate = ({ inData, goToNextTaskCallback }: StudentDrill
 
     return (
         <StudentDrillingTaskInterface
+            name={name}
             taskTypeName="translate"
             newObjectData={{ ...getObjectData(0) }}
             goToNextTaskCallback={goToNextTaskCallback}

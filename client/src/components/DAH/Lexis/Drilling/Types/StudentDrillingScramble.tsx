@@ -5,15 +5,15 @@ import { Button } from "react-bootstrap";
 import StudentDrillingTaskInterface, { StudentDrillingTaskProps } from "./StudentDrillingTaskInterface";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 
-const StudentDrillingScramble = ({ inData, goToNextTaskCallback }: StudentDrillingTaskProps) => {
+const StudentDrillingScramble = ({ name, inData, goToNextTaskCallback }: StudentDrillingTaskProps) => {
     const dispatch = useAppDispatch();
     const item = useAppSelector(selectDrilling).selectedItem;
 
     const setNewWord = (id: number) => {
         return {
             wordId: id,
-            usedChars: inData.chars[id % inData.words.length],
-            doneWord: Array.from({ length: inData.chars[id % inData.words.length].length }, () => "⠀"),
+            usedChars: inData.word_chars[id % inData.word_words.length],
+            doneWord: Array.from({ length: inData.word_chars[id % inData.word_words.length].length }, () => "⠀"),
             message: "Собери слово!",
         };
     };
@@ -40,8 +40,8 @@ const StudentDrillingScramble = ({ inData, goToNextTaskCallback }: StudentDrilli
         dispatch(setDrillingSelectedItemField({ doneWord: newDoneWord, usedChars: newUsedChars }));
 
         for (let i = 0; i < newDoneWord.length; i++) {
-            LogInfo("NDW", newDoneWord, inData.words[item.wordId][i]);
-            if (newDoneWord[i] !== inData.words[item.wordId][i]) {
+            LogInfo("NDW", newDoneWord, inData.word_words[item.wordId][i]);
+            if (newDoneWord[i] !== inData.word_words[item.wordId][i]) {
                 return;
             }
         }
@@ -51,13 +51,14 @@ const StudentDrillingScramble = ({ inData, goToNextTaskCallback }: StudentDrilli
 
     return (
         <StudentDrillingTaskInterface
+            name={name}
             taskTypeName="scramble"
             newObjectData={{
                 ...setNewWord(0),
             }}
             goToNextTaskCallback={goToNextTaskCallback}
             isTaskDone={() => {
-                return item.wordId === inData.words.length;
+                return item.wordId === inData.word_words.length;
             }}
             maincontent={() => {
                 return (
@@ -89,7 +90,7 @@ const StudentDrillingScramble = ({ inData, goToNextTaskCallback }: StudentDrilli
                                 </Button>
                             ))}
                         </div>
-                        <div> {inData.words[item.wordId]} </div>
+                        <div> {inData.word_words[item.wordId]} </div>
                         <div> {item.message} </div>
                     </div>
                 );

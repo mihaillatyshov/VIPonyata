@@ -1,27 +1,21 @@
 from ...queries import StudentDBqueries as DBQS
-from ..routes_utils import CalcTasksDeadline, GetCurrentUserId
+from ..routes_utils import GetCurrentUserId
 
 
 def getLessonsByCourseId(courseId: int):
-    if course := DBQS.GetCourseById(courseId, GetCurrentUserId()):
-        return {"course": course, "items": DBQS.GetLessonsByCourseId(courseId, GetCurrentUserId())}
-
-    return {"course": None, "items": None}, 403
+    course = DBQS.GetCourseById(courseId, GetCurrentUserId())
+    return {"course": course, "items": DBQS.GetLessonsByCourseId(courseId, GetCurrentUserId())}
 
 
 def getLessonActivities(lessonId: int):
-    if lesson := DBQS.GetLessonById(lessonId, GetCurrentUserId()):
-        if drilling := DBQS.GetDrillingByLessonId(lessonId, GetCurrentUserId()):
-            drilling.tries = DBQS.GetDoneDrillingsByDrillingId(
-                drilling.id, GetCurrentUserId())                                                                        # type: ignore
+    lesson = DBQS.GetLessonById(lessonId, GetCurrentUserId())
+    if drilling := DBQS.GetDrillingByLessonId(lessonId, GetCurrentUserId()):
+        drilling.tries = DBQS.GetDoneDrillingsByDrillingId(drilling.id, GetCurrentUserId())                             # type: ignore
 
-            if drilling.time_limit and drilling.tries and drilling.tries[-1].end_datetime == None:
-                drilling.deadline = CalcTasksDeadline(drilling.time_limit,                                              # type: ignore
-                                                      drilling.tries[-1].start_datetime)                                # type: ignore
+    # if assessment := GetAssessmentByLessonId(id, GetCurrentUserId()):
 
-        # if assessment := GetAssessmentByLessonId(id, GetCurrentUserId()):
-        # if hieroglyph := GetHieroglyphByLessonId(id, GetCurrentUserId()):
+    hieroglyph = {}
+    #if hieroglyph := DBQS.GetHieroglyphByLessonId(lessonId, GetCurrentUserId()):
+    #    hieroglyph.tries = DBQS.GetDoneHieroglyphsByHieroglyphId(hieroglyph.id, GetCurrentUserId())
 
-        return {"lesson": lesson, "items": {"drilling": drilling, "assessment": {}, "hieroglyph": {}}}
-
-    return {"lesson": None, "items": None}, 403
+    return {"lesson": lesson, "items": {"drilling": drilling, "assessment": {}, "hieroglyph": hieroglyph}}

@@ -5,7 +5,7 @@ import { Button } from "react-bootstrap";
 import StudentDrillingTaskInterface, { StudentDrillingTaskProps } from "./StudentDrillingTaskInterface";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 
-const StudentDrillingSpace = ({ inData, goToNextTaskCallback }: StudentDrillingTaskProps) => {
+const StudentDrillingSpace = ({ name, inData, goToNextTaskCallback }: StudentDrillingTaskProps) => {
     const dispatch = useAppDispatch();
     const item = useAppSelector(selectDrilling).selectedItem;
 
@@ -24,13 +24,14 @@ const StudentDrillingSpace = ({ inData, goToNextTaskCallback }: StudentDrillingT
     const nextWord = () => {
         const fullInput = item.wordStart + item.inputText.trim() + item.wordEnd;
         LogInfo(inData.words[item.wordId], fullInput);
-        if (inData.words[item.wordId].word_jp === fullInput) {
+        if (inData.words[item.wordId].word_or_char_jp === fullInput) {
             dispatch(setDrillingSelectedItemField({ ...getWordData(item.wordId + 1) }));
         }
     };
 
     return (
         <StudentDrillingTaskInterface
+            name={name}
             taskTypeName="space"
             newObjectData={{
                 ...getWordData(0),

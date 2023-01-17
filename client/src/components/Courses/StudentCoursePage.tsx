@@ -26,6 +26,7 @@ const StudentCoursePage = () => {
             },
             handleStatus: (res) => {
                 LogInfo(res.status);
+                if (res.status === 404) navigate("/");
                 if (res.status === 403) navigate("/");
             },
         });

@@ -2,15 +2,16 @@ import React from "react";
 import { ServerAPI_POST } from "libs/ServerAPI";
 import { Button } from "react-bootstrap";
 
-type DrillingHubProps = {
+type StudentLexisHubProps = {
     id: string | undefined;
+    name: "drilling" | "hieroglyph";
     onBackToLesson: () => void;
 };
 
-const DrillingHub = ({ id, onBackToLesson }: DrillingHubProps) => {
-    const onEndDrilling = () => {
+const StudentLexisHub = ({ id, name, onBackToLesson }: StudentLexisHubProps) => {
+    const onEndLexis = () => {
         ServerAPI_POST({
-            url: `/api/drilling/${id}/endtry`,
+            url: `/api/${name}/${id}/endtry`,
             onDataReceived: () => {
                 onBackToLesson();
             },
@@ -19,10 +20,10 @@ const DrillingHub = ({ id, onBackToLesson }: DrillingHubProps) => {
 
     return (
         <div>
-            Hub
-            <Button onClick={onEndDrilling}> Завершить </Button>
+            <div>Hub {name}</div>
+            <Button onClick={onEndLexis}> Завершить </Button>
         </div>
     );
 };
 
-export default DrillingHub;
+export default StudentLexisHub;

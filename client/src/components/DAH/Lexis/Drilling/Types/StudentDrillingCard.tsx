@@ -7,7 +7,7 @@ import style from "../StyleDrilling.module.css";
 import { StudentDrillingTaskProps } from "./StudentDrillingTaskInterface";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 
-const StudentDrillingCard = ({ inData, goToNextTaskCallback }: StudentDrillingTaskProps) => {
+const StudentDrillingCard = ({ name, inData, goToNextTaskCallback }: StudentDrillingTaskProps) => {
     const { cardId } = useParams();
     const navigate = useNavigate();
     const dispatch = useAppDispatch();

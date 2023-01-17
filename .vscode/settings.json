@@ -1,5 +1,3 @@
 {
-    "editor.detectIndentation": false,
-    "editor.tabCompletion": "on",
     "python.analysis.typeCheckingMode": "basic"
 }

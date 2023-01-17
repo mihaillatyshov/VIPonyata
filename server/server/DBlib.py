@@ -1,26 +1,26 @@
-from sqlalchemy import (Column, Date, DateTime, ForeignKey, Integer, String,
-                        Table, Text, Time, create_engine)
+import datetime
+from sqlalchemy import (Column, Date, DateTime, ForeignKey, Integer, String, Table, Text, Time, create_engine, JSON)
 from sqlalchemy.engine import URL
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.sql import func
 
 Base = declarative_base()
 
-
-a_users_courses = Table("users_courses",  Base.metadata,
-                        Column('id', Integer, primary_key=True),
+a_users_courses = Table("users_courses", Base.metadata, Column('id', Integer, primary_key=True),
                         Column('user_id', Integer, ForeignKey('users.id')),
                         Column('course_id', Integer, ForeignKey('courses.id')))
 
-
-a_users_lessons = Table("users_lessons",  Base.metadata,
-                        Column('id', Integer, primary_key=True),
+a_users_lessons = Table("users_lessons", Base.metadata, Column('id', Integer, primary_key=True),
                         Column('user_id', Integer, ForeignKey('users.id')),
                         Column('lesson_id', Integer, ForeignKey('lessons.id')))
 
 
 class User(Base):
+    class Level:
+        STUDENT = 0
+        TEACHER = 1
+
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
 
@@ -99,42 +99,77 @@ class Dictionary(Base):
         return f"<Dictionary: (id={self.id}; char_jp={self.char_jp}; word_jp={self.char_jp}; ru={self.ru})>"
 
 
-class Drilling(Base):
-    __tablename__ = "drillings"
+class AbstractDAH(Base):
+    __abstract__ = True
     id = Column(Integer, primary_key=True)
 
     description = Column(String(2048))
     tasks = Column(String(2048), nullable=False)
     time_limit = Column(Time)
 
-    lesson_id = Column(Integer, ForeignKey("lessons.id"))
-    lesson = relationship("Lesson")
+    @declared_attr
+    def lesson_id(cls):
+        return Column(Integer, ForeignKey("lessons.id"))
 
-    cards = relationship("DrillingCard")
+    @declared_attr
+    def lesson(cls):
+        return relationship("Lesson")
 
     tries = []
-    deadline = None
     now_try = None
 
+    def getTasksNames(self):
+        return self.tasks.split(",")
+
+    def getCardWords(self):
+        wordsRU = []
+        wordsJP = []
+        charsJP = []
+        for card in self.cards:
+            wordsRU.append(card.dictionary.ru)
+            wordsJP.append(card.dictionary.word_jp)
+            charsJP.append(card.dictionary.char_jp)
+
+        return wordsRU, wordsJP, charsJP
+
+    def time_limit__ToTimedelta(self) -> datetime.timedelta:
+        return datetime.timedelta(hours=self.time_limit.hour,
+                                  minutes=self.time_limit.minute,
+                                  seconds=self.time_limit.second,
+                                  microseconds=self.time_limit.microsecond)
+
+    def calcDeadline(self) -> datetime.datetime | None:
+        if not self.time_limit:
+            return None
+
+        if self.now_try:
+            return self.now_try.start_datetime + self.time_limit__ToTimedelta()
+        if self.tries and not self.tries[-1].end_datetime:
+            return self.tries[-1].start_datetime + self.time_limit__ToTimedelta()
+
+        return None
+
     def __json__(self):
-        data = {"tries": self.tries, "time_limit": self.time_limit, "deadline": self.deadline, "try": self.now_try}
+        data = {"tries": self.tries, "deadline": self.calcDeadline(), "try": self.now_try}
         for column in self.__table__.columns:
             data[column.name] = getattr(self, column.name)
         return data
 
 
-class DrillingCard(Base):
-    __tablename__ = "drilling_cards"
+class AbstractCard(Base):
+    __abstract__ = True
     id = Column(Integer, primary_key=True)
 
     sentence = Column(String(256), nullable=False)
     answer = Column(String(256), nullable=False)
 
-    drilling_id = Column(Integer, ForeignKey("drillings.id"))
-    drilling = relationship("Drilling")
+    @declared_attr
+    def dictionary_id(cls):
+        return Column(Integer, ForeignKey("dictionary.id"))
 
-    dictionary_id = Column(Integer, ForeignKey("dictionary.id"))
-    dictionary = relationship("Dictionary")
+    @declared_attr
+    def dictionary(cls):
+        return relationship("Dictionary")
 
     def __json__(self):
         data = {"word": self.dictionary}
@@ -143,8 +178,8 @@ class DrillingCard(Base):
         return data
 
 
-class DoneDrilling(Base):
-    __tablename__ = "done_drillings"
+class AbstractDone(Base):
+    __abstract__ = True
     id = Column(Integer, primary_key=True)
 
     try_number = Column(Integer, nullable=False)
@@ -152,11 +187,9 @@ class DoneDrilling(Base):
     end_datetime = Column(DateTime)
     done_tasks = Column(String(2048))
 
-    user_id = Column(Integer, ForeignKey("users.id"))
-
-    drilling_id = Column(Integer, ForeignKey("drillings.id"))
-    drilling = relationship("Drilling")\
-
+    @declared_attr
+    def user_id(cls):
+        return Column(Integer, ForeignKey("users.id"))
 
     def getDoneTasksDict(self) -> dict:
         res = {}
@@ -172,6 +205,46 @@ class DoneDrilling(Base):
             data[column.name] = getattr(self, column.name)
         data["done_tasks"] = self.getDoneTasksDict()
         return data
+
+
+class Drilling(AbstractDAH):
+    __tablename__ = "drillings"
+
+    cards = relationship("DrillingCard")
+
+
+class DrillingCard(AbstractCard):
+    __tablename__ = "drilling_cards"
+
+    drilling_id = Column(Integer, ForeignKey("drillings.id"))
+    drilling = relationship("Drilling")
+
+
+class DoneDrilling(AbstractDone):
+    __tablename__ = "done_drillings"
+
+    drilling_id = Column(Integer, ForeignKey("drillings.id"))
+    drilling = relationship("Drilling")
+
+
+class Hieroglyph(AbstractDAH):
+    __tablename__ = "hieroglyphs"
+
+    cards = relationship("HieroglyphCard")
+
+
+class HieroglyphCard(AbstractCard):
+    __tablename__ = "hieroglyph_cards"
+
+    drilling_id = Column(Integer, ForeignKey("hieroglyphs.id"))
+    drilling = relationship("Hieroglyph")
+
+
+class DoneHieroglyph(AbstractDone):
+    __tablename__ = "done_hieroglyphs"
+
+    drilling_id = Column(Integer, ForeignKey("hieroglyphs.id"))
+    drilling = relationship("Hieroglyph")
 
 
 def CreateSession(url, username, password, host, database):

@@ -6,7 +6,7 @@ import StudentDrillingTaskInterface, { StudentDrillingTaskProps } from "./Studen
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 //import MD5 from "crypto-js/md5";
 
-const StudentDrillingFindPair = ({ inData, goToNextTaskCallback }: StudentDrillingTaskProps) => {
+const StudentDrillingFindPair = ({ name, inData, goToNextTaskCallback }: StudentDrillingTaskProps) => {
     const dispatch = useAppDispatch();
     const item = useAppSelector(selectDrilling).selectedItem;
     const strWordsRU = "words_ru";
@@ -77,6 +77,7 @@ const StudentDrillingFindPair = ({ inData, goToNextTaskCallback }: StudentDrilli
 
     return (
         <StudentDrillingTaskInterface
+            name={name}
             taskTypeName="findpair"
             newObjectData={{
                 selectedField: { id: -1, type: "None" },

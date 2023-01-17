@@ -32,7 +32,8 @@ const StudentLessonPage = () => {
                 }
             },
             handleStatus: (res) => {
-                if (res.status === 403) navigate("/");
+                if (res.status === 404) navigate("/");
+                if (res.status === 403) navigate(`/courses/${res.data.course_id}`);
             },
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps

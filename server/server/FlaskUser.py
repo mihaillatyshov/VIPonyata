@@ -62,7 +62,7 @@ class FlaskUser(UserMixin):
         return self.data["password"]
 
     def IsStudent(self):
-        return str(self.data["level"]) == "0"
+        return self.data["level"] == User.Level.STUDENT
 
     def IsTeacher(self):
-        return str(self.data["level"]) == "1"
+        return self.data["level"] == User.Level.TEACHER
