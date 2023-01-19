@@ -1,19 +1,18 @@
 import React from "react";
 import { Card } from "react-bootstrap";
 import { LogInfo } from "libs/Logger";
-import { selectDrilling, setDrillingSelectedItemField } from "redux/slices/drillingSlice";
-import StudentDrillingTaskInterface, { StudentDrillingTaskProps } from "./StudentDrillingTaskInterface";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
+import StudentLexisTaskInterface from "./StudentLexisTaskInterface";
+import { NameTo_words_or_chars, StudentLexisTaskProps, useLexisItem, useSetLexisSelectedItemField } from "./LexisUtils";
 //import MD5 from "crypto-js/md5";
 
-const StudentDrillingFindPair = ({ name, inData, goToNextTaskCallback }: StudentDrillingTaskProps) => {
-    const dispatch = useAppDispatch();
-    const item = useAppSelector(selectDrilling).selectedItem;
-    const strWordsRU = "words_ru";
-    const strWordsJP = "words_jp";
+const StudentLexisFindPair = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps) => {
+    const item = useLexisItem(name);
+    const strRU = "words_ru";
+    const strJP = NameTo_words_or_chars(name);
+    const setLexisSelectedItemField = useSetLexisSelectedItemField(name);
 
     const deselectField = () => {
-        dispatch(setDrillingSelectedItemField({ selectedField: { id: -1, type: "None" } }));
+        setLexisSelectedItemField({ selectedField: { id: -1, type: "None" } });
     };
 
     const isInDoneFields = (id: number, type: string) => {
@@ -28,7 +27,7 @@ const StudentDrillingFindPair = ({ name, inData, goToNextTaskCallback }: Student
     const selectField = (id: number, type: string) => {
         LogInfo("clicked", id, type);
 
-        const otherType = type === strWordsJP ? strWordsRU : strWordsJP;
+        const otherType = type === strJP ? strRU : strJP;
 
         LogInfo("DoneFields:", item.doneFields);
         // 0. Clicked field in DoneFields array
@@ -47,7 +46,7 @@ const StudentDrillingFindPair = ({ name, inData, goToNextTaskCallback }: Student
         // 2. Selected another field with the same type OR first selection
         if (item.selectedField.type === "None" || item.selectedField.type === type) {
             LogInfo("2. Selected another field with the same type OR first selection");
-            dispatch(setDrillingSelectedItemField({ selectedField: { id: id, type: type } }));
+            setLexisSelectedItemField({ selectedField: { id: id, type: type } });
             return;
         }
 
@@ -57,7 +56,7 @@ const StudentDrillingFindPair = ({ name, inData, goToNextTaskCallback }: Student
             const newField = { [otherType]: item.selectedField.id, [type]: id };
             //newField[otherType] = item.selectedField.id;
             //newField[type] = id;
-            dispatch(setDrillingSelectedItemField({ doneFields: [...item.doneFields, newField] }));
+            setLexisSelectedItemField({ doneFields: [...item.doneFields, newField] });
             deselectField();
             return;
         }
@@ -65,7 +64,7 @@ const StudentDrillingFindPair = ({ name, inData, goToNextTaskCallback }: Student
         // Clicked wrong answer
         LogInfo("3. Else");
         deselectField();
-        dispatch(setDrillingSelectedItemField({ mistakeCount: item.mistakeCount + 1 }));
+        setLexisSelectedItemField({ mistakeCount: item.mistakeCount + 1 });
     };
 
     const getCardClassName = (id: number, type: string) => {
@@ -76,7 +75,7 @@ const StudentDrillingFindPair = ({ name, inData, goToNextTaskCallback }: Student
     };
 
     return (
-        <StudentDrillingTaskInterface
+        <StudentLexisTaskInterface
             name={name}
             taskTypeName="findpair"
             newObjectData={{
@@ -85,20 +84,23 @@ const StudentDrillingFindPair = ({ name, inData, goToNextTaskCallback }: Student
             }}
             goToNextTaskCallback={goToNextTaskCallback}
             isTaskDone={() => {
-                return item.doneFields.length === inData.answers[strWordsRU].length;
+                return item.doneFields.length === inData.answers[strRU].length;
             }}
             maincontent={() => {
                 return (
                     <div className="container">
+                        {
+                            // TODO Create other component to left and right columns
+                        }
                         <div className="row">
                             <div className="col-6">
                                 <div className="container">
                                     <div className="row justify-content-end">
-                                        {inData[strWordsJP].map((value: string, key: number) => (
+                                        {inData[strJP].map((value: string, key: number) => (
                                             <Card
-                                                className={getCardClassName(key, strWordsJP)}
+                                                className={getCardClassName(key, strJP)}
                                                 key={key}
-                                                onClick={() => selectField(key, strWordsJP)}
+                                                onClick={() => selectField(key, strJP)}
                                             >
                                                 {value}
                                             </Card>
@@ -110,11 +112,11 @@ const StudentDrillingFindPair = ({ name, inData, goToNextTaskCallback }: Student
                             <div className="col-6">
                                 <div className="container">
                                     <div className="row">
-                                        {inData[strWordsRU].map((value: string, key: number) => (
+                                        {inData[strRU].map((value: string, key: number) => (
                                             <Card
-                                                className={getCardClassName(key, strWordsRU)}
+                                                className={getCardClassName(key, strRU)}
                                                 key={key}
-                                                onClick={() => selectField(key, strWordsRU)}
+                                                onClick={() => selectField(key, strRU)}
                                             >
                                                 {value}
                                             </Card>
@@ -130,4 +132,4 @@ const StudentDrillingFindPair = ({ name, inData, goToNextTaskCallback }: Student
     );
 };
 
-export default StudentDrillingFindPair;
+export default StudentLexisFindPair;

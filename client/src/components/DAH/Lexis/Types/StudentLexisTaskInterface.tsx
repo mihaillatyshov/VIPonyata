@@ -1,20 +1,11 @@
 import React, { useEffect } from "react";
 import { LogInfo } from "libs/Logger";
-import { selectDrilling, setDrillingSelectedItem } from "redux/slices/drillingSlice";
-import { selectHieroglyph, setHieroglyphSelectedItem } from "redux/slices/hieroglyphSlice";
 import { Button } from "react-bootstrap";
-import { GoToNextTaskCallbackType } from "../StudentDrillingPage";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { GoToNextTaskCallbackType, LexisName, useLexisItem, useSetLexisSelectedItem } from "./LexisUtils";
 //import MD5 from "crypto-js/md5";
 
-export type StudentDrillingTaskProps = {
-    name: "drilling" | "hieroglyph";
-    inData: any;
-    goToNextTaskCallback: GoToNextTaskCallbackType;
-};
-
-export type StudentDrillingTaskInterfaceProps = {
-    name: "drilling" | "hieroglyph";
+export type StudentLexisTaskInterfaceProps = {
+    name: LexisName;
     maincontent: () => React.ReactNode;
     newObjectData: any;
     goToNextTaskCallback: GoToNextTaskCallbackType;
@@ -23,30 +14,7 @@ export type StudentDrillingTaskInterfaceProps = {
     checkItem?: (item: any, taskTypeName: string) => boolean;
 };
 
-const GetLexisDataByName = (name: "drilling" | "hieroglyph") => {
-    const dispatch = useAppDispatch();
-    const drilling = useAppSelector(selectDrilling).selectedItem;
-    const hieroglyph = useAppSelector(selectHieroglyph).selectedItem;
-
-    switch (name) {
-        case "drilling":
-            return [
-                drilling,
-                (data: any) => {
-                    dispatch(setDrillingSelectedItem(data));
-                },
-            ];
-        case "hieroglyph":
-            return [
-                hieroglyph,
-                (data: any) => {
-                    dispatch(setHieroglyphSelectedItem(data));
-                },
-            ];
-    }
-};
-
-const StudentDrillingTaskInterface = ({
+const StudentLexisTaskInterface = ({
     name,
     maincontent,
     newObjectData,
@@ -61,8 +29,9 @@ const StudentDrillingTaskInterface = ({
         }
         return false;
     },
-}: StudentDrillingTaskInterfaceProps) => {
-    const [item, setLexisSelectedItem] = GetLexisDataByName(name);
+}: StudentLexisTaskInterfaceProps) => {
+    const item = useLexisItem(name);
+    const setLexisSelectedItem = useSetLexisSelectedItem(name);
 
     useEffect(() => {
         LogInfo("setLexisSelectedItem FindPair");
@@ -71,14 +40,6 @@ const StudentDrillingTaskInterface = ({
             type: taskTypeName,
             mistakeCount: 0,
         });
-        // dispatch(
-        //     setDrillingSelectedItem({
-        //         ...newObjectData,
-        //         type: taskTypeName,
-        //         mistakeCount: 0,
-        //     })
-        // );
-
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -106,4 +67,4 @@ const StudentDrillingTaskInterface = ({
     );
 };
 
-export default StudentDrillingTaskInterface;
+export default StudentLexisTaskInterface;

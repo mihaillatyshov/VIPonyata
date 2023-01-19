@@ -1,19 +1,24 @@
 import React from "react";
 import { LogInfo } from "libs/Logger";
-import { selectDrilling, setDrillingSelectedItemField } from "redux/slices/drillingSlice";
 import { Button } from "react-bootstrap";
-import StudentDrillingTaskInterface, { StudentDrillingTaskProps } from "./StudentDrillingTaskInterface";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
+import StudentLexisTaskInterface from "./StudentLexisTaskInterface";
+import {
+    NameToScrambe_word_or_char,
+    StudentLexisTaskProps,
+    useLexisItem,
+    useSetLexisSelectedItemField,
+} from "./LexisUtils";
 
-const StudentDrillingScramble = ({ name, inData, goToNextTaskCallback }: StudentDrillingTaskProps) => {
-    const dispatch = useAppDispatch();
-    const item = useAppSelector(selectDrilling).selectedItem;
+const StudentLexisScramble = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps) => {
+    const item = useLexisItem(name);
+    const setLexisSelectedItemField = useSetLexisSelectedItemField(name);
+    const [full, symb] = NameToScrambe_word_or_char(name);
 
     const setNewWord = (id: number) => {
         return {
             wordId: id,
-            usedChars: inData.word_chars[id % inData.word_words.length],
-            doneWord: Array.from({ length: inData.word_chars[id % inData.word_words.length].length }, () => "⠀"),
+            usedChars: inData[symb][id % inData[full].length],
+            doneWord: Array.from({ length: inData[symb][id % inData[full].length].length }, () => "⠀"),
             message: "Собери слово!",
         };
     };
@@ -23,7 +28,7 @@ const StudentDrillingScramble = ({ name, inData, goToNextTaskCallback }: Student
             let newDoneWord = [...item.doneWord];
             let newUsedChars = [...item.usedChars, newDoneWord[id]];
             newDoneWord[id] = "⠀";
-            dispatch(setDrillingSelectedItemField({ doneWord: newDoneWord, usedChars: newUsedChars }));
+            setLexisSelectedItemField({ doneWord: newDoneWord, usedChars: newUsedChars });
         }
     };
 
@@ -37,20 +42,20 @@ const StudentDrillingScramble = ({ name, inData, goToNextTaskCallback }: Student
             }
         }
         newUsedChars.splice(id, 1);
-        dispatch(setDrillingSelectedItemField({ doneWord: newDoneWord, usedChars: newUsedChars }));
+        setLexisSelectedItemField({ doneWord: newDoneWord, usedChars: newUsedChars });
 
         for (let i = 0; i < newDoneWord.length; i++) {
-            LogInfo("NDW", newDoneWord, inData.word_words[item.wordId][i]);
-            if (newDoneWord[i] !== inData.word_words[item.wordId][i]) {
+            LogInfo("NDW", newDoneWord, inData[full][item.wordId][i]);
+            if (newDoneWord[i] !== inData[full][item.wordId][i]) {
                 return;
             }
         }
         // if last word, save changes and go to hub
-        dispatch(setDrillingSelectedItemField({ ...setNewWord(item.wordId + 1) }));
+        setLexisSelectedItemField({ ...setNewWord(item.wordId + 1) });
     };
 
     return (
-        <StudentDrillingTaskInterface
+        <StudentLexisTaskInterface
             name={name}
             taskTypeName="scramble"
             newObjectData={{
@@ -58,7 +63,7 @@ const StudentDrillingScramble = ({ name, inData, goToNextTaskCallback }: Student
             }}
             goToNextTaskCallback={goToNextTaskCallback}
             isTaskDone={() => {
-                return item.wordId === inData.word_words.length;
+                return item.wordId === inData[full].length;
             }}
             maincontent={() => {
                 return (
@@ -90,7 +95,7 @@ const StudentDrillingScramble = ({ name, inData, goToNextTaskCallback }: Student
                                 </Button>
                             ))}
                         </div>
-                        <div> {inData.word_words[item.wordId]} </div>
+                        <div> {inData[full][item.wordId]} </div>
                         <div> {item.message} </div>
                     </div>
                 );
@@ -99,4 +104,4 @@ const StudentDrillingScramble = ({ name, inData, goToNextTaskCallback }: Student
     );
 };
 
-export default StudentDrillingScramble;
+export default StudentLexisScramble;

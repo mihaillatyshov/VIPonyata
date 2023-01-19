@@ -1,7 +1,7 @@
 import random
 import typing
 
-from ...ApiExceptions import InvalidAPIUsage, InvalidRequestJson
+from ...ApiExceptions import InvalidAPIUsage
 from ...queries import StudentDBqueries as DBQS
 from ...DBlib import Drilling, DoneDrilling
 
@@ -70,7 +70,12 @@ def CreateScramble(wordsRU: list[str], wordsJP: list[str], charsJP: list[str]) -
         char_chars.append(list(char))
         random.shuffle(char_chars[-1])
 
-    return {"word_words": shuffleWordsJP, "word_chars": word_chars}
+    return {
+        "word_words": shuffleWordsJP,
+        "word_chars": word_chars,
+        "char_words": shuffleCharsJP,
+        "char_chars": char_chars
+    }
 
 
 def CreateTranslate(wordsRU: list[str], wordsJP: list[str], charsJP: list[str]) -> dict:

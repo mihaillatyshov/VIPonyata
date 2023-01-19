@@ -1,0 +1,39 @@
+.lexisCard {
+    background-color: var(--css-var-block);
+    margin: 10px auto 40px auto;
+    min-height: 100%;
+    padding: 10px;
+    width: fit-content;
+}
+
+div.lexisCardDiv {
+    height: 300px;
+}
+
+div.lexisCardImgDiv {
+    width: 300px;
+    min-width: 300px;
+    max-width: 600px;
+    height: 300px;
+}
+
+.lexisCardImg {
+    max-width: 300px;
+    max-height: 300px;
+}
+
+.lexisCardWords {
+    margin-bottom: 40px;
+}
+
+.lexisCardSentence {
+    margin-bottom: 10px;
+}
+
+.lexisCardLimit {
+    min-height: 340px;
+}
+
+.clearFloat {
+    clear: both;
+}

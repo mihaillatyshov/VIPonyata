@@ -2,18 +2,25 @@ import React, { useEffect } from "react";
 import { Button } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import { LogInfo } from "libs/Logger";
-import { selectDrilling, setDrillingSelectedItem, setDrillingSelectedItemField } from "redux/slices/drillingSlice";
-import style from "../StyleDrilling.module.css";
-import { StudentDrillingTaskProps } from "./StudentDrillingTaskInterface";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
+import style from "../StyleLexis.module.css";
+import {
+    NameTo_word_or_char,
+    StudentLexisTaskProps,
+    useLexisItem,
+    useSetLexisSelectedItem,
+    useSetLexisSelectedItemField,
+} from "./LexisUtils";
 
-const StudentDrillingCard = ({ name, inData, goToNextTaskCallback }: StudentDrillingTaskProps) => {
+const StudentLexisCard = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps) => {
     const { cardId } = useParams();
     const navigate = useNavigate();
-    const dispatch = useAppDispatch();
-    const item = useAppSelector(selectDrilling).selectedItem;
     const taskTypeName = "card";
     var synth = window.speechSynthesis;
+
+    const item = useLexisItem(name);
+    const setLexisSelectedItem = useSetLexisSelectedItem(name);
+    const setLexisSelectedItemField = useSetLexisSelectedItemField(name);
+    const aliasJP = NameTo_word_or_char(name);
 
     const sayJP = (sentence: string) => {
         const voices = synth.getVoices();
@@ -42,17 +49,15 @@ const StudentDrillingCard = ({ name, inData, goToNextTaskCallback }: StudentDril
     };
 
     useEffect(() => {
-        LogInfo("setDrillingSelectedItem Card", cardId);
+        LogInfo("set Lexis Selected Item Card", cardId);
         if (inData && cardId) {
             if (Number(cardId) < inData.length && Number(cardId) >= 0) {
-                dispatch(
-                    setDrillingSelectedItem({
-                        ...inData[cardId],
-                        type: taskTypeName,
-                        isOpen: false,
-                        number: Number(cardId),
-                    })
-                );
+                setLexisSelectedItem({
+                    ...inData[cardId],
+                    type: taskTypeName,
+                    isOpen: false,
+                    number: Number(cardId),
+                });
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -68,7 +73,7 @@ const StudentDrillingCard = ({ name, inData, goToNextTaskCallback }: StudentDril
     };
 
     const handleChangeIsOpen = () => {
-        dispatch(setDrillingSelectedItemField({ isOpen: !item.isOpen }));
+        setLexisSelectedItemField({ isOpen: !item.isOpen });
     };
 
     if (!checkItem()) {
@@ -76,21 +81,21 @@ const StudentDrillingCard = ({ name, inData, goToNextTaskCallback }: StudentDril
     }
 
     return (
-        <div className={style.drillingCard}>
+        <div className={style.lexisCard}>
             <div className="row">
                 <div className="col-auto">
-                    <div className={style.drillingCardDiv}>
-                        <div className={style.drillingCardWords}>
+                    <div className={style.lexisCardDiv}>
+                        <div className={style.lexisCardWords}>
                             <div>
-                                {item.word.word_jp}
-                                <Button variant="success" onClick={() => sayJP(item.word.word_jp)}>
+                                {item.word[aliasJP]}
+                                <Button variant="success" onClick={() => sayJP(item.word[aliasJP])}>
                                     {" "}
                                     Say{" "}
                                 </Button>
                             </div>
                             <div>{item.word.ru}</div>
                         </div>
-                        <div className={style.drillingCardSentence}>
+                        <div className={style.lexisCardSentence}>
                             <div>
                                 {item.sentence}
                                 <Button variant="success" onClick={() => sayJP(item.sentence)}>
@@ -115,8 +120,8 @@ const StudentDrillingCard = ({ name, inData, goToNextTaskCallback }: StudentDril
                     </div>
                 </div>
                 <div className="col-auto">
-                    <div className={style.drillingCardImgDiv}>
-                        <img src={item.word.img ? item.word.img : ""} className={style.drillingCardImg} alt="" />
+                    <div className={style.lexisCardImgDiv}>
+                        <img src={item.word.img ? item.word.img : ""} className={style.lexisCardImg} alt="" />
                     </div>
                 </div>
             </div>
@@ -138,4 +143,4 @@ const StudentDrillingCard = ({ name, inData, goToNextTaskCallback }: StudentDril
     );
 };
 
-export default StudentDrillingCard;
+export default StudentLexisCard;

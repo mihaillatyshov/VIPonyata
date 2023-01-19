@@ -1,40 +1,40 @@
 import React from "react";
 import { LogInfo } from "libs/Logger";
-import { selectDrilling, setDrillingSelectedItemField } from "redux/slices/drillingSlice";
 import { Button } from "react-bootstrap";
-import StudentDrillingTaskInterface, { StudentDrillingTaskProps } from "./StudentDrillingTaskInterface";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
+import StudentLexisTaskInterface from "./StudentLexisTaskInterface";
+import { NameTo_words_or_chars, StudentLexisTaskProps, useLexisItem, useSetLexisSelectedItemField } from "./LexisUtils";
 
-const StudentDrillingTranslate = ({ name, inData, goToNextTaskCallback }: StudentDrillingTaskProps) => {
-    const dispatch = useAppDispatch();
-    const item = useAppSelector(selectDrilling).selectedItem;
+const StudentLexisTranslate = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps) => {
+    const item = useLexisItem(name);
+    const setLexisSelectedItemField = useSetLexisSelectedItemField(name);
+    const aliasJP = NameTo_words_or_chars(name);
 
     const getObjectData = (id: number) => {
         return {
             wordId: id,
             inputText: "",
-            wordJP: inData.words_jp[id % inData.words_jp.length],
+            wordJP: inData[aliasJP][id % inData[aliasJP].length],
         };
     };
 
     const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(setDrillingSelectedItemField({ inputText: e.target.value }));
+        setLexisSelectedItemField({ inputText: e.target.value });
     };
 
     const nextWord = () => {
         LogInfo(inData.words_ru, item.inputText.trim());
         if (inData.words_ru[item.wordId] === item.inputText.trim())
-            dispatch(setDrillingSelectedItemField({ ...getObjectData(item.wordId + 1) }));
+            setLexisSelectedItemField({ ...getObjectData(item.wordId + 1) });
     };
 
     return (
-        <StudentDrillingTaskInterface
+        <StudentLexisTaskInterface
             name={name}
             taskTypeName="translate"
             newObjectData={{ ...getObjectData(0) }}
             goToNextTaskCallback={goToNextTaskCallback}
             isTaskDone={() => {
-                return item.wordId === inData.words_jp.length;
+                return item.wordId === inData[aliasJP].length;
             }}
             maincontent={() => {
                 return (
@@ -51,4 +51,4 @@ const StudentDrillingTranslate = ({ name, inData, goToNextTaskCallback }: Studen
     );
 };
 
-export default StudentDrillingTranslate;
+export default StudentLexisTranslate;
