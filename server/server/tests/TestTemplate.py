@@ -12,3 +12,4 @@ class OverTest(AbstractTest):
 
 obj = OverTest()
 print(obj.test_name)
+print(OverTest.__name__)

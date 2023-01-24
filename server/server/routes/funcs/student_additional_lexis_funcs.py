@@ -3,10 +3,10 @@ import typing
 
 from ...ApiExceptions import InvalidAPIUsage
 from ...queries import StudentDBqueries as DBQS
-from ...DBlib import Drilling, DoneDrilling
+from ...db_models import Drilling, DrillingTry, Hieroglyph, HieroglyphTry
 
 
-class LexisType:
+class LexisTypeEnum:
     DRILLING = 0
     HIEROGLYPH = 1
 
@@ -25,14 +25,22 @@ LexisTaskNameList = [
 ]
 
 
-def GetLexisData(lexisType: int) -> tuple[typing.Callable[[int, int], Drilling],                                        #
-                                          typing.Callable[[int, int], DoneDrilling],                                    #
-                                          str]:                                                                         #
-    if lexisType == LexisType.DRILLING:
-        return DBQS.GetDrillingById, DBQS.GetUnfinishedDoneDrillingsByDrillingId, "drilling"
+def GetLexisData(lexisType: int) -> tuple[DBQS.LexisQueries, str]:
+    if lexisType == LexisTypeEnum.DRILLING:
+        return DBQS.DrillingQueries, "drilling"
 
-    #if lexisType == LexisType.HIEROGLYPH:
-    #    return DBQS.GetHye
+    if lexisType == LexisTypeEnum.HIEROGLYPH:
+        return DBQS.HieroglyphQueries, "hieroglyph"
+
+    raise InvalidAPIUsage("Check server GetLexisData()", 500)
+
+
+def GetLexisTypes(lexisType: int) -> tuple[Drilling, DrillingTry] | tuple[Hieroglyph, HieroglyphTry]:
+    if lexisType == LexisTypeEnum.DRILLING:
+        return Drilling, DrillingTry
+
+    if lexisType == LexisTypeEnum.HIEROGLYPH:
+        return Hieroglyph, HieroglyphTry
 
     raise InvalidAPIUsage("Check server GetLexisData()", 500)
 
@@ -107,9 +115,9 @@ def CreateSpaceFromChars(wordsRU: list[str], wordsJP: list[str], charsJP: list[s
 
 
 def CreateSpace(wordsRU: list[str], wordsJP: list[str], charsJP: list[str], lexisType: int) -> dict:
-    if lexisType == LexisType.DRILLING:
+    if lexisType == LexisTypeEnum.DRILLING:
         return CreateSpaceFromWords(wordsRU, wordsJP, charsJP)
-    if lexisType == LexisType.HIEROGLYPH:
+    if lexisType == LexisTypeEnum.HIEROGLYPH:
         return CreateSpaceFromChars(wordsRU, wordsJP, charsJP)
 
     raise InvalidAPIUsage("Check server CreateSpace()", 500)

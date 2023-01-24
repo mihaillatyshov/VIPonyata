@@ -1,7 +1,7 @@
 import React from "react";
 import { useDispatch } from "react-redux";
 import { setDrillingEndByTime } from "redux/slices/drillingSlice";
-import StudentDAHBubble from "components/DAH/Bouble/StudentDAHBouble";
+import StudentActivityBubble from "components/Activities/Bouble/StudentActivityBouble";
 
 type StudentDrillingBubbleProps = {
     drilling: any;
@@ -11,7 +11,7 @@ const StudentDrillingBubble = ({ drilling }: StudentDrillingBubbleProps) => {
     const dispatch = useDispatch();
 
     return (
-        <StudentDAHBubble
+        <StudentActivityBubble
             title="Лексика"
             info={drilling.info}
             name="drilling"

@@ -7,13 +7,12 @@ from werkzeug.utils import secure_filename
 
 from .. import DBsession
 from ..ApiExceptions import InvalidAPIUsage
-from ..DBlib import Course
+from ..db_models import Course
 from .funcs import funcs_student as student_funcs
 from .funcs import funcs_teacher as teacher_funcs
 from .routes_utils import UserSelectorFunction
 
 routes_bp = Blueprint("routes", __name__)
-
 
 UPLOAD_FOLDER = "C:/Coding/Web/VIPonyata/client/public"
 
@@ -62,35 +61,35 @@ def getLessonsByCourseId(id):
 
 @routes_bp.route("/lessons/<id>", methods=["GET"])
 @login_required
-def getLessonActivities(id):  # TODO add assessment and hieroglyph
+def getLessonActivities(id):                                                                                            # TODO add assessment and hieroglyph
     return UserSelectorFunction(teacher_funcs.getLessonActivities, student_funcs.getLessonActivities, lessonId=id)
 
 
 @routes_bp.route("/drilling/<id>/newtry", methods=["POST"])
 @login_required
 def startNewDrillingTry(id):
-    return UserSelectorFunction(None, student_funcs.startNewDrillingTry, drillingId=id)
+    return UserSelectorFunction(None, student_funcs.DrillingFuncs.StartNewLexisTry, lexisId=id)
 
 
 @routes_bp.route("/drilling/<id>/continuetry", methods=["POST"])
 @login_required
 def continueDrillingTry(id):
-    return UserSelectorFunction(None, student_funcs.continueDrilingTry, drillingId=id)
+    return UserSelectorFunction(None, student_funcs.DrillingFuncs.ContinueLexisTry, lexisId=id)
 
 
 @routes_bp.route("/drilling/<id>/endtry", methods=["POST"])
 @login_required
 def endDrillingTry(id):
-    return UserSelectorFunction(None, student_funcs.endDrillingTry, drillingId=id)
+    return UserSelectorFunction(None, student_funcs.DrillingFuncs.EndLexisTry, lexisId=id)
 
 
 @routes_bp.route("/drilling/<id>/newdonetask", methods=["POST"])
 @login_required
-def addNewDoneTask(id):
-    return UserSelectorFunction(None, student_funcs.addNewDoneTask, drillingId=id)
+def addDrillingNewDoneTasks(id):
+    return UserSelectorFunction(None, student_funcs.DrillingFuncs.AddLexisNewDoneTasks, lexisId=id)
 
 
 @routes_bp.route("/drilling/<id>", methods=["GET"])
 @login_required
 def getDrillingById(id):
-    return UserSelectorFunction(teacher_funcs.getDrillingById, student_funcs.getDrillingById, drillingId=id)
+    return UserSelectorFunction(teacher_funcs.getDrillingById, student_funcs.DrillingFuncs.GetLexisById, lexisId=id)

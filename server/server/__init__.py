@@ -4,7 +4,7 @@ from flask import Blueprint, json
 from flask_login import LoginManager
 from sqlalchemy.ext.declarative import DeclarativeMeta
 
-from .DBlib import CreateSession
+from .db_models import CreateSession
 
 DBsession = CreateSession("mysql+mysqlconnector", "mihail", "dbnfvbys5", "localhost", "japan")
 login_manager = LoginManager()

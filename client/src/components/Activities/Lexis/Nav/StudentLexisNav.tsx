@@ -21,11 +21,11 @@ const StudentLexisNav = ({ items, doneTasks }: StudentLexisNavProps) => {
     };
 
     const itemsData = {
-        ...createItem("card", "Card", "card/0", "/img/DAH/DH/nav/card.png"),
-        ...createItem("findpair", "Find Pair", "findpair", "/img/DAH/DH/nav/findpair.png"),
-        ...createItem("scramble", "Scramble", "scramble", "/img/DAH/DH/nav/scramble.png"),
-        ...createItem("space", "Space", "space", "/img/DAH/DH/nav/space.png"),
-        ...createItem("translate", "Translate", "translate", "/img/DAH/DH/nav/translate.png"),
+        ...createItem("card", "Card", "card/0", "/img/Activity/Lexis/nav/card.png"),
+        ...createItem("findpair", "Find Pair", "findpair", "/img/Activity/Lexis/nav/findpair.png"),
+        ...createItem("scramble", "Scramble", "scramble", "/img/Activity/Lexis/nav/scramble.png"),
+        ...createItem("space", "Space", "space", "/img/Activity/Lexis/nav/space.png"),
+        ...createItem("translate", "Translate", "translate", "/img/Activity/Lexis/nav/translate.png"),
     };
 
     LogInfo(items);

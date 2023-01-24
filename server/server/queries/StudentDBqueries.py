@@ -1,11 +1,15 @@
 from datetime import datetime
 
-from ..ApiExceptions import InvalidAPIUsage, CourseNotFoundException, LessonNotFoundException, DrillingNotFoundException
-from ..DBlib import (Course, Dictionary, DoneDrilling, Drilling, DrillingCard, Lesson, User)
+from ..ApiExceptions import InvalidAPIUsage, CourseNotFoundException, LessonNotFoundException, LexisNotFoundException
+from ..db_models import (User, Course, Lesson, Drilling, DrillingTry, Hieroglyph, HieroglyphTry, LexisType,
+                         LexisTryType)
 from ..log_lib import LogI
 from .DBqueriesUtils import DBsession
 
 
+#########################################################################################################################
+################ Course and Lesson ######################################################################################
+#########################################################################################################################
 def GetAvailableCourses(userId: int) -> list[Course]:
     return DBsession.query(Course).join(Course.users).filter(User.id == userId).order_by(Course.sort).all()
 
@@ -60,109 +64,99 @@ def GetLessonById(lessonId: int, userId: int) -> Lesson:
     raise LessonNotFoundException()
 
 
-def GetDrillingByLessonId(lessonId: int, userId: int) -> Drilling:
-    return (                                                                                                            #
-        DBsession                                                                                                       #
-        .query(Drilling)                                                                                                #
-        .join(Drilling.lesson)                                                                                          #
-        .filter(Lesson.id == lessonId)                                                                                  #
-        .join(Lesson.users)                                                                                             #
-        .filter(User.id == userId)                                                                                      #
-        .one_or_none()                                                                                                  #
-    )                                                                                                                   #
+#########################################################################################################################
+################ Lexis ##################################################################################################
+#########################################################################################################################
+class LexisQueries:
+    lexis_type: LexisType
+    lexisTry_type: LexisTryType
 
+    def __init__(self, lexis_type: LexisType, lexisTry_type: LexisTryType):
+        self.lexis_type = lexis_type
+        self.lexisTry_type = lexisTry_type
 
-def GetDrillingById(drillingId: int, userId: int) -> Drilling:
-    drilling = (                                                                                                        #
-        DBsession                                                                                                       #
-        .query(Drilling)                                                                                                #
-        .filter(Drilling.id == drillingId)                                                                              #
-        .join(Drilling.lesson)                                                                                          #
-        .join(Lesson.users)                                                                                             #
-        .filter(User.id == userId)                                                                                      #
-        .one_or_none()                                                                                                  #
-    )                                                                                                                   #
+    def GetLexisByLessonId(self, lessonId: int, userId: int) -> LexisType | None:
+        return (                                                                                                        #
+            DBsession                                                                                                   #
+            .query(self.lexis_type)                                                                                     #
+            .join(self.lexis_type.lesson)                                                                               #
+            .filter(Lesson.id == lessonId)                                                                              #
+            .join(Lesson.users)                                                                                         #
+            .filter(User.id == userId)                                                                                  #
+            .one_or_none()                                                                                              #
+        )                                                                                                               #
 
-    if drilling:
-        return drilling
+    def GetLexisById(self, lexisId: int, userId: int) -> LexisType:
+        lexis = (                                                                                                       #
+            DBsession                                                                                                   #
+            .query(self.lexis_type)                                                                                     #
+            .filter(self.lexis_type.id == lexisId)                                                                      #
+            .join(self.lexis_type.lesson)                                                                               #
+            .join(Lesson.users)                                                                                         #
+            .filter(User.id == userId)                                                                                  #
+            .one_or_none()                                                                                              #
+        )                                                                                                               #
 
-    if drilling := DBsession.query(Drilling).filter(Drilling.id == drillingId).one_or_none():
-        raise InvalidAPIUsage("You do not have access to this drilling!", 403, {"lesson_id": drilling.lesson_id})
+        if lexis:
+            return lexis
 
-    raise DrillingNotFoundException()
+        if lexis := DBsession.query(self.lexis_type).filter(self.lexis_type.id == lexisId).one_or_none():
+            raise InvalidAPIUsage(f"You do not have access to this {self.lexis_type.__name__}!", 403,
+                                  {"lesson_id": lexis.lesson_id})
 
+        raise LexisNotFoundException(self.lexis_type.__name__)
 
-def GetDoneDrillingsByDrillingId(drillingId: int, userId: int) -> list[DoneDrilling]:
-    return (                                                                                                            #
-        DBsession                                                                                                       #
-        .query(DoneDrilling)                                                                                            #
-        .join(DoneDrilling.drilling)                                                                                    #
-        .filter(Drilling.id == drillingId)                                                                              #
-        .join(Drilling.lesson)                                                                                          #
-        .join(Lesson.users)                                                                                             #
-        .filter(User.id == userId)                                                                                      #
-        .order_by(DoneDrilling.try_number)                                                                              #
-        .all()                                                                                                          #
-    )
+    def GetLexisTriesByLexisId(self, lexisId: int, userId: int) -> list[LexisTryType]:
+        return (                                                                                                        #
+            DBsession                                                                                                   #
+            .query(self.lexisTry_type)                                                                                  #
+            .join(self.lexisTry_type.base)                                                                              #
+            .filter(self.lexis_type.id == lexisId)                                                                      #
+            .join(self.lexis_type.lesson)                                                                               #
+            .join(Lesson.users)                                                                                         #
+            .filter(User.id == userId)                                                                                  #
+            .order_by(self.lexisTry_type.try_number)                                                                    #
+            .all()                                                                                                      #
+        )
 
-
-def AddNewDoneDrilling(tryNumber: int, drillingId: int, userId: int) -> DoneDrilling | None:
-    LogI("AddNewDoneDrilling:", tryNumber, drillingId, userId)
-    newDoneDrilling = DoneDrilling(try_number=tryNumber,
-                                    start_datetime=datetime.now(),
-                                    user_id=userId,
-                                    drilling_id=drillingId)
-    DBsession.add(newDoneDrilling)
-    DBsession.commit()
-    return newDoneDrilling
-
-
-def GetUnfinishedDoneDrillingsByDrillingId(drillingId: int, userId: int) -> DoneDrilling:
-    doneDrilling = (                                                                                                    #
-        DBsession                                                                                                       #
-        .query(DoneDrilling)                                                                                            #
-        .filter(DoneDrilling.end_datetime == None)                                                                      #
-        .join(DoneDrilling.drilling)                                                                                    #
-        .filter(Drilling.id == drillingId)                                                                              #
-        .join(Drilling.lesson)                                                                                          #
-        .join(Lesson.users)                                                                                             #
-        .filter(User.id == userId)                                                                                      #
-        .one_or_none()                                                                                                  #
-    )
-
-    if doneDrilling:
-        return doneDrilling
-
-    if drilling := DBsession.query(Drilling).filter(Drilling.id == drillingId).one_or_none():
-        raise InvalidAPIUsage("Drilling not started!", 403, {"lesson_id": drilling.lesson_id})
-
-    raise DrillingNotFoundException()
-
-
-def SetDoneTaskInDoneDrilling(doneDrillingId: int, doneTasks: str) -> None:
-    doneDrilling = DBsession.query(DoneDrilling).filter(DoneDrilling.id == doneDrillingId).one_or_none()
-    if doneDrilling:
-        doneDrilling.done_tasks = doneTasks
-        DBsession.add(doneDrilling)
+    def AddNewLexisTry(self, tryNumber: int, lexisId: int, userId: int) -> LexisTryType | None:
+        LogI(f"AddNewLexisTry {self.lexisTry_type.__name__}:", tryNumber, lexisId, userId)
+        newLexisTry = self.lexisTry_type(try_number=tryNumber,
+                                         start_datetime=datetime.now(),
+                                         user_id=userId,
+                                         base_id=lexisId)
+        DBsession.add(newLexisTry)
         DBsession.commit()
+        return newLexisTry
+
+    def GetUnfinishedLexisTryByLexisId(self, lexisId: int, userId: int) -> LexisTryType:
+        lexisTry = (                                                                                                    #
+            DBsession                                                                                                   #
+            .query(self.lexisTry_type)                                                                                  #
+            .filter(self.lexisTry_type.end_datetime == None)                                                            #
+            .join(self.lexisTry_type.base)                                                                              #
+            .filter(self.lexis_type.id == lexisId)                                                                      #
+            .join(self.lexis_type.lesson)                                                                               #
+            .join(Lesson.users)                                                                                         #
+            .filter(User.id == userId)                                                                                  #
+            .one_or_none()                                                                                              #
+        )
+
+        if lexisTry:
+            return lexisTry
+
+        if lexis := DBsession.query(self.lexis_type).filter(self.lexis_type.id == lexisId).one_or_none():
+            raise InvalidAPIUsage(f"{self.lexis_type.__name__} not started!", 403, {"lesson_id": lexis.lesson_id})
+
+        raise LexisNotFoundException(self.lexis_type.__name__)
+
+    def SetDoneTasksInLexisTry(self, lexisTryId: int, doneTasks: str) -> None:
+        lexisTry = DBsession.query(self.lexisTry_type).filter(self.lexisTry_type.id == lexisTryId).one_or_none()
+        if lexisTry:
+            lexisTry.done_tasks = doneTasks
+            DBsession.add(lexisTry)
+            DBsession.commit()
 
 
-def GetDrillingCardsByDrillingId(drillingId: int) -> list[DrillingCard]:
-    return DBsession.query(DrillingCard).join(DrillingCard.drilling).filter(Drilling.id == drillingId).all()
-
-
-def GetDictionaryByDrillingCardId(drillingCardId: int) -> Dictionary | None:
-    return (                                                                                                            #
-        DBsession                                                                                                       #
-        .query(Dictionary)                                                                                              #
-        .join(Dictionary.drilling_card)                                                                                 #
-        .filter(DrillingCard.id == drillingCardId)                                                                      #
-        .one_or_none()                                                                                                  #
-    )                                                                                                                   #
-
-
-# def GetAssessmentByLessonId(lessonId: int, userId: int):
-#    return GetSingleItem(DB.GetTableJson("assessment", where=f"LessonId = '{lessonId}'"))
-
-# def GetHieroglyphByLessonId(lessonId: int, userId: int):
-#    return GetSingleItem(DB.GetTableJson("hieroglyph", where=f"LessonId = '{lessonId}'"))
+DrillingQueries = LexisQueries(Drilling, DrillingTry)
+HieroglyphQueries = LexisQueries(Hieroglyph, HieroglyphTry)

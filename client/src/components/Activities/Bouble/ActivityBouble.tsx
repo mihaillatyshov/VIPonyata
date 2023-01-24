@@ -1,14 +1,14 @@
 import React from "react";
 
-type DAHBoubleProps = {
+type ActivityBoubleProps = {
     title: string;
     children: React.ReactNode;
 };
 
-const DAHBouble = ({ title, children }: DAHBoubleProps) => {
+const ActivityBouble = ({ title, children }: ActivityBoubleProps) => {
     return (
-        <div className="wrapperDAH">
-            <div className="textDAH">
+        <div className="wrapperActivity">
+            <div className="textActivity">
                 <div>
                     <div> {title} </div>
                     {children}
@@ -18,4 +18,4 @@ const DAHBouble = ({ title, children }: DAHBoubleProps) => {
     );
 };
 
-export default DAHBouble;
+export default ActivityBouble;

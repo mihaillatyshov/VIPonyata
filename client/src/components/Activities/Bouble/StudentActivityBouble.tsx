@@ -2,21 +2,21 @@ import React from "react";
 import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { ServerAPI_POST } from "libs/ServerAPI";
-import StudentTimeRemaining from "components/DAH/StudentTimeRemaining";
+import StudentTimeRemaining from "components/Activities/StudentTimeRemaining";
 import { LogInfo } from "libs/Logger";
-import DAHBouble from "./DAHBouble";
+import ActivityBouble from "./ActivityBouble";
 
-type StudentDAHBubbleProps = {
+type StudentActivityBubbleProps = {
     info: any;
     title: string;
     name: string;
     onDeadline: () => void;
 };
 
-const StudentDAHBubble = ({ info, title, name, onDeadline }: StudentDAHBubbleProps) => {
+const StudentActivityBubble = ({ info, title, name, onDeadline }: StudentActivityBubbleProps) => {
     const navigate = useNavigate();
 
-    LogInfo("DAHBubble info:", info);
+    LogInfo("ActivityBubble info:", info);
 
     const isInProgress = () => {
         if (info.tries && info.tries.length !== 0) {
@@ -56,13 +56,13 @@ const StudentDAHBubble = ({ info, title, name, onDeadline }: StudentDAHBubblePro
     };
 
     return (
-        <DAHBouble title={title}>
+        <ActivityBouble title={title}>
             <div>{getTextInfo()}</div>
             <Button type="button" onClick={onButtonClick}>
                 {getButtonText()}
             </Button>
-        </DAHBouble>
+        </ActivityBouble>
     );
 };
 
-export default StudentDAHBubble;
+export default StudentActivityBubble;

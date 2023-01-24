@@ -1,11 +1,12 @@
 import threading
-from datetime import datetime, time, timedelta
+from datetime import datetime, timedelta
 
 from flask_login import current_user
 
 from ..ApiExceptions import InvalidAPIUsage
 from ..log_lib import LogI
 from ..queries import OtherDBqueries as DBQO
+from ..db_models import ActivityType, ActivityTryType, Drilling, DrillingTry, Hieroglyph, HieroglyphTry, Assessment, AssessmentTry
 
 
 def GetCurrentUserId() -> int:
@@ -33,27 +34,43 @@ def UserSelectorFunction(teacherFunc=None, studentFunc=None, *args, **kwargs) ->
     raise InvalidAPIUsage("User level error!", 400)
 
 
-def DrillingEndTimeHandler(doneDrillingId: int):
-    doneDrilling = DBQO.GetDoneDrillingById(doneDrillingId)
-    if (doneDrilling and not doneDrilling.end_datetime):
+#########################################################################################################################
+################ Activity Timer ############################################################################################
+#########################################################################################################################
+def ActivityEndTimeHandler(activityTryId: int, activityTry_type: ActivityTryType):
+    activityTry = DBQO.GetActivityTryById(activityTryId, activityTry_type)
+    if (activityTry and not activityTry.end_datetime):
         LogI("========= Not Hand ===============================")
-        DBQO.UpdateDoneDrillingEndTime(doneDrillingId, datetime.now())
+        DBQO.UpdateActivityTryEndTime(activityTryId, datetime.now(), activityTry_type)
     LogI("========= Timer End ===============================")
 
 
-def StartDrilingTimerLimit(timedeltaRemaining: timedelta, doneDrillingId: int):
+# def DrillingEndTimeHandler(doneDrillingId: int):
+#     doneDrilling = DBQO.GetDoneDrillingById(doneDrillingId)
+#     if (doneDrilling and not doneDrilling.end_datetime):
+#         LogI("========= Not Hand ===============================")
+#         DBQO.UpdateLexisTryEndTime(doneDrillingId, datetime.now(), DrillingTry)
+#     LogI("========= Timer End ===============================")
+
+
+def StartActivityTimerLimit(timedeltaRemaining: timedelta, activityTryId: int, activityTry_type: ActivityTryType):
     secondsRemaining = int(timedeltaRemaining.total_seconds())
     LogI("secondsRemaining", secondsRemaining)
-    threading.Timer(secondsRemaining if secondsRemaining > 0 else 0, DrillingEndTimeHandler,
-                    args={doneDrillingId}).start()
+    threading.Timer(max(secondsRemaining, 0), ActivityEndTimeHandler, args={activityTryId, activityTry_type}).start()
+
+
+def OnRestartServerCheckTasksTimersByType(activity_type: ActivityType, activityTry_type: ActivityTryType):
+    LogI(f"OnRestartServerCheckTasksTimers ==== START ==== {activity_type.__name__}")
+    activityTries = DBQO.GetActivityCheckTasksTimers(Drilling, DrillingTry)
+    LogI("OnRestartServerCheckTasksTimers:", activityTries)
+    for activityTry in activityTries:
+        timeRemaining = (activityTry.start_datetime + activityTry.base.time_limit__ToTimedelta()) - datetime.now()
+        LogI("OnRestartServerCheckTasksTimers:", timeRemaining)
+        StartActivityTimerLimit(timeRemaining, activityTry.id, activityTry_type)                                        # type: ignore
+    LogI(f"OnRestartServerCheckTasksTimers ==== END ==== {activity_type.__name__}")
 
 
 def OnRestartServerCheckTasksTimers():
-    LogI("OnRestartServerCheckTasksTimers ==== START ====")
-    doneDrillings = DBQO.GetCheckTasksTimersDrillings()
-    LogI("OnRestartServerCheckTasksTimers:", doneDrillings)
-    for doneDrilling in doneDrillings:
-        timeRemaining = (doneDrilling.start_datetime + doneDrilling.drilling.time_limit__ToTimedelta()) - datetime.now()
-        LogI("OnRestartServerCheckTasksTimers:", timeRemaining)
-        StartDrilingTimerLimit(timeRemaining, doneDrilling.id)                                                          # type: ignore
-    LogI("OnRestartServerCheckTasksTimers ==== END ====")
+    OnRestartServerCheckTasksTimersByType(Drilling, DrillingTry)
+    OnRestartServerCheckTasksTimersByType(Hieroglyph, HieroglyphTry)
+    OnRestartServerCheckTasksTimersByType(Assessment, AssessmentTry)

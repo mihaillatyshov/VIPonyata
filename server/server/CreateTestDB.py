@@ -1,6 +1,6 @@
 from datetime import datetime, time
 
-from DBlib import Course, CreateSession, Dictionary, Drilling, DrillingCard, Hieroglyph, HieroglyphCard, Lesson, User
+from db_models import Course, CreateSession, Dictionary, Drilling, DrillingCard, Hieroglyph, HieroglyphCard, Lesson, User
 from log_lib import LogI
 from werkzeug.security import generate_password_hash
 
@@ -75,15 +75,15 @@ if user:
         d_cards = [
             DrillingCard(sentence="わたしは家族が好きです。",
                          answer="я люблю свою семью",
-                         drilling_id=drillings[0].id,
+                         base_id=drillings[0].id,
                          dictionary_id=dictionary[0].id),
             DrillingCard(sentence="私は姉妹がいる。",
                          answer="у меня есть сестры",
-                         drilling_id=drillings[0].id,
+                         base_id=drillings[0].id,
                          dictionary_id=dictionary[1].id),
             DrillingCard(sentence="わたしは家族が好きです。",
                          answer="я люблю свою семью",
-                         drilling_id=drillings[1].id,
+                         base_id=drillings[1].id,
                          dictionary_id=dictionary[0].id),
         ]
         DBsession.add_all(d_cards)
@@ -109,15 +109,15 @@ if user:
         h_cards = [
             HieroglyphCard(sentence="わたしは家族が好きです。",
                            answer="я люблю свою семью",
-                           drilling_id=drillings[0].id,
+                           base_id=hieroglyps[0].id,
                            dictionary_id=dictionary[0].id),
             HieroglyphCard(sentence="私は姉妹がいる。",
                            answer="у меня есть сестры",
-                           drilling_id=drillings[0].id,
+                           base_id=hieroglyps[0].id,
                            dictionary_id=dictionary[1].id),
             HieroglyphCard(sentence="わたしは家族が好きです。",
                            answer="я люблю свою семью",
-                           drilling_id=drillings[1].id,
+                           base_id=hieroglyps[1].id,
                            dictionary_id=dictionary[0].id),
         ]
         DBsession.add_all(h_cards)

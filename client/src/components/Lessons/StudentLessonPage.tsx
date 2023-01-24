@@ -4,7 +4,7 @@ import { LogInfo } from "libs/Logger";
 import { ServerAPI_GET } from "libs/ServerAPI";
 import { selectDrilling, setDrillingInfo } from "redux/slices/drillingSlice";
 import { selectLessons, setSelectedLesson } from "redux/slices/lessonsSlice";
-import StudentDrillingBubble from "../DAH/Lexis/Drilling/StudentDrillingBubble";
+import StudentDrillingBubble from "components/Activities/Lexis/Drilling/StudentDrillingBubble";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { selectAssessment } from "redux/slices/assessmentSlice";
 import { selectHieroglyph } from "redux/slices/hieroglyphSlice";

@@ -5,7 +5,7 @@ from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .. import DBsession, base_blueprint, login_manager
-from ..DBlib import User
+from ..db_models import User
 from ..FlaskUser import FlaskUser
 from ..log_lib import LogI
 
@@ -24,14 +24,14 @@ def load_user(user_id):
 
 def getCurrentUserData() -> dict:
     data = {}
-    if (current_user.get_id() != None):                 # type: ignore
+    if (current_user.get_id() != None):                                                                                 # type: ignore
         data = {
-            "id": current_user.GetId(),                 # type: ignore
-            "name": current_user.GetName(),             # type: ignore
-            "nickname": current_user.GetNickname(),     # type: ignore
-            "level": current_user.GetLevel(),           # type: ignore
-            "avatar": current_user.GetAvatar(),         # type: ignore
-            "form": current_user.GetForm()              # type: ignore
+            "id": current_user.GetId(),                                                                                 # type: ignore
+            "name": current_user.GetName(),                                                                             # type: ignore
+            "nickname": current_user.GetNickname(),                                                                     # type: ignore
+            "level": current_user.GetLevel(),                                                                           # type: ignore
+            "avatar": current_user.GetAvatar(),                                                                         # type: ignore
+            "form": current_user.GetForm()                                                                              # type: ignore
         }
 
     return data

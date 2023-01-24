@@ -34,6 +34,6 @@ class LessonNotFoundException(InvalidAPIUsage):
         super().__init__("Lesson not found!", 404)
 
 
-class DrillingNotFoundException(InvalidAPIUsage):
-    def __init__(self):
-        super().__init__("Drilling not found!", 404)
+class LexisNotFoundException(InvalidAPIUsage):
+    def __init__(self, type_name: str):
+        super().__init__(f"{type_name} not found!", 404)

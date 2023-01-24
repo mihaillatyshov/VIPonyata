@@ -99,12 +99,12 @@ class Dictionary(Base):
         return f"<Dictionary: (id={self.id}; char_jp={self.char_jp}; word_jp={self.char_jp}; ru={self.ru})>"
 
 
-class AbstractDAH(Base):
+class AbstractActivity(Base):
     __abstract__ = True
     id = Column(Integer, primary_key=True)
 
     description = Column(String(2048))
-    tasks = Column(String(2048), nullable=False)
+
     time_limit = Column(Time)
 
     @declared_attr
@@ -117,6 +117,23 @@ class AbstractDAH(Base):
 
     tries = []
     now_try = None
+
+    def time_limit__ToTimedelta(self) -> datetime.timedelta:
+        return datetime.timedelta(hours=self.time_limit.hour,
+                                  minutes=self.time_limit.minute,
+                                  seconds=self.time_limit.second,
+                                  microseconds=self.time_limit.microsecond)
+
+    def __json__(self):
+        data = {"tries": self.tries, "deadline": self.calcDeadline(), "try": self.now_try}
+        for column in self.__table__.columns:
+            data[column.name] = getattr(self, column.name)
+        return data
+
+
+class AbstractLexis(AbstractActivity):
+    __abstract__ = True
+    tasks = Column(String(2048), nullable=False)
 
     def getTasksNames(self):
         return self.tasks.split(",")
@@ -132,12 +149,6 @@ class AbstractDAH(Base):
 
         return wordsRU, wordsJP, charsJP
 
-    def time_limit__ToTimedelta(self) -> datetime.timedelta:
-        return datetime.timedelta(hours=self.time_limit.hour,
-                                  minutes=self.time_limit.minute,
-                                  seconds=self.time_limit.second,
-                                  microseconds=self.time_limit.microsecond)
-
     def calcDeadline(self) -> datetime.datetime | None:
         if not self.time_limit:
             return None
@@ -149,14 +160,8 @@ class AbstractDAH(Base):
 
         return None
 
-    def __json__(self):
-        data = {"tries": self.tries, "deadline": self.calcDeadline(), "try": self.now_try}
-        for column in self.__table__.columns:
-            data[column.name] = getattr(self, column.name)
-        return data
 
-
-class AbstractCard(Base):
+class AbstractLexisCard(Base):
     __abstract__ = True
     id = Column(Integer, primary_key=True)
 
@@ -178,18 +183,28 @@ class AbstractCard(Base):
         return data
 
 
-class AbstractDone(Base):
+class AbstractActivityTry(Base):
     __abstract__ = True
     id = Column(Integer, primary_key=True)
 
     try_number = Column(Integer, nullable=False)
     start_datetime = Column(DateTime, nullable=False)
     end_datetime = Column(DateTime)
-    done_tasks = Column(String(2048))
 
     @declared_attr
     def user_id(cls):
         return Column(Integer, ForeignKey("users.id"))
+
+    def __json__(self):
+        data = {}
+        for column in self.__table__.columns:
+            data[column.name] = getattr(self, column.name)
+        return data
+
+
+class AbstractLexisTry(AbstractActivityTry):
+    __abstract__ = True
+    done_tasks = Column(String(2048))
 
     def getDoneTasksDict(self) -> dict:
         res = {}
@@ -200,51 +215,66 @@ class AbstractDone(Base):
         return res
 
     def __json__(self):
-        data = {}
-        for column in self.__table__.columns:
-            data[column.name] = getattr(self, column.name)
+        data = super().__json__()
         data["done_tasks"] = self.getDoneTasksDict()
         return data
 
 
-class Drilling(AbstractDAH):
+class Drilling(AbstractLexis):
     __tablename__ = "drillings"
 
     cards = relationship("DrillingCard")
 
 
-class DrillingCard(AbstractCard):
+class DrillingCard(AbstractLexisCard):
     __tablename__ = "drilling_cards"
 
-    drilling_id = Column(Integer, ForeignKey("drillings.id"))
-    drilling = relationship("Drilling")
+    base_id = Column(Integer, ForeignKey("drillings.id"))
+    base = relationship("Drilling")
 
 
-class DoneDrilling(AbstractDone):
-    __tablename__ = "done_drillings"
+class DrillingTry(AbstractLexisTry):
+    __tablename__ = "drilling_tries"
 
-    drilling_id = Column(Integer, ForeignKey("drillings.id"))
-    drilling = relationship("Drilling")
+    base_id = Column(Integer, ForeignKey("drillings.id"))
+    base = relationship("Drilling")
 
 
-class Hieroglyph(AbstractDAH):
+class Hieroglyph(AbstractLexis):
     __tablename__ = "hieroglyphs"
 
     cards = relationship("HieroglyphCard")
 
 
-class HieroglyphCard(AbstractCard):
+class HieroglyphCard(AbstractLexisCard):
     __tablename__ = "hieroglyph_cards"
 
-    drilling_id = Column(Integer, ForeignKey("hieroglyphs.id"))
-    drilling = relationship("Hieroglyph")
+    base_id = Column(Integer, ForeignKey("hieroglyphs.id"))
+    base = relationship("Hieroglyph")
 
 
-class DoneHieroglyph(AbstractDone):
-    __tablename__ = "done_hieroglyphs"
+class HieroglyphTry(AbstractLexisTry):
+    __tablename__ = "hieroglyph_tries"
 
-    drilling_id = Column(Integer, ForeignKey("hieroglyphs.id"))
-    drilling = relationship("Hieroglyph")
+    base_id = Column(Integer, ForeignKey("hieroglyphs.id"))
+    base = relationship("Hieroglyph")
+
+
+class Assessment(AbstractActivity):
+    __tablename__ = "assessments"
+
+
+class AssessmentTry(AbstractActivityTry):
+    __tablename__ = "assessment_tries"
+
+    base_id = Column(Integer, ForeignKey("assessments.id"))
+    base = relationship("Assessment")
+
+
+LexisType = Drilling | Hieroglyph
+LexisTryType = DrillingTry | HieroglyphTry
+ActivityType = LexisType | Assessment
+ActivityTryType = LexisTryType | AssessmentTry
 
 
 def CreateSession(url, username, password, host, database):

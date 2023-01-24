@@ -1,4 +1,4 @@
-from ..DBlib import Course, Drilling, Lesson
+from ..db_models import Course, Drilling, Lesson
 from .DBqueriesUtils import *
 
 

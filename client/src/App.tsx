@@ -13,7 +13,7 @@ import TestUpload from "./components/TestUpload";
 import NavigateHome from "./components/NavigateHome";
 import StudentCoursePage from "./components/Courses/StudentCoursePage";
 import NavBar from "./components/NavBar";
-import StudentDrillingPage from "./components/DAH/Lexis/Drilling/StudentDrillingPage";
+import StudentDrillingPage from "./components/Activities/Lexis/Drilling/StudentDrillingPage";
 import StudentLessonPage from "./components/Lessons/StudentLessonPage";
 import { useAppDispatch, useAppSelector } from "./redux/hooks";
 import { Button } from "react-bootstrap";

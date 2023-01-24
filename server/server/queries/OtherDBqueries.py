@@ -1,22 +1,27 @@
 from datetime import datetime
 
-from ..DBlib import DoneDrilling, Drilling
+from ..db_models import ActivityType, ActivityTryType
 from .DBqueriesUtils import *
 
 
-def GetCheckTasksTimersDrillings() -> list[DoneDrilling]:
-    return DBsession.query(DoneDrilling).filter(
-        DoneDrilling.end_datetime == None).join(
-        DoneDrilling.drilling).filter(
-        Drilling.time_limit != None).all()
+def GetActivityCheckTasksTimers(activity_type: ActivityType,
+                                activityTry_type: ActivityTryType) -> list[ActivityTryType]:
+    return (                                                                                                            #
+        DBsession                                                                                                       #
+        .query(activityTry_type)                                                                                        #
+        .filter(activityTry_type.end_datetime == None)                                                                  #
+        .join(activityTry_type.base)                                                                                    #
+        .filter(activity_type.time_limit != None)                                                                       #
+        .all()                                                                                                          #
+    )                                                                                                                   #
 
 
-def GetDoneDrillingById(doneDrillingId: int) -> DoneDrilling | None:
-    return DBsession.query(DoneDrilling).filter_by(id=doneDrillingId).one_or_none()
+def GetActivityTryById(activityTryId: int, activityTry_type: ActivityTryType) -> ActivityTryType | None:
+    return DBsession.query(activityTry_type).filter(activityTry_type.id == activityTryId).one_or_none()
 
 
-def UpdateDoneDrillingEndTime(doneDrillingId: int, endTime: datetime) -> None:
-    if doneDrilling := DBsession.query(DoneDrilling).filter_by(id=doneDrillingId).one_or_none():
-        doneDrilling.end_datetime = endTime
-        DBsession.add(doneDrilling)
+def UpdateActivityTryEndTime(activityTryId: int, endTime: datetime, activityTry_type: ActivityTryType) -> None:
+    if activityTry := DBsession.query(activityTry_type).filter(activityTry_type.id == activityTryId).one_or_none():
+        activityTry.end_datetime = endTime
+        DBsession.add(activityTry)
         DBsession.commit()
