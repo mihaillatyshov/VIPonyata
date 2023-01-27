@@ -19,6 +19,7 @@ import { useAppDispatch, useAppSelector } from "./redux/hooks";
 import { Button } from "react-bootstrap";
 import styleThemes from "./themes/StyleThemes.module.css";
 import { LogInfo } from "libs/Logger";
+import StudentHieroglyphPage from "components/Activities/Lexis/Hieroglyph/StudentHieroglyphPage";
 
 // eslint-disable-next-line
 const App = () => {
@@ -91,6 +92,10 @@ const App = () => {
                     <Route
                         path="/drilling/:id/*"
                         element={getRoute(<StudentDrillingPage />, <StudentDrillingPage />, <NavigateHome />)}
+                    />
+                    <Route
+                        path="/hieroglyph/:id/*"
+                        element={getRoute(<StudentHieroglyphPage />, <StudentHieroglyphPage />, <NavigateHome />)}
                     />
                     <Route path="/upload" element={<TestUpload />} />
                 </Routes>

@@ -7,7 +7,8 @@ import { selectLessons, setSelectedLesson } from "redux/slices/lessonsSlice";
 import StudentDrillingBubble from "components/Activities/Lexis/Drilling/StudentDrillingBubble";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { selectAssessment } from "redux/slices/assessmentSlice";
-import { selectHieroglyph } from "redux/slices/hieroglyphSlice";
+import { selectHieroglyph, setHieroglyphInfo } from "redux/slices/hieroglyphSlice";
+import StudentHieroglyphBubble from "components/Activities/Lexis/Hieroglyph/StudentHieroglyphBubble";
 
 const StudentLessonPage = () => {
     const { id } = useParams();
@@ -30,6 +31,10 @@ const StudentLessonPage = () => {
                     LogInfo("SetDrillingData");
                     dispatch(setDrillingInfo(data.items.drilling));
                 }
+                if (Object.keys(data.items.hieroglyph).length !== 0) {
+                    LogInfo("SetHieroglyphData");
+                    dispatch(setHieroglyphInfo(data.items.hieroglyph));
+                }
             },
             handleStatus: (res) => {
                 if (res.status === 404) navigate("/");
@@ -50,7 +55,7 @@ const StudentLessonPage = () => {
                 <div> {lesson.description} </div>
                 {drilling && drilling.info && <StudentDrillingBubble drilling={drilling} />}
                 {assessment && assessment.info && <StudentDrillingBubble drilling={drilling} />}
-                {hieroglyph && hieroglyph.info && <StudentDrillingBubble drilling={drilling} />}
+                {hieroglyph && hieroglyph.info && <StudentHieroglyphBubble hieroglyph={hieroglyph} />}
             </div>
         </div>
     );

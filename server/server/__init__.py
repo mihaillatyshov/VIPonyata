@@ -4,9 +4,9 @@ from flask import Blueprint, json
 from flask_login import LoginManager
 from sqlalchemy.ext.declarative import DeclarativeMeta
 
-from .db_models import CreateSession
+from .db_models import CreateSessionFromJsonFile
 
-DBsession = CreateSession("mysql+mysqlconnector", "mihail", "dbnfvbys5", "localhost", "japan")
+DBsession = CreateSessionFromJsonFile()
 login_manager = LoginManager()
 
 base_blueprint = Blueprint("base", __name__, url_prefix="/api")

@@ -2,8 +2,9 @@ import datetime
 from sqlalchemy import (Column, Date, DateTime, ForeignKey, Integer, String, Table, Text, Time, create_engine, JSON)
 from sqlalchemy.engine import URL
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
-from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.orm import relationship, sessionmaker, scoped_session
 from sqlalchemy.sql import func
+from .load_config import load_config
 
 Base = declarative_base()
 
@@ -286,9 +287,15 @@ def CreateSession(url, username, password, host, database):
         database=database,
     )
 
-    engine = create_engine(db_config, echo=True)
-    session = sessionmaker(bind=engine)()
+    engine = create_engine(db_config, pool_recycle=3600)
+    session_factory = sessionmaker(bind=engine)
     print("session created succesfully")
     Base.metadata.create_all(engine)
 
-    return session
+    Session = scoped_session(session_factory)
+    return Session
+
+
+def CreateSessionFromJsonFile():
+    config = load_config("config.json")["db"]
+    return CreateSession(config["url"], config["username"], config["password"], config["host"], config["database"])

@@ -9,8 +9,8 @@ DBsession = CreateSession("mysql+mysqlconnector", "mihail", "dbnfvbys5", "localh
 hashPwd = generate_password_hash("dbnfvbys")
 user = User(name="Mihail", nickname="lm", password=hashPwd, birthday=datetime.now(), level=User.Level.STUDENT)
 userTeacher = User(name="Mary", nickname="mary", password=hashPwd, birthday=datetime.now(), level=User.Level.TEACHER)
-DBsession.add_all([user, userTeacher])
-DBsession.commit()
+DBsession().add_all([user, userTeacher])
+DBsession().commit()
 
 if user:
     LogI(user)
@@ -20,8 +20,8 @@ if user:
         Dictionary(char_jp="家族", word_jp="かぞく", ru="семья", img="/img/dictionary/dsa.png"),
         Dictionary(char_jp="姉妹", word_jp="しまい", ru="сестры")
     ]
-    DBsession.add_all(dictionary)
-    DBsession.commit()
+    DBsession().add_all(dictionary)
+    DBsession().commit()
 
     size = 10
 
@@ -32,8 +32,8 @@ if user:
     courses[0].users = [user]
     courses[1].users = [user]
     courses[2].users = [user]
-    DBsession.add_all(courses)
-    DBsession.commit()
+    DBsession().add_all(courses)
+    DBsession().commit()
 
     for course in courses:
         lessons = [
@@ -53,8 +53,8 @@ if user:
             lessons[1].users = [user]
             lessons[2].users = [user]
             lessons[3].users = [user]
-        DBsession.add_all(lessons)
-        DBsession.commit()
+        DBsession().add_all(lessons)
+        DBsession().commit()
 
         drillings = [
             Drilling(description="Drilling with limit",
@@ -69,8 +69,8 @@ if user:
                      tasks="findpair,scramble",
                      time_limit=time(second=20)),
         ]
-        DBsession.add_all(drillings)
-        DBsession.commit()
+        DBsession().add_all(drillings)
+        DBsession().commit()
 
         d_cards = [
             DrillingCard(sentence="わたしは家族が好きです。",
@@ -86,8 +86,8 @@ if user:
                          base_id=drillings[1].id,
                          dictionary_id=dictionary[0].id),
         ]
-        DBsession.add_all(d_cards)
-        DBsession.commit()
+        DBsession().add_all(d_cards)
+        DBsession().commit()
 
         hieroglyps = [
             Hieroglyph(description="Hieroglyph with limit",
@@ -103,8 +103,8 @@ if user:
                        time_limit=time(second=20)),
         ]
 
-        DBsession.add_all(hieroglyps)
-        DBsession.commit()
+        DBsession().add_all(hieroglyps)
+        DBsession().commit()
 
         h_cards = [
             HieroglyphCard(sentence="わたしは家族が好きです。",
@@ -120,7 +120,7 @@ if user:
                            base_id=hieroglyps[1].id,
                            dictionary_id=dictionary[0].id),
         ]
-        DBsession.add_all(h_cards)
-        DBsession.commit()
+        DBsession().add_all(h_cards)
+        DBsession().commit()
 
     LogI("Test data created successfuly")

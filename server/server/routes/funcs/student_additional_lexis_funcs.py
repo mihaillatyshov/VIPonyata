@@ -3,44 +3,14 @@ import typing
 
 from ...ApiExceptions import InvalidAPIUsage
 from ...queries import StudentDBqueries as DBQS
-from ...db_models import Drilling, DrillingTry, Hieroglyph, HieroglyphTry
+from ...db_models import Drilling, DrillingTry, Hieroglyph, HieroglyphTry, LexisType
 
 
-class LexisTypeEnum:
-    DRILLING = 0
-    HIEROGLYPH = 1
-
-
-class LexisTaskName:
-    CARD = "card"
-    FINDPAIR = "findpair"
-    SCRAMBLE = "scramble"
-    TRANSLATE = "translate"
-    SPACE = "space"
-
-
-LexisTaskNameList = [
-    value for name, value in vars(LexisTaskName).items()
-    if not callable(getattr(LexisTaskName, name)) and not name.startswith("__")
-]
-
-
-def GetLexisData(lexisType: int) -> tuple[DBQS.LexisQueries, str]:
-    if lexisType == LexisTypeEnum.DRILLING:
+def GetLexisData(lexis_type: LexisType) -> tuple[DBQS.LexisQueries, str]:
+    if lexis_type == Drilling:
         return DBQS.DrillingQueries, "drilling"
-
-    if lexisType == LexisTypeEnum.HIEROGLYPH:
+    if lexis_type == Hieroglyph:
         return DBQS.HieroglyphQueries, "hieroglyph"
-
-    raise InvalidAPIUsage("Check server GetLexisData()", 500)
-
-
-def GetLexisTypes(lexisType: int) -> tuple[Drilling, DrillingTry] | tuple[Hieroglyph, HieroglyphTry]:
-    if lexisType == LexisTypeEnum.DRILLING:
-        return Drilling, DrillingTry
-
-    if lexisType == LexisTypeEnum.HIEROGLYPH:
-        return Hieroglyph, HieroglyphTry
 
     raise InvalidAPIUsage("Check server GetLexisData()", 500)
 
@@ -114,10 +84,10 @@ def CreateSpaceFromChars(wordsRU: list[str], wordsJP: list[str], charsJP: list[s
     return __getSpaceFromArray(wordsRU, charsJP)
 
 
-def CreateSpace(wordsRU: list[str], wordsJP: list[str], charsJP: list[str], lexisType: int) -> dict:
-    if lexisType == LexisTypeEnum.DRILLING:
+def CreateSpace(wordsRU: list[str], wordsJP: list[str], charsJP: list[str], lexis_type: LexisType) -> dict:
+    if lexis_type == Drilling:
         return CreateSpaceFromWords(wordsRU, wordsJP, charsJP)
-    if lexisType == LexisTypeEnum.HIEROGLYPH:
+    if lexis_type == Hieroglyph:
         return CreateSpaceFromChars(wordsRU, wordsJP, charsJP)
 
     raise InvalidAPIUsage("Check server CreateSpace()", 500)

@@ -43,7 +43,7 @@ def fileUpload():
 @routes_bp.route("/test", methods=["GET"])
 def testSomeThings():
     raise InvalidAPIUsage("Test Error", 400, {"testdata": 10, "other": time(second=10)})
-    courses = DBsession.query(Course).all()
+    courses = DBsession().query(Course).all()
     return {"courses": courses, "datetime": [time(1, 1, 1), timedelta(1, 1, 1), datetime(1, 1, 1, 1, 1, 1)]}
 
 
@@ -68,28 +68,60 @@ def getLessonActivities(id):                                                    
 @routes_bp.route("/drilling/<id>/newtry", methods=["POST"])
 @login_required
 def startNewDrillingTry(id):
-    return UserSelectorFunction(None, student_funcs.DrillingFuncs.StartNewLexisTry, lexisId=id)
+    return UserSelectorFunction(None, student_funcs.DrillingFuncs.StartNewTry, activityId=id)
 
 
 @routes_bp.route("/drilling/<id>/continuetry", methods=["POST"])
 @login_required
 def continueDrillingTry(id):
-    return UserSelectorFunction(None, student_funcs.DrillingFuncs.ContinueLexisTry, lexisId=id)
+    return UserSelectorFunction(None, student_funcs.DrillingFuncs.ContinueTry, activityId=id)
 
 
 @routes_bp.route("/drilling/<id>/endtry", methods=["POST"])
 @login_required
 def endDrillingTry(id):
-    return UserSelectorFunction(None, student_funcs.DrillingFuncs.EndLexisTry, lexisId=id)
+    return UserSelectorFunction(None, student_funcs.DrillingFuncs.EndTry, activityId=id)
 
 
 @routes_bp.route("/drilling/<id>/newdonetask", methods=["POST"])
 @login_required
 def addDrillingNewDoneTasks(id):
-    return UserSelectorFunction(None, student_funcs.DrillingFuncs.AddLexisNewDoneTasks, lexisId=id)
+    return UserSelectorFunction(None, student_funcs.DrillingFuncs.AddNewDoneTasks, activityId=id)
 
 
 @routes_bp.route("/drilling/<id>", methods=["GET"])
 @login_required
 def getDrillingById(id):
-    return UserSelectorFunction(teacher_funcs.getDrillingById, student_funcs.DrillingFuncs.GetLexisById, lexisId=id)
+    return UserSelectorFunction(teacher_funcs.DrillingFuncs.GetById, student_funcs.DrillingFuncs.GetById, activityId=id)
+
+
+@routes_bp.route("/hieroglyph/<id>/newtry", methods=["POST"])
+@login_required
+def startNewHieroglyphTry(id):
+    return UserSelectorFunction(None, student_funcs.HieroglyphFuncs.StartNewTry, activityId=id)
+
+
+@routes_bp.route("/hieroglyph/<id>/continuetry", methods=["POST"])
+@login_required
+def continueHieroglyphTry(id):
+    return UserSelectorFunction(None, student_funcs.HieroglyphFuncs.ContinueTry, activityId=id)
+
+
+@routes_bp.route("/hieroglyph/<id>/endtry", methods=["POST"])
+@login_required
+def endHieroglyphTry(id):
+    return UserSelectorFunction(None, student_funcs.HieroglyphFuncs.EndTry, activityId=id)
+
+
+@routes_bp.route("/hieroglyph/<id>/newdonetask", methods=["POST"])
+@login_required
+def addHieroglyphNewDoneTasks(id):
+    return UserSelectorFunction(None, student_funcs.HieroglyphFuncs.AddNewDoneTasks, activityId=id)
+
+
+@routes_bp.route("/hieroglyph/<id>", methods=["GET"])
+@login_required
+def getHieroglyphById(id):
+    return UserSelectorFunction(teacher_funcs.HieroglyphFuncs.GetById,
+                                student_funcs.HieroglyphFuncs.GetById,
+                                activityId=id)

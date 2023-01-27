@@ -2,48 +2,17 @@ from flask import request
 from ...ApiExceptions import InvalidAPIUsage, InvalidRequestJson
 from ..routes_utils import GetCurrentUserId
 from ...queries import StudentDBqueries as DBQS
-from .student_additional_lexis_funcs import (CreateFindPair, CreateScramble, CreateSpace, CreateTranslate, GetLexisData,
-                                             LexisTypeEnum, LexisTaskName, LexisTaskNameList)
+from .student_additional_lexis_funcs import (CreateFindPair, CreateScramble, CreateSpace, CreateTranslate, GetLexisData)
+from .additional_lexis_funcs import LexisTaskName, LexisTaskNameList
 from ..routes_utils import ActivityEndTimeHandler, GetCurrentUserId, StartActivityTimerLimit
+from ...db_models import LexisType, Drilling, Hieroglyph
+from .student_activity_funcs import ActivityFuncs
 
 
-class LexisFuncs:
-    lexisQueries: DBQS.LexisQueries
-    lexisName: str
-    lexisType: int
+class LexisFuncs(ActivityFuncs):
+    _activityQueries: DBQS.LexisQueries
 
-    def __init__(self, lexisType: int):
-        self.lexisQueries, self.lexisName = GetLexisData(lexisType)
-        self.lexisType = lexisType
-
-    def StartNewLexisTry(self, lexisId: int):
-        lexis = self.lexisQueries.GetLexisById(lexisId, GetCurrentUserId())
-        lexisTries = self.lexisQueries.GetLexisTriesByLexisId(lexisId, GetCurrentUserId())
-
-        if lexisTries and lexisTries[-1].end_datetime == None:
-            return {"message": "Already Exists"}, 409
-
-        newLexisTry = self.lexisQueries.AddNewLexisTry(len(lexisTries) + 1, lexisId, GetCurrentUserId())
-
-        if lexis.time_limit and newLexisTry:
-            StartActivityTimerLimit(                                                                                    #
-                lexis.time_limit__ToTimedelta(),                                                                        #
-                newLexisTry.id,                                                                                         # type: ignore
-                self.lexisQueries.lexisTry_type)                                                                        #
-        return {"message": "Successfully created"}
-
-    def ContinueLexisTry(self, lexisId: int):
-        self.lexisQueries.GetUnfinishedLexisTryByLexisId(lexisId, GetCurrentUserId())
-        return {"message": "Successfully continue"}
-
-    def EndLexisTry(self, lexisId: int):
-        lexisTry = self.lexisQueries.GetUnfinishedLexisTryByLexisId(lexisId, GetCurrentUserId())
-        ActivityEndTimeHandler(                                                                                         #
-            lexisTry.id,                                                                                                # type: ignore
-            self.lexisQueries.lexisTry_type)                                                                            #
-        return {"message": "Successfully closed"}
-
-    def AddLexisNewDoneTasks(self, lexisId: int):
+    def AddNewDoneTasks(self, activityId: int):
         if not request.json:
             raise InvalidRequestJson()
 
@@ -51,7 +20,7 @@ class LexisFuncs:
         if not (inDoneTasks and isinstance(inDoneTasks, dict)):
             raise InvalidAPIUsage("Wrong data format", 403)
 
-        lexisTry = self.lexisQueries.GetUnfinishedLexisTryByLexisId(lexisId, GetCurrentUserId())
+        lexisTry = self._activityQueries.GetUnfinishedTryByActivityId(activityId, GetCurrentUserId())
         doneTasks = lexisTry.getDoneTasksDict()
         for name, value in inDoneTasks.items():
             try:
@@ -61,19 +30,19 @@ class LexisFuncs:
             if isinstance(name, str) and name in LexisTaskNameList:
                 doneTasks[name] = value
         doneTasksStr = ",".join([f"{name}:{value}" for name, value in doneTasks.items()])
-        self.lexisQueries.SetDoneTasksInLexisTry(                                                                       #
+        self._activityQueries.SetDoneTasksInTry(                                                                        #
             lexisTry.id,                                                                                                # type: ignore
             doneTasksStr)                                                                                               #
         return {"message": "Tasks updated!"}
 
-    def GetLexisById(self, lexisId: int):
-        lexis = self.lexisQueries.GetLexisById(lexisId, GetCurrentUserId())
-        lexis.now_try = self.lexisQueries.GetUnfinishedLexisTryByLexisId(lexisId, GetCurrentUserId())
+    def GetById(self, activityId: int):
+        lexis = self._activityQueries.GetById(activityId, GetCurrentUserId())
+        lexis.now_try = self._activityQueries.GetUnfinishedTryByActivityId(activityId, GetCurrentUserId())
 
         tasks = {}
         tasks[LexisTaskName.CARD] = lexis.cards
         if not tasks[LexisTaskName.CARD]:
-            raise InvalidAPIUsage("No cards in drilling", 403)
+            raise InvalidAPIUsage("No cards in lexis", 403)
 
         wordsRU, wordsJP, charsJP = lexis.getCardWords()
         tasksNames = lexis.getTasksNames()
@@ -88,10 +57,10 @@ class LexisFuncs:
             tasks[LexisTaskName.TRANSLATE] = CreateTranslate(wordsRU, wordsJP, charsJP)
 
         if LexisTaskName.SPACE in tasksNames:
-            tasks[LexisTaskName.SPACE] = CreateSpace(wordsRU, wordsJP, charsJP, self.lexisType)
+            tasks[LexisTaskName.SPACE] = CreateSpace(wordsRU, wordsJP, charsJP, self._activityQueries._activity_type)
 
-        return {self.lexisName: lexis, "items": tasks}
+        return {self._activityName: lexis, "items": tasks}
 
 
-DrillingFuncs = LexisFuncs(LexisTypeEnum.DRILLING)
-HieroglyphFuncs = LexisFuncs(LexisTypeEnum.HIEROGLYPH)
+DrillingFuncs = LexisFuncs(Drilling)
+HieroglyphFuncs = LexisFuncs(Hieroglyph)

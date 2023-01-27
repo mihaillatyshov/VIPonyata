@@ -9,7 +9,7 @@ import ActivityBouble from "./ActivityBouble";
 type StudentActivityBubbleProps = {
     info: any;
     title: string;
-    name: string;
+    name: "drilling" | "hieroglyph" | "assessment";
     onDeadline: () => void;
 };
 

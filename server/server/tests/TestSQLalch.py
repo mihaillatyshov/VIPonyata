@@ -8,7 +8,7 @@ from ..log_lib import LogI
 
 DBsession = CreateSession("mysql+mysqlconnector", "mihail", "dbnfvbys5", "localhost", "japan")
 
-courses = DBsession.query(Course).all()
+courses = DBsession().query(Course).all()
 
 LogI("1: ", courses)
 LogI("1: ", json.dumps(courses))

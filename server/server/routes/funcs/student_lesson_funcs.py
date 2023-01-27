@@ -9,12 +9,18 @@ def getLessonsByCourseId(courseId: int):
 
 def getLessonActivities(lessonId: int):
     lesson = DBQS.GetLessonById(lessonId, GetCurrentUserId())
-    if dril := DBQS.DrillingQueries.GetLexisByLessonId(lessonId, GetCurrentUserId()):
-        dril.tries = DBQS.DrillingQueries.GetLexisTriesByLexisId(dril.id, GetCurrentUserId())                           # type: ignore
+    if dril := DBQS.DrillingQueries.GetByLessonId(lessonId, GetCurrentUserId()):
+        dril.tries = DBQS.DrillingQueries.GetTriesByActivityId(                                                         #
+            dril.id,                                                                                                    # type: ignore
+            GetCurrentUserId()                                                                                          #
+        )                                                                                                               #
 
     # if assessment := GetAssessmentByLessonId(id, GetCurrentUserId()):
 
-    if hier := DBQS.HieroglyphQueries.GetLexisByLessonId(lessonId, GetCurrentUserId()):
-        hier.tries = DBQS.HieroglyphQueries.GetLexisTriesByLexisId(hier.id, GetCurrentUserId())                         # type: ignore
+    if hier := DBQS.HieroglyphQueries.GetByLessonId(lessonId, GetCurrentUserId()):
+        hier.tries = DBQS.HieroglyphQueries.GetTriesByActivityId(                                                       #
+            hier.id,                                                                                                    # type: ignore
+            GetCurrentUserId()                                                                                          #
+        )                                                                                                               #
 
     return {"lesson": lesson, "items": {"drilling": dril, "assessment": {}, "hieroglyph": hier}}
