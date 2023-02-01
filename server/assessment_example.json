@@ -1,0 +1,73 @@
+{
+    "tasks": [
+        {
+            "name": "text",
+            "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        },
+        {
+            "name": "test_single",
+            "question": "Ansewer to this question single",
+            "answers": ["False 0", "False 1", "True 2", "False 3"],
+            "meta": { "answers": [2] }
+        },
+        {
+            "name": "test_multi",
+            "question": "Ansewer to this question multi",
+            "answers": ["False 0", "False 1", "True 2", "True 3"],
+            "meta": { "answers": [2, 3] }
+        },
+        {
+            "name": "find_pair",
+            "first": ["f1", "f2", "f3", "f4", "f5", "f6", "f7"],
+            "second": ["s1", "s2", "s3", "s4", "s5", "s6", "s7"]
+        },
+        {
+            "name": "create_sentence",
+            "parts": ["Cre1ate", "th2is", "sent3ence"]
+        },
+        {
+            "name": "fill_spaces_exists",
+            "separates": ["Exist. Fill word after (word):", "and", ": before this (char)"],
+            "answers": ["word", "char"]
+        },
+        {
+            "name": "fill_spaces_by_hand",
+            "separates": ["By Hand. Fill word after (word):", "and", ": before this (char)"],
+            "meta": { "answers": ["word", "char"] }
+        },
+        {
+            "name": "find_pair",
+            "ru": ["Ru1", "Ru2", "Ru3"],
+            "jp": ["Jp1", "Jp2", "Jp3"]
+        },
+        {
+            "name": "classification",
+            "columns": [
+                {
+                    "title": "Col1",
+                    "data": ["Ansewer 1 (Col1)", "Ansewer 2 (Col1)", "Ansewer 3 (Col1)"]
+                },
+                {
+                    "title": "Col2",
+                    "data": ["Ansewer 1 (Col2)", "Ansewer 2 (Col2)", "Ansewer 3 (Col2)"]
+                },
+                {
+                    "title": "Col3",
+                    "data": ["Ansewer 1 (Col3)", "Ansewer 2 (Col3)", "Ansewer 3 (Col3)"]
+                }
+            ]
+        },
+        {
+            "name": "sentence_order",
+            "sentences": ["First sentence", "Second sentence", "Third sentence", "Fourth sentence"]
+        },
+        {
+            "name": "open_question",
+            "question": "Ansewer to this question pls"
+        },
+        {
+            "name": "img",
+            "url": "/img/Activity/Assessment/test.png"
+        }
+    ]
+}

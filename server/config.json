@@ -1,9 +1,0 @@
-{
-    "db": {
-        "url": "mysql+mysqlconnector",
-        "username" : "mihail", 
-        "password": "dbnfvbys5", 
-        "host": "localhost", 
-        "database": "japan"
-    }
-}

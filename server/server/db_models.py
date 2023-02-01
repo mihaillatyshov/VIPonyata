@@ -1,5 +1,5 @@
 import datetime
-from sqlalchemy import (Column, Date, DateTime, ForeignKey, Integer, String, Table, Text, Time, create_engine, JSON)
+from sqlalchemy import (Column, Date, DateTime, ForeignKey, Integer, String, Table, Text, Time, create_engine)
 from sqlalchemy.engine import URL
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import relationship, sessionmaker, scoped_session
@@ -15,6 +15,12 @@ a_users_courses = Table("users_courses", Base.metadata, Column('id', Integer, pr
 a_users_lessons = Table("users_lessons", Base.metadata, Column('id', Integer, primary_key=True),
                         Column('user_id', Integer, ForeignKey('users.id')),
                         Column('lesson_id', Integer, ForeignKey('lessons.id')))
+
+# class Img(Base):
+#     __tablename__ = "images"
+#     id = Column(Integer, primary_key=True)
+#     path = Column(String(1024), nullable=False, unique=True)
+#     name = Column(String(128))
 
 
 class User(Base):
@@ -263,6 +269,8 @@ class HieroglyphTry(AbstractLexisTry):
 
 class Assessment(AbstractActivity):
     __tablename__ = "assessments"
+
+    tasks = Column(Text, nullable=False)
 
 
 class AssessmentTry(AbstractActivityTry):

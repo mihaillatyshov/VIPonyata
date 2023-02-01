@@ -1,0 +1,9 @@
+{
+    "db": {
+        "url": "mysql+mysqlconnector",
+        "username": "username",
+        "password": "password",
+        "host": "localhost",
+        "database": "database_name"
+    }
+}

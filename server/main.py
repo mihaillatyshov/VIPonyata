@@ -1,7 +1,36 @@
+import logging
+import click
+
+from random import choice
+
+import os
+import datetime
+import time
+import colors
+from rfc3339 import rfc3339
+from flask import g, request
+
 from flask_cors import CORS
 
-from server.start_server import createApp
 from server.ApiExceptions import InvalidAPIUsage
+from server.start_server import createApp
+
+if not os.path.isdir("./log"):
+    os.mkdir("./log")
+logging.basicConfig(filename=f'./log/{datetime.datetime.now()}.log',
+                    level=logging.DEBUG,
+                    format='%(asctime)-15s %(name)-5s %(levelname)-8s %(message)s')
+
+
+class RemoveColorFilter(logging.Filter):
+    def filter(self, record):
+        if record and record.msg and isinstance(record.msg, str):
+            record.msg = click.unstyle(record.msg)
+        return True
+
+
+remove_color_filter = RemoveColorFilter()
+logging.getLogger("werkzeug").addFilter(remove_color_filter)
 
 app = createApp()
 CORS(app)

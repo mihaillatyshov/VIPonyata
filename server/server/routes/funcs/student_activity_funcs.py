@@ -1,11 +1,7 @@
-from flask import request
-from ...ApiExceptions import InvalidAPIUsage, InvalidRequestJson
-from ..routes_utils import GetCurrentUserId
+from ...ApiExceptions import InvalidAPIUsage
+from ...db_models import ActivityType, Assessment, Drilling, Hieroglyph
 from ...queries import StudentDBqueries as DBQS
-from .student_additional_lexis_funcs import (CreateFindPair, CreateScramble, CreateSpace, CreateTranslate, GetLexisData)
-from .additional_lexis_funcs import LexisTaskName, LexisTaskNameList
-from ..routes_utils import ActivityEndTimeHandler, GetCurrentUserId, StartActivityTimerLimit
-from ...db_models import ActivityType, Drilling, Hieroglyph, Assessment
+from ..routes_utils import (ActivityEndTimeHandler, GetCurrentUserId, StartActivityTimerLimit)
 
 
 def GetActivityData(activity_type: ActivityType) -> tuple[DBQS.ActivityQueries, str]:

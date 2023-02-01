@@ -12,9 +12,10 @@ const TestUpload = () => {
 
         if (filepath === undefined) return;
 
-        const data = new FormData();
+        let data = new FormData();
         data.append("file", filepath);
-        console.log(data);
+        //data.set("test_name", "my test message");
+        console.log("Data to server(FormData): ", data);
 
         fetch("/api/upload", {
             method: "POST",
@@ -22,8 +23,8 @@ const TestUpload = () => {
         }).then((response) => {
             const promise = response.json();
             promise.then((body) => {
-                setImageURL(body);
-                console.log("post", body);
+                setImageURL(body.meta.filename);
+                console.log("Post response", body);
             });
         });
 

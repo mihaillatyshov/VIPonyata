@@ -14,11 +14,8 @@ auth_bp = Blueprint("auth", __name__)
 
 @login_manager.user_loader
 def load_user(user_id):
-    print("GetUserFromDB")
     if user_id is not None:
-        print("user id not None")
         return FlaskUser().FromDB(user_id)
-    print("user id is None")
     return None
 
 

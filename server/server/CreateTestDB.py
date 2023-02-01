@@ -1,7 +1,7 @@
 from datetime import datetime, time
 
-from db_models import Course, CreateSession, Dictionary, Drilling, DrillingCard, Hieroglyph, HieroglyphCard, Lesson, User
-from log_lib import LogI
+from .db_models import Course, CreateSession, Dictionary, Drilling, DrillingCard, Hieroglyph, HieroglyphCard, Lesson, User
+from .log_lib import LogI
 from werkzeug.security import generate_password_hash
 
 DBsession = CreateSession("mysql+mysqlconnector", "mihail", "dbnfvbys5", "localhost", "japan")

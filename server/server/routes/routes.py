@@ -1,7 +1,8 @@
 import os
+import hashlib
 from datetime import datetime, time, timedelta
 
-from flask import Blueprint, jsonify, request, session
+from flask import Blueprint, request
 from flask_login import login_required
 from werkzeug.utils import secure_filename
 
@@ -11,33 +12,51 @@ from ..db_models import Course
 from .funcs import funcs_student as student_funcs
 from .funcs import funcs_teacher as teacher_funcs
 from .routes_utils import UserSelectorFunction
+from ..log_lib import LogI
 
 routes_bp = Blueprint("routes", __name__)
 
-UPLOAD_FOLDER = "C:/Coding/Web/VIPonyata/client/public"
+#UPLOAD_FOLDER = "C:/Coding/Web/VIPonyata/client/public"
+UPLOAD_FOLDER = "/home/lm/coding/WEB/VIPonyata/client/public"
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+
+def get_file_extention(filename):
+    return filename.rsplit('.', 1)[1].lower()
+
+
+def allowed_file(filename):
+    return '.' in filename and get_file_extention(filename) in ALLOWED_EXTENSIONS
 
 
 @routes_bp.route("/upload", methods=["POST"])
 def fileUpload():
-    target = os.path.join(UPLOAD_FOLDER, "img")
+    relative_folder = "img/dictionary"
+    target = os.path.join(UPLOAD_FOLDER, relative_folder)
     if not os.path.isdir(target):
         os.mkdir(target)
-    print("==========================================================")
-    print("welcome to upload`")
-    print(len(request.files))
-    if (len(request.files) == 0):
-        return jsonify("img/Test.png")
-    file = request.files["file"]
-    if file and file.filename:
-        filename = secure_filename(file.filename)
-        destination = "/".join([target, filename])
-        file.save(destination)
-        session["uploadFilePath"] = destination
-        response = "img/" + filename
-        print("==========================================================")
-        return jsonify(response)
 
-    return "Error"
+    LogI("==========================================================")
+    LogI("Welcome to upload")
+    LogI("FilesCount: ", len(request.files))
+    LogI("Request files: ", request.files)
+    if (len(request.files) == 0):
+        return {"message": "Error, No files"}, 400
+    file = request.files["file"]
+    if file and file.filename and allowed_file(file.filename):
+        filename = secure_filename(hashlib.sha512(datetime.now().strftime("%Y%m%d%H%M%S").encode()).hexdigest())
+        filename += "." + get_file_extention(file.filename)
+
+        destination = "/".join([target, filename])
+        if not os.path.exists(destination):
+            file.save(destination)
+        #session["uploadFilePath"] = destination
+        response = relative_folder + "/" + filename
+        LogI("==========================================================")
+        return {"meta": {"filename": response}}
+
+    return {"message": "Error"}, 500
 
 
 @routes_bp.route("/test", methods=["GET"])

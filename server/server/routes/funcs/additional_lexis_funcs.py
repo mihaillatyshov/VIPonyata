@@ -2,11 +2,6 @@ from ...ApiExceptions import InvalidAPIUsage
 from ...db_models import Drilling, DrillingTry, Hieroglyph, HieroglyphTry, LexisType
 
 
-class LexisTypeEnum:
-    DRILLING = 0
-    HIEROGLYPH = 1
-
-
 class LexisTaskName:
     CARD = "card"
     FINDPAIR = "findpair"
