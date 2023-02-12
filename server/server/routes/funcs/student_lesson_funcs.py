@@ -15,7 +15,11 @@ def getLessonActivities(lessonId: int):
             GetCurrentUserId()                                                                                          #
         )                                                                                                               #
 
-    # if assessment := GetAssessmentByLessonId(id, GetCurrentUserId()):
+    if asse := DBQS.AssessmentQueries.GetByLessonId(lessonId, GetCurrentUserId()):
+        asse.tries = DBQS.AssessmentQueries.GetTriesByActivityId(                                                       #
+            asse.id,                                                                                                    # type: ignore
+            GetCurrentUserId()                                                                                          #
+        )                                                                                                               #
 
     if hier := DBQS.HieroglyphQueries.GetByLessonId(lessonId, GetCurrentUserId()):
         hier.tries = DBQS.HieroglyphQueries.GetTriesByActivityId(                                                       #
@@ -23,4 +27,4 @@ def getLessonActivities(lessonId: int):
             GetCurrentUserId()                                                                                          #
         )                                                                                                               #
 
-    return {"lesson": lesson, "items": {"drilling": dril, "assessment": {}, "hieroglyph": hier}}
+    return {"lesson": lesson, "items": {"drilling": dril, "assessment": asse, "hieroglyph": hier}}

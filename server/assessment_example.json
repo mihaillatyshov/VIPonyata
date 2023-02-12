@@ -7,14 +7,14 @@
         {
             "name": "test_single",
             "question": "Ansewer to this question single",
-            "answers": ["False 0", "False 1", "True 2", "False 3"],
-            "meta": { "answers": [2] }
+            "options": ["False 0", "False 1", "True 2", "False 3"],
+            "answer": 2
         },
         {
             "name": "test_multi",
             "question": "Ansewer to this question multi",
-            "answers": ["False 0", "False 1", "True 2", "True 3"],
-            "meta": { "answers": [2, 3] }
+            "options": ["False 0", "False 1", "True 2", "True 3"],
+            "answers": [2, 3]
         },
         {
             "name": "find_pair",
@@ -33,12 +33,7 @@
         {
             "name": "fill_spaces_by_hand",
             "separates": ["By Hand. Fill word after (word):", "and", ": before this (char)"],
-            "meta": { "answers": ["word", "char"] }
-        },
-        {
-            "name": "find_pair",
-            "ru": ["Ru1", "Ru2", "Ru3"],
-            "jp": ["Jp1", "Jp2", "Jp3"]
+            "answers": ["word", "char"]
         },
         {
             "name": "classification",

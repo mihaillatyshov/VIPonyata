@@ -36,9 +36,6 @@ export const hieroglyphSlice = createSlice({
         setHieroglyphSelectedItemField: (state, action) => {
             for (const key in action.payload) state.selectedItem[key] = action.payload[key];
         },
-        addHieroglyphDoneTash: (state, action) => {
-            state.info.done_tasks[action.payload.name] = action.payload.percent;
-        },
     },
 });
 

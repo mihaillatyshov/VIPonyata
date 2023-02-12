@@ -131,6 +131,17 @@ class AbstractActivity(Base):
                                   seconds=self.time_limit.second,
                                   microseconds=self.time_limit.microsecond)
 
+    def calcDeadline(self) -> datetime.datetime | None:
+        if not self.time_limit:
+            return None
+
+        if self.now_try:
+            return self.now_try.start_datetime + self.time_limit__ToTimedelta()
+        if self.tries and not self.tries[-1].end_datetime:
+            return self.tries[-1].start_datetime + self.time_limit__ToTimedelta()
+
+        return None
+
     def __json__(self):
         data = {"tries": self.tries, "deadline": self.calcDeadline(), "try": self.now_try}
         for column in self.__table__.columns:
@@ -155,17 +166,6 @@ class AbstractLexis(AbstractActivity):
             charsJP.append(card.dictionary.char_jp)
 
         return wordsRU, wordsJP, charsJP
-
-    def calcDeadline(self) -> datetime.datetime | None:
-        if not self.time_limit:
-            return None
-
-        if self.now_try:
-            return self.now_try.start_datetime + self.time_limit__ToTimedelta()
-        if self.tries and not self.tries[-1].end_datetime:
-            return self.tries[-1].start_datetime + self.time_limit__ToTimedelta()
-
-        return None
 
 
 class AbstractLexisCard(Base):
@@ -272,12 +272,18 @@ class Assessment(AbstractActivity):
 
     tasks = Column(Text, nullable=False)
 
+    def __json__(self):
+        data = super().__json__()
+        del data["tasks"]
+        return data
+
 
 class AssessmentTry(AbstractActivityTry):
     __tablename__ = "assessment_tries"
 
     base_id = Column(Integer, ForeignKey("assessments.id"))
     base = relationship("Assessment")
+    done_tasks = Column(Text, nullable=False)
 
 
 LexisType = Drilling | Hieroglyph
@@ -295,7 +301,7 @@ def CreateSession(url, username, password, host, database):
         database=database,
     )
 
-    engine = create_engine(db_config, pool_recycle=3600)
+    engine = create_engine(db_config, pool_recycle=3600, pool_size=20, max_overflow=0)
     session_factory = sessionmaker(bind=engine)
     print("session created succesfully")
     Base.metadata.create_all(engine)

@@ -2,9 +2,9 @@ from flask import request
 from ...ApiExceptions import InvalidAPIUsage, InvalidRequestJson
 from ..routes_utils import GetCurrentUserId
 from ...queries import StudentDBqueries as DBQS
-from .student_additional_lexis_funcs import (CreateFindPair, CreateScramble, CreateSpace, CreateTranslate, GetLexisData)
+from .student_additional_lexis_funcs import (CreateFindPair, CreateScramble, CreateSpace, CreateTranslate)
 from .additional_lexis_funcs import LexisTaskName, LexisTaskNameList
-from ..routes_utils import ActivityEndTimeHandler, GetCurrentUserId, StartActivityTimerLimit
+from ..routes_utils import GetCurrentUserId
 from ...db_models import LexisType, Drilling, Hieroglyph
 from .student_activity_funcs import ActivityFuncs
 

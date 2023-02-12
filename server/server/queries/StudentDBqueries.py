@@ -1,8 +1,8 @@
 from datetime import datetime
 
 from ..ApiExceptions import InvalidAPIUsage, CourseNotFoundException, LessonNotFoundException, ActivityNotFoundException
-from ..db_models import (User, Course, Lesson, Drilling, DrillingTry, Hieroglyph, HieroglyphTry, ActivityType,
-                         ActivityTryType, LexisType, LexisTryType)
+from ..db_models import (User, Course, Lesson, Drilling, DrillingTry, Hieroglyph, HieroglyphTry, Assessment,
+                         AssessmentTry, ActivityType, ActivityTryType)
 from ..log_lib import LogI
 from .DBqueriesUtils import DBsession
 
@@ -177,7 +177,22 @@ class LexisQueries(ActivityQueries):
 DrillingQueries = LexisQueries(Drilling, DrillingTry)
 HieroglyphQueries = LexisQueries(Hieroglyph, HieroglyphTry)
 
+
 #########################################################################################################################
 ################ Assessment #############################################################################################
 #########################################################################################################################
-AssessmentQueries = ActivityQueries(Drilling, DrillingTry)
+class AssessmentQueriesClass(ActivityQueries):
+    def AddNewTry(self, tryNumber: int, activityId: int, userId: int, tasks) -> ActivityTryType | None:
+        LogI(f"Add New Activity Try {self._activityTry_type.__name__}:", tryNumber, activityId, userId)
+        #activity = DBsession().query(self._activity_type).filter(self._activity_type.id == activityId).one_or_none()
+        newActivityTry = self._activityTry_type(try_number=tryNumber,
+                                                start_datetime=datetime.now(),
+                                                user_id=userId,
+                                                done_tasks=tasks,
+                                                base_id=activityId)
+        DBsession().add(newActivityTry)
+        DBsession().commit()
+        return newActivityTry
+
+
+AssessmentQueries = AssessmentQueriesClass(Assessment, AssessmentTry)

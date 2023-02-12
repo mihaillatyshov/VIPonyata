@@ -1,6 +1,6 @@
 from datetime import datetime, time
 
-from .db_models import Course, CreateSession, Dictionary, Drilling, DrillingCard, Hieroglyph, HieroglyphCard, Lesson, User
+from .db_models import Course, CreateSession, Dictionary, Drilling, DrillingCard, Hieroglyph, HieroglyphCard, Assessment, Lesson, User
 from .log_lib import LogI
 from werkzeug.security import generate_password_hash
 
@@ -122,5 +122,18 @@ if user:
         ]
         DBsession().add_all(h_cards)
         DBsession().commit()
+
+        with open("assessment_example.json", "r") as file:
+            data = file.read()
+            LogI(data)
+            LogI(type(data))
+            assessments = [
+                Assessment(description="Assessment with limit",
+                           lesson_id=lessons[0].id,
+                           tasks=data,
+                           time_limit=time(minute=10)),
+            ]
+            DBsession().add_all(assessments)
+            DBsession().commit()
 
     LogI("Test data created successfuly")

@@ -68,10 +68,12 @@ const StudentLexisFindPair = ({ name, inData, goToNextTaskCallback }: StudentLex
     };
 
     const getCardClassName = (id: number, type: string) => {
-        if (isInDoneFields(id, type)) return "col-auto findPairCorrect";
-        if (item.selectedField.type === type && item.selectedField.id === id) return "col-auto findPairSelected";
+        const defaultClassName = "col-auto noselect ";
+        if (isInDoneFields(id, type)) return defaultClassName + "findPairCorrect";
+        if (item.selectedField.type === type && item.selectedField.id === id)
+            return defaultClassName + "findPairSelected";
 
-        return "col-auto";
+        return defaultClassName;
     };
 
     return (

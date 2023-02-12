@@ -80,7 +80,7 @@ def getLessonsByCourseId(id):
 
 @routes_bp.route("/lessons/<id>", methods=["GET"])
 @login_required
-def getLessonActivities(id):                                                                                            # TODO add assessment and hieroglyph
+def getLessonActivities(id):
     return UserSelectorFunction(teacher_funcs.getLessonActivities, student_funcs.getLessonActivities, lessonId=id)
 
 
@@ -143,4 +143,36 @@ def addHieroglyphNewDoneTasks(id):
 def getHieroglyphById(id):
     return UserSelectorFunction(teacher_funcs.HieroglyphFuncs.GetById,
                                 student_funcs.HieroglyphFuncs.GetById,
+                                activityId=id)
+
+
+@routes_bp.route("/assessment/<id>/newtry", methods=["POST"])
+@login_required
+def startNewAssessmentTry(id):
+    return UserSelectorFunction(None, student_funcs.AssessmentFuncs.StartNewTry, activityId=id)
+
+
+@routes_bp.route("/assessment/<id>/continuetry", methods=["POST"])
+@login_required
+def continueAssessmentTry(id):
+    return UserSelectorFunction(None, student_funcs.AssessmentFuncs.ContinueTry, activityId=id)
+
+
+@routes_bp.route("/assessment/<id>/endtry", methods=["POST"])
+@login_required
+def endAssessmentTry(id):
+    return UserSelectorFunction(None, student_funcs.AssessmentFuncs.EndTry, activityId=id)
+
+
+# @routes_bp.route("/assessment/<id>/newdonetask", methods=["POST"])
+# @login_required
+# def addAssessmentNewDoneTasks(id):
+#     return UserSelectorFunction(None, student_funcs.AssessmentFuncs.AddNewDoneTasks, activityId=id)
+
+
+@routes_bp.route("/assessment/<id>", methods=["GET"])
+@login_required
+def getAssessmentById(id):
+    return UserSelectorFunction(teacher_funcs.AssessmentFuncs.GetById,
+                                student_funcs.AssessmentFuncs.GetById,
                                 activityId=id)

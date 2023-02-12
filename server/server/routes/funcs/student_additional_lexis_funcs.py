@@ -6,15 +6,6 @@ from ...queries import StudentDBqueries as DBQS
 from ...db_models import Drilling, DrillingTry, Hieroglyph, HieroglyphTry, LexisType
 
 
-def GetLexisData(lexis_type: LexisType) -> tuple[DBQS.LexisQueries, str]:
-    if lexis_type == Drilling:
-        return DBQS.DrillingQueries, "drilling"
-    if lexis_type == Hieroglyph:
-        return DBQS.HieroglyphQueries, "hieroglyph"
-
-    raise InvalidAPIUsage("Check server GetLexisData()", 500)
-
-
 def CreateShuffleList(strList: list[str]) -> list[str]:
     shuffleStrList = strList.copy()
     random.shuffle(shuffleStrList)

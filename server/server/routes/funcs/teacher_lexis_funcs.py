@@ -20,7 +20,7 @@ class LexisFuncs:
         self.lexisQueries, self.lexisName = GetLexisData(lexis_type)
 
     def GetById(self, lexisId: int):
-        return DBQT.DrillingQueries.GetLexisById(lexisId)
+        return DBQT.DrillingQueries.GetById(lexisId)
 
 
 DrillingFuncs = LexisFuncs(Drilling)

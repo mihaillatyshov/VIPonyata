@@ -2,4 +2,4 @@ venv/
 .vscode
 .trunk
 log/
-server/config.json
+/server/config.json

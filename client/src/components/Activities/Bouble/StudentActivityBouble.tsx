@@ -5,11 +5,12 @@ import { ServerAPI_POST } from "libs/ServerAPI";
 import StudentTimeRemaining from "components/Activities/StudentTimeRemaining";
 import { LogInfo } from "libs/Logger";
 import ActivityBouble from "./ActivityBouble";
+import { ActivityName } from "../ActivityUtils";
 
 type StudentActivityBubbleProps = {
     info: any;
     title: string;
-    name: "drilling" | "hieroglyph" | "assessment";
+    name: ActivityName;
     onDeadline: () => void;
 };
 

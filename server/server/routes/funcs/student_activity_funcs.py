@@ -27,7 +27,7 @@ class ActivityFuncs:
         activityTries = self._activityQueries.GetTriesByActivityId(activityId, GetCurrentUserId())
 
         if activityTries and activityTries[-1].end_datetime == None:
-            return {"message": "Already Exists"}, 409
+            return {"message": "Lexis try already Exists"}, 409
 
         newActivityTry = self._activityQueries.AddNewTry(len(activityTries) + 1, activityId, GetCurrentUserId())
 
@@ -36,7 +36,7 @@ class ActivityFuncs:
                 activity.time_limit__ToTimedelta(),                                                                     #
                 newActivityTry.id,                                                                                      # type: ignore
                 self._activityQueries._activityTry_type)                                                                #
-        return {"message": "Successfully created"}
+        return {"message": "Lexis try successfully created"}
 
     def ContinueTry(self, activityId: int):
         self._activityQueries.GetUnfinishedTryByActivityId(activityId, GetCurrentUserId())

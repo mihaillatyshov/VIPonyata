@@ -42,11 +42,8 @@ def islogin():
 
 @auth_bp.route("/login", methods=["POST"])
 def login():
-    print(request.data)
     if not request.json:
         abort(400)
-
-    print(request.json)
 
     nickname = request.json.get("nickname")
     password = request.json.get("password")

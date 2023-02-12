@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
-import { Button } from "react-bootstrap";
 import { LogInfo } from "libs/Logger";
 import { ServerAPI_GET, ServerAPI_POST } from "libs/ServerAPI";
 import NavigateToElement from "components/NavigateToElement";
@@ -9,11 +8,17 @@ import StudentLexisCard from "./Types/StudentLexisCard";
 import StudentLexisFindPair from "./Types/StudentLexisFindPair";
 import StudentProgress from "components/Activities/StudentProgress";
 import StudentLexisHub from "./StudentLexisHub";
-import StudentTimeRemaining from "components/Activities/StudentTimeRemaining";
-import { LexisName } from "./Types/LexisUtils";
+import { LexisName, StudentLexisTaskProps } from "./Types/LexisUtils";
 import StudentLexisScramble from "./Types/StudentLexisScramble";
 import StudentLexisTranslate from "./Types/StudentLexisTranslate";
 import StudentLexisSpace from "./Types/StudentLexisSpace";
+import StudentActivityPageHeader from "../StudentActivityPageHeader";
+
+type StudentLexisPageRouteProps = {
+    taskName: string;
+    path?: string;
+    component: (props: StudentLexisTaskProps) => JSX.Element;
+};
 
 type StudentLexisPageProps = {
     name: LexisName;
@@ -32,6 +37,14 @@ const StudentLexisPage = ({
 }: StudentLexisPageProps) => {
     const { id } = useParams();
     const navigate = useNavigate();
+
+    const routeElements: StudentLexisPageRouteProps[] = [
+        { taskName: "card", path: "/card/:cardId", component: StudentLexisCard },
+        { taskName: "findpair", path: "/findpair", component: StudentLexisFindPair },
+        { taskName: "scramble", path: "/scramble", component: StudentLexisScramble },
+        { taskName: "translate", path: "/translate", component: StudentLexisTranslate },
+        { taskName: "space", path: "/space", component: StudentLexisSpace },
+    ];
 
     const goToUndoneTask = (items: any, doneTasks: any) => {
         LogInfo("goToUndoneTask", items);
@@ -89,19 +102,8 @@ const StudentLexisPage = ({
         goToUndoneTask(lexis.items, newDoneTasks);
     };
 
-    const onBackToLesson = () => {
+    const backToLessonHandle = () => {
         navigate(`/lessons/${lexis.info.lesson_id}`);
-    };
-
-    const drawDeadlineComponent = () => {
-        if (lexis.info.deadline) {
-            return (
-                <StudentTimeRemaining
-                    deadline={lexis.info.deadline}
-                    onDeadline={() => navigate(`/lessons/${lexis.info.lesson_id}`)}
-                />
-            );
-        }
     };
 
     if (
@@ -118,66 +120,25 @@ const StudentLexisPage = ({
             <StudentProgress
                 percent={(Object.keys(lexis.info.try.done_tasks).length / Object.keys(lexis.items).length) * 100}
             />
-            <Button onClick={onBackToLesson}> Вернуться к уроку </Button>
-            <div>
-                {lexis.info.description} {lexis.info.time_limit} {lexis.info.try.start_datetime}
-            </div>
-            {drawDeadlineComponent()}
+            <StudentActivityPageHeader activityInfo={lexis.info} backToLessonCallback={backToLessonHandle} />
             <StudentLexisNav items={lexis.items} doneTasks={lexis.info.try.done_tasks} />
-
             <Routes>
-                <Route path="/" element={<StudentLexisHub id={id} name={name} onBackToLesson={onBackToLesson} />} />
+                <Route
+                    path="/"
+                    element={<StudentLexisHub id={id} name={name} backToLessonCallback={backToLessonHandle} />}
+                />
                 <Route path="/card" element={<NavigateToElement to="../card/0" />} />
-                <Route
-                    path="/card/:cardId"
-                    element={
-                        <StudentLexisCard
-                            name={name}
-                            inData={lexis.items.card}
-                            goToNextTaskCallback={goToNextTaskHandle}
-                        />
-                    }
-                />
-                <Route
-                    path="/findpair"
-                    element={
-                        <StudentLexisFindPair
-                            name={name}
-                            inData={lexis.items.findpair}
-                            goToNextTaskCallback={goToNextTaskHandle}
-                        />
-                    }
-                />
-                <Route
-                    path="/scramble"
-                    element={
-                        <StudentLexisScramble
-                            name={name}
-                            inData={lexis.items.scramble}
-                            goToNextTaskCallback={goToNextTaskHandle}
-                        />
-                    }
-                />
-                <Route
-                    path="/translate"
-                    element={
-                        <StudentLexisTranslate
-                            name={name}
-                            inData={lexis.items.translate}
-                            goToNextTaskCallback={goToNextTaskHandle}
-                        />
-                    }
-                />
-                <Route
-                    path="/space"
-                    element={
-                        <StudentLexisSpace
-                            name={name}
-                            inData={lexis.items.space}
-                            goToNextTaskCallback={goToNextTaskHandle}
-                        />
-                    }
-                />
+                {routeElements.map((element, i) => (
+                    <Route
+                        key={i}
+                        path={element.path}
+                        element={React.createElement(element.component, {
+                            name: name,
+                            inData: lexis.items[element.taskName],
+                            goToNextTaskCallback: goToNextTaskHandle,
+                        })}
+                    />
+                ))}
             </Routes>
         </div>
     );

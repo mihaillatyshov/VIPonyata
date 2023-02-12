@@ -28,13 +28,13 @@ const StudentLexisNavItem = ({ to, name, img, mistakeCount }: StudentLexisNavIte
 
     LogInfo(mistakeCount);
 
-    const onClick = () => {
+    const onClickHandle = () => {
         navigate(to);
     };
 
     return (
         <div className="col-auto text-center">
-            <div className={style.navItem} onClick={onClick}>
+            <div className={style.navItem} onClick={onClickHandle}>
                 <div className="px-auto">
                     <img src={img} width="32px" alt={name} />
                 </div>

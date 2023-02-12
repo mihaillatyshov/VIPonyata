@@ -20,6 +20,7 @@ import { Button } from "react-bootstrap";
 import styleThemes from "./themes/StyleThemes.module.css";
 import { LogInfo } from "libs/Logger";
 import StudentHieroglyphPage from "components/Activities/Lexis/Hieroglyph/StudentHieroglyphPage";
+import StudentAssessmentPage from "components/Activities/Assessment/StudentAssessmentPage";
 
 // eslint-disable-next-line
 const App = () => {
@@ -96,6 +97,10 @@ const App = () => {
                     <Route
                         path="/hieroglyph/:id/*"
                         element={getRoute(<StudentHieroglyphPage />, <StudentHieroglyphPage />, <NavigateHome />)}
+                    />
+                    <Route
+                        path="/assessment/:id/*"
+                        element={getRoute(<StudentAssessmentPage />, <StudentAssessmentPage />, <NavigateHome />)}
                     />
                     <Route path="/upload" element={<TestUpload />} />
                 </Routes>

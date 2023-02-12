@@ -5,15 +5,15 @@ import { Button } from "react-bootstrap";
 type StudentLexisHubProps = {
     id: string | undefined;
     name: "drilling" | "hieroglyph";
-    onBackToLesson: () => void;
+    backToLessonCallback: () => void;
 };
 
-const StudentLexisHub = ({ id, name, onBackToLesson }: StudentLexisHubProps) => {
-    const onEndLexis = () => {
+const StudentLexisHub = ({ id, name, backToLessonCallback }: StudentLexisHubProps) => {
+    const endLexisHandle = () => {
         ServerAPI_POST({
             url: `/api/${name}/${id}/endtry`,
             onDataReceived: () => {
-                onBackToLesson();
+                backToLessonCallback();
             },
         });
     };
@@ -21,7 +21,7 @@ const StudentLexisHub = ({ id, name, onBackToLesson }: StudentLexisHubProps) => 
     return (
         <div>
             <div>Hub {name}</div>
-            <Button onClick={onEndLexis}> Завершить </Button>
+            <Button onClick={endLexisHandle}> Завершить </Button>
         </div>
     );
 };

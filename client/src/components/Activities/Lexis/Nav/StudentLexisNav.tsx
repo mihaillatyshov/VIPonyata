@@ -28,7 +28,8 @@ const StudentLexisNav = ({ items, doneTasks }: StudentLexisNavProps) => {
         ...createItem("translate", "Translate", "translate", "/img/Activity/Lexis/nav/translate.png"),
     };
 
-    LogInfo(items);
+    console.log("Lexsis Items: ", items);
+    console.log("Lexsis Nav Items: ", itemsData);
 
     return (
         <div className="container-fluid mx-0">

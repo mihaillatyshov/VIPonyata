@@ -11,7 +11,6 @@ class FlaskUser(UserMixin):
     def FromDB(self, user_id):
         self.data = {}
         if userData := DBsession().query(User).filter_by(nickname=user_id).one_or_none():
-            print(userData)
             self.data["id"] = userData.id
             self.data["name"] = userData.name
             self.data["nickname"] = userData.nickname
