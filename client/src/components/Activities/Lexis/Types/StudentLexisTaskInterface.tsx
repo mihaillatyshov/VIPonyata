@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { LogInfo } from "libs/Logger";
 import { Button } from "react-bootstrap";
 import { GoToNextTaskCallbackType, LexisName, useLexisItem, useSetLexisSelectedItem } from "./LexisUtils";
 //import MD5 from "crypto-js/md5";
@@ -34,7 +33,7 @@ const StudentLexisTaskInterface = ({
     const setLexisSelectedItem = useSetLexisSelectedItem(name);
 
     useEffect(() => {
-        LogInfo("setLexisSelectedItem FindPair");
+        console.log("setLexisSelectedItem FindPair");
         setLexisSelectedItem({
             ...newObjectData,
             type: taskTypeName,

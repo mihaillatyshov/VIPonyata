@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { selectAssessment, setAssessmentInfo, setAssessmentItems } from "redux/slices/assessmentSlice";
 import StudentActivityPageHeader from "../StudentActivityPageHeader";
-import { ServerAPI_GET, ServerAPI_POST } from "libs/ServerAPI";
+import { AjaxGet, AjaxPost } from "libs/ServerAPI";
 import { useNavigate, useParams } from "react-router-dom";
 import { StudentAssessmentTypeProps } from "./Types/StudentAssessmentTypeProps";
 import StudentAssessmentText from "./Types/StudentAssessmentText";
@@ -17,6 +17,13 @@ import StudentAssessmentSentenceOrder from "./Types/StudentAssessmentSentenceOrd
 import StudentAssessmentOpenQuestion from "./Types/StudentAssessmentOpenQuestion";
 import StudentAssessmentImg from "./Types/StudentAssessmentImg";
 import { Button } from "react-bootstrap";
+import { TAssessment } from "models/Activity/TAssessment";
+import { TAssessmentItems } from "models/Activity/Items/TAssessmentItems";
+
+type ResponseData = {
+    assessment: TAssessment;
+    items: TAssessmentItems;
+};
 
 type StudentAssessmentAliasProps = {
     taskName: string;
@@ -31,18 +38,17 @@ const StudentAssessmentPage = () => {
 
     useEffect(() => {
         dispatch(setAssessmentInfo(undefined));
-        ServerAPI_GET({
-            url: `/api/assessment/${id}`,
-            onDataReceived: (data) => {
-                console.log(`Assessment page data:`, data);
-                dispatch(setAssessmentInfo(data["assessment"]));
-                dispatch(setAssessmentItems(data.items));
-            },
-            handleStatus: (res) => {
-                if (res.status === 404) navigate("/");
-                if (res.status === 403) navigate(`/lessons/${res.data.lesson_id}`);
-            },
-        });
+        AjaxGet<ResponseData>({ url: `/api/assessment/${id}` })
+            .then((json) => {
+                dispatch(setAssessmentInfo(json.assessment));
+                dispatch(setAssessmentItems(json.items));
+            })
+            .catch(({ isServerError, json, response }) => {
+                if (!isServerError) {
+                    if (response.status === 404) navigate("/");
+                    if (response.status === 403) navigate(`/lessons/${json.lesson_id}`);
+                }
+            });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -51,12 +57,11 @@ const StudentAssessmentPage = () => {
     };
 
     const endAssessmentHandle = () => {
-        ServerAPI_POST({
+        AjaxPost({
             url: `/api/assessment/${id}/endtry`,
             body: { done_tasks: "test" }, // TODO FIXIT (TEST MESSAGE)
-            onDataReceived: () => {
-                backToLessonHandle();
-            },
+        }).then(() => {
+            backToLessonHandle();
         });
     };
 

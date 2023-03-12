@@ -61,6 +61,7 @@ def fileUpload():
 
 @routes_bp.route("/test", methods=["GET"])
 def testSomeThings():
+    return {"test": "test", "val": 10}
     raise InvalidAPIUsage("Test Error", 400, {"testdata": 10, "other": time(second=10)})
     courses = DBsession().query(Course).all()
     return {"courses": courses, "datetime": [time(1, 1, 1), timedelta(1, 1, 1), datetime(1, 1, 1, 1, 1, 1)]}

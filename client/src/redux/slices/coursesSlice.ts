@@ -1,9 +1,13 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { TCourse } from "models/TCourse";
 import { RootState } from "redux/store";
 
+type ItemsType = TCourse[] | undefined;
+type SelectedType = TCourse | undefined;
+
 export interface CoursesState {
-    items: any[] | undefined;
-    selected: any | undefined;
+    items: ItemsType;
+    selected: SelectedType;
 }
 
 const initialState: CoursesState = {
@@ -15,10 +19,10 @@ export const coursesSlice = createSlice({
     name: "courses",
     initialState,
     reducers: {
-        setCourses: (state, action) => {
+        setCourses: (state, action: PayloadAction<ItemsType>) => {
             state.items = action.payload;
         },
-        setSelectedCourse: (state, action) => {
+        setSelectedCourse: (state, action: PayloadAction<SelectedType>) => {
             state.selected = action.payload;
         },
     },

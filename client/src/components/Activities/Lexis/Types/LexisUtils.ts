@@ -18,15 +18,17 @@ export const NameTo_dril_or_hier = (name: LexisName, dril: any, hier: any) => {
     }
 };
 
-export const NameTo_word_or_char = (name: LexisName) => {
+export const NameTo_word_or_char = (name: LexisName): "word_jp" | "char_jp" => {
     return NameTo_dril_or_hier(name, "word_jp", "char_jp");
 };
 
-export const NameTo_words_or_chars = (name: LexisName) => {
+export const NameTo_words_or_chars = (name: LexisName): "words_jp" | "chars_jp" => {
     return NameTo_dril_or_hier(name, "words_jp", "chars_jp");
 };
 
-export const NameToScrambe_word_or_char = (name: LexisName) => {
+export const NameToScrambe_word_or_char = (
+    name: LexisName
+): ["word_words", "word_chars"] | ["char_words", "char_chars"] => {
     return NameTo_dril_or_hier(name, ["word_words", "word_chars"], ["char_words", "char_chars"]);
 };
 
@@ -67,8 +69,8 @@ export const useSetLexisSelectedItemField = (name: LexisName) => {
 
 export type GoToNextTaskCallbackType = (taskTypeName: string, percent: number) => void;
 
-export type StudentLexisTaskProps = {
+export type StudentLexisTaskProps<T> = {
     name: LexisName;
-    inData: any;
+    inData: T;
     goToNextTaskCallback: GoToNextTaskCallbackType;
 };

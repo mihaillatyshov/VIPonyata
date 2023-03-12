@@ -1,5 +1,4 @@
 import React from "react";
-import { LogInfo } from "libs/Logger";
 import { Button } from "react-bootstrap";
 import StudentLexisTaskInterface from "./StudentLexisTaskInterface";
 import {
@@ -8,8 +7,9 @@ import {
     useLexisItem,
     useSetLexisSelectedItemField,
 } from "./LexisUtils";
+import { TScramble } from "models/Activity/Items/TLexisItems";
 
-const StudentLexisScramble = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps) => {
+const StudentLexisScramble = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps<TScramble>) => {
     const item = useLexisItem(name);
     const setLexisSelectedItemField = useSetLexisSelectedItemField(name);
     const [full, symb] = NameToScrambe_word_or_char(name);
@@ -45,7 +45,7 @@ const StudentLexisScramble = ({ name, inData, goToNextTaskCallback }: StudentLex
         setLexisSelectedItemField({ doneWord: newDoneWord, usedChars: newUsedChars });
 
         for (let i = 0; i < newDoneWord.length; i++) {
-            LogInfo("NDW", newDoneWord, inData[full][item.wordId][i]);
+            console.log("NDW", newDoneWord, inData[full][item.wordId][i]);
             if (newDoneWord[i] !== inData[full][item.wordId][i]) {
                 return;
             }

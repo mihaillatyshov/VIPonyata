@@ -1,9 +1,9 @@
 import React from "react";
 import "./App.css";
 import "./RoundBlock.css";
-import { ServerAPI_GET, ServerAPI_POST } from "./libs/ServerAPI";
+import { AjaxGet, AjaxPost } from "./libs/ServerAPI";
 import { useEffect } from "react";
-import { selectUser, setUserData } from "./redux/slices/userSlice";
+import { UserState, selectUser, setUserData } from "./redux/slices/userSlice";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoadingPage from "./components/LoadingPage";
 import LoginPage from "./components/Authentication/LoginPage";
@@ -18,7 +18,6 @@ import StudentLessonPage from "./components/Lessons/StudentLessonPage";
 import { useAppDispatch, useAppSelector } from "./redux/hooks";
 import { Button } from "react-bootstrap";
 import styleThemes from "./themes/StyleThemes.module.css";
-import { LogInfo } from "libs/Logger";
 import StudentHieroglyphPage from "components/Activities/Lexis/Hieroglyph/StudentHieroglyphPage";
 import StudentAssessmentPage from "components/Activities/Assessment/StudentAssessmentPage";
 
@@ -28,23 +27,15 @@ const App = () => {
     const dispatch = useAppDispatch();
 
     useEffect(() => {
-        ServerAPI_GET({
-            url: "/api/islogin",
-            onDataReceived: (data) => {
-                LogInfo(data);
-                dispatch(setUserData(data));
-            },
+        AjaxGet<UserState>({ url: "/api/islogin" }).then((json) => {
+            dispatch(setUserData(json));
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleLogout = () => {
-        ServerAPI_POST({
-            url: "/api/logout",
-            onDataReceived: (data) => {
-                console.log(data);
-                dispatch(setUserData({ isAuth: false, userData: {} }));
-            },
+        AjaxPost({ url: "/api/logout" }).then(() => {
+            dispatch(setUserData({ isAuth: false, userData: undefined }));
         });
     };
 
@@ -58,10 +49,10 @@ const App = () => {
     //};
 
     const getRoute = (logedTeacher: any, logedStudent: any, unloged: any, additionalCondition = false) => {
-        if (user.isAuth === undefined || user.data === undefined || additionalCondition) {
+        if (user.isAuth === undefined || user.userData === undefined || additionalCondition) {
             return <LoadingPage />;
         } else if (user.isAuth) {
-            if (user.data.level === 1) {
+            if (user.userData.level === 1) {
                 return logedTeacher;
             } else {
                 return logedStudent;

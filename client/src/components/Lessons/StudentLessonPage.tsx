@@ -1,8 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { LogInfo } from "libs/Logger";
-import { ServerAPI_GET } from "libs/ServerAPI";
+import { AjaxGet } from "libs/ServerAPI";
 import { ActivityName } from "components/Activities/ActivityUtils";
 import { selectLessons, setSelectedLesson } from "redux/slices/lessonsSlice";
 import { selectDrilling, setDrillingInfo } from "redux/slices/drillingSlice";
@@ -11,6 +10,19 @@ import { selectAssessment, setAssessmentInfo } from "redux/slices/assessmentSlic
 import StudentDrillingBubble from "components/Activities/Lexis/Drilling/StudentDrillingBubble";
 import StudentHieroglyphBubble from "components/Activities/Lexis/Hieroglyph/StudentHieroglyphBubble";
 import StudentAssessmentBubble from "components/Activities/Assessment/StudentAssessmentBubble";
+import { TAssessment } from "models/Activity/TAssessment";
+import { TDrilling } from "models/Activity/TDrilling";
+import { THieroglyph } from "models/Activity/THieroglyph";
+import { TLesson } from "models/TLesson";
+
+type ResponseData = {
+    lesson: TLesson;
+    items: {
+        drilling: TDrilling;
+        hieroglyph: THieroglyph;
+        assessment: TAssessment;
+    };
+};
 
 const StudentLessonPage = () => {
     const { id } = useParams();
@@ -21,30 +33,36 @@ const StudentLessonPage = () => {
     const assessment = useAppSelector(selectAssessment);
     const hieroglyph = useAppSelector(selectHieroglyph);
 
-    const setActivityInfo = (name: ActivityName, data: any, setInfoCallback: (info: any) => any) => {
-        if (Object.keys(data.items[name]).length !== 0) {
-            console.log(`Set ${name} info`);
-            dispatch(setInfoCallback(data.items[name]));
-        }
-    };
+    const setActivityInfo = useCallback(
+        (
+            name: ActivityName,
+            data: ResponseData,
+            setInfoCallback: (info: TDrilling | THieroglyph | TAssessment) => any
+        ) => {
+            if (Object.keys(data.items[name]).length !== 0) {
+                console.log(`Set ${name} info`, data);
+                dispatch(setInfoCallback(data.items[name]));
+            }
+        },
+        [dispatch]
+    );
 
     useEffect(() => {
         dispatch(setSelectedLesson(undefined));
         dispatch(setDrillingInfo(undefined));
-        ServerAPI_GET({
-            url: `/api/lessons/${id}`,
-            onDataReceived: (data) => {
-                LogInfo(data);
-                dispatch(setSelectedLesson(data.lesson));
-                setActivityInfo("drilling", data, setDrillingInfo);
-                setActivityInfo("hieroglyph", data, setHieroglyphInfo);
-                setActivityInfo("assessment", data, setAssessmentInfo);
-            },
-            handleStatus: (res) => {
-                if (res.status === 404) navigate("/");
-                if (res.status === 403) navigate(`/courses/${res.data.course_id}`);
-            },
-        });
+        AjaxGet<ResponseData>({ url: `/api/lessons/${id}` })
+            .then((json) => {
+                dispatch(setSelectedLesson(json.lesson));
+                setActivityInfo("drilling", json, setDrillingInfo);
+                setActivityInfo("hieroglyph", json, setHieroglyphInfo);
+                setActivityInfo("assessment", json, setAssessmentInfo);
+            })
+            .catch(({ isServerError, json, response }) => {
+                if (!isServerError) {
+                    if (response.status === 404) navigate("/");
+                    if (response.status === 403) navigate(`/courses/${json.course_id}`);
+                }
+            });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 

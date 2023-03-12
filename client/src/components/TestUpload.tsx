@@ -1,9 +1,17 @@
-import React, { useState } from "react";
+import { AjaxGet } from "libs/ServerAPI";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 const TestUpload = () => {
     const [imageURL, setImageURL] = useState("");
     let filepath: File | undefined = undefined;
+
+    useEffect(() => {
+        console.log("test data");
+        AjaxGet<any>({ url: "/test" }).then((json) => {
+            console.log(json);
+        });
+    }, []);
 
     const handleUploadImage = () => {
         //e.preventDefault();

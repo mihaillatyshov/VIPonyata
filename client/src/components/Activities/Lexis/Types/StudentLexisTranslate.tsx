@@ -1,10 +1,10 @@
 import React from "react";
-import { LogInfo } from "libs/Logger";
 import { Button } from "react-bootstrap";
 import StudentLexisTaskInterface from "./StudentLexisTaskInterface";
 import { NameTo_words_or_chars, StudentLexisTaskProps, useLexisItem, useSetLexisSelectedItemField } from "./LexisUtils";
+import { TTranslate } from "models/Activity/Items/TLexisItems";
 
-const StudentLexisTranslate = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps) => {
+const StudentLexisTranslate = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps<TTranslate>) => {
     const item = useLexisItem(name);
     const setLexisSelectedItemField = useSetLexisSelectedItemField(name);
     const aliasJP = NameTo_words_or_chars(name);
@@ -22,7 +22,7 @@ const StudentLexisTranslate = ({ name, inData, goToNextTaskCallback }: StudentLe
     };
 
     const nextWord = () => {
-        LogInfo(inData.words_ru, item.inputText.trim());
+        console.log(inData.words_ru, item.inputText.trim());
         if (inData.words_ru[item.wordId] === item.inputText.trim())
             setLexisSelectedItemField({ ...getObjectData(item.wordId + 1) });
     };

@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Form, Button } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import { ServerAPI_POST } from "libs/ServerAPI";
+import { AjaxPost } from "libs/ServerAPI";
 import {
     resetRegisterForm,
     setRegisterValidated,
@@ -27,8 +27,9 @@ const RegisterPage = () => {
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         event.stopPropagation();
-        if (!(event.currentTarget.checkValidity() === false)) {
-            ServerAPI_POST({
+
+        if (event.currentTarget.checkValidity()) {
+            AjaxPost<any>({
                 url: "/api/register",
                 body: {
                     nickname: register.nickname,
@@ -37,17 +38,18 @@ const RegisterPage = () => {
                     password2: register.password2,
                     birthday: register.birthday,
                 },
-                onDataReceived: (data) => {
+            })
+                .then(() => {
                     dispatch(resetRegisterForm());
                     navigate("/");
-                },
-                handleStatus: (res) => {
-                    if (res.status === 422) {
-                        console.log(res);
-                        dispatch(setRegisterMessage(res.data.message));
+                })
+                .catch(({ isServerError, json, response }) => {
+                    if (!isServerError) {
+                        if (response.status === 422) {
+                            dispatch(setRegisterMessage(json.message));
+                        }
                     }
-                },
-            });
+                });
         }
 
         dispatch(setRegisterValidated());

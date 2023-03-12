@@ -1,5 +1,4 @@
 import React from "react";
-import { LogInfo } from "libs/Logger";
 import { useNavigate } from "react-router-dom";
 import style from "./StyleLexisNav.module.css";
 
@@ -26,7 +25,7 @@ const Mistake = ({ mistakeCount }: MistakeProps) => {
 const StudentLexisNavItem = ({ to, name, img, mistakeCount }: StudentLexisNavItemProps) => {
     const navigate = useNavigate();
 
-    LogInfo(mistakeCount);
+    console.log(mistakeCount);
 
     const onClickHandle = () => {
         navigate(to);

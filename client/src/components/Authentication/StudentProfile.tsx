@@ -5,17 +5,21 @@ import { selectUser } from "redux/slices/userSlice";
 const StudentProfile = () => {
     const user = useAppSelector(selectUser);
 
+    if (!user.userData) {
+        return <div> Error! </div>;
+    }
+
     return (
         <div className="col-auto" style={{ border: "solid 1px" }}>
             <div className="d-flex">
                 <img
                     className="profile"
                     alt="profile"
-                    src={user.data.avatar === null ? "/img/users/DefaultAvatar.png" : user.data.avatar}
+                    src={user.userData.avatar === null ? "/img/users/DefaultAvatar.png" : user.userData.avatar}
                 />
                 <div>
-                    <div className="mx-auto"> {user.data.name} </div>
-                    <div> {user.data.nickname} </div>
+                    <div className="mx-auto"> {user.userData.name} </div>
+                    <div> {user.userData.nickname} </div>
                 </div>
             </div>
         </div>

@@ -1,11 +1,11 @@
 import React from "react";
 import { Card } from "react-bootstrap";
-import { LogInfo } from "libs/Logger";
 import StudentLexisTaskInterface from "./StudentLexisTaskInterface";
 import { NameTo_words_or_chars, StudentLexisTaskProps, useLexisItem, useSetLexisSelectedItemField } from "./LexisUtils";
+import { TFindPair } from "models/Activity/Items/TLexisItems";
 //import MD5 from "crypto-js/md5";
 
-const StudentLexisFindPair = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps) => {
+const StudentLexisFindPair = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps<TFindPair>) => {
     const item = useLexisItem(name);
     const strRU = "words_ru";
     const strJP = NameTo_words_or_chars(name);
@@ -24,35 +24,35 @@ const StudentLexisFindPair = ({ name, inData, goToNextTaskCallback }: StudentLex
         return false;
     };
 
-    const selectField = (id: number, type: string) => {
-        LogInfo("clicked", id, type);
+    const selectField = (id: number, type: "words_jp" | "words_ru" | "chars_jp") => {
+        console.log("clicked", id, type);
 
         const otherType = type === strJP ? strRU : strJP;
 
-        LogInfo("DoneFields:", item.doneFields);
+        console.log("DoneFields:", item.doneFields);
         // 0. Clicked field in DoneFields array
         if (isInDoneFields(id, type)) {
-            LogInfo("0. Clicked field in DoneFields array");
+            console.log("0. Clicked field in DoneFields array");
             return;
         }
 
         // 1. SelectedField is selected now
         if (item.selectedField.type === type && item.selectedField.id === id) {
-            LogInfo("1. SelectedField is selected now");
+            console.log("1. SelectedField is selected now");
             deselectField();
             return;
         }
 
         // 2. Selected another field with the same type OR first selection
         if (item.selectedField.type === "None" || item.selectedField.type === type) {
-            LogInfo("2. Selected another field with the same type OR first selection");
+            console.log("2. Selected another field with the same type OR first selection");
             setLexisSelectedItemField({ selectedField: { id: id, type: type } });
             return;
         }
 
         // 3. Clicked field with correct id of other type in answers
         if (inData.answers[otherType][item.selectedField.id] === inData.answers[type][id]) {
-            LogInfo("3. Clicked field with correct id of other type");
+            console.log("3. Clicked field with correct id of other type");
             const newField = { [otherType]: item.selectedField.id, [type]: id };
             //newField[otherType] = item.selectedField.id;
             //newField[type] = id;
@@ -62,7 +62,7 @@ const StudentLexisFindPair = ({ name, inData, goToNextTaskCallback }: StudentLex
         }
 
         // Clicked wrong answer
-        LogInfo("3. Else");
+        console.log("3. Else");
         deselectField();
         setLexisSelectedItemField({ mistakeCount: item.mistakeCount + 1 });
     };

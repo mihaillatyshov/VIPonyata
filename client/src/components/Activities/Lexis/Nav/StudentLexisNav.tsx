@@ -1,5 +1,4 @@
 import React from "react";
-import { LogInfo } from "libs/Logger";
 import StudentLexisNavItem from "./StudentLexisNavItem";
 
 export type StudentLexisNavProps = {
@@ -8,7 +7,7 @@ export type StudentLexisNavProps = {
 };
 
 const StudentLexisNav = ({ items, doneTasks }: StudentLexisNavProps) => {
-    LogInfo("doneTasks:", doneTasks);
+    console.log("doneTasks:", doneTasks);
     const createItem = (taskName: string, name: string, to: string, imgSrc: string) => {
         return {
             [taskName]: {

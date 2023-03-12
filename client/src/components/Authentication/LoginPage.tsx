@@ -8,8 +8,8 @@ import {
     setLoginPassword,
     setLoginValidated,
 } from "redux/slices/loginSlice";
-import { ServerAPI_POST } from "libs/ServerAPI";
-import { setUserData } from "redux/slices/userSlice";
+import { AjaxPost } from "libs/ServerAPI";
+import { UserState, setUserData } from "redux/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 
 const LoginPage = () => {
@@ -23,22 +23,26 @@ const LoginPage = () => {
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         event.stopPropagation();
-        if (!(event.currentTarget.checkValidity() === false)) {
-            ServerAPI_POST({
+
+        if (event.currentTarget.checkValidity()) {
+            AjaxPost<UserState>({
                 url: "/api/login",
                 body: {
                     nickname: login.nickname,
                     password: login.password,
                 },
-                onDataReceived: (data) => {
-                    dispatch(setUserData(data));
+            })
+                .then((json) => {
+                    dispatch(setUserData(json));
                     dispatch(resetLoginForm());
-                },
-                handleStatus(data) {
-                    if (data.status === 400) {
+                })
+                .catch(({ isServerError, json, response }) => {
+                    if (!isServerError) {
+                        if (response.status === 422) {
+                            // dispatch(setLoginMessage(json.message));
+                        }
                     }
-                },
-            });
+                });
         }
 
         dispatch(setLoginValidated());

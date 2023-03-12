@@ -12,8 +12,8 @@ const InputsField = ({ accept, inputFields, onDropCallback }: InputsFieldProps) 
         <div>
             <div
                 {...getDropToSpread({
-                    accept: "testDND",
-                    onDropCallback: (dragData) => {
+                    accept,
+                    onDropCallback({ dragData }) {
                         onDropCallback({ from: dragData, to: { id: -1, name: "inputs" } });
                         console.log(dragData);
                     },

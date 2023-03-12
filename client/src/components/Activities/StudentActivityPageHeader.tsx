@@ -2,9 +2,11 @@ import React from "react";
 import StudentTimeRemaining from "./StudentTimeRemaining";
 import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { TAssessment } from "models/Activity/TAssessment";
+import { ILexis } from "models/Activity/ILexis";
 
 type StudentActivityPageHeaderProps = {
-    activityInfo: any;
+    activityInfo: ILexis | TAssessment;
     backToLessonCallback: () => void;
 };
 

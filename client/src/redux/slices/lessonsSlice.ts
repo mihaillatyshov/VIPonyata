@@ -1,9 +1,13 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { TLesson } from "models/TLesson";
 import { RootState } from "redux/store";
 
+type ItemsType = TLesson[] | undefined;
+type SelectedType = TLesson | undefined;
+
 export interface LessonsState {
-    items: any[] | undefined;
-    selected: any | undefined;
+    items: ItemsType;
+    selected: SelectedType;
 }
 
 const initialState: LessonsState = {
@@ -15,10 +19,10 @@ export const lessonsSlice = createSlice({
     name: "lessons",
     initialState,
     reducers: {
-        setLessons: (state, action) => {
+        setLessons: (state, action: PayloadAction<ItemsType>) => {
             state.items = action.payload;
         },
-        setSelectedLesson: (state, action) => {
+        setSelectedLesson: (state, action: PayloadAction<SelectedType>) => {
             state.selected = action.payload;
         },
     },

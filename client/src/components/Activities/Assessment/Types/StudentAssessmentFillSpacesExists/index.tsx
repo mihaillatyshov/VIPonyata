@@ -46,26 +46,18 @@ const StudentAssessmentFillSpacesExists = ({ data, taskId }: StudentAssessmentTy
             swapData.to.name,
             "}"
         );
-        if (swapData.from.name === "inputs" && swapData.to.name === "inputs") {
-            console.log("ii");
+        if (swapData.from.name === "answers" && swapData.to.name === "answers") {
+            handleAnsAns(swapData);
         } else if (swapData.from.name === "answers" && swapData.to.name === "inputs") {
             handleAnsInp(swapData);
         } else if (swapData.from.name === "inputs" && swapData.to.name === "answers") {
             handleInpAns(swapData);
-        } else {
-            handleAnsAns(swapData);
         }
         dispatch(setAssessmentTaskData({ id: taskId, data: data }));
     };
 
-    const first: SwapDataProps = { from: { id: 0, name: "inputs" }, to: { id: 0, name: "answers" } };
-    const second: SwapDataProps = { from: { id: 0, name: "inputs" }, to: { id: 1, name: "answers" } };
-    const third: SwapDataProps = { from: { id: 1, name: "answers" }, to: { id: 0, name: "inputs" } };
     return (
         <div>
-            <input type="button" value="i0 a0" onClick={() => onDropHandle(first)} />
-            <input type="button" value="i0 a1" onClick={() => onDropHandle(second)} />
-            <input type="button" value="a1 i0" onClick={() => onDropHandle(third)} />
             <InputsField accept={accept} inputFields={data.inputs} onDropCallback={onDropHandle} />
             <hr />
             <div>

@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
-import { LogInfo } from "libs/Logger";
-import { ServerAPI_GET, ServerAPI_POST } from "libs/ServerAPI";
+import { AjaxGet, AjaxPost } from "libs/ServerAPI";
 import NavigateToElement from "components/NavigateToElement";
 import StudentLexisNav from "./Nav/StudentLexisNav";
 import StudentLexisCard from "./Types/StudentLexisCard";
@@ -13,20 +12,48 @@ import StudentLexisScramble from "./Types/StudentLexisScramble";
 import StudentLexisTranslate from "./Types/StudentLexisTranslate";
 import StudentLexisSpace from "./Types/StudentLexisSpace";
 import StudentActivityPageHeader from "../StudentActivityPageHeader";
+import { TDrilling } from "models/Activity/TDrilling";
+import { THieroglyph } from "models/Activity/THieroglyph";
+import { DrillingState } from "redux/slices/drillingSlice";
+import { HieroglyphState } from "redux/slices/hieroglyphSlice";
+import {
+    TLexisAnyItem,
+    TCardItem,
+    TFindPair,
+    TLexisItems,
+    TScramble,
+    TSpace,
+    TTranslate,
+} from "models/Activity/Items/TLexisItems";
+import { TLexisDoneTasks } from "models/Activity/DoneTasks/TLexisDoneTasks";
 
-type StudentLexisPageRouteProps = {
-    taskName: string;
-    path?: string;
-    component: (props: StudentLexisTaskProps) => JSX.Element;
+type ResponseData = {
+    drilling?: TDrilling;
+    hieroglyph?: THieroglyph;
+    items: TLexisItems;
 };
+
+interface StudentLexisPageRouteProps<T> {
+    taskName: string;
+    path: string;
+    component: (props: StudentLexisTaskProps<T>) => JSX.Element;
+}
 
 type StudentLexisPageProps = {
     name: LexisName;
-    lexis: any;
-    setLexisInfoCallback: (info: any) => void;
-    setLexisItemsCallback: (items: any) => void;
-    setLexisDoneTaskCallback: (doneTasks: any) => void;
+    lexis: DrillingState | HieroglyphState;
+    setLexisInfoCallback: (info: TDrilling | THieroglyph | undefined) => void;
+    setLexisItemsCallback: (items: TLexisItems | undefined) => void;
+    setLexisDoneTaskCallback: (doneTasks: TLexisDoneTasks | undefined) => void;
 };
+
+interface TRouteElements {
+    card: StudentLexisPageRouteProps<TCardItem>;
+    findpair: StudentLexisPageRouteProps<TFindPair>;
+    scramble: StudentLexisPageRouteProps<TScramble>;
+    translate: StudentLexisPageRouteProps<TTranslate>;
+    space: StudentLexisPageRouteProps<TSpace>;
+}
 
 const StudentLexisPage = ({
     name,
@@ -38,20 +65,20 @@ const StudentLexisPage = ({
     const { id } = useParams();
     const navigate = useNavigate();
 
-    const routeElements: StudentLexisPageRouteProps[] = [
-        { taskName: "card", path: "/card/:cardId", component: StudentLexisCard },
-        { taskName: "findpair", path: "/findpair", component: StudentLexisFindPair },
-        { taskName: "scramble", path: "/scramble", component: StudentLexisScramble },
-        { taskName: "translate", path: "/translate", component: StudentLexisTranslate },
-        { taskName: "space", path: "/space", component: StudentLexisSpace },
-    ];
+    const routeElements: TRouteElements = {
+        card: { taskName: "card", path: "/card/:cardId", component: StudentLexisCard },
+        findpair: { taskName: "findpair", path: "/findpair", component: StudentLexisFindPair },
+        scramble: { taskName: "scramble", path: "/scramble", component: StudentLexisScramble },
+        translate: { taskName: "translate", path: "/translate", component: StudentLexisTranslate },
+        space: { taskName: "space", path: "/space", component: StudentLexisSpace },
+    };
 
-    const goToUndoneTask = (items: any, doneTasks: any) => {
-        LogInfo("goToUndoneTask", items);
+    const goToUndoneTask = (items: TLexisItems, doneTasks: TLexisDoneTasks) => {
+        console.log("goToUndoneTask", items);
         for (const taskName of Object.keys(items)) {
-            LogInfo("for", taskName);
+            console.log("for", taskName);
             if (Object.keys(doneTasks).includes(taskName)) {
-                LogInfo("in", taskName, Object.keys(doneTasks));
+                console.log("in", taskName, Object.keys(doneTasks));
                 continue;
             }
             navigate(taskName);
@@ -59,46 +86,46 @@ const StudentLexisPage = ({
         }
 
         if (Object.keys(doneTasks).length) {
-            ServerAPI_POST({
-                url: `/api/${name}/${id}/newdonetask`,
-                body: { done_tasks: doneTasks },
-            });
+            // TODO Add some checks???
+            AjaxPost({ url: `/api/${name}/${id}/newdonetask`, body: { done_tasks: doneTasks } });
         }
 
         if (Object.keys(doneTasks).length === Object.keys(items).length) {
-            LogInfo("Navigate");
+            console.log("Navigate");
             navigate("");
         }
     };
 
     useEffect(() => {
         setLexisInfoCallback(undefined);
-        ServerAPI_GET({
-            url: `/api/${name}/${id}`,
-            onDataReceived: (data) => {
-                LogInfo(`Lexis(${name}) page data: `, data);
-                setLexisInfoCallback(data[name]);
-                setLexisItemsCallback(data.items);
-                goToUndoneTask(data.items, data[name].try.done_tasks);
-            },
-            handleStatus: (res) => {
-                if (res.status === 404) navigate("/");
-                if (res.status === 403) navigate(`/lessons/${res.data.lesson_id}`);
-            },
-        });
+        AjaxGet<ResponseData>({ url: `/api/${name}/${id}` })
+            .then((json) => {
+                const LexisInfo = json[name];
+                if (LexisInfo !== undefined) {
+                    setLexisInfoCallback(LexisInfo);
+                    setLexisItemsCallback(json.items);
+                    goToUndoneTask(json.items, LexisInfo.try.done_tasks);
+                }
+            })
+            .catch(({ isServerError, json, response }) => {
+                if (!isServerError) {
+                    if (response.status === 404) navigate("/");
+                    if (response.status === 403) navigate(`/lessons/${json.lesson_id}`);
+                }
+            });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const goToNextTaskHandle = (taskTypeName: string, percent: number) => {
         if (lexis.items === undefined) return;
 
-        LogInfo("Go to next Task Handle", taskTypeName, percent);
+        console.log("Go to next Task Handle", taskTypeName, percent);
         const newDoneTasks = Object.assign(structuredClone(lexis.info.try.done_tasks), { [taskTypeName]: percent });
-        LogInfo(newDoneTasks);
+        console.log(newDoneTasks);
         setLexisDoneTaskCallback(newDoneTasks);
 
-        LogInfo("NDT", Object.keys(newDoneTasks));
-        LogInfo("DI", Object.keys(lexis.items));
+        console.log("NDT", Object.keys(newDoneTasks));
+        console.log("DI", Object.keys(lexis.items));
         goToUndoneTask(lexis.items, newDoneTasks);
     };
 
@@ -128,7 +155,7 @@ const StudentLexisPage = ({
                     element={<StudentLexisHub id={id} name={name} backToLessonCallback={backToLessonHandle} />}
                 />
                 <Route path="/card" element={<NavigateToElement to="../card/0" />} />
-                {routeElements.map((element, i) => (
+                {Object.values(routeElements).map((element: StudentLexisPageRouteProps<TLexisAnyItem>, i: number) => (
                     <Route
                         key={i}
                         path={element.path}

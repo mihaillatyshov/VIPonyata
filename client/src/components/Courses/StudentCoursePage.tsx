@@ -1,12 +1,18 @@
 import React, { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ServerAPI_GET } from "libs/ServerAPI";
+import { AjaxGet } from "libs/ServerAPI";
 import { selectCourses, setSelectedCourse } from "redux/slices/coursesSlice";
 import { setLessons } from "redux/slices/lessonsSlice";
 import style from "./StyleCourses.module.css";
-import { LogInfo } from "libs/Logger";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import StudentLessonsList from "components/Lessons/StudentLessonsList";
+import { TCourse } from "models/TCourse";
+import { TLesson } from "models/TLesson";
+
+type ResponseData = {
+    course: TCourse;
+    items: TLesson[];
+};
 
 const StudentCoursePage = () => {
     const { id } = useParams();
@@ -17,19 +23,16 @@ const StudentCoursePage = () => {
     useEffect(() => {
         dispatch(setSelectedCourse(undefined));
         dispatch(setLessons(undefined));
-        ServerAPI_GET({
-            url: `/api/courses/${id}`,
-            onDataReceived: (data) => {
-                LogInfo(data);
-                dispatch(setSelectedCourse(data.course));
-                dispatch(setLessons(data.items));
-            },
-            handleStatus: (res) => {
-                LogInfo(res.status);
-                if (res.status === 404) navigate("/");
-                if (res.status === 403) navigate("/");
-            },
-        });
+        AjaxGet<ResponseData>({ url: `/api/courses/${id}` })
+            .then((json) => {
+                dispatch(setSelectedCourse(json.course));
+                dispatch(setLessons(json.items));
+            })
+            .catch(({ isServerError, json, response }) => {
+                if (!isServerError) {
+                    if (response.status === 404 || response.status === 403) navigate("/");
+                }
+            });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 

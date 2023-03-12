@@ -15,9 +15,12 @@ const DragItem = ({ accept, fieldName, text, fieldId }: DropFieldProps) => {
     return (
         <div
             {...getDragToSpread({
-                accept: "testDND",
-                data: { name: fieldName, id: fieldId },
-                onDragStartCallback: () => setOpacity(0.5),
+                accept,
+                onDragStartCallback: ({ setDataCallback }) => {
+                    setOpacity(0.5);
+                    setDataCallback({ name: fieldName, id: fieldId });
+                },
+                onDragLeaveCallback: () => setOpacity(1),
                 onDragEndCallback: () => setOpacity(1),
             })}
             className="d-inline-flex"

@@ -1,8 +1,13 @@
 import React, { useEffect } from "react";
-import { ServerAPI_GET } from "libs/ServerAPI";
+import { AjaxGet } from "libs/ServerAPI";
 import { selectCourses, setCourses } from "redux/slices/coursesSlice";
 import CourseCard from "./CourseCard";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { TCourse } from "models/TCourse";
+
+type ResponseData = {
+    items: TCourse[];
+};
 
 const StudentCoursesList = () => {
     const courses = useAppSelector(selectCourses);
@@ -10,12 +15,10 @@ const StudentCoursesList = () => {
 
     useEffect(() => {
         dispatch(setCourses(undefined));
-        ServerAPI_GET({
+        AjaxGet<ResponseData>({
             url: "/api/courses",
-            onDataReceived: (data) => {
-                console.log(data);
-                dispatch(setCourses(data.items));
-            },
+        }).then((json) => {
+            dispatch(setCourses(json.items));
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);

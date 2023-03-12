@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { Button } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
-import { LogInfo } from "libs/Logger";
 import style from "../StyleLexis.module.css";
 import {
     NameTo_word_or_char,
@@ -10,8 +9,9 @@ import {
     useSetLexisSelectedItem,
     useSetLexisSelectedItemField,
 } from "./LexisUtils";
+import { TCardItem } from "models/Activity/Items/TLexisItems";
 
-const StudentLexisCard = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps) => {
+const StudentLexisCard = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps<TCardItem>) => {
     const { cardId } = useParams();
     const navigate = useNavigate();
     const taskTypeName = "card";
@@ -24,9 +24,9 @@ const StudentLexisCard = ({ name, inData, goToNextTaskCallback }: StudentLexisTa
 
     const sayJP = (sentence: string) => {
         const voices = synth.getVoices();
-        LogInfo(voices);
+        console.log(voices);
         const result = voices.filter((voice) => voice.lang === "ja-JP");
-        LogInfo(result);
+        console.log(result);
         var utterance = new SpeechSynthesisUtterance(sentence);
         utterance.lang = "ja-JP";
         //utterance.voice = result2[0];
@@ -49,11 +49,11 @@ const StudentLexisCard = ({ name, inData, goToNextTaskCallback }: StudentLexisTa
     };
 
     useEffect(() => {
-        LogInfo("set Lexis Selected Item Card", cardId);
+        console.log("set Lexis Selected Item Card", cardId);
         if (inData && cardId) {
             if (Number(cardId) < inData.length && Number(cardId) >= 0) {
                 setLexisSelectedItem({
-                    ...inData[cardId],
+                    ...inData[Number(cardId)],
                     type: taskTypeName,
                     isOpen: false,
                     number: Number(cardId),

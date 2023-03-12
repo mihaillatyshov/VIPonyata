@@ -1,9 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import style from "./StyleCourses.module.css";
+import { TCourse } from "models/TCourse";
 
 type CourseCardProps = {
-    course: any;
+    course: TCourse;
 };
 
 const CourseCard = ({ course }: CourseCardProps) => {

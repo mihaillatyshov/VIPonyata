@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { LogInfo } from "libs/Logger";
 import { setDrillingSelectedItem, setDrillingSelectedItemField } from "redux/slices/drillingSlice";
 
 const StudentDrillingListen = ({ words }) => {
@@ -11,9 +10,9 @@ const StudentDrillingListen = ({ words }) => {
     const strWordsJP = "WordsJP";
 
     useEffect(() => {
-        LogInfo("setDrillingSelectedItem Listen");
+        console.log("setDrillingSelectedItem Listen");
         if (pairs) {
-            LogInfo(pairs);
+            console.log(pairs);
             dispatch(
                 setDrillingSelectedItem({
                     ...pairs,

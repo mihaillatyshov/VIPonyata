@@ -1,71 +1,98 @@
 import React from "react";
 
-export type DragAndDropProps = {
-    accept: string;
+type DragCallbackProps = {
+    dragData: any;
+    setDataCallback: (data: any) => void;
 };
 
-type DragToSpreadProps = {
+let sharedAccept = "";
+let sharedData: any = undefined;
+
+type EventType = React.DragEvent<HTMLDivElement>;
+
+type onDragCallbackType = ({ dragData, setDataCallback }: DragCallbackProps) => void;
+
+type SharedDataAndCallbacks = {
     accept: string;
-    data?: any;
-    onDragStartCallback?: () => void;
-    onDragEndCallback?: () => void;
-    onDragLeaveCallback?: () => void;
-    onDragOverCallback?: () => void;
+    onDragEnterCallback?: onDragCallbackType;
+    onDragLeaveCallback?: onDragCallbackType;
+    onDragOverCallback?: onDragCallbackType;
 };
 
-type DropToSpreadProps = {
-    accept: string;
-    onDragOverCallback?: () => void;
-    onDropCallback?: (dragData: any) => void;
+type DragToSpreadProps = SharedDataAndCallbacks & {
+    onDragStartCallback?: onDragCallbackType;
+    onDragEndCallback?: onDragCallbackType;
+};
+
+type DropToSpreadProps = SharedDataAndCallbacks & {
+    onDropCallback?: onDragCallbackType;
+};
+
+const setDataHandle = (accept: string, data: any) => {
+    sharedAccept = accept;
+    sharedData = data;
+};
+
+const getDragData = () => {
+    return sharedData;
+};
+
+const getCallbackProps = (accept: string) => {
+    return {
+        dragData: getDragData(),
+        setDataCallback: (data: any) => setDataHandle(accept, data),
+    };
+};
+
+const isAcceptable = (accept: string) => {
+    return sharedAccept === accept;
 };
 
 export const getDragToSpread = ({
     accept,
-    data = undefined,
     onDragStartCallback,
     onDragEndCallback,
+    onDragEnterCallback,
     onDragLeaveCallback,
     onDragOverCallback,
 }: DragToSpreadProps) => {
     return {
         draggable: true,
-        onDragStart: (event: React.DragEvent<HTMLDivElement>) => {
-            onDragStartCallback && onDragStartCallback();
-            event.dataTransfer.setData("accept", accept);
-            event.dataTransfer.setData("data", JSON.stringify(data));
+        onDragStart(event: EventType) {
+            onDragStartCallback && onDragStartCallback(getCallbackProps(accept));
         },
-        onDragEnd: (event: React.DragEvent<HTMLDivElement>) => {
-            onDragEndCallback && onDragEndCallback();
-            console.log("DnD End");
+        onDragEnd(event: EventType) {
+            isAcceptable(accept) && onDragEndCallback && onDragEndCallback(getCallbackProps(accept));
         },
-        onDragLeave: (event: React.DragEvent<HTMLDivElement>) => {
-            onDragLeaveCallback && onDragLeaveCallback();
-            console.log("DnD Leave");
+        onDragEnter(event: EventType) {
+            isAcceptable(accept) && onDragLeaveCallback && onDragLeaveCallback(getCallbackProps(accept));
         },
-        onDragOver: (event: React.DragEvent<HTMLDivElement>) => {
-            onDragOverCallback && onDragOverCallback();
-            console.log("DnD Over");
+        onDragLeave(event: EventType) {
+            isAcceptable(accept) && onDragLeaveCallback && onDragLeaveCallback(getCallbackProps(accept));
+        },
+        onDragOver(event: EventType) {
+            event.preventDefault();
+            isAcceptable(accept) && onDragOverCallback && onDragOverCallback(getCallbackProps(accept));
         },
     };
 };
 
-export const getDropToSpread = ({ accept, onDragOverCallback, onDropCallback }: DropToSpreadProps) => {
+export const getDropToSpread = ({
+    accept,
+    onDropCallback,
+    onDragLeaveCallback,
+    onDragOverCallback,
+}: DropToSpreadProps) => {
     return {
-        onDrop: (event: React.DragEvent<HTMLDivElement>) => {
-            const dragAccept = event.dataTransfer.getData("accept");
-            const dragData = JSON.parse(event.dataTransfer.getData("data"));
-
-            if (accept !== dragAccept) {
-                return;
-            }
-
-            onDropCallback && onDropCallback(dragData);
-            console.log("DnD Drop", accept);
+        onDrop: (event: EventType) => {
+            isAcceptable(accept) && onDropCallback && onDropCallback(getCallbackProps(accept));
         },
-        onDragOver: (event: React.DragEvent<HTMLDivElement>) => {
+        onDragLeave(event: EventType) {
+            isAcceptable(accept) && onDragLeaveCallback && onDragLeaveCallback(getCallbackProps(accept));
+        },
+        onDragOver: (event: EventType) => {
             event.preventDefault();
-            onDragOverCallback && onDragOverCallback();
-            console.log("DnD Over (Drop)");
+            isAcceptable(accept) && onDragOverCallback && onDragOverCallback(getCallbackProps(accept));
         },
     };
 };

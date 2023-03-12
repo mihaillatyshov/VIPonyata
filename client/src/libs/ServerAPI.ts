@@ -38,48 +38,53 @@ const getStrFromParams = (rawParams: Object | undefined) => {
         : "";
 };
 
-const ServerAPI = (params: ServerAPIParams) => {
-    console.log(params.url + getStrFromParams(params.urlParams));
-    fetch(params.url + getStrFromParams(params.urlParams), {
-        method: params.method,
-        headers: params.headers || { "Content-Type": "application/json; charset=UTF-8" },
-        body: params.body && JSON.stringify(params.body),
-    })
-        .then((response) => {
-            const promise = response.json();
-            if (promise !== undefined) {
-                promise
-                    .then((data) => {
-                        if (response.ok) {
-                            params.onDataReceived && params.onDataReceived(data);
-                        } else {
-                            params.handleStatus &&
-                                params.handleStatus({ isOk: response.ok, status: response.status, data: data && data });
-                        }
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                    });
-            }
-        })
-        .catch((err) => {
-            console.log(err);
-            params.handleServerError && params.handleServerError();
+type ServerError = {
+    isServerError: boolean;
+    message: string;
+};
+const Ajax = async <T>({ method, url, urlParams, body, headers }: ServerAPIParams): Promise<T> => {
+    let response;
+    try {
+        response = await fetch(url + getStrFromParams(urlParams), {
+            method: method,
+            mode: "cors",
+            //credentials: credentials ? "include" : undefined,
+            body: body && JSON.stringify(body),
+            headers: { "Content-Type": "application/json; charset=UTF-8" },
         });
+    } catch (e) {
+        const error: ServerError = { isServerError: true, message: "Server Error!" };
+        throw error;
+    }
+
+    let json;
+    try {
+        json = await response.json();
+    } catch {
+        const error: ServerError = { isServerError: true, message: "JSON Error!" };
+        throw error;
+    }
+
+    if (response.ok) {
+        return json;
+    }
+
+    const error = { isServerError: false, json: json, response: response };
+    throw error;
 };
 
-export const ServerAPI_GET = (params = DefaultServerAPIParams) => {
-    ServerAPI({ ...params, method: "GET" });
+export const AjaxGet = <T>(params = DefaultServerAPIParams) => {
+    return Ajax<T>({ ...params, method: "GET" });
 };
 
-export const ServerAPI_POST = (params = DefaultServerAPIParams) => {
-    ServerAPI({ ...params, method: "POST" });
+export const AjaxPost = <T>(params = DefaultServerAPIParams) => {
+    return Ajax<T>({ ...params, method: "POST" });
 };
 
-export const ServerAPI_PATCH = (params = DefaultServerAPIParams) => {
-    ServerAPI({ ...params, method: "PATCH" });
+export const AjaxPatch = <T>(params = DefaultServerAPIParams) => {
+    return Ajax<T>({ ...params, method: "PATCH" });
 };
 
-export const ServerAPI_DELETE = (params = DefaultServerAPIParams) => {
-    ServerAPI({ ...params, method: "DELETE" });
+export const AjaxDelete = <T>(params = DefaultServerAPIParams) => {
+    return Ajax<T>({ ...params, method: "DELETE" });
 };

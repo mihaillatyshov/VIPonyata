@@ -1,17 +1,21 @@
 import React from "react";
-import { LogInfo } from "libs/Logger";
 import { Button } from "react-bootstrap";
 import StudentLexisTaskInterface from "./StudentLexisTaskInterface";
 import { StudentLexisTaskProps, useLexisItem, useSetLexisSelectedItemField } from "./LexisUtils";
+import { TSpace } from "models/Activity/Items/TLexisItems";
 
-const StudentLexisSpace = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps) => {
+const StudentLexisSpace = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps<TSpace>) => {
     const item = useLexisItem(name);
     const setLexisSelectedItemField = useSetLexisSelectedItemField(name);
 
-    LogInfo("Space", inData);
+    console.log("Space", inData);
 
     const getWordData = (id: number) => {
-        LogInfo(id, inData.words[id % inData.words.length].word_start, inData.words[id % inData.words.length].word_end);
+        console.log(
+            id,
+            inData.words[id % inData.words.length].word_start,
+            inData.words[id % inData.words.length].word_end
+        );
         return {
             inputText: "",
             wordId: id,
@@ -22,7 +26,7 @@ const StudentLexisSpace = ({ name, inData, goToNextTaskCallback }: StudentLexisT
 
     const nextWord = () => {
         const fullInput = item.wordStart + item.inputText.trim() + item.wordEnd;
-        LogInfo(inData.words[item.wordId], fullInput);
+        console.log(inData.words[item.wordId], fullInput);
         if (inData.words[item.wordId].word_or_char_jp === fullInput) {
             setLexisSelectedItemField({ ...getWordData(item.wordId + 1) });
         }

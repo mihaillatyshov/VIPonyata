@@ -1,23 +1,26 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../store";
+import { TUserData } from "models/TUser";
+
+type UserDataType = TUserData | undefined;
 
 export interface UserState {
     isAuth: boolean | undefined;
-    data: any | undefined;
+    userData: UserDataType;
 }
 
 const initialState: UserState = {
     isAuth: undefined,
-    data: undefined,
+    userData: undefined,
 };
 
 export const userSlice = createSlice({
     name: "user",
     initialState,
     reducers: {
-        setUserData: (state, action) => {
+        setUserData: (state, action: PayloadAction<UserState>) => {
             state.isAuth = action.payload.isAuth;
-            state.data = action.payload.userData;
+            state.userData = action.payload.userData;
         },
     },
 });

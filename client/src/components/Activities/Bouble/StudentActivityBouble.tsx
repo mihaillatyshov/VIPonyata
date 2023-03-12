@@ -1,14 +1,16 @@
 import React from "react";
 import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { ServerAPI_POST } from "libs/ServerAPI";
+import { AjaxPost } from "libs/ServerAPI";
 import StudentTimeRemaining from "components/Activities/StudentTimeRemaining";
-import { LogInfo } from "libs/Logger";
 import ActivityBouble from "./ActivityBouble";
 import { ActivityName } from "../ActivityUtils";
+import { TDrilling } from "models/Activity/TDrilling";
+import { THieroglyph } from "models/Activity/THieroglyph";
+import { TAssessment } from "models/Activity/TAssessment";
 
 type StudentActivityBubbleProps = {
-    info: any;
+    info: TDrilling | THieroglyph | TAssessment;
     title: string;
     name: ActivityName;
     onDeadline: () => void;
@@ -17,26 +19,26 @@ type StudentActivityBubbleProps = {
 const StudentActivityBubble = ({ info, title, name, onDeadline }: StudentActivityBubbleProps) => {
     const navigate = useNavigate();
 
-    LogInfo("ActivityBubble info:", info);
+    console.log("ActivityBubble info:", info);
 
     const isInProgress = () => {
         if (info.tries && info.tries.length !== 0) {
-            LogInfo("end_datetime", info.tries[info.tries.length - 1].end_datetime);
+            console.log("end_datetime", info.tries[info.tries.length - 1].end_datetime);
             return info.tries[info.tries.length - 1].end_datetime === null;
         }
         return false;
     };
 
     const onButtonClick = () => {
-        ServerAPI_POST({
-            url: `/api/${name}/${info.id}` + (isInProgress() ? "/continuetry" : "/newtry"),
-            onDataReceived: (data) => {
+        AjaxPost({ url: `/api/${name}/${info.id}` + (isInProgress() ? "/continuetry" : "/newtry") })
+            .then(() => {
                 navigate(`/${name}/${info.id}`);
-            },
-            handleStatus: (res) => {
-                if (res.status === 403) navigate("/");
-            },
-        });
+            })
+            .catch(({ isServerError, json, response }) => {
+                if (!isServerError) {
+                    if (response.status === 403) navigate("/");
+                }
+            });
     };
 
     const getButtonText = () => {

@@ -1,20 +1,18 @@
 import React from "react";
-import { ServerAPI_POST } from "libs/ServerAPI";
+import { AjaxPost } from "libs/ServerAPI";
 import { Button } from "react-bootstrap";
+import { LexisName } from "./Types/LexisUtils";
 
 type StudentLexisHubProps = {
     id: string | undefined;
-    name: "drilling" | "hieroglyph";
+    name: LexisName;
     backToLessonCallback: () => void;
 };
 
 const StudentLexisHub = ({ id, name, backToLessonCallback }: StudentLexisHubProps) => {
     const endLexisHandle = () => {
-        ServerAPI_POST({
-            url: `/api/${name}/${id}/endtry`,
-            onDataReceived: () => {
-                backToLessonCallback();
-            },
+        AjaxPost({ url: `/api/${name}/${id}/endtry` }).then(() => {
+            backToLessonCallback();
         });
     };
 
