@@ -2,8 +2,9 @@ import React from "react";
 import { StudentAssessmentTypeProps } from "./StudentAssessmentTypeProps";
 import { useAppDispatch } from "redux/hooks";
 import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
+import { TAssessmentTestSingle } from "models/Activity/Items/TAssessmentItems";
 
-const StudentAssessmentTestSingle = ({ data, taskId }: StudentAssessmentTypeProps) => {
+const StudentAssessmentTestSingle = ({ data, taskId }: StudentAssessmentTypeProps<TAssessmentTestSingle>) => {
     const dispatch = useAppDispatch();
 
     const onChangeHandler = (newId: number) => {

@@ -27,7 +27,7 @@ type ResponseData = {
 
 type StudentAssessmentAliasProps = {
     taskName: string;
-    component: (props: StudentAssessmentTypeProps) => JSX.Element;
+    component: (props: StudentAssessmentTypeProps<any>) => JSX.Element;
 };
 
 const StudentAssessmentPage = () => {

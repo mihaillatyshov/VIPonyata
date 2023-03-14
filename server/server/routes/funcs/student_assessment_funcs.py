@@ -153,10 +153,12 @@ class ClassificationParser(AssessmentParser):
 
     def parse(self, task_json: dict) -> dict:
         task_json["titles"] = []
-        task_json["data"] = []
+        task_json["inputs"] = []
+        task_json["answers"] = []
         for column in task_json["columns"]:
             task_json["titles"].append(column["title"])
-            task_json["data"].extend(column["data"])
+            task_json["inputs"].extend(column["data"])
+            task_json["answers"].append([])
         del task_json["columns"]
         return task_json
 

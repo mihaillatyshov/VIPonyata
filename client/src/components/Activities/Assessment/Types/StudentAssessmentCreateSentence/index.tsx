@@ -1,7 +1,8 @@
 import React from "react";
 import { StudentAssessmentTypeProps } from "../StudentAssessmentTypeProps";
+import { TAssessmentCreateSentence } from "models/Activity/Items/TAssessmentItems";
 
-const StudentAssessmentCreateSentence = ({ data, taskId }: StudentAssessmentTypeProps) => {
+const StudentAssessmentCreateSentence = ({ data, taskId }: StudentAssessmentTypeProps<TAssessmentCreateSentence>) => {
     return (
         <div>
             {data.parts.map((part: string, i: number) => (

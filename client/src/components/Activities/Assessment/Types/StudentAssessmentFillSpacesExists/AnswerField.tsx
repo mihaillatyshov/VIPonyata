@@ -10,6 +10,9 @@ export type AnswerFieldProps = FieldProps & {
 };
 
 const AnswerField = ({ accept, text, fieldId, onDropCallback }: AnswerFieldProps) => {
+    const getCN = () => {
+        return `border border-primary ${style.s_fillSpaceExists}`;
+    };
     return (
         <div
             {...getDropToSpread({
@@ -19,12 +22,12 @@ const AnswerField = ({ accept, text, fieldId, onDropCallback }: AnswerFieldProps
                     console.log(dragData);
                 },
             })}
-            className={style.s_fillSpaceExist}
+            className={getCN()}
         >
             {text !== undefined && text !== null ? (
                 <DragItem accept={accept} fieldName="answers" text={text} fieldId={fieldId} />
             ) : (
-                <div className="mx-2" style={{ width: "100px", height: "4em" }}>
+                <div className="mx-2" style={{ width: "100px", height: "1.5rem" }}>
                     {" "}
                 </div>
             )}

@@ -5,15 +5,23 @@ import InputsField from "./InputsField";
 import { useAppDispatch } from "redux/hooks";
 import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
 import { SwapDataProps } from "./DragAndDrop";
+import { TAssessmentFillSpacesExists } from "models/Activity/Items/TAssessmentItems";
 
-const StudentAssessmentFillSpacesExists = ({ data, taskId }: StudentAssessmentTypeProps) => {
+const StudentAssessmentFillSpacesExists = ({
+    data,
+    taskId,
+}: StudentAssessmentTypeProps<TAssessmentFillSpacesExists>) => {
     const dispatch = useAppDispatch();
     const accept = `dnd_ac_${taskId}`;
 
     const handleAnsInp = (swapData: SwapDataProps) => {
         const answerId = swapData.from.id;
 
-        data.inputs.push(data.answers[answerId]);
+        const answer = data.answers[answerId];
+        if (answer === null) {
+            return;
+        }
+        data.inputs.push(answer);
         data.answers[answerId] = null;
     };
 
@@ -21,12 +29,12 @@ const StudentAssessmentFillSpacesExists = ({ data, taskId }: StudentAssessmentTy
         const inputId = swapData.from.id;
         const answerId = swapData.to.id;
 
-        if (data.answers[answerId] !== null) {
-            data.inputs.push(data.answers[answerId]);
+        const answer = data.answers[answerId];
+        if (answer !== null) {
+            data.inputs.push(answer);
         }
 
-        data.answers[answerId] = data.inputs[inputId];
-        data.inputs.splice(inputId, 1);
+        data.answers[answerId] = data.inputs.splice(inputId, 1)[0];
     };
 
     const handleAnsAns = (swapData: SwapDataProps) => {
@@ -37,15 +45,7 @@ const StudentAssessmentFillSpacesExists = ({ data, taskId }: StudentAssessmentTy
     };
 
     const onDropHandle = (swapData: SwapDataProps) => {
-        console.log(
-            "SD: from: {",
-            swapData.from.id,
-            swapData.from.name,
-            "}, to: {",
-            swapData.to.id,
-            swapData.to.name,
-            "}"
-        );
+        console.log(swapData);
         if (swapData.from.name === "answers" && swapData.to.name === "answers") {
             handleAnsAns(swapData);
         } else if (swapData.from.name === "answers" && swapData.to.name === "inputs") {
@@ -60,10 +60,10 @@ const StudentAssessmentFillSpacesExists = ({ data, taskId }: StudentAssessmentTy
         <div>
             <InputsField accept={accept} inputFields={data.inputs} onDropCallback={onDropHandle} />
             <hr />
-            <div>
+            <div className="d-flex">
                 {data.separates.map((element: string, fieldId: number) => (
-                    <div key={fieldId}>
-                        <div>{element}</div>
+                    <div key={fieldId} className="d-flex">
+                        <div className="mx-2">{element}</div>
                         {fieldId < data.separates.length - 1 && (
                             <AnswerField
                                 accept={accept}

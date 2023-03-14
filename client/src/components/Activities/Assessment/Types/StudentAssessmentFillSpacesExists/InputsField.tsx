@@ -3,11 +3,12 @@ import DragItem from "./DragItem";
 import { FieldProps } from "./DragAndDrop";
 import { getDropToSpread } from "libs/DragAndDrop";
 
-export type InputsFieldProps = FieldProps & {
-    inputFields: any[string];
-};
+export interface InputsFieldProps extends FieldProps {
+    inputFields: string[];
+}
 
 const InputsField = ({ accept, inputFields, onDropCallback }: InputsFieldProps) => {
+    console.log("IF: ", inputFields);
     return (
         <div>
             <div
@@ -18,7 +19,7 @@ const InputsField = ({ accept, inputFields, onDropCallback }: InputsFieldProps) 
                         console.log(dragData);
                     },
                 })}
-                style={{ backgroundColor: "#CCCCCC", minHeight: "100px" }}
+                style={{ backgroundColor: "#CCCCCC", minHeight: "10rem", padding: "20px" }}
             >
                 {inputFields.map((text: string, fieldId: number) => (
                     <DragItem key={fieldId} accept={accept} fieldName="inputs" text={text} fieldId={fieldId} />

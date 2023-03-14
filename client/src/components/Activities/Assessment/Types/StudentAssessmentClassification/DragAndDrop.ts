@@ -1,6 +1,6 @@
 export type FieldName = "answers" | "inputs";
 
-export type SingleSwapDataProps = { id: number; name: FieldName };
+export type SingleSwapDataProps = { id: number; colId: number; name: FieldName };
 
 export type SwapDataProps = {
     from: SingleSwapDataProps;
