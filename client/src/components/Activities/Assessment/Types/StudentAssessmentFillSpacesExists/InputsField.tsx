@@ -8,7 +8,6 @@ export interface InputsFieldProps extends FieldProps {
 }
 
 const InputsField = ({ accept, inputFields, onDropCallback }: InputsFieldProps) => {
-    console.log("IF: ", inputFields);
     return (
         <div>
             <div

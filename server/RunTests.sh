@@ -1,0 +1,1 @@
+python -m unittest -f -v -c server.tests.assessment.TestCheckInput

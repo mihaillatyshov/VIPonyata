@@ -45,6 +45,13 @@ class AssessmentParser(abc.ABC):
     def parse(self, task_json: dict) -> dict:
         pass
 
+    @abc.abstractmethod
+    def checkInputFields(self, origin: dict, input: dict) -> bool:
+        pass
+
+    def checkInput(self, origin: dict, input: dict) -> bool:
+        return self.CanParse(input) and self.checkInputFields(origin, input)
+
 
 class Handlers:
     handlers = {}
@@ -80,6 +87,9 @@ class TextParser(AssessmentParser):
     def parse(self, task_json: dict) -> dict:
         return task_json
 
+    def checkInputFields(self, origin: dict, input: dict) -> bool:
+        return True
+
 
 @handlers.Add()
 class SingleTestParser(AssessmentParser):
@@ -89,6 +99,19 @@ class SingleTestParser(AssessmentParser):
     def parse(self, task_json: dict) -> dict:
         task_json["answer"] = None
         return task_json
+
+    def checkInputFields(self, origin: dict, input: dict) -> bool:                                                      # TODO make it better !!!
+        answer = input.get("answer", -1)
+        if answer == -1:
+            return False
+
+        if not (type(answer) is None or type(answer) is int):
+            return False
+
+        if answer < 0 or answer >= len(origin["options"]):
+            return False
+
+        return True
 
 
 @handlers.Add()
@@ -100,6 +123,9 @@ class MultiTestParser(AssessmentParser):
         task_json["answers"] = []
         return task_json
 
+    def checkInputFields(self, origin: dict, input: dict) -> bool:                                                      # TODO
+        return False
+
 
 @handlers.Add()
 class FindPairParser(AssessmentParser):
@@ -109,7 +135,11 @@ class FindPairParser(AssessmentParser):
     def parse(self, task_json: dict) -> dict:
         random.shuffle(task_json["first"])
         random.shuffle(task_json["second"])
+        task_json["pars_created"] = 0
         return task_json
+
+    def checkInputFields(self, origin: dict, input: dict) -> bool:                                                      # TODO
+        return False
 
 
 @handlers.Add()
@@ -120,6 +150,9 @@ class CreateSentence(AssessmentParser):
     def parse(self, task_json: dict) -> dict:
         random.shuffle(task_json["parts"])
         return task_json
+
+    def checkInputFields(self, origin: dict, input: dict) -> bool:                                                      # TODO
+        return False
 
 
 @handlers.Add()
@@ -134,6 +167,9 @@ class FillSpacesExists(AssessmentParser):
             task_json["answers"][i] = None
         return task_json
 
+    def checkInputFields(self, origin: dict, input: dict) -> bool:                                                      # TODO
+        return False
+
 
 @handlers.Add()
 class FillSpacesByHand(AssessmentParser):
@@ -144,6 +180,9 @@ class FillSpacesByHand(AssessmentParser):
         for i in range(len(task_json["answers"])):
             task_json["answers"][i] = ""
         return task_json
+
+    def checkInputFields(self, origin: dict, input: dict) -> bool:                                                      # TODO
+        return False
 
 
 @handlers.Add()
@@ -162,6 +201,9 @@ class ClassificationParser(AssessmentParser):
         del task_json["columns"]
         return task_json
 
+    def checkInputFields(self, origin: dict, input: dict) -> bool:                                                      # TODO
+        return False
+
 
 @handlers.Add()
 class SentenceOrderParser(AssessmentParser):
@@ -169,8 +211,11 @@ class SentenceOrderParser(AssessmentParser):
         return AssessmentTaskName.SENTENCE_OREDER
 
     def parse(self, task_json: dict) -> dict:
-        random.shuffle(task_json["sentences"])
+        random.shuffle(task_json["parts"])
         return task_json
+
+    def checkInputFields(self, origin: dict, input: dict) -> bool:                                                      # TODO
+        return False
 
 
 @handlers.Add()
@@ -182,6 +227,9 @@ class OpenQuestionParser(AssessmentParser):
         task_json["answer"] = ""
         return task_json
 
+    def checkInputFields(self, origin: dict, input: dict) -> bool:                                                      # TODO
+        return False
+
 
 @handlers.Add()
 class ImgParser(AssessmentParser):
@@ -190,6 +238,9 @@ class ImgParser(AssessmentParser):
 
     def parse(self, task_json: dict) -> dict:
         return task_json
+
+    def checkInputFields(self, origin: dict, input: dict) -> bool:                                                      # TODO
+        return False
 
 
 def ParseTasks(data_str: str) -> list[dict]:
@@ -262,6 +313,7 @@ class AssessmentFuncsClass(ActivityFuncs):
         if not request.json:
             raise InvalidRequestJson()
         done_tasks = request.json.get("done_tasks")
+        LogI("Done Tasks: ", done_tasks)
         if not done_tasks:
             raise InvalidAPIUsage("No done tasks!")
 

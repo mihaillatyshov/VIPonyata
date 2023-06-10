@@ -32,6 +32,7 @@ export interface TAssessmentTestMulti extends TAssessmentItemBase {
 export interface TAssessmentFindPair extends TAssessmentItemBase {
     first: string[];
     second: string[];
+    pars_created: number;
 }
 
 export interface TAssessmentCreateSentence extends TAssessmentItemBase {
@@ -57,7 +58,7 @@ export interface TAssessmentClassification extends TAssessmentItemBase {
 }
 
 export interface TAssessmentSentenceOrder extends TAssessmentItemBase {
-    sentences: string[];
+    parts: string[];
 }
 
 export interface TAssessmentOpenQuestion extends TAssessmentItemBase {

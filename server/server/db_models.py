@@ -301,7 +301,7 @@ def CreateSession(url, username, password, host, database):
         database=database,
     )
 
-    engine = create_engine(db_config, pool_recycle=3600, pool_size=20, max_overflow=0)
+    engine = create_engine(db_config, pool_recycle=3600, pool_size=20, max_overflow=30, pool_timeout=5)
     session_factory = sessionmaker(bind=engine)
     print("session created succesfully")
     Base.metadata.create_all(engine)

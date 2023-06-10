@@ -40,7 +40,7 @@ const StudentAssessmentClassification = ({ data, taskId }: StudentAssessmentType
         dispatch(setAssessmentTaskData({ id: taskId, data: data }));
     };
 
-    console.log("TAssessmentClassification", data);
+    // console.log("TAssessmentClassification", data);
     return (
         <div>
             <ItemsField

@@ -4,13 +4,11 @@ import { RootState } from "redux/store";
 export interface AssessmentState {
     info: any | undefined;
     items: any | undefined;
-    selectedItem: any | undefined;
 }
 
 const initialState: AssessmentState = {
     info: undefined,
     items: undefined,
-    selectedItem: undefined,
 };
 
 export const assessmentSlice = createSlice({

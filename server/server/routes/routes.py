@@ -45,6 +45,7 @@ def fileUpload():
         return {"message": "Error, No files"}, 400
     file = request.files["file"]
     if file and file.filename and allowed_file(file.filename):
+        LogI("file: ", file)
         filename = secure_filename(hashlib.sha512(datetime.now().strftime("%Y%m%d%H%M%S").encode()).hexdigest())
         filename += "." + get_file_extention(file.filename)
 

@@ -1,0 +1,54 @@
+[
+    {
+        "name": "text",
+        "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+    },
+    {
+        "name": "test_single",
+        "question": "Ansewer to this question single",
+        "options": ["False 0", "False 1", "True 2", "False 3"],
+        "answer": null
+    },
+    {
+        "name": "test_multi",
+        "question": "Ansewer to this question multi",
+        "options": ["False 0", "False 1", "True 2", "True 3"],
+        "answers": []
+    },
+    {
+        "name": "find_pair",
+        "first": ["f5", "f4", "f6", "f7", "f1", "f2", "f3"],
+        "second": ["s6", "s3", "s4", "s2", "s7", "s1", "s5"]
+    },
+    { "name": "create_sentence", "parts": ["th2is", "sent3ence", "Cre1ate"] },
+    {
+        "name": "fill_spaces_exists",
+        "separates": ["Exist. Fill word after (word):", "and", ": before this (char)"],
+        "answers": [null, null],
+        "inputs": ["char", "word"]
+    },
+    {
+        "name": "fill_spaces_by_hand",
+        "separates": ["By Hand. Fill word after (word):", "and", ": before this (char)"],
+        "answers": ["", ""]
+    },
+    {
+        "name": "classification",
+        "titles": ["Col1", "Col2", "Col3"],
+        "inputs": [
+            "Ansewer 1 (Col1)",
+            "Ansewer 2 (Col1)",
+            "Ansewer 3 (Col1)",
+            "Ansewer 1 (Col2)",
+            "Ansewer 2 (Col2)",
+            "Ansewer 3 (Col2)",
+            "Ansewer 1 (Col3)",
+            "Ansewer 2 (Col3)",
+            "Ansewer 3 (Col3)"
+        ],
+        "answers": [[], [], []]
+    },
+    { "name": "sentence_order", "parts": ["Fourth sentence", "Second sentence", "First sentence", "Third sentence"] },
+    { "name": "open_question", "question": "Ansewer to this question pls", "answer": "" },
+    { "name": "img", "url": "/img/Activity/Assessment/test.png" }
+]

@@ -1,15 +1,10 @@
 import React from "react";
 import { StudentAssessmentTypeProps } from "./StudentAssessmentTypeProps";
 import { TAssessmentSentenceOrder } from "models/Activity/Items/TAssessmentItems";
+import MoveDragAndDrop from "./MoveDragAndDrop";
 
 const StudentAssessmentSentenceOrder = ({ data, taskId }: StudentAssessmentTypeProps<TAssessmentSentenceOrder>) => {
-    return (
-        <div>
-            {data.sentences.map((element: string, i: number) => (
-                <div key={i}>{element}</div>
-            ))}
-        </div>
-    );
+    return <MoveDragAndDrop data={data} taskId={taskId} flexType="column" />;
 };
 
 export default StudentAssessmentSentenceOrder;

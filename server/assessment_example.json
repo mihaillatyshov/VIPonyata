@@ -54,7 +54,7 @@
         },
         {
             "name": "sentence_order",
-            "sentences": ["First sentence", "Second sentence", "Third sentence", "Fourth sentence"]
+            "parts": ["First sentence", "Second sentence", "Third sentence", "Fourth sentence"]
         },
         {
             "name": "open_question",

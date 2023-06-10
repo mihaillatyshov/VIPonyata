@@ -1,14 +1,8 @@
 import logging
 import click
 
-from random import choice
-
 import os
 import datetime
-import time
-import colors
-from rfc3339 import rfc3339
-from flask import g, request
 
 from flask_cors import CORS
 

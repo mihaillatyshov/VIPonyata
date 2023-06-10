@@ -13,8 +13,8 @@ import StudentAssessmentCreateSentence from "./Types/StudentAssessmentCreateSent
 import StudentAssessmentFillSpacesExists from "./Types/StudentAssessmentFillSpacesExists";
 import StudentAssessmentFillSpacesByHand from "./Types/StudentAssessmentFillSpacesByHand";
 import StudentAssessmentClassification from "./Types/StudentAssessmentClassification";
-import StudentAssessmentSentenceOrder from "./Types/StudentAssessmentSentenceOrder";
 import StudentAssessmentOpenQuestion from "./Types/StudentAssessmentOpenQuestion";
+import StudentAssessmentSentenceOrder from "./Types/StudentAssessmentSentenceOrder";
 import StudentAssessmentImg from "./Types/StudentAssessmentImg";
 import { Button } from "react-bootstrap";
 import { TAssessment } from "models/Activity/TAssessment";
@@ -52,6 +52,13 @@ const StudentAssessmentPage = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            console.log("Send Some Changes . . .");
+        }, 2000);
+        return () => clearTimeout(timer);
+    }, [assessment]);
+
     const backToLessonHandle = () => {
         navigate(`/lessons/${assessment.info.lesson_id}`);
     };
@@ -59,7 +66,7 @@ const StudentAssessmentPage = () => {
     const endAssessmentHandle = () => {
         AjaxPost({
             url: `/api/assessment/${id}/endtry`,
-            body: { done_tasks: "test" }, // TODO FIXIT (TEST MESSAGE)
+            body: { done_tasks: assessment.items }, // TODO FIXIT (TEST MESSAGE)
         }).then(() => {
             backToLessonHandle();
         });
