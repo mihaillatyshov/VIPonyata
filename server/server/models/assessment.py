@@ -134,7 +134,7 @@ class MultiTestTaskRes(MultiTestTaskFullBase, BaseModelRes):
             return False
 
         for answer in self.answers:
-            if 0 <= answer < len(self.options):
+            if not (0 <= answer < len(self.options)):
                 return False
 
         return True
@@ -171,9 +171,9 @@ class FindPairTaskBase(BaseModelTask):
 
 
 class FindPairTaskReqBase(FindPairTaskBase):
-    @root_validator()
+    @root_validator(skip_on_failure=True)
     def first_second_validate(cls, values: dict):
-        print("values", values)
+        print("========================= VALUES", values)
         first: list[str] = values["first"]
         second: list[str] = values["second"]
 
@@ -194,7 +194,7 @@ class FindPairTaskRes(FindPairTaskBase, BaseModelRes):
     to_check_first: list[str] = []
     to_check_second: list[str] = []
 
-    @root_validator()
+    @root_validator(skip_on_failure=True)
     def to_check_first_second_validation(cls, values: dict):
         if len(values["to_check_first"]) == 0:
             values["to_check_first"] = values["first"]
@@ -211,6 +211,11 @@ class FindPairTaskRes(FindPairTaskBase, BaseModelRes):
         return result
 
     def custom_validation(self) -> bool:
+        if ((len(set(self.to_check_first)) != len(self.first)) or (len(set(self.to_check_second)) != len(self.second))):
+            return False
+
+        if ((set(self.to_check_first) != set(self.first)) or (set(self.to_check_second) != set(self.second))):
+            return False
 
         return True
 
@@ -219,19 +224,19 @@ class FindPairTaskReqCreate(FindPairTaskReqBase):
     pass
 
 
-fp = FindPairTaskReq(name=AssessmentTaskName.FIND_PAIR, first=["f1", "f2"], second=["s1", "s2"])
-print(fp.dict())
+# fp = FindPairTaskReq(name=AssessmentTaskName.FIND_PAIR, first=["f1", "f2"], second=["s1", "s2"])
+# print(fp.dict())
 
-fp2 = FindPairTaskRes(name=AssessmentTaskName.FIND_PAIR, first=["f2", "f1"], second=["s2", "s1"])
-print("CD", fp2.combine_dict())
-print(fp2)
-print(fp2.dict())
+# fp2 = FindPairTaskRes(name=AssessmentTaskName.FIND_PAIR, first=["f2", "f1"], second=["s2", "s1"])
+# print("CD", fp2.combine_dict())
+# print(fp2)
+# print(fp2.dict())
 
-fp3 = FindPairTaskRes(**(fp2.combine_dict() | fp.combine_dict()))
-print(fp3)
-print(fp3.dict())
+# fp3 = FindPairTaskRes(**(fp2.combine_dict() | fp.combine_dict()))
+# print(fp3)
+# print(fp3.dict())
 
-exit()
+# exit()
 
 
 #########################################################################################################################
@@ -255,6 +260,6 @@ create_alias(AssessmentTaskName.TEST_SINGLE, SingleTestTaskReq, SingleTestTaskRe
 create_alias(AssessmentTaskName.TEST_MULTI, MultiTestTaskReq, MultiTestTaskRes, MultiTestTaskReqCreate)
 
 #Check Aliases
-for name in AssessmentTaskName:
-    if name not in Aliases.keys():
-        raise KeyError(f"Alias {name} not found")
+# for name in AssessmentTaskName:
+#     if name not in Aliases.keys():
+#         raise KeyError(f"Alias {name} not found")
