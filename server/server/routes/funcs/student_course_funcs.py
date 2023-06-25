@@ -1,4 +1,4 @@
-from ...queries import StudentDBqueries as DBQS
+import server.queries.StudentDBqueries as DBQS
 from ..routes_utils import GetCurrentUserId
 
 

@@ -1,4 +1,4 @@
-from ...queries import TeacherDBqueries as DBQT
+import server.queries.TeacherDBqueries as DBQT
 
 
 def getLessonsByCourseId(courseId: int):

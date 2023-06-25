@@ -7,7 +7,7 @@ from flask_login import login_required
 from werkzeug.utils import secure_filename
 
 from .. import DBsession
-from ..ApiExceptions import InvalidAPIUsage
+from server.exceptions.ApiExceptions import InvalidAPIUsage
 from ..db_models import Course
 from .funcs import funcs_student as student_funcs
 from .funcs import funcs_teacher as teacher_funcs

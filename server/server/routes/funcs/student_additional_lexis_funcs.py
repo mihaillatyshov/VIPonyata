@@ -1,8 +1,8 @@
 import random
 import typing
 
-from ...ApiExceptions import InvalidAPIUsage
-from ...queries import StudentDBqueries as DBQS
+from server.exceptions.ApiExceptions import InvalidAPIUsage
+import server.queries.StudentDBqueries as DBQS
 from ...db_models import Drilling, DrillingTry, Hieroglyph, HieroglyphTry, LexisType
 
 

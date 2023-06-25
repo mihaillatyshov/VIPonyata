@@ -1,123 +1,43 @@
 import unittest
 
+from pydantic import ValidationError
+
 import server.routes.funcs.student_assessment_funcs as SAF
+from server.models.assessment import (AssessmentTaskName, TextTaskReq, TextTaskRes, TextTaskReqCreate,
+                                      SingleTestTaskReq, SingleTestTaskRes, SingleTestTaskReqCreate, MultiTestTaskReq,
+                                      MultiTestTaskRes, MultiTestTaskReqCreate)
 
 
-class TestSum(unittest.TestCase):
-    def createOriginTest(self, parser: SAF.AssessmentParser, origin: dict, tests: list[dict]):
-        with self.subTest(origin=origin):
-            self.assertTrue(parser.checkInput(origin, origin))
-
-        for test in tests:
-            with self.subTest(test=test):
-                if test.get("result"):
-                    self.assertTrue(parser.checkInput(origin, test["value"]))
-                else:
-                    self.assertFalse(parser.checkInput(origin, test["value"]))
-
+class TestAssessmentModels(unittest.TestCase):
     def test_Text(self):
-        testOrigin = {"name": "text", "text": "Some Text 1"}
-        tests = [{"value": {"name": "text"}, "result": True}]
+        self.assertRaises(ValidationError, TextTaskReq, **{"name": AssessmentTaskName.TEST_SINGLE})
+        self.assertRaises(ValidationError, TextTaskReqCreate, **{"name": AssessmentTaskName.TEXT})
 
-        self.createOriginTest(SAF.TextParser(), testOrigin, tests)
+        self.assertTrue(TextTaskRes(name=AssessmentTaskName.TEXT, text="some text").custom_validation())
 
     def test_SingleTest(self):
-        testOrigin = {                                                                                                  # Test Original
-            "name": "test_single",
-            "question": "Ansewer to this question single",
-            "options": ["False 0", "False 1", "True 2", "False 3"],
-            "answer": 2
+        value_base = {
+            "name": AssessmentTaskName.TEST_SINGLE,
+            "question": "Ansewer to this question multi",
+            "options": ["False 0", "False 1", "True 2", "True 3"]
         }
 
-        def valueCreator(value):
-            return {"name": "test_single", "answer": value}
+        self.assertRaises(ValidationError, SingleTestTaskReq, **{"name": AssessmentTaskName.TEXT})
+        self.assertRaises(ValidationError, SingleTestTaskReqCreate, **{"name": AssessmentTaskName.TEST_SINGLE})
 
-        tests = [
-            {
-                "value": {                                                                                              # No Answer
-                    "name": "test_single"
-                }
-            },
-            {
-                "value": valueCreator(None)                                                                             # Answer is None
-            },
-            {
-                "value": valueCreator(-2)                                                                               # Answer < 0
-            },
-            {
-                "value": valueCreator(5)                                                                                # Answer >= len(options)
-            },
-            {
-                "value": valueCreator("answer")                                                                         # Other type
-            },
-            {
-                "value": valueCreator([])                                                                               # Other type
-            },
-            {
-                "value": valueCreator("0")                                                                              # Other type
-            },
-            {
-                "value": valueCreator(0),
-                "result": True
-            },
-            {
-                "value": valueCreator(1),
-                "result": True
-            },
-            {
-                "value": valueCreator(2),
-                "result": True
-            },
-            {
-                "value": valueCreator(3),
-                "result": True
-            }
-        ]
+        self.assertTrue(SingleTestTaskRes(**value_base, answer=None).custom_validation())
 
-        self.createOriginTest(SAF.SingleTestParser(), testOrigin, tests)
+        self.assertFalse(SingleTestTaskRes(**value_base, answer=-1).custom_validation())
+
+        self.assertFalse(SingleTestTaskRes(**value_base, answer=4).custom_validation())
+
+        self.assertTrue(SingleTestTaskRes(**value_base, answer=0).custom_validation())
+
+        self.assertTrue(SingleTestTaskRes(**value_base, answer=3).custom_validation())
 
     def test_MultiTest(self):
-        testOrigin = {                                                                                                  # Test Original
-            "name": "test_multi",
-            "question": "Ansewer to this question multi",
-            "options": ["False 0", "False 1", "True 2", "True 3"],
-            "answer": [2, 3]
-        }
-
-        def valueCreator(value):
-            return {"name": "test_multi", "answer": value}
-
-        tests = [
-            {
-                "value": {                                                                                              # No Answer
-                    "name": "test_multi"
-                }
-            },
-            {
-                "value": valueCreator([3, -2, 1])                                                                       # Answer < 0
-            },
-            {
-                "value": valueCreator([1, 5, 3])                                                                        # Answer >= len(options)
-            },
-            {
-                "value": valueCreator("answer")                                                                         # Other type
-            },
-            {
-                "value": valueCreator(1)                                                                                # Other type
-            },
-            {
-                "value": valueCreator([1, "0"])                                                                         # Other type
-            },
-            {
-                "value": valueCreator([1, 3, 3])                                                                        # Repeats
-            },
-            {
-                "value": valueCreator([1]),
-                "result": True
-            }
-        ]
-
-        self.createOriginTest(SAF.MultiTestParser(), testOrigin, tests)
+        self.assertRaises(ValidationError, SingleTestTaskReq, **{"name": AssessmentTaskName.TEXT})
+        self.assertRaises(ValidationError, SingleTestTaskReqCreate, **{"name": AssessmentTaskName.TEST_MULTI})
 
 
 if __name__ == '__main__':

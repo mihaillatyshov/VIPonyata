@@ -1,6 +1,6 @@
-from ...ApiExceptions import InvalidAPIUsage
+from server.exceptions.ApiExceptions import InvalidAPIUsage
 from ...db_models import ActivityType, Assessment, Drilling, Hieroglyph
-from ...queries import StudentDBqueries as DBQS
+import server.queries.StudentDBqueries as DBQS
 from ..routes_utils import (ActivityEndTimeHandler, GetCurrentUserId, StartActivityTimerLimit)
 
 

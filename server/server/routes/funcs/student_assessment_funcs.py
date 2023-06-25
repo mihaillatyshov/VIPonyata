@@ -1,36 +1,20 @@
 import abc
-import random
 import json
+import random
+from types import NoneType
+from typing import Any
 
 from flask import request
-from ...ApiExceptions import InvalidAPIUsage, InvalidRequestJson
 
-from .student_activity_funcs import ActivityFuncs
-from ...queries import StudentDBqueries as DBQS
-from ..routes_utils import (ActivityEndTimeHandler, GetCurrentUserId, StartActivityTimerLimit)
-from ...queries.DBqueriesUtils import DBsession
+from server.exceptions.ApiExceptions import InvalidAPIUsage, InvalidRequestJson
+from server.queries import StudentDBqueries as DBQS
+from server.queries.DBqueriesUtils import DBsession
+from server.models.assessment import AssessmentTaskName
+
 from ...db_models import Assessment
-from ...log_lib import LogI, LogW, LogE
-
-
-class AssessmentTaskName:
-    TEXT = "text"
-    TEST_SINGLE = "test_single"
-    TEST_MULTI = "test_multi"
-    CREATE_SENTENCE = "create_sentence"
-    FILL_SPACES_EXISTS = "fill_spaces_exists"
-    FILL_SPACES_BY_HAND = "fill_spaces_by_hand"
-    FIND_PAIR = "find_pair"
-    CLASSIFICATION = "classification"
-    SENTENCE_OREDER = "sentence_order"
-    OPEN_QUESTION = "open_question"
-    IMG = "img"
-
-
-AssessmentTaskNameList = [
-    value for name, value in vars(AssessmentTaskName).items()
-    if not callable(getattr(AssessmentTaskName, name)) and not name.startswith("__")
-]
+from ...log_lib import LogE, LogI, LogW
+from ..routes_utils import (ActivityEndTimeHandler, GetCurrentUserId, StartActivityTimerLimit)
+from .student_activity_funcs import ActivityFuncs
 
 
 class AssessmentParser(abc.ABC):
@@ -38,7 +22,7 @@ class AssessmentParser(abc.ABC):
         return self.name() == task_json["name"]
 
     @abc.abstractmethod
-    def name(self) -> str:
+    def name(self) -> AssessmentTaskName:
         pass
 
     @abc.abstractmethod
@@ -54,7 +38,7 @@ class AssessmentParser(abc.ABC):
 
 
 class Handlers:
-    handlers = {}
+    _handlers: dict[str, Any] = {}
     stop_adding = False
 
     def Add(self):
@@ -63,7 +47,7 @@ class Handlers:
         def decorator(parser):
             if not self.stop_adding:
                 parser_obj = parser()
-                self.handlers[parser_obj.name()] = parser_obj                                                           # TODO add check of adding existing parser
+                self._handlers[parser_obj.name()] = parser_obj                                                          # TODO add check of adding existing parser
                 LogI("Added parser: ", parser)
             return parser
 
@@ -73,7 +57,7 @@ class Handlers:
         self.stop_adding = True
 
     def __call__(self):
-        return self.handlers
+        return self._handlers
 
 
 handlers = Handlers()
@@ -81,7 +65,7 @@ handlers = Handlers()
 
 @handlers.Add()
 class TextParser(AssessmentParser):
-    def name(self) -> str:
+    def name(self) -> AssessmentTaskName:
         return AssessmentTaskName.TEXT
 
     def parse(self, task_json: dict) -> dict:
@@ -93,7 +77,7 @@ class TextParser(AssessmentParser):
 
 @handlers.Add()
 class SingleTestParser(AssessmentParser):
-    def name(self) -> str:
+    def name(self) -> AssessmentTaskName:
         return AssessmentTaskName.TEST_SINGLE
 
     def parse(self, task_json: dict) -> dict:
@@ -105,18 +89,19 @@ class SingleTestParser(AssessmentParser):
         if answer == -1:
             return False
 
-        if not (type(answer) is None or type(answer) is int):
+        if not (type(answer) is NoneType or type(answer) is int):
             return False
 
-        if answer < 0 or answer >= len(origin["options"]):
-            return False
+        if (type(answer) is int):
+            if answer < 0 or answer >= len(origin["options"]):
+                return False
 
         return True
 
 
 @handlers.Add()
 class MultiTestParser(AssessmentParser):
-    def name(self) -> str:
+    def name(self) -> AssessmentTaskName:
         return AssessmentTaskName.TEST_MULTI
 
     def parse(self, task_json: dict) -> dict:
@@ -129,7 +114,7 @@ class MultiTestParser(AssessmentParser):
 
 @handlers.Add()
 class FindPairParser(AssessmentParser):
-    def name(self) -> str:
+    def name(self) -> AssessmentTaskName:
         return AssessmentTaskName.FIND_PAIR
 
     def parse(self, task_json: dict) -> dict:
@@ -144,7 +129,7 @@ class FindPairParser(AssessmentParser):
 
 @handlers.Add()
 class CreateSentence(AssessmentParser):
-    def name(self) -> str:
+    def name(self) -> AssessmentTaskName:
         return AssessmentTaskName.CREATE_SENTENCE
 
     def parse(self, task_json: dict) -> dict:
@@ -157,7 +142,7 @@ class CreateSentence(AssessmentParser):
 
 @handlers.Add()
 class FillSpacesExists(AssessmentParser):
-    def name(self) -> str:
+    def name(self) -> AssessmentTaskName:
         return AssessmentTaskName.FILL_SPACES_EXISTS
 
     def parse(self, task_json: dict) -> dict:
@@ -173,7 +158,7 @@ class FillSpacesExists(AssessmentParser):
 
 @handlers.Add()
 class FillSpacesByHand(AssessmentParser):
-    def name(self) -> str:
+    def name(self) -> AssessmentTaskName:
         return AssessmentTaskName.FILL_SPACES_BY_HAND
 
     def parse(self, task_json: dict) -> dict:
@@ -187,7 +172,7 @@ class FillSpacesByHand(AssessmentParser):
 
 @handlers.Add()
 class ClassificationParser(AssessmentParser):
-    def name(self) -> str:
+    def name(self) -> AssessmentTaskName:
         return AssessmentTaskName.CLASSIFICATION
 
     def parse(self, task_json: dict) -> dict:
@@ -207,7 +192,7 @@ class ClassificationParser(AssessmentParser):
 
 @handlers.Add()
 class SentenceOrderParser(AssessmentParser):
-    def name(self) -> str:
+    def name(self) -> AssessmentTaskName:
         return AssessmentTaskName.SENTENCE_OREDER
 
     def parse(self, task_json: dict) -> dict:
@@ -220,7 +205,7 @@ class SentenceOrderParser(AssessmentParser):
 
 @handlers.Add()
 class OpenQuestionParser(AssessmentParser):
-    def name(self) -> str:
+    def name(self) -> AssessmentTaskName:
         return AssessmentTaskName.OPEN_QUESTION
 
     def parse(self, task_json: dict) -> dict:
@@ -233,7 +218,7 @@ class OpenQuestionParser(AssessmentParser):
 
 @handlers.Add()
 class ImgParser(AssessmentParser):
-    def name(self) -> str:
+    def name(self) -> AssessmentTaskName:
         return AssessmentTaskName.IMG
 
     def parse(self, task_json: dict) -> dict:

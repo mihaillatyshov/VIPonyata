@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from ..ApiExceptions import InvalidAPIUsage, CourseNotFoundException, LessonNotFoundException, ActivityNotFoundException
+from server.exceptions.ApiExceptions import InvalidAPIUsage, CourseNotFoundException, LessonNotFoundException, ActivityNotFoundException
 from ..db_models import (User, Course, Lesson, Drilling, DrillingTry, Hieroglyph, HieroglyphTry, Assessment,
                          AssessmentTry, ActivityType, ActivityTryType)
 from ..log_lib import LogI
@@ -10,55 +10,55 @@ from .DBqueriesUtils import DBsession
 #########################################################################################################################
 ################ Course and Lesson ######################################################################################
 #########################################################################################################################
-def GetAvailableCourses(userId: int) -> list[Course]:
-    return DBsession().query(Course).join(Course.users).filter(User.id == userId).order_by(Course.sort).all()
+def GetAvailableCourses(user_id: int) -> list[Course]:
+    return DBsession().query(Course).join(Course.users).filter(User.id == user_id).order_by(Course.sort).all()
 
 
-def GetCourseById(courseId: int, userId: int) -> Course:
+def GetCourseById(course_id: int, user_id: int) -> Course:
     course = (                                                                                                          #
         DBsession()                                                                                                     #
         .query(Course)                                                                                                  #
-        .filter(Course.id == courseId)                                                                                  #
+        .filter(Course.id == course_id)                                                                                 #
         .join(Course.users)                                                                                             #
-        .filter(User.id == userId)                                                                                      #
+        .filter(User.id == user_id)                                                                                     #
         .one_or_none()                                                                                                  #
     )                                                                                                                   #
 
     if course:
         return course
 
-    if DBsession().query(Course).filter(Course.id == courseId).one_or_none():
+    if DBsession().query(Course).filter(Course.id == course_id).one_or_none():
         raise InvalidAPIUsage("You do not have access to this course!", 403)
 
     raise CourseNotFoundException()
 
 
-def GetLessonsByCourseId(courseId: int, userId: int) -> list[Lesson]:
+def GetLessonsByCourseId(course_id: int, user_id: int) -> list[Lesson]:
     return (                                                                                                            #
         DBsession()                                                                                                     #
         .query(Lesson)                                                                                                  #
-        .filter(Lesson.course_id == courseId)                                                                           #
+        .filter(Lesson.course_id == course_id)                                                                          #
         .join(Lesson.users)                                                                                             #
-        .filter(User.id == userId)                                                                                      #
+        .filter(User.id == user_id)                                                                                     #
         .order_by(Lesson.number)                                                                                        #
         .all()                                                                                                          #
     )                                                                                                                   #
 
 
-def GetLessonById(lessonId: int, userId: int) -> Lesson:
+def GetLessonById(lesson_id: int, user_id: int) -> Lesson:
     lesson = (                                                                                                          #
         DBsession()                                                                                                     #
         .query(Lesson)                                                                                                  #
-        .filter(Lesson.id == lessonId)                                                                                  #
+        .filter(Lesson.id == lesson_id)                                                                                 #
         .join(Lesson.users)                                                                                             #
-        .filter(User.id == userId)                                                                                      #
+        .filter(User.id == user_id)                                                                                     #
         .one_or_none()                                                                                                  #
     )                                                                                                                   #
 
     if lesson:
         return lesson
 
-    if lesson := DBsession().query(Lesson).filter(Lesson.id == lessonId).one_or_none():
+    if lesson := DBsession().query(Lesson).filter(Lesson.id == lesson_id).one_or_none():
         raise InvalidAPIUsage("You do not have access to this lesson!", 403, {"course_id": lesson.course_id})
 
     raise LessonNotFoundException()

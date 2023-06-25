@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from ..db_models import ActivityType, ActivityTryType, CreateSessionFromJsonFile
-from ..log_lib import LogW
-from .DBqueriesUtils import *
+from server.db_models import ActivityType, ActivityTryType, CreateSessionFromJsonFile
+from server.log_lib import LogW
+from .DBqueriesUtils import DBsession
 
 
 def GetActivityCheckTasksTimers(activity_type: ActivityType,
@@ -23,8 +23,8 @@ def GetActivityTryById(activityTryId: int, activityTry_type: ActivityTryType) ->
     return DBsession().query(activityTry_type).filter(activityTry_type.id == activityTryId).one_or_none()
 
 
-def UpdateActivityTryEndTime(activityTryId: int, endTime: datetime, activityTry_type: ActivityTryType) -> None:
-    if activityTry := DBsession().query(activityTry_type).filter(activityTry_type.id == activityTryId).one_or_none():
-        activityTry.end_datetime = endTime
-        DBsession().add(activityTry)
+def UpdateActivityTryEndTime(activity_try_id: int, endTime: datetime, activityTry_type: ActivityTryType) -> None:
+    if activity_try := DBsession().query(activityTry_type).filter(activityTry_type.id == activity_try_id).one_or_none():
+        activity_try.end_datetime = endTime
+        DBsession().add(activity_try)
         DBsession().commit()

@@ -1,3 +1,6 @@
+import server.models.assessment
+
+exit()
 import logging
 import click
 
@@ -6,8 +9,8 @@ import datetime
 
 from flask_cors import CORS
 
-from server.ApiExceptions import InvalidAPIUsage
-from server.start_server import createApp
+from server.exceptions.ApiExceptions import InvalidAPIUsage
+from server.start_server import create_app
 
 if not os.path.isdir("./log"):
     os.mkdir("./log")
@@ -26,12 +29,12 @@ class RemoveColorFilter(logging.Filter):
 remove_color_filter = RemoveColorFilter()
 logging.getLogger("werkzeug").addFilter(remove_color_filter)
 
-app = createApp()
+app = create_app()
 CORS(app)
 
 
 @app.errorhandler(InvalidAPIUsage)
-def appErrorHandler(exception: InvalidAPIUsage):
+def app_error_handler(exception: InvalidAPIUsage):
     return exception.to_dict(), exception.status_code
 
 

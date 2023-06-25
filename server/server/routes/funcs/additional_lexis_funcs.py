@@ -1,4 +1,4 @@
-from ...ApiExceptions import InvalidAPIUsage
+from server.exceptions.ApiExceptions import InvalidAPIUsage
 from ...db_models import Drilling, DrillingTry, Hieroglyph, HieroglyphTry, LexisType
 
 

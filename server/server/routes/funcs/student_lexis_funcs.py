@@ -1,7 +1,7 @@
 from flask import request
-from ...ApiExceptions import InvalidAPIUsage, InvalidRequestJson
+from server.exceptions.ApiExceptions import InvalidAPIUsage, InvalidRequestJson
 from ..routes_utils import GetCurrentUserId
-from ...queries import StudentDBqueries as DBQS
+import server.queries.StudentDBqueries as DBQS
 from .student_additional_lexis_funcs import (CreateFindPair, CreateScramble, CreateSpace, CreateTranslate)
 from .additional_lexis_funcs import LexisTaskName, LexisTaskNameList
 from ..routes_utils import GetCurrentUserId

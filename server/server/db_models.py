@@ -1,4 +1,5 @@
 import datetime
+from typing import Type
 from sqlalchemy import (Column, Date, DateTime, ForeignKey, Integer, String, Table, Text, Time, create_engine)
 from sqlalchemy.engine import URL
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
@@ -6,7 +7,7 @@ from sqlalchemy.orm import relationship, sessionmaker, scoped_session
 from sqlalchemy.sql import func
 from .load_config import load_config
 
-Base = declarative_base()
+Base: Type = declarative_base()
 
 a_users_courses = Table("users_courses", Base.metadata, Column('id', Integer, primary_key=True),
                         Column('user_id', Integer, ForeignKey('users.id')),
@@ -122,7 +123,7 @@ class AbstractActivity(Base):
     def lesson(cls):
         return relationship("Lesson")
 
-    tries = []
+    tries: list = []
     now_try = None
 
     def time_limit__ToTimedelta(self) -> datetime.timedelta:
@@ -286,10 +287,10 @@ class AssessmentTry(AbstractActivityTry):
     done_tasks = Column(Text, nullable=False)
 
 
-LexisType = Drilling | Hieroglyph
-LexisTryType = DrillingTry | HieroglyphTry
-ActivityType = LexisType | Assessment
-ActivityTryType = LexisTryType | AssessmentTry
+LexisType = type[Drilling] | type[Hieroglyph]
+LexisTryType = type[DrillingTry] | type[HieroglyphTry]
+ActivityType = LexisType | type[Assessment]
+ActivityTryType = LexisTryType | type[AssessmentTry]
 
 
 def CreateSession(url, username, password, host, database):

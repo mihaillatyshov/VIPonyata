@@ -1,6 +1,6 @@
-from ...queries import TeacherDBqueries as DBQT
+import server.queries.TeacherDBqueries as DBQT
 from ...db_models import LexisType, Drilling, Hieroglyph
-from ...ApiExceptions import InvalidAPIUsage
+from server.exceptions.ApiExceptions import InvalidAPIUsage
 
 
 def GetLexisData(lexis_type: LexisType) -> tuple[DBQT.LexisQueries, str]:

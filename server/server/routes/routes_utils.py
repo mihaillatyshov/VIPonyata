@@ -3,9 +3,9 @@ from datetime import datetime, timedelta
 
 from flask_login import current_user
 
-from ..ApiExceptions import InvalidAPIUsage
+from server.exceptions.ApiExceptions import InvalidAPIUsage
 from ..log_lib import LogI
-from ..queries import OtherDBqueries as DBQO
+import server.queries.OtherDBqueries as DBQO
 from ..db_models import ActivityType, ActivityTryType, Drilling, DrillingTry, Hieroglyph, HieroglyphTry, Assessment, AssessmentTry
 
 
