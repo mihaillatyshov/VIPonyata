@@ -47,13 +47,14 @@ class Handlers:
         def decorator(parser):
             if not self.stop_adding:
                 parser_obj = parser()
-                self._handlers[parser_obj.name()] = parser_obj                                                          # TODO add check of adding existing parser
+                self._handlers[parser_obj.name().value] = parser_obj                                                    # TODO add check of adding existing parser
                 LogI("Added parser: ", parser)
             return parser
 
         return decorator
 
     def StopAdding(self):
+        print(self._handlers)
         self.stop_adding = True
 
     def __call__(self):

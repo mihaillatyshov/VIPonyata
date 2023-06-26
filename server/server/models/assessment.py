@@ -173,7 +173,6 @@ class FindPairTaskBase(BaseModelTask):
 class FindPairTaskReqBase(FindPairTaskBase):
     @root_validator(skip_on_failure=True)
     def first_second_validate(cls, values: dict):
-        print("========================= VALUES", values)
         first: list[str] = values["first"]
         second: list[str] = values["second"]
 
@@ -182,6 +181,9 @@ class FindPairTaskReqBase(FindPairTaskBase):
 
         if (len(first) != len(second)):
             raise ValueError("Первый и второй стоблец разной длины")
+
+        if (len(first) < 2):
+            raise ValueError("Слишком мало полей")
 
         return values
 
@@ -224,6 +226,64 @@ class FindPairTaskReqCreate(FindPairTaskReqBase):
     pass
 
 
+#########################################################################################################################
+################ CreateSentence #########################################################################################
+#########################################################################################################################
+class CreateSentenceTaskBase(BaseModelTask):
+    parts: list[str]
+
+    @validator("name", always=True)
+    def name_validation(cls, v):
+        return validate_name(v, AssessmentTaskName.CREATE_SENTENCE)
+
+    class Config:
+        fields = {"to_check_parts": {"exclude": True}}
+
+
+class CreateSentenceTaskReqBase(CreateSentenceTaskBase):
+    @root_validator(skip_on_failure=True)
+    def parts_validate(cls, values: dict):
+        if (len(values["parts"]) < 2):
+            raise ValueError("Слишком мало полей")
+        return values
+
+
+class CreateSentenceTaskReq(CreateSentenceTaskReqBase):
+    pass
+
+
+class CreateSentenceTaskRes(CreateSentenceTaskBase, BaseModelRes):
+    to_check_parts: list[str] = []
+
+    @root_validator(skip_on_failure=True)
+    def to_check_parts_validation(cls, values: dict):
+        if len(values["to_check_parts"]) == 0:
+            values["to_check_parts"] = values["parts"]
+        return values
+
+    def combine_dict(self) -> dict:
+        result = self.dict()
+        result["to_check_parts"] = self.to_check_parts
+        return result
+
+    def custom_validation(self) -> bool:
+        if (len(self.to_check_parts) != len(self.parts)):
+            return False
+
+        to_check_parts = self.to_check_parts.copy()
+        to_check_parts.sort()
+        parts = self.parts.copy()
+        parts.sort()
+
+        print(to_check_parts, parts)
+
+        return to_check_parts == parts
+
+
+class CreateSentenceTaskReqCreate(CreateSentenceTaskReqBase):
+    pass
+
+
 # fp = FindPairTaskReq(name=AssessmentTaskName.FIND_PAIR, first=["f1", "f2"], second=["s1", "s2"])
 # print(fp.dict())
 
@@ -248,11 +308,11 @@ class AliasName(Enum):
     CREATE = "create"
 
 
-Aliases: dict[AssessmentTaskName, dict] = {}
+Aliases: dict[str, dict] = {}
 
 
 def create_alias(name: AssessmentTaskName, req, res, create):
-    Aliases[name] = {AliasName.REQ: req, AliasName.RES: res, AliasName.CREATE: create}
+    Aliases[name.value] = {AliasName.REQ: req, AliasName.RES: res, AliasName.CREATE: create}
 
 
 create_alias(AssessmentTaskName.TEXT, TextTaskReq, TextTaskRes, TextTaskReqCreate)
@@ -261,5 +321,5 @@ create_alias(AssessmentTaskName.TEST_MULTI, MultiTestTaskReq, MultiTestTaskRes, 
 
 #Check Aliases
 # for name in AssessmentTaskName:
-#     if name not in Aliases.keys():
+#     if name.value not in Aliases.keys():
 #         raise KeyError(f"Alias {name} not found")

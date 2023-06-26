@@ -1,4 +1,4 @@
-from server.log_lib import LogE
+from server.log_lib import LogE, logger
 
 
 class InvalidAPIUsage(Exception):
@@ -11,6 +11,8 @@ class InvalidAPIUsage(Exception):
             self.status_code = status_code
         self.payload = payload
 
+        logger.warn("API exception: " + self.__class__.__name__ + "    CODE: " + str(self.status_code) +
+                    "    Message: " + self.message)
         LogE(self.message, f"\n            status: {self.status_code}")
 
     def to_dict(self):

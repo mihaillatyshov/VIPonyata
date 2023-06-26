@@ -1,3 +1,6 @@
+import logging
+
+
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -27,3 +30,5 @@ var_str = "io"
 LogI("Test:", var_int, var_str)
 LogW("Test:", var_int, var_str)
 LogE("Test:", var_int, var_str)
+
+logger = logging.getLogger("werkzeug")

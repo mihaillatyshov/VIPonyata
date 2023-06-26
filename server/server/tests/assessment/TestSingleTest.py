@@ -2,7 +2,6 @@ import unittest
 
 from pydantic import ValidationError
 
-import server.routes.funcs.student_assessment_funcs as SAF
 from server.models.assessment import (AssessmentTaskName, SingleTestTaskReq, SingleTestTaskRes, SingleTestTaskReqCreate)
 
 

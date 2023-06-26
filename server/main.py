@@ -1,6 +1,3 @@
-import server.models.assessment
-
-exit()
 import logging
 import click
 
