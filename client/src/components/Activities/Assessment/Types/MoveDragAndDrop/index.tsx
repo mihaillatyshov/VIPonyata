@@ -34,7 +34,7 @@ const MoveDragAndDrop = <T extends TAssessmentSentenceOrder>({ data, taskId, fle
     return (
         <div className={`d-flex ${flexTypeClassName}`}>
             {data.parts.map((sentence: string, i: number) => (
-                <div key={i} className={`d-flex ${flexTypeClassName}`}>
+                <div key={`sentence_${i}`} className={`d-flex ${flexTypeClassName}`}>
                     <DragItem
                         id={i}
                         text={sentence}

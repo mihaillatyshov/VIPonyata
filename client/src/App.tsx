@@ -20,6 +20,7 @@ import { Button } from "react-bootstrap";
 import styleThemes from "./themes/StyleThemes.module.css";
 import StudentHieroglyphPage from "components/Activities/Lexis/Hieroglyph/StudentHieroglyphPage";
 import StudentAssessmentPage from "components/Activities/Assessment/StudentAssessmentPage";
+import { DndContext } from "@dnd-kit/core";
 
 // eslint-disable-next-line
 const App = () => {
@@ -66,39 +67,41 @@ const App = () => {
 
     return (
         <div className={`${styleThemes.Violet} App`}>
-            {user.isAuth !== undefined && <NavBar />}
-            <BrowserRouter>
-                <Routes>
-                    <Route path="/" element={getRoute(<StudentMainPage />, <StudentMainPage />, <LoginPage />)} />
-                    <Route path="/register" element={<RegisterPage />} />
-                    <Route path="/" element={getRoute(<StudentMainPage />, <StudentMainPage />, <LoginPage />)} />
+            <DndContext>
+                {user.isAuth !== undefined && <NavBar />}
+                <BrowserRouter>
+                    <Routes>
+                        <Route path="/" element={getRoute(<StudentMainPage />, <StudentMainPage />, <LoginPage />)} />
+                        <Route path="/register" element={<RegisterPage />} />
+                        <Route path="/" element={getRoute(<StudentMainPage />, <StudentMainPage />, <LoginPage />)} />
 
-                    <Route
-                        path="/courses/:id"
-                        element={getRoute(<StudentCoursePage />, <StudentCoursePage />, <NavigateHome />)}
-                    />
-                    <Route
-                        path="/lessons/:id"
-                        element={getRoute(<StudentLessonPage />, <StudentLessonPage />, <NavigateHome />)}
-                    />
-                    <Route
-                        path="/drilling/:id/*"
-                        element={getRoute(<StudentDrillingPage />, <StudentDrillingPage />, <NavigateHome />)}
-                    />
-                    <Route
-                        path="/hieroglyph/:id/*"
-                        element={getRoute(<StudentHieroglyphPage />, <StudentHieroglyphPage />, <NavigateHome />)}
-                    />
-                    <Route
-                        path="/assessment/:id/*"
-                        element={getRoute(<StudentAssessmentPage />, <StudentAssessmentPage />, <NavigateHome />)}
-                    />
-                    <Route path="/upload" element={<TestUpload />} />
-                </Routes>
-            </BrowserRouter>
-            <Button type="button" onClick={handleLogout}>
-                Logout
-            </Button>
+                        <Route
+                            path="/courses/:id"
+                            element={getRoute(<StudentCoursePage />, <StudentCoursePage />, <NavigateHome />)}
+                        />
+                        <Route
+                            path="/lessons/:id"
+                            element={getRoute(<StudentLessonPage />, <StudentLessonPage />, <NavigateHome />)}
+                        />
+                        <Route
+                            path="/drilling/:id/*"
+                            element={getRoute(<StudentDrillingPage />, <StudentDrillingPage />, <NavigateHome />)}
+                        />
+                        <Route
+                            path="/hieroglyph/:id/*"
+                            element={getRoute(<StudentHieroglyphPage />, <StudentHieroglyphPage />, <NavigateHome />)}
+                        />
+                        <Route
+                            path="/assessment/:id/*"
+                            element={getRoute(<StudentAssessmentPage />, <StudentAssessmentPage />, <NavigateHome />)}
+                        />
+                        <Route path="/upload" element={<TestUpload />} />
+                    </Routes>
+                </BrowserRouter>
+                <Button type="button" onClick={handleLogout}>
+                    Logout
+                </Button>
+            </DndContext>
         </div>
     );
 };
