@@ -3,3 +3,10 @@
     width: "min-content";
     border-radius: "1000px 1000px 1000px 1000px";
 }
+
+.createSentenceItem {
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 5px;
+    background-color: white;
+}

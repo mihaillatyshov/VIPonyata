@@ -4,19 +4,39 @@ import { TAssessmentCreateSentence } from "models/Activity/Items/TAssessmentItem
 import MoveDragAndDrop from "./MoveDragAndDrop";
 import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
 import { SortableContext, arrayMove, rectSortingStrategy, useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import { CSS as DNDCSS } from "@dnd-kit/utilities";
 import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
 import { useAppDispatch } from "redux/hooks";
 import { Card } from "react-bootstrap";
+import CSS from "csstype";
+import styles from "./StyleAssessmentType.module.css";
 
-const SortableItem = ({ id, word, customData }: { id: string; word: string; customData: any }) => {
-    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: id, data: customData });
+const SortableItem = ({
+    id,
+    word,
+    customData,
+    width,
+}: {
+    id: string;
+    word: string;
+    customData: any;
+    width: number;
+}) => {
+    const { attributes, listeners, setNodeRef, transform, transition, items, over, index, newIndex } = useSortable({
+        id: id,
+        data: customData,
+    });
 
-    const style = {
-        transform: CSS.Transform.toString(transform),
+    // console.log("items", items);
+    // console.log("over", over);
+    console.log("index", index, newIndex);
+
+    const style: CSS.Properties = {
+        transform: DNDCSS.Transform.toString(transform),
         transition,
+        minWidth: `calc(${width}em * 0.75)`,
     };
-    console.log(transform);
+    // console.log(transform);
 
     return (
         <div
@@ -24,9 +44,9 @@ const SortableItem = ({ id, word, customData }: { id: string; word: string; cust
             style={style}
             {...attributes}
             {...listeners}
-            className="border border-primary d-flex flex-grow-1"
+            className={`d-flex ${styles.createSentenceItem}`}
         >
-            <Card body>{word}</Card>
+            {word}
         </div>
     );
 };
@@ -43,6 +63,8 @@ const StudentAssessmentCreateSentence = ({ data, taskId }: StudentAssessmentType
         }));
     }, [data.parts]);
     console.log(localParts);
+
+    const itemWidth = Math.max(...localParts.map((item) => item.word.length), 3);
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
@@ -63,13 +85,14 @@ const StudentAssessmentCreateSentence = ({ data, taskId }: StudentAssessmentType
         <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <div className="container">
                 <SortableContext items={localParts.map((item) => item.word_id)} strategy={rectSortingStrategy}>
-                    <div className="">
+                    <div className="d-flex flex-wrap gap-3">
                         {localParts.map((item) => (
                             <SortableItem
                                 key={item.word_id}
                                 id={item.word_id}
                                 word={item.word}
                                 customData={{ arrayId: item.arrayId }}
+                                width={itemWidth}
                             />
                         ))}
                     </div>
