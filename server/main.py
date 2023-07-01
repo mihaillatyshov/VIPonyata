@@ -11,7 +11,7 @@ from server.start_server import create_app
 
 if not os.path.isdir("./log"):
     os.mkdir("./log")
-logging.basicConfig(filename=f'./log/{datetime.datetime.now()}.log',
+logging.basicConfig(filename=f'./log/{str(datetime.datetime.now()).replace(":", " ")}.log',
                     level=logging.DEBUG,
                     format='%(asctime)-15s %(name)-5s %(levelname)-8s %(message)s')
 

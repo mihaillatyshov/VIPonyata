@@ -1,10 +1,10 @@
 from datetime import datetime, time
 
-from .db_models import Course, CreateSession, Dictionary, Drilling, DrillingCard, Hieroglyph, HieroglyphCard, Assessment, Lesson, User
+from .db_models import Course, CreateSessionFromJsonFile, Dictionary, Drilling, DrillingCard, Hieroglyph, HieroglyphCard, Assessment, Lesson, User
 from .log_lib import LogI
 from werkzeug.security import generate_password_hash
 
-DBsession = CreateSession("mysql+mysqlconnector", "mihail", "12345", "localhost", "japan")
+DBsession = CreateSessionFromJsonFile()
 
 hashPwd = generate_password_hash("dbnfvbys")
 user = User(name="Mihail", nickname="lm", password=hashPwd, birthday=datetime.now(), level=User.Level.STUDENT)
