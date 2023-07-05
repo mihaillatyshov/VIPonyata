@@ -1,1 +1,1 @@
-python -m unittest discover -v -c server/tests/assessment
+python -m unittest discover -v -c server/tests/assessment -p 'Test*.py'

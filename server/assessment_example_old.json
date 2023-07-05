@@ -8,7 +8,7 @@
             "name": "test_single",
             "question": "Ansewer to this question single",
             "options": ["False 0", "False 1", "True 2", "False 3"],
-            "meta_answer": 2
+            "answer": 2
         },
         {
             "name": "test_multi",
@@ -37,11 +37,19 @@
         },
         {
             "name": "classification",
-            "titles": ["Col1", "Col2", "Col3"],
-            "answers": [
-                ["Ansewer 1 (Col1)", "Ansewer 2 (Col1)", "Ansewer 3 (Col1)"],
-                ["Ansewer 1 (Col2)", "Ansewer 2 (Col2)", "Ansewer 3 (Col2)"],
-                ["Ansewer 1 (Col3)", "Ansewer 2 (Col3)", "Ansewer 3 (Col3)"]
+            "columns": [
+                {
+                    "title": "Col1",
+                    "data": ["Ansewer 1 (Col1)", "Ansewer 2 (Col1)", "Ansewer 3 (Col1)"]
+                },
+                {
+                    "title": "Col2",
+                    "data": ["Ansewer 1 (Col2)", "Ansewer 2 (Col2)", "Ansewer 3 (Col2)"]
+                },
+                {
+                    "title": "Col3",
+                    "data": ["Ansewer 1 (Col3)", "Ansewer 2 (Col3)", "Ansewer 3 (Col3)"]
+                }
             ]
         },
         {

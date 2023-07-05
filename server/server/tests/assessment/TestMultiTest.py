@@ -2,13 +2,13 @@ import unittest
 
 from pydantic import ValidationError
 
-from server.models.assessment import (AssessmentTaskName, MultiTestTaskReq, MultiTestTaskRes, MultiTestTaskReqCreate)
+from server.models.assessment import (AssessmentTaskName, MultiTestTaskReq, MultiTestTaskRes, MultiTestTaskCreate)
 
 
 class TestAssessmentMultiTest(unittest.TestCase):
     def test_MultiTestExceptions(self):
         self.assertRaises(ValidationError, MultiTestTaskReq, **{"name": AssessmentTaskName.TEXT})
-        self.assertRaises(ValidationError, MultiTestTaskReqCreate, **{"name": AssessmentTaskName.TEST_MULTI})
+        self.assertRaises(ValidationError, MultiTestTaskCreate, **{"name": AssessmentTaskName.TEST_MULTI})
 
     def test_MultiTestRes(self):
         value_base = {

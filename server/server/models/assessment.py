@@ -33,7 +33,10 @@ class BaseModelRes(abc.ABC):
 class BaseModelTask(BaseModel, abc.ABC):
     name: AssessmentTaskName
 
-    def create_new_dict(self) -> dict:
+    def student_dict(self) -> dict:
+        return self.dict()
+
+    def teacher_dict(self) -> dict:
         return self.dict()
 
     def combine_dict(self) -> dict:
@@ -46,21 +49,25 @@ class BaseModelTask(BaseModel, abc.ABC):
 #########################################################################################################################
 ################ Text ###################################################################################################
 #########################################################################################################################
-class TextTaskReq(BaseModelTask):
+class TextTaskBase(BaseModelTask):
     @validator("name", always=True)
     def name_validation(cls, v):
         return validate_name(v, AssessmentTaskName.TEXT)
 
 
-class TextTaskRes(TextTaskReq, BaseModelRes):
+class TextTaskStudentReq(TextTaskBase):
+    pass
+
+
+class TextTaskRes(TextTaskBase, BaseModelRes):
     text: str
 
     def custom_validation(self) -> bool:
         return True
 
 
-class TextTaskReqCreate(TextTaskRes):
-    pass
+class TextTaskTeacherReq(TextTaskBase):
+    text: str
 
 
 #########################################################################################################################
@@ -84,7 +91,7 @@ class SingleTestTaskReq(SingleTestTaskBase):
 class SingleTestTaskRes(SingleTestTaskFullBase, BaseModelRes):
     answer: int | None
 
-    def create_new_dict(self) -> dict:
+    def student_dict(self) -> dict:
         result = self.dict()
         result["answer"] = None
         return result
@@ -93,7 +100,7 @@ class SingleTestTaskRes(SingleTestTaskFullBase, BaseModelRes):
         return self.answer is None or (0 <= self.answer < len(self.options))
 
 
-class SingleTestTaskReqCreate(SingleTestTaskFullBase):
+class SingleTestTaskCreate(SingleTestTaskFullBase):
     answer: int
 
     @validator("options", always=True)
@@ -124,7 +131,7 @@ class MultiTestTaskReq(MultiTestTaskBase):
 
 
 class MultiTestTaskRes(MultiTestTaskFullBase, BaseModelRes):
-    def create_new_dict(self) -> dict:
+    def student_dict(self) -> dict:
         result = self.dict()
         result["answers"] = []
         return result
@@ -140,7 +147,7 @@ class MultiTestTaskRes(MultiTestTaskFullBase, BaseModelRes):
         return True
 
 
-class MultiTestTaskReqCreate(MultiTestTaskFullBase):
+class MultiTestTaskCreate(MultiTestTaskFullBase):
     @validator("answers", always=True)
     def answers_validation(cls, v):
         if len(v) < 1:
@@ -222,7 +229,7 @@ class FindPairTaskRes(FindPairTaskBase, BaseModelRes):
         return True
 
 
-class FindPairTaskReqCreate(FindPairTaskReqBase):
+class FindPairTaskCreate(FindPairTaskReqBase):
     pass
 
 
@@ -275,13 +282,65 @@ class CreateSentenceTaskRes(CreateSentenceTaskBase, BaseModelRes):
         parts = self.parts.copy()
         parts.sort()
 
-        print(to_check_parts, parts)
-
         return to_check_parts == parts
 
 
-class CreateSentenceTaskReqCreate(CreateSentenceTaskReqBase):
+class CreateSentenceTaskCreate(CreateSentenceTaskReqBase):
     pass
+
+
+#########################################################################################################################
+################ FillSpacesExists #######################################################################################
+#########################################################################################################################
+class FillSpacesExistsTaskBase(BaseModelTask):
+    @validator("name", always=True)
+    def name_validation(cls, v):
+        return validate_name(v, AssessmentTaskName.FILL_SPACES_EXISTS)
+
+    class Config:
+        fields = {"to_check_answers": {"exclude": True}}
+
+
+class FillSpacesExistsTaskReq(FillSpacesExistsTaskBase):
+    answers: list[str | None]
+    inputs: list[str]
+
+
+class FillSpacesExistsTaskRes(FillSpacesExistsTaskBase, BaseModelRes):
+    answers: list[str | None]
+    inputs: list[str]
+    to_check_answers: list[str] = []
+
+    @root_validator(skip_on_failure=True)
+    def to_check_answers_validation(cls, values: dict):
+        if len(values["to_check_answers"]) == 0:
+            values["to_check_answers"] = values["answers"]
+        return values
+
+    def combine_dict(self) -> dict:
+        result = self.dict()
+        result["to_check_answers"] = self.to_check_answers
+        return result
+
+    def custom_validation(self) -> bool:
+        combo_answers = [*list(filter(lambda item: item is not None, self.answers)), *self.inputs]
+        combo_answers.sort()
+
+        to_check_answers = self.to_check_answers.copy()
+        to_check_answers.sort()
+
+        return combo_answers == to_check_answers
+
+
+class FillSpacesExistsTaskCreate(FillSpacesExistsTaskBase):
+    separates: list[str]
+    answers: list[str]
+
+    @root_validator(skip_on_failure=True)
+    def answers_validate(cls, values: dict):
+        if (len(values["answers"]) < 2):
+            raise ValueError("Слишком мало полей")
+        return values
 
 
 # fp = FindPairTaskReq(name=AssessmentTaskName.FIND_PAIR, first=["f1", "f2"], second=["s1", "s2"])
@@ -315,9 +374,9 @@ def create_alias(name: AssessmentTaskName, req, res, create):
     Aliases[name.value] = {AliasName.REQ: req, AliasName.RES: res, AliasName.CREATE: create}
 
 
-create_alias(AssessmentTaskName.TEXT, TextTaskReq, TextTaskRes, TextTaskReqCreate)
-create_alias(AssessmentTaskName.TEST_SINGLE, SingleTestTaskReq, SingleTestTaskRes, SingleTestTaskReqCreate)
-create_alias(AssessmentTaskName.TEST_MULTI, MultiTestTaskReq, MultiTestTaskRes, MultiTestTaskReqCreate)
+create_alias(AssessmentTaskName.TEXT, TextTaskReq, TextTaskRes, TextTaskCreate)
+create_alias(AssessmentTaskName.TEST_SINGLE, SingleTestTaskReq, SingleTestTaskRes, SingleTestTaskCreate)
+create_alias(AssessmentTaskName.TEST_MULTI, MultiTestTaskReq, MultiTestTaskRes, MultiTestTaskCreate)
 
 #Check Aliases
 # for name in AssessmentTaskName:

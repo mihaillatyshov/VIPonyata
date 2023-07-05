@@ -3,13 +3,13 @@ import unittest
 from pydantic import ValidationError
 
 from server.models.assessment import (AssessmentTaskName, CreateSentenceTaskReq, CreateSentenceTaskRes,
-                                      CreateSentenceTaskReqCreate)
+                                      CreateSentenceTaskCreate)
 
 
 class TestAssessmentCreateSentence(unittest.TestCase):
     def test_CreateSentenceExceptions(self):
         self.assertRaises(ValidationError, CreateSentenceTaskReq, **{"name": AssessmentTaskName.TEXT})
-        self.assertRaises(ValidationError, CreateSentenceTaskReqCreate, **{"name": AssessmentTaskName.CREATE_SENTENCE})
+        self.assertRaises(ValidationError, CreateSentenceTaskCreate, **{"name": AssessmentTaskName.CREATE_SENTENCE})
 
     def test_CreateSentenceRes(self):
         value_base = {"name": AssessmentTaskName.CREATE_SENTENCE, "to_check_parts": ["Cre1ate", "th2is", "sent3ence"]}
