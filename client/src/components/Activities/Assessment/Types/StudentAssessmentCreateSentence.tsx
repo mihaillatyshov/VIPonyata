@@ -1,13 +1,11 @@
 import React, { useMemo } from "react";
 import { StudentAssessmentTypeProps } from "./StudentAssessmentTypeProps";
 import { TAssessmentCreateSentence } from "models/Activity/Items/TAssessmentItems";
-import MoveDragAndDrop from "./MoveDragAndDrop";
 import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
 import { SortableContext, arrayMove, rectSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS as DNDCSS } from "@dnd-kit/utilities";
 import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
 import { useAppDispatch } from "redux/hooks";
-import { Card } from "react-bootstrap";
 import CSS from "csstype";
 import styles from "./StyleAssessmentType.module.css";
 
@@ -22,21 +20,16 @@ const SortableItem = ({
     customData: any;
     width: number;
 }) => {
-    const { attributes, listeners, setNodeRef, transform, transition, items, over, index, newIndex } = useSortable({
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
         id: id,
         data: customData,
     });
-
-    // console.log("items", items);
-    // console.log("over", over);
-    console.log("index", index, newIndex);
 
     const style: CSS.Properties = {
         transform: DNDCSS.Transform.toString(transform),
         transition,
         minWidth: `calc(${width}em * 0.75)`,
     };
-    // console.log(transform);
 
     return (
         <div
@@ -55,20 +48,17 @@ const StudentAssessmentCreateSentence = ({ data, taskId }: StudentAssessmentType
     const dispatch = useAppDispatch();
 
     const localParts = useMemo(() => {
-        console.log("memoUpdate");
         return data.parts.map((item, id) => ({
             word_id: `${item}_${id}`,
             word: item,
             arrayId: id,
         }));
     }, [data.parts]);
-    console.log(localParts);
 
     const itemWidth = Math.max(...localParts.map((item) => item.word.length), 3);
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
-        console.log(active, over);
         if (over === null) return;
 
         if (active?.data?.current?.arrayId !== over?.data?.current?.arrayId) {
@@ -100,8 +90,6 @@ const StudentAssessmentCreateSentence = ({ data, taskId }: StudentAssessmentType
             </div>
         </DndContext>
     );
-
-    return <MoveDragAndDrop data={data} taskId={taskId} flexType="row" />;
 };
 
 export default StudentAssessmentCreateSentence;
