@@ -1,5 +1,7 @@
 import abc
+import random
 from enum import Enum
+from typing import TypedDict
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -62,19 +64,21 @@ class TextTaskBase(BaseModelTask):
         return validate_name(v, AssessmentTaskName.TEXT)
 
 
+class TextTaskTeacherBase(TextTaskBase):
+    text: str
+
+
 class TextTaskStudentReq(TextTaskBase):
     pass
 
 
-class TextTaskRes(TextTaskBase, BaseModelRes):
-    text: str
-
+class TextTaskRes(TextTaskTeacherBase, BaseModelRes):
     def custom_validation(self) -> bool:
         return True
 
 
-class TextTaskTeacherReq(TextTaskBase):
-    text: str
+class TextTaskTeacherReq(TextTaskTeacherBase):
+    pass
 
 
 #########################################################################################################################
@@ -86,10 +90,9 @@ class SingleTestTaskBase(BaseModelTask):
         return validate_name(v, AssessmentTaskName.TEST_SINGLE)
 
 
-class SingleTestTaskFullBase(SingleTestTaskBase):
+class SingleTestTaskTeacherBase(SingleTestTaskBase):
     question: str
     options: list[str]
-
     meta_answer: int
 
 
@@ -97,14 +100,14 @@ class SingleTestTaskStudentReq(SingleTestTaskBase):
     answer: int | None                                                                                                  #or (self.answer > 0 and self.answer < len(self.opt))
 
 
-class SingleTestTaskRes(SingleTestTaskFullBase, BaseModelRes):
+class SingleTestTaskRes(SingleTestTaskTeacherBase, BaseModelRes):
     answer: int | None = None
 
     def custom_validation(self) -> bool:
         return self.answer is None or (0 <= self.answer < len(self.options))
 
 
-class SingleTestTaskTeacherReq(SingleTestTaskFullBase):
+class SingleTestTaskTeacherReq(SingleTestTaskTeacherBase):
     @validator("options", always=True)
     def options_validation(cls, v: list[str]):
         if len(v) <= 1:
@@ -115,7 +118,7 @@ class SingleTestTaskTeacherReq(SingleTestTaskFullBase):
     def meta_answer_validation(cls, values: dict):
         meta_answer = values["meta_answer"]
         if not (0 <= meta_answer < len(values["options"])):
-            raise ValueError(f"Выбран неверный вариант ответа ({meta_answer + 1})")
+            raise ValueError(f"Выбран недопустимый вариант ответа ({meta_answer + 1})")
 
 
 #########################################################################################################################
@@ -127,18 +130,17 @@ class MultiTestTaskBase(BaseModelTask):
         return validate_name(v, AssessmentTaskName.TEST_MULTI)
 
 
-class MultiTestTaskFullBase(MultiTestTaskBase):
-    meta_answers: list[int]
-
+class MultiTestTaskTeacherBase(MultiTestTaskBase):
     question: str
     options: list[str]
+    meta_answers: list[int]
 
 
 class MultiTestTaskStudentReq(MultiTestTaskBase):
     answers: list[int]
 
 
-class MultiTestTaskRes(MultiTestTaskFullBase, BaseModelRes):
+class MultiTestTaskRes(MultiTestTaskTeacherBase, BaseModelRes):
     answers: list[int] = []
 
     def custom_validation(self) -> bool:
@@ -152,7 +154,7 @@ class MultiTestTaskRes(MultiTestTaskFullBase, BaseModelRes):
         return True
 
 
-class MultiTestTaskTeacherReq(MultiTestTaskFullBase):
+class MultiTestTaskTeacherReq(MultiTestTaskTeacherBase):
     @validator("options", always=True)
     def options_validation(cls, v):
         if len(v) <= 1:
@@ -180,128 +182,126 @@ class MultiTestTaskTeacherReq(MultiTestTaskFullBase):
 ################ FindPair ###############################################################################################
 #########################################################################################################################
 class FindPairTaskBase(BaseModelTask):
-    pars_created: int = 0
-    first: list[str]
-    second: list[str]
-
     @validator("name", always=True)
     def name_validation(cls, v):
         return validate_name(v, AssessmentTaskName.FIND_PAIR)
 
-    class Config:
-        fields = {"to_check_first": {"exclude": True}, "to_check_second": {"exclude": True}}
+
+class FindPairTaskTeacherBase(FindPairTaskBase):
+    meta_first: list[str]
+    meta_second: list[str]
 
 
-class FindPairTaskReqBase(FindPairTaskBase):
+def find_pair_fs_validation_base(first: list[str], second: list[str]):
+    if (len(first) != len(set(first))) or (len(second) != len(set(second))):
+        raise ValueError("Есть повторения полей")
+
+    if len(first) != len(second):
+        raise ValueError(f"Первый и второй стоблец разной длины (f:{len(first)}, s:{len(second)})")
+
+    if len(first) < 2:
+        raise ValueError(f"Слишком мало полей {len(first)}")
+
+
+class FindPairTaskStudentReq(FindPairTaskBase):
+    first: list[str]
+    second: list[str]
+    pars_created: int
+
     @root_validator(skip_on_failure=True)
-    def first_second_validate(cls, values: dict):
-        first: list[str] = values["first"]
-        second: list[str] = values["second"]
-
-        if ((len(first) != len(set(first))) or (len(second) != len(set(second)))):
-            raise ValueError("Есть повторения полей")
-
-        if (len(first) != len(second)):
-            raise ValueError("Первый и второй стоблец разной длины")
-
-        if (len(first) < 2):
-            raise ValueError("Слишком мало полей")
-
+    def first_second_validation(cls, values: dict):
+        find_pair_fs_validation_base(values["first"], values["second"])
         return values
 
 
-class FindPairTaskReq(FindPairTaskReqBase):
-    pass
-
-
-class FindPairTaskRes(FindPairTaskBase, BaseModelRes):
-    to_check_first: list[str] = []
-    to_check_second: list[str] = []
+class FindPairTaskRes(FindPairTaskTeacherBase, BaseModelRes):
+    pars_created: int = 0
+    first: list[str] = []
+    second: list[str] = []
 
     @root_validator(skip_on_failure=True)
-    def to_check_first_second_validation(cls, values: dict):
-        if len(values["to_check_first"]) == 0:
-            values["to_check_first"] = values["first"]
+    def new_first_second_validation(cls, values: dict):
+        if len(values["first"]) == 0:
+            values["first"] = values["meta_first"]
+            random.shuffle(values["first"])
 
-        if len(values["to_check_second"]) == 0:
-            values["to_check_second"] = values["second"]
+        if len(values["second"]) == 0:
+            values["second"] = values["meta_second"]
+            random.shuffle(values["second"])
 
         return values
-
-    def combine_dict(self) -> dict:
-        result = self.dict()
-        result["to_check_first"] = self.to_check_first
-        result["to_check_second"] = self.to_check_second
-        return result
 
     def custom_validation(self) -> bool:
-        if ((len(set(self.to_check_first)) != len(self.first)) or (len(set(self.to_check_second)) != len(self.second))):
+        if (len(set(self.meta_first)) != len(self.first)) or (len(set(self.meta_second)) != len(self.second)):
             return False
 
-        if ((set(self.to_check_first) != set(self.first)) or (set(self.to_check_second) != set(self.second))):
+        if (set(self.meta_first) != set(self.first)) or (set(self.meta_second) != set(self.second)):
             return False
 
         return True
 
 
-class FindPairTaskCreate(FindPairTaskReqBase):
-    pass
+class FindPairTaskTeacherReq(FindPairTaskTeacherBase):
+    @root_validator(skip_on_failure=True)
+    def meta_first_second_validation(cls, values: dict):
+        find_pair_fs_validation_base(values["meta_first"], values["meta_second"])
+        return values
 
 
 #########################################################################################################################
 ################ CreateSentence #########################################################################################
 #########################################################################################################################
 class CreateSentenceTaskBase(BaseModelTask):
-    parts: list[str]
-
     @validator("name", always=True)
     def name_validation(cls, v):
         return validate_name(v, AssessmentTaskName.CREATE_SENTENCE)
 
-    class Config:
-        fields = {"to_check_parts": {"exclude": True}}
+
+class CreateSentenceTaskTeacherBase(CreateSentenceTaskBase):
+    meta_parts: list[str]
 
 
-class CreateSentenceTaskReqBase(CreateSentenceTaskBase):
+def create_sentence_parts_validation_base(parts: list[str]):
+    if len(parts) < 2:
+        raise ValueError(f"Слишком мало полей ({len(parts)})")
+
+
+class CreateSentenceTaskStudentReq(CreateSentenceTaskBase):
+    parts: list[str]
+
     @root_validator(skip_on_failure=True)
-    def parts_validate(cls, values: dict):
-        if (len(values["parts"]) < 2):
-            raise ValueError("Слишком мало полей")
+    def parts_validation(cls, values: dict):
+        create_sentence_parts_validation_base(values["parts"])
         return values
 
 
-class CreateSentenceTaskReq(CreateSentenceTaskReqBase):
-    pass
-
-
-class CreateSentenceTaskRes(CreateSentenceTaskBase, BaseModelRes):
-    to_check_parts: list[str] = []
+class CreateSentenceTaskRes(CreateSentenceTaskTeacherBase, BaseModelRes):
+    parts: list[str] = []
 
     @root_validator(skip_on_failure=True)
-    def to_check_parts_validation(cls, values: dict):
-        if len(values["to_check_parts"]) == 0:
-            values["to_check_parts"] = values["parts"]
+    def new_parts_validation(cls, values: dict):
+        if len(values["parts"]) == 0:
+            values["parts"] = values["meta_parts"]
+            random.shuffle(values["parts"])
         return values
-
-    def combine_dict(self) -> dict:
-        result = self.dict()
-        result["to_check_parts"] = self.to_check_parts
-        return result
 
     def custom_validation(self) -> bool:
-        if (len(self.to_check_parts) != len(self.parts)):
+        if len(self.meta_parts) != len(self.parts):
             return False
 
-        to_check_parts = self.to_check_parts.copy()
-        to_check_parts.sort()
+        meta_parts = self.meta_parts.copy()
+        meta_parts.sort()
         parts = self.parts.copy()
         parts.sort()
 
-        return to_check_parts == parts
+        return meta_parts == parts
 
 
-class CreateSentenceTaskCreate(CreateSentenceTaskReqBase):
-    pass
+class CreateSentenceTaskTeacherReq(CreateSentenceTaskTeacherBase):
+    @root_validator(skip_on_failure=True)
+    def meta_parts_validation(cls, values: dict):
+        create_sentence_parts_validation_base(values["meta_parts"])
+        return values
 
 
 #########################################################################################################################
@@ -312,48 +312,47 @@ class FillSpacesExistsTaskBase(BaseModelTask):
     def name_validation(cls, v):
         return validate_name(v, AssessmentTaskName.FILL_SPACES_EXISTS)
 
-    class Config:
-        fields = {"to_check_answers": {"exclude": True}}
+
+class FillSpacesExistsTaskTeacherBase(FillSpacesExistsTaskBase):
+    separates: list[str]
+    meta_answers: list[str]
 
 
-class FillSpacesExistsTaskReq(FillSpacesExistsTaskBase):
+class FillSpacesExistsTaskStudentReq(FillSpacesExistsTaskBase):
     answers: list[str | None]
     inputs: list[str]
 
 
-class FillSpacesExistsTaskRes(FillSpacesExistsTaskBase, BaseModelRes):
-    answers: list[str | None]
-    inputs: list[str]
-    to_check_answers: list[str] = []
+class FillSpacesExistsTaskRes(FillSpacesExistsTaskTeacherBase, BaseModelRes):
+    answers: list[str | None] = []
+    inputs: list[str] = []
 
     @root_validator(skip_on_failure=True)
-    def to_check_answers_validation(cls, values: dict):
-        if len(values["to_check_answers"]) == 0:
-            values["to_check_answers"] = values["answers"]
-        return values
+    def new_inputs_validation(cls, values: dict):
+        if len(values["answers"]) == 0:
+            values["inputs"] = values["meta_answers"].copy()
+            random.shuffle(values["inputs"])
+            for _ in range(len(values["meta_answers"])):
+                values["answers"].append(None)
 
-    def combine_dict(self) -> dict:
-        result = self.dict()
-        result["to_check_answers"] = self.to_check_answers
-        return result
+        return values
 
     def custom_validation(self) -> bool:
         combo_answers = [*list(filter(lambda item: item is not None, self.answers)), *self.inputs]
         combo_answers.sort()
 
-        to_check_answers = self.to_check_answers.copy()
-        to_check_answers.sort()
+        meta_answers = self.meta_answers.copy()
+        meta_answers.sort()
 
-        return combo_answers == to_check_answers
+        return combo_answers == meta_answers
 
 
-class FillSpacesExistsTaskCreate(FillSpacesExistsTaskBase):
-    separates: list[str]
+class FillSpacesExistsTaskTeacherReq(FillSpacesExistsTaskTeacherBase):
     answers: list[str]
 
     @root_validator(skip_on_failure=True)
     def answers_validate(cls, values: dict):
-        if (len(values["answers"]) < 2):
+        if (len(values["meta_answers"]) < 2):
             raise ValueError("Слишком мало полей")
         return values
 
@@ -392,6 +391,11 @@ def create_alias(name: AssessmentTaskName, req, res, create):
 create_alias(AssessmentTaskName.TEXT, TextTaskStudentReq, TextTaskRes, TextTaskTeacherReq)
 create_alias(AssessmentTaskName.TEST_SINGLE, SingleTestTaskStudentReq, SingleTestTaskRes, SingleTestTaskTeacherReq)
 create_alias(AssessmentTaskName.TEST_MULTI, MultiTestTaskStudentReq, MultiTestTaskRes, MultiTestTaskTeacherReq)
+create_alias(AssessmentTaskName.FIND_PAIR, FindPairTaskStudentReq, FindPairTaskRes, FindPairTaskTeacherReq)
+create_alias(AssessmentTaskName.CREATE_SENTENCE, CreateSentenceTaskStudentReq, CreateSentenceTaskRes,
+             CreateSentenceTaskTeacherReq)
+create_alias(AssessmentTaskName.FILL_SPACES_EXISTS, FillSpacesExistsTaskStudentReq, FillSpacesExistsTaskRes,
+             FillSpacesExistsTaskTeacherReq)
 
 #Check Aliases
 # for name in AssessmentTaskName:
