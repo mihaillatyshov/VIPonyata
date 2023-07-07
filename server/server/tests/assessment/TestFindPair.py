@@ -2,19 +2,20 @@ import unittest
 
 from pydantic import ValidationError
 
-from server.models.assessment import (AssessmentTaskName, FindPairTaskReq, FindPairTaskRes, FindPairTaskCreate)
+from server.models.assessment import (AssessmentTaskName, FindPairTaskStudentReq, FindPairTaskRes,
+                                      FindPairTaskTeacherReq)
 
 
 class TestAssessmentFindPair(unittest.TestCase):
     def test_FindPairExceptions(self):
-        self.assertRaises(ValidationError, FindPairTaskReq, **{"name": AssessmentTaskName.TEXT})
-        self.assertRaises(ValidationError, FindPairTaskCreate, **{"name": AssessmentTaskName.FIND_PAIR})
+        self.assertRaises(ValidationError, FindPairTaskStudentReq, **{"name": AssessmentTaskName.TEXT})
+        self.assertRaises(ValidationError, FindPairTaskTeacherReq, **{"name": AssessmentTaskName.FIND_PAIR})
 
     def test_FindPairRes(self):
         value_base = {
             "name": AssessmentTaskName.FIND_PAIR,
-            "to_check_first": ["f1", "f2", "f3", "f4", "f5", "f6", "f7"],
-            "to_check_second": ["s1", "s2", "s3", "s4", "s5", "s6", "s7"]
+            "meta_first": ["f1", "f2", "f3", "f4", "f5", "f6", "f7"],
+            "meta_second": ["s1", "s2", "s3", "s4", "s5", "s6", "s7"]
         }
 
         self.assertFalse(

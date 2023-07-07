@@ -338,6 +338,9 @@ class FillSpacesExistsTaskRes(FillSpacesExistsTaskTeacherBase, BaseModelRes):
         return values
 
     def custom_validation(self) -> bool:
+        if len(self.answers) != len(self.meta_answers):
+            return False
+
         combo_answers = [*list(filter(lambda item: item is not None, self.answers)), *self.inputs]
         combo_answers.sort()
 
@@ -352,8 +355,14 @@ class FillSpacesExistsTaskTeacherReq(FillSpacesExistsTaskTeacherBase):
 
     @root_validator(skip_on_failure=True)
     def answers_validate(cls, values: dict):
-        if (len(values["meta_answers"]) < 2):
+        if len(values["meta_answers"]) < 2:
             raise ValueError("Слишком мало полей")
+
+        if (len(values["separates"]) - 1) != len(values["meta_answers"]):
+            raise ValueError(
+                f"Ответов должно быть на 1 меньше, чем разделителей (s:{len(values['separates'])}, a:{len(values['meta_answers'])})"
+            )
+
         return values
 
 

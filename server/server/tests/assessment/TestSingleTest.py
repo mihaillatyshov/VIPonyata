@@ -2,19 +2,21 @@ import unittest
 
 from pydantic import ValidationError
 
-from server.models.assessment import (AssessmentTaskName, SingleTestTaskReq, SingleTestTaskRes, SingleTestTaskCreate)
+from server.models.assessment import (AssessmentTaskName, SingleTestTaskStudentReq, SingleTestTaskRes,
+                                      SingleTestTaskTeacherReq)
 
 
 class TestAssessmentSingleTest(unittest.TestCase):
     def test_SingleTestExceptions(self):
-        self.assertRaises(ValidationError, SingleTestTaskReq, **{"name": AssessmentTaskName.TEXT})
-        self.assertRaises(ValidationError, SingleTestTaskCreate, **{"name": AssessmentTaskName.TEST_SINGLE})
+        self.assertRaises(ValidationError, SingleTestTaskStudentReq, **{"name": AssessmentTaskName.TEXT})
+        self.assertRaises(ValidationError, SingleTestTaskTeacherReq, **{"name": AssessmentTaskName.TEST_SINGLE})
 
     def test_SingleTestRes(self):
         value_base = {
             "name": AssessmentTaskName.TEST_SINGLE,
             "question": "Ansewer to this question multi",
-            "options": ["False 0", "False 1", "True 2", "True 3"]
+            "options": ["False 0", "False 1", "True 2", "True 3"],
+            "meta_answer": 2
         }
 
         self.assertFalse(SingleTestTaskRes(**value_base, answer=-1).custom_validation())
