@@ -14,31 +14,31 @@
             "name": "test_multi",
             "question": "Ansewer to this question multi",
             "options": ["False 0", "False 1", "True 2", "True 3"],
-            "answers": [2, 3]
+            "meta_answers": [2, 3]
         },
         {
             "name": "find_pair",
-            "first": ["f1", "f2", "f3", "f4", "f5", "f6", "f7"],
-            "second": ["s1", "s2", "s3", "s4", "s5", "s6", "s7"]
+            "meta_first": ["f1", "f2", "f3", "f4", "f5", "f6", "f7"],
+            "meta_second": ["s1", "s2", "s3", "s4", "s5", "s6", "s7"]
         },
         {
             "name": "create_sentence",
-            "parts": ["Cre1ate", "th2is", "sent3ence"]
+            "meta_parts": ["Cre1ate", "th2is", "sent3ence"]
         },
         {
             "name": "fill_spaces_exists",
             "separates": ["Exist. Fill word after (word):", "and", ": before this (char)"],
-            "answers": ["word", "char"]
+            "meta_answers": ["word", "char"]
         },
         {
             "name": "fill_spaces_by_hand",
             "separates": ["By Hand. Fill word after (word):", "and", ": before this (char)"],
-            "answers": ["word", "char"]
+            "meta_answers": ["word", "char"]
         },
         {
             "name": "classification",
             "titles": ["Col1", "Col2", "Col3"],
-            "answers": [
+            "meta_answers": [
                 ["Ansewer 1 (Col1)", "Ansewer 2 (Col1)", "Ansewer 3 (Col1)"],
                 ["Ansewer 1 (Col2)", "Ansewer 2 (Col2)", "Ansewer 3 (Col2)"],
                 ["Ansewer 1 (Col3)", "Ansewer 2 (Col3)", "Ansewer 3 (Col3)"]
@@ -46,7 +46,7 @@
         },
         {
             "name": "sentence_order",
-            "parts": ["First sentence", "Second sentence", "Third sentence", "Fourth sentence"]
+            "meta_parts": ["First sentence", "Second sentence", "Third sentence", "Fourth sentence"]
         },
         {
             "name": "open_question",

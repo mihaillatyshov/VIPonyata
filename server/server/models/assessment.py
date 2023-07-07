@@ -34,7 +34,14 @@ class BaseModelTask(BaseModel, abc.ABC):
     name: AssessmentTaskName
 
     def student_dict(self) -> dict:
-        return self.dict()
+        data = {}
+        for key in self.dict().keys():
+            if not key.startswith("meta_"):
+                data[key] = self.dict()[key]
+        return data
+
+    def student_new_dict(self) -> dict:
+        return self.student_dict()
 
     def teacher_dict(self) -> dict:
         return self.dict()
@@ -83,58 +90,56 @@ class SingleTestTaskFullBase(SingleTestTaskBase):
     question: str
     options: list[str]
 
+    meta_answer: int
 
-class SingleTestTaskReq(SingleTestTaskBase):
+
+class SingleTestTaskStudentReq(SingleTestTaskBase):
     answer: int | None                                                                                                  #or (self.answer > 0 and self.answer < len(self.opt))
 
 
 class SingleTestTaskRes(SingleTestTaskFullBase, BaseModelRes):
-    answer: int | None
-
-    def student_dict(self) -> dict:
-        result = self.dict()
-        result["answer"] = None
-        return result
+    answer: int | None = None
 
     def custom_validation(self) -> bool:
         return self.answer is None or (0 <= self.answer < len(self.options))
 
 
-class SingleTestTaskCreate(SingleTestTaskFullBase):
-    answer: int
-
+class SingleTestTaskTeacherReq(SingleTestTaskFullBase):
     @validator("options", always=True)
     def options_validation(cls, v: list[str]):
         if len(v) <= 1:
             raise ValueError(f"Мало вариантов выбора ({len(v)})")
         return v
 
+    @root_validator(skip_on_failure=True)
+    def meta_answer_validation(cls, values: dict):
+        meta_answer = values["meta_answer"]
+        if not (0 <= meta_answer < len(values["options"])):
+            raise ValueError(f"Выбран неверный вариант ответа ({meta_answer + 1})")
+
 
 #########################################################################################################################
 ################ MultiTest ##############################################################################################
 #########################################################################################################################
 class MultiTestTaskBase(BaseModelTask):
-    answers: list[int]
-
     @validator("name", always=True)
     def name_validation(cls, v):
         return validate_name(v, AssessmentTaskName.TEST_MULTI)
 
 
 class MultiTestTaskFullBase(MultiTestTaskBase):
+    meta_answers: list[int]
+
     question: str
     options: list[str]
 
 
-class MultiTestTaskReq(MultiTestTaskBase):
-    pass
+class MultiTestTaskStudentReq(MultiTestTaskBase):
+    answers: list[int]
 
 
 class MultiTestTaskRes(MultiTestTaskFullBase, BaseModelRes):
-    def student_dict(self) -> dict:
-        result = self.dict()
-        result["answers"] = []
-        return result
+    answers: list[int] = []
 
     def custom_validation(self) -> bool:
         if len(self.answers) != len(set(self.answers)):
@@ -147,18 +152,28 @@ class MultiTestTaskRes(MultiTestTaskFullBase, BaseModelRes):
         return True
 
 
-class MultiTestTaskCreate(MultiTestTaskFullBase):
-    @validator("answers", always=True)
-    def answers_validation(cls, v):
-        if len(v) < 1:
-            raise ValueError(f"Мало вариантов ответа ({len(v)})")
-        return v
-
+class MultiTestTaskTeacherReq(MultiTestTaskFullBase):
     @validator("options", always=True)
     def options_validation(cls, v):
         if len(v) <= 1:
             raise ValueError(f"Мало вариантов выбора ({len(v)})")
         return v
+
+    @root_validator(skip_on_failure=True)
+    def meta_answer_validation(cls, values: dict):
+        meta_answers = values["meta_answers"]
+
+        if len(meta_answers) < 1:
+            raise ValueError(f"Мало вариантов ответа ({len(meta_answers)})")
+
+        if len(meta_answers) != len(set(meta_answers)):
+            raise ValueError(f"Варианты ответа повторяются ({meta_answers})")
+
+        for answer in meta_answers:
+            if not (0 <= answer < len(values["options"])):
+                raise ValueError(f"Варианты ответа вне диапазона ({meta_answers})")
+
+        return values
 
 
 #########################################################################################################################
@@ -374,9 +389,9 @@ def create_alias(name: AssessmentTaskName, req, res, create):
     Aliases[name.value] = {AliasName.REQ: req, AliasName.RES: res, AliasName.CREATE: create}
 
 
-create_alias(AssessmentTaskName.TEXT, TextTaskReq, TextTaskRes, TextTaskCreate)
-create_alias(AssessmentTaskName.TEST_SINGLE, SingleTestTaskReq, SingleTestTaskRes, SingleTestTaskCreate)
-create_alias(AssessmentTaskName.TEST_MULTI, MultiTestTaskReq, MultiTestTaskRes, MultiTestTaskCreate)
+create_alias(AssessmentTaskName.TEXT, TextTaskStudentReq, TextTaskRes, TextTaskTeacherReq)
+create_alias(AssessmentTaskName.TEST_SINGLE, SingleTestTaskStudentReq, SingleTestTaskRes, SingleTestTaskTeacherReq)
+create_alias(AssessmentTaskName.TEST_MULTI, MultiTestTaskStudentReq, MultiTestTaskRes, MultiTestTaskTeacherReq)
 
 #Check Aliases
 # for name in AssessmentTaskName:
