@@ -107,6 +107,13 @@ class Dictionary(Base):
         return f"<Dictionary: (id={self.id}; char_jp={self.char_jp}; word_jp={self.char_jp}; ru={self.ru})>"
 
 
+def time_limit_to_timedelta(time_limit: Time) -> datetime.timedelta:
+    return datetime.timedelta(hours=time_limit.hour,
+                              minutes=time_limit.minute,
+                              seconds=time_limit.second,
+                              microseconds=time_limit.microsecond)
+
+
 class AbstractActivity(Base):
     __abstract__ = True
     id = Column(Integer, primary_key=True)
@@ -124,7 +131,7 @@ class AbstractActivity(Base):
         return relationship("Lesson")
 
     tries: list = []
-    now_try = None
+    now_try: "ActivityTryType" | None = None
 
     def time_limit__ToTimedelta(self) -> datetime.timedelta:
         return datetime.timedelta(hours=self.time_limit.hour,

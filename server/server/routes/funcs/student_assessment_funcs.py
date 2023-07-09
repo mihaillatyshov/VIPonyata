@@ -7,12 +7,12 @@ from typing import Any
 from flask import request
 
 from server.exceptions.ApiExceptions import InvalidAPIUsage, InvalidRequestJson
+from server.models.assessment import AssessmentTaskName, Aliases
 from server.queries import StudentDBqueries as DBQS
 from server.queries.DBqueriesUtils import DBsession
-from server.models.assessment import AssessmentTaskName
 
-from ...db_models import Assessment
-from ...log_lib import LogE, LogI, LogW
+from server.db_models import Assessment, time_limit_to_timedelta
+from server.log_lib import LogE, LogI, LogW
 from ..routes_utils import (ActivityEndTimeHandler, GetCurrentUserId, StartActivityTimerLimit)
 from .student_activity_funcs import ActivityFuncs
 
@@ -229,14 +229,16 @@ class ImgParser(AssessmentParser):
         return False
 
 
-def ParseTasks(data_str: str) -> list[dict]:
+def parse_tasks(data_str: str) -> list[dict]:
     data = json.loads(data_str)
 
     tasks = []
     for task in data["tasks"]:
-        if handler := handlers().get(task["name"]):
-            LogI(handler.name())
-            tasks.append(handler.parse(task))
+        if handler := Aliases.get(task["name"]):
+            LogI(task["name"])
+            task_base = handler["create"](**task)
+            task_new = handler["res"](**task_base.dict())
+            tasks.append(task_new.student_dict())
         else:
             LogW("No parser for this task!", task["name"])
     return tasks
@@ -249,22 +251,21 @@ class AssessmentFuncsClass(ActivityFuncs):
     def __init__(self):
         super().__init__(Assessment)
 
-    def StartNewTry(self, activityId: int):
-        activity = self._activityQueries.GetById(activityId, GetCurrentUserId())
-        activityTries = self._activityQueries.GetTriesByActivityId(activityId, GetCurrentUserId())
+    def StartNewTry(self, activity_id: int):
+        activity = self._activityQueries.GetById(activity_id, GetCurrentUserId())
+        activity_tries = self._activityQueries.GetTriesByActivityId(activity_id, GetCurrentUserId())
 
-        if activityTries and activityTries[-1].end_datetime == None:
+        if activity_tries and activity_tries[-1].end_datetime == None:
             return {"message": "Lexis try already Exists"}, 409
 
-        tasks = json.dumps(ParseTasks(                                                                                  #
-            activity.tasks                                                                                              # type: ignore
-        ))                                                                                                              #
-        newActivityTry = self._activityQueries.AddNewTry(len(activityTries) + 1, activityId, GetCurrentUserId(), tasks)
+        tasks = json.dumps(parse_tasks(activity.tasks))
+        new_activity_try = self._activityQueries.AddNewTry(
+            len(activity_tries) + 1, activity_id, GetCurrentUserId(), tasks)
 
-        if activity.time_limit and newActivityTry:
+        if activity.time_limit and new_activity_try:
             StartActivityTimerLimit(                                                                                    #
-                activity.time_limit__ToTimedelta(),                                                                     #
-                newActivityTry.id,                                                                                      # type: ignore
+                time_limit_to_timedelta(activity.time_limit),                                                           #
+                new_activity_try.id,                                                                                    #
                 self._activityQueries._activityTry_type)                                                                #
         return {"message": "Lexis try successfully created"}
 

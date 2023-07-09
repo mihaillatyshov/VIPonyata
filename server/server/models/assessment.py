@@ -26,6 +26,11 @@ def validate_name(input_name: str, task_name: AssessmentTaskName):
     return input_name
 
 
+def create_sentence_parts_validation_base(parts: list[str]):
+    if len(parts) < 2:
+        raise ValueError(f"Слишком мало полей ({len(parts)})")
+
+
 class BaseModelRes(abc.ABC):
     @abc.abstractmethod
     def custom_validation(self) -> bool:
@@ -251,22 +256,11 @@ class FindPairTaskTeacherReq(FindPairTaskTeacherBase):
 #########################################################################################################################
 ################ CreateSentence #########################################################################################
 #########################################################################################################################
-class CreateSentenceTaskBase(BaseModelTask):
-    @validator("name", always=True)
-    def name_validation(cls, v):
-        return validate_name(v, AssessmentTaskName.CREATE_SENTENCE)
-
-
-class CreateSentenceTaskTeacherBase(CreateSentenceTaskBase):
+class IOrderTaskTeacherBase(BaseModelTask):
     meta_parts: list[str]
 
 
-def create_sentence_parts_validation_base(parts: list[str]):
-    if len(parts) < 2:
-        raise ValueError(f"Слишком мало полей ({len(parts)})")
-
-
-class CreateSentenceTaskStudentReq(CreateSentenceTaskBase):
+class IOrderTaskStudentReq(BaseModelTask):
     parts: list[str]
 
     @root_validator(skip_on_failure=True)
@@ -275,7 +269,7 @@ class CreateSentenceTaskStudentReq(CreateSentenceTaskBase):
         return values
 
 
-class CreateSentenceTaskRes(CreateSentenceTaskTeacherBase, BaseModelRes):
+class IOrderTaskRes(IOrderTaskTeacherBase, BaseModelRes):
     parts: list[str] = []
 
     @root_validator(skip_on_failure=True)
@@ -297,11 +291,32 @@ class CreateSentenceTaskRes(CreateSentenceTaskTeacherBase, BaseModelRes):
         return meta_parts == parts
 
 
-class CreateSentenceTaskTeacherReq(CreateSentenceTaskTeacherBase):
+class IOrderTaskTeacherReq(IOrderTaskTeacherBase):
     @root_validator(skip_on_failure=True)
     def meta_parts_validation(cls, values: dict):
         create_sentence_parts_validation_base(values["meta_parts"])
         return values
+
+
+#########################################################################################################################
+################ CreateSentence #########################################################################################
+#########################################################################################################################
+class CreateSentenceTaskBase(BaseModelTask):
+    @validator("name", always=True)
+    def name_validation(cls, v):
+        return validate_name(v, AssessmentTaskName.CREATE_SENTENCE)
+
+
+class CreateSentenceTaskStudentReq(CreateSentenceTaskBase, IOrderTaskStudentReq):
+    pass
+
+
+class CreateSentenceTaskRes(CreateSentenceTaskBase, IOrderTaskRes):
+    pass
+
+
+class CreateSentenceTaskTeacherReq(CreateSentenceTaskBase, IOrderTaskTeacherReq):
+    pass
 
 
 #########################################################################################################################
@@ -351,12 +366,10 @@ class FillSpacesExistsTaskRes(FillSpacesExistsTaskTeacherBase, BaseModelRes):
 
 
 class FillSpacesExistsTaskTeacherReq(FillSpacesExistsTaskTeacherBase):
-    answers: list[str]
-
     @root_validator(skip_on_failure=True)
     def answers_validate(cls, values: dict):
         if len(values["meta_answers"]) < 2:
-            raise ValueError("Слишком мало полей")
+            raise ValueError(f"Слишком мало полей ({len(values['meta_answers'])})")
 
         if (len(values["separates"]) - 1) != len(values["meta_answers"]):
             raise ValueError(
@@ -364,6 +377,195 @@ class FillSpacesExistsTaskTeacherReq(FillSpacesExistsTaskTeacherBase):
             )
 
         return values
+
+
+#########################################################################################################################
+################ FillSpacesByHand #######################################################################################
+#########################################################################################################################
+class FillSpacesByHandTaskBase(BaseModelTask):
+    @validator("name", always=True)
+    def name_validation(cls, v):
+        return validate_name(v, AssessmentTaskName.FILL_SPACES_BY_HAND)
+
+
+class FillSpacesByHandTaskTeacherBase(FillSpacesByHandTaskBase):
+    separates: list[str]
+    meta_answers: list[str]
+
+
+class FillSpacesByHandTaskStudentReq(FillSpacesByHandTaskBase):
+    answers: list[str]
+
+
+class FillSpacesByHandTaskRes(FillSpacesByHandTaskTeacherBase, BaseModelRes):
+    answers: list[str] = []
+
+    @root_validator(skip_on_failure=True)
+    def new_inputs_validation(cls, values: dict):
+        if len(values["answers"]) == 0:
+            for _ in range(len(values["meta_answers"])):
+                values["answers"].append("")
+
+        return values
+
+    def custom_validation(self) -> bool:
+        return len(self.answers) == len(self.meta_answers)
+
+
+class FillSpacesByHandTaskTeacherReq(FillSpacesByHandTaskTeacherBase):
+    @root_validator(skip_on_failure=True)
+    def answers_validate(cls, values: dict):
+        if len(values["meta_answers"]) < 1:
+            raise ValueError(f"Слишком мало полей ({len(values['meta_answers'])})")
+
+        if (len(values["separates"]) - 1) != len(values["meta_answers"]):
+            raise ValueError(
+                f"Ответов должно быть на 1 меньше, чем разделителей (s:{len(values['separates'])}, a:{len(values['meta_answers'])})"
+            )
+
+        return values
+
+
+#########################################################################################################################
+################ Classification #########################################################################################
+#########################################################################################################################
+class ClassificationTaskBase(BaseModelTask):
+    @validator("name", always=True)
+    def name_validation(cls, v):
+        return validate_name(v, AssessmentTaskName.CLASSIFICATION)
+
+
+class ClassificationTaskTeacherBase(ClassificationTaskBase):
+    titles: list[str]
+    meta_answers: list[list[str]]
+
+
+class ClassificationTaskStudentReq(ClassificationTaskBase):
+    answers: list[list[str]]
+
+
+class ClassificationTaskRes(ClassificationTaskTeacherBase, BaseModelRes):
+    answers: list[list[str]] = []
+    inputs: list[str] = []
+
+    @root_validator(skip_on_failure=True)
+    def new_inputs_validation(cls, values: dict):
+        if len(values["answers"]) == 0:
+            for col in values["meta_answers"]:
+                values["answers"].append([])
+                values["inputs"] += col
+            random.shuffle(values["inputs"])
+
+        return values
+
+    def custom_validation(self) -> bool:
+        if len(self.answers) != len(self.meta_answers):
+            return False
+
+        combo_answers = self.inputs.copy()
+        for col in self.answers:
+            combo_answers += col.copy()
+        combo_answers.sort()
+
+        meta_answers = []
+        for col in self.meta_answers:
+            meta_answers += col.copy()
+        meta_answers.sort()
+
+        return combo_answers == meta_answers
+
+
+class ClassificationTaskTeacherReq(ClassificationTaskTeacherBase):
+    @root_validator(skip_on_failure=True)
+    def answers_validate(cls, values: dict):
+        if len(values["meta_answers"]) < 1:
+            raise ValueError(f"Слишком мало колонок ({len(values['meta_answers'])})")
+
+        if len(values["meta_answers"]) != len(values["titles"]):
+            raise ValueError(
+                f"Количество колонок ({len(values['meta_answers'])}) не равно количеству названий ({len(values['titles'])})"
+            )
+
+        for col in values["meta_answers"]:
+            if len(values["meta_answers"]) < 1:
+                raise ValueError(f"Слишком мало значений в колонке ({len(col)})")
+
+        return values
+
+
+#########################################################################################################################
+################ SentenceOrder ##########################################################################################
+#########################################################################################################################
+class SentenceOrderTaskBase(BaseModelTask):
+    @validator("name", always=True)
+    def name_validation(cls, v):
+        return validate_name(v, AssessmentTaskName.SENTENCE_OREDER)
+
+
+class SentenceOrderTaskStudentReq(SentenceOrderTaskBase, IOrderTaskStudentReq):
+    pass
+
+
+class SentenceOrderTaskRes(SentenceOrderTaskBase, IOrderTaskRes):
+    pass
+
+
+class SentenceOrderTaskTeacherReq(SentenceOrderTaskBase, IOrderTaskTeacherReq):
+    pass
+
+
+#########################################################################################################################
+################ OpenQuestion ###########################################################################################
+#########################################################################################################################
+class OpenQuestionTaskBase(BaseModelTask):
+    @validator("name", always=True)
+    def name_validation(cls, v):
+        return validate_name(v, AssessmentTaskName.OPEN_QUESTION)
+
+
+class OpenQuestionTaskTeacherBase(OpenQuestionTaskBase):
+    question: str
+
+
+class OpenQuestionTaskStudentReq(OpenQuestionTaskBase):
+    answer: str
+
+
+class OpenQuestionTaskRes(OpenQuestionTaskTeacherBase, BaseModelRes):
+    answer: str = ""
+
+    def custom_validation(self) -> bool:
+        return True
+
+
+class OpenQuestionTaskTeacherReq(OpenQuestionTaskTeacherBase):
+    pass
+
+
+#########################################################################################################################
+################ Img ###################################################################################################
+#########################################################################################################################
+class ImgTaskBase(BaseModelTask):
+    @validator("name", always=True)
+    def name_validation(cls, v):
+        return validate_name(v, AssessmentTaskName.IMG)
+
+
+class ImgTaskTeacherBase(ImgTaskBase):
+    url: str
+
+
+class ImgTaskStudentReq(ImgTaskBase):
+    pass
+
+
+class ImgTaskRes(ImgTaskTeacherBase, BaseModelRes):
+    def custom_validation(self) -> bool:
+        return True
+
+
+class ImgTaskTeacherReq(ImgTaskTeacherBase):
+    pass
 
 
 # fp = FindPairTaskReq(name=AssessmentTaskName.FIND_PAIR, first=["f1", "f2"], second=["s1", "s2"])
@@ -384,17 +586,17 @@ class FillSpacesExistsTaskTeacherReq(FillSpacesExistsTaskTeacherBase):
 #########################################################################################################################
 ################ Alias ##################################################################################################
 #########################################################################################################################
-class AliasName(Enum):
-    REQ = "req"
-    RES = "res"
-    CREATE = "create"
+class AliasType(TypedDict):
+    req: type[BaseModelTask]
+    res: type[BaseModelTask]
+    create: type[BaseModelTask]
 
 
-Aliases: dict[str, dict] = {}
+Aliases: dict[str, AliasType] = {}
 
 
 def create_alias(name: AssessmentTaskName, req, res, create):
-    Aliases[name.value] = {AliasName.REQ: req, AliasName.RES: res, AliasName.CREATE: create}
+    Aliases[name.value] = {"req": req, "res": res, "create": create}
 
 
 create_alias(AssessmentTaskName.TEXT, TextTaskStudentReq, TextTaskRes, TextTaskTeacherReq)
@@ -405,8 +607,17 @@ create_alias(AssessmentTaskName.CREATE_SENTENCE, CreateSentenceTaskStudentReq, C
              CreateSentenceTaskTeacherReq)
 create_alias(AssessmentTaskName.FILL_SPACES_EXISTS, FillSpacesExistsTaskStudentReq, FillSpacesExistsTaskRes,
              FillSpacesExistsTaskTeacherReq)
+create_alias(AssessmentTaskName.FILL_SPACES_BY_HAND, FillSpacesByHandTaskStudentReq, FillSpacesByHandTaskRes,
+             FillSpacesByHandTaskTeacherReq)
+create_alias(AssessmentTaskName.CLASSIFICATION, ClassificationTaskStudentReq, ClassificationTaskRes,
+             ClassificationTaskTeacherReq)
+create_alias(AssessmentTaskName.SENTENCE_OREDER, SentenceOrderTaskStudentReq, SentenceOrderTaskRes,
+             SentenceOrderTaskTeacherReq)
+create_alias(AssessmentTaskName.OPEN_QUESTION, OpenQuestionTaskStudentReq, OpenQuestionTaskRes,
+             OpenQuestionTaskTeacherReq)
+create_alias(AssessmentTaskName.IMG, ImgTaskStudentReq, ImgTaskRes, ImgTaskTeacherReq)
 
-#Check Aliases
-# for name in AssessmentTaskName:
-#     if name.value not in Aliases.keys():
-#         raise KeyError(f"Alias {name} not found")
+# Check Aliases
+for name in AssessmentTaskName:
+    if name.value not in Aliases.keys():
+        raise KeyError(f"Alias {name} not found")
