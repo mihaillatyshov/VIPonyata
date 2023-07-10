@@ -6,7 +6,7 @@ from typing import TypedDict
 from pydantic import BaseModel, root_validator, validator
 
 
-class AssessmentTaskName(Enum):
+class AssessmentTaskName(str, Enum):
     TEXT = "text"
     TEST_SINGLE = "test_single"
     TEST_MULTI = "test_multi"
@@ -125,6 +125,8 @@ class SingleTestTaskTeacherReq(SingleTestTaskTeacherBase):
         if not (0 <= meta_answer < len(values["options"])):
             raise ValueError(f"Выбран недопустимый вариант ответа ({meta_answer + 1})")
 
+        return values
+
 
 #########################################################################################################################
 ################ MultiTest ##############################################################################################
@@ -227,11 +229,11 @@ class FindPairTaskRes(FindPairTaskTeacherBase, BaseModelRes):
     @root_validator(skip_on_failure=True)
     def new_first_second_validation(cls, values: dict):
         if len(values["first"]) == 0:
-            values["first"] = values["meta_first"]
+            values["first"] = values["meta_first"].copy()
             random.shuffle(values["first"])
 
         if len(values["second"]) == 0:
-            values["second"] = values["meta_second"]
+            values["second"] = values["meta_second"].copy()
             random.shuffle(values["second"])
 
         return values
