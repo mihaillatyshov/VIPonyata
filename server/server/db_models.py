@@ -1,5 +1,5 @@
 import datetime
-from typing import Type
+from typing import Type, Any
 from sqlalchemy import (Column, Date, DateTime, ForeignKey, Integer, String, Table, Text, Time, create_engine)
 from sqlalchemy.engine import URL
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
@@ -131,7 +131,7 @@ class AbstractActivity(Base):
         return relationship("Lesson")
 
     tries: list = []
-    now_try: "ActivityTryType" | None = None
+    now_try: Any | None = None
 
     def time_limit__ToTimedelta(self) -> datetime.timedelta:
         return datetime.timedelta(hours=self.time_limit.hour,
