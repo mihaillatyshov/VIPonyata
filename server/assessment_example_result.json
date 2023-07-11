@@ -7,49 +7,68 @@
         "name": "test_single",
         "question": "Ansewer to this question single",
         "options": ["False 0", "False 1", "True 2", "False 3"],
+        "meta_answer": 2,
         "answer": null
     },
     {
         "name": "test_multi",
         "question": "Ansewer to this question multi",
         "options": ["False 0", "False 1", "True 2", "True 3"],
+        "meta_answers": [2, 3],
         "answers": []
     },
     {
         "name": "find_pair",
-        "first": ["f2", "f3", "f6", "f1", "f5", "f7", "f4"],
-        "second": ["s2", "s3", "s1", "s4", "s6", "s7", "s5"],
-        "pars_created": 0
+        "meta_first": ["f1", "f2", "f3", "f4", "f5", "f6", "f7"],
+        "meta_second": ["s1", "s2", "s3", "s4", "s5", "s6", "s7"],
+        "pars_created": 0,
+        "first": ["f3", "f2", "f7", "f5", "f4", "f6", "f1"],
+        "second": ["s7", "s6", "s5", "s2", "s3", "s1", "s4"]
     },
-    { "name": "create_sentence", "parts": ["Cre1ate", "sent3ence", "th2is"] },
+    {
+        "name": "create_sentence",
+        "meta_parts": ["Cre1ate", "th2is", "sent3ence"],
+        "parts": ["th2is", "sent3ence", "Cre1ate"]
+    },
     {
         "name": "fill_spaces_exists",
         "separates": ["Exist. Fill word after (word):", "and", ": before this (char)"],
+        "meta_answers": ["word", "char"],
         "answers": [null, null],
-        "inputs": ["word", "char"]
+        "inputs": ["char", "word"]
     },
     {
         "name": "fill_spaces_by_hand",
         "separates": ["By Hand. Fill word after (word):", "and", ": before this (char)"],
+        "meta_answers": ["word", "char"],
         "answers": ["", ""]
     },
     {
         "name": "classification",
         "titles": ["Col1", "Col2", "Col3"],
+        "meta_answers": [
+            ["Ansewer 1 (Col1)", "Ansewer 2 (Col1)", "Ansewer 3 (Col1)"],
+            ["Ansewer 1 (Col2)", "Ansewer 2 (Col2)", "Ansewer 3 (Col2)"],
+            ["Ansewer 1 (Col3)", "Ansewer 2 (Col3)", "Ansewer 3 (Col3)"]
+        ],
+        "answers": [[], [], []],
         "inputs": [
-            "Ansewer 1 (Col1)",
-            "Ansewer 2 (Col1)",
             "Ansewer 3 (Col1)",
             "Ansewer 1 (Col2)",
-            "Ansewer 2 (Col2)",
+            "Ansewer 1 (Col1)",
             "Ansewer 3 (Col2)",
             "Ansewer 1 (Col3)",
+            "Ansewer 3 (Col3)",
             "Ansewer 2 (Col3)",
-            "Ansewer 3 (Col3)"
-        ],
-        "answers": [[], [], []]
+            "Ansewer 2 (Col2)",
+            "Ansewer 2 (Col1)"
+        ]
     },
-    { "name": "sentence_order", "parts": ["First sentence", "Second sentence", "Third sentence", "Fourth sentence"] },
+    {
+        "name": "sentence_order",
+        "meta_parts": ["First sentence", "Second sentence", "Third sentence", "Fourth sentence"],
+        "parts": ["Fourth sentence", "First sentence", "Second sentence", "Third sentence"]
+    },
     { "name": "open_question", "question": "Ansewer to this question pls", "answer": "" },
     { "name": "img", "url": "/img/Activity/Assessment/test.png" }
 ]

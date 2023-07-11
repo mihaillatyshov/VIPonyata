@@ -277,7 +277,7 @@ class IOrderTaskRes(IOrderTaskTeacherBase, BaseModelRes):
     @root_validator(skip_on_failure=True)
     def new_parts_validation(cls, values: dict):
         if len(values["parts"]) == 0:
-            values["parts"] = values["meta_parts"]
+            values["parts"] = values["meta_parts"].copy()
             random.shuffle(values["parts"])
         return values
 
@@ -455,7 +455,7 @@ class ClassificationTaskRes(ClassificationTaskTeacherBase, BaseModelRes):
         if len(values["answers"]) == 0:
             for col in values["meta_answers"]:
                 values["answers"].append([])
-                values["inputs"] += col
+                values["inputs"] += col.copy()
             random.shuffle(values["inputs"])
 
         return values
