@@ -10,3 +10,27 @@
     padding: 5px;
     background-color: white;
 }
+
+.fillSpaceExistsDraggable {
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 5px;
+    background-color: white;
+}
+
+.fillSpaceExistsDroppable {
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 5px;
+    background-color: white;
+    color: #aaaaaa;
+}
+
+.fillSpaceExistsDroppableNone {
+    border-radius: 5px;
+    background-color: white;
+}
+
+.fillSpaceExistsDroppableOver {
+    opacity: 50%;
+}

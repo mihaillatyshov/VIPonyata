@@ -1,29 +1,17 @@
 import React from "react";
-import DragItem from "./DragItem";
-import { FieldProps } from "./DragAndDrop";
-import { getDropToSpread } from "libs/DragAndDrop";
+import Draggable from "./Draggable";
 
-export interface InputsFieldProps extends FieldProps {
+interface InputsFieldProps {
     inputFields: string[];
+    width: number;
 }
 
-const InputsField = ({ accept, inputFields, onDropCallback }: InputsFieldProps) => {
+const InputsField = ({ inputFields, width }: InputsFieldProps) => {
     return (
-        <div>
-            <div
-                {...getDropToSpread({
-                    accept,
-                    onDropCallback({ dragData }) {
-                        onDropCallback({ from: dragData, to: { id: -1, name: "inputs" } });
-                        console.log(dragData);
-                    },
-                })}
-                style={{ backgroundColor: "#CCCCCC", minHeight: "10rem", padding: "20px" }}
-            >
-                {inputFields.map((text: string, fieldId: number) => (
-                    <DragItem key={fieldId} accept={accept} fieldName="inputs" text={text} fieldId={fieldId} />
-                ))}
-            </div>
+        <div className="d-flex gap-3 flex-wrap">
+            {inputFields.map((item, id) => (
+                <Draggable key={id} id={id} str={item} width={width} type="inputs"></Draggable>
+            ))}
         </div>
     );
 };
