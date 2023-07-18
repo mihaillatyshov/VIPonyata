@@ -60,8 +60,7 @@ const StudentLexisCard = ({ name, inData, goToNextTaskCallback }: StudentLexisTa
                 });
             }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [cardId]);
+    }, [cardId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleButtonNavigate = (newId: number) => {
         if (newId === inData.length) {

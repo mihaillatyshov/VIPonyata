@@ -22,7 +22,6 @@ import StudentHieroglyphPage from "components/Activities/Lexis/Hieroglyph/Studen
 import StudentAssessmentPage from "components/Activities/Assessment/StudentAssessmentPage";
 import { DndContext } from "@dnd-kit/core";
 
-// eslint-disable-next-line
 const App = () => {
     const user = useAppSelector(selectUser);
     const dispatch = useAppDispatch();
@@ -31,8 +30,7 @@ const App = () => {
         AjaxGet<UserState>({ url: "/api/islogin" }).then((json) => {
             dispatch(setUserData(json));
         });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleLogout = () => {
         AjaxPost({ url: "/api/logout" }).then(() => {

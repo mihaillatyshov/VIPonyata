@@ -63,8 +63,7 @@ const StudentLessonPage = () => {
                     if (response.status === 403) navigate(`/courses/${json.course_id}`);
                 }
             });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     if (lesson === undefined) {
         return <p> Loading... </p>;

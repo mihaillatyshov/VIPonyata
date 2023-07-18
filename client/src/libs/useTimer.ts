@@ -28,8 +28,7 @@ export default function useTimer({ deadline, interval = SECOND / 2, onDeadline =
         return () => {
             clearInterval(intervalId);
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [deadline, interval]);
+    }, [deadline, interval]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const getVV = (value: number) => {
         return `${value}`.padStart(2, "0");

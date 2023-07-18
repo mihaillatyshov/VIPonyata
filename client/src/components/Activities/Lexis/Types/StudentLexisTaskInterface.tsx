@@ -39,8 +39,7 @@ const StudentLexisTaskInterface = ({
             type: taskTypeName,
             mistakeCount: 0,
         });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (!checkItem(item, taskTypeName)) return;
@@ -51,8 +50,7 @@ const StudentLexisTaskInterface = ({
                 item.mistakeCount //Math.max(0, 100 - Math.round((100 / item.doneFields.length) * item.mistakeCount))
             );
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [item]);
+    }, [item]); // eslint-disable-line react-hooks/exhaustive-deps
 
     if (!checkItem(item, taskTypeName)) {
         return <div> Loading . . . </div>;

@@ -20,8 +20,7 @@ const StudentCoursesList = () => {
         }).then((json) => {
             dispatch(setCourses(json.items));
         });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     if (courses.items === undefined) {
         return <div> Loading... </div>;

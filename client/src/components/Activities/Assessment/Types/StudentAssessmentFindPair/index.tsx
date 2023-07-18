@@ -34,9 +34,7 @@ const StudentAssessmentFindPair = ({ data, taskId }: StudentAssessmentTypeProps<
             setSelectedSecond(undefined);
             dispatch(setAssessmentTaskData({ id: taskId, data: data }));
         }
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedFirst, selectedSecond]);
+    }, [selectedFirst, selectedSecond]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <div className="row mx-0">

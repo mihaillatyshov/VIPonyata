@@ -49,15 +49,15 @@ const StudentAssessmentPage = () => {
                     if (response.status === 403) navigate(`/lessons/${json.lesson_id}`);
                 }
             });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            console.log("TODO Send Some Changes . . ."); // TODO
+            console.log("TODO Send Some Changes . . .", assessment.items); // TODO
+            AjaxPost({ url: `/api/assessment/${id}/newdonetasks`, body: { done_tasks: assessment.items } });
         }, 2000);
         return () => clearTimeout(timer);
-    }, [assessment]);
+    }, [assessment, id]);
 
     const backToLessonHandle = () => {
         navigate(`/lessons/${assessment.info.lesson_id}`);

@@ -17,7 +17,7 @@ interface SortableOrderProps {
 }
 
 const SortableOrder = ({ handleDragEnd, order, data }: SortableOrderProps) => {
-    const sortContextClassName = `d-flex mx-auto ${order === "horizontal" ? "flex-wrap" : "flex-column "} gap-3`;
+    const sortContextClassName = `d-flex mx-auto ${order === "horizontal" ? "flex-wrap" : "flex-column"} gap-3`;
 
     const localParts: TLocalPart[] = useMemo(() => {
         return data.parts.map((item, id) => ({

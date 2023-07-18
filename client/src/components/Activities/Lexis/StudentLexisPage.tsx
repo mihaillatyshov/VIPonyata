@@ -113,8 +113,7 @@ const StudentLexisPage = ({
                     if (response.status === 403) navigate(`/lessons/${json.lesson_id}`);
                 }
             });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const goToNextTaskHandle = (taskTypeName: string, percent: number) => {
         if (lexis.items === undefined) return;

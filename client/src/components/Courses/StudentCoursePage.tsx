@@ -33,8 +33,7 @@ const StudentCoursePage = () => {
                     if (response.status === 404 || response.status === 403) navigate("/");
                 }
             });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <div className="container">

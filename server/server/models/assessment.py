@@ -31,12 +31,6 @@ def create_sentence_parts_validation_base(parts: list[str]):
         raise ValueError(f"Слишком мало полей ({len(parts)})")
 
 
-class BaseModelRes(abc.ABC):
-    @abc.abstractmethod
-    def custom_validation(self) -> bool:
-        pass
-
-
 class BaseModelTask(BaseModel, abc.ABC):
     name: AssessmentTaskName
 
@@ -58,6 +52,12 @@ class BaseModelTask(BaseModel, abc.ABC):
 
     class Config:
         extra = "ignore"
+
+
+class BaseModelRes(BaseModelTask, abc.ABC):
+    @abc.abstractmethod
+    def custom_validation(self) -> bool:
+        pass
 
 
 #########################################################################################################################
@@ -444,6 +444,7 @@ class ClassificationTaskTeacherBase(ClassificationTaskBase):
 
 class ClassificationTaskStudentReq(ClassificationTaskBase):
     answers: list[list[str]]
+    inputs: list[str]
 
 
 class ClassificationTaskRes(ClassificationTaskTeacherBase, BaseModelRes):
@@ -452,7 +453,9 @@ class ClassificationTaskRes(ClassificationTaskTeacherBase, BaseModelRes):
 
     @root_validator(skip_on_failure=True)
     def new_inputs_validation(cls, values: dict):
+        print("root_validator:   ", values["answers"])
         if len(values["answers"]) == 0:
+            print("len(values['answers']) == 0")
             for col in values["meta_answers"]:
                 values["answers"].append([])
                 values["inputs"] += col.copy()
@@ -590,7 +593,7 @@ class ImgTaskTeacherReq(ImgTaskTeacherBase):
 #########################################################################################################################
 class AliasType(TypedDict):
     req: type[BaseModelTask]
-    res: type[BaseModelTask]
+    res: type[BaseModelRes]
     create: type[BaseModelTask]
 
 

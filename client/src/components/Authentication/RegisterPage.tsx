@@ -21,8 +21,8 @@ const RegisterPage = () => {
     const dispatch = useAppDispatch();
 
     useEffect(() => {
-        dispatch(resetRegisterForm()); // eslint-disable-next-line
-    }, []);
+        dispatch(resetRegisterForm());
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();

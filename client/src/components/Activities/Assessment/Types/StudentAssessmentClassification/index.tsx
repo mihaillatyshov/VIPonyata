@@ -1,75 +1,180 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { TAssessmentClassification } from "models/Activity/Items/TAssessmentItems";
 import { StudentAssessmentTypeProps } from "../StudentAssessmentTypeProps";
-import ItemsField from "./ItemsField";
-import { SwapDataProps } from "./DragAndDrop";
 import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
 import { useAppDispatch } from "redux/hooks";
+import {
+    DndContext,
+    useSensors,
+    PointerSensor,
+    KeyboardSensor,
+    useSensor,
+    DragOverlay,
+    DragStartEvent,
+    DragOverEvent,
+    DragEndEvent,
+    UniqueIdentifier,
+    pointerWithin,
+} from "@dnd-kit/core";
+import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import Container from "./Container";
+import { Item } from "./SortableItem";
+
+export interface ItemState {
+    strId: string;
+    str: string;
+}
 
 const StudentAssessmentClassification = ({ data, taskId }: StudentAssessmentTypeProps<TAssessmentClassification>) => {
     const dispatch = useAppDispatch();
-    const accept = `dnd_ac_${taskId}`;
 
-    const handleAnsInp = (swapData: SwapDataProps) => {
-        const fromValue = data.answers[swapData.from.colId].splice(swapData.from.id, 1)[0];
-        data.inputs.push(fromValue);
-    };
+    const [items, setItems] = useState<ItemState[][]>(() => {
+        const inputs: ItemState[] = data.inputs.map((str, i) => ({ strId: `id_${i}`, str }));
+        const answers: ItemState[][] = data.answers.map((col) => []);
+        return [inputs, ...answers];
+    });
 
-    const handleInpAns = (swapData: SwapDataProps) => {
-        const inputId = swapData.from.id;
-        const answerColId = swapData.to.colId;
+    const strWidth = Math.max(
+        ...[data.inputs, ...data.answers].map((col) => Math.max(...col.map((str) => str.length))),
+        5
+    );
+    console.log(strWidth);
 
-        const inputValue = data.inputs.splice(inputId, 1)[0];
-        data.answers[answerColId].push(inputValue);
-    };
+    useEffect(() => {
+        data.inputs = items[0].map(({ str }) => str);
+        data.answers = items.slice(1).map((col) => col.map(({ str }) => str));
 
-    const handleAnsAns = (swapData: SwapDataProps) => {
-        const fromValue = data.answers[swapData.from.colId].splice(swapData.from.id, 1)[0];
-        data.answers[swapData.to.colId].push(fromValue);
-    };
-
-    const onDropHandle = (swapData: SwapDataProps) => {
-        console.log("StudentAssessmentClassification SD", swapData);
-        if (swapData.from.name === "answers" && swapData.to.name === "answers") {
-            handleAnsAns(swapData);
-        } else if (swapData.from.name === "answers" && swapData.to.name === "inputs") {
-            handleAnsInp(swapData);
-        } else if (swapData.from.name === "inputs" && swapData.to.name === "answers") {
-            handleInpAns(swapData);
-        }
         dispatch(setAssessmentTaskData({ id: taskId, data: data }));
+    }, [items]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const [active, setActive] = useState<ItemState | null>(null);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    const findContainer = (id: UniqueIdentifier): number => {
+        if (Number.isInteger(id)) {
+            return id as number;
+        }
+
+        return items.findIndex((col) => undefined !== col.find(({ strId }) => id === strId));
     };
 
-    // console.log("TAssessmentClassification", data);
+    const findIndex = (col: ItemState[], id: UniqueIdentifier): number => {
+        return col.findIndex(({ strId }) => id === strId);
+    };
+
+    const handleDragStart = (event: DragStartEvent) => {
+        const { active } = event;
+        const { id } = active;
+
+        const containerId = findContainer(id);
+        const index = findIndex(items[containerId], id);
+        setActive(items[containerId][index]);
+    };
+
+    const handleDragOver = (event: DragOverEvent) => {
+        const { active, over, delta } = event;
+        const { id } = active;
+        if (!over || !active.rect) return;
+        const { id: overId } = over;
+
+        if (id === overId) {
+            return;
+        }
+        const activeContainerId = findContainer(id);
+        const overContainerId = findContainer(overId);
+        if (activeContainerId === overContainerId) {
+            return;
+        }
+
+        setItems((prev): ItemState[][] => {
+            const activeItems = prev[activeContainerId];
+            const overItems = prev[overContainerId];
+
+            const activeIndex = findIndex(activeItems, id);
+            const overIndex = findIndex(overItems, overId);
+
+            let newIndex;
+            if (overId in prev) {
+                newIndex = overItems.length + 1;
+            } else {
+                const isBelowLastItem =
+                    over && overIndex === overItems.length - 1 && delta.y > over.rect.top + over.rect.height;
+
+                const modifier = isBelowLastItem ? 1 : 0;
+
+                newIndex = overIndex >= 0 ? overIndex + modifier : overItems.length + 1;
+            }
+
+            return Object.assign([], {
+                ...prev,
+                [activeContainerId]: [...prev[activeContainerId].filter((item) => item.strId !== active.id)],
+                [overContainerId]: [
+                    ...prev[overContainerId].slice(0, newIndex),
+                    items[activeContainerId][activeIndex],
+                    ...prev[overContainerId].slice(newIndex, prev[overContainerId].length),
+                ],
+            });
+        });
+    };
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (!over) {
+            return;
+        }
+        const { id } = active;
+        const { id: overId } = over;
+
+        const activeContainer = findContainer(id);
+        const overContainer = findContainer(overId);
+
+        if (id === overId) {
+            return;
+        }
+
+        if (activeContainer !== overContainer) {
+            return;
+        }
+
+        const activeIndex = findIndex(items[activeContainer], active.id);
+        const overIndex = findIndex(items[overContainer], overId);
+
+        if (activeIndex !== overIndex) {
+            setItems((items) =>
+                Object.assign([], {
+                    ...items,
+                    [overContainer]: arrayMove(items[overContainer], activeIndex, overIndex),
+                })
+            );
+        }
+
+        setActive(null);
+    };
+
     return (
         <div>
-            <ItemsField
-                accept={accept}
-                dragFields={data.inputs}
-                onDropCallback={onDropHandle}
-                fieldName="inputs"
-                answerColId={-1}
-            />
-            <div>
-                {data.inputs.map((element: string, i: number) => (
-                    <span key={i}>{element}</span>
-                ))}
-            </div>
-            <div className="row mx-0">
-                {data.titles.map((element: string, i: number) => (
-                    <div className="col-auto" key={i}>
-                        {element}
-                        <ItemsField
-                            accept={accept}
-                            dragFields={data.answers[i]}
-                            onDropCallback={onDropHandle}
-                            fieldName="answers"
-                            answerColId={i}
-                            additionalClasses="d-flex flex-column"
-                        />
-                    </div>
-                ))}
-            </div>
+            <DndContext
+                sensors={sensors}
+                collisionDetection={pointerWithin}
+                onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
+                onDragEnd={handleDragEnd}
+            >
+                <div>
+                    <Container id={0} items={items[0]} type="inputs" strWidth={strWidth} />
+                </div>
+                <div className="d-flex flex-wrap justify-content-center">
+                    {items.slice(1).map((col, i) => (
+                        <Container key={i + 1} id={i + 1} items={col} type="answer" strWidth={strWidth} />
+                    ))}
+                </div>
+                <DragOverlay>{active ? <Item str={active.str} width={strWidth} /> : null}</DragOverlay>
+            </DndContext>
         </div>
     );
 };

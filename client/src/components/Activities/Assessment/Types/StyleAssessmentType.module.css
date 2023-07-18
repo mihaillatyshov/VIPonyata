@@ -34,3 +34,18 @@
 .fillSpaceExistsDroppableOver {
     opacity: 50%;
 }
+
+.classificationInputs {
+    flex: 1 0;
+    min-height: 100px;
+    overflow: hidden;
+}
+
+.classificationAnswers {
+    flex: 1 0 0;
+    min-height: 120px;
+}
+
+.classificationItem {
+    white-space: nowrap;
+}

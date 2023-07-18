@@ -23,8 +23,6 @@ def parse_new_tasks(data_str: str) -> list[dict]:
     tasks = []
     for task in data:
         if handler := Aliases.get(task["name"]):
-            LogI(task["name"])
-            LogI(task)
             task_base = handler["create"](**task)
             task_new = handler["res"](**task_base.dict())
             tasks.append(task_new.dict())
@@ -39,12 +37,41 @@ def parse_student_tasks(data_str: str) -> list[dict]:
     tasks = []
     for task in data:
         if handler := Aliases.get(task["name"]):
-            LogI(task["name"])
-            LogI(task)
             task_db = handler["res"](**task)
+            if (task["name"] == AssessmentTaskName.CLASSIFICATION):
+                print("parse_student_tasks:   ", task_db)
+                print("parse_student_tasks 2:    ", task_db.student_dict())
             tasks.append(task_db.student_dict())
         else:
             LogW("No parser for this task!", task["name"])
+    return tasks
+
+
+def parse_student_req(req_data: dict, db_data: dict) -> str:
+    tasks: list = []
+
+    if not isinstance(req_data, list) or len(req_data) != len(db_data):
+        raise InvalidRequestJson()
+
+    for req, db in zip(req_data, db_data):
+        if req.get("name") is None:
+            raise InvalidRequestJson()
+
+        if handler := Aliases.get(req["name"]):
+            req_handler = handler["req"](**req)
+            db_handler = handler["res"](**db)
+            res_handler = handler["res"](**(db_handler.combine_dict() | req_handler.combine_dict()))
+            if not res_handler.custom_validation():
+                LogE(req, "\n", db)
+                LogW(req_handler)
+                LogW(db_handler)
+                LogW(res_handler)
+
+                raise InvalidAPIUsage(f"Currupted task {req['name']}")
+            tasks.append(res_handler.dict())
+        else:
+            raise InvalidAPIUsage(f"Wrong name alias {req['name']}")
+
     return tasks
 
 
@@ -70,38 +97,37 @@ class AssessmentFuncsClass(ActivityFuncs):
                                     self._activityQueries._activityTry_type)
         return {"message": "Lexis try successfully created"}
 
-    def AddNewDoneTask(self, activityId: int):
+    def _SetDoneTasks(self, req_data, activity_id: int):
+        done_tasks = req_data.get("done_tasks")
+        if not done_tasks:
+            raise InvalidAPIUsage("No done tasks!")
+
+        activity_try = self._activityQueries.GetUnfinishedTryByActivityId(activity_id, GetCurrentUserId())
+
+        db_done_tasks = json.loads(activity_try.done_tasks)
+
+        # Check DoneTasks
+        done_tasks_str = json.dumps(parse_student_req(done_tasks, db_done_tasks))
+        activity_try.done_tasks = done_tasks_str
+
+        # Set DoneTasks
+        DBsession().add(activity_try)
+        DBsession().commit()
+
+        return activity_try
+
+    def AddNewDoneTasks(self, activityId: int):
         if not request.json:
             raise InvalidRequestJson()
 
-        taskId = request.json.get("id")
-        data = request.json.get("data")
-        if not taskId or not data or type(taskId) != int:
-            raise InvalidRequestJson()
+        self._SetDoneTasks(request.json, activityId)
 
-        activityTry = self._activityQueries.GetUnfinishedTryByActivityId(activityId, GetCurrentUserId())
-        done_tasks = json.loads(activityTry.done_tasks)                                                                 # type: ignore
-        if taskId < 0 or taskId >= len(done_tasks):
-            raise InvalidRequestJson()
-
-        task: dict = done_tasks[taskId]
-        if handler := handlers().get(task["name"]):
-            # TODO in check do checks: all fields exists; no extra fields; fields have needed data
-            if not handler.check(task, data):
-                raise InvalidRequestJson()
-        else:
-            raise InvalidRequestJson()
-
-        done_tasks[taskId] = data
-        activityTry.done_tasks = json.dumps(done_tasks)                                                                 # type: ignore
-        DBsession().add(activityTry)
-        DBsession().commit()
+        return {"message": "ok"}
 
     def EndTry(self, activityId: int):
         if not request.json:
             raise InvalidRequestJson()
         done_tasks = request.json.get("done_tasks")
-        LogI("Done Tasks: ", done_tasks)
         if not done_tasks:
             raise InvalidAPIUsage("No done tasks!")
 
@@ -114,14 +140,13 @@ class AssessmentFuncsClass(ActivityFuncs):
         DBsession().add(activityTry)
         DBsession().commit()
 
-        ActivityEndTimeHandler(                                                                                         #
-            activityTry.id,                                                                                             # type: ignore
-            self._activityQueries._activityTry_type)                                                                    #
+        ActivityEndTimeHandler(activityTry.id, self._activityQueries._activityTry_type)
         return {"message": "Successfully closed"}
 
     def GetById(self, activityId: int):
         assessment = self._activityQueries.GetById(activityId, GetCurrentUserId())
         assessment.now_try = self._activityQueries.GetUnfinishedTryByActivityId(activityId, GetCurrentUserId())
+        print(assessment.now_try.done_tasks)
         tasks = parse_student_tasks(assessment.now_try.done_tasks)
         return {self._activityName: assessment, "items": tasks}
 

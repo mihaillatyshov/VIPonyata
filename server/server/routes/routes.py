@@ -166,10 +166,10 @@ def endAssessmentTry(id):
     return UserSelectorFunction(None, student_funcs.AssessmentFuncs.EndTry, activityId=id)
 
 
-# @routes_bp.route("/assessment/<id>/newdonetask", methods=["POST"])
-# @login_required
-# def addAssessmentNewDoneTasks(id):
-#     return UserSelectorFunction(None, student_funcs.AssessmentFuncs.AddNewDoneTasks, activityId=id)
+@routes_bp.route("/assessment/<id>/newdonetasks", methods=["POST"])
+@login_required
+def addAssessmentNewDoneTasks(id):
+    return UserSelectorFunction(None, student_funcs.AssessmentFuncs.AddNewDoneTasks, activityId=id)
 
 
 @routes_bp.route("/assessment/<id>", methods=["GET"])

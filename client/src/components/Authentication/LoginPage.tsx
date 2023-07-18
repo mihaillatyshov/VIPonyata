@@ -17,8 +17,8 @@ const LoginPage = () => {
     const dispatch = useAppDispatch();
 
     useEffect(() => {
-        dispatch(resetLoginForm()); // eslint-disable-next-line
-    }, []);
+        dispatch(resetLoginForm());
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
