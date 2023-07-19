@@ -127,20 +127,10 @@ class AssessmentFuncsClass(ActivityFuncs):
     def EndTry(self, activityId: int):
         if not request.json:
             raise InvalidRequestJson()
-        done_tasks = request.json.get("done_tasks")
-        if not done_tasks:
-            raise InvalidAPIUsage("No done tasks!")
 
-        # TODO Add some checks(all tasks in request exists)
+        activity_try = self._SetDoneTasks(request.json, activityId)
 
-        activityTry = self._activityQueries.GetUnfinishedTryByActivityId(activityId, GetCurrentUserId())
-        # TODO Add it back
-        # activityTry.done_tasks = done_tasks
-
-        DBsession().add(activityTry)
-        DBsession().commit()
-
-        ActivityEndTimeHandler(activityTry.id, self._activityQueries._activityTry_type)
+        ActivityEndTimeHandler(activity_try.id, self._activityQueries._activityTry_type)
         return {"message": "Successfully closed"}
 
     def GetById(self, activityId: int):
@@ -148,6 +138,7 @@ class AssessmentFuncsClass(ActivityFuncs):
         assessment.now_try = self._activityQueries.GetUnfinishedTryByActivityId(activityId, GetCurrentUserId())
         print(assessment.now_try.done_tasks)
         tasks = parse_student_tasks(assessment.now_try.done_tasks)
+        print("after parse:   ", tasks)
         return {self._activityName: assessment, "items": tasks}
 
 
