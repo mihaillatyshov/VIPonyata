@@ -1,5 +1,5 @@
 import React from "react";
-import StudentCoursesList from "components/Courses/StudentCoursesList";
+import CoursesList from "components/Courses/CoursesList";
 import style from "./StyleMainPage.module.css";
 
 const StudentMainPage = () => {
@@ -8,7 +8,7 @@ const StudentMainPage = () => {
             <div className="row">
                 <div className={"col-auto " + style.mainTitle}>Мои путешествия</div>
             </div>
-            <StudentCoursesList />
+            <CoursesList />
             {
                 //<div className="mt-4">
                 //    MOVE IT IN PROFILE!!!

@@ -1,11 +1,8 @@
-import React from "react";
-import "./App.css";
-import "./RoundBlock.css";
+import React, { useEffect } from "react";
 import { AjaxGet, AjaxPost } from "./libs/ServerAPI";
-import { useEffect } from "react";
 import { UserState, selectUser, setUserData } from "./redux/slices/userSlice";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import LoadingPage from "./components/LoadingPage";
+import Loading from "./components/Common/Loading";
 import LoginPage from "./components/Authentication/LoginPage";
 import RegisterPage from "./components/Authentication/RegisterPage";
 import StudentMainPage from "./components/MainPage/StudentMainPage";
@@ -20,7 +17,11 @@ import { Button } from "react-bootstrap";
 import styleThemes from "./themes/StyleThemes.module.css";
 import StudentHieroglyphPage from "components/Activities/Lexis/Hieroglyph/StudentHieroglyphPage";
 import StudentAssessmentPage from "components/Activities/Assessment/StudentAssessmentPage";
-import { DndContext } from "@dnd-kit/core";
+import StudentProfilePage from "components/Profile/StudentProfilePage";
+
+import "./App.css";
+import "./RoundBlock.css";
+import CourseCreatePage from "components/Courses/CourseCreatePage";
 
 const App = () => {
     const user = useAppSelector(selectUser);
@@ -48,9 +49,9 @@ const App = () => {
     //};
 
     const getRoute = (logedTeacher: any, logedStudent: any, unloged: any, additionalCondition = false) => {
-        if (user.isAuth === undefined || user.userData === undefined || additionalCondition) {
-            return <LoadingPage />;
-        } else if (user.isAuth) {
+        if (user.isAuth === undefined || additionalCondition) {
+            return <Loading />;
+        } else if (user.isAuth && user.userData !== undefined) {
             if (user.userData.level === 1) {
                 return logedTeacher;
             } else {
@@ -63,43 +64,53 @@ const App = () => {
 
     // TODO Select theme
 
+    if (user.isAuth === undefined) {
+        return <Loading size="xxl" />;
+    }
+
     return (
         <div className={`${styleThemes.Violet} App`}>
-            <DndContext>
-                {user.isAuth !== undefined && <NavBar />}
-                <BrowserRouter>
-                    <Routes>
-                        <Route path="/" element={getRoute(<StudentMainPage />, <StudentMainPage />, <LoginPage />)} />
-                        <Route path="/register" element={<RegisterPage />} />
-                        <Route path="/" element={getRoute(<StudentMainPage />, <StudentMainPage />, <LoginPage />)} />
+            <BrowserRouter>
+                {user.isAuth === true && <NavBar />}
+                <Routes>
+                    <Route path="/" element={getRoute(<StudentMainPage />, <StudentMainPage />, <LoginPage />)} />
+                    <Route path="/register" element={<RegisterPage />} />
 
-                        <Route
-                            path="/courses/:id"
-                            element={getRoute(<StudentCoursePage />, <StudentCoursePage />, <NavigateHome />)}
-                        />
-                        <Route
-                            path="/lessons/:id"
-                            element={getRoute(<StudentLessonPage />, <StudentLessonPage />, <NavigateHome />)}
-                        />
-                        <Route
-                            path="/drilling/:id/*"
-                            element={getRoute(<StudentDrillingPage />, <StudentDrillingPage />, <NavigateHome />)}
-                        />
-                        <Route
-                            path="/hieroglyph/:id/*"
-                            element={getRoute(<StudentHieroglyphPage />, <StudentHieroglyphPage />, <NavigateHome />)}
-                        />
-                        <Route
-                            path="/assessment/:id/*"
-                            element={getRoute(<StudentAssessmentPage />, <StudentAssessmentPage />, <NavigateHome />)}
-                        />
-                        <Route path="/upload" element={<TestUpload />} />
-                    </Routes>
-                </BrowserRouter>
+                    <Route
+                        path="/courses/create"
+                        element={getRoute(<CourseCreatePage />, <NavigateHome />, <NavigateHome />)}
+                    />
+
+                    <Route
+                        path="/courses/:id"
+                        element={getRoute(<StudentCoursePage />, <StudentCoursePage />, <NavigateHome />)}
+                    />
+                    <Route
+                        path="/lessons/:id"
+                        element={getRoute(<StudentLessonPage />, <StudentLessonPage />, <NavigateHome />)}
+                    />
+                    <Route
+                        path="/drilling/:id/*"
+                        element={getRoute(<StudentDrillingPage />, <StudentDrillingPage />, <NavigateHome />)}
+                    />
+                    <Route
+                        path="/hieroglyph/:id/*"
+                        element={getRoute(<StudentHieroglyphPage />, <StudentHieroglyphPage />, <NavigateHome />)}
+                    />
+                    <Route
+                        path="/assessment/:id/*"
+                        element={getRoute(<StudentAssessmentPage />, <StudentAssessmentPage />, <NavigateHome />)}
+                    />
+                    <Route
+                        path="/profile"
+                        element={getRoute(<StudentProfilePage />, <StudentProfilePage />, <NavigateHome />)}
+                    />
+                    <Route path="/upload" element={<TestUpload />} />
+                </Routes>
                 <Button type="button" onClick={handleLogout}>
                     Logout
                 </Button>
-            </DndContext>
+            </BrowserRouter>
         </div>
     );
 };

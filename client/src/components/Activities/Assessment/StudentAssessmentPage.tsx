@@ -53,7 +53,6 @@ const StudentAssessmentPage = () => {
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            console.log("TODO Send Some Changes . . .", assessment.items); // TODO
             AjaxPost({ url: `/api/assessment/${id}/newdonetasks`, body: { done_tasks: assessment.items } });
         }, 2000);
         return () => clearTimeout(timer);
@@ -115,8 +114,6 @@ const StudentAssessmentPage = () => {
             <div className="container">
                 {assessment.items.map((item: any, i: number) => (
                     <div key={i}>
-                        DEBUG
-                        <div style={{ whiteSpace: "pre" }}>{JSON.stringify(item, null, "\t")}</div>
                         {drawItem(JSON.parse(JSON.stringify(item)), i)}
                         <hr />
                     </div>

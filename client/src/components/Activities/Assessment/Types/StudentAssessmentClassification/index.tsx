@@ -30,7 +30,9 @@ const StudentAssessmentClassification = ({ data, taskId }: StudentAssessmentType
 
     const [items, setItems] = useState<ItemState[][]>(() => {
         const inputs: ItemState[] = data.inputs.map((str, i) => ({ strId: `id_${i}`, str }));
-        const answers: ItemState[][] = data.answers.map((col) => []);
+        const answers: ItemState[][] = data.answers.map((col, i) =>
+            col.map((str, j) => ({ strId: `id_${i}_${j}`, str }))
+        );
         return [inputs, ...answers];
     });
 

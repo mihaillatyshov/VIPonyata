@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import LoadingPage from "./LoadingPage";
+import Loading from "./Common/Loading";
 
 const NavigateHome = () => {
     const navigate = useNavigate();
@@ -8,7 +8,7 @@ const NavigateHome = () => {
         navigate("/");
     });
     console.log("navigate");
-    return <LoadingPage />;
+    return <Loading />;
 };
 
 export default NavigateHome;
