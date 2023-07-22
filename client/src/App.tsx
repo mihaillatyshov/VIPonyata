@@ -18,10 +18,10 @@ import styleThemes from "./themes/StyleThemes.module.css";
 import StudentHieroglyphPage from "components/Activities/Lexis/Hieroglyph/StudentHieroglyphPage";
 import StudentAssessmentPage from "components/Activities/Assessment/StudentAssessmentPage";
 import StudentProfilePage from "components/Profile/StudentProfilePage";
+import CourseCreatePage from "components/Courses/CourseCreatePage";
 
 import "./App.css";
 import "./RoundBlock.css";
-import CourseCreatePage from "components/Courses/CourseCreatePage";
 
 const App = () => {
     const user = useAppSelector(selectUser);

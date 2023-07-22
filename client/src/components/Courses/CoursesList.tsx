@@ -42,7 +42,7 @@ const CoursesList = () => {
     }
 
     return (
-        <div className="row justify-content-center  mt-5">
+        <div className="row justify-content-center mt-5">
             <CourseCardCreate />
             {courses.items.map((course) => {
                 return <CourseCardWithContent key={course.id} course={course} />;
