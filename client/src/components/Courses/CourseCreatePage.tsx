@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import InputText from "components/Form/InputText";
 import InputSelect, { TOption } from "components/Form/InputSelect";
 import InputImage from "components/Form/InputImage";
@@ -11,6 +11,12 @@ const colors: TOption[] = [
 ];
 
 const CourseCreatePage = () => {
+    const [imgUrl, setImgUrl] = useState<string | undefined>(undefined);
+
+    const changeImgHandle = (value: string | undefined) => {
+        setImgUrl(value);
+    };
+
     return (
         <div className="container mt-5">
             <InputText
@@ -34,7 +40,7 @@ const CourseCreatePage = () => {
                     />
                 </div>
             </div>
-            <InputImage htmlId="course-image" onChangeHandler={() => {}} placeholder="Картинка" />
+            <InputImage htmlId="course-image" onChangeHandler={changeImgHandle} value={imgUrl} placeholder="Картинка" />
         </div>
     );
 };

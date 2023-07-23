@@ -3,3 +3,4 @@ venv/
 .trunk
 log/
 /server/config.json
+/uploads

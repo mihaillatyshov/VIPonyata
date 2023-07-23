@@ -16,7 +16,6 @@ const InputSelect = ({ htmlId, placeholder, value, className, onChangeHandler, o
                 value={value}
                 id={htmlId}
                 placeholder={placeholder}
-                defaultValue={value}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onChangeHandler(e.target.value)}
             >
                 {options.map(({ value, title }) => (

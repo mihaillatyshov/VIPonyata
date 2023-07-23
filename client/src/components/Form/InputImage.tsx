@@ -5,12 +5,27 @@ export interface InputImageProps {
     placeholder: string;
     value?: string;
     className?: string;
-    onChangeHandler: (value: string) => void;
+    onChangeHandler: (value: string | undefined) => void;
 }
 
 const InputImage = ({ htmlId, placeholder, value, className, onChangeHandler }: InputImageProps) => {
-    const testHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(e.currentTarget.value, e.currentTarget.files);
+    const handler = (e: React.ChangeEvent<HTMLInputElement>) => {
+        console.log(e.target.value, e.target.files);
+        if (e.target.files && e.target.files.length > 0) {
+            const data = new FormData();
+            data.append("file", e.target.files[0]);
+            fetch("/api/upload/img", {
+                method: "POST",
+                body: data,
+            }).then((response) => {
+                const promise = response.json();
+                promise.then((body) => {
+                    console.log("Loading Done!!!");
+                    console.log("Post response", body);
+                    onChangeHandler(body.filename);
+                });
+            });
+        }
     };
 
     const hasValue = value !== undefined;
@@ -25,7 +40,7 @@ const InputImage = ({ htmlId, placeholder, value, className, onChangeHandler }: 
                 type="file"
                 id={htmlId}
                 accept="image/*"
-                onChange={testHandler}
+                onChange={handler}
             />
         </div>
     );

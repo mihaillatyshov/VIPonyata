@@ -1,25 +1,28 @@
-import os
 import hashlib
+import os
 from datetime import datetime, time, timedelta
 
-from flask import Blueprint, request
+from flask import Blueprint, request, send_from_directory
 from flask_login import login_required
+from PIL import Image
 from werkzeug.utils import secure_filename
 
-from .. import DBsession
 from server.exceptions.ApiExceptions import InvalidAPIUsage
+
+from .. import DBsession
 from ..db_models import Course
+from ..log_lib import LogI
 from .funcs import funcs_student as student_funcs
 from .funcs import funcs_teacher as teacher_funcs
 from .routes_utils import UserSelectorFunction
-from ..log_lib import LogI
 
 routes_bp = Blueprint("routes", __name__)
 
-#UPLOAD_FOLDER = "C:/Coding/Web/VIPonyata/client/public"
-UPLOAD_FOLDER = "/home/lm/coding/WEB/VIPonyata/client/public"
-
+UPLOAD_FOLDER = "C:/Coding/Web/VIPonyata/uploads" if os.name == 'nt' else "/home/lm/coding/WEB/VIPonyata/uploads"
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+UPLOAD_IMG_FOLDER = "img"
+RELATIVE_FOLDER_BASE = "/uploads"
 
 
 def get_file_extention(filename):
@@ -30,32 +33,55 @@ def allowed_file(filename):
     return '.' in filename and get_file_extention(filename) in ALLOWED_EXTENSIONS
 
 
-@routes_bp.route("/upload", methods=["POST"])
-def fileUpload():
-    relative_folder = "img/dictionary"
-    target = os.path.join(UPLOAD_FOLDER, relative_folder)
-    if not os.path.isdir(target):
-        os.mkdir(target)
+@routes_bp.route("/uploads/<path:path>")
+def get_uploads(path):
+    LogI("GetFile: ", path)
+    return send_from_directory(UPLOAD_FOLDER, path)
+
+
+def validate_folder(folder: str):
+    if not os.path.isdir(folder):
+        os.mkdir(folder)
+
+    return folder
+
+
+def add_path_to_folders(target: str, relative: str, add: str):
+    return validate_folder(f"{target}/{add}"), f"{relative}/{add}"
+
+
+@routes_bp.route("/upload/img", methods=["POST"])
+def post_img_upload():
+    validate_folder(UPLOAD_FOLDER)
+    target, relative_folder = add_path_to_folders(UPLOAD_FOLDER, RELATIVE_FOLDER_BASE, UPLOAD_IMG_FOLDER)
 
     LogI("==========================================================")
-    LogI("Welcome to upload")
-    LogI("FilesCount: ", len(request.files))
-    LogI("Request files: ", request.files)
+
     if (len(request.files) == 0):
         return {"message": "Error, No files"}, 400
-    file = request.files["file"]
-    if file and file.filename and allowed_file(file.filename):
-        LogI("file: ", file)
-        filename = secure_filename(hashlib.sha512(datetime.now().strftime("%Y%m%d%H%M%S").encode()).hexdigest())
-        filename += "." + get_file_extention(file.filename)
+
+    img_file = request.files["file"]
+    if img_file and img_file.filename and allowed_file(img_file.filename):
+        image = Image.open(img_file)
+        image = image.convert('RGBA')
+
+        time_str = datetime.now().strftime("%Y%m%d%H%M%S").encode()
+
+        target, relative_folder = add_path_to_folders(target, relative_folder,
+                                                      hashlib.blake2b(key=time_str, digest_size=1).hexdigest())
+
+        target, relative_folder = add_path_to_folders(target, relative_folder,
+                                                      hashlib.blake2s(key=time_str, digest_size=1).hexdigest())
+
+        filename = secure_filename(hashlib.sha512(time_str).hexdigest())
+        filename += "." + "webp"
 
         destination = "/".join([target, filename])
         if not os.path.exists(destination):
-            file.save(destination)
-        #session["uploadFilePath"] = destination
+            image.save(f'{destination}', 'webp')
         response = relative_folder + "/" + filename
         LogI("==========================================================")
-        return {"meta": {"filename": response}}
+        return {"filename": response}
 
     return {"message": "Error"}, 500
 

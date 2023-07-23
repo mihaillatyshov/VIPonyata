@@ -1,5 +1,5 @@
-import { AjaxGet } from "libs/ServerAPI";
 import React, { useEffect, useState } from "react";
+import { AjaxGet } from "libs/ServerAPI";
 import { Link } from "react-router-dom";
 
 const TestUpload = () => {
@@ -13,8 +13,8 @@ const TestUpload = () => {
         });
     }, []);
 
-    const handleUploadImage = () => {
-        //e.preventDefault();
+    const handleUploadImage = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
         console.log("startHandle");
         console.log(filepath);
 
@@ -29,17 +29,18 @@ const TestUpload = () => {
             method: "POST",
             body: data,
         }).then((response) => {
-            const promise = response.json();
-            promise.then((body) => {
-                setImageURL(body.meta.filename);
-                console.log("Post response", body);
-            });
+            // const promise = response.json();
+            // promise.then((body) => {
+            //     setImageURL(body.meta.filename);
+            //     console.log("Post response", body);
+            // });
         });
 
         console.log("endHandle");
     };
 
     const handleFilepathChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        e.preventDefault();
         if (e.target.files) {
             console.log(e.target.files[0]);
             filepath = e.target.files[0];
@@ -48,20 +49,20 @@ const TestUpload = () => {
 
     // ref={(ref) => { filepath = ref; console.log("Test ", ref)}}
     return (
-        <div>
+        <form onSubmit={handleUploadImage}>
             <div>
                 <input type="file" onChange={handleFilepathChange} />
             </div>
             <br />
             <div>
-                <input type="button" onClick={handleUploadImage} value="Upload" />
+                <input type="submit" value="Upload" />
             </div>
             <img src={imageURL} alt="img" />
             <br />
             <img src={"/img/38UNp4Gt-d8.jpg"} alt="img" />
 
             <Link to="/"> Main </Link>
-        </div>
+        </form>
     );
 };
 
