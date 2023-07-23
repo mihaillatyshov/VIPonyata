@@ -5,14 +5,15 @@ export interface ImageStateDone {
     url: string;
 }
 
+export interface ImageStateLoading {
+    loadStatus: typeof LoadStatus.LOADING;
+    url?: string;
+}
+
 export interface ImageStateError {
     loadStatus: typeof LoadStatus.ERROR;
-    code: number;
     message?: string;
     url?: string;
 }
 
-export type ImageState =
-    | ImageStateDone
-    | ImageStateError
-    | { loadsStatus: typeof LoadStatus.NONE | typeof LoadStatus.LOADING };
+export type ImageState = ImageStateDone | ImageStateError | ImageStateLoading | { loadStatus: typeof LoadStatus.NONE };

@@ -1,22 +1,22 @@
 import React from "react";
 import { InputBaseProps } from "./InputBase";
 
-interface InputTextProps extends InputBaseProps {
-    value: string;
-    onChangeHandler: (value: string) => void;
+interface InputNumberProps extends InputBaseProps {
+    value: number;
+    onChangeHandler: (value: number) => void;
 }
 
-const InputText = ({ htmlId, placeholder, value, className, onChangeHandler }: InputTextProps) => {
+const InputText = ({ htmlId, placeholder, value, className, onChangeHandler }: InputNumberProps) => {
     className = className ?? "";
     return (
         <div className={`form-floating ${className}`}>
             <input
-                type="text"
+                type="number"
                 className="form-control is-invalid"
                 value={value}
                 id={htmlId}
                 placeholder={placeholder}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeHandler(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeHandler(parseInt(e.target.value))}
             />
             <label htmlFor={htmlId}>{placeholder}</label>
         </div>

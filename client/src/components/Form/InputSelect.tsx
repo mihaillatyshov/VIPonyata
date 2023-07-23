@@ -4,6 +4,8 @@ import { InputBaseProps } from "./InputBase";
 export type TOption = { value: string; title: string };
 
 interface InputSelectProps extends InputBaseProps {
+    value: string;
+    onChangeHandler: (value: string) => void;
     options: TOption[];
 }
 

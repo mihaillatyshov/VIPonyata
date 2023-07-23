@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import InputText from "components/Form/InputText";
 import InputSelect, { TOption } from "components/Form/InputSelect";
 import InputImage from "components/Form/InputImage";
+import { ImageState } from "models/Img";
 
 const colors: TOption[] = [
     { value: "", title: "Без цвета" },
@@ -11,22 +12,18 @@ const colors: TOption[] = [
 ];
 
 const CourseCreatePage = () => {
-    const [imgUrl, setImgUrl] = useState<string | undefined>(undefined);
-
-    const changeImgHandle = (value: string | undefined) => {
-        setImgUrl(value);
-    };
+    const [img, setImg] = useState<ImageState>({ loadStatus: "NONE" });
 
     return (
-        <div className="container mt-5">
+        <div className="container mt-5 d-flex flex-column">
             <InputText
                 placeholder="Название"
                 htmlId="course-name"
                 value=""
                 onChangeHandler={() => {}}
-                className="mt-4 mb-4"
+                className="mt-4"
             />
-            <div className="row g-4">
+            <div className="row gx-4 mt-4">
                 <div className="col-md">
                     <InputText placeholder="Сложность" htmlId="course-difficulty" value="" onChangeHandler={() => {}} />
                 </div>
@@ -40,7 +37,13 @@ const CourseCreatePage = () => {
                     />
                 </div>
             </div>
-            <InputImage htmlId="course-image" onChangeHandler={changeImgHandle} value={imgUrl} placeholder="Картинка" />
+            <InputImage
+                htmlId="course-image"
+                onChangeHandler={setImg}
+                value={img}
+                placeholder="Картинка"
+                className="mt-4"
+            />
         </div>
     );
 };

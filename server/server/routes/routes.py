@@ -1,6 +1,7 @@
 import hashlib
 import os
 from datetime import datetime, time, timedelta
+from time import sleep
 
 from flask import Blueprint, request, send_from_directory
 from flask_login import login_required
@@ -56,6 +57,8 @@ def post_img_upload():
     target, relative_folder = add_path_to_folders(UPLOAD_FOLDER, RELATIVE_FOLDER_BASE, UPLOAD_IMG_FOLDER)
 
     LogI("==========================================================")
+    # sleep(3)
+    # return {"message": "Some error!!!"}, 400
 
     if (len(request.files) == 0):
         return {"message": "Error, No files"}, 400

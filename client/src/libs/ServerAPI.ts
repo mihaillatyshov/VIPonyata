@@ -6,12 +6,12 @@ interface HandleStatusData {
 
 interface AnyServerAPIParams {
     url: string;
-    urlParams?: Object | undefined;
-    body?: any | undefined;
-    onDataReceived?: ((data: any) => void) | undefined;
-    handleStatus?: ((data: HandleStatusData) => void) | undefined;
-    handleServerError?: (() => void) | undefined;
-    headers?: HeadersInit | undefined;
+    urlParams?: Object;
+    body?: any;
+    onDataReceived?: (data: any) => void;
+    handleStatus?: (data: HandleStatusData) => void;
+    handleServerError?: () => void;
+    headers?: HeadersInit;
 }
 
 const DefaultServerAPIParams: AnyServerAPIParams = {

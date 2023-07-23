@@ -6,7 +6,7 @@ from .DBqueriesUtils import *
 ################ Course and Lesson ######################################################################################
 #########################################################################################################################
 def GetCourses() -> list[Course]:
-    return DBsession().query(Course).all()
+    return DBsession().query(Course).order_by(Course.sort).all()
     # return DB.GetTableJson("courses")
 
 
