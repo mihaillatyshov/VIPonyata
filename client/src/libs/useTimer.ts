@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 export type TimerProps = {
     deadline: string;
     interval?: number;
-    onDeadline?: (() => void) | undefined;
+    onDeadline?: () => void;
 };
 
 const SECOND = 1_000;

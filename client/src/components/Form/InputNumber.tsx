@@ -1,26 +1,35 @@
 import React from "react";
 import { InputBaseProps } from "./InputBase";
+import InputError from "./InputError";
 
 interface InputNumberProps extends InputBaseProps {
     value: number;
     onChangeHandler: (value: number) => void;
 }
 
-const InputText = ({ htmlId, placeholder, value, className, onChangeHandler }: InputNumberProps) => {
+const InputNumber = ({ htmlId, placeholder, value, errorMessage, className, onChangeHandler }: InputNumberProps) => {
     className = className ?? "";
+    const hasError = errorMessage !== undefined && errorMessage !== "";
+
+    const handler = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const res = parseInt(e.target.value);
+        isNaN(res) || onChangeHandler(res);
+    };
+
     return (
         <div className={`form-floating ${className}`}>
             <input
                 type="number"
-                className="form-control is-invalid"
+                className={`form-control ${hasError ? "is-invalid" : ""}`}
                 value={value}
                 id={htmlId}
                 placeholder={placeholder}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeHandler(parseInt(e.target.value))}
+                onChange={handler}
             />
             <label htmlFor={htmlId}>{placeholder}</label>
+            <InputError message={errorMessage} />
         </div>
     );
 };
 
-export default InputText;
+export default InputNumber;

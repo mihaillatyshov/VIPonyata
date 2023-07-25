@@ -1,36 +1,41 @@
 import React from "react";
 import { InputBaseProps } from "./InputBase";
+import CSS from "csstype";
 import InputError from "./InputError";
 
-interface InputTextProps extends InputBaseProps {
+interface InputTextAreaProps extends InputBaseProps {
     value: string;
     onChangeHandler: (value: string) => void;
-    customValidation?: () => void;
+    rows?: number;
 }
 
-const InputText = ({
-    htmlId,
-    placeholder,
+const InputTextArea = ({
     value,
     errorMessage,
-    className,
     onChangeHandler,
-    customValidation,
-}: InputTextProps) => {
+    placeholder,
+    htmlId,
+    className,
+    rows,
+}: InputTextAreaProps) => {
     className = className ?? "";
 
     const hasError = errorMessage !== undefined && errorMessage !== "";
 
+    const style: CSS.Properties = {
+        height: `${rows}em`,
+        resize: "none",
+    };
+
     return (
         <div className={`form-floating ${className}`}>
-            <input
-                type="text"
+            <textarea
                 className={`form-control ${hasError ? "is-invalid" : ""}`}
-                value={value}
-                id={htmlId}
                 placeholder={placeholder}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeHandler(e.target.value)}
-                onBlur={customValidation}
+                id={htmlId}
+                value={value}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChangeHandler(e.target.value)}
+                style={rows ? style : {}}
             />
             <label htmlFor={htmlId}>{placeholder}</label>
             <InputError message={errorMessage} />
@@ -38,4 +43,4 @@ const InputText = ({
     );
 };
 
-export default InputText;
+export default InputTextArea;
