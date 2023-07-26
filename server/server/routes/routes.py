@@ -56,12 +56,10 @@ def post_img_upload():
     validate_folder(UPLOAD_FOLDER)
     target, relative_folder = add_path_to_folders(UPLOAD_FOLDER, RELATIVE_FOLDER_BASE, UPLOAD_IMG_FOLDER)
 
-    LogI("==========================================================")
-    # sleep(3)
-    # return {"message": "Some error!!!"}, 400
-
     if (len(request.files) == 0):
         return {"message": "Error, No files"}, 400
+
+    sleep(3)
 
     img_file = request.files["file"]
     if img_file and img_file.filename and allowed_file(img_file.filename):
@@ -72,7 +70,6 @@ def post_img_upload():
 
         target, relative_folder = add_path_to_folders(target, relative_folder,
                                                       hashlib.blake2b(key=time_str, digest_size=1).hexdigest())
-
         target, relative_folder = add_path_to_folders(target, relative_folder,
                                                       hashlib.blake2s(key=time_str, digest_size=1).hexdigest())
 
@@ -80,10 +77,15 @@ def post_img_upload():
         filename += "." + "webp"
 
         destination = "/".join([target, filename])
-        if not os.path.exists(destination):
-            image.save(f'{destination}', 'webp')
+        while os.path.exists(destination):
+            time_str = datetime.now().strftime("%Y%m%d%H%M%S").encode()
+            filename = secure_filename(hashlib.sha512(time_str).hexdigest())
+            filename += "." + "webp"
+            destination = "/".join([target, filename])
+
+        image.save(f'{destination}', 'webp')
+
         response = relative_folder + "/" + filename
-        LogI("==========================================================")
         return {"filename": response}
 
     return {"message": "Error"}, 500
@@ -101,6 +103,12 @@ def testSomeThings():
 @login_required
 def getAllCourses():
     return UserSelectorFunction(teacher_funcs.getAllCourses, student_funcs.getAllCourses)
+
+
+@routes_bp.route("/courses/create", methods=["POST"])
+@login_required
+def create_course():
+    return UserSelectorFunction(teacher_funcs.create_course, None)
 
 
 @routes_bp.route("/courses/<id>", methods=["GET"])

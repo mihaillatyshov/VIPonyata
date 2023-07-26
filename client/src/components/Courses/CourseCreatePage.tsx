@@ -1,4 +1,4 @@
-import React, { FormEvent, useState } from "react";
+import React, { FormEvent } from "react";
 import InputText from "components/Form/InputText";
 import InputSelect, { TOption } from "components/Form/InputSelect";
 import InputImage from "components/Form/InputImage";
@@ -6,8 +6,12 @@ import { ImageState } from "models/Img";
 import InputNumber from "components/Form/InputNumber";
 import InputTextArea from "components/Form/InputTextArea";
 import SubmitButton from "components/Form/SubmitButton";
-import { useFormState } from "components/Form/InputBase";
-import { ValidateEmpty } from "validators/FormValidators";
+import { useFormState } from "components/Form/useFormState";
+import { ValidateEmpty, ValidateImgLoading } from "validators/FormValidators";
+import { AjaxPost } from "libs/ServerAPI";
+import { TCourse, TCourseCreate } from "models/TCourse";
+import { GetStringOrNull } from "components/Form/InputBase";
+import { useNavigate } from "react-router-dom";
 
 const colors: TOption[] = [
     { value: "", title: "Без цвета" },
@@ -19,7 +23,7 @@ const colors: TOption[] = [
 interface CourseForm {
     name: string;
     difficulty: string;
-    difficultyColor: string | null;
+    difficultyColor: string;
     sort: number;
     description: string;
     img: ImageState;
@@ -28,42 +32,46 @@ interface CourseForm {
 const defaults: CourseForm = {
     name: "",
     difficulty: "",
-    difficultyColor: null,
+    difficultyColor: "",
     sort: 500,
     description: "",
     img: { loadStatus: "NONE" },
 };
 
 const CourseCreatePage = () => {
-    const { inputs, handlers, validators, errors, inputProps } = useFormState<CourseForm>(
+    const navigate = useNavigate();
+
+    const { inputs, validateForm, inputProps } = useFormState<CourseForm>(
         defaults,
-        {
-            difficultyColor: (val: string) => (val === "" ? null : val),
-        },
+        {},
         {
             name: ValidateEmpty,
             difficulty: ValidateEmpty,
+            img: ValidateImgLoading,
         }
     );
 
-    // const [name, setName] = useState<string>("");
-    // const [difficulty, setDifficulty] = useState<string>("");
-    // const [difficultyColor, setDifficultyColor] = useState<string | null>(null);
-    // const [sort, setSort] = useState<number>(500);
-    // const [description, setDescription] = useState<string>("");
-    // const [img, setImg] = useState<ImageState>({ loadStatus: "NONE" });
-
     const onSubmitHandler = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        if (!validateForm()) {
+            return;
+        }
+        const course: TCourseCreate = {
+            name: inputs.name.trim(),
+            difficulty: inputs.difficulty.trim(),
+            difficulty_color: GetStringOrNull(inputs.difficultyColor),
+            sort: inputs.sort,
+            description: GetStringOrNull(inputs.description),
+            img: inputs.img.loadStatus,
+        };
+        AjaxPost<{ course: TCourse }>({ url: "/api/courses/create", body: course }).then((body) => {
+            navigate(`/courses/${body.course.id}`);
+        });
     };
-
-    // const onDifficultyColorChaneHandler = (value: string) => {
-    //     setDifficultyColor(value === "" ? null : value);
-    // };
 
     return (
         <form className="container mt-5 d-flex flex-column" onSubmit={onSubmitHandler}>
-            <InputText placeholder="Название" htmlId="course-name" {...inputProps.name} className="mt-2" />
+            <InputText placeholder="Название" htmlId="course-name" className="mt-2" {...inputProps.name} />
             <div className="row gx-4 mt-2">
                 <div className="col-md">
                     <InputText placeholder="Сложность" htmlId="course-difficulty" {...inputProps.difficulty} />
@@ -72,14 +80,12 @@ const CourseCreatePage = () => {
                     <InputSelect
                         placeholder="Цвет"
                         htmlId="course-difficulty-color"
-                        value={inputs.difficultyColor ?? ""}
-                        errorMessage={errors.difficultyColor}
                         options={colors}
-                        onChangeHandler={handlers.difficultyColor}
+                        {...inputProps.difficultyColor}
                     />
                 </div>
             </div>
-            <InputNumber htmlId="course-sort" {...inputProps.sort} placeholder="Порядок соритровки" className="mt-2" />
+            <InputNumber htmlId="course-sort" placeholder="Порядок соритровки" className="mt-2" {...inputProps.sort} />
             <InputTextArea
                 htmlId="course-description"
                 {...inputProps.description}
@@ -87,7 +93,7 @@ const CourseCreatePage = () => {
                 className="mt-2"
                 rows={10}
             />
-            <InputImage htmlId="course-image" {...inputProps.img} placeholder="Картинка" className="mt-2" />
+            <InputImage htmlId="course-image" placeholder="Картинка" className="mt-2" {...inputProps.img} />
             <SubmitButton value="Создать" className="btn-success mt-4" />
         </form>
     );

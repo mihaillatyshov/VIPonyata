@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { AjaxGet, AjaxPost } from "./libs/ServerAPI";
+import { AjaxGet } from "./libs/ServerAPI";
 import { UserState, selectUser, setUserData } from "./redux/slices/userSlice";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Loading from "./components/Common/Loading";
@@ -13,7 +13,6 @@ import NavBar from "./components/NavBar";
 import StudentDrillingPage from "./components/Activities/Lexis/Drilling/StudentDrillingPage";
 import StudentLessonPage from "./components/Lessons/StudentLessonPage";
 import { useAppDispatch, useAppSelector } from "./redux/hooks";
-import { Button } from "react-bootstrap";
 import styleThemes from "./themes/StyleThemes.module.css";
 import StudentHieroglyphPage from "components/Activities/Lexis/Hieroglyph/StudentHieroglyphPage";
 import StudentAssessmentPage from "components/Activities/Assessment/StudentAssessmentPage";
@@ -22,6 +21,7 @@ import CourseCreatePage from "components/Courses/CourseCreatePage";
 
 import "./App.css";
 import "./RoundBlock.css";
+import LessonCreatePage from "components/Lessons/LessonCreatePage";
 
 const App = () => {
     const user = useAppSelector(selectUser);
@@ -32,12 +32,6 @@ const App = () => {
             dispatch(setUserData(json));
         });
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-    const handleLogout = () => {
-        AjaxPost({ url: "/api/logout" }).then(() => {
-            dispatch(setUserData({ isAuth: false, userData: undefined }));
-        });
-    };
 
     //const getTeacherStudentRoute = (teacher, student) => {
     //    if (user.isAuth === undefined) return;
@@ -77,18 +71,23 @@ const App = () => {
                     <Route path="/register" element={<RegisterPage />} />
 
                     <Route
+                        path="/courses/:id"
+                        element={getRoute(<StudentCoursePage />, <StudentCoursePage />, <NavigateHome />)}
+                    />
+                    <Route
                         path="/courses/create"
                         element={getRoute(<CourseCreatePage />, <NavigateHome />, <NavigateHome />)}
                     />
 
                     <Route
-                        path="/courses/:id"
-                        element={getRoute(<StudentCoursePage />, <StudentCoursePage />, <NavigateHome />)}
-                    />
-                    <Route
                         path="/lessons/:id"
                         element={getRoute(<StudentLessonPage />, <StudentLessonPage />, <NavigateHome />)}
                     />
+                    <Route
+                        path="/lessons/create/:courseId"
+                        element={getRoute(<LessonCreatePage />, <NavigateHome />, <NavigateHome />)}
+                    />
+
                     <Route
                         path="/drilling/:id/*"
                         element={getRoute(<StudentDrillingPage />, <StudentDrillingPage />, <NavigateHome />)}
@@ -107,9 +106,6 @@ const App = () => {
                     />
                     <Route path="/upload" element={<TestUpload />} />
                 </Routes>
-                <Button type="button" onClick={handleLogout}>
-                    Logout
-                </Button>
             </BrowserRouter>
         </div>
     );

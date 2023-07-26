@@ -14,7 +14,6 @@ const LessonCard = ({ lesson }: LessonCardProps) => {
                     {false && <img src="" alt="" />}
                     <div>
                         <div> {lesson.name} </div>
-                        <div className="mb-2 text-muted"> {lesson.difficulty} </div>
                         <div> {lesson.description} </div>
                     </div>
                 </div>

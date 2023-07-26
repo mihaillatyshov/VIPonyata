@@ -9,6 +9,8 @@ from flask_cors import CORS
 from server.exceptions.ApiExceptions import InvalidAPIUsage
 from server.start_server import create_app
 
+from server import DBsession
+
 if not os.path.isdir("./log"):
     os.mkdir("./log")
 logging.basicConfig(filename=f'./log/{str(datetime.datetime.now()).replace(":", " ")}.log',
@@ -33,6 +35,11 @@ CORS(app)
 @app.errorhandler(InvalidAPIUsage)
 def app_error_handler(exception: InvalidAPIUsage):
     return exception.to_dict(), exception.status_code
+
+
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    DBsession.remove()
 
 
 if __name__ == "__main__":

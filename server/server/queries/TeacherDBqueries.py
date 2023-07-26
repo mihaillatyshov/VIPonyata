@@ -1,4 +1,7 @@
-from ..db_models import Course, Lesson, Drilling, DrillingTry, Hieroglyph, HieroglyphTry, LexisType, LexisTryType
+from server.log_lib import LogI
+from server.models.course import CourseCreateReq
+
+from ..db_models import (Course, Drilling, DrillingTry, Hieroglyph, HieroglyphTry, Lesson, LexisTryType, LexisType)
 from .DBqueriesUtils import *
 
 
@@ -13,6 +16,15 @@ def GetCourses() -> list[Course]:
 def GetCourseById(courseId: int) -> Course:
     return DBsession().query(Course).filter(Course.id == courseId).one_or_none()
     # return GetSingleItem(DB.GetTableJson("courses", where=f"Id='{courseId}'"))
+
+
+def create_course(course_data: CourseCreateReq) -> Course:
+    course = Course(**course_data.dict())
+    DBsession.add(course)
+    DBsession.commit()
+
+    LogI(course)
+    return course
 
 
 def GetLessonsByCourseId(courseId: int) -> list[Lesson]:

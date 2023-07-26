@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { TCourse } from "models/TCourse";
 import CourseCardCreate from "./Cards/CourseCardCreate";
 import CourseCardLoading from "./Cards/CourseCardLoading";
+import { useUserIsTeacher } from "redux/funcs/user";
 
 type ResponseData = {
     items: TCourse[];
@@ -14,6 +15,8 @@ type ResponseData = {
 const CoursesList = () => {
     const courses = useAppSelector(selectCourses);
     const dispatch = useAppDispatch();
+
+    const isTeacher = useUserIsTeacher();
 
     useLayoutEffect(() => {
         AjaxGet<ResponseData>({
@@ -37,8 +40,8 @@ const CoursesList = () => {
         );
     }
 
-    if (courses.items.length === 0) {
-        return <div>No Items</div>;
+    if (!isTeacher && courses.items.length === 0) {
+        return <div>No Items</div>; // TODO: add placeholder
     }
 
     return (

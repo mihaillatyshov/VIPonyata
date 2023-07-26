@@ -1,6 +1,6 @@
 import { LoadStatus } from "libs/Status";
 import { ImageState } from "models/Img";
-import React from "react";
+import React, { useEffect } from "react";
 import InputError from "./InputError";
 
 import styles from "./Styles.module.css";
@@ -10,6 +10,7 @@ import { InputBaseProps } from "./InputBase";
 export interface InputImageProps extends InputBaseProps {
     value: ImageState;
     onChangeHandler: (value: ImageState) => void;
+    customValidation?: () => void;
 }
 
 interface InputImageLabelProps extends InputBaseProps {
@@ -52,7 +53,15 @@ const InputImageLabel = ({ htmlId, value, placeholder }: InputImageLabelProps) =
 type ImageResponse = { filename: string };
 type ImageError = { message?: string };
 
-const InputImage = ({ htmlId, placeholder, value, className, onChangeHandler }: InputImageProps) => {
+const InputImage = ({
+    htmlId,
+    placeholder,
+    value,
+    errorMessage,
+    className,
+    onChangeHandler,
+    customValidation,
+}: InputImageProps) => {
     className = className ?? "";
     const errorHandler = (error: ImageError) => {
         onChangeHandler({
@@ -61,6 +70,12 @@ const InputImage = ({ htmlId, placeholder, value, className, onChangeHandler }: 
             message: error.message,
         });
     };
+
+    useEffect(() => {
+        if (value.loadStatus !== LoadStatus.LOADING) {
+            customValidation?.();
+        }
+    }, [value.loadStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handler = (e: React.ChangeEvent<HTMLInputElement>) => {
         console.log(e.target.value, e.target.files);
@@ -95,13 +110,16 @@ const InputImage = ({ htmlId, placeholder, value, className, onChangeHandler }: 
     };
 
     const getErrorMessage = () => {
-        return value.loadStatus === LoadStatus.ERROR ? value.message ?? "Нет ответа от сервера" : undefined;
+        if (value.loadStatus === LoadStatus.ERROR) {
+            return { message: value.message ?? "Нет ответа от сервера", isWarning: true };
+        }
+        return { message: errorMessage };
     };
 
     return (
         <div className={`${styles.inputImage} ${className}`}>
             <InputImageLabel value={value} placeholder={placeholder} htmlId={htmlId} />
-            <InputError message={getErrorMessage()} className="justify-content-center" />
+            <InputError {...getErrorMessage()} className="justify-content-center" />
             <input className="d-none" type="file" id={htmlId} accept="image/*" onChange={handler} />
         </div>
     );

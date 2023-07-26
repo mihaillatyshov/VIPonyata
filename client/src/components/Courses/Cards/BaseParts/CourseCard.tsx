@@ -12,7 +12,7 @@ export const Difficulty = ({ difficulty }: DifficultyProps) => {
 
 type DescriptionProps = { description: string | null };
 export const Description = ({ description }: DescriptionProps) => {
-    return <div> {description || ""} </div>;
+    return <div> {description ?? ""} </div>;
 };
 
 export const TitlePlaceholder = () => {
