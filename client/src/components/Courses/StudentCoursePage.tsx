@@ -3,11 +3,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { AjaxGet } from "libs/ServerAPI";
 import { selectCourses, setSelectedCourse } from "redux/slices/coursesSlice";
 import { setLessons } from "redux/slices/lessonsSlice";
-import style from "./StyleCourses.module.css";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import StudentLessonsList from "components/Lessons/StudentLessonsList";
 import { TCourse } from "models/TCourse";
 import { TLesson } from "models/TLesson";
+
+import style from "./StyleCourses.module.css";
 
 type ResponseData = {
     course: TCourse;
@@ -38,7 +39,15 @@ const StudentCoursePage = () => {
     return (
         <div className="container">
             <div className="row">
-                <div className={"col-auto " + style.mainTitle}>{course && course.name}</div>
+                <div className={"col-auto " + style.mainTitle}>
+                    {course === undefined ? (
+                        <div className="placeholder-wave w-100">
+                            <span className="placeholder w-100 bg-light rounded"></span>
+                        </div>
+                    ) : (
+                        course.name
+                    )}
+                </div>
             </div>
             <StudentLessonsList />
         </div>

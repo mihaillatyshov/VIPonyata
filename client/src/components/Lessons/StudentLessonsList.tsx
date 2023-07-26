@@ -1,11 +1,12 @@
 import React from "react";
 import { useAppSelector } from "redux/hooks";
 import { selectLessons } from "redux/slices/lessonsSlice";
-import LessonCard from "./LessonCard";
 import { useUserIsTeacher } from "redux/funcs/user";
 import LessonCardWithContent from "./Cards/LessonCardWithContent";
 import LessonCardCreate from "./Cards/LessonCardCreate";
 import { selectCourses } from "redux/slices/coursesSlice";
+import ErrorPage from "components/ErrorPages/ErrorPage";
+import LessonCardLoading from "./Cards/LessonCardLoading";
 
 const StudentLessonsList = () => {
     const course = useAppSelector(selectCourses).selected;
@@ -14,19 +15,35 @@ const StudentLessonsList = () => {
     const isTeacher = useUserIsTeacher();
 
     if (lessons.items === undefined || course === undefined) {
-        return <div> Loading... </div>;
+        return (
+            <div className="row justify-content-center mt-5 mx-0 px-0">
+                {Array.from(Array(12)).map((_, i) => (
+                    <LessonCardLoading key={i} />
+                ))}
+            </div>
+        );
     }
 
     if (!isTeacher && lessons.items.length === 0) {
-        return <div>No Items</div>;
+        return (
+            <ErrorPage
+                errorImg="/svg/SomethingWrong.svg"
+                textMain="Нет доступных уроков"
+                textDisabled="Попросите Машу открыть вам досутуп к урокам :3"
+                needReload={false}
+            />
+        );
     }
 
     return (
-        <div>
+        <div className=" mt-5">
             <LessonCardCreate courseId={course.id} />
             {lessons.items.map((lesson) => {
                 return <LessonCardWithContent key={lesson.id} lesson={lesson} />;
             })}
+            {isTeacher && lessons.items.length === 0 && (
+                <ErrorPage errorImg="/svg/SomethingWrong.svg" textMain="Нет созданных уроков" needReload={false} />
+            )}
         </div>
     );
 };

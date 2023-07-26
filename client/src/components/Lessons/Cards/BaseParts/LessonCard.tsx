@@ -11,7 +11,7 @@ export const Description = ({ description }: DescriptionProps) => {
 export const TitlePlaceholder = () => {
     return (
         <div className="placeholder-wave ">
-            <span className="placeholder w-75 bg-secondary rounded"></span>
+            <span className="placeholder w-25 bg-secondary rounded"></span>
         </div>
     );
 };

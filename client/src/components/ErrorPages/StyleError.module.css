@@ -1,0 +1,16 @@
+.errorBlock {
+	text-align: center;
+	margin: 40px auto 0 auto;
+}
+
+.errorBlockTextMain {
+	font-size: 20px;
+	line-height: 24px;
+}
+
+.errorBlockTextDisabled {
+	font-size: 16px;
+	line-height: 22px;
+	color: rgba(29, 29, 29, 0.5);
+	margin-bottom: 24px;
+}

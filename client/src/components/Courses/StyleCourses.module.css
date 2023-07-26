@@ -19,4 +19,5 @@ div.mainTitle {
     font-size: 32px;
     padding: 5px;
     background-color: var(--css-var-title);
+    min-width: 100px;
 }
