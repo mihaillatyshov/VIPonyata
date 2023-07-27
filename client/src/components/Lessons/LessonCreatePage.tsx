@@ -1,5 +1,5 @@
 import React from "react";
-import { GetStringOrNull } from "components/Form/InputBase";
+import { GetImg, GetStringOrNull } from "components/Form/InputBase";
 import InputImage from "components/Form/InputImage";
 import InputNumber from "components/Form/InputNumber";
 import InputText from "components/Form/InputText";
@@ -48,7 +48,7 @@ const LessonCreatePage = () => {
             name: inputs.name.trim(),
             number: inputs.number,
             description: GetStringOrNull(inputs.description),
-            img: inputs.img.loadStatus,
+            img: GetImg(inputs.img),
         };
         AjaxPost<{ lesson: TLesson }>({ url: `/api/lessons/${courseId}`, body: lesson }).then((body) => {
             navigate(`/lessons/${body.lesson.id}`);

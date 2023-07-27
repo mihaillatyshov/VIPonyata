@@ -10,7 +10,7 @@ import { useFormState } from "components/Form/useFormState";
 import { ValidateEmpty, ValidateImgLoading } from "validators/FormValidators";
 import { AjaxPost } from "libs/ServerAPI";
 import { TCourse, TCourseCreate } from "models/TCourse";
-import { GetStringOrNull } from "components/Form/InputBase";
+import { GetImg, GetStringOrNull } from "components/Form/InputBase";
 import { useNavigate } from "react-router-dom";
 
 const colors: TOption[] = [
@@ -62,7 +62,7 @@ const CourseCreatePage = () => {
             difficulty_color: GetStringOrNull(inputs.difficultyColor),
             sort: inputs.sort,
             description: GetStringOrNull(inputs.description),
-            img: inputs.img.loadStatus,
+            img: GetImg(inputs.img),
         };
         AjaxPost<{ course: TCourse }>({ url: "/api/courses", body: course }).then((body) => {
             navigate(`/courses/${body.course.id}`);

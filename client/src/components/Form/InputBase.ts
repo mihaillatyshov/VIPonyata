@@ -15,7 +15,7 @@ export const GetImg = (value: ImageState): string | null => {
         return value.url;
     }
     if (value.loadStatus === LoadStatus.ERROR || value.loadStatus === LoadStatus.LOADING) {
-        return value.url !== undefined ? value.url : null;
+        return value.url ?? null;
     }
     return null;
 };

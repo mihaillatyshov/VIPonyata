@@ -32,7 +32,6 @@ export const ValidateImgError = (value: ImageState) => {
 };
 
 export const ValidateImgLoading = (value: ImageState) => {
-    console.log("startValidtion");
     if (value.loadStatus === LoadStatus.LOADING) {
         return "Картинка еще не загрузилась";
     }
