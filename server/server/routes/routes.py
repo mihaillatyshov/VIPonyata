@@ -1,7 +1,6 @@
 import hashlib
 import os
 from datetime import datetime, time, timedelta
-from time import sleep
 
 from flask import Blueprint, request, send_from_directory
 from flask_login import login_required
@@ -59,8 +58,6 @@ def post_img_upload():
     if (len(request.files) == 0):
         return {"message": "Error, No files"}, 400
 
-    sleep(3)
-
     img_file = request.files["file"]
     if img_file and img_file.filename and allowed_file(img_file.filename):
         image = Image.open(img_file)
@@ -105,7 +102,7 @@ def getAllCourses():
     return UserSelectorFunction(teacher_funcs.getAllCourses, student_funcs.getAllCourses)
 
 
-@routes_bp.route("/courses/create", methods=["POST"])
+@routes_bp.route("/courses", methods=["POST"])
 @login_required
 def create_course():
     return UserSelectorFunction(teacher_funcs.create_course, None)
@@ -121,6 +118,12 @@ def getLessonsByCourseId(id):
 @login_required
 def getLessonActivities(id):
     return UserSelectorFunction(teacher_funcs.getLessonActivities, student_funcs.getLessonActivities, lessonId=id)
+
+
+@routes_bp.route("/lessons/<course_id>", methods=["POST"])
+@login_required
+def create_lesson(course_id):
+    return UserSelectorFunction(teacher_funcs.create_lesson, None, course_id=course_id)
 
 
 @routes_bp.route("/drilling/<id>/newtry", methods=["POST"])

@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "./redux/hooks";
 import { AjaxGet } from "./libs/ServerAPI";
 import { UserState, selectUser, setUserData } from "./redux/slices/userSlice";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -8,18 +9,18 @@ import RegisterPage from "./components/Authentication/RegisterPage";
 import StudentMainPage from "./components/MainPage/StudentMainPage";
 import TestUpload from "./components/TestUpload";
 import NavigateHome from "./components/NavigateHome";
-import StudentCoursePage from "./components/Courses/StudentCoursePage";
+import CoursePage from "./components/Courses/CoursePage";
 import NavBar from "./components/NavBar";
 import StudentDrillingPage from "./components/Activities/Lexis/Drilling/StudentDrillingPage";
 import StudentLessonPage from "./components/Lessons/StudentLessonPage";
-import { useAppDispatch, useAppSelector } from "./redux/hooks";
-import styleThemes from "./themes/StyleThemes.module.css";
 import StudentHieroglyphPage from "components/Activities/Lexis/Hieroglyph/StudentHieroglyphPage";
 import StudentAssessmentPage from "components/Activities/Assessment/StudentAssessmentPage";
 import StudentProfilePage from "components/Profile/StudentProfilePage";
 import CourseCreatePage from "components/Courses/CourseCreatePage";
 import LessonCreatePage from "components/Lessons/LessonCreatePage";
 import { getScrollbarWidth } from "libs/ScrollbarWidth";
+
+import styleThemes from "./themes/StyleThemes.module.css";
 
 import "./App.css";
 import "./RoundBlock.css";
@@ -74,10 +75,7 @@ const App = () => {
                     <Route path="/" element={getRoute(<StudentMainPage />, <StudentMainPage />, <LoginPage />)} />
                     <Route path="/register" element={<RegisterPage />} />
 
-                    <Route
-                        path="/courses/:id"
-                        element={getRoute(<StudentCoursePage />, <StudentCoursePage />, <NavigateHome />)}
-                    />
+                    <Route path="/courses/:id" element={getRoute(<CoursePage />, <CoursePage />, <NavigateHome />)} />
                     <Route
                         path="/courses/create"
                         element={getRoute(<CourseCreatePage />, <NavigateHome />, <NavigateHome />)}

@@ -1,8 +1,10 @@
 from server.log_lib import LogI
 from server.models.course import CourseCreateReq
 
-from ..db_models import (Course, Drilling, DrillingTry, Hieroglyph, HieroglyphTry, Lesson, LexisTryType, LexisType)
-from .DBqueriesUtils import *
+from server.db_models import (Course, Drilling, DrillingTry, Hieroglyph, HieroglyphTry, Lesson, LexisTryType, LexisType)
+from server.queries.DBqueriesUtils import *
+from server.models.lesson import LessonCreateReq
+from server.exceptions.ApiExceptions import InvalidAPIUsage
 
 
 #########################################################################################################################
@@ -10,12 +12,10 @@ from .DBqueriesUtils import *
 #########################################################################################################################
 def GetCourses() -> list[Course]:
     return DBsession().query(Course).order_by(Course.sort).all()
-    # return DB.GetTableJson("courses")
 
 
-def GetCourseById(courseId: int) -> Course:
+def GetCourseById(courseId: int) -> Course | None:
     return DBsession().query(Course).filter(Course.id == courseId).one_or_none()
-    # return GetSingleItem(DB.GetTableJson("courses", where=f"Id='{courseId}'"))
 
 
 def create_course(course_data: CourseCreateReq) -> Course:
@@ -29,12 +29,22 @@ def create_course(course_data: CourseCreateReq) -> Course:
 
 def GetLessonsByCourseId(courseId: int) -> list[Lesson]:
     return DBsession().query(Lesson).filter(Lesson.course_id == courseId).all()
-    # return DB.GetTableJson("lessons", where=f"CourseId='{courseId}'")
 
 
 def GetLessonById(lessonId: int) -> Lesson:
     return DBsession().query(Lesson).filter(Lesson.id == lessonId).one_or_none()
-    # return GetSingleItem(DB.GetTableJson("lessons", where=f"Id='{lessonId}'"))
+
+
+def create_lesson(course_id: int, lesson_data: LessonCreateReq) -> Lesson:
+    if GetCourseById(course_id):
+        lesson = Lesson(course_id=course_id, **lesson_data.dict())
+        DBsession.add(lesson)
+        DBsession.commit()
+        LogI(lesson)
+
+        return lesson
+
+    raise InvalidAPIUsage("No course in db!", 403)
 
 
 #########################################################################################################################

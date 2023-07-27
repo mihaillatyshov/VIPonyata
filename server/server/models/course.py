@@ -1,4 +1,4 @@
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel
 
 
 class CourseCreateReq(BaseModel):

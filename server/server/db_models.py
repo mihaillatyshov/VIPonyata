@@ -72,6 +72,7 @@ class Lesson(Base):
     name = Column(String(128), nullable=False)
     number = Column(Integer, nullable=False)
     description = Column(String(2048))
+    img = Column(String(1024))
 
     creation_datetime = Column(DateTime, default=func.now())
 

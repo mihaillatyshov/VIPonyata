@@ -11,13 +11,13 @@ const StudentProfile = () => {
     }
 
     return (
-        <div className="col-auto" style={{ border: "solid 1px" }}>
+        <div className="col-auto" style={{ border: "solid 1px", height: "100px" }}>
             <Link to={"/profile"}>
                 <div className="d-flex">
                     <img
                         className="profile"
                         alt="profile"
-                        src={user.userData.avatar === null ? "/img/users/DefaultAvatar.png" : user.userData.avatar}
+                        src={user.userData.avatar ?? "/img/users/DefaultAvatar.png"}
                     />
                     <div>
                         <div className="mx-auto"> {user.userData.name} </div>

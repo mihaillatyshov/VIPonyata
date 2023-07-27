@@ -39,17 +39,19 @@ const StudentLessonPage = () => {
             data: ResponseData,
             setInfoCallback: (info: TDrilling | THieroglyph | TAssessment) => any
         ) => {
-            if (Object.keys(data.items[name]).length !== 0) {
-                console.log(`Set ${name} info`, data);
-                dispatch(setInfoCallback(data.items[name]));
+            if (
+                data.items[name] === null ||
+                data.items[name] === undefined ||
+                Object.keys(data.items[name]).length === 0
+            ) {
+                return;
             }
+            dispatch(setInfoCallback(data.items[name]));
         },
         [dispatch]
     );
 
     useEffect(() => {
-        dispatch(setSelectedLesson(undefined));
-        dispatch(setDrillingInfo(undefined));
         AjaxGet<ResponseData>({ url: `/api/lessons/${id}` })
             .then((json) => {
                 dispatch(setSelectedLesson(json.lesson));
@@ -57,12 +59,19 @@ const StudentLessonPage = () => {
                 setActivityInfo("hieroglyph", json, setHieroglyphInfo);
                 setActivityInfo("assessment", json, setAssessmentInfo);
             })
-            .catch(({ isServerError, json, response }) => {
+            .catch(({ isServerError, response, json }) => {
+                console.log(isServerError, response.status, json);
                 if (!isServerError) {
                     if (response.status === 404) navigate("/");
                     if (response.status === 403) navigate(`/courses/${json.course_id}`);
                 }
             });
+        return () => {
+            dispatch(setSelectedLesson(undefined));
+            dispatch(setDrillingInfo(undefined));
+            dispatch(setHieroglyphInfo(undefined));
+            dispatch(setAssessmentInfo(undefined));
+        };
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     if (lesson === undefined) {

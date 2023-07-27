@@ -8,7 +8,7 @@ import { selectCourses } from "redux/slices/coursesSlice";
 import ErrorPage from "components/ErrorPages/ErrorPage";
 import LessonCardLoading from "./Cards/LessonCardLoading";
 
-const StudentLessonsList = () => {
+const LessonsList = () => {
     const course = useAppSelector(selectCourses).selected;
     const lessons = useAppSelector(selectLessons);
 
@@ -48,4 +48,4 @@ const StudentLessonsList = () => {
     );
 };
 
-export default StudentLessonsList;
+export default LessonsList;

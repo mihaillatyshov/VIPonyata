@@ -1,4 +1,4 @@
-import React, { FormEvent } from "react";
+import React from "react";
 import InputText from "components/Form/InputText";
 import InputSelect, { TOption } from "components/Form/InputSelect";
 import InputImage from "components/Form/InputImage";
@@ -51,7 +51,7 @@ const CourseCreatePage = () => {
         }
     );
 
-    const onSubmitHandler = (e: FormEvent<HTMLFormElement>) => {
+    const onSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!validateForm()) {
             return;
@@ -64,7 +64,7 @@ const CourseCreatePage = () => {
             description: GetStringOrNull(inputs.description),
             img: inputs.img.loadStatus,
         };
-        AjaxPost<{ course: TCourse }>({ url: "/api/courses/create", body: course }).then((body) => {
+        AjaxPost<{ course: TCourse }>({ url: "/api/courses", body: course }).then((body) => {
             navigate(`/courses/${body.course.id}`);
         });
     };

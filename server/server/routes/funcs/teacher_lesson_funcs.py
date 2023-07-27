@@ -1,4 +1,8 @@
+from flask import request
+
 import server.queries.TeacherDBqueries as DBQT
+from server.exceptions.ApiExceptions import InvalidRequestJson
+from server.models.lesson import LessonCreateReq
 
 
 def getLessonsByCourseId(courseId: int):
@@ -10,10 +14,23 @@ def getLessonsByCourseId(courseId: int):
 
 def getLessonActivities(lessonId: int):
     if lesson := DBQT.GetLessonById(lessonId):
-        drilling = lesson.drilling
+        # drilling = lesson.drilling
         #assesment = GetAssessmentByLessonId(id)
         #hieroglyph = GetHieroglyphByLessonId(id)
 
-        return {"lesson": lesson, "items": {"drilling": drilling}}
+        dril = None
+        asse = None
+        hier = None
 
-    return {"lesson": None, "items": None}, 403
+        return {"lesson": lesson, "items": {"drilling": dril, "assessment": asse, "hieroglyph": hier}}
+
+    return {"lesson": None, "items": None}, 404
+
+
+def create_lesson(course_id: int):
+    if not request.json:
+        raise InvalidRequestJson()
+
+    lesson_data = LessonCreateReq(**request.json)
+
+    return {"lesson": DBQT.create_lesson(course_id, lesson_data)}

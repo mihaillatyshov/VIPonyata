@@ -6,3 +6,10 @@ export interface TLesson {
     course_id: number;
     creation_datetime: string | null;
 }
+
+export interface TLessonCreate {
+    name: string;
+    number: number;
+    description: string | null;
+    img: string | null;
+}
