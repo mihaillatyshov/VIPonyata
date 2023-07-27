@@ -5,7 +5,7 @@ from sqlalchemy.engine import URL
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import relationship, sessionmaker, scoped_session
 from sqlalchemy.sql import func
-from .load_config import load_config
+from server.load_config import load_config
 
 Base: Type = declarative_base()
 
@@ -16,12 +16,6 @@ a_users_courses = Table("users_courses", Base.metadata, Column('id', Integer, pr
 a_users_lessons = Table("users_lessons", Base.metadata, Column('id', Integer, primary_key=True),
                         Column('user_id', Integer, ForeignKey('users.id')),
                         Column('lesson_id', Integer, ForeignKey('lessons.id')))
-
-# class Img(Base):
-#     __tablename__ = "images"
-#     id = Column(Integer, primary_key=True)
-#     path = Column(String(1024), nullable=False, unique=True)
-#     name = Column(String(128))
 
 
 class User(Base):
@@ -43,8 +37,8 @@ class User(Base):
 
     registration_date = Column(DateTime, default=func.now())
 
-    courses = relationship('Course', secondary=a_users_courses, backref='user')
-    lessons = relationship('Lesson', secondary=a_users_lessons, backref='user')
+    courses = relationship('Course', secondary=a_users_courses, overlaps="courses, user")
+    lessons = relationship('Lesson', secondary=a_users_lessons, overlaps="lessons, user")
 
     def __repr__(self):
         return f"<User: (id={self.id}; nickname={self.nickname}; level={self.level})>"
@@ -63,9 +57,9 @@ class Course(Base):
 
     creation_datetime = Column(DateTime, default=func.now())
 
-    users = relationship('User', secondary=a_users_courses, backref='course')
+    users = relationship('User', secondary=a_users_courses, overlaps="courses, user")
 
-    lessons = relationship("Lesson")
+    lessons = relationship("Lesson", back_populates="course")
 
     def __repr__(self):
         return f"<Course: (id={self.id}; name={self.name})>"
@@ -81,12 +75,10 @@ class Lesson(Base):
 
     creation_datetime = Column(DateTime, default=func.now())
 
-    users = relationship('User', secondary=a_users_lessons, backref='lesson')
+    users = relationship('User', secondary=a_users_lessons, overlaps="lessons, user")
 
     course_id = Column(Integer, ForeignKey("courses.id"))
-    course = relationship("Course")
-
-    drilling = relationship("Drilling")
+    course = relationship("Course", back_populates="lessons")
 
     def __repr__(self):
         return f"<Lesson: (id={self.id}; name={self.name})>"
@@ -100,8 +92,6 @@ class Dictionary(Base):
     word_jp = Column(String(128))
     ru = Column(String(128))
     img = Column(String(1024))
-
-    drilling_card = relationship("DrillingCard")
 
     def __repr__(self):
         return f"<Dictionary: (id={self.id}; char_jp={self.char_jp}; word_jp={self.char_jp}; ru={self.ru})>"
@@ -128,7 +118,7 @@ class AbstractActivity(Base):
 
     @declared_attr
     def lesson(cls):
-        return relationship("Lesson")
+        return relationship("Lesson", overlaps="drilling, hieroglyphs, assessment")
 
     tries: list = []
     now_try: Any | None = None
@@ -245,7 +235,7 @@ class DrillingCard(AbstractLexisCard):
     __tablename__ = "drilling_cards"
 
     base_id = Column(Integer, ForeignKey("drillings.id"))
-    base = relationship("Drilling")
+    base = relationship("Drilling", back_populates="cards")
 
 
 class DrillingTry(AbstractLexisTry):
@@ -265,7 +255,7 @@ class HieroglyphCard(AbstractLexisCard):
     __tablename__ = "hieroglyph_cards"
 
     base_id = Column(Integer, ForeignKey("hieroglyphs.id"))
-    base = relationship("Hieroglyph")
+    base = relationship("Hieroglyph", back_populates="cards")
 
 
 class HieroglyphTry(AbstractLexisTry):

@@ -43,10 +43,13 @@ const StudentAssessmentClassification = ({ data, taskId }: StudentAssessmentType
     console.log(strWidth);
 
     useEffect(() => {
-        data.inputs = items[0].map(({ str }) => str);
-        data.answers = items.slice(1).map((col) => col.map(({ str }) => str));
+        const newData = {
+            ...data,
+            inputs: items[0].map(({ str }) => str),
+            answers: items.slice(1).map((col) => col.map(({ str }) => str)),
+        };
 
-        dispatch(setAssessmentTaskData({ id: taskId, data: data }));
+        dispatch(setAssessmentTaskData({ id: taskId, data: newData }));
     }, [items]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const [active, setActive] = useState<ItemState | null>(null);

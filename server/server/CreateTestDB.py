@@ -125,8 +125,8 @@ if user:
 
         with open("assessment_example.json", "r") as file:
             data = file.read()
-            LogI(data)
-            LogI(type(data))
+            # LogI(data)
+            # LogI(type(data))
             assessments = [
                 Assessment(description="Assessment with limit",
                            lesson_id=lessons[0].id,

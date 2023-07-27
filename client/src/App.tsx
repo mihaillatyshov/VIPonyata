@@ -18,10 +18,14 @@ import StudentHieroglyphPage from "components/Activities/Lexis/Hieroglyph/Studen
 import StudentAssessmentPage from "components/Activities/Assessment/StudentAssessmentPage";
 import StudentProfilePage from "components/Profile/StudentProfilePage";
 import CourseCreatePage from "components/Courses/CourseCreatePage";
+import LessonCreatePage from "components/Lessons/LessonCreatePage";
+import { getScrollbarWidth } from "libs/ScrollbarWidth";
 
 import "./App.css";
 import "./RoundBlock.css";
-import LessonCreatePage from "components/Lessons/LessonCreatePage";
+
+const scrollbarWidth = getScrollbarWidth();
+console.log("scrollbarWidth: ", scrollbarWidth);
 
 const App = () => {
     const user = useAppSelector(selectUser);
