@@ -7,6 +7,7 @@ import lessonsSlice from "./slices/lessonsSlice";
 import drillingSlice from "./slices/drillingSlice";
 import assessmentSlice from "./slices/assessmentSlice";
 import hieroglyphSlice from "./slices/hieroglyphSlice";
+import dictionarySlice from "./slices/dictionarySlice";
 
 const store = configureStore({
     reducer: {
@@ -18,6 +19,7 @@ const store = configureStore({
         drilling: drillingSlice,
         assessment: assessmentSlice,
         hyeroglyph: hieroglyphSlice,
+        dictionary: dictionarySlice,
     },
 });
 

@@ -12,6 +12,11 @@ const InputNumber = ({ htmlId, placeholder, value, errorMessage, className, onCh
     const hasError = errorMessage !== undefined && errorMessage !== "";
 
     const handler = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.value === "") {
+            onChangeHandler(0);
+            return;
+        }
+
         const res = parseInt(e.target.value);
         isNaN(res) || onChangeHandler(res);
     };

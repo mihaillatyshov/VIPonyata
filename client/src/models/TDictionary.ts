@@ -5,3 +5,5 @@ export interface TDictionaryItem {
     ru: string;
     img: string;
 }
+
+export type TDictionary = TDictionaryItem[];

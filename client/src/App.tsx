@@ -4,8 +4,8 @@ import { AjaxGet } from "./libs/ServerAPI";
 import { UserState, selectUser, setUserData } from "./redux/slices/userSlice";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Loading from "./components/Common/Loading";
-import LoginPage from "./components/Authentication/LoginPage";
-import RegisterPage from "./components/Authentication/RegisterPage";
+import LoginPage from "./components/NavBar/Authentication/LoginPage";
+import RegisterPage from "./components/NavBar/Authentication/RegisterPage";
 import StudentMainPage from "./components/MainPage/StudentMainPage";
 import TestUpload from "./components/TestUpload";
 import NavigateHome from "./components/NavigateHome";
@@ -24,6 +24,8 @@ import styleThemes from "./themes/StyleThemes.module.css";
 
 import "./App.css";
 import "./RoundBlock.css";
+import StudentDictionaryPage from "components/Dictionary/StudentDictionaryPage";
+import TeacherDictionaryPage from "components/Dictionary/TeacherDictionaryPage";
 
 const scrollbarWidth = getScrollbarWidth();
 console.log("scrollbarWidth: ", scrollbarWidth);
@@ -47,8 +49,8 @@ const App = () => {
     //    }
     //};
 
-    const getRoute = (logedTeacher: any, logedStudent: any, unloged: any, additionalCondition = false) => {
-        if (user.isAuth === undefined || additionalCondition) {
+    const getRoute = (logedTeacher: React.ReactNode, logedStudent: React.ReactNode, unloged: React.ReactNode) => {
+        if (user.isAuth === undefined) {
             return <Loading />;
         } else if (user.isAuth && user.userData !== undefined) {
             if (user.userData.level === 1) {
@@ -102,10 +104,17 @@ const App = () => {
                         path="/assessment/:id/*"
                         element={getRoute(<StudentAssessmentPage />, <StudentAssessmentPage />, <NavigateHome />)}
                     />
+
                     <Route
                         path="/profile"
                         element={getRoute(<StudentProfilePage />, <StudentProfilePage />, <NavigateHome />)}
                     />
+
+                    <Route
+                        path="/dictionary"
+                        element={getRoute(<TeacherDictionaryPage />, <StudentDictionaryPage />, <NavigateHome />)}
+                    />
+
                     <Route path="/upload" element={<TestUpload />} />
                 </Routes>
             </BrowserRouter>
