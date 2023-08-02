@@ -1,12 +1,13 @@
 from flask import request
-from server.exceptions.ApiExceptions import InvalidAPIUsage, InvalidRequestJson
-from ..routes_utils import GetCurrentUserId
+
 import server.queries.StudentDBqueries as DBQS
-from .student_additional_lexis_funcs import (CreateFindPair, CreateScramble, CreateSpace, CreateTranslate)
-from .additional_lexis_funcs import LexisTaskName, LexisTaskNameList
-from ..routes_utils import GetCurrentUserId
-from ...db_models import LexisType, Drilling, Hieroglyph
-from .student_activity_funcs import ActivityFuncs
+from server.exceptions.ApiExceptions import InvalidAPIUsage, InvalidRequestJson
+from server.models.db_models import Drilling, Hieroglyph, LexisType
+from server.routes.funcs.additional_lexis_funcs import (LexisTaskName, LexisTaskNameList)
+from server.routes.funcs.student_activity_funcs import ActivityFuncs
+from server.routes.funcs.student_additional_lexis_funcs import (CreateFindPair, CreateScramble, CreateSpace,
+                                                                CreateTranslate)
+from server.routes.routes_utils import GetCurrentUserId
 
 
 class LexisFuncs(ActivityFuncs):

@@ -1,5 +1,5 @@
 import server.queries.TeacherDBqueries as DBQT
-from ...db_models import LexisType, Drilling, Hieroglyph
+from server.models.db_models import LexisType, Drilling, Hieroglyph
 from server.exceptions.ApiExceptions import InvalidAPIUsage
 
 

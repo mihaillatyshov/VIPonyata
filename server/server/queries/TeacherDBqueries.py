@@ -1,10 +1,10 @@
+from server.exceptions.ApiExceptions import InvalidAPIUsage
 from server.log_lib import LogI
 from server.models.course import CourseCreateReq
-
-from server.db_models import (Course, Drilling, DrillingTry, Hieroglyph, HieroglyphTry, Lesson, LexisTryType, LexisType)
-from server.queries.DBqueriesUtils import *
+from server.models.db_models import (Course, Drilling, DrillingTry, Hieroglyph, HieroglyphTry, Lesson, LexisTryType,
+                                     LexisType)
 from server.models.lesson import LessonCreateReq
-from server.exceptions.ApiExceptions import InvalidAPIUsage
+from server.common import DBsession
 
 
 #########################################################################################################################
@@ -52,11 +52,11 @@ def create_lesson(course_id: int, lesson_data: LessonCreateReq) -> Lesson:
 #########################################################################################################################
 class LexisQueries:
     lexis_type: LexisType
-    lexisTry_type: LexisTryType
+    lexis_try_type: LexisTryType
 
-    def __init__(self, lexis_type: LexisType, lexisTry_type: LexisTryType):
+    def __init__(self, lexis_type: LexisType, lexis_try_type: LexisTryType):
         self.lexis_type = lexis_type
-        self.lexisTry_type = lexisTry_type
+        self.lexis_try_type = lexis_try_type
 
     def GetByLessonId(self, lessondId: int) -> LexisType:
         return DBsession().query(self.lexis_type).filter(self.lexis_type.lesson_id == lessondId).one_or_none()

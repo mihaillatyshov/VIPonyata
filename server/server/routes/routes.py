@@ -1,20 +1,17 @@
 import hashlib
 import os
-from datetime import datetime, time, timedelta
+from datetime import datetime
 
 from flask import Blueprint, request, send_from_directory
 from flask_login import login_required
 from PIL import Image
 from werkzeug.utils import secure_filename
 
-from server.exceptions.ApiExceptions import InvalidAPIUsage
-
-from .. import DBsession
-from ..db_models import Course
-from ..log_lib import LogI
-from .funcs import funcs_student as student_funcs
-from .funcs import funcs_teacher as teacher_funcs
-from .routes_utils import UserSelectorFunction
+from server.models.db_models import Course
+from server.log_lib import LogI
+from server.routes.funcs import funcs_student as student_funcs
+from server.routes.funcs import funcs_teacher as teacher_funcs
+from server.routes.routes_utils import UserSelectorFunction
 
 routes_bp = Blueprint("routes", __name__)
 
@@ -89,34 +86,31 @@ def post_img_upload():
 
 
 @routes_bp.route("/test", methods=["GET"])
-def testSomeThings():
+def get_test_some_things():
     return {"test": "test", "val": 10}
-    raise InvalidAPIUsage("Test Error", 400, {"testdata": 10, "other": time(second=10)})
-    courses = DBsession().query(Course).all()
-    return {"courses": courses, "datetime": [time(1, 1, 1), timedelta(1, 1, 1), datetime(1, 1, 1, 1, 1, 1)]}
 
 
 @routes_bp.route("/courses", methods=["GET"])
 @login_required
-def getAllCourses():
+def get_all_courses():
     return UserSelectorFunction(teacher_funcs.getAllCourses, student_funcs.getAllCourses)
 
 
 @routes_bp.route("/courses", methods=["POST"])
 @login_required
-def create_course():
+def post_create_course():
     return UserSelectorFunction(teacher_funcs.create_course, None)
 
 
 @routes_bp.route("/courses/<id>", methods=["GET"])
 @login_required
-def getLessonsByCourseId(id):
+def get_lessons_by_course_id(id):
     return UserSelectorFunction(teacher_funcs.getLessonsByCourseId, student_funcs.getLessonsByCourseId, courseId=id)
 
 
 @routes_bp.route("/lessons/<id>", methods=["GET"])
 @login_required
-def getLessonActivities(id):
+def get_lesson_activities(id):
     return UserSelectorFunction(teacher_funcs.getLessonActivities, student_funcs.getLessonActivities, lessonId=id)
 
 

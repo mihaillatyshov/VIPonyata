@@ -1,10 +1,11 @@
 from datetime import datetime
 
-from server.exceptions.ApiExceptions import InvalidAPIUsage, CourseNotFoundException, LessonNotFoundException, ActivityNotFoundException
-from ..db_models import (User, Course, Lesson, Drilling, DrillingTry, Hieroglyph, HieroglyphTry, Assessment,
-                         AssessmentTry, ActivityType, ActivityTryType)
-from ..log_lib import LogI
-from .DBqueriesUtils import DBsession
+from server.common import DBsession
+from server.exceptions.ApiExceptions import (ActivityNotFoundException, CourseNotFoundException, InvalidAPIUsage,
+                                             LessonNotFoundException)
+from server.log_lib import LogI
+from server.models.db_models import (ActivityTryType, ActivityType, Assessment, AssessmentTry, Course, Drilling,
+                                     DrillingTry, Hieroglyph, HieroglyphTry, Lesson, User)
 
 
 #########################################################################################################################

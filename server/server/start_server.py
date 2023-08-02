@@ -1,6 +1,7 @@
 from flask import Flask
 
-from . import CustomJSONEncoder, base_blueprint, login_manager, routes
+from server.common import CustomJSONEncoder, base_blueprint, login_manager
+from server.routes.common import on_start_app
 
 
 def create_app():
@@ -13,6 +14,6 @@ def create_app():
 
     app.register_blueprint(base_blueprint)
 
-    routes.on_start_app()
+    on_start_app()
 
     return app

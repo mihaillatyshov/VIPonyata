@@ -1,18 +1,14 @@
-import abc
 import json
-import random
-from types import NoneType
-from typing import Any
 
 from flask import request
 
+from server.common import DBsession
 from server.exceptions.ApiExceptions import InvalidAPIUsage, InvalidRequestJson
-from server.models.assessment import AssessmentTaskName, Aliases
+from server.log_lib import LogE, LogW
+from server.models.assessment import Aliases, AssessmentTaskName
+from server.models.db_models import Assessment, time_limit_to_timedelta
 from server.queries import StudentDBqueries as DBQS
-from server.queries.DBqueriesUtils import DBsession
 
-from server.db_models import Assessment, time_limit_to_timedelta
-from server.log_lib import LogE, LogI, LogW
 from ..routes_utils import (ActivityEndTimeHandler, GetCurrentUserId, StartActivityTimerLimit)
 from .student_activity_funcs import ActivityFuncs
 

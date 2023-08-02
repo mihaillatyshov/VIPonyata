@@ -1,13 +1,11 @@
-import datetime
-
-from flask import Blueprint, abort, current_app, request
+from flask import Blueprint, abort, request
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from .. import DBsession, base_blueprint, login_manager
-from ..db_models import User
-from ..FlaskUser import FlaskUser
-from ..log_lib import LogI
+from server.common import DBsession, login_manager
+from server.log_lib import LogI
+from server.models.db_models import User
+from server.models.FlaskUser import FlaskUser
 
 auth_bp = Blueprint("auth", __name__)
 

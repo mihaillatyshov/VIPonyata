@@ -1,6 +1,3 @@
-from .. import DBsession
-
-
 def ObjectToDict(obj) -> dict:
     resDict = {}
     if obj:
@@ -20,10 +17,12 @@ def ObjectListToDictList(objList) -> list:
 def DecoratorObjectListToDictList(func):
     def wrapper(*args, **kwargs) -> list:
         return ObjectListToDictList(func(*args, **kwargs))
+
     return wrapper
 
 
 def DecoratorObjectToDict(func):
     def wrapper(*args, **kwargs) -> dict:
         return ObjectToDict(func(*args, **kwargs))
+
     return wrapper

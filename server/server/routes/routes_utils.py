@@ -3,10 +3,11 @@ from datetime import datetime, timedelta
 
 from flask_login import current_user
 
-from server.exceptions.ApiExceptions import InvalidAPIUsage
-from ..log_lib import LogI
 import server.queries.OtherDBqueries as DBQO
-from ..db_models import ActivityType, ActivityTryType, Drilling, DrillingTry, Hieroglyph, HieroglyphTry, Assessment, AssessmentTry
+from server.exceptions.ApiExceptions import InvalidAPIUsage
+from server.log_lib import LogI
+from server.models.db_models import (ActivityTryType, ActivityType, Assessment, AssessmentTry, Drilling, DrillingTry,
+                                     Hieroglyph, HieroglyphTry)
 
 
 def GetCurrentUserId() -> int:

@@ -1,9 +1,8 @@
 import random
-import typing
 
 from server.exceptions.ApiExceptions import InvalidAPIUsage
 import server.queries.StudentDBqueries as DBQS
-from ...db_models import Drilling, DrillingTry, Hieroglyph, HieroglyphTry, LexisType
+from server.models.db_models import Drilling, DrillingTry, Hieroglyph, HieroglyphTry, LexisType
 
 
 def CreateShuffleList(strList: list[str]) -> list[str]:

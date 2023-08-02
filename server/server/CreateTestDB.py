@@ -1,8 +1,10 @@
 from datetime import datetime, time
 
-from .db_models import Course, CreateSessionFromJsonFile, Dictionary, Drilling, DrillingCard, Hieroglyph, HieroglyphCard, Assessment, Lesson, User
-from .log_lib import LogI
 from werkzeug.security import generate_password_hash
+
+from server.log_lib import LogI
+from server.models.db_models import (Assessment, Course, CreateSessionFromJsonFile, Dictionary, Drilling, DrillingCard,
+                                     Hieroglyph, HieroglyphCard, Lesson, User)
 
 DBsession = CreateSessionFromJsonFile()
 

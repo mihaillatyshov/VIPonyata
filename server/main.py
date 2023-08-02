@@ -9,7 +9,7 @@ from flask_cors import CORS
 from server.exceptions.ApiExceptions import InvalidAPIUsage
 from server.start_server import create_app
 
-from server import DBsession
+from server.common import DBsession
 
 if not os.path.isdir("./log"):
     os.mkdir("./log")

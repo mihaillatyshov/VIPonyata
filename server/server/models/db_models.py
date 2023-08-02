@@ -1,10 +1,12 @@
 import datetime
-from typing import Type, Any
+from typing import Any, Type
+
 from sqlalchemy import (Column, Date, DateTime, ForeignKey, Integer, String, Table, Text, Time, create_engine)
 from sqlalchemy.engine import URL
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
-from sqlalchemy.orm import relationship, sessionmaker, scoped_session
+from sqlalchemy.orm import relationship, scoped_session, sessionmaker
 from sqlalchemy.sql import func
+
 from server.load_config import load_config
 
 Base: Type = declarative_base()

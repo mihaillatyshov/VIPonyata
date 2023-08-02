@@ -1,7 +1,7 @@
 from flask_login import UserMixin
 
-from . import DBsession
-from .db_models import User
+from server.common import DBsession
+from server.models.db_models import User
 
 
 class FlaskUser(UserMixin):

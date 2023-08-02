@@ -1,7 +1,7 @@
-from server.exceptions.ApiExceptions import InvalidAPIUsage
-from ...db_models import ActivityType, Assessment, Drilling, Hieroglyph
 import server.queries.StudentDBqueries as DBQS
-from ..routes_utils import (ActivityEndTimeHandler, GetCurrentUserId, StartActivityTimerLimit)
+from server.exceptions.ApiExceptions import InvalidAPIUsage
+from server.models.db_models import (ActivityType, Assessment, Drilling, Hieroglyph)
+from server.routes.routes_utils import (ActivityEndTimeHandler, GetCurrentUserId, StartActivityTimerLimit)
 
 
 def GetActivityData(activity_type: ActivityType) -> tuple[DBQS.ActivityQueries, str]:
@@ -32,10 +32,8 @@ class ActivityFuncs:
         newActivityTry = self._activityQueries.AddNewTry(len(activityTries) + 1, activityId, GetCurrentUserId())
 
         if activity.time_limit and newActivityTry:
-            StartActivityTimerLimit(                                                                                    #
-                activity.time_limit__ToTimedelta(),                                                                     #
-                newActivityTry.id,                                                                                      # type: ignore
-                self._activityQueries._activityTry_type)                                                                #
+            StartActivityTimerLimit(activity.time_limit__ToTimedelta(), newActivityTry.id,
+                                    self._activityQueries._activityTry_type)
         return {"message": "Lexis try successfully created"}
 
     def ContinueTry(self, activityId: int):
@@ -44,7 +42,5 @@ class ActivityFuncs:
 
     def EndTry(self, activityId: int):
         activityTry = self._activityQueries.GetUnfinishedTryByActivityId(activityId, GetCurrentUserId())
-        ActivityEndTimeHandler(                                                                                         #
-            activityTry.id,                                                                                             # type: ignore
-            self._activityQueries._activityTry_type)                                                                    #
+        ActivityEndTimeHandler(activityTry.id, self._activityQueries._activityTry_type)
         return {"message": "Successfully closed"}

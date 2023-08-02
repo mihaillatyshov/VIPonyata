@@ -1,5 +1,5 @@
 import server.queries.StudentDBqueries as DBQS
-from ..routes_utils import GetCurrentUserId
+from server.routes.routes_utils import GetCurrentUserId
 
 
 def getAllCourses():

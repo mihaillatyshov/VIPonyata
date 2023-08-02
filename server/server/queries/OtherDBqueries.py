@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from server.db_models import ActivityType, ActivityTryType, CreateSessionFromJsonFile
+from server.common import DBsession
 from server.log_lib import LogW
-from .DBqueriesUtils import DBsession
+from server.models.db_models import ActivityTryType, ActivityType
 
 
 def GetActivityCheckTasksTimers(activity_type: ActivityType,
