@@ -10,9 +10,9 @@ import { THieroglyph } from "models/Activity/THieroglyph";
 import { TAssessment } from "models/Activity/TAssessment";
 
 type StudentActivityBubbleProps = {
-    info: TDrilling | THieroglyph | TAssessment;
     title: string;
     name: ActivityName;
+    info: TDrilling | THieroglyph | TAssessment;
     onDeadline: () => void;
 };
 

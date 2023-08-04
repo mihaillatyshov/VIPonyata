@@ -1,6 +1,11 @@
 div.Violet {
-    --css-var-bg: #E1D8E8;
-    --css-var-block: #BFACE0;
-    --css-var-title: #A084CA;
-    --css-var-other: #A084CA;
+    --css-var-bg: #e1d8e8;
+    --css-var-block: #bface0;
+    --css-var-title: #a084ca;
+    --css-var-other: #a084ca;
+
+    --css-var-table-header: #1976d2;
+    --css-var-table-header-border: #1565c0;
+    --css-var-table-border: #d9d9d9;
+    --css-var-table-row-bg: #f4f2f1;
 }

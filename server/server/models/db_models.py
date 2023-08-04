@@ -11,13 +11,13 @@ from server.load_config import load_config
 
 Base: Type = declarative_base()
 
-a_users_courses = Table("users_courses", Base.metadata, Column('id', Integer, primary_key=True),
-                        Column('user_id', Integer, ForeignKey('users.id')),
-                        Column('course_id', Integer, ForeignKey('courses.id')))
+a_users_courses = Table("users_courses", Base.metadata, Column("id", Integer, primary_key=True),
+                        Column("user_id", Integer, ForeignKey("users.id")),
+                        Column("course_id", Integer, ForeignKey("courses.id")))
 
-a_users_lessons = Table("users_lessons", Base.metadata, Column('id', Integer, primary_key=True),
-                        Column('user_id', Integer, ForeignKey('users.id')),
-                        Column('lesson_id', Integer, ForeignKey('lessons.id')))
+a_users_lessons = Table("users_lessons", Base.metadata, Column("id", Integer, primary_key=True),
+                        Column("user_id", Integer, ForeignKey("users.id")),
+                        Column("lesson_id", Integer, ForeignKey("lessons.id")))
 
 
 class User(Base):
@@ -39,8 +39,10 @@ class User(Base):
 
     registration_date = Column(DateTime, default=func.now())
 
-    courses = relationship('Course', secondary=a_users_courses, overlaps="courses, user")
-    lessons = relationship('Lesson', secondary=a_users_lessons, overlaps="lessons, user")
+    courses = relationship("Course", secondary=a_users_courses, overlaps="courses, user")
+    lessons = relationship("Lesson", secondary=a_users_lessons, overlaps="lessons, user")
+
+    users_dictionary = relationship("UserDictionary", back_populates="user")
 
     def __repr__(self):
         return f"<User: (id={self.id}; nickname={self.nickname}; level={self.level})>"
@@ -59,7 +61,7 @@ class Course(Base):
 
     creation_datetime = Column(DateTime, default=func.now())
 
-    users = relationship('User', secondary=a_users_courses, overlaps="courses, user")
+    users = relationship("User", secondary=a_users_courses, overlaps="courses, user")
 
     lessons = relationship("Lesson", back_populates="course")
 
@@ -78,10 +80,12 @@ class Lesson(Base):
 
     creation_datetime = Column(DateTime, default=func.now())
 
-    users = relationship('User', secondary=a_users_lessons, overlaps="lessons, user")
+    users = relationship("User", secondary=a_users_lessons, overlaps="lessons, user")
 
     course_id = Column(Integer, ForeignKey("courses.id"))
     course = relationship("Course", back_populates="lessons")
+
+    drilling = relationship("Drilling", uselist=False)
 
     def __repr__(self):
         return f"<Lesson: (id={self.id}; name={self.name})>"
@@ -96,8 +100,24 @@ class Dictionary(Base):
     ru = Column(String(128))
     img = Column(String(1024))
 
+    users_dictionary = relationship("UserDictionary", back_populates="dictionary")
+
     def __repr__(self):
         return f"<Dictionary: (id={self.id}; char_jp={self.char_jp}; word_jp={self.char_jp}; ru={self.ru})>"
+
+
+class UserDictionary(Base):
+    __tablename__ = "users_dictionary"
+
+    id = Column(Integer, primary_key=True)
+
+    img = Column(String(1024))
+
+    user_id = Column(Integer, ForeignKey("users.id"))
+    user = relationship("User", back_populates="users_dictionary")
+
+    dictionary_id = Column(Integer, ForeignKey("dictionary.id"))
+    dictionary = relationship("Dictionary", back_populates="users_dictionary")
 
 
 def time_limit_to_timedelta(time_limit: Time) -> datetime.timedelta:

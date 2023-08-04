@@ -4,7 +4,7 @@ import { setDrillingEndByTime } from "redux/slices/drillingSlice";
 import StudentActivityBubble from "components/Activities/Bouble/StudentActivityBouble";
 
 type StudentDrillingBubbleProps = {
-    drilling: any;
+    drilling: any; // TODO: Remove any
 };
 
 const StudentDrillingBubble = ({ drilling }: StudentDrillingBubbleProps) => {

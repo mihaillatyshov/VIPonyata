@@ -19,14 +19,14 @@ def load_user(user_id):
 
 def getCurrentUserData() -> dict:
     data = {}
-    if (current_user.get_id() != None):                                                                                 # type: ignore
+    if (current_user.get_id() != None):
         data = {
-            "id": current_user.GetId(),                                                                                 # type: ignore
-            "name": current_user.GetName(),                                                                             # type: ignore
-            "nickname": current_user.GetNickname(),                                                                     # type: ignore
-            "level": current_user.GetLevel(),                                                                           # type: ignore
-            "avatar": current_user.GetAvatar(),                                                                         # type: ignore
-            "form": current_user.GetForm()                                                                              # type: ignore
+            "id": current_user.GetId(),
+            "name": current_user.GetName(),
+            "nickname": current_user.GetNickname(),
+            "level": current_user.GetLevel(),
+            "avatar": current_user.GetAvatar(),
+            "form": current_user.GetForm()
         }
 
     return data

@@ -11,15 +11,15 @@ from server.models.db_models import (ActivityTryType, ActivityType, Assessment, 
 
 
 def GetCurrentUserId() -> int:
-    return current_user.GetId()                                                                                         # type: ignore
+    return current_user.GetId()
 
 
 def GetCurrentUserIsTeacher() -> bool:
-    return current_user.IsTeacher()                                                                                     # type: ignore
+    return current_user.IsTeacher()
 
 
 def GetCurrentUserIsStudent() -> bool:
-    return current_user.IsStudent()                                                                                     # type: ignore
+    return current_user.IsStudent()
 
 
 def UserSelectorFunction(teacherFunc=None, studentFunc=None, *args, **kwargs) -> dict | tuple:
@@ -59,7 +59,7 @@ def OnRestartServerCheckTasksTimersByType(activity_type: ActivityType, activityT
     for activityTry in activityTries:
         timeRemaining = (activityTry.start_datetime + activityTry.base.time_limit__ToTimedelta()) - datetime.now()
         LogI("OnRestartServerCheckTasksTimers:", timeRemaining)
-        StartActivityTimerLimit(timeRemaining, activityTry.id, activityTry_type)                                        # type: ignore
+        StartActivityTimerLimit(timeRemaining, activityTry.id, activityTry_type)
     LogI(f"OnRestartServerCheckTasksTimers ==== END ==== {activity_type.__name__}")
 
 

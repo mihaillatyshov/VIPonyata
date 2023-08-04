@@ -3,7 +3,9 @@ import { Link } from "react-router-dom";
 import { useAppSelector } from "redux/hooks";
 import { selectUser } from "redux/slices/userSlice";
 
-const StudentProfile = () => {
+import styles from "./StyleNavBar.module.css";
+
+const Profile = () => {
     const user = useAppSelector(selectUser);
 
     if (!user.userData) {
@@ -11,17 +13,18 @@ const StudentProfile = () => {
     }
 
     return (
-        <div className="col-auto" style={{ border: "solid 1px", height: "100px" }}>
+        <div className="col-auto">
             <Link to={"/profile"}>
                 <div className="d-flex">
-                    <img
-                        className="profile"
-                        alt="profile"
-                        src={user.userData.avatar ?? "/img/users/DefaultAvatar.png"}
-                    />
+                    <div className={styles.profileImgWrapper}>
+                        <img
+                            className={styles.profileImg}
+                            alt="profile"
+                            src={user.userData.avatar ?? "/img/users/DefaultAvatar.png"}
+                        />
+                    </div>
                     <div>
                         <div className="mx-auto"> {user.userData.name} </div>
-                        {/* <div> {user.userData.nickname} </div> */}
                     </div>
                 </div>
             </Link>
@@ -29,4 +32,4 @@ const StudentProfile = () => {
     );
 };
 
-export default StudentProfile;
+export default Profile;

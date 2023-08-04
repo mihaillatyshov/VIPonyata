@@ -12,7 +12,7 @@ import {
     setRegisterName,
     setRegisterBirthday,
     selectRegister,
-} from "../../../redux/slices/registerSlice";
+} from "redux/slices/registerSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 
 const RegisterPage = () => {

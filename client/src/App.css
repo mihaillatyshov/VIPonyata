@@ -44,12 +44,6 @@ a.a-link:active {
     color: #000000;
 }
 
-img.profile {
-    max-width: 96px;
-    max-height: 96px;
-    float: left;
-}
-
 .testBorder {
     border: #000000 solid 1px;
 }

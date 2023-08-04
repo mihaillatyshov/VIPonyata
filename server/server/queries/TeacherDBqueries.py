@@ -1,8 +1,8 @@
 from server.exceptions.ApiExceptions import InvalidAPIUsage
 from server.log_lib import LogI
 from server.models.course import CourseCreateReq
-from server.models.db_models import (Course, Drilling, DrillingTry, Hieroglyph, HieroglyphTry, Lesson, LexisTryType,
-                                     LexisType)
+from server.models.db_models import (Course, Dictionary, Drilling, DrillingTry, Hieroglyph, HieroglyphTry, Lesson,
+                                     LexisTryType, LexisType)
 from server.models.lesson import LessonCreateReq
 from server.common import DBsession
 
@@ -31,7 +31,7 @@ def GetLessonsByCourseId(courseId: int) -> list[Lesson]:
     return DBsession().query(Lesson).filter(Lesson.course_id == courseId).all()
 
 
-def GetLessonById(lessonId: int) -> Lesson:
+def GetLessonById(lessonId: int) -> Lesson | None:
     return DBsession().query(Lesson).filter(Lesson.id == lessonId).one_or_none()
 
 
@@ -72,3 +72,10 @@ HieroglyphQueries = LexisQueries(Hieroglyph, HieroglyphTry)
 def GetAssessmentByLessonId(lessondId: int) -> dict:
     return {}
     # return GetSingleItem(DB.GetTableJson("assessment", where=f"LessonId = '{lessondId}'"))
+
+
+#########################################################################################################################
+################ Dictionary #############################################################################################
+#########################################################################################################################
+def get_dictionary() -> list[Dictionary]:
+    return DBsession.query(Dictionary).all()

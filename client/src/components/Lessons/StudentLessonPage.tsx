@@ -1,91 +1,40 @@
-import React, { useCallback, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { AjaxGet } from "libs/ServerAPI";
-import { ActivityName } from "components/Activities/ActivityUtils";
-import { selectLessons, setSelectedLesson } from "redux/slices/lessonsSlice";
-import { selectDrilling, setDrillingInfo } from "redux/slices/drillingSlice";
-import { selectHieroglyph, setHieroglyphInfo } from "redux/slices/hieroglyphSlice";
-import { selectAssessment, setAssessmentInfo } from "redux/slices/assessmentSlice";
+import React from "react";
+import { useAppSelector } from "redux/hooks";
+import { useParams } from "react-router-dom";
+import { selectLessons } from "redux/slices/lessonsSlice";
+import { selectDrilling } from "redux/slices/drillingSlice";
+import { selectHieroglyph } from "redux/slices/hieroglyphSlice";
+import { selectAssessment } from "redux/slices/assessmentSlice";
 import StudentDrillingBubble from "components/Activities/Lexis/Drilling/StudentDrillingBubble";
 import StudentHieroglyphBubble from "components/Activities/Lexis/Hieroglyph/StudentHieroglyphBubble";
 import StudentAssessmentBubble from "components/Activities/Assessment/StudentAssessmentBubble";
-import { TAssessment } from "models/Activity/TAssessment";
-import { TDrilling } from "models/Activity/TDrilling";
-import { THieroglyph } from "models/Activity/THieroglyph";
-import { TLesson } from "models/TLesson";
-
-type ResponseData = {
-    lesson: TLesson;
-    items: {
-        drilling: TDrilling;
-        hieroglyph: THieroglyph;
-        assessment: TAssessment;
-    };
-};
+import { useRequestLesson } from "requests/Lesson";
+import Loading from "components/Common/Loading";
+import PageTitle from "components/Common/PageTitle";
 
 const StudentLessonPage = () => {
     const { id } = useParams();
-    const navigate = useNavigate();
-    const dispatch = useAppDispatch();
     const lesson = useAppSelector(selectLessons).selected;
     const drilling = useAppSelector(selectDrilling);
     const assessment = useAppSelector(selectAssessment);
     const hieroglyph = useAppSelector(selectHieroglyph);
 
-    const setActivityInfo = useCallback(
-        (
-            name: ActivityName,
-            data: ResponseData,
-            setInfoCallback: (info: TDrilling | THieroglyph | TAssessment) => any
-        ) => {
-            if (
-                data.items[name] === null ||
-                data.items[name] === undefined ||
-                Object.keys(data.items[name]).length === 0
-            ) {
-                return;
-            }
-            dispatch(setInfoCallback(data.items[name]));
-        },
-        [dispatch]
-    );
-
-    useEffect(() => {
-        AjaxGet<ResponseData>({ url: `/api/lessons/${id}` })
-            .then((json) => {
-                dispatch(setSelectedLesson(json.lesson));
-                setActivityInfo("drilling", json, setDrillingInfo);
-                setActivityInfo("hieroglyph", json, setHieroglyphInfo);
-                setActivityInfo("assessment", json, setAssessmentInfo);
-            })
-            .catch(({ isServerError, response, json }) => {
-                console.log(isServerError, response.status, json);
-                if (!isServerError) {
-                    if (response.status === 404) navigate("/");
-                    if (response.status === 403) navigate(`/courses/${json.course_id}`);
-                }
-            });
-        return () => {
-            dispatch(setSelectedLesson(undefined));
-            dispatch(setDrillingInfo(undefined));
-            dispatch(setHieroglyphInfo(undefined));
-            dispatch(setAssessmentInfo(undefined));
-        };
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    useRequestLesson(id);
 
     if (lesson === undefined) {
-        return <p> Loading... </p>;
+        return <Loading />;
     }
 
     return (
         <div className="container">
             <div>
-                <div> {lesson.name} </div>
+                <PageTitle title={lesson?.name} />
                 <div> {lesson.description} </div>
-                {drilling && drilling.info && <StudentDrillingBubble drilling={drilling} />}
-                {assessment && assessment.info && <StudentAssessmentBubble assessment={assessment} />}
-                {hieroglyph && hieroglyph.info && <StudentHieroglyphBubble hieroglyph={hieroglyph} />}
+                <div className="d-flex justify-content-around flex-wrap">
+                    {drilling?.info && <StudentDrillingBubble drilling={drilling} />}
+                    {assessment?.info && <StudentAssessmentBubble assessment={assessment} />}
+                    {hieroglyph?.info && <StudentHieroglyphBubble hieroglyph={hieroglyph} />}
+                </div>
             </div>
         </div>
     );

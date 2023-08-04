@@ -4,8 +4,8 @@ from server.common import DBsession
 from server.exceptions.ApiExceptions import (ActivityNotFoundException, CourseNotFoundException, InvalidAPIUsage,
                                              LessonNotFoundException)
 from server.log_lib import LogI
-from server.models.db_models import (ActivityTryType, ActivityType, Assessment, AssessmentTry, Course, Drilling,
-                                     DrillingTry, Hieroglyph, HieroglyphTry, Lesson, User)
+from server.models.db_models import (ActivityTryType, ActivityType, Assessment, AssessmentTry, Course, Dictionary,
+                                     Drilling, DrillingTry, Hieroglyph, HieroglyphTry, Lesson, User, UserDictionary)
 
 
 #########################################################################################################################
@@ -183,7 +183,7 @@ HieroglyphQueries = LexisQueries(Hieroglyph, HieroglyphTry)
 ################ Assessment #############################################################################################
 #########################################################################################################################
 class AssessmentQueriesClass(ActivityQueries):
-    def AddNewTry(self, tryNumber: int, activityId: int, userId: int, tasks) -> ActivityTryType | None:
+    def AddNewTry(self, tryNumber: int, activityId: int, userId: int, tasks={}) -> ActivityTryType | None:
         LogI(f"Add New Activity Try {self._activityTry_type.__name__}:", tryNumber, activityId, userId)
         #activity = DBsession().query(self._activity_type).filter(self._activity_type.id == activityId).one_or_none()
         newActivityTry = self._activityTry_type(try_number=tryNumber,
@@ -197,3 +197,15 @@ class AssessmentQueriesClass(ActivityQueries):
 
 
 AssessmentQueries = AssessmentQueriesClass(Assessment, AssessmentTry)
+
+
+#########################################################################################################################
+################ Dictionary #############################################################################################
+#########################################################################################################################
+def get_dictionary(user_id: int) -> list[Dictionary]:
+    return (                                                                                                            #
+        DBsession.query(Dictionary, UserDictionary)                                                                     #
+        .filter(Dictionary.id == UserDictionary.dictionary_id)                                                          #
+        .filter(UserDictionary.user_id == user_id)                                                                      #
+        .all()                                                                                                          #
+    )

@@ -9,6 +9,7 @@ import { TCourse } from "models/TCourse";
 import { TLesson } from "models/TLesson";
 
 import style from "./StyleCourses.module.css";
+import PageTitle from "components/Common/PageTitle";
 
 type ResponseData = {
     course: TCourse;
@@ -38,17 +39,7 @@ const CoursePage = () => {
 
     return (
         <div className="container">
-            <div className="row">
-                <div className={"col-auto " + style.mainTitle}>
-                    {course === undefined ? (
-                        <div className="placeholder-wave w-100">
-                            <span className="placeholder w-100 bg-light rounded"></span>
-                        </div>
-                    ) : (
-                        course.name
-                    )}
-                </div>
-            </div>
+            <PageTitle title={course?.name} />
             <LessonsList />
         </div>
     );

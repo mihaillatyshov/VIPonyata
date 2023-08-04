@@ -31,9 +31,7 @@ class LexisFuncs(ActivityFuncs):
             if isinstance(name, str) and name in LexisTaskNameList:
                 doneTasks[name] = value
         doneTasksStr = ",".join([f"{name}:{value}" for name, value in doneTasks.items()])
-        self._activityQueries.SetDoneTasksInTry(                                                                        #
-            lexisTry.id,                                                                                                # type: ignore
-            doneTasksStr)                                                                                               #
+        self._activityQueries.SetDoneTasksInTry(lexisTry.id, doneTasksStr)
         return {"message": "Tasks updated!"}
 
     def GetById(self, activityId: int):

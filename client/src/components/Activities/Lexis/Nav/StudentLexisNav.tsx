@@ -1,5 +1,6 @@
 import React from "react";
 import StudentLexisNavItem from "./StudentLexisNavItem";
+import { LexisImages } from "models/Activity/ILexis";
 
 export type StudentLexisNavProps = {
     items: any;
@@ -20,11 +21,11 @@ const StudentLexisNav = ({ items, doneTasks }: StudentLexisNavProps) => {
     };
 
     const itemsData = {
-        ...createItem("card", "Card", "card/0", "/img/Activity/Lexis/nav/card.png"),
-        ...createItem("findpair", "Find Pair", "findpair", "/img/Activity/Lexis/nav/findpair.png"),
-        ...createItem("scramble", "Scramble", "scramble", "/img/Activity/Lexis/nav/scramble.png"),
-        ...createItem("space", "Space", "space", "/img/Activity/Lexis/nav/space.png"),
-        ...createItem("translate", "Translate", "translate", "/img/Activity/Lexis/nav/translate.png"),
+        ...createItem("card", "Card", "card/0", LexisImages["card"]),
+        ...createItem("findpair", "Find Pair", "findpair", LexisImages["findpair"]),
+        ...createItem("scramble", "Scramble", "scramble", LexisImages["scramble"]),
+        ...createItem("space", "Space", "space", LexisImages["space"]),
+        ...createItem("translate", "Translate", "translate", LexisImages["translate"]),
     };
 
     console.log("Lexsis Items: ", items);

@@ -4,8 +4,8 @@ import { AjaxGet } from "./libs/ServerAPI";
 import { UserState, selectUser, setUserData } from "./redux/slices/userSlice";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Loading from "./components/Common/Loading";
-import LoginPage from "./components/NavBar/Authentication/LoginPage";
-import RegisterPage from "./components/NavBar/Authentication/RegisterPage";
+import LoginPage from "./components/Authentication/LoginPage";
+import RegisterPage from "./components/Authentication/RegisterPage";
 import StudentMainPage from "./components/MainPage/StudentMainPage";
 import TestUpload from "./components/TestUpload";
 import NavigateHome from "./components/NavigateHome";
@@ -15,7 +15,7 @@ import StudentDrillingPage from "./components/Activities/Lexis/Drilling/StudentD
 import StudentLessonPage from "./components/Lessons/StudentLessonPage";
 import StudentHieroglyphPage from "components/Activities/Lexis/Hieroglyph/StudentHieroglyphPage";
 import StudentAssessmentPage from "components/Activities/Assessment/StudentAssessmentPage";
-import StudentProfilePage from "components/Profile/StudentProfilePage";
+import StudentProfilePage from "components/Authentication/StudentProfilePage";
 import CourseCreatePage from "components/Courses/CourseCreatePage";
 import LessonCreatePage from "components/Lessons/LessonCreatePage";
 import { getScrollbarWidth } from "libs/ScrollbarWidth";
@@ -24,8 +24,8 @@ import styleThemes from "./themes/StyleThemes.module.css";
 
 import "./App.css";
 import "./RoundBlock.css";
-import StudentDictionaryPage from "components/Dictionary/StudentDictionaryPage";
-import TeacherDictionaryPage from "components/Dictionary/TeacherDictionaryPage";
+import DictionaryPage from "components/Dictionary/DictionaryPage";
+import TeacherLessonPage from "components/Lessons/TeacherLessonPage";
 
 const scrollbarWidth = getScrollbarWidth();
 console.log("scrollbarWidth: ", scrollbarWidth);
@@ -49,17 +49,37 @@ const App = () => {
     //    }
     //};
 
-    const getRoute = (logedTeacher: React.ReactNode, logedStudent: React.ReactNode, unloged: React.ReactNode) => {
+    const getRoute = (
+        teacherRoute: React.ReactNode,
+        studentRoute: React.ReactNode,
+        unloggedRoute: React.ReactNode = <NavigateHome />
+    ) => {
         if (user.isAuth === undefined) {
             return <Loading />;
         } else if (user.isAuth && user.userData !== undefined) {
             if (user.userData.level === 1) {
-                return logedTeacher;
+                return teacherRoute;
             } else {
-                return logedStudent;
+                return studentRoute;
             }
         } else {
-            return unloged;
+            return unloggedRoute;
+        }
+    };
+
+    const getLoggedRoute = (loggedRoute: React.ReactNode) => {
+        if (user.isAuth && user.userData !== undefined) {
+            return loggedRoute;
+        } else {
+            return <NavigateHome />;
+        }
+    };
+
+    const getTeacherRoute = (teacherRoute: React.ReactNode) => {
+        if (user.isAuth && user.userData !== undefined && user.userData.level === 1) {
+            return teacherRoute;
+        } else {
+            return <NavigateHome />;
         }
     };
 
@@ -77,43 +97,28 @@ const App = () => {
                     <Route path="/" element={getRoute(<StudentMainPage />, <StudentMainPage />, <LoginPage />)} />
                     <Route path="/register" element={<RegisterPage />} />
 
-                    <Route path="/courses/:id" element={getRoute(<CoursePage />, <CoursePage />, <NavigateHome />)} />
-                    <Route
-                        path="/courses/create"
-                        element={getRoute(<CourseCreatePage />, <NavigateHome />, <NavigateHome />)}
-                    />
+                    <Route path="/courses/:id" element={getLoggedRoute(<CoursePage />)} />
+                    <Route path="/courses/create" element={getTeacherRoute(<CourseCreatePage />)} />
 
-                    <Route
-                        path="/lessons/:id"
-                        element={getRoute(<StudentLessonPage />, <StudentLessonPage />, <NavigateHome />)}
-                    />
-                    <Route
-                        path="/lessons/create/:courseId"
-                        element={getRoute(<LessonCreatePage />, <NavigateHome />, <NavigateHome />)}
-                    />
+                    <Route path="/lessons/:id" element={getRoute(<TeacherLessonPage />, <StudentLessonPage />)} />
+                    <Route path="/lessons/create/:courseId" element={getTeacherRoute(<LessonCreatePage />)} />
 
                     <Route
                         path="/drilling/:id/*"
-                        element={getRoute(<StudentDrillingPage />, <StudentDrillingPage />, <NavigateHome />)}
+                        element={getRoute(<StudentDrillingPage />, <StudentDrillingPage />)}
                     />
                     <Route
                         path="/hieroglyph/:id/*"
-                        element={getRoute(<StudentHieroglyphPage />, <StudentHieroglyphPage />, <NavigateHome />)}
+                        element={getRoute(<StudentHieroglyphPage />, <StudentHieroglyphPage />)}
                     />
                     <Route
                         path="/assessment/:id/*"
-                        element={getRoute(<StudentAssessmentPage />, <StudentAssessmentPage />, <NavigateHome />)}
+                        element={getRoute(<StudentAssessmentPage />, <StudentAssessmentPage />)}
                     />
 
-                    <Route
-                        path="/profile"
-                        element={getRoute(<StudentProfilePage />, <StudentProfilePage />, <NavigateHome />)}
-                    />
+                    <Route path="/profile" element={getRoute(<StudentProfilePage />, <StudentProfilePage />)} />
 
-                    <Route
-                        path="/dictionary"
-                        element={getRoute(<TeacherDictionaryPage />, <StudentDictionaryPage />, <NavigateHome />)}
-                    />
+                    <Route path="/dictionary" element={getLoggedRoute(<DictionaryPage />)} />
 
                     <Route path="/upload" element={<TestUpload />} />
                 </Routes>

@@ -14,10 +14,3 @@ div.cardCourse {
     margin: 40px 20px;
     padding: 0;
 }
-
-div.mainTitle {
-    font-size: 32px;
-    padding: 5px;
-    background-color: var(--css-var-title);
-    min-width: 100px;
-}

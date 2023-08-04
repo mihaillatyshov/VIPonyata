@@ -4,7 +4,7 @@ import { TLexisItems } from "models/Activity/Items/TLexisItems";
 import { TDrilling } from "models/Activity/TDrilling";
 import { RootState } from "redux/store";
 
-type InfoType = TDrilling | undefined;
+type InfoType = TDrilling | undefined | null;
 type ItemsType = TLexisItems | undefined;
 
 export interface DrillingState {

@@ -1,13 +1,11 @@
 import React from "react";
 import CoursesList from "components/Courses/CoursesList";
-import style from "./StyleMainPage.module.css";
+import PageTitle from "components/Common/PageTitle";
 
 const StudentMainPage = () => {
     return (
         <div className="container">
-            <div className="row">
-                <div className={"col-auto " + style.mainTitle}>Мои путешествия</div>
-            </div>
+            <PageTitle title="Мои путешествия" />
             <CoursesList />
             {
                 //<div className="mt-4">

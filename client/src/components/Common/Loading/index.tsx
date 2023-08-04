@@ -1,6 +1,6 @@
 import React from "react";
 
-import styles from "./Loading.module.css";
+import styles from "./StyleLoading.module.css";
 
 export interface LoadingProps {
     size?: "s" | "m" | "l" | "xl" | "xxl";

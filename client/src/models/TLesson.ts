@@ -1,3 +1,7 @@
+import { TAssessment } from "./Activity/TAssessment";
+import { TDrilling } from "./Activity/TDrilling";
+import { THieroglyph } from "./Activity/THieroglyph";
+
 export interface TLesson {
     id: number;
     name: string;
@@ -13,3 +17,12 @@ export interface TLessonCreate {
     description: string | null;
     img: string | null;
 }
+
+export type TLessonResponse = {
+    lesson: TLesson;
+    items: {
+        drilling: TDrilling;
+        hieroglyph: THieroglyph;
+        assessment: TAssessment;
+    };
+};

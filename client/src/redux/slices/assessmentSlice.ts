@@ -2,7 +2,7 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "redux/store";
 
 export interface AssessmentState {
-    info: any | undefined;
+    info: any | undefined | null; // TODO: RemoveAny
     items: any | undefined;
 }
 

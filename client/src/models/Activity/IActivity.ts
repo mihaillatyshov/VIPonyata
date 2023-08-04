@@ -4,6 +4,7 @@ export interface IActivity<TryType> {
     time_limit: string | null;
     lesson_id: number;
     deadline: string | null;
+    tasks: string;
     tries: TryType[];
     try: TryType;
 }

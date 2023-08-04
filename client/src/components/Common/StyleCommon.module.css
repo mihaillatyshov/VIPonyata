@@ -1,0 +1,8 @@
+.pageTitle {
+    font-size: 32px;
+    padding: 5px;
+    background-color: var(--css-var-title);
+    min-width: 160px;
+    width: fit-content;
+    margin: 20px auto;
+}

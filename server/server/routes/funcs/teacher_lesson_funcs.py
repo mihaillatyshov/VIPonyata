@@ -14,11 +14,10 @@ def getLessonsByCourseId(courseId: int):
 
 def getLessonActivities(lessonId: int):
     if lesson := DBQT.GetLessonById(lessonId):
-        # drilling = lesson.drilling
+        dril = lesson.drilling
         #assesment = GetAssessmentByLessonId(id)
         #hieroglyph = GetHieroglyphByLessonId(id)
 
-        dril = None
         asse = None
         hier = None
 

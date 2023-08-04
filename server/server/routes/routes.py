@@ -212,3 +212,9 @@ def getAssessmentById(id):
     return UserSelectorFunction(teacher_funcs.AssessmentFuncs.GetById,
                                 student_funcs.AssessmentFuncs.GetById,
                                 activityId=id)
+
+
+@routes_bp.route("/dictionary", methods=["GET"])
+@login_required
+def get_drilling():
+    return UserSelectorFunction(teacher_funcs.get_dictionary, student_funcs.get_dictionary)
