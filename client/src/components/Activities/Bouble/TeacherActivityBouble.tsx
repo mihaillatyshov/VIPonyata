@@ -7,26 +7,32 @@ import ActivityBouble from "./ActivityBouble";
 import LoadingBouble from "./LoadingBouble";
 import { LexisImages } from "models/Activity/ILexis";
 
+import styles from "./StylesBouble.module.css";
+import { Link } from "react-router-dom";
+
+const footerItemSize = "32px";
+
 interface TeacherActivityBoubleProps {
     title: string;
     name: ActivityName;
+    lessonId: number;
     info: TDrilling | THieroglyph | TAssessment | undefined | null;
 }
 
 interface TeacherActivityBoubleChildProps {
+    name: ActivityName;
+    lessonId: number;
     info: TDrilling | THieroglyph | TAssessment | null;
 }
 
-const TeacherActivityBoubleChild = ({ info }: TeacherActivityBoubleChildProps) => {
+const TeacherActivityBoubleChild = ({ name, lessonId, info }: TeacherActivityBoubleChildProps) => {
     const onAddClick = () => {};
-
-    console.log("drilling: ", info);
 
     if (info === null) {
         return (
-            <div onClick={onAddClick}>
-                <i className="bi bi-plus-lg" style={{ fontSize: "140px" }} />
-            </div>
+            <Link to={`/${name}/create/${lessonId}`} className={"a-link"} onClick={onAddClick}>
+                <i className={`bi bi-plus-lg ${styles.teacherBoublePlus}`} style={{ fontSize: "140px" }} />
+            </Link>
         );
     }
 
@@ -47,26 +53,26 @@ const TeacherActivityBoubleChild = ({ info }: TeacherActivityBoubleChildProps) =
             <div className="mt-2">
                 {tasks.map((name) => (
                     <div className="d-inline" key={name}>
-                        <img className="m-2" src={getImgSrc(name)} alt={name} style={{ width: "32px" }} />
+                        <img className={`m-2 ${styles.teacherBoubleTaskIcon}`} src={getImgSrc(name)} alt={name} />
                     </div>
                 ))}
             </div>
-            <div className="d-flex justify-content-center w-100" style={{ position: "absolute", bottom: "16px" }}>
-                <i className="mx-3 bi bi-pencil-square" style={{ fontSize: "32px" }} />
-                <i className="mx-3 bi bi-graph-up" style={{ fontSize: "32px" }} />
+            <div className={`d-flex justify-content-center w-100 ${styles.teacherBoubleFooter}`}>
+                <i className="mx-3 bi bi-pencil-square" style={{ fontSize: footerItemSize }} />
+                <i className="mx-3 bi bi-graph-up" style={{ fontSize: footerItemSize }} />
             </div>
         </div>
     );
 };
 
-const TeacherActivityBouble = ({ title, name, info }: TeacherActivityBoubleProps) => {
+const TeacherActivityBouble = ({ title, name, lessonId, info }: TeacherActivityBoubleProps) => {
     if (info === undefined) {
         return <LoadingBouble title={title} />;
     }
 
     return (
         <ActivityBouble title={title}>
-            <TeacherActivityBoubleChild info={info} />
+            <TeacherActivityBoubleChild name={name} lessonId={lessonId} info={info} />
         </ActivityBouble>
     );
 };

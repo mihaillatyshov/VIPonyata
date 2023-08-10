@@ -26,6 +26,7 @@ import "./App.css";
 import "./RoundBlock.css";
 import DictionaryPage from "components/Dictionary/DictionaryPage";
 import TeacherLessonPage from "components/Lessons/TeacherLessonPage";
+import DrillingCreatePage from "components/Activities/Lexis/Drilling/DrillingCreatePage";
 
 const scrollbarWidth = getScrollbarWidth();
 console.log("scrollbarWidth: ", scrollbarWidth);
@@ -107,6 +108,8 @@ const App = () => {
                         path="/drilling/:id/*"
                         element={getRoute(<StudentDrillingPage />, <StudentDrillingPage />)}
                     />
+                    <Route path="/drilling/create/:lessonId" element={getTeacherRoute(<DrillingCreatePage />)} />
+
                     <Route
                         path="/hieroglyph/:id/*"
                         element={getRoute(<StudentHieroglyphPage />, <StudentHieroglyphPage />)}

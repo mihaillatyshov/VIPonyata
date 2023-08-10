@@ -1,0 +1,15 @@
+.teacherBoubleFooter {
+    position: absolute;
+    bottom: 16px;
+}
+
+.teacherBoubleTaskIcon {
+    width: 40px;
+    background-color: #ffffffaa;
+    border-radius: 5px;
+    padding: 4px;
+}
+
+.teacherBoublePlusWrapper {
+    cursor: pointer;
+}

@@ -7,13 +7,15 @@ import {
     setHieroglyphSelectedItemField,
 } from "redux/slices/hieroglyphSlice";
 
-export type LexisName = "drilling" | "hieroglyph";
+export const LexisNameDrilling = "drilling";
+export const LexisNameHieroglyph = "hieroglyph";
+export type LexisName = typeof LexisNameDrilling | typeof LexisNameHieroglyph;
 
 export const NameTo_dril_or_hier = (name: LexisName, dril: any, hier: any) => {
     switch (name) {
-        case "drilling":
+        case LexisNameDrilling:
             return dril;
-        case "hieroglyph":
+        case LexisNameHieroglyph:
             return hier;
     }
 };

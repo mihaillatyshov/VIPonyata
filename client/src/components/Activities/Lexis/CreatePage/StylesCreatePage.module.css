@@ -1,0 +1,14 @@
+.task {
+    padding: 8px;
+}
+
+.taskImgWrapper {
+    width: 128px;
+    height: 128px;
+    padding: 8px;
+}
+
+.taskImg {
+    width: 100%;
+    height: 100%;
+}
