@@ -12,3 +12,51 @@
     width: 100%;
     height: 100%;
 }
+
+.modalBg {
+    background-color: #eaeaea;
+}
+
+.newWordsModal {
+    width: 90vw;
+    min-height: 80vh;
+}
+
+.newWordsTableContainer {
+    display: block;
+    margin: 2em auto;
+    width: 90%;
+}
+
+.newWordsTable {
+    display: flex;
+    flex-flow: row wrap;
+    border-left: solid 1px #d9d9d9;
+    transition: 0.5s;
+}
+
+.newWordsTable:first-of-type {
+    border-top: solid 1px #1565c0;
+    border-left: solid 1px #1565c0;
+}
+.newWordsTable:first-of-type .newWordsTableCell {
+    background: #1976d2;
+    color: white;
+    border-color: #1565c0;
+}
+
+.newWordsTable.newWordsTableRow .newWordsTableCell {
+    background: #f4f2f177;
+}
+
+.newWordsTable.newWordsTableRow:nth-child(odd) .newWordsTableCell {
+    background: #f4f2f1cc;
+}
+
+.newWordsTableCell {
+    width: calc(100% / 3);
+    text-align: center;
+    padding: 0.5em 0.5em;
+    border-right: solid 1px #d9d9d9;
+    border-bottom: solid 1px #d9d9d9;
+}

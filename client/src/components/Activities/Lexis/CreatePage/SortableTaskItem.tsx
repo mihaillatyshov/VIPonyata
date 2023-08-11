@@ -9,16 +9,22 @@ import styles from "./StylesCreatePage.module.css";
 interface SortableTaskItemProps {
     taskName: LexisTaskName;
     isSelected: boolean;
+    setSelected: (taskName: LexisTaskName, checked: boolean) => void;
 }
 
-const SortableTaskItem = ({ taskName, isSelected }: SortableTaskItemProps) => {
+const SortableTaskItem = ({ taskName, isSelected, setSelected }: SortableTaskItemProps) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
         id: taskName,
+        data: { taskName },
     });
 
     const style: CSS.Properties = {
         transform: DNDCSS.Transform.toString(transform),
         transition,
+    };
+
+    const onChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSelected(taskName, e.target.checked);
     };
 
     return (
@@ -27,7 +33,13 @@ const SortableTaskItem = ({ taskName, isSelected }: SortableTaskItemProps) => {
                 <img className={styles.taskImg} src={LexisImages[taskName]} alt={taskName} />
             </div>
             <div className="form-check mx-auto">
-                <input className="form-check-input" type="checkbox" id={taskName} />
+                <input
+                    className="form-check-input"
+                    type="checkbox"
+                    id={taskName}
+                    checked={isSelected}
+                    onChange={onChangeHandler}
+                />
                 <label className="form-check-label" htmlFor={taskName}>
                     {taskName}
                 </label>

@@ -9,16 +9,22 @@ export type SelectableTask = { name: LexisTaskName; isSelected: boolean };
 interface TasksProps {
     tasks: SelectableTask[];
     handleDragEnd: (event: DragEndEvent) => void;
+    setSelected: (taskName: LexisTaskName, checked: boolean) => void;
 }
 
-const Tasks = ({ tasks, handleDragEnd }: TasksProps) => {
+const Tasks = ({ tasks, handleDragEnd, setSelected }: TasksProps) => {
     return (
         <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <div className="container">
                 <SortableContext items={tasks.map(({ name }) => name)} strategy={rectSortingStrategy}>
                     <div className="d-flex">
                         {tasks.map(({ name, isSelected }) => (
-                            <SortableTaskItem key={name} taskName={name} isSelected={isSelected} />
+                            <SortableTaskItem
+                                key={name}
+                                taskName={name}
+                                isSelected={isSelected}
+                                setSelected={setSelected}
+                            />
                         ))}
                     </div>
                 </SortableContext>
