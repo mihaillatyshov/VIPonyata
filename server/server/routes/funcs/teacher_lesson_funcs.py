@@ -1,7 +1,7 @@
 from flask import request
 
 import server.queries.TeacherDBqueries as DBQT
-from server.exceptions.ApiExceptions import InvalidRequestJson
+from server.exceptions.ApiExceptions import InvalidAPIUsage, InvalidRequestJson
 from server.models.lesson import LessonCreateReq
 
 
@@ -29,6 +29,9 @@ def getLessonActivities(lessonId: int):
 def create_lesson(course_id: int):
     if not request.json:
         raise InvalidRequestJson()
+
+    if not DBQT.GetCourseById(course_id):
+        raise InvalidAPIUsage("No course in db!", 403)
 
     lesson_data = LessonCreateReq(**request.json)
 

@@ -49,7 +49,6 @@ const StudentLexisCard = ({ name, inData, goToNextTaskCallback }: StudentLexisTa
     };
 
     useEffect(() => {
-        console.log("set Lexis Selected Item Card", cardId);
         if (inData && cardId) {
             if (Number(cardId) < inData.length && Number(cardId) >= 0) {
                 setLexisSelectedItem({

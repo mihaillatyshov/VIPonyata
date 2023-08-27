@@ -5,6 +5,8 @@ import { NameTo_words_or_chars, StudentLexisTaskProps, useLexisItem, useSetLexis
 import { TFindPair } from "models/Activity/Items/TLexisItems";
 //import MD5 from "crypto-js/md5";
 
+type AvailTypes = "words_jp" | "words_ru" | "chars_jp";
+
 const StudentLexisFindPair = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps<TFindPair>) => {
     const item = useLexisItem(name);
     const strRU = "words_ru";
@@ -24,12 +26,27 @@ const StudentLexisFindPair = ({ name, inData, goToNextTaskCallback }: StudentLex
         return false;
     };
 
-    const selectField = (id: number, type: "words_jp" | "words_ru" | "chars_jp") => {
+    const isPairCorrect = (type: AvailTypes, typeId: number, otherType: AvailTypes, otherTypeId: number): boolean => {
+        console.log(
+            "New: ",
+            type,
+            typeId,
+            inData.answers[type][typeId],
+            otherType,
+            otherTypeId,
+            inData.answers[otherType][otherTypeId]
+        );
+        if (type === strRU) {
+            return inData.answers[otherType][otherTypeId] === typeId;
+        }
+        return inData.answers[type][typeId] === otherTypeId;
+    };
+
+    const selectField = (id: number, type: AvailTypes) => {
         console.log("clicked", id, type);
 
         const otherType = type === strJP ? strRU : strJP;
 
-        console.log("DoneFields:", item.doneFields);
         // 0. Clicked field in DoneFields array
         if (isInDoneFields(id, type)) {
             console.log("0. Clicked field in DoneFields array");
@@ -50,8 +67,28 @@ const StudentLexisFindPair = ({ name, inData, goToNextTaskCallback }: StudentLex
             return;
         }
 
+        console.log(otherType, inData.answers[otherType], type, inData.answers[type]);
+        console.log(otherType, inData.answers[otherType][item.selectedField.id], type, inData.answers[type][id]);
+        console.log(
+            otherType,
+            inData.answers[otherType].indexOf(inData.answers[otherType][item.selectedField.id]),
+            type,
+            inData.answers[type].indexOf(inData.answers[type][id])
+        );
+        console.log(
+            otherType,
+            inData.answers[otherType].indexOf(inData.answers[type][id]),
+            type,
+            inData.answers[type].indexOf(inData.answers[otherType][item.selectedField.id])
+        );
         // 3. Clicked field with correct id of other type in answers
+        // if (
+
+        //     inData.answers[otherType].indexOf(inData.answers[type][id]) ===
+        //     inData.answers[type].indexOf(inData.answers[otherType][item.selectedField.id])
+        // )
         if (inData.answers[otherType][item.selectedField.id] === inData.answers[type][id]) {
+            // if (isPairCorrect(type, id, otherType, item.selectedField.id)) {
             console.log("3. Clicked field with correct id of other type");
             const newField = { [otherType]: item.selectedField.id, [type]: id };
             //newField[otherType] = item.selectedField.id;

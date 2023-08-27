@@ -25,8 +25,6 @@ const Mistake = ({ mistakeCount }: MistakeProps) => {
 const StudentLexisNavItem = ({ to, name, img, mistakeCount }: StudentLexisNavItemProps) => {
     const navigate = useNavigate();
 
-    console.log(mistakeCount);
-
     const onClickHandle = () => {
         navigate(to);
     };

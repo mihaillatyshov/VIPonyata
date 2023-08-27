@@ -74,7 +74,6 @@ const StudentLexisPage = ({
     };
 
     const goToUndoneTask = (items: TLexisItems, doneTasks: TLexisDoneTasks) => {
-        console.log("goToUndoneTask", items);
         for (const taskName of Object.keys(items)) {
             console.log("for", taskName);
             if (Object.keys(doneTasks).includes(taskName)) {
@@ -91,7 +90,6 @@ const StudentLexisPage = ({
         }
 
         if (Object.keys(doneTasks).length === Object.keys(items).length) {
-            console.log("Navigate");
             navigate("");
         }
     };

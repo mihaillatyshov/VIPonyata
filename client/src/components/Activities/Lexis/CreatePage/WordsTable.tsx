@@ -19,8 +19,8 @@ const WordsTable = ({ words }: WordsTableProps) => {
                 <div className={styles.newWordsTableCell}>Слово</div>
                 <div className={styles.newWordsTableCell}>Символ</div>
             </div>
-            {words.map((item) => (
-                <div key={item.ru} className={`${styles.newWordsTable} ${styles.newWordsTableRow}`}>
+            {words.map((item, i) => (
+                <div key={`${item.ru}_${i}`} className={`${styles.newWordsTable} ${styles.newWordsTableRow}`}>
                     <div className={styles.newWordsTableCell}>{item.ru}</div>
                     <div className={styles.newWordsTableCell}>{item.word_jp}</div>
                     <div className={styles.newWordsTableCell}>{item.char_jp}</div>

@@ -1,8 +1,22 @@
 import random
+from typing import TypedDict
 
 from server.exceptions.ApiExceptions import InvalidAPIUsage
 import server.queries.StudentDBqueries as DBQS
 from server.models.db_models import Drilling, DrillingTry, Hieroglyph, HieroglyphTry, LexisType
+
+
+class ListItemType(TypedDict):
+    value: str
+    id: int
+
+
+def create_shuffle_list_with_id(strList: list[str]) -> list[ListItemType]:
+    shuffle_str_list: list[ListItemType] = []
+    for i in range(len(strList)):
+        shuffle_str_list.append({"value": strList[i], "id": i})
+    random.shuffle(shuffle_str_list)
+    return shuffle_str_list
 
 
 def CreateShuffleList(strList: list[str]) -> list[str]:
@@ -17,14 +31,26 @@ def CreateShuffleTuple(wordsRU: list[str], wordsJP: list[str],
 
 
 def CreateFindPair(wordsRU: list[str], wordsJP: list[str], charsJP: list[str]) -> dict:
-    shuffleWordsRU, shuffleWordsJP, shuffleCharsJP = CreateShuffleTuple(wordsRU, wordsJP, charsJP)
-    answers = {"words_ru": [], "words_jp": [], "chars_jp": []}
-    for word in shuffleWordsRU:
-        answers["words_ru"].append(shuffleWordsRU.index(word))
-        answers["words_jp"].append(shuffleWordsJP.index(wordsJP[wordsRU.index(word)]))
-        answers["chars_jp"].append(shuffleCharsJP.index(charsJP[wordsRU.index(word)]))
+    shuffle_words_ru = create_shuffle_list_with_id(wordsRU)
+    shuffle_words_jp = create_shuffle_list_with_id(wordsJP)
+    shuffle_chars_jp = create_shuffle_list_with_id(charsJP)
+    print(
+        shuffle_words_ru,
+        shuffle_words_jp,
+        shuffle_chars_jp,
+    )
+    answers = {
+        "words_ru": list(map(lambda x: x['id'], shuffle_words_ru)),
+        "words_jp": list(map(lambda x: x['id'], shuffle_words_jp)),
+        "chars_jp": list(map(lambda x: x['id'], shuffle_chars_jp))
+    }
 
-    return {"words_ru": shuffleWordsRU, "words_jp": shuffleWordsJP, "chars_jp": shuffleCharsJP, "answers": answers}
+    return {
+        "words_ru": list(map(lambda x: x['value'], shuffle_words_ru)),
+        "words_jp": list(map(lambda x: x['value'], shuffle_words_jp)),
+        "chars_jp": list(map(lambda x: x['value'], shuffle_chars_jp)),
+        "answers": answers
+    }
 
 
 def CreateScramble(wordsRU: list[str], wordsJP: list[str], charsJP: list[str]) -> dict:

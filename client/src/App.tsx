@@ -28,9 +28,6 @@ import DictionaryPage from "components/Dictionary/DictionaryPage";
 import TeacherLessonPage from "components/Lessons/TeacherLessonPage";
 import DrillingCreatePage from "components/Activities/Lexis/Drilling/DrillingCreatePage";
 
-const scrollbarWidth = getScrollbarWidth();
-console.log("scrollbarWidth: ", scrollbarWidth);
-
 const App = () => {
     const user = useAppSelector(selectUser);
     const dispatch = useAppDispatch();

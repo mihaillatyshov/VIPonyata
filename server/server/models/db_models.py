@@ -308,6 +308,7 @@ class AssessmentTry(AbstractActivityTry):
 
 
 LexisType = type[Drilling] | type[Hieroglyph]
+LexisCardType = type[DrillingCard] | type[HieroglyphCard]
 LexisTryType = type[DrillingTry] | type[HieroglyphTry]
 ActivityType = LexisType | type[Assessment]
 ActivityTryType = LexisTryType | type[AssessmentTry]

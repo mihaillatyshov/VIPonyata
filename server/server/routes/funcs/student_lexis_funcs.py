@@ -49,6 +49,16 @@ class LexisFuncs(ActivityFuncs):
         if LexisTaskName.FINDPAIR in tasksNames:
             tasks[LexisTaskName.FINDPAIR] = CreateFindPair(wordsRU, wordsJP, charsJP)
 
+            print(tasks[LexisTaskName.FINDPAIR])
+
+            print("==========================")
+            for i in tasks[LexisTaskName.FINDPAIR]["answers"]["words_ru"]:
+                print(tasks[LexisTaskName.FINDPAIR]["words_ru"][i])
+            print()
+            for i in tasks[LexisTaskName.FINDPAIR]["answers"]["words_jp"]:
+                print(tasks[LexisTaskName.FINDPAIR]["words_jp"][i])
+            print("==========================")
+
         if LexisTaskName.SCRAMBLE in tasksNames:
             tasks[LexisTaskName.SCRAMBLE] = CreateScramble(wordsRU, wordsJP, charsJP)
 

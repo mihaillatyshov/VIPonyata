@@ -32,10 +32,15 @@ const NewWordsModal = ({ setWords, isShow, close, colToCheck }: NewWordsModalPro
             if (line[colToCheck] === null) {
                 setError("Нужная колонка имеет пропуски!!!");
                 console.log("error");
-                return;
+                return false;
+            }
+            if (line["ru"] === null) {
+                setError("Столбец с переводом имеет пропуски!!!");
+                return false;
             }
         }
         setError("");
+        return true;
     };
 
     const testParseExcel = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -53,9 +58,7 @@ const NewWordsModal = ({ setWords, isShow, close, colToCheck }: NewWordsModalPro
             .map((line) => ({ ru: line.at(0) ?? null, word_jp: line.at(1) ?? null, char_jp: line.at(2) ?? null }));
 
         setText(value);
-        setPreview(lines);
-
-        checkCol(lines);
+        setPreview(checkCol(lines) ? lines : []);
 
         console.log(lines);
     };

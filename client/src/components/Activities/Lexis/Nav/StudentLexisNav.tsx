@@ -8,7 +8,6 @@ export type StudentLexisNavProps = {
 };
 
 const StudentLexisNav = ({ items, doneTasks }: StudentLexisNavProps) => {
-    console.log("doneTasks:", doneTasks);
     const createItem = (taskName: string, name: string, to: string, imgSrc: string) => {
         return {
             [taskName]: {
@@ -27,9 +26,6 @@ const StudentLexisNav = ({ items, doneTasks }: StudentLexisNavProps) => {
         ...createItem("space", "Space", "space", LexisImages["space"]),
         ...createItem("translate", "Translate", "translate", LexisImages["translate"]),
     };
-
-    console.log("Lexsis Items: ", items);
-    console.log("Lexsis Nav Items: ", itemsData);
 
     return (
         <div className="container-fluid mx-0">

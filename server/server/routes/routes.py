@@ -98,7 +98,7 @@ def get_all_courses():
 
 @routes_bp.route("/courses", methods=["POST"])
 @login_required
-def post_create_course():
+def create_course():
     return UserSelectorFunction(teacher_funcs.create_course, None)
 
 
@@ -122,61 +122,67 @@ def create_lesson(course_id):
 
 @routes_bp.route("/drilling/<id>/newtry", methods=["POST"])
 @login_required
-def startNewDrillingTry(id):
+def start_new_drilling_try(id):
     return UserSelectorFunction(None, student_funcs.DrillingFuncs.StartNewTry, activityId=id)
 
 
 @routes_bp.route("/drilling/<id>/continuetry", methods=["POST"])
 @login_required
-def continueDrillingTry(id):
+def continue_drilling_try(id):
     return UserSelectorFunction(None, student_funcs.DrillingFuncs.ContinueTry, activityId=id)
 
 
 @routes_bp.route("/drilling/<id>/endtry", methods=["POST"])
 @login_required
-def endDrillingTry(id):
+def end_drilling_try(id):
     return UserSelectorFunction(None, student_funcs.DrillingFuncs.EndTry, activityId=id)
 
 
 @routes_bp.route("/drilling/<id>/newdonetask", methods=["POST"])
 @login_required
-def addDrillingNewDoneTasks(id):
+def add_drilling_new_done_tasks(id):
     return UserSelectorFunction(None, student_funcs.DrillingFuncs.AddNewDoneTasks, activityId=id)
 
 
 @routes_bp.route("/drilling/<id>", methods=["GET"])
 @login_required
-def getDrillingById(id):
+def get_drilling_by_id(id):
     return UserSelectorFunction(teacher_funcs.DrillingFuncs.GetById, student_funcs.DrillingFuncs.GetById, activityId=id)
+
+
+@routes_bp.route("/drilling/<lesson_id>", methods=["POST"])
+@login_required
+def create_drilling(lesson_id):
+    return UserSelectorFunction(teacher_funcs.DrillingFuncs.create, None, lesson_id=lesson_id)
 
 
 @routes_bp.route("/hieroglyph/<id>/newtry", methods=["POST"])
 @login_required
-def startNewHieroglyphTry(id):
+def start_new_hieroglyph_try(id):
     return UserSelectorFunction(None, student_funcs.HieroglyphFuncs.StartNewTry, activityId=id)
 
 
 @routes_bp.route("/hieroglyph/<id>/continuetry", methods=["POST"])
 @login_required
-def continueHieroglyphTry(id):
+def continue_hieroglyph_try(id):
     return UserSelectorFunction(None, student_funcs.HieroglyphFuncs.ContinueTry, activityId=id)
 
 
 @routes_bp.route("/hieroglyph/<id>/endtry", methods=["POST"])
 @login_required
-def endHieroglyphTry(id):
+def end_hieroglyph_try(id):
     return UserSelectorFunction(None, student_funcs.HieroglyphFuncs.EndTry, activityId=id)
 
 
 @routes_bp.route("/hieroglyph/<id>/newdonetask", methods=["POST"])
 @login_required
-def addHieroglyphNewDoneTasks(id):
+def add_hieroglyph_new_done_tasks(id):
     return UserSelectorFunction(None, student_funcs.HieroglyphFuncs.AddNewDoneTasks, activityId=id)
 
 
 @routes_bp.route("/hieroglyph/<id>", methods=["GET"])
 @login_required
-def getHieroglyphById(id):
+def get_hieroglyph_by_id(id):
     return UserSelectorFunction(teacher_funcs.HieroglyphFuncs.GetById,
                                 student_funcs.HieroglyphFuncs.GetById,
                                 activityId=id)
@@ -184,31 +190,31 @@ def getHieroglyphById(id):
 
 @routes_bp.route("/assessment/<id>/newtry", methods=["POST"])
 @login_required
-def startNewAssessmentTry(id):
+def start_new_assessment_try(id):
     return UserSelectorFunction(None, student_funcs.AssessmentFuncs.StartNewTry, activityId=id)
 
 
 @routes_bp.route("/assessment/<id>/continuetry", methods=["POST"])
 @login_required
-def continueAssessmentTry(id):
+def continue_assessment_try(id):
     return UserSelectorFunction(None, student_funcs.AssessmentFuncs.ContinueTry, activityId=id)
 
 
 @routes_bp.route("/assessment/<id>/endtry", methods=["POST"])
 @login_required
-def endAssessmentTry(id):
+def end_assessment_try(id):
     return UserSelectorFunction(None, student_funcs.AssessmentFuncs.EndTry, activityId=id)
 
 
 @routes_bp.route("/assessment/<id>/newdonetasks", methods=["POST"])
 @login_required
-def addAssessmentNewDoneTasks(id):
+def add_assessment_new_done_tasks(id):
     return UserSelectorFunction(None, student_funcs.AssessmentFuncs.AddNewDoneTasks, activityId=id)
 
 
 @routes_bp.route("/assessment/<id>", methods=["GET"])
 @login_required
-def getAssessmentById(id):
+def get_assessment_by_id(id):
     return UserSelectorFunction(teacher_funcs.AssessmentFuncs.GetById,
                                 student_funcs.AssessmentFuncs.GetById,
                                 activityId=id)
@@ -216,5 +222,5 @@ def getAssessmentById(id):
 
 @routes_bp.route("/dictionary", methods=["GET"])
 @login_required
-def get_drilling():
+def get_dictionary():
     return UserSelectorFunction(teacher_funcs.get_dictionary, student_funcs.get_dictionary)

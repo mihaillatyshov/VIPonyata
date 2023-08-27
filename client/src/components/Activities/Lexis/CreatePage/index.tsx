@@ -1,11 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { LexisName } from "components/Activities/Lexis/Types/LexisUtils";
 import Tasks, { SelectableTask } from "./Tasks";
-import { LexisTaskName, LexisTaskNameSelectable } from "models/Activity/ILexis";
+import { LexisTaskName } from "models/Activity/ILexis";
 import { DragEndEvent } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import NewWordsModal, { DictionaryWord } from "./NewWordsModal";
 import WordsTable from "./WordsTable";
+import PageTitle from "components/Common/PageTitle";
+import { AjaxPost } from "libs/ServerAPI";
+import { useNavigate, useParams } from "react-router-dom";
+import InputError from "components/Form/InputError";
+import InputTime from "components/Form/InputTime";
+import InputTextArea from "components/Form/InputTextArea";
 
 interface LexisCreatePageProps {
     title: string;
@@ -19,9 +25,19 @@ const getDefaultTasksArray = (): SelectableTask[] => {
 };
 
 const LexisCreatePage = ({ title, name }: LexisCreatePageProps) => {
+    const { lessonId } = useParams();
+    const navigate = useNavigate();
+
     const [tasks, setTasks] = useState<SelectableTask[]>(getDefaultTasksArray());
     const [isShowNewWordsModal, setIsShowNewWordsModal] = useState<boolean>(false);
     const [newWords, setNewWords] = useState<DictionaryWord[]>([]);
+    const [timelimit, setTimelimit] = useState<string>("00:00:00");
+    const [error, setError] = useState<string>("");
+    const [description, setDescription] = useState<string>("");
+
+    useEffect(() => {
+        setError("");
+    }, [newWords, tasks]);
 
     const findIndex = (inTaskName: string): number => {
         return Object.values(tasks).findIndex(({ name }) => name === inTaskName);
@@ -45,23 +61,72 @@ const LexisCreatePage = ({ title, name }: LexisCreatePageProps) => {
         }
     };
 
+    const createHandler = () => {
+        if (newWords.length < 1) {
+            setError("Не добавлены слова");
+            return;
+        }
+        const tasksToAdd = tasks
+            .filter(({ isSelected }) => isSelected)
+            .map(({ name }) => name)
+            .join(",");
+        if (tasksToAdd.length < 1) {
+            setError("Не добавлены активности");
+            return;
+        }
+        AjaxPost<any>({
+            url: `/api/${name}/${lessonId}`,
+            body: {
+                lexis: {
+                    tasks: tasksToAdd,
+                    time_limit: timelimit === "00:00:00" || timelimit === "" ? null : timelimit,
+                    description,
+                },
+                words: newWords,
+            },
+        })
+            .then((body) => {
+                navigate(`/${name}/${body.lexis.id}`);
+            })
+            .catch(({ isServerError, response, json }) => {
+                if (!isServerError) {
+                    if (response.status === 404 || response.status === 403) navigate("/");
+                }
+            });
+    };
+
     return (
         <div className="container">
-            <div>{title}</div>
+            <PageTitle title={title} />
             <input
                 type="button"
-                className="btn btn-primary"
+                className="btn btn-primary w-100"
                 onClick={() => setIsShowNewWordsModal(true)}
                 value={"Импортировать слова"}
             />
             <Tasks tasks={tasks} handleDragEnd={handleDragEnd} setSelected={onSelectedChange} />
+            <InputTime
+                placeholder="Лимит времени"
+                value={timelimit}
+                onChangeHandler={setTimelimit}
+                htmlId="timelimit"
+            />
+            <InputTextArea
+                htmlId="description"
+                placeholder="Описание"
+                rows={5}
+                onChangeHandler={setDescription}
+                value={description}
+            />
+            <WordsTable words={newWords} />
+            <InputError message={error} className="mt-4" />
+            <input type="button" className="btn btn-success w-100 mt-2" onClick={createHandler} value={"Создать"} />
             <NewWordsModal
                 isShow={isShowNewWordsModal}
                 close={() => setIsShowNewWordsModal(false)}
                 setWords={setNewWords}
                 colToCheck={name === "drilling" ? "word_jp" : "char_jp"}
             />
-            <WordsTable words={newWords} />
         </div>
     );
 };
