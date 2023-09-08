@@ -111,8 +111,7 @@ const StudentAssessmentFillSpacesExists = ({
     return (
         <DndContext onDragEnd={handleDragEnd}>
             <InputsField inputFields={data.inputs} width={itemWidth} />
-            <hr />
-            <div className="d-flex flex-wrap">
+            <div className="d-flex flex-wrap mt-3">
                 {data.separates.map((element: string, fieldId: number) => (
                     <div key={fieldId} className="d-flex flex-wrap">
                         <div className="mx-2">{element}</div>

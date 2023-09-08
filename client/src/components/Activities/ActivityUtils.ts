@@ -1,3 +1,4 @@
 import { LexisName } from "./Lexis/Types/LexisUtils";
 
-export type ActivityName = LexisName | "assessment";
+export type AssessmentName = "assessment";
+export type ActivityName = LexisName | AssessmentName;

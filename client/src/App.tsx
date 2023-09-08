@@ -18,7 +18,6 @@ import StudentAssessmentPage from "components/Activities/Assessment/StudentAsses
 import StudentProfilePage from "components/Authentication/StudentProfilePage";
 import CourseCreatePage from "components/Courses/CourseCreatePage";
 import LessonCreatePage from "components/Lessons/LessonCreatePage";
-import { getScrollbarWidth } from "libs/ScrollbarWidth";
 
 import styleThemes from "./themes/StyleThemes.module.css";
 
@@ -27,6 +26,8 @@ import "./RoundBlock.css";
 import DictionaryPage from "components/Dictionary/DictionaryPage";
 import TeacherLessonPage from "components/Lessons/TeacherLessonPage";
 import DrillingCreatePage from "components/Activities/Lexis/Drilling/DrillingCreatePage";
+import { AssessmentCreatePage } from "components/Activities/Assessment/CreatePage";
+import HieroglyphCreatePage from "components/Activities/Lexis/Hieroglyph/HieroglyphCreatePage";
 
 const App = () => {
     const user = useAppSelector(selectUser);
@@ -37,15 +38,6 @@ const App = () => {
             dispatch(setUserData(json));
         });
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-    //const getTeacherStudentRoute = (teacher, student) => {
-    //    if (user.isAuth === undefined) return;
-    //    if (user.data.level === 1) {
-    //        return teacher;
-    //    } else {
-    //        return student;
-    //    }
-    //};
 
     const getRoute = (
         teacherRoute: React.ReactNode,
@@ -111,10 +103,13 @@ const App = () => {
                         path="/hieroglyph/:id/*"
                         element={getRoute(<StudentHieroglyphPage />, <StudentHieroglyphPage />)}
                     />
+                    <Route path="/hieroglyph/create/:lessonId" element={getTeacherRoute(<HieroglyphCreatePage />)} />
+
                     <Route
                         path="/assessment/:id/*"
                         element={getRoute(<StudentAssessmentPage />, <StudentAssessmentPage />)}
                     />
+                    <Route path="/assessment/create/:lessonId" element={getTeacherRoute(<AssessmentCreatePage />)} />
 
                     <Route path="/profile" element={getRoute(<StudentProfilePage />, <StudentProfilePage />)} />
 

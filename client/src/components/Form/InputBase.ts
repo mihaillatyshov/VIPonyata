@@ -6,6 +6,7 @@ export interface InputBaseProps {
     placeholder: string;
     className?: string;
     errorMessage?: string;
+    noErrorField?: boolean;
 }
 
 export const GetStringOrNull = (value: string): string | null => (value.trim() === "" ? null : value.trim());

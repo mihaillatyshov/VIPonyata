@@ -13,11 +13,13 @@ const InputText = ({
     placeholder,
     value,
     errorMessage,
+    noErrorField,
     className,
     onChangeHandler,
     customValidation,
 }: InputTextProps) => {
     className = className ?? "";
+    noErrorField = noErrorField === undefined ? false : noErrorField;
 
     const hasError = errorMessage !== undefined && errorMessage !== "";
 
@@ -33,7 +35,7 @@ const InputText = ({
                 onBlur={customValidation}
             />
             <label htmlFor={htmlId}>{placeholder}</label>
-            <InputError message={errorMessage} />
+            {!noErrorField && <InputError message={errorMessage} />}
         </div>
     );
 };

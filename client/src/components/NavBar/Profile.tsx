@@ -17,11 +17,11 @@ const Profile = () => {
             <Link to={"/profile"}>
                 <div className="d-flex">
                     <div className={styles.profileImgWrapper}>
-                        <img
-                            className={styles.profileImg}
-                            alt="profile"
-                            src={user.userData.avatar ?? "/img/users/DefaultAvatar.png"}
-                        />
+                        {user.userData.avatar ? (
+                            <img className={styles.profileImg} alt="profile" src={user.userData.avatar} />
+                        ) : (
+                            <i className="bi bi-person-circle font-icon-height-0 a-link" style={{ fontSize: "48px" }} />
+                        )}
                     </div>
                     <div>
                         <div className="mx-auto"> {user.userData.name} </div>

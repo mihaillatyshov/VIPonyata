@@ -3,9 +3,10 @@ import { Link } from "react-router-dom";
 
 const StudentDictionary = () => {
     return (
-        <div className="col-auto" style={{ border: "solid 1px" }}>
-            <Link to="/dictionary">StudentDictionary</Link>
-        </div>
+        <>
+            <Link to="/dictionary">Словарь</Link>
+            <div style={{ fontSize: "48px" }}>777</div>
+        </>
     );
 };
 

@@ -18,7 +18,7 @@ import StudentAssessmentSentenceOrder from "./Types/StudentAssessmentSentenceOrd
 import StudentAssessmentImg from "./Types/StudentAssessmentImg";
 import { Button } from "react-bootstrap";
 import { TAssessment } from "models/Activity/TAssessment";
-import { TAssessmentItems } from "models/Activity/Items/TAssessmentItems";
+import { TAssessmentItems, TAssessmentTaskName } from "models/Activity/Items/TAssessmentItems";
 
 type ResponseData = {
     assessment: TAssessment;
@@ -26,7 +26,7 @@ type ResponseData = {
 };
 
 type StudentAssessmentAliasProps = {
-    taskName: string;
+    taskName: TAssessmentTaskName;
     component: (props: StudentAssessmentTypeProps<any>) => JSX.Element;
 };
 
@@ -72,17 +72,17 @@ const StudentAssessmentPage = () => {
     };
 
     const aliases: StudentAssessmentAliasProps[] = [
-        { taskName: "text", component: StudentAssessmentText },
-        { taskName: "test_single", component: StudentAssessmentTestSingle },
-        { taskName: "test_multi", component: StudentAssessmentTestMulti },
-        { taskName: "find_pair", component: StudentAssessmentFindPair },
-        { taskName: "create_sentence", component: StudentAssessmentCreateSentence },
-        { taskName: "fill_spaces_exists", component: StudentAssessmentFillSpacesExists },
-        { taskName: "fill_spaces_by_hand", component: StudentAssessmentFillSpacesByHand },
-        { taskName: "classification", component: StudentAssessmentClassification },
-        { taskName: "sentence_order", component: StudentAssessmentSentenceOrder },
-        { taskName: "open_question", component: StudentAssessmentOpenQuestion },
-        { taskName: "img", component: StudentAssessmentImg },
+        { taskName: TAssessmentTaskName.TEXT, component: StudentAssessmentText },
+        { taskName: TAssessmentTaskName.TEST_SINGLE, component: StudentAssessmentTestSingle },
+        { taskName: TAssessmentTaskName.TEST_MULTI, component: StudentAssessmentTestMulti },
+        { taskName: TAssessmentTaskName.FIND_PAIR, component: StudentAssessmentFindPair },
+        { taskName: TAssessmentTaskName.CREATE_SENTENCE, component: StudentAssessmentCreateSentence },
+        { taskName: TAssessmentTaskName.FILL_SPACES_EXISTS, component: StudentAssessmentFillSpacesExists },
+        { taskName: TAssessmentTaskName.FILL_SPACES_BY_HAND, component: StudentAssessmentFillSpacesByHand },
+        { taskName: TAssessmentTaskName.CLASSIFICATION, component: StudentAssessmentClassification },
+        { taskName: TAssessmentTaskName.SENTENCE_ORDER, component: StudentAssessmentSentenceOrder },
+        { taskName: TAssessmentTaskName.OPEN_QUESTION, component: StudentAssessmentOpenQuestion },
+        { taskName: TAssessmentTaskName.IMG, component: StudentAssessmentImg },
     ];
 
     if (

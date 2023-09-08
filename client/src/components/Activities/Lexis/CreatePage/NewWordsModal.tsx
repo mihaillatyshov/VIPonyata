@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import Modal from "react-bootstrap/Modal";
 import WordsTable from "./WordsTable";
-
-import styles from "./StylesCreatePage.module.css";
 import InputError from "components/Form/InputError";
 
 export interface DictionaryWord {
@@ -72,11 +70,11 @@ const NewWordsModal = ({ setWords, isShow, close, colToCheck }: NewWordsModalPro
     };
 
     return (
-        <Modal size="xl" show={isShow} onHide={close} dialogClassName={styles.newWordsModal}>
-            <Modal.Header closeButton className={styles.modalBg}>
-                <Modal.Title>Modal</Modal.Title>
+        <Modal size="xl" show={isShow} onHide={close} dialogClassName="modal-dialog">
+            <Modal.Header closeButton className="modal-bg">
+                <Modal.Title>Импорт слов</Modal.Title>
             </Modal.Header>
-            <Modal.Body className={styles.modalBg}>
+            <Modal.Body className="modal-bg">
                 <textarea
                     rows={10}
                     onChange={testParseExcel}

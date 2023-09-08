@@ -1,0 +1,13 @@
+.font-icon-height-0 {
+    line-height: 0;
+}
+
+.font-icon-button:hover {
+    cursor: pointer;
+    color: #666666;
+}
+
+.font-icon-button-danger:hover {
+    cursor: pointer;
+    color: #ff0000;
+}

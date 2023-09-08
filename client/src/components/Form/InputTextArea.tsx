@@ -12,6 +12,7 @@ interface InputTextAreaProps extends InputBaseProps {
 const InputTextArea = ({
     value,
     errorMessage,
+    noErrorField,
     onChangeHandler,
     placeholder,
     htmlId,
@@ -19,6 +20,7 @@ const InputTextArea = ({
     rows,
 }: InputTextAreaProps) => {
     className = className ?? "";
+    noErrorField = noErrorField === undefined ? false : noErrorField;
 
     const hasError = errorMessage !== undefined && errorMessage !== "";
 
@@ -38,7 +40,7 @@ const InputTextArea = ({
                 style={rows ? style : {}}
             />
             <label htmlFor={htmlId}>{placeholder}</label>
-            <InputError message={errorMessage} />
+            {!noErrorField && <InputError message={errorMessage} />}
         </div>
     );
 };

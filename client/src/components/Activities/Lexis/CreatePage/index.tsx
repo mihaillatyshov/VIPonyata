@@ -32,8 +32,8 @@ const LexisCreatePage = ({ title, name }: LexisCreatePageProps) => {
     const [isShowNewWordsModal, setIsShowNewWordsModal] = useState<boolean>(false);
     const [newWords, setNewWords] = useState<DictionaryWord[]>([]);
     const [timelimit, setTimelimit] = useState<string>("00:00:00");
-    const [error, setError] = useState<string>("");
     const [description, setDescription] = useState<string>("");
+    const [error, setError] = useState<string>("");
 
     useEffect(() => {
         setError("");

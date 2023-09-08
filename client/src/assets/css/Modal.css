@@ -1,0 +1,8 @@
+.modal-dialog {
+    width: 90vw;
+    min-height: 80vh;
+}
+
+.modal-bg {
+    background-color: #eaeaea;
+}

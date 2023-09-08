@@ -8,6 +8,8 @@ import { Provider } from "react-redux";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.min.css";
 import "./assets/css/Table.css";
+import "./assets/css/Modal.css";
+import "./assets/css/FontIcon.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
