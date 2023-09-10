@@ -25,7 +25,6 @@
 }
 
 .bigCheck {
-    margin-right: 10px;
     margin-left: 2px;
 }
 
@@ -54,4 +53,11 @@
 .fillSpacesResultAnswer {
     color: #888888;
     text-decoration: underline;
+}
+
+.classificationCol {
+    padding: 10px;
+    height: 100%;
+    border: 1px solid #00000044;
+    border-radius: 8px;
 }

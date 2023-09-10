@@ -1,13 +1,14 @@
 import React from "react";
-import { TAssessmentSentenceOrder } from "models/Activity/Items/TAssessmentItems";
+import { TTeacherAssessmentSentenceOrder } from "models/Activity/Items/TAssessmentItems";
 import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
+import ITeacherAssessmentOrderTask from "./ITeacherAssessmentOrderTask";
 
 const TeacherAssessmentSentenceOrder = ({
     data,
     taskId,
     onChangeTask,
-}: TeacherAssessmentTypeProps<TAssessmentSentenceOrder>) => {
-    return <div>TeacherAssessmentSentenceOrder</div>;
+}: TeacherAssessmentTypeProps<TTeacherAssessmentSentenceOrder>) => {
+    return <ITeacherAssessmentOrderTask data={data} taskId={taskId} onChangeTask={onChangeTask} isCompact={false} />;
 };
 
 export default TeacherAssessmentSentenceOrder;

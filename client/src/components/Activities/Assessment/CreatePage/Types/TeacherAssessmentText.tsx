@@ -1,11 +1,11 @@
 import React from "react";
-import { TAssessmentTaskName, TAssessmentText } from "models/Activity/Items/TAssessmentItems";
+import { TAssessmentTaskName, TTeacherAssessmentText } from "models/Activity/Items/TAssessmentItems";
 import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
 import InputTextArea from "components/Form/InputTextArea";
 
-const TeacherAssessmentText = ({ data, taskId, onChangeTask }: TeacherAssessmentTypeProps<TAssessmentText>) => {
+const TeacherAssessmentText = ({ data, taskId, onChangeTask }: TeacherAssessmentTypeProps<TTeacherAssessmentText>) => {
     const changeTextHandler = (newValue: string) => {
-        onChangeTask(taskId, { name: TAssessmentTaskName.TEXT, text: newValue });
+        onChangeTask(taskId, { name: TAssessmentTaskName.TEXT, text: newValue.trim() });
     };
 
     return (
@@ -16,6 +16,7 @@ const TeacherAssessmentText = ({ data, taskId, onChangeTask }: TeacherAssessment
                 value={data.text}
                 onChangeHandler={changeTextHandler}
                 className=""
+                autoFocus={true}
                 noErrorField={true}
             />
         </div>

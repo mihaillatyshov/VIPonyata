@@ -188,6 +188,12 @@ def get_hieroglyph_by_id(id):
                                 activityId=id)
 
 
+@routes_bp.route("/hieroglyph/<lesson_id>", methods=["POST"])
+@login_required
+def create_hieroglyph(lesson_id):
+    return UserSelectorFunction(teacher_funcs.HieroglyphFuncs.create, None, lesson_id=lesson_id)
+
+
 @routes_bp.route("/assessment/<id>/newtry", methods=["POST"])
 @login_required
 def start_new_assessment_try(id):
@@ -218,6 +224,12 @@ def get_assessment_by_id(id):
     return UserSelectorFunction(teacher_funcs.AssessmentFuncs.GetById,
                                 student_funcs.AssessmentFuncs.GetById,
                                 activityId=id)
+
+
+@routes_bp.route("/assessment/<lesson_id>", methods=["POST"])
+@login_required
+def create_assessment(lesson_id):
+    return UserSelectorFunction(teacher_funcs.AssessmentFuncs.create, None, lesson_id=lesson_id)
 
 
 @routes_bp.route("/dictionary", methods=["GET"])

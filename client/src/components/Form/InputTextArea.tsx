@@ -18,9 +18,11 @@ const InputTextArea = ({
     htmlId,
     className,
     rows,
+    autoFocus,
 }: InputTextAreaProps) => {
     className = className ?? "";
-    noErrorField = noErrorField === undefined ? false : noErrorField;
+    noErrorField = noErrorField ?? false;
+    autoFocus = autoFocus ?? false;
 
     const hasError = errorMessage !== undefined && errorMessage !== "";
 
@@ -38,6 +40,7 @@ const InputTextArea = ({
                 value={value}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChangeHandler(e.target.value)}
                 style={rows ? style : {}}
+                autoFocus={autoFocus}
             />
             <label htmlFor={htmlId}>{placeholder}</label>
             {!noErrorField && <InputError message={errorMessage} />}

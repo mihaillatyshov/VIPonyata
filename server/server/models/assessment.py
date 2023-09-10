@@ -1,4 +1,5 @@
 import abc
+import datetime
 import random
 from enum import Enum
 from typing import TypedDict
@@ -18,6 +19,10 @@ class AssessmentTaskName(str, Enum):
     SENTENCE_OREDER = "sentence_order"
     OPEN_QUESTION = "open_question"
     IMG = "img"
+
+
+ANSWER_CANT_BE_EMPTY = "Ответ не может быть пустым"
+QESTION_CANT_BE_EMPTY = "Вопрос не может быть пустым"
 
 
 def validate_name(input_name: str, task_name: AssessmentTaskName):
@@ -83,7 +88,12 @@ class TextTaskRes(TextTaskTeacherBase, BaseModelRes):
 
 
 class TextTaskTeacherReq(TextTaskTeacherBase):
-    pass
+    @root_validator(skip_on_failure=True)
+    def validate_on_create(cls, values: dict):
+        if not values["text"]:
+            raise ValueError("Текст не может быть пустым")
+
+        return values
 
 
 #########################################################################################################################
@@ -120,10 +130,17 @@ class SingleTestTaskTeacherReq(SingleTestTaskTeacherBase):
         return v
 
     @root_validator(skip_on_failure=True)
-    def meta_answer_validation(cls, values: dict):
+    def validate_on_create(cls, values: dict):
         meta_answer = values["meta_answer"]
         if not (0 <= meta_answer < len(values["options"])):
             raise ValueError(f"Выбран недопустимый вариант ответа ({meta_answer + 1})")
+
+        if not values["question"]:
+            raise ValueError(QESTION_CANT_BE_EMPTY)
+
+        for option in values["options"]:
+            if not option:
+                raise ValueError(ANSWER_CANT_BE_EMPTY)
 
         return values
 
@@ -169,7 +186,7 @@ class MultiTestTaskTeacherReq(MultiTestTaskTeacherBase):
         return v
 
     @root_validator(skip_on_failure=True)
-    def meta_answer_validation(cls, values: dict):
+    def validate_on_create(cls, values: dict):
         meta_answers = values["meta_answers"]
 
         if len(meta_answers) < 1:
@@ -181,6 +198,13 @@ class MultiTestTaskTeacherReq(MultiTestTaskTeacherBase):
         for answer in meta_answers:
             if not (0 <= answer < len(values["options"])):
                 raise ValueError(f"Варианты ответа вне диапазона ({meta_answers})")
+
+        if not values["question"]:
+            raise ValueError(QESTION_CANT_BE_EMPTY)
+
+        for option in values["options"]:
+            if not option:
+                raise ValueError(ANSWER_CANT_BE_EMPTY)
 
         return values
 
@@ -250,8 +274,17 @@ class FindPairTaskRes(FindPairTaskTeacherBase, BaseModelRes):
 
 class FindPairTaskTeacherReq(FindPairTaskTeacherBase):
     @root_validator(skip_on_failure=True)
-    def meta_first_second_validation(cls, values: dict):
+    def validate_on_create(cls, values: dict):
         find_pair_fs_validation_base(values["meta_first"], values["meta_second"])
+
+        for first in values["meta_first"]:
+            if not first:
+                raise ValueError("Пустые поля в первой колонке")
+
+        for second in values["meta_second"]:
+            if not second:
+                raise ValueError("Пустые поля во второй колонке")
+
         return values
 
 
@@ -295,8 +328,13 @@ class IOrderTaskRes(IOrderTaskTeacherBase, BaseModelRes):
 
 class IOrderTaskTeacherReq(IOrderTaskTeacherBase):
     @root_validator(skip_on_failure=True)
-    def meta_parts_validation(cls, values: dict):
+    def validate_on_create(cls, values: dict):
         create_sentence_parts_validation_base(values["meta_parts"])
+
+        for part in values["meta_parts"]:
+            if not part:
+                raise ValueError("Поля не могут быть пустыми")
+
         return values
 
 
@@ -369,9 +407,13 @@ class FillSpacesExistsTaskRes(FillSpacesExistsTaskTeacherBase, BaseModelRes):
 
 class FillSpacesExistsTaskTeacherReq(FillSpacesExistsTaskTeacherBase):
     @root_validator(skip_on_failure=True)
-    def answers_validate(cls, values: dict):
+    def validate_on_create(cls, values: dict):
         if len(values["meta_answers"]) < 2:
             raise ValueError(f"Слишком мало полей ({len(values['meta_answers'])})")
+
+        for answer in values["meta_answers"]:
+            if not answer:
+                raise ValueError(ANSWER_CANT_BE_EMPTY)
 
         if (len(values["separates"]) - 1) != len(values["meta_answers"]):
             raise ValueError(
@@ -416,9 +458,13 @@ class FillSpacesByHandTaskRes(FillSpacesByHandTaskTeacherBase, BaseModelRes):
 
 class FillSpacesByHandTaskTeacherReq(FillSpacesByHandTaskTeacherBase):
     @root_validator(skip_on_failure=True)
-    def answers_validate(cls, values: dict):
+    def validate_on_create(cls, values: dict):
         if len(values["meta_answers"]) < 1:
             raise ValueError(f"Слишком мало полей ({len(values['meta_answers'])})")
+
+        for answer in values["meta_answers"]:
+            if not answer:
+                raise ValueError(ANSWER_CANT_BE_EMPTY)
 
         if (len(values["separates"]) - 1) != len(values["meta_answers"]):
             raise ValueError(
@@ -482,7 +528,7 @@ class ClassificationTaskRes(ClassificationTaskTeacherBase, BaseModelRes):
 
 class ClassificationTaskTeacherReq(ClassificationTaskTeacherBase):
     @root_validator(skip_on_failure=True)
-    def answers_validate(cls, values: dict):
+    def validate_on_create(cls, values: dict):
         if len(values["meta_answers"]) < 1:
             raise ValueError(f"Слишком мало колонок ({len(values['meta_answers'])})")
 
@@ -492,8 +538,16 @@ class ClassificationTaskTeacherReq(ClassificationTaskTeacherBase):
             )
 
         for col in values["meta_answers"]:
-            if len(values["meta_answers"]) < 1:
+            if len(col) < 1:
                 raise ValueError(f"Слишком мало значений в колонке ({len(col)})")
+
+            for cell in col:
+                if not cell:
+                    raise ValueError("Поля не могут быть пустымы")
+
+        for title in values["titles"]:
+            if not title:
+                raise ValueError("Название не может быть пустым")
 
         return values
 
@@ -544,7 +598,12 @@ class OpenQuestionTaskRes(OpenQuestionTaskTeacherBase, BaseModelRes):
 
 
 class OpenQuestionTaskTeacherReq(OpenQuestionTaskTeacherBase):
-    pass
+    @root_validator(skip_on_failure=True)
+    def validate_on_create(cls, values: dict):
+        if not values["question"]:
+            raise ValueError(QESTION_CANT_BE_EMPTY)
+
+        return values
 
 
 #########################################################################################################################
@@ -570,22 +629,12 @@ class ImgTaskRes(ImgTaskTeacherBase, BaseModelRes):
 
 
 class ImgTaskTeacherReq(ImgTaskTeacherBase):
-    pass
+    @root_validator(skip_on_failure=True)
+    def validate_on_create(cls, values: dict):
+        if not values["url"]:
+            raise ValueError("Картинка не добавлена")
 
-
-# fp = FindPairTaskReq(name=AssessmentTaskName.FIND_PAIR, first=["f1", "f2"], second=["s1", "s2"])
-# print(fp.dict())
-
-# fp2 = FindPairTaskRes(name=AssessmentTaskName.FIND_PAIR, first=["f2", "f1"], second=["s2", "s1"])
-# print("CD", fp2.combine_dict())
-# print(fp2)
-# print(fp2.dict())
-
-# fp3 = FindPairTaskRes(**(fp2.combine_dict() | fp.combine_dict()))
-# print(fp3)
-# print(fp3.dict())
-
-# exit()
+        return values
 
 
 #########################################################################################################################
@@ -626,3 +675,15 @@ create_alias(AssessmentTaskName.IMG, ImgTaskStudentReq, ImgTaskRes, ImgTaskTeach
 for name in AssessmentTaskName:
     if name.value not in Aliases.keys():
         raise KeyError(f"Alias {name} not found")
+
+
+class AssessmentCreateReq(BaseModel):
+    tasks: str
+    description: str | None = None
+    time_limit: datetime.time | None = None
+
+    @validator("time_limit", always=True, pre=True)
+    def options_validation(cls, v):
+        if v is None:
+            return None
+        return datetime.datetime.strptime(v, '%H:%M:%S').time()

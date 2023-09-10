@@ -1,5 +1,5 @@
 import React from "react";
-import { TAssessmentTestMulti } from "models/Activity/Items/TAssessmentItems";
+import { TTeacherAssessmentTestMulti } from "models/Activity/Items/TAssessmentItems";
 import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
 import InputCheckSingle from "components/Form/InputCheckSingle";
 
@@ -10,23 +10,23 @@ const TeacherAssessmentTestMulti = ({
     data,
     taskId,
     onChangeTask,
-}: TeacherAssessmentTypeProps<TAssessmentTestMulti>) => {
+}: TeacherAssessmentTypeProps<TTeacherAssessmentTestMulti>) => {
     const changeAnswerHandler = (id: number) => {
-        const newAnswers = [...data.answers];
+        const newAnswers = [...data.meta_answers];
         if (newAnswers.includes(id)) newAnswers.splice(newAnswers.indexOf(id), 1);
         else newAnswers.push(id);
-        onChangeTask(taskId, { ...data, answers: newAnswers });
+        onChangeTask(taskId, { ...data, meta_answers: newAnswers });
     };
 
     const removeOption = (id: number) => {
         const newOptions = [...data.options];
         newOptions.splice(id, 1);
 
-        let newAnswers = [...data.answers];
+        let newAnswers = [...data.meta_answers];
         if (newAnswers.includes(id)) newAnswers.splice(newAnswers.indexOf(id), 1);
         newAnswers = newAnswers.map((answer) => (answer > id ? answer - 1 : answer));
 
-        onChangeTask(taskId, { ...data, options: newOptions, answers: newAnswers });
+        onChangeTask(taskId, { ...data, options: newOptions, meta_answers: newAnswers });
     };
 
     return (
@@ -40,9 +40,9 @@ const TeacherAssessmentTestMulti = ({
                     blockName={`${taskId}`}
                     htmlId={`${taskId}`}
                     id={id}
-                    className={styles.bigCheck}
+                    className={`input-group-text ${styles.bigCheck}`}
                     placeholder={""}
-                    selectedIds={data.answers}
+                    selectedIds={data.meta_answers}
                     onChange={changeAnswerHandler}
                 />
             )}

@@ -1,7 +1,9 @@
 from server.log_lib import LogI
+from server.models.assessment import AssessmentCreateReq
 from server.models.course import CourseCreateReq
-from server.models.db_models import (Course, Dictionary, Drilling, DrillingCard, DrillingTry, Hieroglyph,
-                                     HieroglyphCard, HieroglyphTry, Lesson, LexisCardType, LexisTryType, LexisType)
+from server.models.db_models import (Assessment, AssessmentTry, Course, Dictionary, Drilling, DrillingCard, DrillingTry,
+                                     Hieroglyph, HieroglyphCard, HieroglyphTry, Lesson, LexisCardType, LexisTryType,
+                                     LexisType)
 from server.models.lesson import LessonCreateReq
 from server.common import DBsession
 from server.models.dictionary import DictionaryCreateReq, DictionaryCreateReqItem
@@ -83,9 +85,26 @@ DrillingQueries = LexisQueries(Drilling, DrillingTry, DrillingCard)
 HieroglyphQueries = LexisQueries(Hieroglyph, HieroglyphTry, HieroglyphCard)
 
 
-def GetAssessmentByLessonId(lessondId: int) -> dict:
-    return {}
-    # return GetSingleItem(DB.GetTableJson("assessment", where=f"LessonId = '{lessondId}'"))
+class AssessmentQueriesClass:
+    assessment_type: type[Assessment]
+    assessment_try_type: type[AssessmentTry]
+
+    def __init__(self, assessment_type: type[Assessment], assessment_try_type: type[AssessmentTry]):
+        self.assessment_type = assessment_type
+        self.assessment_try_type = assessment_try_type
+
+    def get_by_lesson_id(self, lesson_id: int) -> Assessment | None:
+        return DBsession().query(self.assessment_type).filter(self.assessment_type.lesson_id == lesson_id).one_or_none()
+
+    def create(self, lesson_id: int, assessment_data: AssessmentCreateReq):
+        assessment = self.assessment_type(lesson_id=lesson_id, **assessment_data.dict())
+        DBsession.add(assessment)
+        DBsession.commit()
+
+        return assessment
+
+
+AssesmentQueries = AssessmentQueriesClass(Assessment, AssessmentTry)
 
 
 #########################################################################################################################

@@ -79,21 +79,6 @@ const Ajax = async <T>({ method, url, urlParams, body, headers }: ServerAPIParam
         };
         throw error;
     }
-
-    // let json;
-    // try {
-    //     json = await response.json();
-    // } catch {
-    //     const error: ServerError = { isServerError: true, message: "JSON Error!", response: response };
-    //     throw error;
-    // }
-
-    // if (response.ok) {
-    //     return json;
-    // }
-
-    // const error = { isServerError: false, json: json, response: response };
-    // throw error;
 };
 
 export const AjaxGet = <T>(params = DefaultServerAPIParams) => {

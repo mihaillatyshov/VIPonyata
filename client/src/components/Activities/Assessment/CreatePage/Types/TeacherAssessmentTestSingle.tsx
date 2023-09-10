@@ -1,5 +1,5 @@
 import React from "react";
-import { TAssessmentTestSingle } from "models/Activity/Items/TAssessmentItems";
+import { TTeacherAssessmentTestSingle } from "models/Activity/Items/TAssessmentItems";
 import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
 import InputRadioSingle from "components/Form/InputRadioSingle";
 
@@ -10,19 +10,19 @@ const TeacherAssessmentTestSingle = ({
     data,
     taskId,
     onChangeTask,
-}: TeacherAssessmentTypeProps<TAssessmentTestSingle>) => {
-    const changeAnswerHandler = (id: number) => onChangeTask(taskId, { ...data, answer: id });
+}: TeacherAssessmentTypeProps<TTeacherAssessmentTestSingle>) => {
+    const changeAnswerHandler = (id: number) => onChangeTask(taskId, { ...data, meta_answer: id });
 
     const removeOption = (id: number) => {
         const newOptions = [...data.options];
         newOptions.splice(id, 1);
         let newAnswer = null;
-        if (data.answer !== null) {
-            newAnswer = data.answer;
-            if (data.answer > id) newAnswer--;
-            else if (data.answer === id) newAnswer = null;
+        if (data.meta_answer !== null) {
+            newAnswer = data.meta_answer;
+            if (data.meta_answer > id) newAnswer--;
+            else if (data.meta_answer === id) newAnswer = null;
         }
-        onChangeTask(taskId, { ...data, options: newOptions, answer: newAnswer });
+        onChangeTask(taskId, { ...data, options: newOptions, meta_answer: newAnswer });
     };
 
     return (
@@ -36,9 +36,9 @@ const TeacherAssessmentTestSingle = ({
                     blockName={`${taskId}`}
                     htmlId={`${taskId}`}
                     id={id}
-                    className={styles.bigCheck}
+                    className={`input-group-text ${styles.bigCheck}`}
                     placeholder={""}
-                    selectedId={data.answer ?? -1}
+                    selectedId={data.meta_answer ?? -1}
                     onChange={changeAnswerHandler}
                 />
             )}

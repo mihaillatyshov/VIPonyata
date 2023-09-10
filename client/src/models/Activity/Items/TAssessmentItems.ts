@@ -16,75 +16,155 @@ export interface TAssessmentItemBase {
     name: TAssessmentTaskName;
 }
 
-export interface TAssessmentText extends TAssessmentItemBase {
+// * ==========================================================================
+// * ========== Text ==========================================================
+// * ==========================================================================
+interface TAssessmentTextBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.TEXT;
     text: string;
 }
+export interface TAssessmentText extends TAssessmentTextBase {}
+export interface TTeacherAssessmentText extends TAssessmentTextBase {}
 
-export interface TAssessmentTestSingle extends TAssessmentItemBase {
+// * ==========================================================================
+// * ========== TestSingle ====================================================
+// * ==========================================================================
+interface TAssessmentTestSingleBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.TEST_SINGLE;
+    options: string[];
+    question: string;
+}
+export interface TAssessmentTestSingle extends TAssessmentTestSingleBase {
     answer: number | null;
-    options: string[];
-    question: string;
+}
+export interface TTeacherAssessmentTestSingle extends TAssessmentTestSingleBase {
+    meta_answer: number | null;
 }
 
-export interface TAssessmentTestMulti extends TAssessmentItemBase {
+// * ==========================================================================
+// * ========== TestMulti =====================================================
+// * ==========================================================================
+interface TAssessmentTestMultiBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.TEST_MULTI;
-    answers: number[];
     options: string[];
     question: string;
 }
+export interface TAssessmentTestMulti extends TAssessmentTestMultiBase {
+    answers: number[];
+}
+export interface TTeacherAssessmentTestMulti extends TAssessmentTestMultiBase {
+    meta_answers: number[];
+}
 
-export interface TAssessmentFindPair extends TAssessmentItemBase {
+// * ==========================================================================
+// * ========== FindPair ======================================================
+// * ==========================================================================
+interface TAssessmentFindPairBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.FIND_PAIR;
+}
+export interface TAssessmentFindPair extends TAssessmentFindPairBase {
     first: string[];
     second: string[];
     pars_created: number;
 }
-
-export interface TAssessmentCreateSentence extends TAssessmentItemBase {
-    name: TAssessmentTaskName.CREATE_SENTENCE;
-    parts: string[];
+export interface TTeacherAssessmentFindPair extends TAssessmentFindPairBase {
+    meta_first: string[];
+    meta_second: string[];
 }
 
-export interface TAssessmentFillSpacesExists extends TAssessmentItemBase {
-    name: TAssessmentTaskName.FILL_SPACES_EXISTS;
+// * ==========================================================================
+// * ========== CreateSentence ================================================
+// * ==========================================================================
+interface TAssessmentCreateSentenceBase extends TAssessmentItemBase {
+    name: TAssessmentTaskName.CREATE_SENTENCE;
+}
+export interface TAssessmentCreateSentence extends TAssessmentCreateSentenceBase {
     parts: string[];
+}
+export interface TTeacherAssessmentCreateSentence extends TAssessmentCreateSentenceBase {
+    meta_parts: string[];
+}
+
+// * ==========================================================================
+// * ========== FillSpacesExists ==============================================
+// * ==========================================================================
+interface TAssessmentFillSpacesExistsBase extends TAssessmentItemBase {
+    name: TAssessmentTaskName.FILL_SPACES_EXISTS;
+    separates: string[];
+}
+export interface TAssessmentFillSpacesExists extends TAssessmentFillSpacesExistsBase {
     answers: (string | null)[];
     inputs: string[];
-    separates: string[];
+}
+export interface TTeacherAssessmentFillSpacesExists extends TAssessmentFillSpacesExistsBase {
+    meta_answers: string[];
 }
 
-export interface TAssessmentFillSpacesByHand extends TAssessmentItemBase {
+// * ==========================================================================
+// * ========== FillSpacesByHand ==============================================
+// * ==========================================================================
+interface TAssessmentFillSpacesByHandBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.FILL_SPACES_BY_HAND;
-    answers: string[];
     separates: string[];
 }
+export interface TAssessmentFillSpacesByHand extends TAssessmentFillSpacesByHandBase {
+    answers: string[];
+}
+export interface TTeacherAssessmentFillSpacesByHand extends TAssessmentFillSpacesByHandBase {
+    meta_answers: string[];
+}
 
-export interface TAssessmentClassification extends TAssessmentItemBase {
+// * ==========================================================================
+// * ========== Classification ================================================
+// * ==========================================================================
+interface TAssessmentClassificationBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.CLASSIFICATION;
     inputs: string[];
     titles: string[];
+}
+export interface TAssessmentClassification extends TAssessmentClassificationBase {
     answers: string[][];
 }
+export interface TTeacherAssessmentClassification extends TAssessmentClassificationBase {
+    meta_answers: string[][];
+}
 
-export interface TAssessmentSentenceOrder extends TAssessmentItemBase {
+// * ==========================================================================
+// * ========== SentenceOrder =================================================
+// * ==========================================================================
+interface TAssessmentSentenceOrderBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.SENTENCE_ORDER;
+}
+export interface TAssessmentSentenceOrder extends TAssessmentSentenceOrderBase {
     parts: string[];
 }
-
-export interface TAssessmentOpenQuestion extends TAssessmentItemBase {
-    name: TAssessmentTaskName.OPEN_QUESTION;
-    answer: string;
-    question: string;
+export interface TTeacherAssessmentSentenceOrder extends TAssessmentSentenceOrderBase {
+    meta_parts: string[];
 }
 
-export interface TAssessmentImg extends TAssessmentItemBase {
+// * ==========================================================================
+// * ========== OpenQuestion ==================================================
+// * ==========================================================================
+interface TAssessmentOpenQuestionBase extends TAssessmentItemBase {
+    name: TAssessmentTaskName.OPEN_QUESTION;
+    question: string;
+}
+export interface TAssessmentOpenQuestion extends TAssessmentOpenQuestionBase {
+    answer: string;
+}
+export interface TTeacherAssessmentOpenQuestion extends TAssessmentOpenQuestionBase {}
+
+// * ==========================================================================
+// * ========== Img ===========================================================
+// * ==========================================================================
+interface TAssessmentImgBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.IMG;
     url: string;
 }
+export interface TAssessmentImg extends TAssessmentImgBase {}
+export interface TTeacherAssessmentImg extends TAssessmentImgBase {}
 
-export interface GetTypeByName {
+export interface TGetStudentTypeByName {
     [TAssessmentTaskName.TEXT]: TAssessmentText;
     [TAssessmentTaskName.TEST_SINGLE]: TAssessmentTestSingle;
     [TAssessmentTaskName.TEST_MULTI]: TAssessmentTestMulti;
@@ -96,6 +176,20 @@ export interface GetTypeByName {
     [TAssessmentTaskName.SENTENCE_ORDER]: TAssessmentSentenceOrder;
     [TAssessmentTaskName.OPEN_QUESTION]: TAssessmentOpenQuestion;
     [TAssessmentTaskName.IMG]: TAssessmentImg;
+}
+
+export interface TGetTeacherTypeByName {
+    [TAssessmentTaskName.TEXT]: TTeacherAssessmentText;
+    [TAssessmentTaskName.TEST_SINGLE]: TTeacherAssessmentTestSingle;
+    [TAssessmentTaskName.TEST_MULTI]: TTeacherAssessmentTestMulti;
+    [TAssessmentTaskName.FIND_PAIR]: TTeacherAssessmentFindPair;
+    [TAssessmentTaskName.CREATE_SENTENCE]: TTeacherAssessmentCreateSentence;
+    [TAssessmentTaskName.FILL_SPACES_EXISTS]: TTeacherAssessmentFillSpacesExists;
+    [TAssessmentTaskName.FILL_SPACES_BY_HAND]: TTeacherAssessmentFillSpacesByHand;
+    [TAssessmentTaskName.CLASSIFICATION]: TTeacherAssessmentClassification;
+    [TAssessmentTaskName.SENTENCE_ORDER]: TTeacherAssessmentSentenceOrder;
+    [TAssessmentTaskName.OPEN_QUESTION]: TTeacherAssessmentOpenQuestion;
+    [TAssessmentTaskName.IMG]: TTeacherAssessmentImg;
 }
 
 export type TAssessmentAnyItem =
@@ -111,34 +205,52 @@ export type TAssessmentAnyItem =
     | TAssessmentOpenQuestion
     | TAssessmentImg;
 
-export type TAssessmentItems = TAssessmentAnyItem[];
+export type TTeacherAssessmentAnyItem =
+    | TTeacherAssessmentText
+    | TTeacherAssessmentTestSingle
+    | TTeacherAssessmentTestMulti
+    | TTeacherAssessmentFindPair
+    | TTeacherAssessmentCreateSentence
+    | TTeacherAssessmentFillSpacesExists
+    | TTeacherAssessmentFillSpacesByHand
+    | TTeacherAssessmentClassification
+    | TTeacherAssessmentSentenceOrder
+    | TTeacherAssessmentOpenQuestion
+    | TTeacherAssessmentImg;
 
-type TAssessmentTaskDefaultDataAliases = {
-    [key in TAssessmentTaskName]: () => GetTypeByName[key];
+export type TAssessmentItems = TAssessmentAnyItem[];
+export type TTeacherAssessmentItems = TTeacherAssessmentAnyItem[];
+
+type TTeacherAssessmentTaskDefaultDataAliases = {
+    [key in TAssessmentTaskName]: () => TGetTeacherTypeByName[key];
 };
 
-const assessmentTaskDefaultDataAliases: TAssessmentTaskDefaultDataAliases = {
+const teacherAssessmentTaskDefaultDataAliases: TTeacherAssessmentTaskDefaultDataAliases = {
     text: () => ({ name: TAssessmentTaskName.TEXT, text: "" }),
-    test_single: () => ({ name: TAssessmentTaskName.TEST_SINGLE, answer: null, options: [], question: "" }),
-    test_multi: () => ({ name: TAssessmentTaskName.TEST_MULTI, answers: [], options: [], question: "" }),
-    find_pair: () => ({ name: TAssessmentTaskName.FIND_PAIR, first: [], second: [], pars_created: 0 }),
-    create_sentence: () => ({ name: TAssessmentTaskName.CREATE_SENTENCE, parts: [] }),
+    test_single: () => ({ name: TAssessmentTaskName.TEST_SINGLE, meta_answer: null, options: [], question: "" }),
+    test_multi: () => ({ name: TAssessmentTaskName.TEST_MULTI, meta_answers: [], options: [], question: "" }),
+    find_pair: () => ({ name: TAssessmentTaskName.FIND_PAIR, meta_first: [], meta_second: [] }),
+    create_sentence: () => ({ name: TAssessmentTaskName.CREATE_SENTENCE, meta_parts: [] }),
     fill_spaces_exists: () => ({
         name: TAssessmentTaskName.FILL_SPACES_EXISTS,
-        parts: [],
-        answers: [],
+        meta_answers: [],
         inputs: [],
-        separates: ["dsa"],
+        separates: [""],
     }),
-    fill_spaces_by_hand: () => ({ name: TAssessmentTaskName.FILL_SPACES_BY_HAND, answers: [], separates: [""] }),
-    classification: () => ({ name: TAssessmentTaskName.CLASSIFICATION, inputs: [], titles: [], answers: [] }),
-    sentence_order: () => ({ name: TAssessmentTaskName.SENTENCE_ORDER, parts: [] }),
+    fill_spaces_by_hand: () => ({ name: TAssessmentTaskName.FILL_SPACES_BY_HAND, meta_answers: [], separates: [""] }),
+    classification: () => ({
+        name: TAssessmentTaskName.CLASSIFICATION,
+        inputs: [],
+        titles: [],
+        meta_answers: [],
+    }),
+    sentence_order: () => ({ name: TAssessmentTaskName.SENTENCE_ORDER, meta_parts: [] }),
     open_question: () => ({ name: TAssessmentTaskName.OPEN_QUESTION, answer: "", question: "" }),
     img: () => ({ name: TAssessmentTaskName.IMG, url: "" }),
 };
 
-export const getAssessmentTaskDefaultData = (name: TAssessmentTaskName): TAssessmentAnyItem => {
-    return assessmentTaskDefaultDataAliases[name]();
+export const getTeacherAssessmentTaskDefaultData = (name: TAssessmentTaskName): TTeacherAssessmentAnyItem => {
+    return teacherAssessmentTaskDefaultDataAliases[name]();
 };
 
 type TAssessmentTaskRusNameAliases = {

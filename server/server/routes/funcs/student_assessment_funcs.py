@@ -8,9 +8,8 @@ from server.log_lib import LogE, LogW
 from server.models.assessment import Aliases, AssessmentTaskName
 from server.models.db_models import Assessment, time_limit_to_timedelta
 from server.queries import StudentDBqueries as DBQS
-
-from ..routes_utils import (ActivityEndTimeHandler, GetCurrentUserId, StartActivityTimerLimit)
-from .student_activity_funcs import ActivityFuncs
+from server.routes.funcs.student_activity_funcs import ActivityFuncs
+from server.routes.routes_utils import (ActivityEndTimeHandler, GetCurrentUserId, StartActivityTimerLimit)
 
 
 def parse_new_tasks(data_str: str) -> list[dict]:

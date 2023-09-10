@@ -28,7 +28,7 @@ class LexisFuncs:
     def GetById(self, activityId: int):
         return {"lexis": self.lexis_queries.GetById(activityId)}
 
-    def create(self, lesson_id):
+    def create(self, lesson_id: int):
         if not request.json:
             raise InvalidRequestJson()
 

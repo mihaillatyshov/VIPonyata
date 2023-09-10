@@ -1,27 +1,27 @@
-import { TAssessmentTestMulti, TAssessmentTestSingle } from "models/Activity/Items/TAssessmentItems";
+import { TTeacherAssessmentTestMulti, TTeacherAssessmentTestSingle } from "models/Activity/Items/TAssessmentItems";
 import React from "react";
 import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
 import InputTextArea from "components/Form/InputTextArea";
 
-type TAssessmentTestType = TAssessmentTestSingle | TAssessmentTestMulti;
+type TTeacherAssessmentTestType = TTeacherAssessmentTestSingle | TTeacherAssessmentTestMulti;
 
-interface TeacherAssessmentTestBaseProps<T extends TAssessmentTestType> extends TeacherAssessmentTypeProps<T> {
+interface TeacherAssessmentTestBaseProps<T extends TTeacherAssessmentTestType> extends TeacherAssessmentTypeProps<T> {
     onRemoveOption: (id: number) => void;
     selectorNode: (id: number) => React.ReactNode;
 }
 
-const TeacherAssessmentTestBase = <T extends TAssessmentTestType>({
+const TeacherAssessmentTestBase = <T extends TTeacherAssessmentTestType>({
     data,
     taskId,
     onChangeTask,
     onRemoveOption,
     selectorNode,
 }: TeacherAssessmentTestBaseProps<T>) => {
-    const changeQuestionHandler = (newValue: string) => onChangeTask(taskId, { ...data, question: newValue });
+    const changeQuestionHandler = (newValue: string) => onChangeTask(taskId, { ...data, question: newValue.trim() });
     const addOption = () => onChangeTask(taskId, { ...data, options: [...data.options, ""] });
-    const changeOptionHandler = (id: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const changeOptionHandler = (newValue: string, id: number) => {
         const newOptions = [...data.options];
-        newOptions[id] = e.target.value;
+        newOptions[id] = newValue.trim();
         onChangeTask(taskId, { ...data, options: newOptions });
     };
 
@@ -36,23 +36,22 @@ const TeacherAssessmentTestBase = <T extends TAssessmentTestType>({
                 noErrorField={true}
             />
             {data.options.map((option, i) => (
-                <div className="d-flex mb-3" key={i}>
+                <div key={i} className="input-group mb-3 w-auto">
                     {selectorNode(i)}
-                    <div className="flex-grow-1">
-                        <input
-                            className="w-100 form-control"
-                            type="text"
-                            value={option}
-                            onChange={(e) => changeOptionHandler(i, e)}
-                        />
-                    </div>
-                    <div className="flex-shrink-1">
+                    <input
+                        type="text"
+                        className="form-control"
+                        value={option}
+                        onChange={(e) => changeOptionHandler(e.target.value, i)}
+                        autoFocus={true}
+                    />
+                    <span className="input-group-text w-auto p-0">
                         <i
-                            className="bi bi-x font-icon-height-0 font-icon-button-danger ms-1"
-                            style={{ fontSize: "2.2em" }}
+                            className="bi bi-x font-icon-height-0 font-icon-button-danger"
+                            style={{ fontSize: "2em", margin: "0 2px" }}
                             onClick={() => onRemoveOption(i)}
                         />
-                    </div>
+                    </span>
                 </div>
             ))}
             <button className="btn btn-outline-dark btn-sm d-flex" onClick={addOption}>

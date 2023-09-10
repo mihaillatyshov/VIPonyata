@@ -1,10 +1,10 @@
 import server.queries.StudentDBqueries as DBQS
 from server.exceptions.ApiExceptions import InvalidAPIUsage
-from server.models.db_models import (ActivityType, Assessment, Drilling, Hieroglyph)
+from server.models.db_models import (ActivityType, Assessment, Drilling, Hieroglyph, time_limit_to_timedelta)
 from server.routes.routes_utils import (ActivityEndTimeHandler, GetCurrentUserId, StartActivityTimerLimit)
 
 
-def GetActivityData(activity_type: ActivityType) -> tuple[DBQS.ActivityQueries, str]:
+def get_activity_data(activity_type: ActivityType) -> tuple[DBQS.ActivityQueries, str]:
     if activity_type == Drilling:
         return DBQS.DrillingQueries, "drilling"
     if activity_type == Hieroglyph:
@@ -12,7 +12,7 @@ def GetActivityData(activity_type: ActivityType) -> tuple[DBQS.ActivityQueries, 
     if activity_type == Assessment:
         return DBQS.AssessmentQueries, "assessment"
 
-    raise InvalidAPIUsage("Check server GetActivityData()", 500)
+    raise InvalidAPIUsage("Check server get_activity_data(activity_type: ActivityType)", 500)
 
 
 class ActivityFuncs:
@@ -20,7 +20,7 @@ class ActivityFuncs:
     _activityName: str
 
     def __init__(self, activity_type: ActivityType):
-        self._activityQueries, self._activityName = GetActivityData(activity_type)
+        self._activityQueries, self._activityName = get_activity_data(activity_type)
 
     def StartNewTry(self, activityId: int):
         activity = self._activityQueries.GetById(activityId, GetCurrentUserId())
@@ -32,7 +32,7 @@ class ActivityFuncs:
         newActivityTry = self._activityQueries.AddNewTry(len(activityTries) + 1, activityId, GetCurrentUserId())
 
         if activity.time_limit and newActivityTry:
-            StartActivityTimerLimit(activity.time_limit__ToTimedelta(), newActivityTry.id,
+            StartActivityTimerLimit(time_limit_to_timedelta(activity.time_limit), newActivityTry.id,
                                     self._activityQueries._activityTry_type)
         return {"message": "Lexis try successfully created"}
 

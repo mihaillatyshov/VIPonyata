@@ -2,6 +2,7 @@ import React from "react";
 
 import styles from "./Style.module.css";
 import { TAssessmentTaskName, assessmentTaskRusNameAliases } from "models/Activity/Items/TAssessmentItems";
+import { PyError } from "libs/PyError";
 
 export interface TeacherAssessmentTypeProps<T> {
     data: T;
@@ -14,9 +15,16 @@ interface TeacherAssessmentTypeBaseProps {
     taskName: TAssessmentTaskName;
     removeTask: (taskId: number) => void;
     children: React.ReactNode;
+    errors?: PyError[];
 }
 
-const TeacherAssessmentTypeBase = ({ taskId, taskName, removeTask, children }: TeacherAssessmentTypeBaseProps) => {
+const TeacherAssessmentTypeBase = ({
+    taskId,
+    taskName,
+    removeTask,
+    children,
+    errors,
+}: TeacherAssessmentTypeBaseProps) => {
     return (
         <div className={styles.base}>
             <div className={styles.baseTopBar}>
@@ -29,7 +37,16 @@ const TeacherAssessmentTypeBase = ({ taskId, taskName, removeTask, children }: T
                     />
                 </div>
             </div>
-            <div className={styles.baseBody}>{children}</div>
+            <div className={styles.baseBody}>
+                {children}
+                <div className={errors !== undefined ? "mt-3" : ""}>
+                    {errors?.map((error, i) => (
+                        <div key={i} className="text-danger">
+                            {error.msg}
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 };

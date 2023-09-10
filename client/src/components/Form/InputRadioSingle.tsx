@@ -15,11 +15,11 @@ const InputRadioSingle = ({ id, selectedId, htmlId, placeholder, className, onCh
     className = className ?? "";
 
     return (
-        <div className={`d-flex justify-content-center align-items-center form-check ${className}`}>
+        <div className={className}>
             <input
                 type="radio"
                 value={id}
-                className="form-check-input"
+                className="form-check-input mt-0"
                 id={htmlId}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(id)}
                 checked={selectedId === id}

@@ -1,21 +1,20 @@
 import React from "react";
-import { TAssessmentFindPair } from "models/Activity/Items/TAssessmentItems";
+import { TTeacherAssessmentFindPair } from "models/Activity/Items/TAssessmentItems";
 import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
 
 import styles from "./Style.module.css";
 
-type TColNames = "first" | "second";
-type TInputEvent = React.ChangeEvent<HTMLInputElement>;
+type TColNames = "meta_first" | "meta_second";
 
-const zip = (first: string[], second: string[]): string[][] => {
-    return first.map((el, i) => [el, second[i]]);
+const zip = (meta_first: string[], meta_second: string[]): string[][] => {
+    return meta_first.map((el, i) => [el, meta_second[i]]);
 };
 
 interface CellProps {
     value: string;
     colName: TColNames;
     rowId: number;
-    onChange: (e: TInputEvent, colName: TColNames, rowId: number) => void;
+    onChange: (newValue: string, colName: TColNames, rowId: number) => void;
 }
 
 const Cell = ({ value, colName, rowId, onChange }: CellProps) => {
@@ -26,30 +25,35 @@ const Cell = ({ value, colName, rowId, onChange }: CellProps) => {
                     type="text"
                     className="form-control"
                     value={value}
-                    onChange={(e) => onChange(e, colName, rowId)}
+                    onChange={(e) => onChange(e.target.value, colName, rowId)}
+                    autoFocus={colName === "meta_first"}
                 />
             </div>
         </div>
     );
 };
 
-const TeacherAssessmentFindPair = ({ data, taskId, onChangeTask }: TeacherAssessmentTypeProps<TAssessmentFindPair>) => {
-    const onTextChangeHandler = (e: TInputEvent, colName: TColNames, rowId: number) => {
+const TeacherAssessmentFindPair = ({
+    data,
+    taskId,
+    onChangeTask,
+}: TeacherAssessmentTypeProps<TTeacherAssessmentFindPair>) => {
+    const onTextChangeHandler = (newValue: string, colName: TColNames, rowId: number) => {
         const newCol = data[colName];
-        newCol[rowId] = e.target.value;
+        newCol[rowId] = newValue.trim();
         onChangeTask(taskId, { ...data, [colName]: newCol });
     };
 
     const addLine = () => {
-        onChangeTask(taskId, { ...data, first: [...data.first, ""], second: [...data.second, ""] });
+        onChangeTask(taskId, { ...data, meta_first: [...data.meta_first, ""], meta_second: [...data.meta_second, ""] });
     };
 
     const removeLine = (rowId: number) => {
-        const newFirst = [...data.first];
-        const newSecond = [...data.second];
+        const newFirst = [...data.meta_first];
+        const newSecond = [...data.meta_second];
         newFirst.splice(rowId, 1);
         newSecond.splice(rowId, 1);
-        onChangeTask(taskId, { ...data, first: newFirst, second: newSecond });
+        onChangeTask(taskId, { ...data, meta_first: newFirst, meta_second: newSecond });
     };
 
     return (
@@ -64,9 +68,9 @@ const TeacherAssessmentFindPair = ({ data, taskId, onChangeTask }: TeacherAssess
                 </div>
             </div>
 
-            {zip(data.first, data.second).map(([first, second], i) => (
+            {zip(data.meta_first, data.meta_second).map(([meta_first, meta_second], i) => (
                 <div key={i} className={`row ${styles.tableRow}`}>
-                    <Cell colName="first" value={first} rowId={i} onChange={onTextChangeHandler} />
+                    <Cell colName="meta_first" value={meta_first} rowId={i} onChange={onTextChangeHandler} />
                     <div className="col-2 jus">
                         <div className="d-flex justify-content-center">
                             <i
@@ -76,7 +80,7 @@ const TeacherAssessmentFindPair = ({ data, taskId, onChangeTask }: TeacherAssess
                             />
                         </div>
                     </div>
-                    <Cell colName="second" value={second} rowId={i} onChange={onTextChangeHandler} />
+                    <Cell colName="meta_second" value={meta_second} rowId={i} onChange={onTextChangeHandler} />
                 </div>
             ))}
 

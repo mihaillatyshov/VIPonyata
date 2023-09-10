@@ -1,13 +1,4 @@
-import React from "react";
-import { TAssessmentFillSpacesByHand } from "models/Activity/Items/TAssessmentItems";
-import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
+import { TTeacherAssessmentFillSpacesByHand } from "models/Activity/Items/TAssessmentItems";
+import ITeacherAssessmentFillSpaces from "./ITeacherAssessmentFillSpaces";
 
-const TeacherAssessmentFillSpacesByHand = ({
-    data,
-    taskId,
-    onChangeTask,
-}: TeacherAssessmentTypeProps<TAssessmentFillSpacesByHand>) => {
-    return <div>TeacherAssessmentFillSpacesByHand</div>;
-};
-
-export default TeacherAssessmentFillSpacesByHand;
+export default ITeacherAssessmentFillSpaces<TTeacherAssessmentFillSpacesByHand>;
