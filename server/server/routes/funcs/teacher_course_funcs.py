@@ -5,8 +5,8 @@ from server.exceptions.ApiExceptions import InvalidRequestJson
 from server.models.course import CourseCreateReq
 
 
-def getAllCourses():
-    return {"items": DBQT.GetCourses()}
+def get_all_courses():
+    return {"items": DBQT.get_all_courses()}
 
 
 def create_course():

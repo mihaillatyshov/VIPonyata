@@ -3,10 +3,10 @@ from datetime import datetime, time
 from werkzeug.security import generate_password_hash
 
 from server.log_lib import LogI
-from server.models.db_models import (Assessment, Course, CreateSessionFromJsonFile, Dictionary, Drilling, DrillingCard,
-                                     Hieroglyph, HieroglyphCard, Lesson, User)
+from server.models.db_models import (Assessment, Course, create_db_session_from_json_config_file, Dictionary, Drilling,
+                                     DrillingCard, Hieroglyph, HieroglyphCard, Lesson, User)
 
-DBsession = CreateSessionFromJsonFile()
+DBsession = create_db_session_from_json_config_file()
 
 hashPwd = generate_password_hash("dbnfvbys")
 user = User(name="Mihail", nickname="lm", password=hashPwd, birthday=datetime.now(), level=User.Level.STUDENT)

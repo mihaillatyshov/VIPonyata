@@ -1,12 +1,9 @@
 import json
-from datetime import datetime, time
 
-from werkzeug.security import generate_password_hash
+from server.log_lib import LogI
+from server.models.db_models import Course, create_db_session
 
-from ..db_models import (Course, CreateSession, Dictionary, Drilling, DrillingCard, Lesson, User)
-from ..log_lib import LogI
-
-DBsession = CreateSession("mysql+mysqlconnector", "mihail", "dbnfvbys5", "localhost", "japan")
+DBsession = create_db_session("mysql+mysqlconnector", "mihail", "dbnfvbys5", "localhost", "japan")
 
 courses = DBsession().query(Course).all()
 

@@ -33,7 +33,7 @@ interface IAssessmentCreatePageProps {
 
 interface TAssessmentCreateResponse {
     assessment: {
-        id: number;
+        lesson_id: number;
     };
 }
 
@@ -106,7 +106,7 @@ const IAssessmentCreatePage = ({ title }: IAssessmentCreatePageProps) => {
             },
         })
             .then((json) => {
-                navigate(`/assessment/${json.assessment.id}`);
+                navigate(`/lessons/${json.assessment.lesson_id}`);
             })
             .catch(({ isServerError, json, response }) => {
                 if (!isServerError) {

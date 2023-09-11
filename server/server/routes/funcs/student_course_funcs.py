@@ -2,5 +2,5 @@ import server.queries.StudentDBqueries as DBQS
 from server.routes.routes_utils import GetCurrentUserId
 
 
-def getAllCourses():
+def get_all_courses():
     return {"items": DBQS.GetAvailableCourses(GetCurrentUserId())}

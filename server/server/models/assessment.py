@@ -25,6 +25,9 @@ ANSWER_CANT_BE_EMPTY = "Ответ не может быть пустым"
 QESTION_CANT_BE_EMPTY = "Вопрос не может быть пустым"
 
 
+#########################################################################################################################
+################ Base ###################################################################################################
+#########################################################################################################################
 def validate_name(input_name: str, task_name: AssessmentTaskName):
     if input_name != task_name:
         raise ValueError(f"Input name : {input_name} not eq to task name: {task_name}")
@@ -65,6 +68,10 @@ class BaseModelRes(BaseModelTask, abc.ABC):
         pass
 
 
+class BaseModelCheck(BaseModel):
+    mistakes_count: int = 0
+
+
 #########################################################################################################################
 ################ Text ###################################################################################################
 #########################################################################################################################
@@ -94,6 +101,10 @@ class TextTaskTeacherReq(TextTaskTeacherBase):
             raise ValueError("Текст не может быть пустым")
 
         return values
+
+
+class TextTaskCheck(BaseModelCheck):
+    pass
 
 
 #########################################################################################################################
@@ -143,6 +154,10 @@ class SingleTestTaskTeacherReq(SingleTestTaskTeacherBase):
                 raise ValueError(ANSWER_CANT_BE_EMPTY)
 
         return values
+
+
+class SingleTestTaskCheck(BaseModelCheck):
+    mistake_answer: None | int = None
 
 
 #########################################################################################################################
@@ -207,6 +222,10 @@ class MultiTestTaskTeacherReq(MultiTestTaskTeacherBase):
                 raise ValueError(ANSWER_CANT_BE_EMPTY)
 
         return values
+
+
+class MultiTestTaskCheck(BaseModelCheck):
+    mistake_answers: list[int] = []
 
 
 #########################################################################################################################
@@ -288,8 +307,12 @@ class FindPairTaskTeacherReq(FindPairTaskTeacherBase):
         return values
 
 
+class FindPairTaskCheck(BaseModelCheck):
+    mistake_lines: list[int] = []
+
+
 #########################################################################################################################
-################ CreateSentence #########################################################################################
+################ IOrder #################################################################################################
 #########################################################################################################################
 class IOrderTaskTeacherBase(BaseModelTask):
     meta_parts: list[str]
@@ -338,6 +361,10 @@ class IOrderTaskTeacherReq(IOrderTaskTeacherBase):
         return values
 
 
+class IOrderTaskCheck(BaseModelCheck):
+    mistake_parts: list[int] = []
+
+
 #########################################################################################################################
 ################ CreateSentence #########################################################################################
 #########################################################################################################################
@@ -357,6 +384,45 @@ class CreateSentenceTaskRes(CreateSentenceTaskBase, IOrderTaskRes):
 
 class CreateSentenceTaskTeacherReq(CreateSentenceTaskBase, IOrderTaskTeacherReq):
     pass
+
+
+class CreateSentenceTaskCheck(IOrderTaskCheck):
+    pass
+
+
+#########################################################################################################################
+################ SentenceOrder ##########################################################################################
+#########################################################################################################################
+class SentenceOrderTaskBase(BaseModelTask):
+    @validator("name", always=True)
+    def name_validation(cls, v):
+        return validate_name(v, AssessmentTaskName.SENTENCE_OREDER)
+
+
+class SentenceOrderTaskStudentReq(SentenceOrderTaskBase, IOrderTaskStudentReq):
+    pass
+
+
+class SentenceOrderTaskRes(SentenceOrderTaskBase, IOrderTaskRes):
+    pass
+
+
+class SentenceOrderTaskTeacherReq(SentenceOrderTaskBase, IOrderTaskTeacherReq):
+    pass
+
+
+class SentenceOrderTaskCheck(IOrderTaskCheck):
+    pass
+
+
+# TODO combine 2 classes of FillSpaces<...>
+#########################################################################################################################
+################ IFillSpaces ############################################################################################
+#########################################################################################################################
+
+
+class IFillSpacesTaskCheck(BaseModelCheck):
+    mistake_answers: list[int] = []
 
 
 #########################################################################################################################
@@ -423,6 +489,10 @@ class FillSpacesExistsTaskTeacherReq(FillSpacesExistsTaskTeacherBase):
         return values
 
 
+class FillSpacesExistsTaskCheck(IFillSpacesTaskCheck):
+    pass
+
+
 #########################################################################################################################
 ################ FillSpacesByHand #######################################################################################
 #########################################################################################################################
@@ -472,6 +542,10 @@ class FillSpacesByHandTaskTeacherReq(FillSpacesByHandTaskTeacherBase):
             )
 
         return values
+
+
+class FillSpacesByHandTaskCheck(IFillSpacesTaskCheck):
+    pass
 
 
 #########################################################################################################################
@@ -552,25 +626,8 @@ class ClassificationTaskTeacherReq(ClassificationTaskTeacherBase):
         return values
 
 
-#########################################################################################################################
-################ SentenceOrder ##########################################################################################
-#########################################################################################################################
-class SentenceOrderTaskBase(BaseModelTask):
-    @validator("name", always=True)
-    def name_validation(cls, v):
-        return validate_name(v, AssessmentTaskName.SENTENCE_OREDER)
-
-
-class SentenceOrderTaskStudentReq(SentenceOrderTaskBase, IOrderTaskStudentReq):
-    pass
-
-
-class SentenceOrderTaskRes(SentenceOrderTaskBase, IOrderTaskRes):
-    pass
-
-
-class SentenceOrderTaskTeacherReq(SentenceOrderTaskBase, IOrderTaskTeacherReq):
-    pass
+class ClassificationTaskCheck(BaseModelCheck):
+    mistake_answers: list[list[int]] = []
 
 
 #########################################################################################################################
@@ -606,6 +663,10 @@ class OpenQuestionTaskTeacherReq(OpenQuestionTaskTeacherBase):
         return values
 
 
+class OpenQuestionTaskCheck(BaseModelCheck):
+    pass
+
+
 #########################################################################################################################
 ################ Img ###################################################################################################
 #########################################################################################################################
@@ -635,6 +696,10 @@ class ImgTaskTeacherReq(ImgTaskTeacherBase):
             raise ValueError("Картинка не добавлена")
 
         return values
+
+
+class ImgTaskCheck(BaseModelCheck):
+    pass
 
 
 #########################################################################################################################

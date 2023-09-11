@@ -93,7 +93,7 @@ def get_test_some_things():
 @routes_bp.route("/courses", methods=["GET"])
 @login_required
 def get_all_courses():
-    return UserSelectorFunction(teacher_funcs.getAllCourses, student_funcs.getAllCourses)
+    return UserSelectorFunction(teacher_funcs.get_all_courses, student_funcs.get_all_courses)
 
 
 @routes_bp.route("/courses", methods=["POST"])

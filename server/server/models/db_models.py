@@ -11,12 +11,14 @@ from server.load_config import load_config
 
 Base: Type = declarative_base()
 
+USERS_ID = "users.id"
+
 a_users_courses = Table("users_courses", Base.metadata, Column("id", Integer, primary_key=True),
-                        Column("user_id", Integer, ForeignKey("users.id")),
+                        Column("user_id", Integer, ForeignKey(USERS_ID)),
                         Column("course_id", Integer, ForeignKey("courses.id")))
 
 a_users_lessons = Table("users_lessons", Base.metadata, Column("id", Integer, primary_key=True),
-                        Column("user_id", Integer, ForeignKey("users.id")),
+                        Column("user_id", Integer, ForeignKey(USERS_ID)),
                         Column("lesson_id", Integer, ForeignKey("lessons.id")))
 
 
@@ -39,8 +41,8 @@ class User(Base):
 
     registration_date = Column(DateTime, default=func.now())
 
-    courses = relationship("Course", secondary=a_users_courses, overlaps="courses, user")
-    lessons = relationship("Lesson", secondary=a_users_lessons, overlaps="lessons, user")
+    courses = relationship("Course", secondary=a_users_courses, overlaps="courses,user")
+    lessons = relationship("Lesson", secondary=a_users_lessons, overlaps="lessons,user")
 
     users_dictionary = relationship("UserDictionary", back_populates="user")
 
@@ -61,7 +63,7 @@ class Course(Base):
 
     creation_datetime = Column(DateTime, default=func.now())
 
-    users = relationship("User", secondary=a_users_courses, overlaps="courses, user")
+    users = relationship("User", secondary=a_users_courses, overlaps="courses,user")
 
     lessons = relationship("Lesson", back_populates="course")
 
@@ -80,12 +82,15 @@ class Lesson(Base):
 
     creation_datetime = Column(DateTime, default=func.now())
 
-    users = relationship("User", secondary=a_users_lessons, overlaps="lessons, user")
+    users = relationship("User", secondary=a_users_lessons, overlaps="lessons,user")
 
     course_id = Column(Integer, ForeignKey("courses.id"))
     course = relationship("Course", back_populates="lessons")
 
     drilling = relationship("Drilling", uselist=False)
+    hieroglyph = relationship("Hieroglyph", uselist=False)
+
+    assessment = relationship("Assessment", uselist=False)
 
     def __repr__(self):
         return f"<Lesson: (id={self.id}; name={self.name})>"
@@ -113,7 +118,7 @@ class UserDictionary(Base):
 
     img = Column(String(1024))
 
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(Integer, ForeignKey(USERS_ID))
     user = relationship("User", back_populates="users_dictionary")
 
     dictionary_id = Column(Integer, ForeignKey("dictionary.id"))
@@ -141,7 +146,7 @@ class AbstractActivity(Base):
 
     @declared_attr
     def lesson(cls):
-        return relationship("Lesson", overlaps="drilling, hieroglyphs, assessment")
+        return relationship("Lesson", overlaps="drilling,hieroglyph,assessment")
 
     tries: list = []
     now_try: Any | None = None
@@ -221,7 +226,7 @@ class AbstractActivityTry(Base):
 
     @declared_attr
     def user_id(cls):
-        return Column(Integer, ForeignKey("users.id"))
+        return Column(Integer, ForeignKey(USERS_ID))
 
     def __json__(self):
         data = {}
@@ -314,7 +319,7 @@ ActivityType = LexisType | type[Assessment]
 ActivityTryType = LexisTryType | type[AssessmentTry]
 
 
-def CreateSession(url, username, password, host, database):
+def create_db_session(url, username, password, host, database):
     db_config = URL.create(
         url,
         username=username,
@@ -328,10 +333,10 @@ def CreateSession(url, username, password, host, database):
     print("session created succesfully")
     Base.metadata.create_all(engine)
 
-    Session = scoped_session(session_factory)
-    return Session
+    new_db_session = scoped_session(session_factory)
+    return new_db_session
 
 
-def CreateSessionFromJsonFile():
+def create_db_session_from_json_config_file():
     config = load_config("config.json")["db"]
-    return CreateSession(config["url"], config["username"], config["password"], config["host"], config["database"])
+    return create_db_session(config["url"], config["username"], config["password"], config["host"], config["database"])

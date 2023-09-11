@@ -18,6 +18,12 @@ interface LexisCreatePageProps {
     name: LexisName;
 }
 
+interface TLexisCreateResponse {
+    lexis: {
+        lesson_id: number;
+    };
+}
+
 const getDefaultTasksArray = (): SelectableTask[] => {
     return Object.values(LexisTaskName)
         .filter((taskName) => taskName !== "card")
@@ -74,7 +80,7 @@ const LexisCreatePage = ({ title, name }: LexisCreatePageProps) => {
             setError("Не добавлены активности");
             return;
         }
-        AjaxPost<any>({
+        AjaxPost<TLexisCreateResponse>({
             url: `/api/${name}/${lessonId}`,
             body: {
                 lexis: {
@@ -85,8 +91,8 @@ const LexisCreatePage = ({ title, name }: LexisCreatePageProps) => {
                 words: newWords,
             },
         })
-            .then((body) => {
-                navigate(`/${name}/${body.lexis.id}`);
+            .then((json) => {
+                navigate(`/lessons/${json.lexis.lesson_id}`);
             })
             .catch(({ isServerError, response, json }) => {
                 if (!isServerError) {
