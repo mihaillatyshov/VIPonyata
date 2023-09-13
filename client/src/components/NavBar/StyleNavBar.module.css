@@ -1,6 +1,17 @@
+.notificationsBlock {
+    cursor: pointer;
+}
+
+.profileBlock:hover {
+    opacity: 80%;
+}
+
 .profileImgWrapper {
     width: 48px;
     height: 48px;
+}
+
+.profileImgWrapper:hover {
 }
 
 .profileImg {

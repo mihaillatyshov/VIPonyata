@@ -19,8 +19,6 @@ type StudentActivityBubbleProps = {
 const StudentActivityBubble = ({ info, title, name, onDeadline }: StudentActivityBubbleProps) => {
     const navigate = useNavigate();
 
-    console.log("ActivityBubble info:", info);
-
     const isInProgress = () => {
         if (info.tries && info.tries.length !== 0) {
             console.log("end_datetime", info.tries[info.tries.length - 1].end_datetime);

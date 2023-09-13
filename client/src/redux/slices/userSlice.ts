@@ -29,4 +29,7 @@ export const selectUser = (state: RootState) => state.user;
 
 export const { setUserData } = userSlice.actions;
 
+export const isTeacher = (userData: TUserData) => userData.level === 1;
+export const isStudent = (userData: TUserData) => userData.level !== 1;
+
 export default userSlice.reducer;

@@ -1,12 +1,11 @@
-from typing import Callable, Type, TypeVar
+from typing import Callable
 
-from server.models.assessment import (AssessmentTaskName, BaseModelCheck, BaseModelRes, ClassificationTaskCheck,
-                                      ClassificationTaskRes, CreateSentenceTaskCheck, CreateSentenceTaskRes,
-                                      FillSpacesByHandTaskRes, FillSpacesExistsTaskRes, FindPairTaskCheck,
-                                      FindPairTaskRes, IFillSpacesTaskCheck, IOrderTaskCheck, ImgTaskCheck, ImgTaskRes,
-                                      MultiTestTaskCheck, MultiTestTaskRes, OpenQuestionTaskCheck, OpenQuestionTaskRes,
-                                      SentenceOrderTaskCheck, SentenceOrderTaskRes, SingleTestTaskCheck,
-                                      SingleTestTaskRes, TextTaskCheck, TextTaskRes)
+from server.models.assessment import (AssessmentTaskName, ClassificationTaskCheck, ClassificationTaskRes,
+                                      CreateSentenceTaskRes, FillSpacesByHandTaskRes, FillSpacesExistsTaskRes,
+                                      FindPairTaskCheck, FindPairTaskRes, IFillSpacesTaskCheck, ImgTaskCheck,
+                                      ImgTaskRes, IOrderTaskCheck, MultiTestTaskCheck, MultiTestTaskRes,
+                                      OpenQuestionTaskCheck, OpenQuestionTaskRes, SentenceOrderTaskRes,
+                                      SingleTestTaskCheck, SingleTestTaskRes, TextTaskCheck, TextTaskRes)
 
 
 def text_task_check(_: TextTaskRes) -> TextTaskCheck:
@@ -105,28 +104,21 @@ def img_task_check(_: ImgTaskRes) -> ImgTaskCheck:
     return ImgTaskCheck()
 
 
-# * ...
-# * ...
-# * ...
+CheckAliases: dict[str, Callable] = {}
 
-BMR = TypeVar('BMR', bound=BaseModelRes)
-BMC = TypeVar('BMC', bound=BaseModelCheck)
-
-Aliases: dict[str, Callable] = {}
-
-Aliases[AssessmentTaskName.TEXT] = text_task_check
-Aliases[AssessmentTaskName.TEST_SINGLE] = single_test_task_check
-Aliases[AssessmentTaskName.TEST_MULTI] = multi_test_task_check
-Aliases[AssessmentTaskName.FIND_PAIR] = find_pair_task_check
-Aliases[AssessmentTaskName.CREATE_SENTENCE] = create_sentence_task_check
-Aliases[AssessmentTaskName.SENTENCE_OREDER] = sentence_order_task_check
-Aliases[AssessmentTaskName.FILL_SPACES_EXISTS] = fill_spaces_exists_task_check
-Aliases[AssessmentTaskName.FILL_SPACES_BY_HAND] = fill_spaces_by_hand_task_check
-Aliases[AssessmentTaskName.CLASSIFICATION] = classification_task_check
-Aliases[AssessmentTaskName.OPEN_QUESTION] = open_question_task_check
-Aliases[AssessmentTaskName.IMG] = img_task_check
+CheckAliases[AssessmentTaskName.TEXT] = text_task_check
+CheckAliases[AssessmentTaskName.TEST_SINGLE] = single_test_task_check
+CheckAliases[AssessmentTaskName.TEST_MULTI] = multi_test_task_check
+CheckAliases[AssessmentTaskName.FIND_PAIR] = find_pair_task_check
+CheckAliases[AssessmentTaskName.CREATE_SENTENCE] = create_sentence_task_check
+CheckAliases[AssessmentTaskName.SENTENCE_OREDER] = sentence_order_task_check
+CheckAliases[AssessmentTaskName.FILL_SPACES_EXISTS] = fill_spaces_exists_task_check
+CheckAliases[AssessmentTaskName.FILL_SPACES_BY_HAND] = fill_spaces_by_hand_task_check
+CheckAliases[AssessmentTaskName.CLASSIFICATION] = classification_task_check
+CheckAliases[AssessmentTaskName.OPEN_QUESTION] = open_question_task_check
+CheckAliases[AssessmentTaskName.IMG] = img_task_check
 
 # Check Aliases
 for name in AssessmentTaskName:
-    if name.value not in Aliases.keys():
-        raise KeyError(f"Alias {name} not found")
+    if name.value not in CheckAliases.keys():
+        raise KeyError(f"CheckAlias {name} not found")

@@ -3,7 +3,7 @@ from server.models.assessment import AssessmentCreateReq
 from server.models.course import CourseCreateReq
 from server.models.db_models import (Assessment, AssessmentTry, Course, Dictionary, Drilling, DrillingCard, DrillingTry,
                                      Hieroglyph, HieroglyphCard, HieroglyphTry, Lesson, LexisCardType, LexisTryType,
-                                     LexisType)
+                                     LexisType, NotificationStudentToTeacher)
 from server.models.lesson import LessonCreateReq
 from server.common import DBsession
 from server.models.dictionary import DictionaryCreateReq, DictionaryCreateReqItem
@@ -152,3 +152,16 @@ def create_or_get_dictionary(dictionary_data: DictionaryCreateReq) -> list[Dicti
         result.append(dictionary_item)
 
     return result
+
+
+#########################################################################################################################
+################ Notifications ##########################################################################################
+#########################################################################################################################
+def get_notifications():
+    return (                                                                                                            #
+        DBsession()                                                                                                     #
+        .query(NotificationStudentToTeacher)                                                                            #
+        .filter(NotificationStudentToTeacher.deleted == False)                                                          #
+        .order_by(NotificationStudentToTeacher.creation_datetime)                                                       #
+        .all()                                                                                                          #
+    )

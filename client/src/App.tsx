@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "./redux/hooks";
 import { AjaxGet } from "./libs/ServerAPI";
-import { UserState, selectUser, setUserData } from "./redux/slices/userSlice";
+import { UserState, isTeacher, selectUser, setUserData } from "./redux/slices/userSlice";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Loading from "./components/Common/Loading";
 import LoginPage from "./components/Authentication/LoginPage";
@@ -47,30 +47,18 @@ const App = () => {
         if (user.isAuth === undefined) {
             return <Loading />;
         } else if (user.isAuth && user.userData !== undefined) {
-            if (user.userData.level === 1) {
-                return teacherRoute;
-            } else {
-                return studentRoute;
-            }
+            return isTeacher(user.userData) ? teacherRoute : studentRoute;
         } else {
             return unloggedRoute;
         }
     };
 
     const getLoggedRoute = (loggedRoute: React.ReactNode) => {
-        if (user.isAuth && user.userData !== undefined) {
-            return loggedRoute;
-        } else {
-            return <NavigateHome />;
-        }
+        return user.isAuth && user.userData !== undefined ? loggedRoute : <NavigateHome />;
     };
 
     const getTeacherRoute = (teacherRoute: React.ReactNode) => {
-        if (user.isAuth && user.userData !== undefined && user.userData.level === 1) {
-            return teacherRoute;
-        } else {
-            return <NavigateHome />;
-        }
+        return user.isAuth && user.userData !== undefined && isTeacher(user.userData) ? teacherRoute : <NavigateHome />;
     };
 
     // TODO Select theme

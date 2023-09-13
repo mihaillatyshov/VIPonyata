@@ -1,7 +1,7 @@
 import datetime
 from typing import Any, Type
 
-from sqlalchemy import (Column, Date, DateTime, ForeignKey, Integer, String, Table, Text, Time, create_engine)
+from sqlalchemy import (Boolean, Column, Date, DateTime, ForeignKey, Integer, String, Table, Text, Time, create_engine)
 from sqlalchemy.engine import URL
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import relationship, scoped_session, sessionmaker
@@ -22,6 +22,9 @@ a_users_lessons = Table("users_lessons", Base.metadata, Column("id", Integer, pr
                         Column("lesson_id", Integer, ForeignKey("lessons.id")))
 
 
+#########################################################################################################################
+################ User ###################################################################################################
+#########################################################################################################################
 class User(Base):
     class Level:
         STUDENT = 0
@@ -50,6 +53,9 @@ class User(Base):
         return f"<User: (id={self.id}; nickname={self.nickname}; level={self.level})>"
 
 
+#########################################################################################################################
+################ Course #################################################################################################
+#########################################################################################################################
 class Course(Base):
     __tablename__ = "courses"
     id = Column(Integer, primary_key=True)
@@ -71,6 +77,9 @@ class Course(Base):
         return f"<Course: (id={self.id}; name={self.name})>"
 
 
+#########################################################################################################################
+################ Lesson #################################################################################################
+#########################################################################################################################
 class Lesson(Base):
     __tablename__ = "lessons"
     id = Column(Integer, primary_key=True)
@@ -96,6 +105,9 @@ class Lesson(Base):
         return f"<Lesson: (id={self.id}; name={self.name})>"
 
 
+#########################################################################################################################
+################ Dictionary #############################################################################################
+#########################################################################################################################
 class Dictionary(Base):
     __tablename__ = "dictionary"
     id = Column(Integer, primary_key=True)
@@ -132,6 +144,9 @@ def time_limit_to_timedelta(time_limit: Time) -> datetime.timedelta:
                               microseconds=time_limit.microsecond)
 
 
+#########################################################################################################################
+################ Activity ###############################################################################################
+#########################################################################################################################
 class AbstractActivity(Base):
     __abstract__ = True
     id = Column(Integer, primary_key=True)
@@ -175,6 +190,32 @@ class AbstractActivity(Base):
         return data
 
 
+class AbstractActivityTry(Base):
+    __abstract__ = True
+    id = Column(Integer, primary_key=True)
+
+    try_number = Column(Integer, nullable=False)
+    start_datetime = Column(DateTime, nullable=False)
+    end_datetime = Column(DateTime)
+
+    @declared_attr
+    def user_id(cls):
+        return Column(Integer, ForeignKey(USERS_ID))
+
+    @declared_attr
+    def user(cls):
+        return relationship("User")
+
+    def __json__(self):
+        data = {}
+        for column in self.__table__.columns:
+            data[column.name] = getattr(self, column.name)
+        return data
+
+
+#########################################################################################################################
+################ Lexis ##################################################################################################
+#########################################################################################################################
 class AbstractLexis(AbstractActivity):
     __abstract__ = True
     tasks = Column(String(2048), nullable=False)
@@ -183,15 +224,15 @@ class AbstractLexis(AbstractActivity):
         return self.tasks.split(",")
 
     def getCardWords(self):
-        wordsRU = []
-        wordsJP = []
-        charsJP = []
+        words_ru = []
+        words_jp = []
+        chars_jp = []
         for card in self.cards:
-            wordsRU.append(card.dictionary.ru)
-            wordsJP.append(card.dictionary.word_jp)
-            charsJP.append(card.dictionary.char_jp)
+            words_ru.append(card.dictionary.ru)
+            words_jp.append(card.dictionary.word_jp)
+            chars_jp.append(card.dictionary.char_jp)
 
-        return wordsRU, wordsJP, charsJP
+        return words_ru, words_jp, chars_jp
 
 
 class AbstractLexisCard(Base):
@@ -216,25 +257,6 @@ class AbstractLexisCard(Base):
         return data
 
 
-class AbstractActivityTry(Base):
-    __abstract__ = True
-    id = Column(Integer, primary_key=True)
-
-    try_number = Column(Integer, nullable=False)
-    start_datetime = Column(DateTime, nullable=False)
-    end_datetime = Column(DateTime)
-
-    @declared_attr
-    def user_id(cls):
-        return Column(Integer, ForeignKey(USERS_ID))
-
-    def __json__(self):
-        data = {}
-        for column in self.__table__.columns:
-            data[column.name] = getattr(self, column.name)
-        return data
-
-
 class AbstractLexisTry(AbstractActivityTry):
     __abstract__ = True
     done_tasks = Column(String(2048))
@@ -253,6 +275,9 @@ class AbstractLexisTry(AbstractActivityTry):
         return data
 
 
+#########################################################################################################################
+################ Drilling ###############################################################################################
+#########################################################################################################################
 class Drilling(AbstractLexis):
     __tablename__ = "drillings"
 
@@ -273,6 +298,9 @@ class DrillingTry(AbstractLexisTry):
     base = relationship("Drilling")
 
 
+#########################################################################################################################
+################ Hieroglyph #############################################################################################
+#########################################################################################################################
 class Hieroglyph(AbstractLexis):
     __tablename__ = "hieroglyphs"
 
@@ -293,6 +321,9 @@ class HieroglyphTry(AbstractLexisTry):
     base = relationship("Hieroglyph")
 
 
+#########################################################################################################################
+################ Assessment #############################################################################################
+#########################################################################################################################
 class Assessment(AbstractActivity):
     __tablename__ = "assessments"
 
@@ -309,9 +340,52 @@ class AssessmentTry(AbstractActivityTry):
 
     base_id = Column(Integer, ForeignKey("assessments.id"))
     base = relationship("Assessment")
+
     done_tasks = Column(Text, nullable=False)
+    checked_tasks = Column(Text)
 
 
+#########################################################################################################################
+################ Notifications ##########################################################################################
+#########################################################################################################################
+class NotificationStudentToTeacher(Base):
+    __tablename__ = "notifications_student_to_teacher"
+    id = Column(Integer, primary_key=True)
+
+    message = Column(Text)
+
+    viewed = Column(Boolean, nullable=False, default=False)
+    deleted = Column(Boolean, nullable=False, default=False)
+
+    drilling_try_id = Column(Integer, ForeignKey("drilling_tries.id"))
+    drilling_try = relationship("DrillingTry")
+
+    hieroglyph_try_id = Column(Integer, ForeignKey("hieroglyph_tries.id"))
+    hieroglyph_try = relationship("HieroglyphTry")
+
+    assessment_try_id = Column(Integer, ForeignKey("assessment_tries.id"))
+    assessment_try = relationship("AssessmentTry")
+
+    creation_datetime = Column(DateTime, default=func.now())
+
+    def __json__(self):
+        data = {"message": self.message, "type": None}
+        for activity_try_name in ["drilling_try", "hieroglyph_try", "assessment_try"]:
+            if activity_try := getattr(self, activity_try_name):
+                data["type"] = activity_try_name
+                data["lesson"] = activity_try.base.lesson
+                data["user"] = activity_try.user
+                data["activity_try_id"] = activity_try.id
+                data["activity_try"] = activity_try
+                data["activity"] = activity_try.base
+                break
+
+        return data
+
+
+#########################################################################################################################
+################ Utils ##################################################################################################
+#########################################################################################################################
 LexisType = type[Drilling] | type[Hieroglyph]
 LexisCardType = type[DrillingCard] | type[HieroglyphCard]
 LexisTryType = type[DrillingTry] | type[HieroglyphTry]

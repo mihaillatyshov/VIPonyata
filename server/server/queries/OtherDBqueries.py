@@ -2,7 +2,9 @@ from datetime import datetime
 
 from server.common import DBsession
 from server.log_lib import LogW
-from server.models.db_models import ActivityTryType, ActivityType
+from server.models.db_models import (ActivityTryType, ActivityType, AssessmentTry, DrillingTry, HieroglyphTry)
+from server.queries.StudentDBqueries import (add_assessment_notification, add_drilling_notification,
+                                             add_hieroglyph_notification)
 
 
 def GetActivityCheckTasksTimers(activity_type: ActivityType,
@@ -25,6 +27,13 @@ def GetActivityTryById(activityTryId: int, activityTry_type: ActivityTryType) ->
 
 def UpdateActivityTryEndTime(activity_try_id: int, endTime: datetime, activityTry_type: ActivityTryType) -> None:
     if activity_try := DBsession().query(activityTry_type).filter(activityTry_type.id == activity_try_id).one_or_none():
+        if activityTry_type == AssessmentTry:
+            add_assessment_notification(activity_try.id)
+        elif activityTry_type == DrillingTry:
+            add_drilling_notification(activity_try.id)
+        elif activityTry_type == HieroglyphTry:
+            add_hieroglyph_notification(activity_try.id)
+
         activity_try.end_datetime = endTime
         DBsession().add(activity_try)
         DBsession().commit()

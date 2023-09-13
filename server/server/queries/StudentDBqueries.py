@@ -5,7 +5,8 @@ from server.exceptions.ApiExceptions import (ActivityNotFoundException, CourseNo
                                              LessonNotFoundException)
 from server.log_lib import LogI
 from server.models.db_models import (ActivityTryType, ActivityType, Assessment, AssessmentTry, Course, Dictionary,
-                                     Drilling, DrillingTry, Hieroglyph, HieroglyphTry, Lesson, User, UserDictionary)
+                                     Drilling, DrillingTry, Hieroglyph, HieroglyphTry, Lesson,
+                                     NotificationStudentToTeacher, User, UserDictionary)
 
 
 #########################################################################################################################
@@ -183,13 +184,18 @@ HieroglyphQueries = LexisQueries(Hieroglyph, HieroglyphTry)
 ################ Assessment #############################################################################################
 #########################################################################################################################
 class AssessmentQueriesClass(ActivityQueries):
-    def AddNewTry(self, tryNumber: int, activityId: int, userId: int, tasks={}) -> ActivityTryType | None:
+    def AddNewTry(self,
+                  tryNumber: int,
+                  activityId: int,
+                  userId: int,
+                  tasks: str = "",
+                  checked_tasks: str = "") -> ActivityTryType | None:
         LogI(f"Add New Activity Try {self._activityTry_type.__name__}:", tryNumber, activityId, userId)
-        #activity = DBsession().query(self._activity_type).filter(self._activity_type.id == activityId).one_or_none()
         newActivityTry = self._activityTry_type(try_number=tryNumber,
                                                 start_datetime=datetime.now(),
                                                 user_id=userId,
                                                 done_tasks=tasks,
+                                                checked_tasks=checked_tasks,
                                                 base_id=activityId)
         DBsession().add(newActivityTry)
         DBsession().commit()
@@ -209,3 +215,32 @@ def get_dictionary(user_id: int) -> list[Dictionary]:
         .filter(UserDictionary.user_id == user_id)                                                                      #
         .all()                                                                                                          #
     )
+
+
+#########################################################################################################################
+################ Notifications ##########################################################################################
+#########################################################################################################################
+def get_notifications(user_id: int):
+    return {"user": user_id}
+    # ! return (                                                                                                            #
+    # !   DBsession()                                                                                                     #
+    # !   .query(NotificationStudentToTeacher)                                                                            #
+    # !   .filter(NotificationStudentToTeacher.deleted == False)                                                          #
+    # !   .order_by(NotificationStudentToTeacher.creation_datetime)                                                       #
+    # !   .all()                                                                                                          #
+    # ! )
+
+
+def add_assessment_notification(assessment_try_id: int):
+    DBsession().add(NotificationStudentToTeacher(assessment_try_id=assessment_try_id))
+    DBsession().commit()
+
+
+def add_drilling_notification(drilling_try_id: int):
+    DBsession().add(NotificationStudentToTeacher(drilling_try_id=drilling_try_id))
+    DBsession().commit()
+
+
+def add_hieroglyph_notification(hieroglyph_try_id: int):
+    DBsession().add(NotificationStudentToTeacher(hieroglyph_try_id=hieroglyph_try_id))
+    DBsession().commit()

@@ -15,7 +15,7 @@ const Profile = () => {
     return (
         <div className="col-auto">
             <Link to={"/profile"}>
-                <div className="d-flex">
+                <div className={`d-flex align-items-center ${styles.profileBlock}`}>
                     <div className={styles.profileImgWrapper}>
                         {user.userData.avatar ? (
                             <img className={styles.profileImg} alt="profile" src={user.userData.avatar} />
@@ -23,7 +23,7 @@ const Profile = () => {
                             <i className="bi bi-person-circle font-icon-height-0 a-link" style={{ fontSize: "48px" }} />
                         )}
                     </div>
-                    <div>
+                    <div className="ms-1">
                         <div className="mx-auto"> {user.userData.name} </div>
                     </div>
                 </div>
