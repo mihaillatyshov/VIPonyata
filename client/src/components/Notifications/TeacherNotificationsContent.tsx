@@ -1,5 +1,6 @@
 import React from "react";
 import { TTeacherNotification, TTeacherNotificationWithActivity } from "models/TNotification";
+import { Link } from "react-router-dom";
 
 const SECOND = 1_000;
 const MINUTE = SECOND * 60;
@@ -50,13 +51,14 @@ const ItemContent = ({ item }: ItemContentProps) => {
 
     return (
         <div>
-            <span>
-                {item.user.name} ({item.user.nickname})
-            </span>
-            <span> выполнил {getTypeName(item)} </span>
-            <span> из урока "{item.lesson.name}" </span>
-            <span> за {getStrHHMMSS(elapsedTime)}. </span>
-            <span> </span>
+            <Link to={`/${item.type}/${item.activity_try_id}`}>
+                <span>
+                    {item.user.name} ({item.user.nickname})
+                </span>
+                <span> выполнил {getTypeName(item)} </span>
+                <span> из урока "{item.lesson.name}" </span>
+                <span> за {getStrHHMMSS(elapsedTime)}. </span>
+            </Link>
         </div>
     );
 };

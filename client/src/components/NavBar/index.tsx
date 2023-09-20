@@ -7,30 +7,39 @@ import Notifications from "components/Notifications/Notifications";
 import styles from "./StyleNavBar.module.css";
 import { AjaxGet } from "libs/ServerAPI";
 import { TAnyNotification } from "models/TNotification";
+import { useAppSelector } from "redux/hooks";
+import { selectUser } from "redux/slices/userSlice";
 
 const NavBar = () => {
     const [showNotifications, setShowNotifications] = useState<boolean>(false);
     const [notifications, setNotifications] = useState<TAnyNotification[]>([]);
+    const user = useAppSelector(selectUser);
 
-    const openNotifications = () => {
-        console.log("open");
-        setShowNotifications(true);
-    };
-    const closeNotifications = () => {
-        console.log("close");
-        setShowNotifications(false);
-    };
+    const openNotifications = () => setShowNotifications(true);
+    const closeNotifications = () => setShowNotifications(false);
 
-    useLayoutEffect(() => {
+    const getNotifications = () => {
         AjaxGet<{ notifications: TAnyNotification[] }>({ url: "/api/notifications" })
             .then((json) => {
-                console.log(json);
                 setNotifications(json.notifications);
             })
             .catch((data) => {
                 console.log(data);
             });
-    }, []);
+    };
+
+    useLayoutEffect(() => {
+        getNotifications();
+        let timerId = setInterval(getNotifications, 60_000);
+
+        return () => clearInterval(timerId);
+    }, [user]);
+
+    const getNotiifcationStr = (): string => {
+        if (notifications.length === 0) return "";
+        if (notifications.length >= 10) return "9+";
+        return notifications.length.toString();
+    };
 
     return (
         <div className="container mainNavBar">
@@ -51,7 +60,7 @@ const NavBar = () => {
                         >
                             <i className="bi bi-bell-fill font-icon-height-0" style={{ fontSize: "32px" }}></i>
                             <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                {notifications.length >= 10 ? "9+" : notifications.length}
+                                {getNotiifcationStr()}
                             </span>
                         </div>
                         <Notifications

@@ -162,6 +162,6 @@ def get_notifications():
         DBsession()                                                                                                     #
         .query(NotificationStudentToTeacher)                                                                            #
         .filter(NotificationStudentToTeacher.deleted == False)                                                          #
-        .order_by(NotificationStudentToTeacher.creation_datetime)                                                       #
+        .order_by(NotificationStudentToTeacher.creation_datetime.desc())                                                #
         .all()                                                                                                          #
     )

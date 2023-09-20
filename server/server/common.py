@@ -21,7 +21,7 @@ class CustomJSONEncoder(json.JSONEncoder):
             for column in obj.__table__.columns:
                 data[column.name] = getattr(obj, column.name)
             return data
-        if type(obj) == timedelta or type(obj) == time or type(obj) == datetime:
+        if isinstance(obj, timedelta) or isinstance(obj, time) or isinstance(obj, datetime):
             return str(obj)
 
         return json.JSONEncoder.default(self, obj)

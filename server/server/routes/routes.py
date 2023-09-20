@@ -6,6 +6,7 @@ from flask import Blueprint, request, send_from_directory
 from flask_login import login_required
 from PIL import Image
 from werkzeug.utils import secure_filename
+from server.exceptions.ApiExceptions import InvalidRequestJson
 
 from server.models.db_models import Course
 from server.log_lib import LogI
@@ -94,6 +95,19 @@ def post_img_upload():
 @routes_bp.route("/test", methods=["GET"])
 def get_test_some_things():
     return {"test": "test", "val": 10}
+
+
+@routes_bp.route("/test", methods=["POST"])
+def post_test_some_things():
+    return {"test": "test", "val": 10}
+
+
+@routes_bp.route("/test_param", methods=["POST"])
+def post_test_some_things_param():
+    if not request.json:
+        raise InvalidRequestJson()
+
+    return {"test": "test", "x": request.json.get("x")}
 
 
 #########################################################################################################################
