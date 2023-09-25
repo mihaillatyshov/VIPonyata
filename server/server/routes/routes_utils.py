@@ -7,7 +7,7 @@ import server.queries.OtherDBqueries as DBQO
 from server.exceptions.ApiExceptions import InvalidAPIUsage
 from server.log_lib import LogI
 from server.models.db_models import (ActivityTryType, ActivityType, Assessment, AssessmentTry, Drilling, DrillingTry,
-                                     Hieroglyph, HieroglyphTry)
+                                     FinalBoss, FinalBossTry, Hieroglyph, HieroglyphTry)
 
 
 def GetCurrentUserId() -> int:
@@ -67,3 +67,4 @@ def OnRestartServerCheckTasksTimers():
     OnRestartServerCheckTasksTimersByType(Drilling, DrillingTry)
     OnRestartServerCheckTasksTimersByType(Hieroglyph, HieroglyphTry)
     OnRestartServerCheckTasksTimersByType(Assessment, AssessmentTry)
+    OnRestartServerCheckTasksTimersByType(FinalBoss, FinalBossTry)

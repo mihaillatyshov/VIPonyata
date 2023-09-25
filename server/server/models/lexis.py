@@ -13,3 +13,12 @@ class LexisCreateReq(BaseModel):
         if v is None:
             return None
         return datetime.datetime.strptime(v, '%H:%M:%S').time()
+
+
+class LexisCardCreateReqItem(BaseModel):
+    sentence: str
+    answer: str
+    dictionary_id: int
+    
+class LexisCardCreateReq(BaseModel):
+    

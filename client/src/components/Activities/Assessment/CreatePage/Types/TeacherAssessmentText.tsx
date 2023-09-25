@@ -5,7 +5,7 @@ import InputTextArea from "components/Form/InputTextArea";
 
 const TeacherAssessmentText = ({ data, taskId, onChangeTask }: TeacherAssessmentTypeProps<TTeacherAssessmentText>) => {
     const changeTextHandler = (newValue: string) => {
-        onChangeTask(taskId, { name: TAssessmentTaskName.TEXT, text: newValue.trim() });
+        onChangeTask(taskId, { name: TAssessmentTaskName.TEXT, text: newValue });
     };
 
     return (

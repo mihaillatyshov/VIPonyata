@@ -9,7 +9,7 @@ const TeacherAssessmentOpenQuestion = ({
     onChangeTask,
 }: TeacherAssessmentTypeProps<TTeacherAssessmentOpenQuestion>) => {
     const changeTextHandler = (newValue: string) => {
-        onChangeTask(taskId, { ...data, question: newValue.trim() });
+        onChangeTask(taskId, { ...data, question: newValue });
     };
 
     return (

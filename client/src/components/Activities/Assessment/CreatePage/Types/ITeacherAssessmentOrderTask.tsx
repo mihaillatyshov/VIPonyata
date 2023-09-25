@@ -73,7 +73,7 @@ const ITeacherAssessmentOrderTask = <T extends TTeacherAssessmentFillSpaceType>(
 }: ITeacherAssessmentOrderTaskProps<T>) => {
     const onTextChange = (newValue: string, id: number) => {
         const newParts = data.meta_parts;
-        newParts[id] = newValue.trim();
+        newParts[id] = newValue;
         onChangeTask(taskId, { ...data, meta_parts: newParts });
     };
 

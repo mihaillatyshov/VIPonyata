@@ -32,6 +32,8 @@ const getTypeName = (item: TTeacherNotificationWithActivity) => {
             return "Иероглифы";
         case "assessment_try":
             return "Ассессмент";
+        case "final_boss_try":
+            return "Финальный босс";
     }
 };
 

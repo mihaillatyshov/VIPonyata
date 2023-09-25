@@ -40,7 +40,7 @@ const TeacherAssessmentFindPair = ({
 }: TeacherAssessmentTypeProps<TTeacherAssessmentFindPair>) => {
     const onTextChangeHandler = (newValue: string, colName: TColNames, rowId: number) => {
         const newCol = data[colName];
-        newCol[rowId] = newValue.trim();
+        newCol[rowId] = newValue;
         onChangeTask(taskId, { ...data, [colName]: newCol });
     };
 

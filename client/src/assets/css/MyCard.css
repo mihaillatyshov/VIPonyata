@@ -1,0 +1,25 @@
+.my-card {
+    width: 100%;
+    min-height: 100px;
+    border-radius: 16px;
+    border: 1px solid #444444;
+    padding: 16px;
+    margin: 20px 0;
+    background-color: var(--css-var-bg);
+    box-shadow: 3px 3px 10px 5px rgba(0, 0, 0, 0.2);
+}
+
+.my-card-header {
+    border-bottom: 1px solid #000000;
+    padding-bottom: 10px;
+    display: flex;
+}
+
+.my-card-header-title {
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.my-card-body {
+    padding-top: 16px;
+}

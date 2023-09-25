@@ -14,13 +14,13 @@ const TeacherAssessmentClassification = ({
 
     const onTitleChangeHandler = (newValue: string, colId: number) => {
         const newTitles = [...data.titles];
-        newTitles.splice(colId, 1, newValue.trim());
+        newTitles.splice(colId, 1, newValue);
         onChangeTask(taskId, { ...data, titles: newTitles });
     };
 
     const onAnswerChangeHandler = (newValue: string, colId: number, rowId: number) => {
         const newAnswers = [...data.meta_answers];
-        newAnswers[colId].splice(rowId, 1, newValue.trim());
+        newAnswers[colId].splice(rowId, 1, newValue);
         onChangeTask(taskId, { ...data, meta_answers: newAnswers });
     };
 

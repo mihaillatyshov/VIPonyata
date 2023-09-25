@@ -12,7 +12,9 @@ interface ContentProps {
 
 const Content = ({ notifications }: ContentProps) => {
     const user = useAppSelector(selectUser);
-    return user.userData !== undefined && isTeacher(user.userData) ? (
+    if (user.userData === undefined) return <div></div>;
+
+    return isTeacher(user.userData) ? (
         <TeacherNotificationsContent notifications={notifications as TTeacherNotification[]} />
     ) : (
         <StudentNotificationsContent notifications={notifications as TStudentNotification[]} />

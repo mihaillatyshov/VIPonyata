@@ -1,10 +1,10 @@
 import React from "react";
+import { TDictionaryItemCreate } from "models/TDictionary";
 
 import styles from "./StylesCreatePage.module.css";
-import { DictionaryWord } from "./NewWordsModal";
 
 interface WordsTableProps {
-    words: DictionaryWord[];
+    words: TDictionaryItemCreate[];
 }
 
 const WordsTable = ({ words }: WordsTableProps) => {

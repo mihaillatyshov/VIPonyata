@@ -13,7 +13,6 @@ const StudentAssessmentFillSpacesByHand = ({
     const onChangeHandler = (e: React.ChangeEvent<HTMLInputElement>, fieldId: number) => {
         console.log(e.target.value);
         data.answers[fieldId] = e.target.value;
-        // TODO Add message to server
         dispatch(setAssessmentTaskData({ id: taskId, data: data }));
     };
 

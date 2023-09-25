@@ -1,4 +1,7 @@
+from flask import request
+
 import server.queries.StudentDBqueries as DBQS
+from server.exceptions.ApiExceptions import InvalidRequestJson
 from server.routes.routes_utils import GetCurrentUserId
 
 
@@ -13,3 +16,16 @@ def get_dictionary() -> dict:
         result.append(dict_item)
 
     return {"dictionary": result}
+
+
+def add_img_to_dictionary(id: int) -> dict:
+    if not request.json:
+        raise InvalidRequestJson()
+
+    url = request.json.get("url")
+    if not isinstance(url, str):
+        raise InvalidRequestJson()
+
+    DBQS.add_img_to_dictionary(id, url, GetCurrentUserId())
+
+    return {"message": "ok"}

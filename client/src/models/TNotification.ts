@@ -1,6 +1,5 @@
+import { ILexis } from "./Activity/ILexis";
 import { TAssessment } from "./Activity/TAssessment";
-import { TDrilling } from "./Activity/TDrilling";
-import { THieroglyph } from "./Activity/THieroglyph";
 import { TAssessmentTry } from "./Activity/Try/TAssessmentTry";
 import { TLexisTry } from "./Activity/Try/TLexisTry";
 import { TLesson } from "./TLesson";
@@ -18,17 +17,12 @@ type TTeacherNotificationActivity = {
     user: TUserData;
 } & (
     | {
-          type: "drilling_try";
-          activity: TDrilling;
+          type: "drilling_try" | "hieroglyph_try";
+          activity: ILexis;
           activity_try: TLexisTry;
       }
     | {
-          type: "hieroglyph_try";
-          activity: THieroglyph;
-          activity_try: TLexisTry;
-      }
-    | {
-          type: "assessment_try";
+          type: "assessment_try" | "final_boss_try";
           activity: TAssessment;
           activity_try: TAssessmentTry;
       }

@@ -276,6 +276,18 @@ def get_dictionary():
     return UserSelectorFunction(teacher_funcs.get_dictionary, student_funcs.get_dictionary)
 
 
+@routes_bp.route("/dictionary", methods=["POST"])
+@login_required
+def create_dictionary():
+    return UserSelectorFunction(teacher_funcs.create_dictionary, None)
+
+
+@routes_bp.route("/dictionary/<id>/img", methods=["POST"])
+@login_required
+def add_img_to_dictionary(id):
+    return UserSelectorFunction(teacher_funcs.add_img_to_dictionary, student_funcs.add_img_to_dictionary, id=id)
+
+
 #########################################################################################################################
 ################ Notifications ##########################################################################################
 #########################################################################################################################

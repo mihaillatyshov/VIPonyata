@@ -1,6 +1,7 @@
 import abc
 import datetime
 import random
+import re
 from enum import Enum
 from typing import TypedDict
 
@@ -23,6 +24,7 @@ class AssessmentTaskName(str, Enum):
 
 ANSWER_CANT_BE_EMPTY = "Ответ не может быть пустым"
 QESTION_CANT_BE_EMPTY = "Вопрос не может быть пустым"
+_RE_COMBINE_WHITESPACE = re.compile(r"\s+")
 
 
 #########################################################################################################################
@@ -510,6 +512,14 @@ class FillSpacesByHandTaskTeacherBase(FillSpacesByHandTaskBase):
 class FillSpacesByHandTaskStudentReq(FillSpacesByHandTaskBase):
     answers: list[str]
 
+    @root_validator(skip_on_failure=True)
+    def answers_validation(cls, values: dict):
+        # TODO: Add check for answers count
+        for i in range(len(values["answers"])):
+            values["answers"][i] = _RE_COMBINE_WHITESPACE.sub(" ", values["answers"][i]).strip()
+
+        return values
+
 
 class FillSpacesByHandTaskRes(FillSpacesByHandTaskTeacherBase, BaseModelRes):
     answers: list[str] = []
@@ -645,6 +655,12 @@ class OpenQuestionTaskTeacherBase(OpenQuestionTaskBase):
 
 class OpenQuestionTaskStudentReq(OpenQuestionTaskBase):
     answer: str
+
+    @root_validator(skip_on_failure=True)
+    def answers_validation(cls, values: dict):
+        values["answer"] = _RE_COMBINE_WHITESPACE.sub(" ", values["answer"]).strip()
+
+        return values
 
 
 class OpenQuestionTaskRes(OpenQuestionTaskTeacherBase, BaseModelRes):

@@ -2,15 +2,16 @@ import React, { useState } from "react";
 import Modal from "react-bootstrap/Modal";
 import WordsTable from "./WordsTable";
 import InputError from "components/Form/InputError";
+import { TDictionaryItemCreate } from "models/TDictionary";
 
-export interface DictionaryWord {
+interface TDictionaryItemCreateRaw {
     ru: string | null;
     word_jp: string | null;
     char_jp: string | null;
 }
 
 interface NewWordsModalProps {
-    setWords: (words: DictionaryWord[]) => void;
+    createNewWords: (words: TDictionaryItemCreate[], setError: (message: string) => void) => void;
     isShow: boolean;
     close: () => void;
     colToCheck: "word_jp" | "char_jp";
@@ -20,12 +21,12 @@ const textareaPlaceholder = Array.from(Array(9).keys())
     .map((i) => `Рус_${i}                Яп_слово_${i}                Яп_символ_${i}`)
     .join("\n");
 
-const NewWordsModal = ({ setWords, isShow, close, colToCheck }: NewWordsModalProps) => {
+const NewWordsModal = ({ createNewWords, isShow, close, colToCheck }: NewWordsModalProps) => {
     const [text, setText] = useState<string>();
-    const [preview, setPreview] = useState<DictionaryWord[]>([]);
+    const [preview, setPreview] = useState<TDictionaryItemCreate[]>([]);
     const [error, setError] = useState<string>("");
 
-    const checkCol = (lines: DictionaryWord[]) => {
+    const checkCol = (lines: TDictionaryItemCreateRaw[]): lines is TDictionaryItemCreate[] => {
         for (const line of lines) {
             if (line[colToCheck] === null) {
                 setError("Нужная колонка имеет пропуски!!!");
@@ -65,8 +66,7 @@ const NewWordsModal = ({ setWords, isShow, close, colToCheck }: NewWordsModalPro
         if (error !== "") {
             return;
         }
-        setWords(preview);
-        close();
+        createNewWords(preview, setError);
     };
 
     return (

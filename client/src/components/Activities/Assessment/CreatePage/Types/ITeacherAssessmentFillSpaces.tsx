@@ -72,7 +72,7 @@ const ITeacherAssessmentFillSpaces = <T extends TTeacherAssessmentFillSpaceType>
 }: TeacherAssessmentTypeProps<T>) => {
     const onTextChangeHandler = (newValue: string, colName: TItemNames, rowId: number) => {
         const newCol = data[colName];
-        newCol[rowId] = newValue.trim();
+        newCol[rowId] = newValue;
         onChangeTask(taskId, { ...data, [colName]: newCol });
     };
 

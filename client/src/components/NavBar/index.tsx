@@ -46,7 +46,7 @@ const NavBar = () => {
             <div className="row justify-content-center align-items-center">
                 <div className="col-12 col-sm-8 col-md-6 col-lg-4 px-0 align-items-center">
                     <Link to="/">
-                        <img src="/svg/Logo.svg" alt="Главная" height={100} />
+                        <img src="/svg/LogoFull.svg" alt="Главная" height={100} />
                     </Link>
                 </div>
                 <div className="col-4 mx-lg-auto order-2 order-lg-1 d-flex flex-column align-items-center">

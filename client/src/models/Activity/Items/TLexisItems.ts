@@ -1,3 +1,9 @@
+export interface TCreateCardItem {
+    sentence: string;
+    answer: string;
+    dictionary_id: number;
+}
+
 export interface TSingleCardItem {
     id: number;
     sentence: string;

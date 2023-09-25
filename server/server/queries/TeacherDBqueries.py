@@ -1,3 +1,4 @@
+from server.exceptions.ApiExceptions import InvalidAPIUsage
 from server.log_lib import LogI
 from server.models.assessment import AssessmentCreateReq
 from server.models.course import CourseCreateReq
@@ -152,6 +153,16 @@ def create_or_get_dictionary(dictionary_data: DictionaryCreateReq) -> list[Dicti
         result.append(dictionary_item)
 
     return result
+
+
+def add_img_to_dictionary(id: int, url: str):
+    dictionary_item: Dictionary = DBsession.query(Dictionary).filter(Dictionary.id == id).one_or_none()
+
+    if dictionary_item is None:
+        raise InvalidAPIUsage(f"Can't find dict item with id {id}", 404)
+
+    dictionary_item.img = url
+    DBsession.commit()
 
 
 #########################################################################################################################

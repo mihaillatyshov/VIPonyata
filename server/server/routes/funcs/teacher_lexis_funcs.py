@@ -39,11 +39,11 @@ class LexisFuncs:
         if self.lexis_queries.GetByLessonId(lesson.id) is not None:
             raise InvalidAPIUsage("Lexis exists!", 403, {"lesson_id": lesson_id})                                       # TODO: add lexis id to redirect
 
+        cards_data = LexisCardCreateReq(items=request.json.get("cards"))
+        cards = DBQT.create_or_get_dictionary(dictionary_data)
+
         lexis_data = LexisCreateReq(**request.json.get("lexis"))
         lexis = self.lexis_queries.create(lesson_id, lexis_data)
-
-        dictionary_data = DictionaryCreateReq(items=request.json.get("words"))
-        dictionary = DBQT.create_or_get_dictionary(dictionary_data)
 
         self.lexis_queries.create_cards(lexis.id, dictionary)
 

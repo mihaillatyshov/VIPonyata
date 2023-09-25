@@ -6,7 +6,7 @@ from server.exceptions.ApiExceptions import (ActivityNotFoundException, CourseNo
 from server.log_lib import LogI
 from server.models.db_models import (ActivityTryType, ActivityType, Assessment, AssessmentTry, Course, Dictionary,
                                      Drilling, DrillingTry, Hieroglyph, HieroglyphTry, Lesson,
-                                     NotificationStudentToTeacher, User, UserDictionary)
+                                     NotificationTeacherToStudent, NotificationStudentToTeacher, User, UserDictionary)
 
 
 #########################################################################################################################
@@ -217,18 +217,33 @@ def get_dictionary(user_id: int) -> list[Dictionary]:
     )
 
 
+def add_img_to_dictionary(id: int, url: str, user_id: int):
+    dictionary_item: UserDictionary = (
+        DBsession.query(UserDictionary)                                                                                 #
+        .filter(UserDictionary.dictionary_id == id)                                                                     #
+        .filter(UserDictionary.user_id == user_id)                                                                      #
+        .one_or_none()                                                                                                  #
+    )
+
+    if dictionary_item is None:
+        raise InvalidAPIUsage(f"Can't find dict item with id {id}", 404)
+
+    dictionary_item.img = url
+    DBsession.commit()
+
+
 #########################################################################################################################
 ################ Notifications ##########################################################################################
 #########################################################################################################################
 def get_notifications(user_id: int):
-    return {"user": user_id}
-    # ! return (                                                                                                            #
-    # !   DBsession()                                                                                                     #
-    # !   .query(NotificationStudentToTeacher)                                                                            #
-    # !   .filter(NotificationStudentToTeacher.deleted == False)                                                          #
-    # !   .order_by(NotificationStudentToTeacher.creation_datetime)                                                       #
-    # !   .all()                                                                                                          #
-    # ! )
+    return []
+    return (                                                                                                            #
+        DBsession()                                                                                                     #
+        .query(NotificationTeacherToStudent)                                                                            #
+        .filter(NotificationTeacherToStudent.deleted == False)                                                          #
+        .order_by(NotificationTeacherToStudent.creation_datetime)                                                       #
+        .all()                                                                                                          #
+    )
 
 
 def add_assessment_notification(assessment_try_id: int):

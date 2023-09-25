@@ -100,6 +100,7 @@ class Lesson(Base):
     hieroglyph = relationship("Hieroglyph", uselist=False)
 
     assessment = relationship("Assessment", uselist=False)
+    final_boss = relationship("FinalBoss", uselist=False)
 
     def __repr__(self):
         return f"<Lesson: (id={self.id}; name={self.name})>"
@@ -114,7 +115,7 @@ class Dictionary(Base):
 
     char_jp = Column(String(128))
     word_jp = Column(String(128))
-    ru = Column(String(128))
+    ru = Column(String(128), nullable=False)
     img = Column(String(1024))
 
     users_dictionary = relationship("UserDictionary", back_populates="dictionary")
@@ -129,6 +130,7 @@ class UserDictionary(Base):
     id = Column(Integer, primary_key=True)
 
     img = Column(String(1024))
+    association = Column(String(1024))
 
     user_id = Column(Integer, ForeignKey(USERS_ID))
     user = relationship("User", back_populates="users_dictionary")
@@ -161,7 +163,7 @@ class AbstractActivity(Base):
 
     @declared_attr
     def lesson(cls):
-        return relationship("Lesson", overlaps="drilling,hieroglyph,assessment")
+        return relationship("Lesson", overlaps="drilling,hieroglyph,assessment,final_boss")
 
     tries: list = []
     now_try: Any | None = None
@@ -322,10 +324,10 @@ class HieroglyphTry(AbstractLexisTry):
 
 
 #########################################################################################################################
-################ Assessment #############################################################################################
+################ AbstractAssessment #####################################################################################
 #########################################################################################################################
-class Assessment(AbstractActivity):
-    __tablename__ = "assessments"
+class AbstractAssessment(AbstractActivity):
+    __abstract__ = True
 
     tasks = Column(Text, nullable=False)
 
@@ -335,14 +337,39 @@ class Assessment(AbstractActivity):
         return data
 
 
-class AssessmentTry(AbstractActivityTry):
+class AbstractAssessmentTry(AbstractActivityTry):
+    __abstract__ = True
+
+    done_tasks = Column(Text, nullable=False)
+    checked_tasks = Column(Text)
+
+
+#########################################################################################################################
+################ Assessment #############################################################################################
+#########################################################################################################################
+class Assessment(AbstractAssessment):
+    __tablename__ = "assessments"
+
+
+class AssessmentTry(AbstractAssessmentTry):
     __tablename__ = "assessment_tries"
 
     base_id = Column(Integer, ForeignKey("assessments.id"))
     base = relationship("Assessment")
 
-    done_tasks = Column(Text, nullable=False)
-    checked_tasks = Column(Text)
+
+#########################################################################################################################
+################ FinalBoss ##############################################################################################
+#########################################################################################################################
+class FinalBoss(AbstractAssessment):
+    __tablename__ = "final_bosses"
+
+
+class FinalBossTry(AbstractAssessmentTry):
+    __tablename__ = "final_boss_tries"
+
+    base_id = Column(Integer, ForeignKey("final_bosses.id"))
+    base = relationship("FinalBoss")
 
 
 #########################################################################################################################
@@ -366,11 +393,14 @@ class NotificationStudentToTeacher(Base):
     assessment_try_id = Column(Integer, ForeignKey("assessment_tries.id"))
     assessment_try = relationship("AssessmentTry")
 
+    final_boss_try_id = Column(Integer, ForeignKey("final_boss_tries.id"))
+    final_boss_try = relationship("FinalBossTry")
+
     creation_datetime = Column(DateTime, default=func.now())
 
     def __json__(self):
         data = {"message": self.message, "type": None}
-        for activity_try_name in ["drilling_try", "hieroglyph_try", "assessment_try"]:
+        for activity_try_name in ["drilling_try", "hieroglyph_try", "assessment_try", "final_boss_try"]:
             if activity_try := getattr(self, activity_try_name):
                 data["type"] = activity_try_name
                 data["lesson"] = activity_try.base.lesson
@@ -379,6 +409,52 @@ class NotificationStudentToTeacher(Base):
                 data["activity_try"] = activity_try
                 data["activity"] = activity_try.base
                 break
+
+        return data
+
+
+class NotificationTeacherToStudent(Base):
+    __tablename__ = "notifications_teacher_to_student"
+    id = Column(Integer, primary_key=True)
+
+    message = Column(Text)
+
+    viewed = Column(Boolean, nullable=False, default=False)
+    deleted = Column(Boolean, nullable=False, default=False)
+
+    course_id = Column(Integer, ForeignKey("drilling_tries.id"))
+    course = relationship("DrillingTry")
+
+    lesson_id = Column(Integer, ForeignKey("hieroglyph_tries.id"))
+    lesson = relationship("HieroglyphTry")
+
+    assessment_try_id = Column(Integer, ForeignKey("assessment_tries.id"))
+    assessment_try = relationship("AssessmentTry")
+
+    final_boss_try_id = Column(Integer, ForeignKey("final_boss_tries.id"))
+    final_boss_try = relationship("FinalBossTry")
+
+    creation_datetime = Column(DateTime, default=func.now())
+
+    def __json__(self):
+        data = {"message": self.message, "type": None}
+        for activity_try_name in ["assessment_try", "final_boss_try"]:
+            if activity_try := getattr(self, activity_try_name):
+                data["type"] = activity_try_name
+                data["lesson"] = activity_try.base.lesson
+                data["user"] = activity_try.user
+                data["activity_try_id"] = activity_try.id
+                data["activity_try"] = activity_try
+                data["activity"] = activity_try.base
+                break
+
+        if self.course is not None:
+            data["type"] = "course"
+            data["course"] = self.course
+
+        if self.lesson is not None:
+            data["type"] = "lesson"
+            data["lesson"] = self.lesson
 
         return data
 

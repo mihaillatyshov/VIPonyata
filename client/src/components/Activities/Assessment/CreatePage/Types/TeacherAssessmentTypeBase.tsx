@@ -1,6 +1,5 @@
 import React from "react";
 
-import styles from "./Style.module.css";
 import { TAssessmentTaskName, assessmentTaskRusNameAliases } from "models/Activity/Items/TAssessmentItems";
 import { PyError } from "libs/PyError";
 
@@ -26,9 +25,9 @@ const TeacherAssessmentTypeBase = ({
     errors,
 }: TeacherAssessmentTypeBaseProps) => {
     return (
-        <div className={styles.base}>
-            <div className={styles.baseTopBar}>
-                <div className={styles.baseTopBarTitle}>{assessmentTaskRusNameAliases[taskName]}</div>
+        <div className="my-card">
+            <div className="my-card-header">
+                <div className="my-card-header-title">{assessmentTaskRusNameAliases[taskName]}</div>
                 <div className="ms-auto">
                     <i
                         className="bi bi-x font-icon-height-0 font-icon-button-danger"
@@ -37,7 +36,7 @@ const TeacherAssessmentTypeBase = ({
                     />
                 </div>
             </div>
-            <div className={styles.baseBody}>
+            <div className="my-card-body">
                 {children}
                 <div className={errors !== undefined ? "mt-3" : ""}>
                     {errors?.map((error, i) => (

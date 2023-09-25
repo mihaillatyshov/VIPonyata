@@ -17,11 +17,11 @@ const TeacherAssessmentTestBase = <T extends TTeacherAssessmentTestType>({
     onRemoveOption,
     selectorNode,
 }: TeacherAssessmentTestBaseProps<T>) => {
-    const changeQuestionHandler = (newValue: string) => onChangeTask(taskId, { ...data, question: newValue.trim() });
+    const changeQuestionHandler = (newValue: string) => onChangeTask(taskId, { ...data, question: newValue });
     const addOption = () => onChangeTask(taskId, { ...data, options: [...data.options, ""] });
     const changeOptionHandler = (newValue: string, id: number) => {
         const newOptions = [...data.options];
-        newOptions[id] = newValue.trim();
+        newOptions[id] = newValue;
         onChangeTask(taskId, { ...data, options: newOptions });
     };
 

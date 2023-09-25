@@ -4,7 +4,7 @@ import Tasks, { SelectableTask } from "./Tasks";
 import { LexisTaskName } from "models/Activity/ILexis";
 import { DragEndEvent } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-import NewWordsModal, { DictionaryWord } from "./NewWordsModal";
+import NewWordsModal from "./NewWordsModal";
 import WordsTable from "./WordsTable";
 import PageTitle from "components/Common/PageTitle";
 import { AjaxPost } from "libs/ServerAPI";
@@ -12,6 +12,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import InputError from "components/Form/InputError";
 import InputTime from "components/Form/InputTime";
 import InputTextArea from "components/Form/InputTextArea";
+import { TDictionaryItem, TDictionaryItemCreate } from "models/TDictionary";
+import { TCreateCardItem } from "models/Activity/Items/TLexisItems";
+import CreatePageLexisCard from "./CreatePageLexisCard";
 
 interface LexisCreatePageProps {
     title: string;
@@ -36,14 +39,15 @@ const LexisCreatePage = ({ title, name }: LexisCreatePageProps) => {
 
     const [tasks, setTasks] = useState<SelectableTask[]>(getDefaultTasksArray());
     const [isShowNewWordsModal, setIsShowNewWordsModal] = useState<boolean>(false);
-    const [newWords, setNewWords] = useState<DictionaryWord[]>([]);
+    const [dictionaryWords, setDictionaryWords] = useState<TDictionaryItem[]>([]);
+    const [lexisCards, setLexisCards] = useState<TCreateCardItem[]>([]);
     const [timelimit, setTimelimit] = useState<string>("00:00:00");
     const [description, setDescription] = useState<string>("");
     const [error, setError] = useState<string>("");
 
     useEffect(() => {
         setError("");
-    }, [newWords, tasks]);
+    }, [tasks]);
 
     const findIndex = (inTaskName: string): number => {
         return Object.values(tasks).findIndex(({ name }) => name === inTaskName);
@@ -68,10 +72,11 @@ const LexisCreatePage = ({ title, name }: LexisCreatePageProps) => {
     };
 
     const createHandler = () => {
-        if (newWords.length < 1) {
+        if (dictionaryWords.length < 1) {
             setError("Не добавлены слова");
             return;
         }
+
         const tasksToAdd = tasks
             .filter(({ isSelected }) => isSelected)
             .map(({ name }) => name)
@@ -80,6 +85,7 @@ const LexisCreatePage = ({ title, name }: LexisCreatePageProps) => {
             setError("Не добавлены активности");
             return;
         }
+
         AjaxPost<TLexisCreateResponse>({
             url: `/api/${name}/${lessonId}`,
             body: {
@@ -88,7 +94,7 @@ const LexisCreatePage = ({ title, name }: LexisCreatePageProps) => {
                     time_limit: timelimit === "00:00:00" || timelimit === "" ? null : timelimit,
                     description,
                 },
-                words: newWords,
+                words: lexisCards,
             },
         })
             .then((json) => {
@@ -99,6 +105,41 @@ const LexisCreatePage = ({ title, name }: LexisCreatePageProps) => {
                     if (response.status === 404 || response.status === 403) navigate("/");
                 }
             });
+    };
+
+    const createNewWords = (words: TDictionaryItemCreate[], setModalError: (message: string) => void) => {
+        if (words.length < 1) {
+            setModalError("Нужно добавить слова");
+            return;
+        }
+
+        AjaxPost<{ words: TDictionaryItem[] }>({ url: "/api/dictionary", body: { words } })
+            .then((json) => {
+                setDictionaryWords(json.words);
+                setLexisCards(json.words.map((item) => ({ sentence: "", answer: "", dictionary_id: item.id })));
+                setIsShowNewWordsModal(false);
+            })
+            .catch(() => {
+                setModalError("Не удалось добавить слова (ошибка сервера)");
+            });
+    };
+
+    const setDictImg = (url: string | null, setDictError: () => void, id: number) => {
+        AjaxPost({ url: `/api/dictionary/${dictionaryWords[id].id}/img`, body: { url: url } })
+            .then(() => {
+                const newDictionaryWords = [...dictionaryWords];
+                newDictionaryWords[id].img = url;
+                setDictionaryWords(newDictionaryWords);
+            })
+            .catch(() => {
+                setDictError();
+            });
+    };
+
+    const setCardData = (value: string, fieldName: "sentence" | "answer", id: number) => {
+        const newCards = [...lexisCards];
+        newCards[id] = { ...newCards[id], [fieldName]: value };
+        setLexisCards(newCards);
     };
 
     return (
@@ -124,13 +165,24 @@ const LexisCreatePage = ({ title, name }: LexisCreatePageProps) => {
                 onChangeHandler={setDescription}
                 value={description}
             />
-            <WordsTable words={newWords} />
+            {/* <WordsTable words={newWords} /> */}
+
+            {lexisCards.map((card, i) => (
+                <CreatePageLexisCard
+                    key={i}
+                    card={card}
+                    dict={dictionaryWords[i]}
+                    setDictImg={(url, setError) => setDictImg(url, setError, i)}
+                    setCardData={(value, fieldName) => setCardData(value, fieldName, i)}
+                />
+            ))}
+
             <InputError message={error} className="mt-4" />
             <input type="button" className="btn btn-success w-100 mt-2" onClick={createHandler} value={"Создать"} />
             <NewWordsModal
                 isShow={isShowNewWordsModal}
                 close={() => setIsShowNewWordsModal(false)}
-                setWords={setNewWords}
+                createNewWords={createNewWords}
                 colToCheck={name === "drilling" ? "word_jp" : "char_jp"}
             />
         </div>

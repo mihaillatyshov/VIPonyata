@@ -10,6 +10,7 @@ import "bootstrap-icons/font/bootstrap-icons.min.css";
 import "./assets/css/Table.css";
 import "./assets/css/Modal.css";
 import "./assets/css/FontIcon.css";
+import "./assets/css/MyCard.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
