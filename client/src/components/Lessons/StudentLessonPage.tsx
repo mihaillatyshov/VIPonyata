@@ -9,7 +9,6 @@ import StudentDrillingBubble from "components/Activities/Lexis/Drilling/StudentD
 import StudentHieroglyphBubble from "components/Activities/Lexis/Hieroglyph/StudentHieroglyphBubble";
 import StudentAssessmentBubble from "components/Activities/Assessment/StudentAssessmentBubble";
 import { useRequestLesson } from "requests/Lesson";
-import Loading from "components/Common/Loading";
 import PageTitle from "components/Common/PageTitle";
 
 const StudentLessonPage = () => {
@@ -21,15 +20,14 @@ const StudentLessonPage = () => {
 
     useRequestLesson(id);
 
-    if (lesson === undefined) {
-        return <Loading />;
-    }
-
     return (
         <div className="container">
             <div>
-                <PageTitle title={lesson?.name} />
-                <div> {lesson.description} </div>
+                <PageTitle
+                    title={lesson?.name}
+                    urlBack={lesson === undefined ? undefined : `/courses/${lesson.course_id}`}
+                />
+                <div> {lesson?.description} </div>
                 <div className="d-flex justify-content-around flex-wrap">
                     {drilling?.info && <StudentDrillingBubble drilling={drilling} />}
                     {assessment?.info && <StudentAssessmentBubble assessment={assessment} />}

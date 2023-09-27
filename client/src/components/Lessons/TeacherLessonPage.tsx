@@ -6,7 +6,6 @@ import { selectLessons } from "redux/slices/lessonsSlice";
 import { selectDrilling } from "redux/slices/drillingSlice";
 import { selectAssessment } from "redux/slices/assessmentSlice";
 import { selectHieroglyph } from "redux/slices/hieroglyphSlice";
-import Loading from "components/Common/Loading";
 import PageTitle from "components/Common/PageTitle";
 import TeacherLexisBouble from "components/Activities/Bouble/Teacher/TeacherLexisBouble";
 import ITeacherAsssessmentBouble from "components/Activities/Bouble/Teacher/ITeacherAsssessmentBouble";
@@ -26,22 +25,19 @@ const TeacherLessonPage = () => {
 
     const lessonId = parseInt(id);
 
-    if (lesson === undefined) {
-        return <Loading />;
-    }
-
     return (
         <div className="container">
-            <PageTitle title={lesson?.name} />
+            <PageTitle
+                title={lesson?.name}
+                urlBack={lesson === undefined ? undefined : `/courses/${lesson.course_id}`}
+            />
             <div className="d-flex justify-content-around flex-wrap mt-5">
                 <TeacherLexisBouble title="Лексика" name="drilling" lessonId={lessonId} info={drilling.info} />
 
                 <ITeacherAsssessmentBouble title="Урок" name="assessment" lessonId={lessonId} info={assessment.info} />
-
                 {/* <ActivityBouble title="Урок">
                     <i className="bi bi-plus-lg" style={{ fontSize: "140px" }} />
                 </ActivityBouble> */}
-
                 <TeacherLexisBouble title="Иероглифы" name="hieroglyph" lessonId={lessonId} info={hieroglyph.info} />
             </div>
         </div>

@@ -18,7 +18,7 @@ const StudentActivityPageHeader = ({ activityInfo, backToLessonCallback }: Stude
             return (
                 <StudentTimeRemaining
                     deadline={activityInfo.deadline}
-                    onDeadline={() => navigate(`/lessons/${activityInfo.lesson_id}`)}
+                    onDeadline={() => setTimeout(() => navigate(`/lessons/${activityInfo.lesson_id}`), 1000)}
                 />
             );
         }
@@ -27,9 +27,7 @@ const StudentActivityPageHeader = ({ activityInfo, backToLessonCallback }: Stude
     return (
         <>
             <Button onClick={backToLessonCallback}> Вернуться к уроку </Button>
-            <div>
-                {activityInfo.description} {activityInfo.time_limit} {activityInfo.try.start_datetime}
-            </div>
+            <div>{activityInfo.description}</div>
             {drawDeadlineComponent()}
         </>
     );

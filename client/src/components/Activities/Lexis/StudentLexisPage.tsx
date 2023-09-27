@@ -26,6 +26,7 @@ import {
     TTranslate,
 } from "models/Activity/Items/TLexisItems";
 import { TLexisDoneTasks } from "models/Activity/DoneTasks/TLexisDoneTasks";
+import { Button } from "react-bootstrap";
 
 type ResponseData = {
     drilling?: TDrilling;
@@ -107,8 +108,8 @@ const StudentLexisPage = ({
             })
             .catch(({ isServerError, json, response }) => {
                 if (!isServerError) {
-                    if (response.status === 404) navigate("/");
-                    if (response.status === 403) navigate(`/lessons/${json.lesson_id}`);
+                    if (response.status === 404) navigate("/", { replace: true });
+                    if (response.status === 403) navigate(`/lessons/${json.lesson_id}`, { replace: true });
                 }
             });
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -140,18 +141,23 @@ const StudentLexisPage = ({
     }
 
     return (
-        <div>
-            <StudentProgress
-                percent={(Object.keys(lexis.info.try.done_tasks).length / Object.keys(lexis.items).length) * 100}
-            />
+        <div className="container">
             <StudentActivityPageHeader activityInfo={lexis.info} backToLessonCallback={backToLessonHandle} />
+            <Button onClick={() => navigate(`/${name}/${lexis.info.id}`)}> Хаб </Button>
+
+            <div className="my-2">
+                <StudentProgress
+                    percent={(Object.keys(lexis.info.try.done_tasks).length / Object.keys(lexis.items).length) * 100}
+                />
+            </div>
             <StudentLexisNav items={lexis.items} doneTasks={lexis.info.try.done_tasks} />
+
             <Routes>
                 <Route
                     path="/"
                     element={<StudentLexisHub id={id} name={name} backToLessonCallback={backToLessonHandle} />}
                 />
-                <Route path="/card" element={<NavigateToElement to="../card/0" />} />
+                <Route path="/card" element={<NavigateToElement to="../card/0" replace />} />
                 {Object.values(routeElements).map((element: StudentLexisPageRouteProps<TLexisAnyItem>, i: number) => (
                     <Route
                         key={i}

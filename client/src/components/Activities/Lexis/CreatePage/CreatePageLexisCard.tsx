@@ -59,9 +59,6 @@ const CreatePageLexisCard = ({ dict, card, setDictImg, setCardData }: CreatePage
                 </div>
             </div>
             <div>
-                {
-                    // TODO
-                }
                 <InputTextArea
                     htmlId={`card_sentence_${dict.id}`}
                     value={card.sentence}
@@ -69,9 +66,6 @@ const CreatePageLexisCard = ({ dict, card, setDictImg, setCardData }: CreatePage
                     placeholder="Предложение на японском"
                     rows={5}
                 />
-                {
-                    // TODO
-                }
                 <InputTextArea
                     htmlId={`card_answer_${dict.id}`}
                     value={card.answer}

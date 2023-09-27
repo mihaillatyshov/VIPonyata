@@ -29,7 +29,8 @@ body {
 }
 
 .mainNavBar {
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid #cccccc;
+    padding-bottom: 4px;
 }
 
 .win_height {

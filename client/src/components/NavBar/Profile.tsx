@@ -23,7 +23,7 @@ const Profile = () => {
                             <i className="bi bi-person-circle font-icon-height-0 a-link" style={{ fontSize: "48px" }} />
                         )}
                     </div>
-                    <div className="ms-1">
+                    <div className="ms-1 d-none d-md-block">
                         <div className="mx-auto"> {user.userData.name} </div>
                     </div>
                 </div>

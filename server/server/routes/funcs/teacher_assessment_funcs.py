@@ -37,7 +37,7 @@ class IAssessmentFuncs:
 
         for i, task in enumerate(req_tasks):
             try:
-                tasks.append(json.dumps(parse_task(task).dict()))
+                tasks.append(json.dumps(parse_task(task).model_dump()))
             except ValidationError as ex:
                 print(ex.errors())
                 errors[i] = ex.errors()

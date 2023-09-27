@@ -4,7 +4,7 @@ import server.queries.TeacherDBqueries as DBQT
 from server.exceptions.ApiExceptions import InvalidAPIUsage, InvalidRequestJson
 from server.models.db_models import Drilling, DrillingCard, Hieroglyph, HieroglyphCard, LexisType, LexisCardType
 from server.models.dictionary import DictionaryCreateReq
-from server.models.lexis import LexisCreateReq
+from server.models.lexis import LexisCardCreateReq, LexisCreateReq
 
 
 def get_lexis_data(lexis_type: LexisType) -> tuple[DBQT.LexisQueries, str]:
@@ -39,13 +39,12 @@ class LexisFuncs:
         if self.lexis_queries.GetByLessonId(lesson.id) is not None:
             raise InvalidAPIUsage("Lexis exists!", 403, {"lesson_id": lesson_id})                                       # TODO: add lexis id to redirect
 
-        cards_data = LexisCardCreateReq(items=request.json.get("cards"))
-        cards = DBQT.create_or_get_dictionary(dictionary_data)
+        cards_data = LexisCardCreateReq(cards=request.json.get("cards"))
 
         lexis_data = LexisCreateReq(**request.json.get("lexis"))
         lexis = self.lexis_queries.create(lesson_id, lexis_data)
 
-        self.lexis_queries.create_cards(lexis.id, dictionary)
+        self.lexis_queries.create_cards(lexis.id, cards_data)
 
         return {"lexis": lexis}
 

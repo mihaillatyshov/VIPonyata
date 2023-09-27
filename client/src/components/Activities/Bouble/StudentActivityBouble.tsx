@@ -21,7 +21,6 @@ const StudentActivityBubble = ({ info, title, name, onDeadline }: StudentActivit
 
     const isInProgress = () => {
         if (info.tries && info.tries.length !== 0) {
-            console.log("end_datetime", info.tries[info.tries.length - 1].end_datetime);
             return info.tries[info.tries.length - 1].end_datetime === null;
         }
         return false;

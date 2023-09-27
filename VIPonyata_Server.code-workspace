@@ -1,0 +1,21 @@
+{
+	"folders": [
+        {
+            "path": "."
+        },
+        {
+			"path": "./server"
+		}
+    ],
+    "settings": {
+        "files.associations": {
+            "*.log-viewer": "log"
+        },
+        "logViewer.watch": [
+            {
+                "title": "VIPonyata server",
+                "pattern": "./server/log/*.log"
+            }
+        ]
+    }
+}

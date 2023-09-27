@@ -5,7 +5,6 @@ import { LexisTaskName } from "models/Activity/ILexis";
 import { DragEndEvent } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import NewWordsModal from "./NewWordsModal";
-import WordsTable from "./WordsTable";
 import PageTitle from "components/Common/PageTitle";
 import { AjaxPost } from "libs/ServerAPI";
 import { useNavigate, useParams } from "react-router-dom";
@@ -94,7 +93,7 @@ const LexisCreatePage = ({ title, name }: LexisCreatePageProps) => {
                     time_limit: timelimit === "00:00:00" || timelimit === "" ? null : timelimit,
                     description,
                 },
-                words: lexisCards,
+                cards: lexisCards,
             },
         })
             .then((json) => {
@@ -165,7 +164,6 @@ const LexisCreatePage = ({ title, name }: LexisCreatePageProps) => {
                 onChangeHandler={setDescription}
                 value={description}
             />
-            {/* <WordsTable words={newWords} /> */}
 
             {lexisCards.map((card, i) => (
                 <CreatePageLexisCard

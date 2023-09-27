@@ -8,7 +8,6 @@ import LessonsList from "components/Lessons/LessonsList";
 import { TCourse } from "models/TCourse";
 import { TLesson } from "models/TLesson";
 
-import style from "./StyleCourses.module.css";
 import PageTitle from "components/Common/PageTitle";
 
 type ResponseData = {
@@ -32,14 +31,14 @@ const CoursePage = () => {
             })
             .catch(({ isServerError, json, response }) => {
                 if (!isServerError) {
-                    if (response.status === 404 || response.status === 403) navigate("/");
+                    if (response.status === 404 || response.status === 403) navigate("/", { replace: true });
                 }
             });
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <div className="container">
-            <PageTitle title={course?.name} />
+            <PageTitle title={course?.name} urlBack="/" />
             <LessonsList />
         </div>
     );

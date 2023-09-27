@@ -5,7 +5,7 @@ const StudentDictionary = () => {
     return (
         <>
             <Link to="/dictionary">Словарь</Link>
-            <div style={{ fontSize: "48px" }}>777</div>
+            <div style={{ fontSize: "32px" }}>777</div>
         </>
     );
 };

@@ -45,8 +45,8 @@ const StudentAssessmentPage = () => {
             })
             .catch(({ isServerError, json, response }) => {
                 if (!isServerError) {
-                    if (response.status === 404) navigate("/");
-                    if (response.status === 403) navigate(`/lessons/${json.lesson_id}`);
+                    if (response.status === 404) navigate("/", { replace: true });
+                    if (response.status === 403) navigate(`/lessons/${json.lesson_id}`, { replace: true });
                 }
             });
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -59,7 +59,7 @@ const StudentAssessmentPage = () => {
     }, [assessment, id]);
 
     const backToLessonHandle = () => {
-        navigate(`/lessons/${assessment.info.lesson_id}`);
+        navigate(`/lessons/${assessment.info.lesson_id}`, { replace: true });
     };
 
     const endAssessmentHandle = () => {

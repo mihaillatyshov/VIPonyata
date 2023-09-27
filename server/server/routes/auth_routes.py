@@ -47,12 +47,9 @@ def login():
     password = request.json.get("password")
 
     if nickname and password:
-        print("Data ok")
         user = FlaskUser().FromDB(nickname)
         if user.IsExists():
-            print("Exist")
             if check_password_hash(user.GetPassword(), password):
-                # print("login user: ", login_user(user, remember=True))
                 return {"isAuth": login_user(user, remember=True), "userData": getCurrentUserData()}
 
     return {"message": "Wrong nickname or password!"}, 422

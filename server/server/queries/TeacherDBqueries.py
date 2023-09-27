@@ -8,7 +8,7 @@ from server.models.db_models import (Assessment, AssessmentTry, Course, Dictiona
 from server.models.lesson import LessonCreateReq
 from server.common import DBsession
 from server.models.dictionary import DictionaryCreateReq, DictionaryCreateReqItem
-from server.models.lexis import LexisCreateReq
+from server.models.lexis import LexisCardCreateReq, LexisCreateReq
 
 
 #########################################################################################################################
@@ -23,7 +23,7 @@ def GetCourseById(courseId: int) -> Course | None:
 
 
 def create_course(course_data: CourseCreateReq) -> Course:
-    course = Course(**course_data.dict())
+    course = Course(**course_data.model_dump())
     DBsession.add(course)
     DBsession.commit()
 
@@ -40,7 +40,7 @@ def GetLessonById(lessonId: int) -> Lesson | None:
 
 
 def create_lesson(course_id: int, lesson_data: LessonCreateReq) -> Lesson:
-    lesson = Lesson(course_id=course_id, **lesson_data.dict())
+    lesson = Lesson(course_id=course_id, **lesson_data.model_dump())
     DBsession.add(lesson)
     DBsession.commit()
 
@@ -66,16 +66,16 @@ class LexisQueries:
     def GetById(self, lexisId: int) -> LexisType | None:
         return DBsession().query(self.lexis_type).filter(self.lexis_type.id == lexisId).one_or_none()
 
-    def create_cards(self, lexis_id: int, dictionary: list[Dictionary]):
+    def create_cards(self, lexis_id: int, cards_data: LexisCardCreateReq):
         cards: list[LexisCardType] = []
-        for item in dictionary:
-            cards.append(self.lexis_card_type(base_id=lexis_id, sentence="", answer="", dictionary_id=item.id))
+        for item in cards_data.cards:
+            cards.append(self.lexis_card_type(base_id=lexis_id, **item.model_dump()))
 
         DBsession.add_all(cards)
         DBsession.commit()
 
     def create(self, lesson_id: int, lexis_data: LexisCreateReq) -> LexisType:
-        lexis = self.lexis_type(lesson_id=lesson_id, **lexis_data.dict())
+        lexis = self.lexis_type(lesson_id=lesson_id, **lexis_data.model_dump())
         DBsession.add(lexis)
         DBsession.commit()
 
@@ -98,7 +98,7 @@ class AssessmentQueriesClass:
         return DBsession().query(self.assessment_type).filter(self.assessment_type.lesson_id == lesson_id).one_or_none()
 
     def create(self, lesson_id: int, assessment_data: AssessmentCreateReq):
-        assessment = self.assessment_type(lesson_id=lesson_id, **assessment_data.dict())
+        assessment = self.assessment_type(lesson_id=lesson_id, **assessment_data.model_dump())
         DBsession.add(assessment)
         DBsession.commit()
 
@@ -137,7 +137,7 @@ def create_or_get_dictionary(dictionary_data: DictionaryCreateReq) -> list[Dicti
     for item in dictionary_data.items:
         dictionary_item = get_dictionary_item(item)
         if dictionary_item is None:
-            dictionary_item = Dictionary(**item.dict())
+            dictionary_item = Dictionary(**item.model_dump())
             DBsession.add(dictionary_item)
             DBsession.commit()
         need_commit = False

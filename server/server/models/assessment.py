@@ -5,7 +5,9 @@ import re
 from enum import Enum
 from typing import TypedDict
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+
+from server.models.utils import StrExtraSpaceRemove
 
 
 class AssessmentTaskName(str, Enum):
@@ -46,22 +48,21 @@ class BaseModelTask(BaseModel, abc.ABC):
 
     def student_dict(self) -> dict:
         data = {}
-        for key in self.dict().keys():
+        for key in self.model_dump().keys():
             if not key.startswith("meta_"):
-                data[key] = self.dict()[key]
+                data[key] = self.model_dump()[key]
         return data
 
     def student_new_dict(self) -> dict:
         return self.student_dict()
 
     def teacher_dict(self) -> dict:
-        return self.dict()
+        return self.model_dump()
 
     def combine_dict(self) -> dict:
-        return self.dict(exclude={})
+        return self.model_dump()
 
-    class Config:
-        extra = "ignore"
+    model_config = ConfigDict(extra="ignore")
 
 
 class BaseModelRes(BaseModelTask, abc.ABC):
@@ -78,13 +79,14 @@ class BaseModelCheck(BaseModel):
 ################ Text ###################################################################################################
 #########################################################################################################################
 class TextTaskBase(BaseModelTask):
-    @validator("name", always=True)
-    def name_validation(cls, v):
+    @field_validator("name")
+    @classmethod
+    def name_validation(cls, v: str):
         return validate_name(v, AssessmentTaskName.TEXT)
 
 
 class TextTaskTeacherBase(TextTaskBase):
-    text: str
+    text: StrExtraSpaceRemove
 
 
 class TextTaskStudentReq(TextTaskBase):
@@ -97,12 +99,12 @@ class TextTaskRes(TextTaskTeacherBase, BaseModelRes):
 
 
 class TextTaskTeacherReq(TextTaskTeacherBase):
-    @root_validator(skip_on_failure=True)
-    def validate_on_create(cls, values: dict):
-        if not values["text"]:
+    @model_validator(mode="after")
+    def validate_on_create(self) -> "TextTaskTeacherReq":
+        if not self.text:
             raise ValueError("Текст не может быть пустым")
 
-        return values
+        return self
 
 
 class TextTaskCheck(BaseModelCheck):
@@ -113,19 +115,20 @@ class TextTaskCheck(BaseModelCheck):
 ################ SingleTest #############################################################################################
 #########################################################################################################################
 class SingleTestTaskBase(BaseModelTask):
-    @validator("name", always=True)
-    def name_validation(cls, v):
+    @field_validator("name")
+    @classmethod
+    def name_validation(cls, v: str):
         return validate_name(v, AssessmentTaskName.TEST_SINGLE)
 
 
 class SingleTestTaskTeacherBase(SingleTestTaskBase):
-    question: str
-    options: list[str]
+    question: StrExtraSpaceRemove
+    options: list[StrExtraSpaceRemove]
     meta_answer: int
 
 
 class SingleTestTaskStudentReq(SingleTestTaskBase):
-    answer: int | None                                                                                                  #or (self.answer > 0 and self.answer < len(self.opt))
+    answer: int | None = None                                                                                           #or (self.answer > 0 and self.answer < len(self.opt))
 
 
 class SingleTestTaskRes(SingleTestTaskTeacherBase, BaseModelRes):
@@ -136,26 +139,26 @@ class SingleTestTaskRes(SingleTestTaskTeacherBase, BaseModelRes):
 
 
 class SingleTestTaskTeacherReq(SingleTestTaskTeacherBase):
-    @validator("options", always=True)
-    def options_validation(cls, v: list[str]):
+    @field_validator("options")
+    @classmethod
+    def options_validation(cls, v: list[StrExtraSpaceRemove]):
         if len(v) <= 1:
             raise ValueError(f"Мало вариантов выбора ({len(v)})")
         return v
 
-    @root_validator(skip_on_failure=True)
-    def validate_on_create(cls, values: dict):
-        meta_answer = values["meta_answer"]
-        if not (0 <= meta_answer < len(values["options"])):
-            raise ValueError(f"Выбран недопустимый вариант ответа ({meta_answer + 1})")
+    @model_validator(mode="after")
+    def validate_on_create(self) -> "SingleTestTaskTeacherReq":
+        if not (0 <= self.meta_answer < len(self.options)):
+            raise ValueError(f"Выбран недопустимый вариант ответа ({self.meta_answer + 1})")
 
-        if not values["question"]:
+        if not self.question:
             raise ValueError(QESTION_CANT_BE_EMPTY)
 
-        for option in values["options"]:
+        for option in self.options:
             if not option:
                 raise ValueError(ANSWER_CANT_BE_EMPTY)
 
-        return values
+        return self
 
 
 class SingleTestTaskCheck(BaseModelCheck):
@@ -166,14 +169,15 @@ class SingleTestTaskCheck(BaseModelCheck):
 ################ MultiTest ##############################################################################################
 #########################################################################################################################
 class MultiTestTaskBase(BaseModelTask):
-    @validator("name", always=True)
-    def name_validation(cls, v):
+    @field_validator("name")
+    @classmethod
+    def name_validation(cls, v: str):
         return validate_name(v, AssessmentTaskName.TEST_MULTI)
 
 
 class MultiTestTaskTeacherBase(MultiTestTaskBase):
-    question: str
-    options: list[str]
+    question: StrExtraSpaceRemove
+    options: list[StrExtraSpaceRemove]
     meta_answers: list[int]
 
 
@@ -196,34 +200,33 @@ class MultiTestTaskRes(MultiTestTaskTeacherBase, BaseModelRes):
 
 
 class MultiTestTaskTeacherReq(MultiTestTaskTeacherBase):
-    @validator("options", always=True)
-    def options_validation(cls, v):
+    @field_validator("options")
+    @classmethod
+    def options_validation(cls, v: list[StrExtraSpaceRemove]):
         if len(v) <= 1:
             raise ValueError(f"Мало вариантов выбора ({len(v)})")
         return v
 
-    @root_validator(skip_on_failure=True)
-    def validate_on_create(cls, values: dict):
-        meta_answers = values["meta_answers"]
+    @model_validator(mode="after")
+    def validate_on_create(self) -> "MultiTestTaskTeacherReq":
+        if len(self.meta_answers) < 1:
+            raise ValueError(f"Мало вариантов ответа ({len(self.meta_answers)})")
 
-        if len(meta_answers) < 1:
-            raise ValueError(f"Мало вариантов ответа ({len(meta_answers)})")
+        if len(self.meta_answers) != len(set(self.meta_answers)):
+            raise ValueError(f"Варианты ответа повторяются ({self.meta_answers})")
 
-        if len(meta_answers) != len(set(meta_answers)):
-            raise ValueError(f"Варианты ответа повторяются ({meta_answers})")
+        for answer in self.meta_answers:
+            if not (0 <= answer < len(self.options)):
+                raise ValueError(f"Варианты ответа вне диапазона ({self.meta_answers})")
 
-        for answer in meta_answers:
-            if not (0 <= answer < len(values["options"])):
-                raise ValueError(f"Варианты ответа вне диапазона ({meta_answers})")
-
-        if not values["question"]:
+        if not self.question:
             raise ValueError(QESTION_CANT_BE_EMPTY)
 
-        for option in values["options"]:
+        for option in self.options:
             if not option:
                 raise ValueError(ANSWER_CANT_BE_EMPTY)
 
-        return values
+        return self
 
 
 class MultiTestTaskCheck(BaseModelCheck):
@@ -234,17 +237,18 @@ class MultiTestTaskCheck(BaseModelCheck):
 ################ FindPair ###############################################################################################
 #########################################################################################################################
 class FindPairTaskBase(BaseModelTask):
-    @validator("name", always=True)
-    def name_validation(cls, v):
+    @field_validator("name")
+    @classmethod
+    def name_validation(cls, v: str):
         return validate_name(v, AssessmentTaskName.FIND_PAIR)
 
 
 class FindPairTaskTeacherBase(FindPairTaskBase):
-    meta_first: list[str]
-    meta_second: list[str]
+    meta_first: list[StrExtraSpaceRemove]
+    meta_second: list[StrExtraSpaceRemove]
 
 
-def find_pair_fs_validation_base(first: list[str], second: list[str]):
+def find_pair_fs_validation_base(first: list[StrExtraSpaceRemove], second: list[StrExtraSpaceRemove]):
     if (len(first) != len(set(first))) or (len(second) != len(set(second))):
         raise ValueError("Есть повторения полей")
 
@@ -256,32 +260,32 @@ def find_pair_fs_validation_base(first: list[str], second: list[str]):
 
 
 class FindPairTaskStudentReq(FindPairTaskBase):
-    first: list[str]
-    second: list[str]
+    first: list[StrExtraSpaceRemove]
+    second: list[StrExtraSpaceRemove]
     pars_created: int
 
-    @root_validator(skip_on_failure=True)
-    def first_second_validation(cls, values: dict):
-        find_pair_fs_validation_base(values["first"], values["second"])
-        return values
+    @model_validator(mode="after")
+    def first_second_validation(self) -> "FindPairTaskStudentReq":
+        find_pair_fs_validation_base(self.first, self.second)
+        return self
 
 
 class FindPairTaskRes(FindPairTaskTeacherBase, BaseModelRes):
     pars_created: int = 0
-    first: list[str] = []
-    second: list[str] = []
+    first: list[StrExtraSpaceRemove] = []
+    second: list[StrExtraSpaceRemove] = []
 
-    @root_validator(skip_on_failure=True)
-    def new_first_second_validation(cls, values: dict):
-        if len(values["first"]) == 0:
-            values["first"] = values["meta_first"].copy()
-            random.shuffle(values["first"])
+    @model_validator(mode="after")
+    def new_first_second_validation(self) -> "FindPairTaskRes":
+        if len(self.first) == 0:
+            self.first = self.meta_first.copy()
+            random.shuffle(self.first)
 
-        if len(values["second"]) == 0:
-            values["second"] = values["meta_second"].copy()
-            random.shuffle(values["second"])
+        if len(self.second) == 0:
+            self.second = self.meta_second.copy()
+            random.shuffle(self.second)
 
-        return values
+        return self
 
     def custom_validation(self) -> bool:
         if (len(set(self.meta_first)) != len(self.first)) or (len(set(self.meta_second)) != len(self.second)):
@@ -294,19 +298,19 @@ class FindPairTaskRes(FindPairTaskTeacherBase, BaseModelRes):
 
 
 class FindPairTaskTeacherReq(FindPairTaskTeacherBase):
-    @root_validator(skip_on_failure=True)
-    def validate_on_create(cls, values: dict):
-        find_pair_fs_validation_base(values["meta_first"], values["meta_second"])
+    @model_validator(mode="after")
+    def validate_on_create(self) -> "FindPairTaskTeacherReq":
+        find_pair_fs_validation_base(self.meta_first, self.meta_second)
 
-        for first in values["meta_first"]:
+        for first in self.meta_first:
             if not first:
                 raise ValueError("Пустые поля в первой колонке")
 
-        for second in values["meta_second"]:
+        for second in self.meta_second:
             if not second:
                 raise ValueError("Пустые поля во второй колонке")
 
-        return values
+        return self
 
 
 class FindPairTaskCheck(BaseModelCheck):
@@ -317,27 +321,27 @@ class FindPairTaskCheck(BaseModelCheck):
 ################ IOrder #################################################################################################
 #########################################################################################################################
 class IOrderTaskTeacherBase(BaseModelTask):
-    meta_parts: list[str]
+    meta_parts: list[StrExtraSpaceRemove]
 
 
 class IOrderTaskStudentReq(BaseModelTask):
-    parts: list[str]
+    parts: list[StrExtraSpaceRemove]
 
-    @root_validator(skip_on_failure=True)
-    def parts_validation(cls, values: dict):
-        create_sentence_parts_validation_base(values["parts"])
-        return values
+    @model_validator(mode="after")
+    def parts_validation(self) -> "IOrderTaskStudentReq":
+        create_sentence_parts_validation_base(self.parts)
+        return self
 
 
 class IOrderTaskRes(IOrderTaskTeacherBase, BaseModelRes):
-    parts: list[str] = []
+    parts: list[StrExtraSpaceRemove] = []
 
-    @root_validator(skip_on_failure=True)
-    def new_parts_validation(cls, values: dict):
-        if len(values["parts"]) == 0:
-            values["parts"] = values["meta_parts"].copy()
-            random.shuffle(values["parts"])
-        return values
+    @model_validator(mode="after")
+    def new_parts_validation(self) -> "IOrderTaskRes":
+        if len(self.parts) == 0:
+            self.parts = self.meta_parts.copy()
+            random.shuffle(self.parts)
+        return self
 
     def custom_validation(self) -> bool:
         if len(self.meta_parts) != len(self.parts):
@@ -352,15 +356,15 @@ class IOrderTaskRes(IOrderTaskTeacherBase, BaseModelRes):
 
 
 class IOrderTaskTeacherReq(IOrderTaskTeacherBase):
-    @root_validator(skip_on_failure=True)
-    def validate_on_create(cls, values: dict):
-        create_sentence_parts_validation_base(values["meta_parts"])
+    @model_validator(mode="after")
+    def validate_on_create(self) -> "IOrderTaskTeacherReq":
+        create_sentence_parts_validation_base(self.meta_parts)
 
-        for part in values["meta_parts"]:
+        for part in self.meta_parts:
             if not part:
                 raise ValueError("Поля не могут быть пустыми")
 
-        return values
+        return self
 
 
 class IOrderTaskCheck(BaseModelCheck):
@@ -371,8 +375,9 @@ class IOrderTaskCheck(BaseModelCheck):
 ################ CreateSentence #########################################################################################
 #########################################################################################################################
 class CreateSentenceTaskBase(BaseModelTask):
-    @validator("name", always=True)
-    def name_validation(cls, v):
+    @field_validator("name")
+    @classmethod
+    def name_validation(cls, v: str):
         return validate_name(v, AssessmentTaskName.CREATE_SENTENCE)
 
 
@@ -396,8 +401,9 @@ class CreateSentenceTaskCheck(IOrderTaskCheck):
 ################ SentenceOrder ##########################################################################################
 #########################################################################################################################
 class SentenceOrderTaskBase(BaseModelTask):
-    @validator("name", always=True)
-    def name_validation(cls, v):
+    @field_validator("name")
+    @classmethod
+    def name_validation(cls, v: str):
         return validate_name(v, AssessmentTaskName.SENTENCE_OREDER)
 
 
@@ -431,34 +437,35 @@ class IFillSpacesTaskCheck(BaseModelCheck):
 ################ FillSpacesExists #######################################################################################
 #########################################################################################################################
 class FillSpacesExistsTaskBase(BaseModelTask):
-    @validator("name", always=True)
-    def name_validation(cls, v):
+    @field_validator("name")
+    @classmethod
+    def name_validation(cls, v: str):
         return validate_name(v, AssessmentTaskName.FILL_SPACES_EXISTS)
 
 
 class FillSpacesExistsTaskTeacherBase(FillSpacesExistsTaskBase):
-    separates: list[str]
-    meta_answers: list[str]
+    separates: list[StrExtraSpaceRemove]
+    meta_answers: list[StrExtraSpaceRemove]
 
 
 class FillSpacesExistsTaskStudentReq(FillSpacesExistsTaskBase):
-    answers: list[str | None]
-    inputs: list[str]
+    answers: list[StrExtraSpaceRemove | None]
+    inputs: list[StrExtraSpaceRemove]
 
 
 class FillSpacesExistsTaskRes(FillSpacesExistsTaskTeacherBase, BaseModelRes):
-    answers: list[str | None] = []
-    inputs: list[str] = []
+    answers: list[StrExtraSpaceRemove | None] = []
+    inputs: list[StrExtraSpaceRemove] = []
 
-    @root_validator(skip_on_failure=True)
-    def new_inputs_validation(cls, values: dict):
-        if len(values["answers"]) == 0:
-            values["inputs"] = values["meta_answers"].copy()
-            random.shuffle(values["inputs"])
-            for _ in range(len(values["meta_answers"])):
-                values["answers"].append(None)
+    @model_validator(mode="after")
+    def new_inputs_validation(self) -> "FillSpacesExistsTaskRes":
+        if len(self.answers) == 0:
+            self.inputs = self.meta_answers.copy()
+            random.shuffle(self.inputs)
+            for _ in range(len(self.meta_answers)):
+                self.answers.append(None)
 
-        return values
+        return self
 
     def custom_validation(self) -> bool:
         if len(self.answers) != len(self.meta_answers):
@@ -474,21 +481,21 @@ class FillSpacesExistsTaskRes(FillSpacesExistsTaskTeacherBase, BaseModelRes):
 
 
 class FillSpacesExistsTaskTeacherReq(FillSpacesExistsTaskTeacherBase):
-    @root_validator(skip_on_failure=True)
-    def validate_on_create(cls, values: dict):
-        if len(values["meta_answers"]) < 2:
-            raise ValueError(f"Слишком мало полей ({len(values['meta_answers'])})")
+    @model_validator(mode="after")
+    def validate_on_create(self) -> "FillSpacesExistsTaskTeacherReq":
+        if len(self.meta_answers) < 2:
+            raise ValueError(f"Слишком мало полей ({len(self.meta_answers)})")
 
-        for answer in values["meta_answers"]:
+        for answer in self.meta_answers:
             if not answer:
                 raise ValueError(ANSWER_CANT_BE_EMPTY)
 
-        if (len(values["separates"]) - 1) != len(values["meta_answers"]):
+        if (len(self.separates) - 1) != len(self.meta_answers):
             raise ValueError(
-                f"Ответов должно быть на 1 меньше, чем разделителей (s:{len(values['separates'])}, a:{len(values['meta_answers'])})"
+                f"Ответов должно быть на 1 меньше, чем разделителей (s:{len(self.separates)}, a:{len(self.meta_answers)})"
             )
 
-        return values
+        return self
 
 
 class FillSpacesExistsTaskCheck(IFillSpacesTaskCheck):
@@ -499,59 +506,60 @@ class FillSpacesExistsTaskCheck(IFillSpacesTaskCheck):
 ################ FillSpacesByHand #######################################################################################
 #########################################################################################################################
 class FillSpacesByHandTaskBase(BaseModelTask):
-    @validator("name", always=True)
-    def name_validation(cls, v):
+    @field_validator("name")
+    @classmethod
+    def name_validation(cls, v: str):
         return validate_name(v, AssessmentTaskName.FILL_SPACES_BY_HAND)
 
 
 class FillSpacesByHandTaskTeacherBase(FillSpacesByHandTaskBase):
-    separates: list[str]
-    meta_answers: list[str]
+    separates: list[StrExtraSpaceRemove]
+    meta_answers: list[StrExtraSpaceRemove]
 
 
 class FillSpacesByHandTaskStudentReq(FillSpacesByHandTaskBase):
-    answers: list[str]
+    answers: list[StrExtraSpaceRemove]
 
-    @root_validator(skip_on_failure=True)
-    def answers_validation(cls, values: dict):
+    @model_validator(mode="after")
+    def answers_validation(self) -> "FillSpacesByHandTaskStudentReq":
         # TODO: Add check for answers count
-        for i in range(len(values["answers"])):
-            values["answers"][i] = _RE_COMBINE_WHITESPACE.sub(" ", values["answers"][i]).strip()
+        for i in range(len(self.answers)):
+            self.answers[i] = _RE_COMBINE_WHITESPACE.sub(" ", self.answers[i]).strip()
 
-        return values
+        return self
 
 
 class FillSpacesByHandTaskRes(FillSpacesByHandTaskTeacherBase, BaseModelRes):
-    answers: list[str] = []
+    answers: list[StrExtraSpaceRemove] = []
 
-    @root_validator(skip_on_failure=True)
-    def new_inputs_validation(cls, values: dict):
-        if len(values["answers"]) == 0:
-            for _ in range(len(values["meta_answers"])):
-                values["answers"].append("")
+    @model_validator(mode="after")
+    def new_inputs_validation(self) -> "FillSpacesByHandTaskRes":
+        if len(self.answers) == 0:
+            for _ in range(len(self.meta_answers)):
+                self.answers.append("")
 
-        return values
+        return self
 
     def custom_validation(self) -> bool:
         return len(self.answers) == len(self.meta_answers)
 
 
 class FillSpacesByHandTaskTeacherReq(FillSpacesByHandTaskTeacherBase):
-    @root_validator(skip_on_failure=True)
-    def validate_on_create(cls, values: dict):
-        if len(values["meta_answers"]) < 1:
-            raise ValueError(f"Слишком мало полей ({len(values['meta_answers'])})")
+    @model_validator(mode="after")
+    def validate_on_create(self) -> "FillSpacesByHandTaskTeacherReq":
+        if len(self.meta_answers) < 1:
+            raise ValueError(f"Слишком мало полей ({len(self.meta_answers)})")
 
-        for answer in values["meta_answers"]:
+        for answer in self.meta_answers:
             if not answer:
                 raise ValueError(ANSWER_CANT_BE_EMPTY)
 
-        if (len(values["separates"]) - 1) != len(values["meta_answers"]):
+        if (len(self.separates) - 1) != len(self.meta_answers):
             raise ValueError(
-                f"Ответов должно быть на 1 меньше, чем разделителей (s:{len(values['separates'])}, a:{len(values['meta_answers'])})"
+                f"Ответов должно быть на 1 меньше, чем разделителей (s:{len(self.separates)}, a:{len(self.meta_answers)})"
             )
 
-        return values
+        return self
 
 
 class FillSpacesByHandTaskCheck(IFillSpacesTaskCheck):
@@ -562,36 +570,35 @@ class FillSpacesByHandTaskCheck(IFillSpacesTaskCheck):
 ################ Classification #########################################################################################
 #########################################################################################################################
 class ClassificationTaskBase(BaseModelTask):
-    @validator("name", always=True)
-    def name_validation(cls, v):
+    @field_validator("name")
+    @classmethod
+    def name_validation(cls, v: str):
         return validate_name(v, AssessmentTaskName.CLASSIFICATION)
 
 
 class ClassificationTaskTeacherBase(ClassificationTaskBase):
-    titles: list[str]
-    meta_answers: list[list[str]]
+    titles: list[StrExtraSpaceRemove]
+    meta_answers: list[list[StrExtraSpaceRemove]]
 
 
 class ClassificationTaskStudentReq(ClassificationTaskBase):
-    answers: list[list[str]]
-    inputs: list[str]
+    answers: list[list[StrExtraSpaceRemove]]
+    inputs: list[StrExtraSpaceRemove]
 
 
 class ClassificationTaskRes(ClassificationTaskTeacherBase, BaseModelRes):
-    answers: list[list[str]] = []
-    inputs: list[str] = []
+    answers: list[list[StrExtraSpaceRemove]] = []
+    inputs: list[StrExtraSpaceRemove] = []
 
-    @root_validator(skip_on_failure=True)
-    def new_inputs_validation(cls, values: dict):
-        print("root_validator:   ", values["answers"])
-        if len(values["answers"]) == 0:
-            print("len(values['answers']) == 0")
-            for col in values["meta_answers"]:
-                values["answers"].append([])
-                values["inputs"] += col.copy()
-            random.shuffle(values["inputs"])
+    @model_validator(mode="after")
+    def new_inputs_validation(self) -> "ClassificationTaskRes":
+        if len(self.answers) == 0:
+            for col in self.meta_answers:
+                self.answers.append([])
+                self.inputs += col.copy()
+            random.shuffle(self.inputs)
 
-        return values
+        return self
 
     def custom_validation(self) -> bool:
         if len(self.answers) != len(self.meta_answers):
@@ -611,17 +618,16 @@ class ClassificationTaskRes(ClassificationTaskTeacherBase, BaseModelRes):
 
 
 class ClassificationTaskTeacherReq(ClassificationTaskTeacherBase):
-    @root_validator(skip_on_failure=True)
-    def validate_on_create(cls, values: dict):
-        if len(values["meta_answers"]) < 1:
-            raise ValueError(f"Слишком мало колонок ({len(values['meta_answers'])})")
+    @model_validator(mode="after")
+    def validate_on_create(self) -> "ClassificationTaskTeacherReq":
+        if len(self.meta_answers) < 1:
+            raise ValueError(f"Слишком мало колонок ({len(self.meta_answers)})")
 
-        if len(values["meta_answers"]) != len(values["titles"]):
+        if len(self.meta_answers) != len(self.titles):
             raise ValueError(
-                f"Количество колонок ({len(values['meta_answers'])}) не равно количеству названий ({len(values['titles'])})"
-            )
+                f"Количество колонок ({len(self.meta_answers)}) не равно количеству названий ({len(self.titles)})")
 
-        for col in values["meta_answers"]:
+        for col in self.meta_answers:
             if len(col) < 1:
                 raise ValueError(f"Слишком мало значений в колонке ({len(col)})")
 
@@ -629,11 +635,11 @@ class ClassificationTaskTeacherReq(ClassificationTaskTeacherBase):
                 if not cell:
                     raise ValueError("Поля не могут быть пустымы")
 
-        for title in values["titles"]:
+        for title in self.titles:
             if not title:
                 raise ValueError("Название не может быть пустым")
 
-        return values
+        return self
 
 
 class ClassificationTaskCheck(BaseModelCheck):
@@ -644,39 +650,40 @@ class ClassificationTaskCheck(BaseModelCheck):
 ################ OpenQuestion ###########################################################################################
 #########################################################################################################################
 class OpenQuestionTaskBase(BaseModelTask):
-    @validator("name", always=True)
-    def name_validation(cls, v):
+    @field_validator("name")
+    @classmethod
+    def name_validation(cls, v: str):
         return validate_name(v, AssessmentTaskName.OPEN_QUESTION)
 
 
 class OpenQuestionTaskTeacherBase(OpenQuestionTaskBase):
-    question: str
+    question: StrExtraSpaceRemove
 
 
 class OpenQuestionTaskStudentReq(OpenQuestionTaskBase):
-    answer: str
+    answer: StrExtraSpaceRemove
 
-    @root_validator(skip_on_failure=True)
-    def answers_validation(cls, values: dict):
-        values["answer"] = _RE_COMBINE_WHITESPACE.sub(" ", values["answer"]).strip()
+    @model_validator(mode="after")
+    def answers_validation(self) -> "OpenQuestionTaskStudentReq":
+        self.answer = _RE_COMBINE_WHITESPACE.sub(" ", self.answer).strip()
 
-        return values
+        return self
 
 
 class OpenQuestionTaskRes(OpenQuestionTaskTeacherBase, BaseModelRes):
-    answer: str = ""
+    answer: StrExtraSpaceRemove = ""
 
     def custom_validation(self) -> bool:
         return True
 
 
 class OpenQuestionTaskTeacherReq(OpenQuestionTaskTeacherBase):
-    @root_validator(skip_on_failure=True)
-    def validate_on_create(cls, values: dict):
-        if not values["question"]:
+    @model_validator(mode="after")
+    def validate_on_create(self) -> "OpenQuestionTaskTeacherReq":
+        if not self.question:
             raise ValueError(QESTION_CANT_BE_EMPTY)
 
-        return values
+        return self
 
 
 class OpenQuestionTaskCheck(BaseModelCheck):
@@ -687,8 +694,9 @@ class OpenQuestionTaskCheck(BaseModelCheck):
 ################ Img ###################################################################################################
 #########################################################################################################################
 class ImgTaskBase(BaseModelTask):
-    @validator("name", always=True)
-    def name_validation(cls, v):
+    @field_validator("name")
+    @classmethod
+    def name_validation(cls, v: str):
         return validate_name(v, AssessmentTaskName.IMG)
 
 
@@ -706,12 +714,12 @@ class ImgTaskRes(ImgTaskTeacherBase, BaseModelRes):
 
 
 class ImgTaskTeacherReq(ImgTaskTeacherBase):
-    @root_validator(skip_on_failure=True)
-    def validate_on_create(cls, values: dict):
-        if not values["url"]:
+    @model_validator(mode="after")
+    def validate_on_create(self) -> "ImgTaskTeacherReq":
+        if not self.url:
             raise ValueError("Картинка не добавлена")
 
-        return values
+        return self
 
 
 class ImgTaskCheck(BaseModelCheck):
@@ -760,10 +768,11 @@ for name in AssessmentTaskName:
 
 class AssessmentCreateReq(BaseModel):
     tasks: str
-    description: str | None = None
+    description: StrExtraSpaceRemove | None = None
     time_limit: datetime.time | None = None
 
-    @validator("time_limit", always=True, pre=True)
+    @field_validator("time_limit", mode="before")
+    @classmethod
     def options_validation(cls, v):
         if v is None:
             return None

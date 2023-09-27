@@ -17,7 +17,6 @@ export const useRequestLesson = (lessonId: string | undefined) => {
     useLayoutEffect(() => {
         AjaxGet<TLessonResponse>({ url: `/api/lessons/${lessonId}` })
             .then((json) => {
-                console.log(json);
                 dispatch(setSelectedLesson(json.lesson));
                 setActivityInfo("drilling", json, setDrillingInfo);
                 setActivityInfo("hieroglyph", json, setHieroglyphInfo);
@@ -26,8 +25,8 @@ export const useRequestLesson = (lessonId: string | undefined) => {
             .catch(({ isServerError, response, json }) => {
                 console.log(isServerError, response.status, json);
                 if (!isServerError) {
-                    if (response.status === 404) navigate("/");
-                    if (response.status === 403) navigate(`/courses/${json.course_id}`);
+                    if (response.status === 404) navigate("/", { replace: true });
+                    if (response.status === 403) navigate(`/courses/${json.course_id}`, { replace: true });
                 }
             });
 

@@ -20,8 +20,8 @@ def parse_new_tasks(data_str: str) -> list[dict]:
     for task in data:
         if handler := Aliases.get(task["name"]):
             task_base = handler["create"](**task)
-            task_new = handler["res"](**task_base.dict())
-            tasks.append(task_new.dict())
+            task_new = handler["res"](**task_base.model_dump())
+            tasks.append(task_new.model_dump())
         else:
             LogW("No parser for this task!", task["name"])
     return tasks
@@ -34,9 +34,6 @@ def parse_student_tasks(data_str: str) -> list[dict]:
     for task in data:
         if handler := Aliases.get(task["name"]):
             task_db = handler["res"](**task)
-            if (task["name"] == AssessmentTaskName.CLASSIFICATION):
-                print("parse_student_tasks:   ", task_db)
-                print("parse_student_tasks 2:    ", task_db.student_dict())
             tasks.append(task_db.student_dict())
         else:
             LogW("No parser for this task!", task["name"])
@@ -64,7 +61,7 @@ def parse_student_req(req_data: dict, db_data: dict) -> list[dict]:
                 LogW(res_handler)
 
                 raise InvalidAPIUsage(f"Currupted task {req['name']}")
-            tasks.append(res_handler.dict())
+            tasks.append(res_handler.model_dump())
         else:
             raise InvalidAPIUsage(f"Wrong name alias {req['name']}")
 
@@ -80,7 +77,7 @@ def check_task_req(tasks: list[dict]) -> list[dict]:
             raise InvalidAPIUsage(f"Currupted task {task['name']}")
 
         res_task = handler["res"](**task)
-        checks.append(check_handler(res_task).dict())
+        checks.append(check_handler(res_task).model_dump())
 
     return checks
 
@@ -149,9 +146,7 @@ class AssessmentFuncsClass(ActivityFuncs):
     def GetById(self, activityId: int):
         assessment = self._activityQueries.GetById(activityId, GetCurrentUserId())
         assessment.now_try = self._activityQueries.GetUnfinishedTryByActivityId(activityId, GetCurrentUserId())
-        print(assessment.now_try.done_tasks)
         tasks = parse_student_tasks(assessment.now_try.done_tasks)
-        print("after parse:   ", tasks)
         return {self._activityName: assessment, "items": tasks}
 
 
