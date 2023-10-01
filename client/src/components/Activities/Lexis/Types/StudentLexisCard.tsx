@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { Button } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
-import style from "../StyleLexis.module.css";
 import {
     NameTo_word_or_char,
     StudentLexisTaskProps,
@@ -11,11 +10,13 @@ import {
 } from "./LexisUtils";
 import { TCardItem } from "models/Activity/Items/TLexisItems";
 
+import style from "../StyleLexis.module.css";
+
 const StudentLexisCard = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps<TCardItem>) => {
     const { cardId } = useParams();
     const navigate = useNavigate();
     const taskTypeName = "card";
-    var synth = window.speechSynthesis;
+    const synth = window.speechSynthesis;
 
     const item = useLexisItem(name);
     const setLexisSelectedItem = useSetLexisSelectedItem(name);
@@ -24,10 +25,10 @@ const StudentLexisCard = ({ name, inData, goToNextTaskCallback }: StudentLexisTa
 
     const sayJP = (sentence: string) => {
         const voices = synth.getVoices();
-        console.log(voices);
+        console.log("voices", voices);
         const result = voices.filter((voice) => voice.lang === "ja-JP");
         console.log(result);
-        var utterance = new SpeechSynthesisUtterance(sentence);
+        const utterance = new SpeechSynthesisUtterance(sentence);
         utterance.lang = "ja-JP";
         //utterance.voice = result2[0];
         speechSynthesis.speak(utterance);
@@ -44,9 +45,7 @@ const StudentLexisCard = ({ name, inData, goToNextTaskCallback }: StudentLexisTa
         return false;
     };
 
-    const isFirstCard = () => {
-        return item.number === 0;
-    };
+    const isFirstCard = () => item.number === 0;
 
     useEffect(() => {
         if (inData && cardId) {
@@ -87,8 +86,7 @@ const StudentLexisCard = ({ name, inData, goToNextTaskCallback }: StudentLexisTa
                             <div>
                                 {item.word[aliasJP]}
                                 <Button variant="success" onClick={() => sayJP(item.word[aliasJP])}>
-                                    {" "}
-                                    Say{" "}
+                                    Say
                                 </Button>
                             </div>
                             <div>{item.word.ru}</div>
@@ -97,14 +95,12 @@ const StudentLexisCard = ({ name, inData, goToNextTaskCallback }: StudentLexisTa
                             <div>
                                 {item.sentence}
                                 <Button variant="success" onClick={() => sayJP(item.sentence)}>
-                                    {" "}
-                                    Say{" "}
+                                    Say
                                 </Button>
                             </div>
                             <div>
                                 <Button variant="success" onClick={handleChangeIsOpen}>
-                                    {" "}
-                                    Показать подсказку{" "}
+                                    Показать подсказку
                                 </Button>
                                 <br />
                                 {item.isOpen ? item.answer : "(. . .)"}
@@ -124,17 +120,11 @@ const StudentLexisCard = ({ name, inData, goToNextTaskCallback }: StudentLexisTa
                 </div>
             </div>
             <div>
-                <Button
-                    type="button"
-                    onClick={() => handleButtonNavigate(Number(cardId) - 1)}
-                    disabled={isFirstCard() ? true : false}
-                >
-                    {" "}
-                    Предыдущая карточка{" "}
+                <Button type="button" onClick={() => handleButtonNavigate(Number(cardId) - 1)} disabled={isFirstCard()}>
+                    Предыдущая карточка
                 </Button>
                 <Button type="button" onClick={() => handleButtonNavigate(Number(cardId) + 1)}>
-                    {" "}
-                    Следующая карточка{" "}
+                    Следующая карточка
                 </Button>
             </div>
         </div>

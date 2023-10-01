@@ -12,23 +12,23 @@ interface TeacherAssessmentTestBaseProps<T extends TTeacherAssessmentTestType> e
 
 const TeacherAssessmentTestBase = <T extends TTeacherAssessmentTestType>({
     data,
-    taskId,
+    taskUUID,
     onChangeTask,
     onRemoveOption,
     selectorNode,
 }: TeacherAssessmentTestBaseProps<T>) => {
-    const changeQuestionHandler = (newValue: string) => onChangeTask(taskId, { ...data, question: newValue });
-    const addOption = () => onChangeTask(taskId, { ...data, options: [...data.options, ""] });
+    const changeQuestionHandler = (newValue: string) => onChangeTask({ ...data, question: newValue });
+    const addOption = () => onChangeTask({ ...data, options: [...data.options, ""] });
     const changeOptionHandler = (newValue: string, id: number) => {
         const newOptions = [...data.options];
         newOptions[id] = newValue;
-        onChangeTask(taskId, { ...data, options: newOptions });
+        onChangeTask({ ...data, options: newOptions });
     };
 
     return (
         <div>
             <InputTextArea
-                htmlId={`${taskId}`}
+                htmlId={taskUUID}
                 placeholder="Вопрос"
                 value={data.question}
                 onChangeHandler={changeQuestionHandler}

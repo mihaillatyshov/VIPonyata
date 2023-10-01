@@ -5,17 +5,17 @@ import InputTextArea from "components/Form/InputTextArea";
 
 const TeacherAssessmentOpenQuestion = ({
     data,
-    taskId,
+    taskUUID,
     onChangeTask,
 }: TeacherAssessmentTypeProps<TTeacherAssessmentOpenQuestion>) => {
     const changeTextHandler = (newValue: string) => {
-        onChangeTask(taskId, { ...data, question: newValue });
+        onChangeTask({ ...data, question: newValue });
     };
 
     return (
         <div>
             <InputTextArea
-                htmlId={`${taskId}`}
+                htmlId={taskUUID}
                 placeholder="Вопрос"
                 value={data.question}
                 onChangeHandler={changeTextHandler}

@@ -53,6 +53,10 @@
     },
     {
         "name": "img",
-        "url": "/img/Activity/Assessment/test.png"
+        "url": "/test_data/test_img.png"
+    },
+    {
+        "name": "audio",
+        "url": "/test_data/sh.mp3"
     }
 ]

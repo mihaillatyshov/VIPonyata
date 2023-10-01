@@ -1,23 +1,24 @@
 import React, { useEffect } from "react";
-import { LoadStatus } from "libs/Status";
-import { ImageState } from "models/Img";
-import InputError from "./InputError";
-import Loading from "components/Common/Loading";
-import { InputBaseProps } from "./InputBase";
 
+import Loading from "components/Common/Loading";
+import { LoadStatus } from "libs/Status";
+import { AudioState } from "models/Audio";
+
+import { InputBaseProps } from "./InputBase";
+import InputError from "./InputError";
 import styles from "./Styles.module.css";
 
-export interface InputImageProps extends InputBaseProps {
-    value: ImageState;
-    onChangeHandler: (value: ImageState) => void;
+export interface InputAudioProps extends InputBaseProps {
+    value: AudioState;
+    onChangeHandler: (value: AudioState) => void;
     customValidation?: () => void;
 }
 
-interface InputImageLabelProps extends InputBaseProps {
-    value: ImageState;
+interface InputAudioLabelProps extends InputBaseProps {
+    value: AudioState;
 }
 
-const InputImageLabel = ({ htmlId, value, placeholder }: InputImageLabelProps) => {
+const InputAudioLabel = ({ htmlId, value, placeholder }: InputAudioLabelProps) => {
     const hasValue =
         value.loadStatus === LoadStatus.DONE ||
         ((value.loadStatus === LoadStatus.ERROR || value.loadStatus === LoadStatus.LOADING) && value.url !== undefined);
@@ -28,18 +29,32 @@ const InputImageLabel = ({ htmlId, value, placeholder }: InputImageLabelProps) =
 
     if (hasValue) {
         return (
-            <label htmlFor={htmlId} className={`${styles.inputFilePrev} ${borderClassName}`}>
-                <img src={value.url} alt={placeholder} className={styles.inputFilePrevImg} />
-                {isLoading ? (
-                    <div className={styles.inputFilePrevEdit}>
-                        <Loading />
-                    </div>
-                ) : (
-                    <div className={styles.inputFilePrevEdit}>
-                        <i className="bi bi-pencil-square" style={{ fontSize: "48px" }} />
-                    </div>
-                )}
-            </label>
+            <>
+                <div className={styles.inputFilePrevAudio}>
+                    {hasValue ? (
+                        <audio controls key={value.url}>
+                            <source src={value.url} type="audio/mpeg" />
+                            Your browser does not support the audio.
+                        </audio>
+                    ) : null}
+                </div>
+                <label
+                    htmlFor={htmlId}
+                    className={`${styles.inputFilePrev} ${borderClassName}`}
+                    style={{ height: "100px", width: "100%" }}
+                >
+                    {/* <img src={value.url} alt={placeholder} className={styles.inputFilePrevAudio} /> */}
+                    {isLoading ? (
+                        <div className={styles.inputFilePrevEdit}>
+                            <Loading />
+                        </div>
+                    ) : (
+                        <div className={styles.inputFilePrevEdit}>
+                            <i className="bi bi-pencil-square" style={{ fontSize: "48px" }} />
+                        </div>
+                    )}
+                </label>
+            </>
         );
     }
 
@@ -50,10 +65,10 @@ const InputImageLabel = ({ htmlId, value, placeholder }: InputImageLabelProps) =
     );
 };
 
-type ImageResponse = { filename: string };
-type ImageError = { message?: string };
+type AudioResponse = { filename: string };
+type AudioError = { message?: string };
 
-const InputImage = ({
+const InputAudio = ({
     htmlId,
     placeholder,
     value,
@@ -61,9 +76,9 @@ const InputImage = ({
     className,
     onChangeHandler,
     customValidation,
-}: InputImageProps) => {
+}: InputAudioProps) => {
     className = className ?? "";
-    const errorHandler = (error: ImageError) => {
+    const errorHandler = (error: AudioError) => {
         onChangeHandler({
             loadStatus: LoadStatus.ERROR,
             url: value.loadStatus !== LoadStatus.NONE ? value.url : undefined,
@@ -87,20 +102,20 @@ const InputImage = ({
             });
             const data = new FormData();
             data.append("file", e.target.files[0]);
-            fetch("/api/upload/img", {
+            fetch("/api/upload/audio", {
                 method: "POST",
                 body: data,
             })
                 .then((response) => {
                     const promise = response.json();
                     if (response.ok) {
-                        promise.then((body: ImageResponse) => {
+                        promise.then((body: AudioResponse) => {
                             onChangeHandler({ loadStatus: LoadStatus.DONE, url: body.filename });
                         });
                     } else {
                         promise
-                            .then((body: ImageError) => {
-                                const error: ImageError = { message: body.message };
+                            .then((body: AudioError) => {
+                                const error: AudioError = { message: body.message };
                                 throw error;
                             })
                             .catch(errorHandler);
@@ -119,11 +134,11 @@ const InputImage = ({
 
     return (
         <div className={`${styles.inputFile} ${className}`}>
-            <InputImageLabel value={value} placeholder={placeholder} htmlId={htmlId} />
+            <InputAudioLabel value={value} placeholder={placeholder} htmlId={htmlId} />
             <InputError {...getErrorMessage()} className="justify-content-center" />
-            <input className="d-none" type="file" id={htmlId} accept="image/*" onChange={handler} />
+            <input className="d-none" type="file" id={htmlId} accept=".mp3,audio/*" onChange={handler} />
         </div>
     );
 };
 
-export default InputImage;
+export default InputAudio;

@@ -8,14 +8,14 @@ import TeacherAssessmentTestBase from "./TeacherAssessmentTestBase";
 
 const TeacherAssessmentTestMulti = ({
     data,
-    taskId,
+    taskUUID,
     onChangeTask,
 }: TeacherAssessmentTypeProps<TTeacherAssessmentTestMulti>) => {
     const changeAnswerHandler = (id: number) => {
         const newAnswers = [...data.meta_answers];
         if (newAnswers.includes(id)) newAnswers.splice(newAnswers.indexOf(id), 1);
         else newAnswers.push(id);
-        onChangeTask(taskId, { ...data, meta_answers: newAnswers });
+        onChangeTask({ ...data, meta_answers: newAnswers });
     };
 
     const removeOption = (id: number) => {
@@ -26,19 +26,19 @@ const TeacherAssessmentTestMulti = ({
         if (newAnswers.includes(id)) newAnswers.splice(newAnswers.indexOf(id), 1);
         newAnswers = newAnswers.map((answer) => (answer > id ? answer - 1 : answer));
 
-        onChangeTask(taskId, { ...data, options: newOptions, meta_answers: newAnswers });
+        onChangeTask({ ...data, options: newOptions, meta_answers: newAnswers });
     };
 
     return (
         <TeacherAssessmentTestBase
             data={data}
-            taskId={taskId}
+            taskUUID={taskUUID}
             onChangeTask={onChangeTask}
             onRemoveOption={removeOption}
             selectorNode={(id: number) => (
                 <InputCheckSingle
-                    blockName={`${taskId}`}
-                    htmlId={`${taskId}`}
+                    blockName={taskUUID}
+                    htmlId={taskUUID}
                     id={id}
                     className={`input-group-text ${styles.bigCheck}`}
                     placeholder={""}

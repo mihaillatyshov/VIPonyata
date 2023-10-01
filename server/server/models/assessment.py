@@ -22,11 +22,11 @@ class AssessmentTaskName(str, Enum):
     SENTENCE_OREDER = "sentence_order"
     OPEN_QUESTION = "open_question"
     IMG = "img"
+    AUDIO = "audio"
 
 
 ANSWER_CANT_BE_EMPTY = "Ответ не может быть пустым"
 QESTION_CANT_BE_EMPTY = "Вопрос не может быть пустым"
-_RE_COMBINE_WHITESPACE = re.compile(r"\s+")
 
 
 #########################################################################################################################
@@ -523,8 +523,6 @@ class FillSpacesByHandTaskStudentReq(FillSpacesByHandTaskBase):
     @model_validator(mode="after")
     def answers_validation(self) -> "FillSpacesByHandTaskStudentReq":
         # TODO: Add check for answers count
-        for i in range(len(self.answers)):
-            self.answers[i] = _RE_COMBINE_WHITESPACE.sub(" ", self.answers[i]).strip()
 
         return self
 
@@ -665,7 +663,6 @@ class OpenQuestionTaskStudentReq(OpenQuestionTaskBase):
 
     @model_validator(mode="after")
     def answers_validation(self) -> "OpenQuestionTaskStudentReq":
-        self.answer = _RE_COMBINE_WHITESPACE.sub(" ", self.answer).strip()
 
         return self
 
@@ -727,6 +724,42 @@ class ImgTaskCheck(BaseModelCheck):
 
 
 #########################################################################################################################
+################ Audio ###################################################################################################
+#########################################################################################################################
+class AudioTaskBase(BaseModelTask):
+    @field_validator("name")
+    @classmethod
+    def name_validation(cls, v: str):
+        return validate_name(v, AssessmentTaskName.AUDIO)
+
+
+class AudioTaskTeacherBase(AudioTaskBase):
+    url: str
+
+
+class AudioTaskStudentReq(AudioTaskBase):
+    pass
+
+
+class AudioTaskRes(AudioTaskTeacherBase, BaseModelRes):
+    def custom_validation(self) -> bool:
+        return True
+
+
+class AudioTaskTeacherReq(AudioTaskTeacherBase):
+    @model_validator(mode="after")
+    def validate_on_create(self) -> "AudioTaskTeacherReq":
+        if not self.url:
+            raise ValueError("Аудио не добавлена")
+
+        return self
+
+
+class AudioTaskCheck(BaseModelCheck):
+    pass
+
+
+#########################################################################################################################
 ################ Alias ##################################################################################################
 #########################################################################################################################
 class AliasType(TypedDict):
@@ -759,6 +792,7 @@ create_alias(AssessmentTaskName.SENTENCE_OREDER, SentenceOrderTaskStudentReq, Se
 create_alias(AssessmentTaskName.OPEN_QUESTION, OpenQuestionTaskStudentReq, OpenQuestionTaskRes,
              OpenQuestionTaskTeacherReq)
 create_alias(AssessmentTaskName.IMG, ImgTaskStudentReq, ImgTaskRes, ImgTaskTeacherReq)
+create_alias(AssessmentTaskName.AUDIO, AudioTaskStudentReq, AudioTaskRes, AudioTaskTeacherReq)
 
 # Check Aliases
 for name in AssessmentTaskName:

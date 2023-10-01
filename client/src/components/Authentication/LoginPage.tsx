@@ -9,8 +9,9 @@ import {
     setLoginValidated,
 } from "redux/slices/loginSlice";
 import { AjaxPost } from "libs/ServerAPI";
-import { UserState, setUserData } from "redux/slices/userSlice";
+import { UserDataType, setUserData } from "redux/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { LoadStatus } from "libs/Status";
 
 const LoginPage = () => {
     const login = useAppSelector(selectLogin);
@@ -25,7 +26,7 @@ const LoginPage = () => {
         event.stopPropagation();
 
         if (event.currentTarget.checkValidity()) {
-            AjaxPost<UserState>({
+            AjaxPost<UserDataType>({
                 url: "/api/login",
                 body: {
                     nickname: login.nickname,
@@ -33,7 +34,7 @@ const LoginPage = () => {
                 },
             })
                 .then((json) => {
-                    dispatch(setUserData(json));
+                    dispatch(setUserData({ loadStatus: LoadStatus.DONE, ...json }));
                     dispatch(resetLoginForm());
                 })
                 .catch(({ isServerError, json, response }) => {

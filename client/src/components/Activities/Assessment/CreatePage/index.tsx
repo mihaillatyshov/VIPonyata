@@ -1,31 +1,36 @@
+import React, { useRef, useState } from "react";
+
 import PageTitle from "components/Common/PageTitle";
 import InputTextArea from "components/Form/InputTextArea";
 import InputTime from "components/Form/InputTime";
-import React, { useState } from "react";
-import SelectTypeModal from "./SelectTypeModal";
-import {
-    TGetTeacherTypeByName,
-    TAssessmentTaskName,
-    getTeacherAssessmentTaskDefaultData,
-    TTeacherAssessmentItems,
-    TTeacherAssessmentAnyItem,
-} from "models/Activity/Items/TAssessmentItems";
-import TeacherAssessmentTypeBase, { TeacherAssessmentTypeProps } from "./Types/TeacherAssessmentTypeBase";
-import TeacherAssessmentText from "./Types/TeacherAssessmentText";
-import TeacherAssessmentTestSingle from "./Types/TeacherAssessmentTestSingle";
-import TeacherAssessmentTestMulti from "./Types/TeacherAssessmentTestMulti";
-import TeacherAssessmentFindPair from "./Types/TeacherAssessmentFindPair";
-import TeacherAssessmentCreateSentence from "./Types/TeacherAssessmentCreateSentence";
-import TeacherAssessmentFillSpacesExists from "./Types/TeacherAssessmentFillSpacesExists";
-import TeacherAssessmentFillSpacesByHand from "./Types/TeacherAssessmentFillSpacesByHand";
-import TeacherAssessmentClassification from "./Types/TeacherAssessmentClassification";
-import TeacherAssessmentSentenceOrder from "./Types/TeacherAssessmentSentenceOrder";
-import TeacherAssessmentOpenQuestion from "./Types/TeacherAssessmentOpenQuestion";
-import TeacherAssessmentImg from "./Types/TeacherAssessmentImg";
-import AddTaskButton from "./AddTaskButton";
-import { AjaxPost } from "libs/ServerAPI";
-import { useNavigate, useParams } from "react-router-dom";
 import { PyErrorResponse } from "libs/PyError";
+import { AjaxPost } from "libs/ServerAPI";
+import { uuid } from "libs/uuid";
+import {
+    getTeacherAssessmentTaskDefaultData,
+    TAssessmentItemBase,
+    TAssessmentTaskName,
+    TGetTeacherTypeByName,
+    TTeacherAssessmentAnyItem,
+    TTeacherAssessmentItems,
+} from "models/Activity/Items/TAssessmentItems";
+import { useNavigate, useParams } from "react-router-dom";
+
+import AddTaskButton from "./AddTaskButton";
+import SelectTypeModal from "./SelectTypeModal";
+import TeacherAssessmentAudio from "./Types/TeacherAssessmentAudio";
+import TeacherAssessmentClassification from "./Types/TeacherAssessmentClassification";
+import TeacherAssessmentCreateSentence from "./Types/TeacherAssessmentCreateSentence";
+import TeacherAssessmentFillSpacesByHand from "./Types/TeacherAssessmentFillSpacesByHand";
+import TeacherAssessmentFillSpacesExists from "./Types/TeacherAssessmentFillSpacesExists";
+import TeacherAssessmentFindPair from "./Types/TeacherAssessmentFindPair";
+import TeacherAssessmentImg from "./Types/TeacherAssessmentImg";
+import TeacherAssessmentOpenQuestion from "./Types/TeacherAssessmentOpenQuestion";
+import TeacherAssessmentSentenceOrder from "./Types/TeacherAssessmentSentenceOrder";
+import TeacherAssessmentTestMulti from "./Types/TeacherAssessmentTestMulti";
+import TeacherAssessmentTestSingle from "./Types/TeacherAssessmentTestSingle";
+import TeacherAssessmentText from "./Types/TeacherAssessmentText";
+import TeacherAssessmentTypeBase, { TeacherAssessmentTypeProps } from "./Types/TeacherAssessmentTypeBase";
 
 interface IAssessmentCreatePageProps {
     title: string;
@@ -37,7 +42,7 @@ interface TAssessmentCreateResponse {
     };
 }
 
-type TAliasProp<T> = (props: TeacherAssessmentTypeProps<T>) => JSX.Element;
+type TAliasProp<T extends TAssessmentItemBase> = (props: TeacherAssessmentTypeProps<T>) => JSX.Element;
 
 type TAliases = {
     [key in TAssessmentTaskName]: TAliasProp<TGetTeacherTypeByName[key]>;
@@ -55,6 +60,7 @@ const aliases: TAliases = {
     sentence_order: TeacherAssessmentSentenceOrder,
     open_question: TeacherAssessmentOpenQuestion,
     img: TeacherAssessmentImg,
+    audio: TeacherAssessmentAudio,
 };
 
 const IAssessmentCreatePage = ({ title }: IAssessmentCreatePageProps) => {
@@ -64,6 +70,7 @@ const IAssessmentCreatePage = ({ title }: IAssessmentCreatePageProps) => {
     const [isShowSelectTypeModal, setIsShowSelectTypeModal] = useState<boolean>(false);
     const [taskIdToAdd, setTaskIdToAdd] = useState<number | undefined>(undefined);
 
+    const tasksHashes = useRef<string[]>([]);
     const [tasks, setTasks] = useState<TTeacherAssessmentItems>([]);
     const [timelimit, setTimelimit] = useState<string>("00:00:00");
     const [description, setDescription] = useState<string>("");
@@ -77,6 +84,13 @@ const IAssessmentCreatePage = ({ title }: IAssessmentCreatePageProps) => {
     const addTask = (name: TAssessmentTaskName) => {
         if (taskIdToAdd === undefined) return;
 
+        while (true) {
+            const id = uuid();
+            if (tasksHashes.current.includes(id)) continue;
+
+            tasksHashes.current.splice(taskIdToAdd, 0, id);
+            break;
+        }
         setTasks((prev) => {
             prev.splice(taskIdToAdd, 0, getTeacherAssessmentTaskDefaultData(name));
             return [...prev];
@@ -84,6 +98,8 @@ const IAssessmentCreatePage = ({ title }: IAssessmentCreatePageProps) => {
     };
 
     const removeTask = (taskId: number) => {
+        tasksHashes.current.splice(taskId, 1);
+
         const newTasks = [...tasks];
         newTasks.splice(taskId, 1);
         setTasks(newTasks);
@@ -116,10 +132,13 @@ const IAssessmentCreatePage = ({ title }: IAssessmentCreatePageProps) => {
             });
     };
 
-    const drawItem = <T extends TTeacherAssessmentAnyItem>(item: T, id: number) => {
-        const task = tasks[id];
-        const component = aliases[task.name] as any as TAliasProp<T>;
-        return React.createElement(component, { data: item, taskId: id, onChangeTask: changeTaskHandler<T> });
+    const drawItem = <T extends TTeacherAssessmentAnyItem>(item: T, id: number, taskUUID: string) => {
+        const component = aliases[item.name] as any as TAliasProp<T>;
+        return React.createElement(component, {
+            data: item,
+            taskUUID: taskUUID,
+            onChangeTask: (data: T) => changeTaskHandler<T>(id, data),
+        });
     };
 
     return (
@@ -140,15 +159,15 @@ const IAssessmentCreatePage = ({ title }: IAssessmentCreatePageProps) => {
             />
 
             {tasks.map((item, i) => (
-                <React.Fragment key={`${item.name}_${i}`}>
+                <React.Fragment key={tasksHashes.current[i]}>
+                    {tasksHashes.current[i]}
                     <AddTaskButton insertId={i} handleClick={openModal} />
                     <TeacherAssessmentTypeBase
-                        taskId={i}
                         taskName={item.name}
-                        removeTask={removeTask}
+                        removeTask={() => removeTask(i)}
                         errors={errors[`${i}`]}
                     >
-                        <div>{drawItem(item, i)}</div>
+                        <div>{drawItem(item, i, tasksHashes.current[i])}</div>
                     </TeacherAssessmentTypeBase>
                 </React.Fragment>
             ))}

@@ -5,10 +5,10 @@ import ITeacherAssessmentOrderTask from "./ITeacherAssessmentOrderTask";
 
 const TeacherAssessmentCreateSentence = ({
     data,
-    taskId,
+    taskUUID,
     onChangeTask,
 }: TeacherAssessmentTypeProps<TTeacherAssessmentCreateSentence>) => {
-    return <ITeacherAssessmentOrderTask data={data} taskId={taskId} onChangeTask={onChangeTask} isCompact={true} />;
+    return <ITeacherAssessmentOrderTask data={data} taskUUID={taskUUID} onChangeTask={onChangeTask} isCompact={true} />;
 };
 
 export default TeacherAssessmentCreateSentence;

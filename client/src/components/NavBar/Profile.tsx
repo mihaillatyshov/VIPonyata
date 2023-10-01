@@ -1,16 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { useAppSelector } from "redux/hooks";
-import { selectUser } from "redux/slices/userSlice";
+import { useGetAuthorizedUserSafe } from "redux/funcs/user";
 
 import styles from "./StyleNavBar.module.css";
 
 const Profile = () => {
-    const user = useAppSelector(selectUser);
-
-    if (!user.userData) {
-        return <div> Error! </div>;
-    }
+    const user = useGetAuthorizedUserSafe();
 
     return (
         <div className="col-auto">

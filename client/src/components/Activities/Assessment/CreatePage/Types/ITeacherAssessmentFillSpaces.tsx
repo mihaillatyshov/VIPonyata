@@ -67,13 +67,13 @@ const AddBlockButton = ({ id, addBlock }: AddBlockButtonProps) => {
 
 const ITeacherAssessmentFillSpaces = <T extends TTeacherAssessmentFillSpaceType>({
     data,
-    taskId,
+    taskUUID,
     onChangeTask,
 }: TeacherAssessmentTypeProps<T>) => {
     const onTextChangeHandler = (newValue: string, colName: TItemNames, rowId: number) => {
         const newCol = data[colName];
         newCol[rowId] = newValue;
-        onChangeTask(taskId, { ...data, [colName]: newCol });
+        onChangeTask({ ...data, [colName]: newCol });
     };
 
     const addBlock = (id: number) => {
@@ -81,7 +81,7 @@ const ITeacherAssessmentFillSpaces = <T extends TTeacherAssessmentFillSpaceType>
         const newAnswers = data.meta_answers;
         newSeparates.splice(id, 0, "");
         newAnswers.splice(id, 0, "");
-        onChangeTask(taskId, { ...data, separates: newSeparates, meta_answers: newAnswers });
+        onChangeTask({ ...data, separates: newSeparates, meta_answers: newAnswers });
     };
 
     const removeBlock = (id: number) => {
@@ -89,7 +89,7 @@ const ITeacherAssessmentFillSpaces = <T extends TTeacherAssessmentFillSpaceType>
         const newAnswers = data.meta_answers;
         newSeparates.splice(id, 1);
         newAnswers.splice(id, 1);
-        onChangeTask(taskId, { ...data, separates: newSeparates, meta_answers: newAnswers });
+        onChangeTask({ ...data, separates: newSeparates, meta_answers: newAnswers });
     };
 
     return (

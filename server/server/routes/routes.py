@@ -1,14 +1,15 @@
 import hashlib
 import os
 from datetime import datetime
+from typing import Callable
 
 from flask import Blueprint, request, send_from_directory
 from flask_login import login_required
 from PIL import Image
-from werkzeug.utils import secure_filename
-from server.exceptions.ApiExceptions import InvalidRequestJson
 
-from server.models.db_models import Course
+from werkzeug.datastructures import FileStorage
+
+from server.exceptions.ApiExceptions import InvalidAPIUsage
 from server.log_lib import LogI
 from server.routes.funcs import funcs_student as student_funcs
 from server.routes.funcs import funcs_teacher as teacher_funcs
@@ -16,10 +17,12 @@ from server.routes.routes_utils import UserSelectorFunction
 
 routes_bp = Blueprint("routes", __name__)
 
-UPLOAD_FOLDER = "C:/Coding/Web/VIPonyata/uploads" if os.name == 'nt' else "/home/lm/coding/WEB/VIPonyata/uploads"
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+UPLOAD_FOLDER = "C:/Coding/Web/VIPonyata/uploads" if os.name == "nt" else "/home/lm/coding/WEB/VIPonyata/uploads"
+ALLOWED_IMG_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
+ALLOWED_AUDIO_EXTENSIONS = {"mp3"}
 
 UPLOAD_IMG_FOLDER = "img"
+UPLOAD_AUDIO_FOLDER = "mp3"
 RELATIVE_FOLDER_BASE = "/uploads"
 
 
@@ -27,87 +30,90 @@ RELATIVE_FOLDER_BASE = "/uploads"
 ################ Utils ##################################################################################################
 #########################################################################################################################
 def get_file_extention(filename):
-    return filename.rsplit('.', 1)[1].lower()
+    return filename.rsplit(".", 1)[-1].lower()
 
 
-def allowed_file(filename):
-    return '.' in filename and get_file_extention(filename) in ALLOWED_EXTENSIONS
+def is_allowed_ext(filename, exts: list[str]):
+    return "." in filename and get_file_extention(filename) in exts
 
 
-@routes_bp.route("/uploads/<path:path>")
+@routes_bp.route("/uploads/<path:path>", methods=["GET"])
 def get_uploads(path):
     LogI("GetFile: ", path)
     return send_from_directory(UPLOAD_FOLDER, path)
 
 
 def validate_folder(folder: str):
-    if not os.path.isdir(folder):
-        os.mkdir(folder)
+    os.makedirs(folder, exist_ok=True)
 
     return folder
 
 
 def add_path_to_folders(target: str, relative: str, add: str):
-    return validate_folder(f"{target}/{add}"), f"{relative}/{add}"
+    return validate_folder(target + "/" + add), relative + "/" + add
+
+
+def get_file_hash() -> tuple[str, str]:
+    result = hashlib.sha512(datetime.now().strftime("%Y%m%d%H%M%S").encode()).hexdigest()
+
+    folder = result[:2] + "/" + result[2:4]
+    return folder + "/" + result[4:], folder
 
 
 #########################################################################################################################
 ################ File Upload ############################################################################################
 #########################################################################################################################
-@routes_bp.route("/upload/img", methods=["POST"])
-def post_img_upload():
+def save_img(in_file: FileStorage, filename: str):
+    image = Image.open(in_file)
+    image = image.convert("RGBA")
+    image.save(filename, "webp")
+
+
+def save_audio(in_file: FileStorage, filename: str):
+    in_file.save(filename, 4096)
+    # with open(in_file, "rb") as fr:
+    #     with open(filename, "wb") as fw:
+    #         for chunk in iter(lambda: fr.read(4096), b""):
+    #             fw.write(chunk)
+
+
+def upload_file(upload_folder: str, ext: str, allowed_exts: list[str], save_func: Callable[[FileStorage, str], None]):
     validate_folder(UPLOAD_FOLDER)
-    target, relative_folder = add_path_to_folders(UPLOAD_FOLDER, RELATIVE_FOLDER_BASE, UPLOAD_IMG_FOLDER)
+    target, relative_folder = add_path_to_folders(UPLOAD_FOLDER, RELATIVE_FOLDER_BASE, upload_folder)
 
     if (len(request.files) == 0):
-        return {"message": "Error, No files"}, 400
+        raise InvalidAPIUsage("Error, no files")
 
-    img_file = request.files["file"]
-    if img_file and img_file.filename and allowed_file(img_file.filename):
-        image = Image.open(img_file)
-        image = image.convert('RGBA')
+    in_file = request.files["file"]
 
-        time_str = datetime.now().strftime("%Y%m%d%H%M%S").encode()
+    if in_file and in_file.filename and is_allowed_ext(in_file.filename, allowed_exts):
+        filename = ""
+        while True:
+            hash_filename, folder = get_file_hash()
+            filename = hash_filename + ext
+            if os.path.exists(target + "/" + filename):
+                continue
 
-        target, relative_folder = add_path_to_folders(target, relative_folder,
-                                                      hashlib.blake2b(key=time_str, digest_size=1).hexdigest())
-        target, relative_folder = add_path_to_folders(target, relative_folder,
-                                                      hashlib.blake2s(key=time_str, digest_size=1).hexdigest())
+            validate_folder(target + "/" + folder)
+            break
 
-        filename = secure_filename(hashlib.sha512(time_str).hexdigest())
-        filename += "." + "webp"
+        save_func(in_file, target + "/" + filename)
 
-        destination = "/".join([target, filename])
-        while os.path.exists(destination):
-            time_str = datetime.now().strftime("%Y%m%d%H%M%S").encode()
-            filename = secure_filename(hashlib.sha512(time_str).hexdigest())
-            filename += "." + "webp"
-            destination = "/".join([target, filename])
+        return {"filename": relative_folder + "/" + filename}
 
-        image.save(f'{destination}', 'webp')
-
-        response = relative_folder + "/" + filename
-        return {"filename": response}
-
-    return {"message": "Error"}, 500
+    return {"message": "Bad file"}, 400
 
 
-@routes_bp.route("/test", methods=["GET"])
-def get_test_some_things():
-    return {"test": "test", "val": 10}
+@routes_bp.route("/upload/img", methods=["POST"])
+@login_required
+def post_img_upload():
+    return upload_file(UPLOAD_IMG_FOLDER, ".webp", ALLOWED_IMG_EXTENSIONS, save_img)
 
 
-@routes_bp.route("/test", methods=["POST"])
-def post_test_some_things():
-    return {"test": "test", "val": 10}
-
-
-@routes_bp.route("/test_param", methods=["POST"])
-def post_test_some_things_param():
-    if not request.json:
-        raise InvalidRequestJson()
-
-    return {"test": "test", "x": request.json.get("x")}
+@routes_bp.route("/upload/audio", methods=["POST"])
+@login_required
+def post_audio_upload():
+    return upload_file(UPLOAD_AUDIO_FOLDER, ".mp3", ALLOWED_AUDIO_EXTENSIONS, save_audio)
 
 
 #########################################################################################################################

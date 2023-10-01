@@ -1,6 +1,6 @@
 .pageTitle {
     font-size: 32px;
-    padding: 5px;
+    padding: 5px 5px 5px 13px;
     background-color: var(--css-var-title);
     min-width: 160px;
     width: fit-content;
@@ -16,4 +16,5 @@
 
     cursor: pointer;
     margin-right: 10px;
+    margin-left: -5px;
 }

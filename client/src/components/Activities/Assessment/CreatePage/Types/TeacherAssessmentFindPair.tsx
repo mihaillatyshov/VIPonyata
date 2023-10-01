@@ -35,17 +35,17 @@ const Cell = ({ value, colName, rowId, onChange }: CellProps) => {
 
 const TeacherAssessmentFindPair = ({
     data,
-    taskId,
+    taskUUID,
     onChangeTask,
 }: TeacherAssessmentTypeProps<TTeacherAssessmentFindPair>) => {
     const onTextChangeHandler = (newValue: string, colName: TColNames, rowId: number) => {
         const newCol = data[colName];
         newCol[rowId] = newValue;
-        onChangeTask(taskId, { ...data, [colName]: newCol });
+        onChangeTask({ ...data, [colName]: newCol });
     };
 
     const addLine = () => {
-        onChangeTask(taskId, { ...data, meta_first: [...data.meta_first, ""], meta_second: [...data.meta_second, ""] });
+        onChangeTask({ ...data, meta_first: [...data.meta_first, ""], meta_second: [...data.meta_second, ""] });
     };
 
     const removeLine = (rowId: number) => {
@@ -53,7 +53,7 @@ const TeacherAssessmentFindPair = ({
         const newSecond = [...data.meta_second];
         newFirst.splice(rowId, 1);
         newSecond.splice(rowId, 1);
-        onChangeTask(taskId, { ...data, meta_first: newFirst, meta_second: newSecond });
+        onChangeTask({ ...data, meta_first: newFirst, meta_second: newSecond });
     };
 
     return (

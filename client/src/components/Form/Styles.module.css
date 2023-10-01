@@ -1,17 +1,17 @@
-.inputImage {
+.inputFile {
     width: fit-content;
     margin: 0 auto;
 }
 
-.inputImageBorderError {
+.inputFileBorderError {
     border: 1px solid #ff0000;
 }
 
-.inputImageBorderDefault {
+.inputFileBorderDefault {
     border: 0.5px solid #000000;
 }
 
-.inputImagePrev {
+.inputFilePrev {
     cursor: pointer;
     display: flex;
     justify-content: center;
@@ -24,30 +24,22 @@
     margin: 0 auto;
 }
 
-.inputImagePrev:hover {
+.inputFilePrev:hover {
     background-color: #ffffff66;
 }
 
-.inputImagePrev:hover .inputImagePrevEdit {
+.inputFilePrev:hover .inputFilePrevEdit {
     opacity: 95%;
 }
 
-.inputImagePrevImg {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
-    border-radius: 10px;
-}
-
-.inputImagePrevEdit {
+.inputFilePrevEdit {
     opacity: 75%;
     position: absolute;
     text-shadow: #000000 0 0 10px;
     color: #ffffff;
 }
 
-.inputImageEmptyLabel {
+.inputFileEmptyLabel {
     cursor: pointer;
     min-height: 160px;
     min-width: 240px;
@@ -58,6 +50,20 @@
     align-items: center;
 }
 
-.inputImageEmptyLabel:hover {
+.inputFileEmptyLabel:hover {
     opacity: 70%;
+}
+
+.inputFilePrevImg {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    border-radius: 10px;
+}
+
+.inputFilePrevAudio {
+    max-width: 100%;
+    width: auto;
+    height: 60px;
 }

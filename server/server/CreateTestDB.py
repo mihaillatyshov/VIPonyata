@@ -19,7 +19,7 @@ if user:
     LogI("Start creating test data")
 
     dictionary = [
-        Dictionary(char_jp="家族", word_jp="かぞく", ru="семья", img="/img/dictionary/dsa.png"),
+        Dictionary(char_jp="家族", word_jp="かぞく", ru="семья", img="/test_data/lexis_img.png"),
         Dictionary(char_jp="姉妹", word_jp="しまい", ru="сестры")
     ]
     DBsession().add_all(dictionary)

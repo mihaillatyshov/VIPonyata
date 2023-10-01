@@ -67,24 +67,24 @@ interface ITeacherAssessmentOrderTaskProps<T extends TTeacherAssessmentFillSpace
 
 const ITeacherAssessmentOrderTask = <T extends TTeacherAssessmentFillSpaceType>({
     data,
-    taskId,
+    taskUUID,
     onChangeTask,
     isCompact,
 }: ITeacherAssessmentOrderTaskProps<T>) => {
     const onTextChange = (newValue: string, id: number) => {
         const newParts = data.meta_parts;
         newParts[id] = newValue;
-        onChangeTask(taskId, { ...data, meta_parts: newParts });
+        onChangeTask({ ...data, meta_parts: newParts });
     };
 
     const addLine = () => {
-        onChangeTask(taskId, { ...data, meta_parts: [...data.meta_parts, ""] });
+        onChangeTask({ ...data, meta_parts: [...data.meta_parts, ""] });
     };
 
     const removeLine = (id: number) => {
         const newParts = [...data.meta_parts];
         newParts.splice(id, 1);
-        onChangeTask(taskId, { ...data, meta_parts: newParts });
+        onChangeTask({ ...data, meta_parts: newParts });
     };
 
     const className = isCompact ? "d-flex flex-wrap" : "";

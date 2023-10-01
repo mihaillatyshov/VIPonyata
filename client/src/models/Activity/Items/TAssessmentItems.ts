@@ -10,6 +10,7 @@ export enum TAssessmentTaskName {
     SENTENCE_ORDER = "sentence_order",
     OPEN_QUESTION = "open_question",
     IMG = "img",
+    AUDIO = "audio",
 }
 
 export interface TAssessmentItemBase {
@@ -164,6 +165,16 @@ interface TAssessmentImgBase extends TAssessmentItemBase {
 export interface TAssessmentImg extends TAssessmentImgBase {}
 export interface TTeacherAssessmentImg extends TAssessmentImgBase {}
 
+// * ==========================================================================
+// * ========== Audio =========================================================
+// * ==========================================================================
+interface TAssessmentAudioBase extends TAssessmentItemBase {
+    name: TAssessmentTaskName.AUDIO;
+    url: string;
+}
+export interface TAssessmentAudio extends TAssessmentAudioBase {}
+export interface TTeacherAssessmentAudio extends TAssessmentAudioBase {}
+
 export interface TGetStudentTypeByName {
     [TAssessmentTaskName.TEXT]: TAssessmentText;
     [TAssessmentTaskName.TEST_SINGLE]: TAssessmentTestSingle;
@@ -176,6 +187,7 @@ export interface TGetStudentTypeByName {
     [TAssessmentTaskName.SENTENCE_ORDER]: TAssessmentSentenceOrder;
     [TAssessmentTaskName.OPEN_QUESTION]: TAssessmentOpenQuestion;
     [TAssessmentTaskName.IMG]: TAssessmentImg;
+    [TAssessmentTaskName.AUDIO]: TAssessmentAudio;
 }
 
 export interface TGetTeacherTypeByName {
@@ -190,41 +202,16 @@ export interface TGetTeacherTypeByName {
     [TAssessmentTaskName.SENTENCE_ORDER]: TTeacherAssessmentSentenceOrder;
     [TAssessmentTaskName.OPEN_QUESTION]: TTeacherAssessmentOpenQuestion;
     [TAssessmentTaskName.IMG]: TTeacherAssessmentImg;
+    [TAssessmentTaskName.AUDIO]: TTeacherAssessmentAudio;
 }
 
-export type TAssessmentAnyItem =
-    | TAssessmentText
-    | TAssessmentTestSingle
-    | TAssessmentTestMulti
-    | TAssessmentFindPair
-    | TAssessmentCreateSentence
-    | TAssessmentFillSpacesExists
-    | TAssessmentFillSpacesByHand
-    | TAssessmentClassification
-    | TAssessmentSentenceOrder
-    | TAssessmentOpenQuestion
-    | TAssessmentImg;
-
-export type TTeacherAssessmentAnyItem =
-    | TTeacherAssessmentText
-    | TTeacherAssessmentTestSingle
-    | TTeacherAssessmentTestMulti
-    | TTeacherAssessmentFindPair
-    | TTeacherAssessmentCreateSentence
-    | TTeacherAssessmentFillSpacesExists
-    | TTeacherAssessmentFillSpacesByHand
-    | TTeacherAssessmentClassification
-    | TTeacherAssessmentSentenceOrder
-    | TTeacherAssessmentOpenQuestion
-    | TTeacherAssessmentImg;
+export type TAssessmentAnyItem = TGetStudentTypeByName[keyof TGetStudentTypeByName];
+export type TTeacherAssessmentAnyItem = TGetTeacherTypeByName[keyof TGetTeacherTypeByName];
 
 export type TAssessmentItems = TAssessmentAnyItem[];
 export type TTeacherAssessmentItems = TTeacherAssessmentAnyItem[];
 
-type TTeacherAssessmentTaskDefaultDataAliases = {
-    [key in TAssessmentTaskName]: () => TGetTeacherTypeByName[key];
-};
-
+type TTeacherAssessmentTaskDefaultDataAliases = { [key in TAssessmentTaskName]: () => TGetTeacherTypeByName[key] };
 const teacherAssessmentTaskDefaultDataAliases: TTeacherAssessmentTaskDefaultDataAliases = {
     text: () => ({ name: TAssessmentTaskName.TEXT, text: "" }),
     test_single: () => ({ name: TAssessmentTaskName.TEST_SINGLE, meta_answer: null, options: [], question: "" }),
@@ -247,16 +234,14 @@ const teacherAssessmentTaskDefaultDataAliases: TTeacherAssessmentTaskDefaultData
     sentence_order: () => ({ name: TAssessmentTaskName.SENTENCE_ORDER, meta_parts: [] }),
     open_question: () => ({ name: TAssessmentTaskName.OPEN_QUESTION, answer: "", question: "" }),
     img: () => ({ name: TAssessmentTaskName.IMG, url: "" }),
+    audio: () => ({ name: TAssessmentTaskName.AUDIO, url: "" }),
 };
 
 export const getTeacherAssessmentTaskDefaultData = (name: TAssessmentTaskName): TTeacherAssessmentAnyItem => {
     return teacherAssessmentTaskDefaultDataAliases[name]();
 };
 
-type TAssessmentTaskRusNameAliases = {
-    [key in TAssessmentTaskName]: string;
-};
-
+type TAssessmentTaskRusNameAliases = { [key in TAssessmentTaskName]: string };
 export const assessmentTaskRusNameAliases: TAssessmentTaskRusNameAliases = {
     text: "Текст",
     test_single: "Тест с одним ответом",
@@ -269,4 +254,5 @@ export const assessmentTaskRusNameAliases: TAssessmentTaskRusNameAliases = {
     sentence_order: "Последовательность предложений",
     open_question: "Открытый вопрос",
     img: "Картинка",
+    audio: "Аудио",
 };

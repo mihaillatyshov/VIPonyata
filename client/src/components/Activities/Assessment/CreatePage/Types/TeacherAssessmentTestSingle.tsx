@@ -8,10 +8,10 @@ import TeacherAssessmentTestBase from "./TeacherAssessmentTestBase";
 
 const TeacherAssessmentTestSingle = ({
     data,
-    taskId,
+    taskUUID,
     onChangeTask,
 }: TeacherAssessmentTypeProps<TTeacherAssessmentTestSingle>) => {
-    const changeAnswerHandler = (id: number) => onChangeTask(taskId, { ...data, meta_answer: id });
+    const changeAnswerHandler = (id: number) => onChangeTask({ ...data, meta_answer: id });
 
     const removeOption = (id: number) => {
         const newOptions = [...data.options];
@@ -22,19 +22,19 @@ const TeacherAssessmentTestSingle = ({
             if (data.meta_answer > id) newAnswer--;
             else if (data.meta_answer === id) newAnswer = null;
         }
-        onChangeTask(taskId, { ...data, options: newOptions, meta_answer: newAnswer });
+        onChangeTask({ ...data, options: newOptions, meta_answer: newAnswer });
     };
 
     return (
         <TeacherAssessmentTestBase
             data={data}
-            taskId={taskId}
+            taskUUID={taskUUID}
             onChangeTask={onChangeTask}
             onRemoveOption={removeOption}
             selectorNode={(id: number) => (
                 <InputRadioSingle
-                    blockName={`${taskId}`}
-                    htmlId={`${taskId}`}
+                    blockName={taskUUID}
+                    htmlId={taskUUID}
                     id={id}
                     className={`input-group-text ${styles.bigCheck}`}
                     placeholder={""}

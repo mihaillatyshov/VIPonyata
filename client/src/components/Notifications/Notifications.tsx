@@ -1,18 +1,16 @@
 import React from "react";
-import { useAppSelector } from "redux/hooks";
-import { isTeacher, selectUser } from "redux/slices/userSlice";
 import TeacherNotificationsContent from "./TeacherNotificationsContent";
 import StudentNotificationsContent from "./StudentNotificationsContent";
 import { Modal } from "react-bootstrap";
 import { TAnyNotification, TStudentNotification, TTeacherNotification } from "models/TNotification";
+import { isTeacher, useGetAuthorizedUserSafe } from "redux/funcs/user";
 
 interface ContentProps {
     notifications: TTeacherNotification[] | TStudentNotification[];
 }
 
 const Content = ({ notifications }: ContentProps) => {
-    const user = useAppSelector(selectUser);
-    if (user.userData === undefined) return <div></div>;
+    const user = useGetAuthorizedUserSafe();
 
     return isTeacher(user.userData) ? (
         <TeacherNotificationsContent notifications={notifications as TTeacherNotification[]} />

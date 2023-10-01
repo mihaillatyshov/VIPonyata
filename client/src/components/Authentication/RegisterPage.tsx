@@ -15,13 +15,16 @@ import {
 } from "redux/slices/registerSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 
+// TODO: remove any and fix setStoreState
 const RegisterPage = () => {
     const navigate = useNavigate();
     const register = useAppSelector(selectRegister);
     const dispatch = useAppDispatch();
 
     useEffect(() => {
-        dispatch(resetRegisterForm());
+        return () => {
+            dispatch(resetRegisterForm());
+        };
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -40,7 +43,6 @@ const RegisterPage = () => {
                 },
             })
                 .then(() => {
-                    dispatch(resetRegisterForm());
                     navigate("/");
                 })
                 .catch(({ isServerError, json, response }) => {

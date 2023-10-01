@@ -1,33 +1,58 @@
 import React, { useEffect } from "react";
+
+import { AjaxGet, AjaxPost } from "libs/ServerAPI";
+import {
+    TAssessmentAnyItem,
+    TAssessmentItemBase,
+    TAssessmentItems,
+    TAssessmentTaskName,
+    TGetStudentTypeByName,
+} from "models/Activity/Items/TAssessmentItems";
+import { TAssessment } from "models/Activity/TAssessment";
+import { Button } from "react-bootstrap";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { selectAssessment, setAssessmentInfo, setAssessmentItems } from "redux/slices/assessmentSlice";
+
 import StudentActivityPageHeader from "../StudentActivityPageHeader";
-import { AjaxGet, AjaxPost } from "libs/ServerAPI";
-import { useNavigate, useParams } from "react-router-dom";
-import { StudentAssessmentTypeProps } from "./Types/StudentAssessmentTypeProps";
-import StudentAssessmentText from "./Types/StudentAssessmentText";
-import StudentAssessmentTestSingle from "./Types/StudentAssessmentTestSingle";
-import StudentAssessmentTestMulti from "./Types/StudentAssessmentTestMulti";
-import StudentAssessmentFindPair from "./Types/StudentAssessmentFindPair";
-import StudentAssessmentCreateSentence from "./Types/StudentAssessmentCreateSentence";
-import StudentAssessmentFillSpacesExists from "./Types/StudentAssessmentFillSpacesExists";
-import StudentAssessmentFillSpacesByHand from "./Types/StudentAssessmentFillSpacesByHand";
+import StudentAssessmentAudio from "./Types/StudentAssessmentAudio";
 import StudentAssessmentClassification from "./Types/StudentAssessmentClassification";
+import StudentAssessmentCreateSentence from "./Types/StudentAssessmentCreateSentence";
+import StudentAssessmentFillSpacesByHand from "./Types/StudentAssessmentFillSpacesByHand";
+import StudentAssessmentFillSpacesExists from "./Types/StudentAssessmentFillSpacesExists";
+import StudentAssessmentFindPair from "./Types/StudentAssessmentFindPair";
+import StudentAssessmentImg from "./Types/StudentAssessmentImg";
 import StudentAssessmentOpenQuestion from "./Types/StudentAssessmentOpenQuestion";
 import StudentAssessmentSentenceOrder from "./Types/StudentAssessmentSentenceOrder";
-import StudentAssessmentImg from "./Types/StudentAssessmentImg";
-import { Button } from "react-bootstrap";
-import { TAssessment } from "models/Activity/TAssessment";
-import { TAssessmentItems, TAssessmentTaskName } from "models/Activity/Items/TAssessmentItems";
+import StudentAssessmentTestMulti from "./Types/StudentAssessmentTestMulti";
+import StudentAssessmentTestSingle from "./Types/StudentAssessmentTestSingle";
+import StudentAssessmentText from "./Types/StudentAssessmentText";
+import { StudentAssessmentTypeProps } from "./Types/StudentAssessmentTypeProps";
 
 type ResponseData = {
     assessment: TAssessment;
     items: TAssessmentItems;
 };
 
-type StudentAssessmentAliasProps = {
-    taskName: TAssessmentTaskName;
-    component: (props: StudentAssessmentTypeProps<any>) => JSX.Element;
+type TAliasProp<T extends TAssessmentItemBase> = (props: StudentAssessmentTypeProps<T>) => JSX.Element;
+
+type TAliases = {
+    [key in TAssessmentTaskName]: TAliasProp<TGetStudentTypeByName[key]>;
+};
+
+const aliases: TAliases = {
+    text: StudentAssessmentText,
+    test_single: StudentAssessmentTestSingle,
+    test_multi: StudentAssessmentTestMulti,
+    find_pair: StudentAssessmentFindPair,
+    create_sentence: StudentAssessmentCreateSentence,
+    fill_spaces_exists: StudentAssessmentFillSpacesExists,
+    fill_spaces_by_hand: StudentAssessmentFillSpacesByHand,
+    classification: StudentAssessmentClassification,
+    sentence_order: StudentAssessmentSentenceOrder,
+    open_question: StudentAssessmentOpenQuestion,
+    img: StudentAssessmentImg,
+    audio: StudentAssessmentAudio,
 };
 
 const StudentAssessmentPage = () => {
@@ -71,20 +96,6 @@ const StudentAssessmentPage = () => {
         });
     };
 
-    const aliases: StudentAssessmentAliasProps[] = [
-        { taskName: TAssessmentTaskName.TEXT, component: StudentAssessmentText },
-        { taskName: TAssessmentTaskName.TEST_SINGLE, component: StudentAssessmentTestSingle },
-        { taskName: TAssessmentTaskName.TEST_MULTI, component: StudentAssessmentTestMulti },
-        { taskName: TAssessmentTaskName.FIND_PAIR, component: StudentAssessmentFindPair },
-        { taskName: TAssessmentTaskName.CREATE_SENTENCE, component: StudentAssessmentCreateSentence },
-        { taskName: TAssessmentTaskName.FILL_SPACES_EXISTS, component: StudentAssessmentFillSpacesExists },
-        { taskName: TAssessmentTaskName.FILL_SPACES_BY_HAND, component: StudentAssessmentFillSpacesByHand },
-        { taskName: TAssessmentTaskName.CLASSIFICATION, component: StudentAssessmentClassification },
-        { taskName: TAssessmentTaskName.SENTENCE_ORDER, component: StudentAssessmentSentenceOrder },
-        { taskName: TAssessmentTaskName.OPEN_QUESTION, component: StudentAssessmentOpenQuestion },
-        { taskName: TAssessmentTaskName.IMG, component: StudentAssessmentImg },
-    ];
-
     if (
         assessment.info === undefined ||
         assessment.info.try === undefined ||
@@ -94,13 +105,10 @@ const StudentAssessmentPage = () => {
         return <div> Loading... </div>;
     }
 
-    const drawItem = (item: any, id: number) => {
-        const alias = aliases.find((obj) => obj.taskName === item.name);
-        if (alias) {
-            return React.createElement(alias.component, { data: item, taskId: id });
-        }
-        console.warn("No assessment task created!!!");
-        return undefined;
+    const drawItem = <T extends TAssessmentAnyItem>(item: T, id: number) => {
+        const component = aliases[item.name] as TAliasProp<T>;
+
+        return React.createElement(component, { data: item, taskId: id });
     };
 
     return (

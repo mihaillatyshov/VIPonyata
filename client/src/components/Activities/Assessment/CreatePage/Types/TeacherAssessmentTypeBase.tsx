@@ -1,29 +1,26 @@
 import React from "react";
 
-import { TAssessmentTaskName, assessmentTaskRusNameAliases } from "models/Activity/Items/TAssessmentItems";
 import { PyError } from "libs/PyError";
+import {
+    assessmentTaskRusNameAliases,
+    TAssessmentItemBase,
+    TAssessmentTaskName,
+} from "models/Activity/Items/TAssessmentItems";
 
-export interface TeacherAssessmentTypeProps<T> {
+export interface TeacherAssessmentTypeProps<T extends TAssessmentItemBase> {
     data: T;
-    onChangeTask: (taskId: number, data: T) => void;
-    taskId: number;
+    onChangeTask: (data: T) => void;
+    taskUUID: string;
 }
 
 interface TeacherAssessmentTypeBaseProps {
-    taskId: number;
     taskName: TAssessmentTaskName;
-    removeTask: (taskId: number) => void;
+    removeTask: () => void;
     children: React.ReactNode;
     errors?: PyError[];
 }
 
-const TeacherAssessmentTypeBase = ({
-    taskId,
-    taskName,
-    removeTask,
-    children,
-    errors,
-}: TeacherAssessmentTypeBaseProps) => {
+const TeacherAssessmentTypeBase = ({ taskName, removeTask, children, errors }: TeacherAssessmentTypeBaseProps) => {
     return (
         <div className="my-card">
             <div className="my-card-header">
@@ -32,7 +29,7 @@ const TeacherAssessmentTypeBase = ({
                     <i
                         className="bi bi-x font-icon-height-0 font-icon-button-danger"
                         style={{ fontSize: "2em" }}
-                        onClick={() => removeTask(taskId)}
+                        onClick={() => removeTask()}
                     />
                 </div>
             </div>

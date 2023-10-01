@@ -24,7 +24,7 @@ body {
     /* --css-var-block: #bface0;
     --css-var-title: #a084ca;
     --css-var-other: #a084ca;; */
-    min-height: 100vh;
+    min-height: 100dvh;
     padding: 10px;
 }
 

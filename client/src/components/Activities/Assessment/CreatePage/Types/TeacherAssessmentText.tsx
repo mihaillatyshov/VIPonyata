@@ -3,15 +3,19 @@ import { TAssessmentTaskName, TTeacherAssessmentText } from "models/Activity/Ite
 import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
 import InputTextArea from "components/Form/InputTextArea";
 
-const TeacherAssessmentText = ({ data, taskId, onChangeTask }: TeacherAssessmentTypeProps<TTeacherAssessmentText>) => {
+const TeacherAssessmentText = ({
+    data,
+    taskUUID,
+    onChangeTask,
+}: TeacherAssessmentTypeProps<TTeacherAssessmentText>) => {
     const changeTextHandler = (newValue: string) => {
-        onChangeTask(taskId, { name: TAssessmentTaskName.TEXT, text: newValue });
+        onChangeTask({ name: TAssessmentTaskName.TEXT, text: newValue });
     };
 
     return (
         <div>
             <InputTextArea
-                htmlId={`${taskId}`}
+                htmlId={taskUUID}
                 placeholder="Текст"
                 value={data.text}
                 onChangeHandler={changeTextHandler}
