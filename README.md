@@ -1,7 +1,15 @@
 # VIPonyata
 
 ## Server: python
+
 In server folder!!!
+
+### Migrations
+- Create migration: `alembic revision --autogenerate -m "main"`
+- Add migrations to DB: `alembic upgrade heads`
+
+
+
 - Create venv in server folder `python -m venv venv` 
 - Start venv `source venv/bin/activate`
 - Install requirements `pip install -r requirements.txt`

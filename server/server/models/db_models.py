@@ -481,7 +481,7 @@ def create_db_session(url, username, password, host, database):
     engine = create_engine(db_config, pool_recycle=3600, pool_size=20, max_overflow=30, pool_timeout=5)
     session_factory = sessionmaker(bind=engine)
     print("session created succesfully")
-    Base.metadata.create_all(engine)
+    # Base.metadata.create_all(engine)
 
     new_db_session = scoped_session(session_factory)
     return new_db_session
@@ -490,3 +490,8 @@ def create_db_session(url, username, password, host, database):
 def create_db_session_from_json_config_file():
     config = load_config("config.json")["db"]
     return create_db_session(config["url"], config["username"], config["password"], config["host"], config["database"])
+
+
+def get_db_url_from_json_config_file():
+    config = load_config("config.json")["db"]
+    return f"{config['url']}://{config['username']}:{config['password']}@{config['host']}/{config['database']}"
