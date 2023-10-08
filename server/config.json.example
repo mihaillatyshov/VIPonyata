@@ -5,5 +5,7 @@
         "password": "password",
         "host": "localhost",
         "database": "database_name"
-    }
+    },
+    "uploads": "/home/lm/coding/WEB/VIPonyata/uploads",
+    "flask_secret": "super_secret_key!!!"
 }
