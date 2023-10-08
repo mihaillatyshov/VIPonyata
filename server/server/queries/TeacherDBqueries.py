@@ -15,11 +15,11 @@ from server.models.lexis import LexisCardCreateReq, LexisCreateReq
 ################ Course and Lesson ######################################################################################
 #########################################################################################################################
 def get_all_courses() -> list[Course]:
-    return DBsession().query(Course).order_by(Course.sort).all()
+    return DBsession.query(Course).order_by(Course.sort).all()
 
 
 def GetCourseById(courseId: int) -> Course | None:
-    return DBsession().query(Course).filter(Course.id == courseId).one_or_none()
+    return DBsession.query(Course).filter(Course.id == courseId).one_or_none()
 
 
 def create_course(course_data: CourseCreateReq) -> Course:
@@ -32,11 +32,11 @@ def create_course(course_data: CourseCreateReq) -> Course:
 
 
 def GetLessonsByCourseId(courseId: int) -> list[Lesson]:
-    return DBsession().query(Lesson).filter(Lesson.course_id == courseId).all()
+    return DBsession.query(Lesson).filter(Lesson.course_id == courseId).all()
 
 
 def GetLessonById(lessonId: int) -> Lesson | None:
-    return DBsession().query(Lesson).filter(Lesson.id == lessonId).one_or_none()
+    return DBsession.query(Lesson).filter(Lesson.id == lessonId).one_or_none()
 
 
 def create_lesson(course_id: int, lesson_data: LessonCreateReq) -> Lesson:
@@ -61,10 +61,10 @@ class LexisQueries:
         self.lexis_card_type = lexis_card_type
 
     def GetByLessonId(self, lessondId: int) -> LexisType | None:
-        return DBsession().query(self.lexis_type).filter(self.lexis_type.lesson_id == lessondId).one_or_none()
+        return DBsession.query(self.lexis_type).filter(self.lexis_type.lesson_id == lessondId).one_or_none()
 
     def GetById(self, lexisId: int) -> LexisType | None:
-        return DBsession().query(self.lexis_type).filter(self.lexis_type.id == lexisId).one_or_none()
+        return DBsession.query(self.lexis_type).filter(self.lexis_type.id == lexisId).one_or_none()
 
     def create_cards(self, lexis_id: int, cards_data: LexisCardCreateReq):
         cards: list[LexisCardType] = []
@@ -95,7 +95,7 @@ class AssessmentQueriesClass:
         self.assessment_try_type = assessment_try_type
 
     def get_by_lesson_id(self, lesson_id: int) -> Assessment | None:
-        return DBsession().query(self.assessment_type).filter(self.assessment_type.lesson_id == lesson_id).one_or_none()
+        return DBsession.query(self.assessment_type).filter(self.assessment_type.lesson_id == lesson_id).one_or_none()
 
     def create(self, lesson_id: int, assessment_data: AssessmentCreateReq):
         assessment = self.assessment_type(lesson_id=lesson_id, **assessment_data.model_dump())
@@ -116,7 +116,7 @@ def get_dictionary() -> list[Dictionary]:
 
 
 def get_dictionary_item(item: DictionaryCreateReqItem) -> Dictionary | None:
-    base_filter = DBsession().query(Dictionary).filter(Dictionary.ru == item.ru)
+    base_filter = DBsession.query(Dictionary).filter(Dictionary.ru == item.ru)
     filter_char_jp = base_filter.filter(Dictionary.char_jp == item.char_jp)
     filter_word_jp = base_filter.filter(Dictionary.word_jp == item.word_jp)
     filter_full_jp = filter_char_jp.filter(Dictionary.word_jp == item.word_jp)
@@ -170,7 +170,7 @@ def add_img_to_dictionary(id: int, url: str):
 #########################################################################################################################
 def get_notifications():
     return (                                                                                                            #
-        DBsession()                                                                                                     #
+        DBsession                                                                                                       #
         .query(NotificationStudentToTeacher)                                                                            #
         .filter(NotificationStudentToTeacher.deleted == False)                                                          #
         .order_by(NotificationStudentToTeacher.creation_datetime.desc())                                                #

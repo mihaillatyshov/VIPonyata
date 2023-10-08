@@ -86,10 +86,10 @@ def register():
 
         hashPwd = generate_password_hash(password1)
         newUser = User(name=name, nickname=nickname, password=hashPwd, birthday=birthday, level=0)
-        DBsession().add(newUser)
-        DBsession().commit()
+        DBsession.add(newUser)
+        DBsession.commit()
 
-    # = DBsession().query(User).filter_by(nickname=nickname).one_or_none()
+    # = DBsession.query(User).filter_by(nickname=nickname).one_or_none()
 
     if newUserData := FlaskUser().FromDB(nickname).data:
         LogI("userData", newUserData)

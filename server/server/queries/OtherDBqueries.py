@@ -13,7 +13,7 @@ def GetActivityCheckTasksTimers(activity_type: ActivityType,
     LogW("GetActivityCheckTasksTimers", activity_type.__name__, activityTry_type.__name__)
 
     return (                                                                                                            #
-        DBsession()                                                                                                     #
+        DBsession                                                                                                       #
         .query(activityTry_type)                                                                                        #
         .filter(activityTry_type.end_datetime == None)                                                                  #
         .join(activityTry_type.base)                                                                                    #
@@ -23,11 +23,11 @@ def GetActivityCheckTasksTimers(activity_type: ActivityType,
 
 
 def GetActivityTryById(activityTryId: int, activityTry_type: ActivityTryType) -> ActivityTryType | None:
-    return DBsession().query(activityTry_type).filter(activityTry_type.id == activityTryId).one_or_none()
+    return DBsession.query(activityTry_type).filter(activityTry_type.id == activityTryId).one_or_none()
 
 
 def UpdateActivityTryEndTime(activity_try_id: int, endTime: datetime, activityTry_type: ActivityTryType) -> None:
-    if activity_try := DBsession().query(activityTry_type).filter(activityTry_type.id == activity_try_id).one_or_none():
+    if activity_try := DBsession.query(activityTry_type).filter(activityTry_type.id == activity_try_id).one_or_none():
         if activityTry_type == FinalBossTry:
             add_final_boss_notification(activity_try.id)
         if activityTry_type == AssessmentTry:
@@ -40,8 +40,8 @@ def UpdateActivityTryEndTime(activity_try_id: int, endTime: datetime, activityTr
             add_user_dictionary_from_try(activity_try)
 
         activity_try.end_datetime = endTime
-        DBsession().add(activity_try)
-        DBsession().commit()
+        DBsession.add(activity_try)
+        DBsession.commit()
 
 
 def add_user_dictionary_from_try(activity_try: DrillingTry | HieroglyphTry):

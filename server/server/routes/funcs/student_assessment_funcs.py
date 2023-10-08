@@ -121,8 +121,8 @@ class AssessmentFuncsClass(ActivityFuncs):
         checked_tasks_list = check_task_req(done_tasks_list)
         activity_try.checked_tasks = json.dumps(checked_tasks_list)
 
-        DBsession().add(activity_try)
-        DBsession().commit()
+        DBsession.add(activity_try)
+        DBsession.commit()
 
         return activity_try
 

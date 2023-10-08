@@ -21,13 +21,13 @@ from server.DBlib import Course, User
 from datetime import datetime
 
 print("========================================== Start Test ==========================================")
-print(DBsession().query(Course).filter_by(id=2).one_or_none())
+print(DBsession.query(Course).filter_by(id=2).one_or_none())
 
 # newUser = User(name="Mihail", nickname="LM", password="dss", birthday=datetime.now(), level=0)
-# DBsession().add(newUser)
-# DBsession().commit()
-# DBsession().add(Course(name="C1", difficulty="Hard"))
-# DBsession().commit()
+# DBsession.add(newUser)
+# DBsession.commit()
+# DBsession.add(Course(name="C1", difficulty="Hard"))
+# DBsession.commit()
 
 
 def GetDictFromSingleItem(func):
@@ -43,12 +43,12 @@ def GetDictFromSingleItem(func):
 
 @GetDictFromSingleItem
 def GetCourseById(courseId: int):
-    return DBsession().query(Course).filter_by(id=courseId).one_or_none()
+    return DBsession.query(Course).filter_by(id=courseId).one_or_none()
 
 
 @GetDictFromSingleItem
 def TestAll():
-    return DBsession().query(Course).filter(Course.id == 1).join(Course.users).add_column(User.avatar).one_or_none()
+    return DBsession.query(Course).filter(Course.id == 1).join(Course.users).add_column(User.avatar).one_or_none()
 
     name = Column(String(128), nullable=False)
     nickname = Column(String(128), nullable=False, unique=True)
@@ -60,13 +60,13 @@ def TestAll():
     form = Column(Text)
 
 
-# DBsession().add(User(name="Das", nickname="Das", password="Das", birthday=datetime.now(), level=0))
-# DBsession().commit()
+# DBsession.add(User(name="Das", nickname="Das", password="Das", birthday=datetime.now(), level=0))
+# DBsession.commit()
 
-UC = DBsession().query(User, Course).all()                                                                              # BAD SO BAD!!!
+UC = DBsession.query(User, Course).all()                                                                                # BAD SO BAD!!!
 print("          1: ", UC)
 for user, course in UC:
     print(user.id, "  ", course.id)
-print("          2: ", DBsession().query(User).filter_by(id=1).join(User.courses).filter(Course.id == 2).one_or_none())
-print("          3: ", DBsession().query(Course).join(Course.users).filter(User.id == 1).all())
+print("          2: ", DBsession.query(User).filter_by(id=1).join(User.courses).filter(Course.id == 2).one_or_none())
+print("          3: ", DBsession.query(Course).join(Course.users).filter(User.id == 1).all())
                                                                                                                         #print("          4: ", TestAll())
