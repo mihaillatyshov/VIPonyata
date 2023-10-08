@@ -1,8 +1,8 @@
 """main
 
-Revision ID: 42eb1c057640
+Revision ID: ad9d5119d2b0
 Revises: 
-Create Date: 2023-10-01 18:23:08.561749
+Create Date: 2023-10-01 23:32:18.917709
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '42eb1c057640'
+revision: str = 'ad9d5119d2b0'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -60,34 +60,36 @@ def upgrade() -> None:
     sa.Column('description', sa.String(length=2048), nullable=True),
     sa.Column('img', sa.String(length=1024), nullable=True),
     sa.Column('creation_datetime', sa.DateTime(), nullable=True),
-    sa.Column('course_id', sa.Integer(), nullable=True),
+    sa.Column('course_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['course_id'], ['courses.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('users_courses',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=True),
-    sa.Column('course_id', sa.Integer(), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('course_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['course_id'], ['courses.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('user_id', 'course_id', name='idx_user_course')
     )
     op.create_table('users_dictionary',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('img', sa.String(length=1024), nullable=True),
     sa.Column('association', sa.String(length=1024), nullable=True),
-    sa.Column('user_id', sa.Integer(), nullable=True),
-    sa.Column('dictionary_id', sa.Integer(), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('dictionary_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['dictionary_id'], ['dictionary.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('user_id', 'dictionary_id', name='idx_user_dictionary')
     )
     op.create_table('assessments',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('description', sa.String(length=2048), nullable=True),
     sa.Column('time_limit', sa.Time(), nullable=True),
     sa.Column('tasks', sa.Text(), nullable=False),
-    sa.Column('lesson_id', sa.Integer(), nullable=True),
+    sa.Column('lesson_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['lesson_id'], ['lessons.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -96,7 +98,7 @@ def upgrade() -> None:
     sa.Column('description', sa.String(length=2048), nullable=True),
     sa.Column('time_limit', sa.Time(), nullable=True),
     sa.Column('tasks', sa.String(length=2048), nullable=False),
-    sa.Column('lesson_id', sa.Integer(), nullable=True),
+    sa.Column('lesson_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['lesson_id'], ['lessons.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -105,7 +107,7 @@ def upgrade() -> None:
     sa.Column('description', sa.String(length=2048), nullable=True),
     sa.Column('time_limit', sa.Time(), nullable=True),
     sa.Column('tasks', sa.Text(), nullable=False),
-    sa.Column('lesson_id', sa.Integer(), nullable=True),
+    sa.Column('lesson_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['lesson_id'], ['lessons.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -114,17 +116,18 @@ def upgrade() -> None:
     sa.Column('description', sa.String(length=2048), nullable=True),
     sa.Column('time_limit', sa.Time(), nullable=True),
     sa.Column('tasks', sa.String(length=2048), nullable=False),
-    sa.Column('lesson_id', sa.Integer(), nullable=True),
+    sa.Column('lesson_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['lesson_id'], ['lessons.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('users_lessons',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=True),
-    sa.Column('lesson_id', sa.Integer(), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('lesson_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['lesson_id'], ['lessons.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('user_id', 'lesson_id', name='idx_user_lesson')
     )
     op.create_table('assessment_tries',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -134,7 +137,7 @@ def upgrade() -> None:
     sa.Column('done_tasks', sa.Text(), nullable=False),
     sa.Column('checked_tasks', sa.Text(), nullable=True),
     sa.Column('base_id', sa.Integer(), nullable=True),
-    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['base_id'], ['assessments.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -143,8 +146,8 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('sentence', sa.String(length=256), nullable=False),
     sa.Column('answer', sa.String(length=256), nullable=False),
-    sa.Column('base_id', sa.Integer(), nullable=True),
-    sa.Column('dictionary_id', sa.Integer(), nullable=True),
+    sa.Column('base_id', sa.Integer(), nullable=False),
+    sa.Column('dictionary_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['base_id'], ['drillings.id'], ),
     sa.ForeignKeyConstraint(['dictionary_id'], ['dictionary.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -155,8 +158,8 @@ def upgrade() -> None:
     sa.Column('start_datetime', sa.DateTime(), nullable=False),
     sa.Column('end_datetime', sa.DateTime(), nullable=True),
     sa.Column('done_tasks', sa.String(length=2048), nullable=True),
-    sa.Column('base_id', sa.Integer(), nullable=True),
-    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('base_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['base_id'], ['drillings.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -169,7 +172,7 @@ def upgrade() -> None:
     sa.Column('done_tasks', sa.Text(), nullable=False),
     sa.Column('checked_tasks', sa.Text(), nullable=True),
     sa.Column('base_id', sa.Integer(), nullable=True),
-    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['base_id'], ['final_bosses.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -178,8 +181,8 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('sentence', sa.String(length=256), nullable=False),
     sa.Column('answer', sa.String(length=256), nullable=False),
-    sa.Column('base_id', sa.Integer(), nullable=True),
-    sa.Column('dictionary_id', sa.Integer(), nullable=True),
+    sa.Column('base_id', sa.Integer(), nullable=False),
+    sa.Column('dictionary_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['base_id'], ['hieroglyphs.id'], ),
     sa.ForeignKeyConstraint(['dictionary_id'], ['dictionary.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -190,8 +193,8 @@ def upgrade() -> None:
     sa.Column('start_datetime', sa.DateTime(), nullable=False),
     sa.Column('end_datetime', sa.DateTime(), nullable=True),
     sa.Column('done_tasks', sa.String(length=2048), nullable=True),
-    sa.Column('base_id', sa.Integer(), nullable=True),
-    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('base_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['base_id'], ['hieroglyphs.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')

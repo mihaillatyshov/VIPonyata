@@ -1,12 +1,14 @@
 import React from "react";
-import { useAppSelector } from "redux/hooks";
-import { selectLessons } from "redux/slices/lessonsSlice";
-import { useUserIsTeacher } from "redux/funcs/user";
-import LessonCardWithContent from "./Cards/LessonCardWithContent";
-import LessonCardCreate from "./Cards/LessonCardCreate";
-import { selectCourses } from "redux/slices/coursesSlice";
+
 import ErrorPage from "components/ErrorPages/ErrorPage";
+import { useUserIsTeacher } from "redux/funcs/user";
+import { useAppSelector } from "redux/hooks";
+import { selectCourses } from "redux/slices/coursesSlice";
+import { selectLessons } from "redux/slices/lessonsSlice";
+
+import LessonCardCreate from "./Cards/LessonCardCreate";
 import LessonCardLoading from "./Cards/LessonCardLoading";
+import LessonCardWithContent from "./Cards/LessonCardWithContent";
 
 const LessonsList = () => {
     const course = useAppSelector(selectCourses).selected;
@@ -16,7 +18,7 @@ const LessonsList = () => {
 
     if (lessons.items === undefined || course === undefined) {
         return (
-            <div className="row justify-content-center mt-5 mx-0 px-0">
+            <div className="">
                 {Array.from(Array(12)).map((_, i) => (
                     <LessonCardLoading key={i} />
                 ))}
@@ -36,7 +38,7 @@ const LessonsList = () => {
     }
 
     return (
-        <div className=" mt-5">
+        <div className="">
             <LessonCardCreate courseId={course.id} />
             {lessons.items.map((lesson) => {
                 return <LessonCardWithContent key={lesson.id} lesson={lesson} />;

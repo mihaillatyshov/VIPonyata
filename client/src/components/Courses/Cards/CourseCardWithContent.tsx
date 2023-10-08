@@ -1,25 +1,33 @@
 import React from "react";
-import { Link } from "react-router-dom";
 
 import { TCourse } from "models/TCourse";
+import { Link } from "react-router-dom";
+
+import styles from "../StyleCourses.module.css";
 import { Description, Difficulty, Title } from "./BaseParts/CourseCard";
 import CourseCardBase from "./CourseCardBase";
 import CourseCardFooter from "./CourseCardFooter";
-
-import styles from "../StyleCourses.module.css";
 
 type CourseCardWithContentProps = {
     course: TCourse;
 };
 
 const CourseCardWithContent = ({ course }: CourseCardWithContentProps) => {
-    // TODO: Add img ???
     return (
         <Link to={`/courses/${course.id}`} className={"col-auto a-link " + styles.linkCourse}>
             <CourseCardBase>
-                <Title title={course.name} />
-                <Difficulty difficulty={course.difficulty} />
-                <Description description={course.description} />
+                <div className="d-flex">
+                    <div>
+                        <Title title={course.name} />
+                        <Difficulty difficulty={course.difficulty} />
+                        <Description description={course.description} />
+                    </div>
+                    <div className="ms-auto">
+                        {course.img !== null ? (
+                            <img src={course.img} alt="" style={{ maxHeight: "200px", maxWidth: "120px" }} />
+                        ) : null}
+                    </div>
+                </div>
                 <CourseCardFooter />
             </CourseCardBase>
         </Link>

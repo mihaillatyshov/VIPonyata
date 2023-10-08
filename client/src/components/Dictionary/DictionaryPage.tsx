@@ -1,11 +1,13 @@
 import React, { useLayoutEffect } from "react";
+
+import Loading from "components/Common/Loading";
+import ErrorPage from "components/ErrorPages/ErrorPage";
 import { AjaxGet } from "libs/ServerAPI";
+import { LoadStatus } from "libs/Status";
 import { TDictionary } from "models/TDictionary";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { selectDictionary, setDictionary } from "redux/slices/dictionarySlice";
-import { LoadStatus } from "libs/Status";
-import Loading from "components/Common/Loading";
-import ErrorPage from "components/ErrorPages/ErrorPage";
+
 import DictionaryItem from "./DictionaryItem";
 
 const TeacherDictionaryPage = () => {
@@ -49,16 +51,16 @@ const TeacherDictionaryPage = () => {
             <div className="table-container" role="table" aria-label="Destinations">
                 <div className="flex-table header" role="rowgroup">
                     <div className="flex-row first" role="columnheader">
-                        Картинка
+                        れんそう
                     </div>
                     <div className="flex-row" role="columnheader">
-                        Перевод
+                        ほんやく
                     </div>
                     <div className="flex-row" role="columnheader">
-                        Слово
+                        ことば
                     </div>
                     <div className="flex-row" role="columnheader">
-                        Символ
+                        かんじ
                     </div>
                 </div>
                 {dictionary.items.map((item) => (

@@ -7,6 +7,7 @@ export interface TLesson {
     name: string;
     number: number;
     description: string | null;
+    img: string | null;
     course_id: number;
     creation_datetime: string | null;
 }

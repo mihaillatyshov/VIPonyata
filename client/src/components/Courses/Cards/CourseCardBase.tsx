@@ -9,7 +9,7 @@ type CourseCardBaseProps = {
 const CourseCardBase = ({ children }: CourseCardBaseProps) => {
     // TODO: Add img ???
     return (
-        <div className={styles.cardCourse}>
+        <div className={`${styles.cardCourse} box-shadow-main`}>
             <div className="d-flex flex-column h-100">{children}</div>
         </div>
     );

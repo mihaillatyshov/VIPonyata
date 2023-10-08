@@ -2,12 +2,17 @@ import threading
 from datetime import datetime, timedelta
 
 from flask_login import current_user
+from server.load_config import load_config
 
 import server.queries.OtherDBqueries as DBQO
 from server.exceptions.ApiExceptions import InvalidAPIUsage
 from server.log_lib import LogI
 from server.models.db_models import (ActivityTryType, ActivityType, Assessment, AssessmentTry, Drilling, DrillingTry,
                                      FinalBoss, FinalBossTry, Hieroglyph, HieroglyphTry)
+
+
+def get_uploads_folder_from_config():
+    return load_config("config.json")["uploads"]
 
 
 def GetCurrentUserId() -> int:

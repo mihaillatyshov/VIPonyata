@@ -1,0 +1,8 @@
+.box-shadow-main {
+    box-shadow: 5px 5px 10px 5px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.5s;
+}
+
+.box-shadow-main:hover {
+    box-shadow: 8px 8px 14px 8px rgba(0, 0, 0, 0.2);
+}

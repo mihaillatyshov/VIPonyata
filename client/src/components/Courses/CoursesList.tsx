@@ -1,12 +1,14 @@
 import React, { useLayoutEffect } from "react";
+
 import { AjaxGet } from "libs/ServerAPI";
-import { selectCourses, setCourses } from "redux/slices/coursesSlice";
-import CourseCardWithContent from "./Cards/CourseCardWithContent";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { TCourse } from "models/TCourse";
+import { useUserIsTeacher } from "redux/funcs/user";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { selectCourses, setCourses } from "redux/slices/coursesSlice";
+
 import CourseCardCreate from "./Cards/CourseCardCreate";
 import CourseCardLoading from "./Cards/CourseCardLoading";
-import { useUserIsTeacher } from "redux/funcs/user";
+import CourseCardWithContent from "./Cards/CourseCardWithContent";
 
 type ResponseData = {
     items: TCourse[];
@@ -32,7 +34,7 @@ const CoursesList = () => {
 
     if (courses.items === undefined) {
         return (
-            <div className="row justify-content-center mt-5">
+            <div className="row justify-content-center">
                 {Array.from(Array(12)).map((_, i) => (
                     <CourseCardLoading key={i} />
                 ))}
@@ -45,7 +47,7 @@ const CoursesList = () => {
     }
 
     return (
-        <div className="row justify-content-center mt-5">
+        <div className="row justify-content-center">
             <CourseCardCreate />
             {courses.items.map((course) => {
                 return <CourseCardWithContent key={course.id} course={course} />;

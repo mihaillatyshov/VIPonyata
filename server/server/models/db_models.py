@@ -1,7 +1,8 @@
 import datetime
 from typing import Any, Type
 
-from sqlalchemy import (Boolean, Column, Date, DateTime, ForeignKey, Integer, String, Table, Text, Time, create_engine)
+from sqlalchemy import (Boolean, Column, Date, DateTime, ForeignKey, Integer, String, Table, Text, Time,
+                        UniqueConstraint, create_engine)
 from sqlalchemy.engine import URL
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import relationship, scoped_session, sessionmaker
@@ -14,12 +15,14 @@ Base: Type = declarative_base()
 USERS_ID = "users.id"
 
 a_users_courses = Table("users_courses", Base.metadata, Column("id", Integer, primary_key=True),
-                        Column("user_id", Integer, ForeignKey(USERS_ID)),
-                        Column("course_id", Integer, ForeignKey("courses.id")))
+                        Column("user_id", Integer, ForeignKey(USERS_ID), nullable=False),
+                        Column("course_id", Integer, ForeignKey("courses.id"), nullable=False),
+                        UniqueConstraint('user_id', 'course_id', name='idx_user_course'))
 
 a_users_lessons = Table("users_lessons", Base.metadata, Column("id", Integer, primary_key=True),
-                        Column("user_id", Integer, ForeignKey(USERS_ID)),
-                        Column("lesson_id", Integer, ForeignKey("lessons.id")))
+                        Column("user_id", Integer, ForeignKey(USERS_ID), nullable=False),
+                        Column("lesson_id", Integer, ForeignKey("lessons.id"), nullable=False),
+                        UniqueConstraint('user_id', 'lesson_id', name='idx_user_lesson'))
 
 
 #########################################################################################################################
@@ -93,7 +96,7 @@ class Lesson(Base):
 
     users = relationship("User", secondary=a_users_lessons, overlaps="lessons,user")
 
-    course_id = Column(Integer, ForeignKey("courses.id"))
+    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
     course = relationship("Course", back_populates="lessons")
 
     drilling = relationship("Drilling", uselist=False)
@@ -120,6 +123,12 @@ class Dictionary(Base):
 
     users_dictionary = relationship("UserDictionary", back_populates="dictionary")
 
+    def __json__(self):
+        data = {}
+        for column in self.__table__.columns:
+            data[column.name] = getattr(self, column.name)
+        return data
+
     def __repr__(self):
         return f"<Dictionary: (id={self.id}; char_jp={self.char_jp}; word_jp={self.char_jp}; ru={self.ru})>"
 
@@ -132,18 +141,19 @@ class UserDictionary(Base):
     img = Column(String(1024))
     association = Column(String(1024))
 
-    user_id = Column(Integer, ForeignKey(USERS_ID))
+    user_id = Column(Integer, ForeignKey(USERS_ID), nullable=False)
     user = relationship("User", back_populates="users_dictionary")
 
-    dictionary_id = Column(Integer, ForeignKey("dictionary.id"))
+    dictionary_id = Column(Integer, ForeignKey("dictionary.id"), nullable=False)
     dictionary = relationship("Dictionary", back_populates="users_dictionary")
 
+    __table_args__ = (UniqueConstraint('user_id', 'dictionary_id', name='idx_user_dictionary'), )
 
-def time_limit_to_timedelta(time_limit: Time) -> datetime.timedelta:
-    return datetime.timedelta(hours=time_limit.hour,
-                              minutes=time_limit.minute,
-                              seconds=time_limit.second,
-                              microseconds=time_limit.microsecond)
+    def __json__(self):
+        data = {}
+        for column in self.__table__.columns:
+            data[column.name] = getattr(self, column.name)
+        return data
 
 
 #########################################################################################################################
@@ -159,7 +169,7 @@ class AbstractActivity(Base):
 
     @declared_attr
     def lesson_id(cls):
-        return Column(Integer, ForeignKey("lessons.id"))
+        return Column(Integer, ForeignKey("lessons.id"), nullable=False)
 
     @declared_attr
     def lesson(cls):
@@ -202,7 +212,7 @@ class AbstractActivityTry(Base):
 
     @declared_attr
     def user_id(cls):
-        return Column(Integer, ForeignKey(USERS_ID))
+        return Column(Integer, ForeignKey(USERS_ID), nullable=False)
 
     @declared_attr
     def user(cls):
@@ -246,7 +256,7 @@ class AbstractLexisCard(Base):
 
     @declared_attr
     def dictionary_id(cls):
-        return Column(Integer, ForeignKey("dictionary.id"))
+        return Column(Integer, ForeignKey("dictionary.id"), nullable=False)
 
     @declared_attr
     def dictionary(cls):
@@ -289,14 +299,14 @@ class Drilling(AbstractLexis):
 class DrillingCard(AbstractLexisCard):
     __tablename__ = "drilling_cards"
 
-    base_id = Column(Integer, ForeignKey("drillings.id"))
+    base_id = Column(Integer, ForeignKey("drillings.id"), nullable=False)
     base = relationship("Drilling", back_populates="cards")
 
 
 class DrillingTry(AbstractLexisTry):
     __tablename__ = "drilling_tries"
 
-    base_id = Column(Integer, ForeignKey("drillings.id"))
+    base_id = Column(Integer, ForeignKey("drillings.id"), nullable=False)
     base = relationship("Drilling")
 
 
@@ -312,14 +322,14 @@ class Hieroglyph(AbstractLexis):
 class HieroglyphCard(AbstractLexisCard):
     __tablename__ = "hieroglyph_cards"
 
-    base_id = Column(Integer, ForeignKey("hieroglyphs.id"))
+    base_id = Column(Integer, ForeignKey("hieroglyphs.id"), nullable=False)
     base = relationship("Hieroglyph", back_populates="cards")
 
 
 class HieroglyphTry(AbstractLexisTry):
     __tablename__ = "hieroglyph_tries"
 
-    base_id = Column(Integer, ForeignKey("hieroglyphs.id"))
+    base_id = Column(Integer, ForeignKey("hieroglyphs.id"), nullable=False)
     base = relationship("Hieroglyph")
 
 
@@ -462,11 +472,18 @@ class NotificationTeacherToStudent(Base):
 #########################################################################################################################
 ################ Utils ##################################################################################################
 #########################################################################################################################
+def time_limit_to_timedelta(time_limit: Time) -> datetime.timedelta:
+    return datetime.timedelta(hours=time_limit.hour,
+                              minutes=time_limit.minute,
+                              seconds=time_limit.second,
+                              microseconds=time_limit.microsecond)
+
+
 LexisType = type[Drilling] | type[Hieroglyph]
 LexisCardType = type[DrillingCard] | type[HieroglyphCard]
 LexisTryType = type[DrillingTry] | type[HieroglyphTry]
-ActivityType = LexisType | type[Assessment]
-ActivityTryType = LexisTryType | type[AssessmentTry]
+ActivityType = LexisType | type[Assessment] | type[FinalBoss]
+ActivityTryType = LexisTryType | type[AssessmentTry] | type[FinalBossTry]
 
 
 def create_db_session(url, username, password, host, database):

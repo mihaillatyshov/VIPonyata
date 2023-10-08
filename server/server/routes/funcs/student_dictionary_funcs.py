@@ -10,10 +10,13 @@ def get_dictionary() -> dict:
     result = []
     for dict_item, dict_association in db_dictionary:
         print(dict_item, dict_association)
-        if dict_association.img != None:
-            dict_item.img = dict_association.img
 
-        result.append(dict_item)
+        data = dict_item.__json__()
+        data["association"] = dict_association.association
+        if dict_association.img != None:
+            data["img"] = dict_association.img
+
+        result.append(data)
 
     return {"dictionary": result}
 

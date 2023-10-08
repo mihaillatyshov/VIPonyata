@@ -1,4 +1,5 @@
 import React from "react";
+
 import { TDictionaryItem } from "models/TDictionary";
 
 interface DictionaryItemProps {
@@ -10,6 +11,7 @@ const DictionaryItem = ({ item }: DictionaryItemProps) => {
         <div className="flex-table flex-table-row" role="rowgroup">
             <div className="flex-row first" role="cell">
                 <img src={item.img ?? "/svg/NoImg.svg"} alt="IMG" className="table-img" />
+                <div className="mt-1"> {item.association} </div>
             </div>
             <div className="flex-row" role="cell">
                 <div className="d-flex w-100 h-100 align-items-center justify-content-center fs-5">{item.ru}</div>

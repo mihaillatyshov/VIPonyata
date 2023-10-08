@@ -10,6 +10,7 @@ export interface TDictionaryItem {
     word_jp: string | null;
     ru: string;
     img: string | null;
+    association: string | null;
 }
 
 export type TDictionary = TDictionaryItem[];

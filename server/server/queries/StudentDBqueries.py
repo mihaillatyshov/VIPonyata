@@ -246,6 +246,11 @@ def get_notifications(user_id: int):
     )
 
 
+def add_final_boss_notification(final_boss_try_id: int):
+    DBsession().add(NotificationStudentToTeacher(final_boss_try_id=final_boss_try_id))
+    DBsession().commit()
+
+
 def add_assessment_notification(assessment_try_id: int):
     DBsession().add(NotificationStudentToTeacher(assessment_try_id=assessment_try_id))
     DBsession().commit()

@@ -6,18 +6,17 @@ from typing import Callable
 from flask import Blueprint, request, send_from_directory
 from flask_login import login_required
 from PIL import Image
-
 from werkzeug.datastructures import FileStorage
 
 from server.exceptions.ApiExceptions import InvalidAPIUsage
 from server.log_lib import LogI
 from server.routes.funcs import funcs_student as student_funcs
 from server.routes.funcs import funcs_teacher as teacher_funcs
-from server.routes.routes_utils import UserSelectorFunction
+from server.routes.routes_utils import (UserSelectorFunction, get_uploads_folder_from_config)
 
 routes_bp = Blueprint("routes", __name__)
 
-UPLOAD_FOLDER = "C:/Coding/Web/VIPonyata/uploads" if os.name == "nt" else "/home/lm/coding/WEB/VIPonyata/uploads"
+UPLOAD_FOLDER = get_uploads_folder_from_config()
 ALLOWED_IMG_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
 ALLOWED_AUDIO_EXTENSIONS = {"mp3"}
 

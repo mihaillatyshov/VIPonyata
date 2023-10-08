@@ -1,15 +1,19 @@
 from flask import Flask
 
 from server.common import CustomJSONEncoder, base_blueprint, login_manager
+from server.load_config import load_config
 from server.routes.common import on_start_app
+
+
+def get_flask_secret_from_config():
+    return load_config("config.json")["flask_secret"]
 
 
 def create_app():
     app = Flask(__name__)
-    app.secret_key = "my super duper puper secret key!"                                                                 # TODO add some env var
-    app.json_encoder = CustomJSONEncoder
-
     # app.config.from_object('config.Config')
+    app.secret_key = get_flask_secret_from_config()
+    app.json_encoder = CustomJSONEncoder
 
     login_manager.init_app(app)
 

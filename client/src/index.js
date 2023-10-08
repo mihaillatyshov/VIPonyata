@@ -1,16 +1,19 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App";
-import reportWebVitals from "./reportWebVitals";
-import store from "./redux/store";
-import { Provider } from "react-redux";
-
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.min.css";
 import "./assets/css/Table.css";
 import "./assets/css/Modal.css";
 import "./assets/css/FontIcon.css";
 import "./assets/css/MyCard.css";
+import "./assets/css/CardMain.css";
+
+import React from "react";
+
+import ReactDOM from "react-dom/client";
+import { Provider } from "react-redux";
+
+import App from "./App";
+import store from "./redux/store";
+import reportWebVitals from "./reportWebVitals";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
