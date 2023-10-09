@@ -3,11 +3,15 @@ from datetime import datetime
 from server.common import DBsession
 from server.log_lib import LogW
 from server.models.db_models import (ActivityTryType, ActivityType, AssessmentTry, DrillingTry, FinalBossTry,
-                                     HieroglyphTry, LexisType, UserDictionary)
+                                     HieroglyphTry, LexisType, User, UserDictionary)
+from server.models.user import UserRegisterReq
 from server.queries.StudentDBqueries import (add_assessment_notification, add_drilling_notification,
                                              add_final_boss_notification, add_hieroglyph_notification)
 
 
+#########################################################################################################################
+################ On Restart #############################################################################################
+#########################################################################################################################
 def GetActivityCheckTasksTimers(activity_type: ActivityType,
                                 activityTry_type: ActivityTryType) -> list[ActivityTryType]:
     LogW("GetActivityCheckTasksTimers", activity_type.__name__, activityTry_type.__name__)
@@ -44,6 +48,18 @@ def UpdateActivityTryEndTime(activity_try_id: int, endTime: datetime, activityTr
         DBsession.commit()
 
 
+#########################################################################################################################
+################ User ###################################################################################################
+#########################################################################################################################
+def create_new_user(user_data: UserRegisterReq, hash_pwd):
+    DBsession.add(
+        User(name=user_data.name, nickname=user_data.nickname, password=hash_pwd, birthday=user_data.birthday, level=0))
+    DBsession.commit()
+
+
+#########################################################################################################################
+################ Dictionary #############################################################################################
+#########################################################################################################################
 def add_user_dictionary_from_try(activity_try: DrillingTry | HieroglyphTry):
     lexis: LexisType = activity_try.base
 

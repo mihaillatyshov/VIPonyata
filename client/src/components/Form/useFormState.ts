@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import { ValidatorFuncType } from "validators/FormValidators";
 
 type TAvail = { [key: string]: any };
@@ -16,7 +17,7 @@ type ErrorType<T> = {
 };
 
 type ValidatorsInput<T> = {
-    [K in keyof T]?: ValidatorFuncType<T[K]>;
+    [K in keyof T]?: ValidatorFuncType<T[K], T>;
 };
 
 type ValidatorsResult<T> = {
@@ -69,7 +70,7 @@ export const useFormState = <T extends TAvail>(
             return [
                 key,
                 () => {
-                    const res = validate(inputs[key]);
+                    const res = validate(inputs[key], inputs);
                     setClientErrors((prev: ErrorType<T>) => {
                         prev[key as keyof T] = res;
                         return { ...prev };

@@ -3,33 +3,29 @@ import React from "react";
 import { InputBaseProps } from "./InputBase";
 import InputError from "./InputError";
 
-interface InputTextProps extends InputBaseProps {
+interface InputDateProps extends InputBaseProps {
     value: string;
-    type?: "text" | "password";
     onChangeHandler: (value: string) => void;
     customValidation?: () => void;
 }
 
-const InputText = ({
+const InputDate = ({
     htmlId,
     placeholder,
     value,
-    type = "text",
     errorMessage,
-    noErrorField,
     className,
     onChangeHandler,
     customValidation,
-}: InputTextProps) => {
+}: InputDateProps) => {
     className = className ?? "";
-    noErrorField = noErrorField === undefined ? false : noErrorField;
 
     const hasError = errorMessage !== undefined && errorMessage !== "";
 
     return (
         <div className={`form-floating ${className}`}>
             <input
-                type={type}
+                type="date"
                 className={`form-control ${hasError ? "is-invalid" : ""}`}
                 value={value}
                 id={htmlId}
@@ -38,9 +34,9 @@ const InputText = ({
                 onBlur={customValidation}
             />
             <label htmlFor={htmlId}>{placeholder}</label>
-            {!noErrorField && <InputError message={errorMessage} />}
+            <InputError message={errorMessage} />
         </div>
     );
 };
 
-export default InputText;
+export default InputDate;

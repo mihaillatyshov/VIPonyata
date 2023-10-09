@@ -10,15 +10,15 @@ class FlaskUser(UserMixin):
 
     def FromDB(self, user_id):
         self.data = {}
-        if userData := DBsession.query(User).filter_by(nickname=user_id).one_or_none():
-            self.data["id"] = userData.id
-            self.data["name"] = userData.name
-            self.data["nickname"] = userData.nickname
-            self.data["password"] = userData.password
-            self.data["level"] = userData.level
-            self.data["avatar"] = userData.avatar
-            self.data["form"] = userData.form
-            self.data["registration_date"] = userData.registration_date
+        if user_data := DBsession.query(User).filter_by(nickname=user_id).one_or_none():
+            self.data["id"] = user_data.id
+            self.data["name"] = user_data.name
+            self.data["nickname"] = user_data.nickname
+            self.data["password"] = user_data.password
+            self.data["level"] = user_data.level
+            self.data["avatar"] = user_data.avatar
+            self.data["form"] = user_data.form
+            self.data["registration_date"] = user_data.registration_date
         return self
 
     def IsExists(self):

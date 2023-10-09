@@ -7,10 +7,12 @@
 html {
     min-width: 100%;
     min-height: 100%;
+    height: 100%;
 }
 
 body {
     min-height: 100%;
+    height: 100%;
     overflow-y: scroll;
 }
 
@@ -25,20 +27,17 @@ body {
     --css-var-title: #a084ca;
     --css-var-other: #a084ca;; */
     min-height: 100dvh;
+    height: 100%;
     padding: 10px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .mainNavBar {
     border-bottom: 1px solid #cccccc;
     padding-bottom: 4px;
-}
-
-.win_height {
-    min-height: 100vh;
-}
-
-.login_form_margin {
-    margin-top: 20vh;
 }
 
 .a-link,

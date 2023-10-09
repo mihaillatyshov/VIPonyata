@@ -1,17 +1,18 @@
 import React from "react";
-import InputText from "components/Form/InputText";
-import InputSelect, { TOption } from "components/Form/InputSelect";
+
+import { GetImg, GetStringOrNull } from "components/Form/InputBase";
 import InputImage from "components/Form/InputImage";
-import { ImageState } from "models/Img";
 import InputNumber from "components/Form/InputNumber";
+import InputSelect, { TOption } from "components/Form/InputSelect";
+import InputText from "components/Form/InputText";
 import InputTextArea from "components/Form/InputTextArea";
 import SubmitButton from "components/Form/SubmitButton";
 import { useFormState } from "components/Form/useFormState";
-import { ValidateEmpty, ValidateImgLoading } from "validators/FormValidators";
 import { AjaxPost } from "libs/ServerAPI";
+import { ImageState } from "models/Img";
 import { TCourse, TCourseCreate } from "models/TCourse";
-import { GetImg, GetStringOrNull } from "components/Form/InputBase";
 import { useNavigate } from "react-router-dom";
+import { ValidateEmpty, ValidateImgLoading } from "validators/FormValidators";
 
 const colors: TOption[] = [
     { value: "", title: "Без цвета" },
@@ -29,7 +30,7 @@ interface CourseForm {
     img: ImageState;
 }
 
-const defaults: CourseForm = {
+const defaultForm: CourseForm = {
     name: "",
     difficulty: "",
     difficultyColor: "",
@@ -42,7 +43,7 @@ const CourseCreatePage = () => {
     const navigate = useNavigate();
 
     const { inputs, validateForm, inputProps } = useFormState<CourseForm>(
-        defaults,
+        { ...defaultForm },
         {},
         {
             name: ValidateEmpty,

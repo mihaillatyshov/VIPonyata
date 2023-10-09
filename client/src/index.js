@@ -5,6 +5,7 @@ import "./assets/css/Modal.css";
 import "./assets/css/FontIcon.css";
 import "./assets/css/MyCard.css";
 import "./assets/css/CardMain.css";
+import "./assets/css/Form.css";
 
 import React from "react";
 

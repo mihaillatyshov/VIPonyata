@@ -1,127 +1,115 @@
-import React, { useEffect } from "react";
-import { Form, Button } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
-import { AjaxPost } from "libs/ServerAPI";
-import {
-    resetRegisterForm,
-    setRegisterValidated,
-    setRegisterMessage,
-    setRegisterNickname,
-    setRegisterPassword1,
-    setRegisterPassword2,
-    setRegisterName,
-    setRegisterBirthday,
-    selectRegister,
-} from "redux/slices/registerSlice";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
+import React, { useEffect, useState } from "react";
 
-// TODO: remove any and fix setStoreState
+import InputDate from "components/Form/InputDate";
+import InputError from "components/Form/InputError";
+import InputText from "components/Form/InputText";
+import { useFormState } from "components/Form/useFormState";
+import { AjaxPost } from "libs/ServerAPI";
+import { LoadStatus } from "libs/Status";
+import { Link, useNavigate } from "react-router-dom";
+import { useAppDispatch } from "redux/hooks";
+import { setUserData, UserDataType } from "redux/slices/userSlice";
+import { ValidateEmpty } from "validators/FormValidators";
+
+export interface RegisterForm {
+    nickname: string;
+    password1: string;
+    password2: string;
+    name: string;
+    birthday: string;
+}
+
+const defaultForm: RegisterForm = {
+    nickname: "",
+    password1: "",
+    password2: "",
+    name: "",
+    birthday: "",
+};
+
 const RegisterPage = () => {
-    const navigate = useNavigate();
-    const register = useAppSelector(selectRegister);
+    const [serverError, setServerError] = useState<string>("");
+
     const dispatch = useAppDispatch();
 
+    const navigate = useNavigate();
+
+    const { inputs, validateForm, inputProps } = useFormState<RegisterForm>(
+        { ...defaultForm },
+        {},
+        {
+            nickname: ValidateEmpty,
+            password1: ValidateEmpty,
+            password2: ValidateEmpty,
+            name: ValidateEmpty,
+            birthday: ValidateEmpty,
+        }
+    );
+
     useEffect(() => {
-        return () => {
-            dispatch(resetRegisterForm());
-        };
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+        if (serverError !== "") {
+            setServerError("");
+        }
+    }, [inputs.nickname, inputs.password1, inputs.password2, inputs.name, inputs.birthday]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        event.stopPropagation();
-
-        if (event.currentTarget.checkValidity()) {
-            AjaxPost<any>({
-                url: "/api/register",
-                body: {
-                    nickname: register.nickname,
-                    name: register.name,
-                    password1: register.password1,
-                    password2: register.password2,
-                    birthday: register.birthday,
-                },
-            })
-                .then(() => {
-                    navigate("/");
-                })
-                .catch(({ isServerError, json, response }) => {
-                    if (!isServerError) {
-                        if (response.status === 422) {
-                            dispatch(setRegisterMessage(json.message));
-                        }
-                    }
-                });
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!validateForm()) {
+            return;
         }
 
-        dispatch(setRegisterValidated());
-    };
-
-    const handleChangeNickname = (e: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(setRegisterNickname(e.target.value));
-    };
-    const handleChangeName = (e: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(setRegisterName(e.target.value));
-    };
-    const handleChangePassword1 = (e: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(setRegisterPassword1(e.target.value));
-    };
-    const handleChangePassword2 = (e: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(setRegisterPassword2(e.target.value));
-    };
-    const handleChangeBirthday = (e: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(setRegisterBirthday(e.target.value));
+        AjaxPost<UserDataType>({
+            url: "/api/register",
+            body: { ...inputs },
+        })
+            .then((json) => {
+                dispatch(setUserData({ loadStatus: LoadStatus.DONE, ...json }));
+                navigate("/");
+            })
+            .catch(({ isServerError, json, response }) => {
+                console.log(json);
+                if (!isServerError) {
+                    if (response.status === 422) {
+                        setServerError(json.message);
+                    }
+                }
+            });
     };
 
     return (
-        <div className="w-100 mx-auto">
-            <Form
-                className="login_form_margin text-center mx-auto w-50"
-                noValidate
-                validated={register.validated}
-                onSubmit={handleSubmit}
-            >
-                <Form.Group className="mt-4">
-                    <Form.Label> Имя </Form.Label>
-                    <Form.Control type="text" required value={register.name} onChange={handleChangeName} />
-                </Form.Group>
-                <Form.Group className="mt-4">
-                    <Form.Label> Никнейм </Form.Label>
-                    <Form.Control type="text" required value={register.nickname} onChange={handleChangeNickname} />
-                </Form.Group>
-                <Form.Group className="mt-4">
-                    <Form.Label> Пароль </Form.Label>
-                    <Form.Control
-                        type="password"
-                        required
-                        value={register.password1}
-                        onChange={handleChangePassword1}
-                    />
-                </Form.Group>
-                <Form.Group className="mt-4">
-                    <Form.Label> Подтвердите пароль </Form.Label>
-                    <Form.Control
-                        type="password"
-                        required
-                        value={register.password2}
-                        onChange={handleChangePassword2}
-                    />
-                </Form.Group>
-                <Form.Group className="mt-4">
-                    <Form.Label> День рождения </Form.Label>
-                    <Form.Control type="date" required value={register.birthday} onChange={handleChangeBirthday} />
-                </Form.Group>
-                <Form.Group className="mt-4">
-                    <Button variant="secondary" type="submit">
-                        {" "}
-                        Зарегистрироваться{" "}
-                    </Button>
-                </Form.Group>
-                <Form.Group className="mt-4">
-                    <Link to="/"> Вход </Link>
-                </Form.Group>
-            </Form>
-        </div>
+        <form className="auth-form" onSubmit={handleSubmit}>
+            <InputText placeholder="Имя" htmlId="register-name" className="mt-2" {...inputProps.name} />
+            <InputText placeholder="Никнейм" htmlId="register-nickname" className="mt-2" {...inputProps.nickname} />
+            <InputText
+                placeholder="Пароль"
+                type="password"
+                htmlId="register-passwd1"
+                className="mt-2"
+                {...inputProps.password1}
+            />
+            <InputText
+                placeholder="Подтверждение пароля"
+                type="password"
+                htmlId="register-passwd2"
+                className="mt-2"
+                {...inputProps.password2}
+            />
+            <InputDate
+                placeholder="День рождения"
+                htmlId="register-birthday"
+                className="mt-2"
+                {...inputProps.birthday}
+            />
+
+            <InputError message={serverError} />
+
+            <div className="d-flex justify-content-center">
+                <input type="submit" className="btn btn-success mt-2" value={"Зарегистрироваться"} />
+            </div>
+            <div className="d-flex justify-content-center mt-3">
+                <Link to="/"> Вход </Link>
+            </div>
+        </form>
     );
 };
 

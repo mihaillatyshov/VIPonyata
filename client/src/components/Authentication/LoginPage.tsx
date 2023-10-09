@@ -1,88 +1,88 @@
-import React, { useEffect } from "react";
-import { Form, Button } from "react-bootstrap";
-import { Link } from "react-router-dom";
-import {
-    resetLoginForm,
-    selectLogin,
-    setLoginNickname,
-    setLoginPassword,
-    setLoginValidated,
-} from "redux/slices/loginSlice";
+import React, { useEffect, useState } from "react";
+
+import InputError from "components/Form/InputError";
+import InputText from "components/Form/InputText";
+import { useFormState } from "components/Form/useFormState";
 import { AjaxPost } from "libs/ServerAPI";
-import { UserDataType, setUserData } from "redux/slices/userSlice";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { LoadStatus } from "libs/Status";
+import { Link } from "react-router-dom";
+import { useAppDispatch } from "redux/hooks";
+import { setUserData, UserDataType } from "redux/slices/userSlice";
+import { ValidateEmpty } from "validators/FormValidators";
+
+export interface LoginForm {
+    nickname: string;
+    password: string;
+}
+
+const defaultForm: LoginForm = {
+    nickname: "",
+    password: "",
+};
 
 const LoginPage = () => {
-    const login = useAppSelector(selectLogin);
+    const [serverError, setServerError] = useState<string>("");
+
     const dispatch = useAppDispatch();
 
+    const { inputs, validateForm, inputProps } = useFormState<LoginForm>(
+        { ...defaultForm },
+        {},
+        {
+            nickname: ValidateEmpty,
+            password: ValidateEmpty,
+        }
+    );
+
     useEffect(() => {
-        dispatch(resetLoginForm());
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+        if (serverError !== "") {
+            setServerError("");
+        }
+    }, [inputs.nickname, inputs.password]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        event.stopPropagation();
-
-        if (event.currentTarget.checkValidity()) {
-            AjaxPost<UserDataType>({
-                url: "/api/login",
-                body: {
-                    nickname: login.nickname,
-                    password: login.password,
-                },
-            })
-                .then((json) => {
-                    dispatch(setUserData({ loadStatus: LoadStatus.DONE, ...json }));
-                    dispatch(resetLoginForm());
-                })
-                .catch(({ isServerError, json, response }) => {
-                    if (!isServerError) {
-                        if (response.status === 422) {
-                            // dispatch(setLoginMessage(json.message));
-                        }
-                    }
-                });
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!validateForm()) {
+            return;
         }
 
-        dispatch(setLoginValidated());
-    };
-
-    const handleChangeNickname = (e: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(setLoginNickname(e.target.value));
-    };
-    const handleChangePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(setLoginPassword(e.target.value));
+        AjaxPost<UserDataType>({
+            url: "/api/login",
+            body: { ...inputs },
+        })
+            .then((json) => {
+                dispatch(setUserData({ loadStatus: LoadStatus.DONE, ...json }));
+            })
+            .catch(({ isServerError, json, response }) => {
+                if (!isServerError) {
+                    if (response.status === 422) {
+                        setServerError(json.message);
+                    }
+                }
+            });
     };
 
     return (
-        <div className="w-100 mx-auto">
-            <Form
-                className="login_form_margin text-center mx-auto w-50"
-                noValidate
-                validated={login.validated}
-                onSubmit={handleSubmit}
-            >
-                <Form.Group className="mt-4">
-                    <Form.Label> Никнейм </Form.Label>
-                    <Form.Control type="text" required value={login.nickname} onChange={handleChangeNickname} />
-                </Form.Group>
-                <Form.Group className="mt-4">
-                    <Form.Label> Пароль </Form.Label>
-                    <Form.Control type="password" required value={login.password} onChange={handleChangePassword} />
-                </Form.Group>
-                <Form.Group className="mt-4">
-                    <Button variant="secondary" type="submit">
-                        {" "}
-                        Войти{" "}
-                    </Button>
-                </Form.Group>
-                <Form.Group className="mt-4">
-                    <Link to="/register"> Регистрация </Link>
-                </Form.Group>
-            </Form>
-        </div>
+        <form className="auth-form" onSubmit={handleSubmit}>
+            <InputText placeholder="Никнейм" htmlId="register-nickname" className="mt-2" {...inputProps.nickname} />
+            <InputText
+                placeholder="Пароль"
+                type="password"
+                htmlId="register-passwd1"
+                className="mt-2"
+                {...inputProps.password}
+            />
+
+            <InputError message={serverError} />
+
+            <div className="d-flex justify-content-center">
+                <input type="submit" className="btn btn-success mt-2" value={"Войти"} />
+            </div>
+
+            <div className="d-flex justify-content-center mt-3">
+                <Link to="/register"> Регистрация </Link>
+            </div>
+        </form>
     );
 };
 
