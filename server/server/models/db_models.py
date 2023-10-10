@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Type
+from typing import Any, Type, TypeVar
 
 from sqlalchemy import (Boolean, Column, Date, DateTime, ForeignKey, Integer, String, Table, Text, Time,
                         UniqueConstraint, create_engine)
@@ -53,7 +53,7 @@ class User(Base):
     users_dictionary = relationship("UserDictionary", back_populates="user")
 
     def __repr__(self):
-        return f"<User: (id={self.id}; nickname={self.nickname}; level={self.level})>"
+        return f"<User: (id={self.id}, nickname={self.nickname}, level={self.level})>"
 
 
 #########################################################################################################################
@@ -77,7 +77,7 @@ class Course(Base):
     lessons = relationship("Lesson", back_populates="course")
 
     def __repr__(self):
-        return f"<Course: (id={self.id}; name={self.name})>"
+        return f"<Course: (id={self.id}, name={self.name})>"
 
 
 #########################################################################################################################
@@ -106,7 +106,7 @@ class Lesson(Base):
     final_boss = relationship("FinalBoss", uselist=False)
 
     def __repr__(self):
-        return f"<Lesson: (id={self.id}; name={self.name})>"
+        return f"<Lesson: (id={self.id}, name={self.name})>"
 
 
 #########################################################################################################################
@@ -130,7 +130,7 @@ class Dictionary(Base):
         return data
 
     def __repr__(self):
-        return f"<Dictionary: (id={self.id}; char_jp={self.char_jp}; word_jp={self.char_jp}; ru={self.ru})>"
+        return f"<Dictionary: (id={self.id}, char_jp={self.char_jp}, word_jp={self.char_jp}, ru={self.ru})>"
 
 
 class UserDictionary(Base):
@@ -479,11 +479,15 @@ def time_limit_to_timedelta(time_limit: Time) -> datetime.timedelta:
                               microseconds=time_limit.microsecond)
 
 
-LexisType = type[Drilling] | type[Hieroglyph]
-LexisCardType = type[DrillingCard] | type[HieroglyphCard]
-LexisTryType = type[DrillingTry] | type[HieroglyphTry]
-ActivityType = LexisType | type[Assessment] | type[FinalBoss]
-ActivityTryType = LexisTryType | type[AssessmentTry] | type[FinalBossTry]
+ActivityType = TypeVar("ActivityType", Drilling, Hieroglyph, Assessment, FinalBoss)
+ActivityTryType = TypeVar("ActivityTryType", DrillingTry, HieroglyphTry, AssessmentTry, FinalBossTry)
+
+LexisType = TypeVar("LexisType", Drilling, Hieroglyph)
+LexisCardType = TypeVar("LexisCardType", DrillingCard, HieroglyphCard)
+LexisTryType = TypeVar("LexisTryType", DrillingTry, HieroglyphTry)
+
+AssessmentType = TypeVar("AssessmentType", Assessment, FinalBoss)
+AssessmentTryType = TypeVar("AssessmentTryType", AssessmentTry, FinalBossTry)
 
 
 def create_db_session(url, username, password, host, database):
@@ -511,4 +515,4 @@ def create_db_session_from_json_config_file():
 
 def get_db_url_from_json_config_file():
     config = load_config("config.json")["db"]
-    return f"{config['url']}://{config['username']}:{config['password']}@{config['host']}/{config['database']}"
+    return f"{config['url']}: //{config['username']}: {config['password']}@{config['host']}/{config['database']}"

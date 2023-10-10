@@ -44,10 +44,10 @@ def UserSelectorFunction(teacherFunc=None, studentFunc=None, *args, **kwargs) ->
 ################ Activity Timer ############################################################################################
 #########################################################################################################################
 def ActivityEndTimeHandler(activityTryId: int, activityTry_type: ActivityTryType):
-    activityTry = DBQO.GetActivityTryById(activityTryId, activityTry_type)
+    activityTry = DBQO.get_activity_try_by_id(activityTryId, activityTry_type)
     if (activityTry and not activityTry.end_datetime):
         LogI("========= Not Hand ===============================")
-        DBQO.UpdateActivityTryEndTime(activityTryId, datetime.now(), activityTry_type)
+        DBQO.update_activity_try_end_time(activityTryId, datetime.now(), activityTry_type)
     LogI("========= Timer End ===============================")
 
 
@@ -59,7 +59,7 @@ def StartActivityTimerLimit(timedeltaRemaining: timedelta, activityTryId: int, a
 
 def OnRestartServerCheckTasksTimersByType(activity_type: ActivityType, activityTry_type: ActivityTryType):
     LogI(f"OnRestartServerCheckTasksTimers ==== START ==== {activity_type.__name__}")
-    activityTries = DBQO.GetActivityCheckTasksTimers(activity_type, activityTry_type)
+    activityTries = DBQO.get_activity_check_tasks_timers(activity_type, activityTry_type)
     LogI("OnRestartServerCheckTasksTimers:", activityTries)
     for activityTry in activityTries:
         timeRemaining = (activityTry.start_datetime + activityTry.base.time_limit__ToTimedelta()) - datetime.now()

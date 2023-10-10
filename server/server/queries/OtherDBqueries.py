@@ -2,48 +2,57 @@ from datetime import datetime
 
 from server.common import DBsession
 from server.log_lib import LogW
-from server.models.db_models import (ActivityTryType, ActivityType, AssessmentTry, DrillingTry, FinalBossTry,
-                                     HieroglyphTry, LexisType, User, UserDictionary)
+from server.models.db_models import (ActivityTryType, ActivityType,
+                                     AssessmentTry, Drilling, DrillingTry,
+                                     FinalBossTry, Hieroglyph, HieroglyphTry,
+                                     LexisTryType, User,
+                                     UserDictionary)
 from server.models.user import UserRegisterReq
-from server.queries.StudentDBqueries import (add_assessment_notification, add_drilling_notification,
-                                             add_final_boss_notification, add_hieroglyph_notification)
+from server.queries.StudentDBqueries import (add_assessment_notification,
+                                             add_drilling_notification,
+                                             add_final_boss_notification,
+                                             add_hieroglyph_notification)
 
 
 #########################################################################################################################
 ################ On Restart #############################################################################################
 #########################################################################################################################
-def GetActivityCheckTasksTimers(activity_type: ActivityType,
-                                activityTry_type: ActivityTryType) -> list[ActivityTryType]:
-    LogW("GetActivityCheckTasksTimers", activity_type.__name__, activityTry_type.__name__)
+def get_activity_check_tasks_timers(activity_type: ActivityType,
+                                    activity_try_type: ActivityTryType) -> list[ActivityTryType]:
+    LogW("GetActivityCheckTasksTimers", activity_type.__name__, activity_try_type.__name__)
 
-    return (                                                                                                            #
-        DBsession                                                                                                       #
-        .query(activityTry_type)                                                                                        #
-        .filter(activityTry_type.end_datetime == None)                                                                  #
-        .join(activityTry_type.base)                                                                                    #
-        .filter(activity_type.time_limit != None)                                                                       #
-        .all()                                                                                                          #
-    )                                                                                                                   #
-
-
-def GetActivityTryById(activityTryId: int, activityTry_type: ActivityTryType) -> ActivityTryType | None:
-    return DBsession.query(activityTry_type).filter(activityTry_type.id == activityTryId).one_or_none()
+    return (
+        DBsession
+        .query(activity_try_type)
+        .filter(activity_try_type.end_datetime == None)
+        .join(activity_try_type.base)
+        .filter(activity_type.time_limit != None)
+        .all()
+    )
 
 
-def UpdateActivityTryEndTime(activity_try_id: int, endTime: datetime, activityTry_type: ActivityTryType) -> None:
-    if activity_try := DBsession.query(activityTry_type).filter(activityTry_type.id == activity_try_id).one_or_none():
-        if activityTry_type == FinalBossTry:
+def get_activity_try_by_id(activity_try_id: int, activity_try_type: ActivityTryType) -> ActivityTryType | None:
+    return DBsession.query(activity_try_type).filter(activity_try_type.id == activity_try_id).one_or_none()
+
+
+def update_activity_try_end_time(activity_try_id: int, end_time: datetime, activity_try_type: ActivityTryType) -> None:
+    activity_try: ActivityTryType = (DBsession
+                                     .query(activity_try_type)
+                                     .filter(activity_try_type.id == activity_try_id)
+                                     .one_or_none())
+    if activity_try:
+        if activity_try_type == FinalBossTry:
             add_final_boss_notification(activity_try.id)
-        if activityTry_type == AssessmentTry:
+        if activity_try_type == AssessmentTry:
             add_assessment_notification(activity_try.id)
-        elif activityTry_type == DrillingTry:
+        elif activity_try_type == DrillingTry:
             add_drilling_notification(activity_try.id)
             add_user_dictionary_from_try(activity_try)
-        elif activityTry_type == HieroglyphTry:
+        elif activity_try_type == HieroglyphTry:
             add_hieroglyph_notification(activity_try.id)
             add_user_dictionary_from_try(activity_try)
 
-        activity_try.end_datetime = endTime
+        activity_try.end_datetime = end_time
         DBsession.add(activity_try)
         DBsession.commit()
 
@@ -60,13 +69,14 @@ def create_new_user(user_data: UserRegisterReq, hash_pwd):
 #########################################################################################################################
 ################ Dictionary #############################################################################################
 #########################################################################################################################
-def add_user_dictionary_from_try(activity_try: DrillingTry | HieroglyphTry):
-    lexis: LexisType = activity_try.base
+def add_user_dictionary_from_try(activity_try: LexisTryType):
+    lexis: Drilling | Hieroglyph = activity_try.base
 
     for card in lexis.cards:
         dictinary = (
             DBsession                                                                                                   #
-            .query(UserDictionary)                                                                                      #
+            #
+            .query(UserDictionary)
             .filter(UserDictionary.dictionary_id == card.dictionary_id)                                                 #
             .filter(UserDictionary.user_id == activity_try.user_id)                                                     #
             .one_or_none()                                                                                              #

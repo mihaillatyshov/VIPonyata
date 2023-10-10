@@ -16,6 +16,10 @@
                 "title": "VIPonyata server",
                 "pattern": "./server/log/*.log"
             }
-        ]
+        ],
+        "[python]": {
+            "editor.defaultFormatter": "ms-python.autopep8"
+        },
+        "python.formatting.provider": "none"
     }
 }
