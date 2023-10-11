@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Generic
 
 from server.common import DBsession
 from server.exceptions.ApiExceptions import (ActivityNotFoundException, CourseNotFoundException, InvalidAPIUsage,
@@ -7,24 +8,25 @@ from server.log_lib import LogI
 from server.models.db_models import (ActivityTryType, ActivityType, Assessment, AssessmentTry, Course, Dictionary,
                                      Drilling, DrillingTry, Hieroglyph, HieroglyphTry, Lesson,
                                      NotificationTeacherToStudent, NotificationStudentToTeacher, User, UserDictionary)
+from server.models.dictionary import DictionaryAssosiationReq, DictionaryImgReq
 
 
 #########################################################################################################################
 ################ Course and Lesson ######################################################################################
 #########################################################################################################################
-def GetAvailableCourses(user_id: int) -> list[Course]:
+def get_available_courses(user_id: int) -> list[Course]:
     return DBsession.query(Course).join(Course.users).filter(User.id == user_id).order_by(Course.sort).all()
 
 
-def GetCourseById(course_id: int, user_id: int) -> Course:
-    course = (                                                                                                          #
-        DBsession                                                                                                       #
-        .query(Course)                                                                                                  #
-        .filter(Course.id == course_id)                                                                                 #
-        .join(Course.users)                                                                                             #
-        .filter(User.id == user_id)                                                                                     #
-        .one_or_none()                                                                                                  #
-    )                                                                                                                   #
+def get_course_by_id(course_id: int, user_id: int) -> Course:
+    course = (
+        DBsession
+        .query(Course)
+        .filter(Course.id == course_id)
+        .join(Course.users)
+        .filter(User.id == user_id)
+        .one_or_none()
+    )
 
     if course:
         return course
@@ -36,26 +38,26 @@ def GetCourseById(course_id: int, user_id: int) -> Course:
 
 
 def GetLessonsByCourseId(course_id: int, user_id: int) -> list[Lesson]:
-    return (                                                                                                            #
-        DBsession                                                                                                       #
-        .query(Lesson)                                                                                                  #
-        .filter(Lesson.course_id == course_id)                                                                          #
-        .join(Lesson.users)                                                                                             #
-        .filter(User.id == user_id)                                                                                     #
-        .order_by(Lesson.number)                                                                                        #
-        .all()                                                                                                          #
-    )                                                                                                                   #
+    return (
+        DBsession
+        .query(Lesson)
+        .filter(Lesson.course_id == course_id)
+        .join(Lesson.users)
+        .filter(User.id == user_id)
+        .order_by(Lesson.number)
+        .all()
+    )
 
 
 def GetLessonById(lesson_id: int, user_id: int) -> Lesson:
-    lesson = (                                                                                                          #
-        DBsession                                                                                                       #
-        .query(Lesson)                                                                                                  #
-        .filter(Lesson.id == lesson_id)                                                                                 #
-        .join(Lesson.users)                                                                                             #
-        .filter(User.id == user_id)                                                                                     #
-        .one_or_none()                                                                                                  #
-    )                                                                                                                   #
+    lesson = (
+        DBsession
+        .query(Lesson)
+        .filter(Lesson.id == lesson_id)
+        .join(Lesson.users)
+        .filter(User.id == user_id)
+        .one_or_none()
+    )
 
     if lesson:
         return lesson
@@ -69,7 +71,7 @@ def GetLessonById(lesson_id: int, user_id: int) -> Lesson:
 #########################################################################################################################
 ################ Activity ###############################################################################################
 #########################################################################################################################
-class ActivityQueries:
+class ActivityQueries(Generic[ActivityType, ActivityTryType]):
     _activity_type: ActivityType
     _activityTry_type: ActivityTryType
 
@@ -78,26 +80,26 @@ class ActivityQueries:
         self._activityTry_type = activityTry_type
 
     def GetByLessonId(self, lessonId: int, userId: int) -> ActivityType | None:
-        return (                                                                                                        #
-            DBsession                                                                                                   #
-            .query(self._activity_type)                                                                                 #
-            .join(self._activity_type.lesson)                                                                           #
-            .filter(Lesson.id == lessonId)                                                                              #
-            .join(Lesson.users)                                                                                         #
-            .filter(User.id == userId)                                                                                  #
-            .one_or_none()                                                                                              #
-        )                                                                                                               #
+        return (
+            DBsession
+            .query(self._activity_type)
+            .join(self._activity_type.lesson)
+            .filter(Lesson.id == lessonId)
+            .join(Lesson.users)
+            .filter(User.id == userId)
+            .one_or_none()
+        )
 
     def GetById(self, activityId: int, userId: int) -> ActivityType:
-        activity = (                                                                                                    #
-            DBsession                                                                                                   #
-            .query(self._activity_type)                                                                                 #
-            .filter(self._activity_type.id == activityId)                                                               #
-            .join(self._activity_type.lesson)                                                                           #
-            .join(Lesson.users)                                                                                         #
-            .filter(User.id == userId)                                                                                  #
-            .one_or_none()                                                                                              #
-        )                                                                                                               #
+        activity = (
+            DBsession
+            .query(self._activity_type)
+            .filter(self._activity_type.id == activityId)
+            .join(self._activity_type.lesson)
+            .join(Lesson.users)
+            .filter(User.id == userId)
+            .one_or_none()
+        )
 
         if activity:
             return activity
@@ -109,20 +111,20 @@ class ActivityQueries:
         raise ActivityNotFoundException(self._activity_type.__name__)
 
     def GetTriesByActivityId(self, activityId: int, userId: int) -> list[ActivityTryType]:
-        return (                                                                                                        #
-            DBsession                                                                                                   #
-            .query(self._activityTry_type)                                                                              #
-            .join(self._activityTry_type.base)                                                                          #
-            .filter(self._activity_type.id == activityId)                                                               #
-            .join(self._activity_type.lesson)                                                                           #
-            .join(Lesson.users)                                                                                         #
-            .filter(User.id == userId)                                                                                  #
-            .order_by(self._activityTry_type.try_number)                                                                #
-            .all()                                                                                                      #
+        return (
+            DBsession
+            .query(self._activityTry_type)
+            .join(self._activityTry_type.base)
+            .filter(self._activity_type.id == activityId)
+            .join(self._activity_type.lesson)
+            .join(Lesson.users)
+            .filter(User.id == userId)
+            .order_by(self._activityTry_type.try_number)
+            .all()
         )
 
     def AddNewTry(self, tryNumber: int, activityId: int, userId: int) -> ActivityTryType | None:
-        LogI(f"Add New Activity Try {self._activityTry_type.__name__}:", tryNumber, activityId, userId)
+        LogI(f"Add New Activity Try {self._activityTry_type.__name__}: ", tryNumber, activityId, userId)
         newActivityTry = self._activityTry_type(try_number=tryNumber,
                                                 start_datetime=datetime.now(),
                                                 user_id=userId,
@@ -132,20 +134,20 @@ class ActivityQueries:
         return newActivityTry
 
     def GetUnfinishedTryByActivityId(self, activityId: int, userId: int) -> ActivityTryType:
-        activityTry = (                                                                                                 #
-            DBsession                                                                                                   #
-            .query(self._activityTry_type)                                                                              #
-            .filter(self._activityTry_type.end_datetime == None)                                                        #
-            .join(self._activityTry_type.base)                                                                          #
-            .filter(self._activity_type.id == activityId)                                                               #
-            .join(self._activity_type.lesson)                                                                           #
-            .join(Lesson.users)                                                                                         #
-            .filter(User.id == userId)                                                                                  #
-            .one_or_none()                                                                                              #
+        activity_try = (
+            DBsession
+            .query(self._activityTry_type)
+            .filter(self._activityTry_type.end_datetime == None)
+            .join(self._activityTry_type.base)
+            .filter(self._activity_type.id == activityId)
+            .join(self._activity_type.lesson)
+            .join(Lesson.users)
+            .filter(User.id == userId)
+            .one_or_none()
         )
 
-        if activityTry:
-            return activityTry
+        if activity_try:
+            return activity_try
 
         if activity := DBsession.query(self._activity_type).filter(self._activity_type.id == activityId).one_or_none():
             raise InvalidAPIUsage(f"{self._activity_type.__name__} not started!", 403,
@@ -158,16 +160,16 @@ class ActivityQueries:
 ################ Lexis ##################################################################################################
 #########################################################################################################################
 class LexisQueries(ActivityQueries):
-    def SetDoneTasksInTry(self, activityTryId: int, doneTasks: str) -> None:
-        activityTry = (                                                                                                 #
-            DBsession                                                                                                   #
-            .query(self._activityTry_type)                                                                              #
-            .filter(self._activityTry_type.id == activityTryId)                                                         #
-            .one_or_none()                                                                                              #
-        )                                                                                                               #
-        if activityTry:
-            activityTry.done_tasks = doneTasks
-            DBsession.add(activityTry)
+    def set_done_tasks_in_try(self, activity_try_id: int, done_tasks: str) -> None:
+        activity_try = (
+            DBsession
+            .query(self._activityTry_type)
+            .filter(self._activityTry_type.id == activity_try_id)
+            .one_or_none()
+        )
+        if activity_try:
+            activity_try.done_tasks = done_tasks
+            DBsession.add(activity_try)
             DBsession.commit()
 
 
@@ -182,22 +184,21 @@ HieroglyphQueries = LexisQueries(Hieroglyph, HieroglyphTry)
 ################ Assessment #############################################################################################
 #########################################################################################################################
 class AssessmentQueriesClass(ActivityQueries):
-    def AddNewTry(self,
-                  tryNumber: int,
-                  activityId: int,
-                  userId: int,
-                  tasks: str = "",
-                  checked_tasks: str = "") -> ActivityTryType | None:
-        LogI(f"Add New Activity Try {self._activityTry_type.__name__}:", tryNumber, activityId, userId)
-        newActivityTry = self._activityTry_type(try_number=tryNumber,
-                                                start_datetime=datetime.now(),
-                                                user_id=userId,
-                                                done_tasks=tasks,
-                                                checked_tasks=checked_tasks,
-                                                base_id=activityId)
-        DBsession.add(newActivityTry)
+    def add_assessment_new_try(self,
+                               try_number: int,
+                               activity_id: int,
+                               user_id: int,
+                               tasks: str = "",
+                               checked_tasks: str = "") -> ActivityTryType | None:
+        new_activity_try = self._activityTry_type(try_number=try_number,
+                                                  start_datetime=datetime.now(),
+                                                  user_id=user_id,
+                                                  done_tasks=tasks,
+                                                  checked_tasks=checked_tasks,
+                                                  base_id=activity_id)
+        DBsession.add(new_activity_try)
         DBsession.commit()
-        return newActivityTry
+        return new_activity_try
 
 
 AssessmentQueries = AssessmentQueriesClass(Assessment, AssessmentTry)
@@ -206,27 +207,43 @@ AssessmentQueries = AssessmentQueriesClass(Assessment, AssessmentTry)
 #########################################################################################################################
 ################ Dictionary #############################################################################################
 #########################################################################################################################
+def add_user_dictionary_if_not_exists(user_id: int, dictionary_id: int) -> UserDictionary:
+    dictinary = (
+        DBsession
+        .query(UserDictionary)
+        .filter(UserDictionary.dictionary_id == dictionary_id)
+        .filter(UserDictionary.user_id == user_id)
+        .one_or_none()
+    )
+
+    if dictinary is None:
+        dictinary = UserDictionary(user_id=user_id, dictionary_id=dictionary_id)
+        DBsession.add(dictinary)
+        DBsession.commit()
+
+    return dictinary
+
+
 def get_dictionary(user_id: int) -> list[Dictionary]:
-    return (                                                                                                            #
-        DBsession.query(Dictionary, UserDictionary)                                                                     #
-        .filter(Dictionary.id == UserDictionary.dictionary_id)                                                          #
-        .filter(UserDictionary.user_id == user_id)                                                                      #
-        .all()                                                                                                          #
+    return (
+        DBsession.query(Dictionary, UserDictionary)
+        .filter(Dictionary.id == UserDictionary.dictionary_id)
+        .filter(UserDictionary.user_id == user_id)
+        .all()
     )
 
 
-def add_img_to_dictionary(id: int, url: str, user_id: int):
-    dictionary_item: UserDictionary = (
-        DBsession.query(UserDictionary)                                                                                 #
-        .filter(UserDictionary.dictionary_id == id)                                                                     #
-        .filter(UserDictionary.user_id == user_id)                                                                      #
-        .one_or_none()                                                                                                  #
-    )
+def add_img_to_dictionary(dictionary_img_req: DictionaryImgReq, user_id: int):
+    dictionary_item = add_user_dictionary_if_not_exists(user_id, dictionary_img_req.dictionary_id)
 
-    if dictionary_item is None:
-        raise InvalidAPIUsage(f"Can't find dict item with id {id}", 404)
+    dictionary_item.img = dictionary_img_req.url
+    DBsession.commit()
 
-    dictionary_item.img = url
+
+def add_assosiation_to_dictionary(dictionary_assosiation_req: DictionaryAssosiationReq, user_id: int):
+    dictionary_item = add_user_dictionary_if_not_exists(user_id, dictionary_assosiation_req.dictionary_id)
+
+    dictionary_item.img = dictionary_assosiation_req.assosiation
     DBsession.commit()
 
 

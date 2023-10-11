@@ -42,7 +42,7 @@ def GetDictFromSingleItem(func):
 
 
 @GetDictFromSingleItem
-def GetCourseById(courseId: int):
+def get_course_by_id(courseId: int):
     return DBsession.query(Course).filter_by(id=courseId).one_or_none()
 
 
@@ -69,4 +69,4 @@ for user, course in UC:
     print(user.id, "  ", course.id)
 print("          2: ", DBsession.query(User).filter_by(id=1).join(User.courses).filter(Course.id == 2).one_or_none())
 print("          3: ", DBsession.query(Course).join(Course.users).filter(User.id == 1).all())
-                                                                                                                        #print("          4: ", TestAll())
+# print("          4: ", TestAll())

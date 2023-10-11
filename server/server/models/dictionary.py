@@ -25,3 +25,13 @@ class DictionaryCreateReq(BaseModel):
             raise ValueError(f"В уроке должно быть больше одного слова ({len(self.items)})")
 
         return self
+
+
+class DictionaryImgReq(BaseModel):
+    dictionary_id: int
+    url: StrExtraSpaceRemove
+
+
+class DictionaryAssosiationReq(BaseModel):
+    dictionary_id: int
+    assosiation: StrExtraSpaceRemove | None = None

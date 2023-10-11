@@ -3,7 +3,7 @@ from server.routes.routes_utils import GetCurrentUserId
 
 
 def getLessonsByCourseId(courseId: int):
-    course = DBQS.GetCourseById(courseId, GetCurrentUserId())
+    course = DBQS.get_course_by_id(courseId, GetCurrentUserId())
     return {"course": course, "items": DBQS.GetLessonsByCourseId(courseId, GetCurrentUserId())}
 
 

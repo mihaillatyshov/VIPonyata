@@ -18,8 +18,8 @@ def get_all_courses() -> list[Course]:
     return DBsession.query(Course).order_by(Course.sort).all()
 
 
-def GetCourseById(courseId: int) -> Course | None:
-    return DBsession.query(Course).filter(Course.id == courseId).one_or_none()
+def get_course_by_id(course_id: int) -> Course | None:
+    return DBsession.query(Course).filter(Course.id == course_id).one_or_none()
 
 
 def create_course(course_data: CourseCreateReq) -> Course:
@@ -122,11 +122,14 @@ def get_dictionary_item(item: DictionaryCreateReqItem) -> Dictionary | None:
     filter_full_jp = filter_char_jp.filter(Dictionary.word_jp == item.word_jp)
 
     if item.word_jp is not None and item.char_jp is not None:
-        if res := filter_full_jp.one_or_none(): return res
+        if res := filter_full_jp.one_or_none():
+            return res
     if item.char_jp is not None:
-        if res := filter_char_jp.one_or_none(): return res
+        if res := filter_char_jp.one_or_none():
+            return res
     if item.word_jp is not None:
-        if res := filter_word_jp.one_or_none(): return res
+        if res := filter_word_jp.one_or_none():
+            return res
 
     return base_filter.one_or_none()
 

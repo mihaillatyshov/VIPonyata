@@ -11,7 +11,7 @@ from server.models.user import UserRegisterReq
 from server.queries.StudentDBqueries import (add_assessment_notification,
                                              add_drilling_notification,
                                              add_final_boss_notification,
-                                             add_hieroglyph_notification)
+                                             add_hieroglyph_notification, add_user_dictionary_if_not_exists)
 
 
 #########################################################################################################################
@@ -73,16 +73,4 @@ def add_user_dictionary_from_try(activity_try: LexisTryType):
     lexis: Drilling | Hieroglyph = activity_try.base
 
     for card in lexis.cards:
-        dictinary = (
-            DBsession                                                                                                   #
-            #
-            .query(UserDictionary)
-            .filter(UserDictionary.dictionary_id == card.dictionary_id)                                                 #
-            .filter(UserDictionary.user_id == activity_try.user_id)                                                     #
-            .one_or_none()                                                                                              #
-        )
-
-        if dictinary is None:
-            user_dictionary = UserDictionary(user_id=activity_try.user_id, dictionary_id=card.dictionary_id)
-            DBsession.add(user_dictionary)
-            DBsession.commit()
+        add_user_dictionary_if_not_exists(activity_try.user_id, card.dictionary_id)

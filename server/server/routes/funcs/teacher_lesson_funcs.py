@@ -6,7 +6,7 @@ from server.models.lesson import LessonCreateReq
 
 
 def getLessonsByCourseId(courseId: int):
-    if course := DBQT.GetCourseById(courseId):
+    if course := DBQT.get_course_by_id(courseId):
         return {"course": course, "items": DBQT.GetLessonsByCourseId(courseId)}
 
     return {"course": None, "items": None}, 403
@@ -27,7 +27,7 @@ def create_lesson(course_id: int):
     if not request.json:
         raise InvalidRequestJson()
 
-    if not DBQT.GetCourseById(course_id):
+    if not DBQT.get_course_by_id(course_id):
         raise InvalidAPIUsage("No course in db!", 403)
 
     lesson_data = LessonCreateReq(**request.json)

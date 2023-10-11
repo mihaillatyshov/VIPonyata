@@ -97,7 +97,7 @@ class AssessmentFuncsClass(ActivityFuncs):
 
         new_tasks = parse_new_tasks(activity.tasks)
         checked_tasks = check_task_req(new_tasks)
-        new_activity_try = self._activityQueries.AddNewTry(
+        new_activity_try = self._activityQueries.add_assessment_new_try(
             len(activity_tries) + 1, activityId, GetCurrentUserId(), json.dumps(new_tasks), json.dumps(checked_tasks))
 
         if activity.time_limit and new_activity_try:

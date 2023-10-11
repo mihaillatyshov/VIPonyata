@@ -1,4 +1,6 @@
 from flask import request
+from server.models.dictionary import DictionaryAssosiationReq, DictionaryImgReq
+from server.models.utils import validate_req
 
 import server.queries.StudentDBqueries as DBQS
 from server.exceptions.ApiExceptions import InvalidRequestJson
@@ -22,13 +24,16 @@ def get_dictionary() -> dict:
 
 
 def add_img_to_dictionary(id: int) -> dict:
-    if not request.json:
-        raise InvalidRequestJson()
+    img_req_data = validate_req(DictionaryImgReq, request.json, other_data={"dictionary_id": id})
 
-    url = request.json.get("url")
-    if not isinstance(url, str):
-        raise InvalidRequestJson()
+    DBQS.add_img_to_dictionary(img_req_data, GetCurrentUserId())
 
-    DBQS.add_img_to_dictionary(id, url, GetCurrentUserId())
+    return {"message": "ok"}
+
+
+def add_assosiation_to_dictionary(id: int):
+    assosiation_req_data = validate_req(DictionaryAssosiationReq, request.json, other_data={"dictionary_id": id})
+
+    DBQS.add_assosiation_to_dictionary(assosiation_req_data, GetCurrentUserId())
 
     return {"message": "ok"}

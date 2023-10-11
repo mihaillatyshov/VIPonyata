@@ -70,10 +70,6 @@ def save_img(in_file: FileStorage, filename: str):
 
 def save_audio(in_file: FileStorage, filename: str):
     in_file.save(filename, 4096)
-    # with open(in_file, "rb") as fr:
-    #     with open(filename, "wb") as fw:
-    #         for chunk in iter(lambda: fr.read(4096), b""):
-    #             fw.write(chunk)
 
 
 def upload_file(upload_folder: str, ext: str, allowed_exts: list[str], save_func: Callable[[FileStorage, str], None]):
@@ -293,9 +289,16 @@ def add_img_to_dictionary(id):
     return UserSelectorFunction(teacher_funcs.add_img_to_dictionary, student_funcs.add_img_to_dictionary, id=id)
 
 
+@routes_bp.route("/dictionary/assosiation/<id>", methods=["POST"])
+@login_required
+def add_assosiation_to_dictionary(id):
+    return UserSelectorFunction(None, student_funcs.add_assosiation_to_dictionary, id=id)
+
 #########################################################################################################################
 ################ Notifications ##########################################################################################
 #########################################################################################################################
+
+
 @routes_bp.route("/notifications", methods=["GET"])
 @login_required
 def get_notifications():
