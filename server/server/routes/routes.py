@@ -129,7 +129,9 @@ def create_course():
 @routes_bp.route("/courses/<id>", methods=["GET"])
 @login_required
 def get_lessons_by_course_id(id):
-    return UserSelectorFunction(teacher_funcs.getLessonsByCourseId, student_funcs.getLessonsByCourseId, courseId=id)
+    return UserSelectorFunction(teacher_funcs.get_lessons_by_course_id,
+                                student_funcs.get_lessons_by_course_id,
+                                course_id=id)
 
 
 #########################################################################################################################

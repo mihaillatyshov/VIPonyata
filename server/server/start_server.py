@@ -9,6 +9,10 @@ def get_flask_secret_from_config():
     return load_config("config.json")["flask_secret"]
 
 
+def get_logs_folder_from_config():
+    return load_config("config.json")["logs_folder"]
+
+
 def create_app():
     app = Flask(__name__)
     # app.config.from_object('config.Config')

@@ -1,21 +1,20 @@
 import logging
-import click
-
+import logging.handlers
 import os
-import datetime
 
+import click
 from flask_cors import CORS
 
-from server.exceptions.ApiExceptions import InvalidAPIUsage
-from server.start_server import create_app
-
 from server.common import DBsession
+from server.exceptions.ApiExceptions import InvalidAPIUsage
+from server.start_server import create_app, get_logs_folder_from_config
 
-if not os.path.isdir("./log"):
-    os.mkdir("./log")
-logging.basicConfig(filename=f'./log/{str(datetime.datetime.now()).replace(":", " ")}.log',
-                    level=logging.DEBUG,
-                    format='%(asctime)-15s %(name)-5s %(levelname)-8s %(message)s')
+logs_folder = get_logs_folder_from_config()
+os.makedirs(logs_folder, exist_ok=True)
+log_file_handler = logging.handlers.TimedRotatingFileHandler(os.path.join(logs_folder, "server.log"), when="midnight")
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)-15s %(name)-5s %(levelname)-8s %(message)s',
+                    handlers=[log_file_handler])
 
 
 class RemoveColorFilter(logging.Filter):

@@ -1,13 +1,14 @@
 from datetime import datetime
-from typing import Generic
+from typing import Generic, Type
 
 from server.common import DBsession
 from server.exceptions.ApiExceptions import (ActivityNotFoundException, CourseNotFoundException, InvalidAPIUsage,
                                              LessonNotFoundException)
 from server.log_lib import LogI
-from server.models.db_models import (ActivityTryType, ActivityType, Assessment, AssessmentTry, Course, Dictionary,
-                                     Drilling, DrillingTry, Hieroglyph, HieroglyphTry, Lesson,
-                                     NotificationTeacherToStudent, NotificationStudentToTeacher, User, UserDictionary)
+from server.models.db_models import (
+    ActivityTryType, ActivityType, Assessment, AssessmentTry, AssessmentTryType, AssessmentType, Course, Dictionary,
+    Drilling, DrillingTry, Hieroglyph, HieroglyphTry, Lesson, LexisTryType, LexisType, NotificationTeacherToStudent,
+    NotificationStudentToTeacher, User, UserDictionary)
 from server.models.dictionary import DictionaryAssosiationReq, DictionaryImgReq
 
 
@@ -37,7 +38,7 @@ def get_course_by_id(course_id: int, user_id: int) -> Course:
     raise CourseNotFoundException()
 
 
-def GetLessonsByCourseId(course_id: int, user_id: int) -> list[Lesson]:
+def get_lessons_by_course_id(course_id: int, user_id: int) -> list[Lesson]:
     return (
         DBsession
         .query(Lesson)
@@ -72,10 +73,10 @@ def GetLessonById(lesson_id: int, user_id: int) -> Lesson:
 ################ Activity ###############################################################################################
 #########################################################################################################################
 class ActivityQueries(Generic[ActivityType, ActivityTryType]):
-    _activity_type: ActivityType
-    _activityTry_type: ActivityTryType
+    _activity_type: Type[ActivityType]
+    _activityTry_type: Type[ActivityTryType]
 
-    def __init__(self, activity_type: ActivityType, activityTry_type: ActivityTryType):
+    def __init__(self, activity_type: Type[ActivityType], activityTry_type: Type[ActivityTryType]):
         self._activity_type = activity_type
         self._activityTry_type = activityTry_type
 
@@ -159,7 +160,7 @@ class ActivityQueries(Generic[ActivityType, ActivityTryType]):
 #########################################################################################################################
 ################ Lexis ##################################################################################################
 #########################################################################################################################
-class LexisQueries(ActivityQueries):
+class LexisQueries(ActivityQueries[LexisType, LexisTryType]):
     def set_done_tasks_in_try(self, activity_try_id: int, done_tasks: str) -> None:
         activity_try = (
             DBsession
@@ -183,7 +184,7 @@ HieroglyphQueries = LexisQueries(Hieroglyph, HieroglyphTry)
 #########################################################################################################################
 ################ Assessment #############################################################################################
 #########################################################################################################################
-class AssessmentQueriesClass(ActivityQueries):
+class AssessmentQueriesClass(ActivityQueries[AssessmentType, AssessmentTryType]):
     def add_assessment_new_try(self,
                                try_number: int,
                                activity_id: int,

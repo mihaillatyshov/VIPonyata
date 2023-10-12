@@ -7,5 +7,6 @@
         "database": "database_name"
     },
     "uploads": "/home/lm/coding/WEB/VIPonyata/uploads",
-    "flask_secret": "super_secret_key!!!"
+    "flask_secret": "super_secret_key!!!",
+    "logs_folder": "./logs"
 }

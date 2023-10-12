@@ -5,9 +5,9 @@ from server.exceptions.ApiExceptions import InvalidAPIUsage, InvalidRequestJson
 from server.models.lesson import LessonCreateReq
 
 
-def getLessonsByCourseId(courseId: int):
-    if course := DBQT.get_course_by_id(courseId):
-        return {"course": course, "items": DBQT.GetLessonsByCourseId(courseId)}
+def get_lessons_by_course_id(course_id: int):
+    if course := DBQT.get_course_by_id(course_id):
+        return {"course": course, "items": DBQT.get_lessons_by_course_id(course_id)}
 
     return {"course": None, "items": None}, 403
 

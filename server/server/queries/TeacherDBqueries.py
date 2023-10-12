@@ -1,3 +1,4 @@
+from typing import Generic, Type
 from server.exceptions.ApiExceptions import InvalidAPIUsage
 from server.log_lib import LogI
 from server.models.assessment import AssessmentCreateReq
@@ -31,8 +32,8 @@ def create_course(course_data: CourseCreateReq) -> Course:
     return course
 
 
-def GetLessonsByCourseId(courseId: int) -> list[Lesson]:
-    return DBsession.query(Lesson).filter(Lesson.course_id == courseId).all()
+def get_lessons_by_course_id(course_id: int) -> list[Lesson]:
+    return DBsession.query(Lesson).filter(Lesson.course_id == course_id).all()
 
 
 def GetLessonById(lessonId: int) -> Lesson | None:
@@ -50,12 +51,14 @@ def create_lesson(course_id: int, lesson_data: LessonCreateReq) -> Lesson:
 #########################################################################################################################
 ################ Lexis ##################################################################################################
 #########################################################################################################################
-class LexisQueries:
-    lexis_type: LexisType
-    lexis_try_type: LexisTryType
-    lexis_card_type: LexisCardType
+class LexisQueries(Generic[LexisType, LexisTryType, LexisCardType]):
+    lexis_type: Type[LexisType]
+    lexis_try_type: Type[LexisTryType]
+    lexis_card_type: Type[LexisCardType]
 
-    def __init__(self, lexis_type: LexisType, lexis_try_type: LexisTryType, lexis_card_type: LexisCardType):
+    def __init__(self, lexis_type: Type[LexisType],
+                 lexis_try_type: Type[LexisTryType],
+                 lexis_card_type: Type[LexisCardType]):
         self.lexis_type = lexis_type
         self.lexis_try_type = lexis_try_type
         self.lexis_card_type = lexis_card_type
