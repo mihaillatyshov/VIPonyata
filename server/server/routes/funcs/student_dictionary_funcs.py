@@ -4,11 +4,11 @@ from server.models.utils import validate_req
 
 import server.queries.StudentDBqueries as DBQS
 from server.exceptions.ApiExceptions import InvalidRequestJson
-from server.routes.routes_utils import GetCurrentUserId
+from server.routes.routes_utils import get_current_user_id
 
 
 def get_dictionary() -> dict:
-    db_dictionary = DBQS.get_dictionary(GetCurrentUserId())
+    db_dictionary = DBQS.get_dictionary(get_current_user_id())
     result = []
     for dict_item, dict_association in db_dictionary:
         print(dict_item, dict_association)
@@ -26,7 +26,7 @@ def get_dictionary() -> dict:
 def add_img_to_dictionary(id: int) -> dict:
     img_req_data = validate_req(DictionaryImgReq, request.json, other_data={"dictionary_id": id})
 
-    DBQS.add_img_to_dictionary(img_req_data, GetCurrentUserId())
+    DBQS.add_img_to_dictionary(img_req_data, get_current_user_id())
 
     return {"message": "ok"}
 
@@ -34,6 +34,6 @@ def add_img_to_dictionary(id: int) -> dict:
 def add_assosiation_to_dictionary(id: int):
     assosiation_req_data = validate_req(DictionaryAssosiationReq, request.json, other_data={"dictionary_id": id})
 
-    DBQS.add_assosiation_to_dictionary(assosiation_req_data, GetCurrentUserId())
+    DBQS.add_assosiation_to_dictionary(assosiation_req_data, get_current_user_id())
 
     return {"message": "ok"}

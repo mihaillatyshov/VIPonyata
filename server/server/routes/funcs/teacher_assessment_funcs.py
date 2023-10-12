@@ -24,7 +24,7 @@ class IAssessmentFuncs:
         if not request.json:
             raise InvalidRequestJson()
 
-        lesson = DBQT.GetLessonById(lesson_id)
+        lesson = DBQT.get_lesson_by_id(lesson_id)
         if lesson is None:
             raise InvalidAPIUsage("No lesson in db!", 404)
 

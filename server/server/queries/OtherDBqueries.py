@@ -3,22 +3,21 @@ from datetime import datetime
 from server.common import DBsession
 from server.log_lib import LogW
 from server.models.db_models import (ActivityTryType, ActivityType,
-                                     AssessmentTry, Drilling, DrillingTry,
-                                     FinalBossTry, Hieroglyph, HieroglyphTry,
-                                     LexisTryType, User,
-                                     UserDictionary)
+                                     AssessmentTry, DrillingTry, FinalBossTry,
+                                     HieroglyphTry, LexisTryType, User)
 from server.models.user import UserRegisterReq
 from server.queries.StudentDBqueries import (add_assessment_notification,
                                              add_drilling_notification,
                                              add_final_boss_notification,
-                                             add_hieroglyph_notification, add_user_dictionary_if_not_exists)
+                                             add_hieroglyph_notification,
+                                             add_user_dictionary_if_not_exists)
 
 
 #########################################################################################################################
 ################ On Restart #############################################################################################
 #########################################################################################################################
-def get_activity_check_tasks_timers(activity_type: ActivityType,
-                                    activity_try_type: ActivityTryType) -> list[ActivityTryType]:
+def get_activity_check_tasks_timers(activity_type: type[ActivityType],
+                                    activity_try_type: type[ActivityTryType]) -> list[ActivityTryType]:
     LogW("GetActivityCheckTasksTimers", activity_type.__name__, activity_try_type.__name__)
 
     return (
@@ -31,25 +30,26 @@ def get_activity_check_tasks_timers(activity_type: ActivityType,
     )
 
 
-def get_activity_try_by_id(activity_try_id: int, activity_try_type: ActivityTryType) -> ActivityTryType | None:
+def get_activity_try_by_id(activity_try_id: int, activity_try_type: type[ActivityTryType]) -> ActivityTryType | None:
     return DBsession.query(activity_try_type).filter(activity_try_type.id == activity_try_id).one_or_none()
 
 
-def update_activity_try_end_time(activity_try_id: int, end_time: datetime, activity_try_type: ActivityTryType) -> None:
+def update_activity_try_end_time(
+        activity_try_id: int, end_time: datetime, activity_try_type: type[ActivityTryType]) -> None:
     activity_try: ActivityTryType = (DBsession
                                      .query(activity_try_type)
                                      .filter(activity_try_type.id == activity_try_id)
                                      .one_or_none())
     if activity_try:
         if activity_try_type == FinalBossTry:
-            add_final_boss_notification(activity_try.id)
+            add_final_boss_notification(activity_try_id)
         if activity_try_type == AssessmentTry:
-            add_assessment_notification(activity_try.id)
-        elif activity_try_type == DrillingTry:
-            add_drilling_notification(activity_try.id)
+            add_assessment_notification(activity_try_id)
+        elif activity_try_type == DrillingTry and isinstance(activity_try, DrillingTry):
+            add_drilling_notification(activity_try_id)
             add_user_dictionary_from_try(activity_try)
-        elif activity_try_type == HieroglyphTry:
-            add_hieroglyph_notification(activity_try.id)
+        elif activity_try_type == HieroglyphTry and isinstance(activity_try, HieroglyphTry):
+            add_hieroglyph_notification(activity_try_id)
             add_user_dictionary_from_try(activity_try)
 
         activity_try.end_datetime = end_time
@@ -70,7 +70,7 @@ def create_new_user(user_data: UserRegisterReq, hash_pwd):
 ################ Dictionary #############################################################################################
 #########################################################################################################################
 def add_user_dictionary_from_try(activity_try: LexisTryType):
-    lexis: Drilling | Hieroglyph = activity_try.base
+    lexis = activity_try.base
 
     for card in lexis.cards:
         add_user_dictionary_if_not_exists(activity_try.user_id, card.dictionary_id)

@@ -11,29 +11,29 @@ class ListItemType(TypedDict):
     id: int
 
 
-def create_shuffle_list_with_id(strList: list[str]) -> list[ListItemType]:
+def create_shuffle_list_with_id(str_list: list[str]) -> list[ListItemType]:
     shuffle_str_list: list[ListItemType] = []
-    for i in range(len(strList)):
-        shuffle_str_list.append({"value": strList[i], "id": i})
+    for i in range(len(str_list)):
+        shuffle_str_list.append({"value": str_list[i], "id": i})
     random.shuffle(shuffle_str_list)
     return shuffle_str_list
 
 
-def CreateShuffleList(strList: list[str]) -> list[str]:
-    shuffleStrList = strList.copy()
-    random.shuffle(shuffleStrList)
-    return shuffleStrList
+def create_shuffle_list(str_list: list[str]) -> list[str]:
+    shuffle_str_list = str_list.copy()
+    random.shuffle(shuffle_str_list)
+    return shuffle_str_list
 
 
-def CreateShuffleTuple(wordsRU: list[str], wordsJP: list[str],
-                       charsJP: list[str]) -> tuple[list[str], list[str], list[str]]:
-    return CreateShuffleList(wordsRU), CreateShuffleList(wordsJP), CreateShuffleList(charsJP)
+def create_shuffle_tuple(words_ru: list[str], words_jp: list[str],
+                         chars_jp: list[str]) -> tuple[list[str], list[str], list[str]]:
+    return create_shuffle_list(words_ru), create_shuffle_list(words_jp), create_shuffle_list(chars_jp)
 
 
-def CreateFindPair(wordsRU: list[str], wordsJP: list[str], charsJP: list[str]) -> dict:
-    shuffle_words_ru = create_shuffle_list_with_id(wordsRU)
-    shuffle_words_jp = create_shuffle_list_with_id(wordsJP)
-    shuffle_chars_jp = create_shuffle_list_with_id(charsJP)
+def create_find_pair(words_ru: list[str], words_jp: list[str], chars_jp: list[str]) -> dict:
+    shuffle_words_ru = create_shuffle_list_with_id(words_ru)
+    shuffle_words_jp = create_shuffle_list_with_id(words_jp)
+    shuffle_chars_jp = create_shuffle_list_with_id(chars_jp)
     print(
         shuffle_words_ru,
         shuffle_words_jp,
@@ -53,37 +53,37 @@ def CreateFindPair(wordsRU: list[str], wordsJP: list[str], charsJP: list[str]) -
     }
 
 
-def CreateScramble(wordsRU: list[str], wordsJP: list[str], charsJP: list[str]) -> dict:
-    _, shuffleWordsJP, shuffleCharsJP = CreateShuffleTuple(wordsRU, wordsJP, charsJP)
+def create_scramble(words_ru: list[str], words_jp: list[str], chars_jp: list[str]) -> dict:
+    _, shuffle_words_jp, shuffle_chars_jp = create_shuffle_tuple(words_ru, words_jp, chars_jp)
     word_chars = []
     char_chars = []
-    for word in shuffleWordsJP:
+    for word in shuffle_words_jp:
         word_chars.append(list(word))
         random.shuffle(word_chars[-1])
-    for char in shuffleCharsJP:
+    for char in shuffle_chars_jp:
         char_chars.append(list(char))
         random.shuffle(char_chars[-1])
 
     return {
-        "word_words": shuffleWordsJP,
+        "word_words": shuffle_words_jp,
         "word_chars": word_chars,
-        "char_words": shuffleCharsJP,
+        "char_words": shuffle_chars_jp,
         "char_chars": char_chars
     }
 
 
-def CreateTranslate(wordsRU: list[str], wordsJP: list[str], charsJP: list[str]) -> dict:
-    return {"words_ru": wordsRU, "words_jp": wordsJP, "chars_jp": charsJP}
+def create_translate(words_ru: list[str], words_jp: list[str], chars_jp: list[str]) -> dict:
+    return {"words_ru": words_ru, "words_jp": words_jp, "chars_jp": chars_jp}
 
 
-def __getSpaceFromArray(wordsRU: list[str], JP: list[str]) -> dict:
+def __get_space_from_array(words_ru: list[str], jp: list[str]) -> dict:
     spaces = []
-    for i in range(len(JP)):
-        word_or_char_jp = JP[i]
+    for i in range(len(jp)):
+        word_or_char_jp = jp[i]
         length = len(word_or_char_jp)
         spaces.append({
             "word_or_char_jp": word_or_char_jp,
-            "word_ru": wordsRU[i],
+            "word_ru": words_ru[i],
             "word_start": word_or_char_jp[0] if length > 2 else "",
             "word_end": word_or_char_jp[-1] if length > 1 else "",
             "spaces": length - 2 if length > 2 else 1
@@ -92,18 +92,18 @@ def __getSpaceFromArray(wordsRU: list[str], JP: list[str]) -> dict:
     return {"words": spaces}
 
 
-def CreateSpaceFromWords(wordsRU: list[str], wordsJP: list[str], charsJP: list[str]) -> dict:
-    return __getSpaceFromArray(wordsRU, wordsJP)
+def __create_space_from_words(words_ru: list[str], words_jp: list[str], _: list[str]) -> dict:
+    return __get_space_from_array(words_ru, words_jp)
 
 
-def CreateSpaceFromChars(wordsRU: list[str], wordsJP: list[str], charsJP: list[str]) -> dict:
-    return __getSpaceFromArray(wordsRU, charsJP)
+def __create_space_from_chars(words_ru: list[str], _: list[str], chars_jp: list[str]) -> dict:
+    return __get_space_from_array(words_ru, chars_jp)
 
 
-def CreateSpace(wordsRU: list[str], wordsJP: list[str], charsJP: list[str], lexis_type: LexisType) -> dict:
+def create_space(words_ru: list[str], words_jp: list[str], chars_jp: list[str], lexis_type: type[LexisType]) -> dict:
     if lexis_type == Drilling:
-        return CreateSpaceFromWords(wordsRU, wordsJP, charsJP)
+        return __create_space_from_words(words_ru, words_jp, chars_jp)
     if lexis_type == Hieroglyph:
-        return CreateSpaceFromChars(wordsRU, wordsJP, charsJP)
+        return __create_space_from_chars(words_ru, words_jp, chars_jp)
 
-    raise InvalidAPIUsage("Check server CreateSpace()", 500)
+    raise InvalidAPIUsage("Check server create_space func", 500)

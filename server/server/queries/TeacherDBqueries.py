@@ -36,8 +36,8 @@ def get_lessons_by_course_id(course_id: int) -> list[Lesson]:
     return DBsession.query(Lesson).filter(Lesson.course_id == course_id).all()
 
 
-def GetLessonById(lessonId: int) -> Lesson | None:
-    return DBsession.query(Lesson).filter(Lesson.id == lessonId).one_or_none()
+def get_lesson_by_id(lesson_id: int) -> Lesson | None:
+    return DBsession.query(Lesson).filter(Lesson.id == lesson_id).one_or_none()
 
 
 def create_lesson(course_id: int, lesson_data: LessonCreateReq) -> Lesson:

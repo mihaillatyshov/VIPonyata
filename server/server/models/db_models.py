@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Type, TypeVar
+from typing import Any, Mapping, Type, TypeVar
 
 from sqlalchemy import (Boolean, Column, Date, DateTime, ForeignKey, Integer, String, Table, Text, Time,
                         UniqueConstraint, create_engine)
@@ -13,15 +13,17 @@ from server.load_config import load_config
 Base: Type = declarative_base()
 
 USERS_ID = "users.id"
+COURSES_ID = "courses.id"
+LESSONS_ID = "lessons.id"
 
 a_users_courses = Table("users_courses", Base.metadata, Column("id", Integer, primary_key=True),
                         Column("user_id", Integer, ForeignKey(USERS_ID), nullable=False),
-                        Column("course_id", Integer, ForeignKey("courses.id"), nullable=False),
+                        Column("course_id", Integer, ForeignKey(COURSES_ID), nullable=False),
                         UniqueConstraint('user_id', 'course_id', name='idx_user_course'))
 
 a_users_lessons = Table("users_lessons", Base.metadata, Column("id", Integer, primary_key=True),
                         Column("user_id", Integer, ForeignKey(USERS_ID), nullable=False),
-                        Column("lesson_id", Integer, ForeignKey("lessons.id"), nullable=False),
+                        Column("lesson_id", Integer, ForeignKey(LESSONS_ID), nullable=False),
                         UniqueConstraint('user_id', 'lesson_id', name='idx_user_lesson'))
 
 
@@ -47,10 +49,10 @@ class User(Base):
 
     registration_date = Column(DateTime, default=func.now())
 
-    courses = relationship("Course", secondary=a_users_courses, overlaps="courses,user")
-    lessons = relationship("Lesson", secondary=a_users_lessons, overlaps="lessons,user")
+    courses: list["Course"] = relationship("Course", secondary=a_users_courses, overlaps="courses,user")
+    lessons: list["Lesson"] = relationship("Lesson", secondary=a_users_lessons, overlaps="lessons,user")
 
-    users_dictionary = relationship("UserDictionary", back_populates="user")
+    users_dictionary: list["UserDictionary"] = relationship("UserDictionary", back_populates="user")
 
     def __repr__(self):
         return f"<User: (id={self.id}, nickname={self.nickname}, level={self.level})>"
@@ -72,9 +74,9 @@ class Course(Base):
 
     creation_datetime = Column(DateTime, default=func.now())
 
-    users = relationship("User", secondary=a_users_courses, overlaps="courses,user")
+    users: list["User"] = relationship("User", secondary=a_users_courses, overlaps="courses,user")
 
-    lessons = relationship("Lesson", back_populates="course")
+    lessons: list["Lesson"] = relationship("Lesson", back_populates="course")
 
     def __repr__(self):
         return f"<Course: (id={self.id}, name={self.name})>"
@@ -85,7 +87,7 @@ class Course(Base):
 #########################################################################################################################
 class Lesson(Base):
     __tablename__ = "lessons"
-    id = Column(Integer, primary_key=True)
+    id: int = Column(Integer, primary_key=True)
 
     name = Column(String(128), nullable=False)
     number = Column(Integer, nullable=False)
@@ -94,16 +96,16 @@ class Lesson(Base):
 
     creation_datetime = Column(DateTime, default=func.now())
 
-    users = relationship("User", secondary=a_users_lessons, overlaps="lessons,user")
+    users: list["User"] = relationship("User", secondary=a_users_lessons, overlaps="lessons,user")
 
-    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
-    course = relationship("Course", back_populates="lessons")
+    course_id = Column(Integer, ForeignKey(COURSES_ID), nullable=False)
+    course: "Course" = relationship("Course", back_populates="lessons", uselist=False)
 
-    drilling = relationship("Drilling", uselist=False)
-    hieroglyph = relationship("Hieroglyph", uselist=False)
+    drilling: "Drilling" = relationship("Drilling", uselist=False)
+    hieroglyph: "Hieroglyph" = relationship("Hieroglyph", uselist=False)
 
-    assessment = relationship("Assessment", uselist=False)
-    final_boss = relationship("FinalBoss", uselist=False)
+    assessment: "Assessment" = relationship("Assessment", uselist=False)
+    final_boss: "FinalBoss" = relationship("FinalBoss", uselist=False)
 
     def __repr__(self):
         return f"<Lesson: (id={self.id}, name={self.name})>"
@@ -121,7 +123,7 @@ class Dictionary(Base):
     ru = Column(String(128), nullable=False)
     img = Column(String(1024))
 
-    users_dictionary = relationship("UserDictionary", back_populates="dictionary")
+    users_dictionary: list["UserDictionary"] = relationship("UserDictionary", back_populates="dictionary")
 
     def __json__(self):
         data = {}
@@ -142,10 +144,10 @@ class UserDictionary(Base):
     association = Column(String(1024))
 
     user_id = Column(Integer, ForeignKey(USERS_ID), nullable=False)
-    user = relationship("User", back_populates="users_dictionary")
+    user: list["User"] = relationship("User", back_populates="users_dictionary")
 
     dictionary_id = Column(Integer, ForeignKey("dictionary.id"), nullable=False)
-    dictionary = relationship("Dictionary", back_populates="users_dictionary")
+    dictionary: list["Dictionary"] = relationship("Dictionary", back_populates="users_dictionary")
 
     __table_args__ = (UniqueConstraint('user_id', 'dictionary_id', name='idx_user_dictionary'), )
 
@@ -161,37 +163,31 @@ class UserDictionary(Base):
 #########################################################################################################################
 class AbstractActivity(Base):
     __abstract__ = True
-    id = Column(Integer, primary_key=True)
+    id: int = Column(Integer, primary_key=True)
 
     description = Column(String(2048))
 
-    time_limit = Column(Time)
+    time_limit: datetime.time | None = Column(Time)
 
     @declared_attr
-    def lesson_id(cls):
-        return Column(Integer, ForeignKey("lessons.id"), nullable=False)
+    def lesson_id(cls) -> Column[Integer]:
+        return Column(Integer, ForeignKey(LESSONS_ID), nullable=False)
 
-    @declared_attr
+    @declared_attr  # type: ignore
     def lesson(cls):
         return relationship("Lesson", overlaps="drilling,hieroglyph,assessment,final_boss")
 
     tries: list = []
     now_try: Any | None = None
 
-    def time_limit__ToTimedelta(self) -> datetime.timedelta:
-        return datetime.timedelta(hours=self.time_limit.hour,
-                                  minutes=self.time_limit.minute,
-                                  seconds=self.time_limit.second,
-                                  microseconds=self.time_limit.microsecond)
-
     def calcDeadline(self) -> datetime.datetime | None:
         if not self.time_limit:
             return None
 
         if self.now_try:
-            return self.now_try.start_datetime + self.time_limit__ToTimedelta()
+            return self.now_try.start_datetime + time_limit_to_timedelta(self.time_limit)
         if self.tries and not self.tries[-1].end_datetime:
-            return self.tries[-1].start_datetime + self.time_limit__ToTimedelta()
+            return self.tries[-1].start_datetime + time_limit_to_timedelta(self.time_limit)
 
         return None
 
@@ -204,17 +200,17 @@ class AbstractActivity(Base):
 
 class AbstractActivityTry(Base):
     __abstract__ = True
-    id = Column(Integer, primary_key=True)
+    id: int = Column(Integer, primary_key=True)
 
     try_number = Column(Integer, nullable=False)
-    start_datetime = Column(DateTime, nullable=False)
+    start_datetime: datetime.datetime = Column(DateTime, nullable=False)
     end_datetime = Column(DateTime)
 
-    @declared_attr
-    def user_id(cls):
+    @declared_attr  # type: ignore
+    def user_id(cls) -> int:
         return Column(Integer, ForeignKey(USERS_ID), nullable=False)
 
-    @declared_attr
+    @declared_attr  # type: ignore
     def user(cls):
         return relationship("User")
 
@@ -235,7 +231,7 @@ class AbstractLexis(AbstractActivity):
     def getTasksNames(self):
         return self.tasks.split(",")
 
-    def getCardWords(self):
+    def get_card_words(self):
         words_ru = []
         words_jp = []
         chars_jp = []
@@ -254,11 +250,11 @@ class AbstractLexisCard(Base):
     sentence = Column(String(256), nullable=False)
     answer = Column(String(256), nullable=False)
 
-    @declared_attr
-    def dictionary_id(cls):
+    @declared_attr  # type: ignore
+    def dictionary_id(cls) -> int:
         return Column(Integer, ForeignKey("dictionary.id"), nullable=False)
 
-    @declared_attr
+    @declared_attr  # type: ignore
     def dictionary(cls):
         return relationship("Dictionary")
 
@@ -293,21 +289,21 @@ class AbstractLexisTry(AbstractActivityTry):
 class Drilling(AbstractLexis):
     __tablename__ = "drillings"
 
-    cards = relationship("DrillingCard")
+    cards: list["DrillingCard"] = relationship("DrillingCard")
 
 
 class DrillingCard(AbstractLexisCard):
     __tablename__ = "drilling_cards"
 
     base_id = Column(Integer, ForeignKey("drillings.id"), nullable=False)
-    base = relationship("Drilling", back_populates="cards")
+    base: "Drilling" = relationship("Drilling", back_populates="cards", uselist=False)
 
 
 class DrillingTry(AbstractLexisTry):
     __tablename__ = "drilling_tries"
 
     base_id = Column(Integer, ForeignKey("drillings.id"), nullable=False)
-    base = relationship("Drilling")
+    base: "Drilling" = relationship("Drilling", uselist=False)
 
 
 #########################################################################################################################
@@ -316,21 +312,21 @@ class DrillingTry(AbstractLexisTry):
 class Hieroglyph(AbstractLexis):
     __tablename__ = "hieroglyphs"
 
-    cards = relationship("HieroglyphCard")
+    cards: list["HieroglyphCard"] = relationship("HieroglyphCard")
 
 
 class HieroglyphCard(AbstractLexisCard):
     __tablename__ = "hieroglyph_cards"
 
     base_id = Column(Integer, ForeignKey("hieroglyphs.id"), nullable=False)
-    base = relationship("Hieroglyph", back_populates="cards")
+    base: "Hieroglyph" = relationship("Hieroglyph", back_populates="cards", uselist=False)
 
 
 class HieroglyphTry(AbstractLexisTry):
     __tablename__ = "hieroglyph_tries"
 
     base_id = Column(Integer, ForeignKey("hieroglyphs.id"), nullable=False)
-    base = relationship("Hieroglyph")
+    base: "Hieroglyph" = relationship("Hieroglyph", uselist=False)
 
 
 #########################################################################################################################
@@ -339,7 +335,7 @@ class HieroglyphTry(AbstractLexisTry):
 class AbstractAssessment(AbstractActivity):
     __abstract__ = True
 
-    tasks = Column(Text, nullable=False)
+    tasks: str = Column(Text, nullable=False)
 
     def __json__(self):
         data = super().__json__()
@@ -350,7 +346,7 @@ class AbstractAssessment(AbstractActivity):
 class AbstractAssessmentTry(AbstractActivityTry):
     __abstract__ = True
 
-    done_tasks = Column(Text, nullable=False)
+    done_tasks: str = Column(Text, nullable=False)
     checked_tasks = Column(Text)
 
 
@@ -365,7 +361,7 @@ class AssessmentTry(AbstractAssessmentTry):
     __tablename__ = "assessment_tries"
 
     base_id = Column(Integer, ForeignKey("assessments.id"))
-    base = relationship("Assessment")
+    base: "Assessment" = relationship("Assessment", uselist=False)
 
 
 #########################################################################################################################
@@ -379,7 +375,7 @@ class FinalBossTry(AbstractAssessmentTry):
     __tablename__ = "final_boss_tries"
 
     base_id = Column(Integer, ForeignKey("final_bosses.id"))
-    base = relationship("FinalBoss")
+    base: "FinalBoss" = relationship("FinalBoss", uselist=False)
 
 
 #########################################################################################################################
@@ -395,16 +391,16 @@ class NotificationStudentToTeacher(Base):
     deleted = Column(Boolean, nullable=False, default=False)
 
     drilling_try_id = Column(Integer, ForeignKey("drilling_tries.id"))
-    drilling_try = relationship("DrillingTry")
+    drilling_try: "DrillingTry" = relationship("DrillingTry", uselist=False)
 
     hieroglyph_try_id = Column(Integer, ForeignKey("hieroglyph_tries.id"))
-    hieroglyph_try = relationship("HieroglyphTry")
+    hieroglyph_try: "HieroglyphTry" = relationship("HieroglyphTry", uselist=False)
 
     assessment_try_id = Column(Integer, ForeignKey("assessment_tries.id"))
-    assessment_try = relationship("AssessmentTry")
+    assessment_try: "AssessmentTry" = relationship("AssessmentTry", uselist=False)
 
     final_boss_try_id = Column(Integer, ForeignKey("final_boss_tries.id"))
-    final_boss_try = relationship("FinalBossTry")
+    final_boss_try: "FinalBossTry" = relationship("FinalBossTry", uselist=False)
 
     creation_datetime = Column(DateTime, default=func.now())
 
@@ -432,17 +428,17 @@ class NotificationTeacherToStudent(Base):
     viewed = Column(Boolean, nullable=False, default=False)
     deleted = Column(Boolean, nullable=False, default=False)
 
-    course_id = Column(Integer, ForeignKey("drilling_tries.id"))
-    course = relationship("DrillingTry")
+    course_id = Column(Integer, ForeignKey(COURSES_ID))
+    course: "Course" = relationship("Course", uselist=False)
 
-    lesson_id = Column(Integer, ForeignKey("hieroglyph_tries.id"))
-    lesson = relationship("HieroglyphTry")
+    lesson_id = Column(Integer, ForeignKey(LESSONS_ID))
+    lesson: "Lesson" = relationship("Lesson", uselist=False)
 
     assessment_try_id = Column(Integer, ForeignKey("assessment_tries.id"))
-    assessment_try = relationship("AssessmentTry")
+    assessment_try: "AssessmentTry" = relationship("AssessmentTry", uselist=False)
 
     final_boss_try_id = Column(Integer, ForeignKey("final_boss_tries.id"))
-    final_boss_try = relationship("FinalBossTry")
+    final_boss_try: "FinalBossTry" = relationship("FinalBossTry", uselist=False)
 
     creation_datetime = Column(DateTime, default=func.now())
 
@@ -472,7 +468,7 @@ class NotificationTeacherToStudent(Base):
 #########################################################################################################################
 ################ Utils ##################################################################################################
 #########################################################################################################################
-def time_limit_to_timedelta(time_limit: Time) -> datetime.timedelta:
+def time_limit_to_timedelta(time_limit: datetime.time) -> datetime.timedelta:
     return datetime.timedelta(hours=time_limit.hour,
                               minutes=time_limit.minute,
                               seconds=time_limit.second,
@@ -482,12 +478,30 @@ def time_limit_to_timedelta(time_limit: Time) -> datetime.timedelta:
 ActivityType = TypeVar("ActivityType", Drilling, Hieroglyph, Assessment, FinalBoss)
 ActivityTryType = TypeVar("ActivityTryType", DrillingTry, HieroglyphTry, AssessmentTry, FinalBossTry)
 
+GenericActivityType = TypeVar(
+    "GenericActivityType", Type[Drilling],
+    Type[Hieroglyph],
+    Type[Assessment],
+    Type[FinalBoss])
+GenericActivityTryType = TypeVar(
+    "GenericActivityTryType", Type[DrillingTry],
+    Type[HieroglyphTry],
+    Type[AssessmentTry],
+    Type[FinalBossTry])
+
 LexisType = TypeVar("LexisType", Drilling, Hieroglyph)
 LexisCardType = TypeVar("LexisCardType", DrillingCard, HieroglyphCard)
 LexisTryType = TypeVar("LexisTryType", DrillingTry, HieroglyphTry)
 
+GenericLexisType = TypeVar("GenericLexisType", Type[Drilling], Type[Hieroglyph])
+GenericLexisCardType = TypeVar("GenericLexisCardType", Type[DrillingCard], Type[HieroglyphCard])
+GenericLexisTryType = TypeVar("GenericLexisTryType", Type[DrillingTry], Type[HieroglyphTry])
+
 AssessmentType = TypeVar("AssessmentType", Assessment, FinalBoss)
 AssessmentTryType = TypeVar("AssessmentTryType", AssessmentTry, FinalBossTry)
+
+GenericAssessmentType = TypeVar("GenericAssessmentType", Type[Assessment], Type[FinalBoss])
+GenericAssessmentTryType = TypeVar("GenericAssessmentTryType", Type[AssessmentTry], Type[FinalBossTry])
 
 
 def create_db_session(url, username, password, host, database):
@@ -516,4 +530,4 @@ def create_db_session_from_json_config_file():
 
 def get_db_url_from_json_config_file():
     config = load_config("config.json")["db"]
-    return f"{config['url']}: //{config['username']}: {config['password']}@{config['host']}/{config['database']}"
+    return f"{config['url']}://{config['username']}:{config['password']}@{config['host']}/{config['database']}"

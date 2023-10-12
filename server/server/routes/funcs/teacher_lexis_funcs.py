@@ -1,13 +1,14 @@
+from typing import Generic
+
 from flask import request
 
 import server.queries.TeacherDBqueries as DBQT
 from server.exceptions.ApiExceptions import InvalidAPIUsage, InvalidRequestJson
-from server.models.db_models import Drilling, DrillingCard, Hieroglyph, HieroglyphCard, LexisType, LexisCardType
-from server.models.dictionary import DictionaryCreateReq
+from server.models.db_models import Drilling, Hieroglyph, LexisType
 from server.models.lexis import LexisCardCreateReq, LexisCreateReq
 
 
-def get_lexis_data(lexis_type: LexisType) -> tuple[DBQT.LexisQueries, str]:
+def get_lexis_data(lexis_type: type[LexisType]) -> tuple[DBQT.LexisQueries, str]:
     if lexis_type == Drilling:
         return DBQT.DrillingQueries, "drilling"
     if lexis_type == Hieroglyph:
@@ -16,12 +17,12 @@ def get_lexis_data(lexis_type: LexisType) -> tuple[DBQT.LexisQueries, str]:
     raise InvalidAPIUsage("Check server GetLexisData()", 500)
 
 
-class LexisFuncs:
+class LexisFuncs(Generic[LexisType]):
     lexis_queries: DBQT.LexisQueries
-    lexis_type: LexisType
+    lexis_type: type[LexisType]
     lexis_name: str
 
-    def __init__(self, lexis_type: LexisType):
+    def __init__(self, lexis_type: type[LexisType]):
         self.lexis_type = lexis_type
         self.lexis_queries, self.lexis_name = get_lexis_data(lexis_type)
 
@@ -32,12 +33,12 @@ class LexisFuncs:
         if not request.json:
             raise InvalidRequestJson()
 
-        lesson = DBQT.GetLessonById(lesson_id)
+        lesson = DBQT.get_lesson_by_id(lesson_id)
         if lesson is None:
             raise InvalidAPIUsage("No lesson in db!", 404)
 
         if self.lexis_queries.GetByLessonId(lesson.id) is not None:
-            raise InvalidAPIUsage("Lexis exists!", 403, {"lesson_id": lesson_id})                                       # TODO: add lexis id to redirect
+            raise InvalidAPIUsage("Lexis exists!", 403, {"lesson_id": lesson_id})
 
         cards_data = LexisCardCreateReq(cards=request.json.get("cards"))
 

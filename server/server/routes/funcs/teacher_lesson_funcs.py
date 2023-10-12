@@ -12,13 +12,13 @@ def get_lessons_by_course_id(course_id: int):
     return {"course": None, "items": None}, 403
 
 
-def getLessonActivities(lessonId: int):
-    if lesson := DBQT.GetLessonById(lessonId):
-        drilling = lesson.drilling
-        assessment = lesson.assessment
-        hieroglyph = lesson.hieroglyph
+def get_lesson_activities(lesson_id: int):
+    if lesson := DBQT.get_lesson_by_id(lesson_id):
 
-        return {"lesson": lesson, "items": {"drilling": drilling, "assessment": assessment, "hieroglyph": hieroglyph}}
+        return {"lesson": lesson,
+                "items": {"drilling": lesson.drilling,
+                          "assessment": lesson.assessment,
+                          "hieroglyph": lesson.hieroglyph}}
 
     return {"lesson": None, "items": None}, 404
 

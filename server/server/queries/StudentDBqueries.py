@@ -1,14 +1,21 @@
 from datetime import datetime
-from typing import Generic, Type
+from typing import Generic, TypeVar
 
 from server.common import DBsession
-from server.exceptions.ApiExceptions import (ActivityNotFoundException, CourseNotFoundException, InvalidAPIUsage,
+from server.exceptions.ApiExceptions import (ActivityNotFoundException,
+                                             CourseNotFoundException,
+                                             InvalidAPIUsage,
                                              LessonNotFoundException)
 from server.log_lib import LogI
-from server.models.db_models import (
-    ActivityTryType, ActivityType, Assessment, AssessmentTry, AssessmentTryType, AssessmentType, Course, Dictionary,
-    Drilling, DrillingTry, Hieroglyph, HieroglyphTry, Lesson, LexisTryType, LexisType, NotificationTeacherToStudent,
-    NotificationStudentToTeacher, User, UserDictionary)
+from server.models.db_models import (ActivityTryType, ActivityType, Assessment,
+                                     AssessmentTry, AssessmentTryType,
+                                     AssessmentType, Course, Dictionary,
+                                     Drilling, DrillingTry, FinalBoss,
+                                     FinalBossTry, Hieroglyph, HieroglyphTry,
+                                     Lesson, LexisTryType, LexisType,
+                                     NotificationStudentToTeacher,
+                                     NotificationTeacherToStudent, User,
+                                     UserDictionary)
 from server.models.dictionary import DictionaryAssosiationReq, DictionaryImgReq
 
 
@@ -50,7 +57,7 @@ def get_lessons_by_course_id(course_id: int, user_id: int) -> list[Lesson]:
     )
 
 
-def GetLessonById(lesson_id: int, user_id: int) -> Lesson:
+def get_lesson_by_id(lesson_id: int, user_id: int) -> Lesson:
     lesson = (
         DBsession
         .query(Lesson)
@@ -73,10 +80,10 @@ def GetLessonById(lesson_id: int, user_id: int) -> Lesson:
 ################ Activity ###############################################################################################
 #########################################################################################################################
 class ActivityQueries(Generic[ActivityType, ActivityTryType]):
-    _activity_type: Type[ActivityType]
-    _activityTry_type: Type[ActivityTryType]
+    _activity_type: type[ActivityType]
+    _activityTry_type: type[ActivityTryType]
 
-    def __init__(self, activity_type: Type[ActivityType], activityTry_type: Type[ActivityTryType]):
+    def __init__(self, activity_type: type[ActivityType], activityTry_type: type[ActivityTryType]):
         self._activity_type = activity_type
         self._activityTry_type = activityTry_type
 
@@ -160,7 +167,12 @@ class ActivityQueries(Generic[ActivityType, ActivityTryType]):
 #########################################################################################################################
 ################ Lexis ##################################################################################################
 #########################################################################################################################
+
+
 class LexisQueries(ActivityQueries[LexisType, LexisTryType]):
+    _activity_type: type[LexisType]
+    _activityTry_type: type[LexisTryType]
+
     def set_done_tasks_in_try(self, activity_try_id: int, done_tasks: str) -> None:
         activity_try = (
             DBsession
@@ -177,8 +189,8 @@ class LexisQueries(ActivityQueries[LexisType, LexisTryType]):
 #########################################################################################################################
 ################ Drilling and Hieroglyph ################################################################################
 #########################################################################################################################
-DrillingQueries = LexisQueries(Drilling, DrillingTry)
-HieroglyphQueries = LexisQueries(Hieroglyph, HieroglyphTry)
+DrillingQueries = LexisQueries[Drilling, DrillingTry](Drilling, DrillingTry)
+HieroglyphQueries = LexisQueries[Hieroglyph, HieroglyphTry](Hieroglyph, HieroglyphTry)
 
 
 #########################################################################################################################
@@ -190,7 +202,7 @@ class AssessmentQueriesClass(ActivityQueries[AssessmentType, AssessmentTryType])
                                activity_id: int,
                                user_id: int,
                                tasks: str = "",
-                               checked_tasks: str = "") -> ActivityTryType | None:
+                               checked_tasks: str = "") -> AssessmentTryType | None:
         new_activity_try = self._activityTry_type(try_number=try_number,
                                                   start_datetime=datetime.now(),
                                                   user_id=user_id,
@@ -202,7 +214,8 @@ class AssessmentQueriesClass(ActivityQueries[AssessmentType, AssessmentTryType])
         return new_activity_try
 
 
-AssessmentQueries = AssessmentQueriesClass(Assessment, AssessmentTry)
+AssessmentQueries = AssessmentQueriesClass[Assessment, AssessmentTry](Assessment, AssessmentTry)
+FinalBossQueries = AssessmentQueriesClass[FinalBoss, FinalBossTry](FinalBoss, FinalBossTry)
 
 
 #########################################################################################################################
