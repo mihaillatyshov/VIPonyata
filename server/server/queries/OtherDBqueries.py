@@ -1,15 +1,14 @@
 from datetime import datetime
 
+from sqlalchemy import select
+
 from server.common import DBsession
 from server.log_lib import LogW
-from server.models.db_models import (ActivityTryType, ActivityType,
-                                     AssessmentTry, DrillingTry, FinalBossTry,
+from server.models.db_models import (ActivityTryType, ActivityType, AssessmentTry, DrillingTry, FinalBossTry,
                                      HieroglyphTry, LexisTryType, User)
 from server.models.user import UserRegisterReq
-from server.queries.StudentDBqueries import (add_assessment_notification,
-                                             add_drilling_notification,
-                                             add_final_boss_notification,
-                                             add_hieroglyph_notification,
+from server.queries.StudentDBqueries import (add_assessment_notification, add_drilling_notification,
+                                             add_final_boss_notification, add_hieroglyph_notification,
                                              add_user_dictionary_if_not_exists)
 
 
@@ -20,27 +19,24 @@ def get_activity_check_tasks_timers(activity_type: type[ActivityType],
                                     activity_try_type: type[ActivityTryType]) -> list[ActivityTryType]:
     LogW("GetActivityCheckTasksTimers", activity_type.__name__, activity_try_type.__name__)
 
-    return (
-        DBsession
-        .query(activity_try_type)
-        .filter(activity_try_type.end_datetime == None)
-        .join(activity_try_type.base)
-        .filter(activity_type.time_limit != None)
-        .all()
-    )
+    with DBsession.begin() as session:
+        return (session.scalars(
+            select(activity_try_type).where(activity_try_type.end_datetime == None).join(
+                activity_try_type.base).where(activity_type.time_limit != None))).all()
 
 
 def get_activity_try_by_id(activity_try_id: int, activity_try_type: type[ActivityTryType]) -> ActivityTryType | None:
-    return DBsession.query(activity_try_type).filter(activity_try_type.id == activity_try_id).one_or_none()
+    with DBsession.begin() as session:
+        return session.scalars(select(activity_try_type).where(activity_try_type.id == activity_try_id)).one_or_none()
 
 
-def update_activity_try_end_time(
-        activity_try_id: int, end_time: datetime, activity_try_type: type[ActivityTryType]) -> None:
-    activity_try: ActivityTryType = (DBsession
-                                     .query(activity_try_type)
-                                     .filter(activity_try_type.id == activity_try_id)
-                                     .one_or_none())
-    if activity_try:
+def update_activity_try_end_time(activity_try_id: int, end_time: datetime,
+                                 activity_try_type: type[ActivityTryType]) -> None:
+    with DBsession.begin() as session:
+        activity_try: ActivityTryType = session.scalars(
+            select(activity_try_type).where(activity_try_type.id == activity_try_id)).one_or_none()
+        if activity_try is None:
+            return
         if activity_try_type == FinalBossTry:
             add_final_boss_notification(activity_try_id)
         if activity_try_type == AssessmentTry:
@@ -53,17 +49,19 @@ def update_activity_try_end_time(
             add_user_dictionary_from_try(activity_try)
 
         activity_try.end_datetime = end_time
-        DBsession.add(activity_try)
-        DBsession.commit()
 
 
 #########################################################################################################################
 ################ User ###################################################################################################
 #########################################################################################################################
 def create_new_user(user_data: UserRegisterReq, hash_pwd):
-    DBsession.add(
-        User(name=user_data.name, nickname=user_data.nickname, password=hash_pwd, birthday=user_data.birthday, level=0))
-    DBsession.commit()
+    with DBsession.begin() as session:
+        session.add(
+            User(name=user_data.name,
+                 nickname=user_data.nickname,
+                 password=hash_pwd,
+                 birthday=user_data.birthday,
+                 level=0))
 
 
 #########################################################################################################################

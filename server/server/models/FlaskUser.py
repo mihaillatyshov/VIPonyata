@@ -1,4 +1,5 @@
 from flask_login import UserMixin
+from sqlalchemy import select
 
 from server.common import DBsession
 from server.models.db_models import User
@@ -10,15 +11,17 @@ class FlaskUser(UserMixin):
 
     def FromDB(self, user_id):
         self.data = {}
-        if user_data := DBsession.query(User).filter_by(nickname=user_id).one_or_none():
-            self.data["id"] = user_data.id
-            self.data["name"] = user_data.name
-            self.data["nickname"] = user_data.nickname
-            self.data["password"] = user_data.password
-            self.data["level"] = user_data.level
-            self.data["avatar"] = user_data.avatar
-            self.data["form"] = user_data.form
-            self.data["registration_date"] = user_data.registration_date
+        with DBsession.begin() as session:
+            user_data = session.scalars(select(User).where(User.nickname == user_id)).one_or_none()
+            if user_data is not None:
+                self.data["id"] = user_data.id
+                self.data["name"] = user_data.name
+                self.data["nickname"] = user_data.nickname
+                self.data["password"] = user_data.password
+                self.data["level"] = user_data.level
+                self.data["avatar"] = user_data.avatar
+                self.data["form"] = user_data.form
+                self.data["registration_date"] = user_data.registration_date
         return self
 
     def IsExists(self):

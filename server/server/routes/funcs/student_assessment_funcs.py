@@ -6,16 +6,12 @@ from server.common import DBsession
 from server.exceptions.ApiExceptions import InvalidAPIUsage, InvalidRequestJson
 from server.log_lib import LogE, LogW
 from server.models.assessment import Aliases
-from server.models.db_models import (Assessment, AssessmentTry,
-                                     AssessmentTryType, AssessmentType,
-                                     FinalBoss, FinalBossTry,
-                                     time_limit_to_timedelta)
+from server.models.db_models import (Assessment, AssessmentTry, AssessmentTryType, AssessmentType, FinalBoss,
+                                     FinalBossTry, time_limit_to_timedelta)
 from server.queries import StudentDBqueries as DBQS
 from server.routes.funcs.assessment_auto_checks import CheckAliases
 from server.routes.funcs.student_activity_funcs import ActivityFuncs
-from server.routes.routes_utils import (activity_end_time_handler,
-                                        get_current_user_id,
-                                        start_activity_timer_limit)
+from server.routes.routes_utils import (activity_end_time_handler, get_current_user_id, start_activity_timer_limit)
 
 
 def parse_new_tasks(data_str: str) -> list[dict]:
@@ -100,8 +96,7 @@ class AssessmentFuncsClass(ActivityFuncs[AssessmentType, AssessmentTryType]):
         new_tasks = parse_new_tasks(activity.tasks)
         checked_tasks = check_task_req(new_tasks)
         new_activity_try = self._activityQueries.add_assessment_new_try(
-            len(activity_tries) + 1, activity_d, get_current_user_id(),
-            json.dumps(new_tasks),
+            len(activity_tries) + 1, activity_d, get_current_user_id(), json.dumps(new_tasks),
             json.dumps(checked_tasks))
 
         if activity.time_limit and new_activity_try:
@@ -118,7 +113,6 @@ class AssessmentFuncsClass(ActivityFuncs[AssessmentType, AssessmentTryType]):
 
         db_done_tasks = json.loads(activity_try.done_tasks)
 
-        # Check DoneTasks
         done_tasks_list = parse_student_req(done_tasks_json, db_done_tasks)
         activity_try.done_tasks = json.dumps(done_tasks_list)
 

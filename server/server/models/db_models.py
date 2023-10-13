@@ -1,11 +1,11 @@
 import datetime
-from typing import Any, Mapping, Type, TypeVar
+from typing import Any, Type, TypeVar
 
 from sqlalchemy import (Boolean, Column, Date, DateTime, ForeignKey, Integer, String, Table, Text, Time,
                         UniqueConstraint, create_engine)
 from sqlalchemy.engine import URL
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
-from sqlalchemy.orm import relationship, scoped_session, sessionmaker
+from sqlalchemy.orm import Mapped, relationship, sessionmaker
 from sqlalchemy.sql import func
 
 from server.load_config import load_config
@@ -173,7 +173,7 @@ class AbstractActivity(Base):
     def lesson_id(cls) -> Column[Integer]:
         return Column(Integer, ForeignKey(LESSONS_ID), nullable=False)
 
-    @declared_attr  # type: ignore
+    @declared_attr                                                                                                      # type: ignore
     def lesson(cls):
         return relationship("Lesson", overlaps="drilling,hieroglyph,assessment,final_boss")
 
@@ -203,15 +203,15 @@ class AbstractActivityTry(Base):
     id: int = Column(Integer, primary_key=True)
 
     try_number = Column(Integer, nullable=False)
-    start_datetime: datetime.datetime = Column(DateTime, nullable=False)
-    end_datetime = Column(DateTime)
+    start_datetime: Mapped[datetime.datetime] = Column(DateTime, nullable=False)
+    end_datetime: Mapped[datetime.datetime] = Column(DateTime)
 
-    @declared_attr  # type: ignore
-    def user_id(cls) -> int:
+    @declared_attr                                                                                                      # type: ignore
+    def user_id(cls) -> Mapped[int]:
         return Column(Integer, ForeignKey(USERS_ID), nullable=False)
 
-    @declared_attr  # type: ignore
-    def user(cls):
+    @declared_attr                                                                                                      # type: ignore
+    def user(cls) -> Mapped[list["User"]]:
         return relationship("User")
 
     def __json__(self):
@@ -250,11 +250,11 @@ class AbstractLexisCard(Base):
     sentence = Column(String(256), nullable=False)
     answer = Column(String(256), nullable=False)
 
-    @declared_attr  # type: ignore
-    def dictionary_id(cls) -> int:
+    @declared_attr                                                                                                      # type: ignore
+    def dictionary_id(cls) -> Mapped[int]:
         return Column(Integer, ForeignKey("dictionary.id"), nullable=False)
 
-    @declared_attr  # type: ignore
+    @declared_attr                                                                                                      # type: ignore
     def dictionary(cls):
         return relationship("Dictionary")
 
@@ -478,16 +478,10 @@ def time_limit_to_timedelta(time_limit: datetime.time) -> datetime.timedelta:
 ActivityType = TypeVar("ActivityType", Drilling, Hieroglyph, Assessment, FinalBoss)
 ActivityTryType = TypeVar("ActivityTryType", DrillingTry, HieroglyphTry, AssessmentTry, FinalBossTry)
 
-GenericActivityType = TypeVar(
-    "GenericActivityType", Type[Drilling],
-    Type[Hieroglyph],
-    Type[Assessment],
-    Type[FinalBoss])
-GenericActivityTryType = TypeVar(
-    "GenericActivityTryType", Type[DrillingTry],
-    Type[HieroglyphTry],
-    Type[AssessmentTry],
-    Type[FinalBossTry])
+GenericActivityType = TypeVar("GenericActivityType", Type[Drilling], Type[Hieroglyph], Type[Assessment],
+                              Type[FinalBoss])
+GenericActivityTryType = TypeVar("GenericActivityTryType", Type[DrillingTry], Type[HieroglyphTry], Type[AssessmentTry],
+                                 Type[FinalBossTry])
 
 LexisType = TypeVar("LexisType", Drilling, Hieroglyph)
 LexisCardType = TypeVar("LexisCardType", DrillingCard, HieroglyphCard)
@@ -513,14 +507,19 @@ def create_db_session(url, username, password, host, database):
         database=database,
     )
 
-    engine = create_engine(db_config, pool_recycle=3600, pool_size=20,
-                           max_overflow=30, pool_timeout=5, pool_pre_ping=True)
+    engine = create_engine(db_config,
+                           pool_recycle=3600,
+                           pool_size=20,
+                           max_overflow=30,
+                           pool_timeout=5,
+                           pool_pre_ping=True)
     session_factory = sessionmaker(bind=engine)
     print("session created succesfully")
     # Base.metadata.create_all(engine)
 
-    new_db_session = scoped_session(session_factory)
-    return new_db_session
+    # new_db_session = scoped_session(session_factory)
+    # return new_db_session
+    return session_factory
 
 
 def create_db_session_from_json_config_file():
