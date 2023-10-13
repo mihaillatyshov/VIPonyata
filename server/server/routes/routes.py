@@ -80,7 +80,7 @@ def create_lesson(course_id):
 @routes_bp.route("/drilling/<id>/newtry", methods=["POST"])
 @login_required
 def start_new_drilling_try(id):
-    return user_selector_function(None, student_funcs.DrillingFuncs.start_new_try, activityId=id)
+    return user_selector_function(None, student_funcs.DrillingFuncs.start_new_try, activity_id=id)
 
 
 @routes_bp.route("/drilling/<id>/continuetry", methods=["POST"])
@@ -120,7 +120,7 @@ def create_drilling(lesson_id):
 @routes_bp.route("/hieroglyph/<id>/newtry", methods=["POST"])
 @login_required
 def start_new_hieroglyph_try(id):
-    return user_selector_function(None, student_funcs.HieroglyphFuncs.start_new_try, activityId=id)
+    return user_selector_function(None, student_funcs.HieroglyphFuncs.start_new_try, activity_id=id)
 
 
 @routes_bp.route("/hieroglyph/<id>/continuetry", methods=["POST"])
@@ -161,7 +161,7 @@ def create_hieroglyph(lesson_id):
 @routes_bp.route("/assessment/<id>/newtry", methods=["POST"])
 @login_required
 def start_new_assessment_try(id):
-    return user_selector_function(None, student_funcs.AssessmentFuncs.start_new_try, activityId=id)
+    return user_selector_function(None, student_funcs.AssessmentFuncs.start_new_try, activity_id=id)
 
 
 @routes_bp.route("/assessment/<id>/continuetry", methods=["POST"])

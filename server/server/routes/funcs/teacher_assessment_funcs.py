@@ -49,7 +49,7 @@ class IAssessmentFuncs:
                                               description=request.json.get("description"),
                                               tasks=f"[{','.join(tasks)}]")
 
-        assessment = DBQT.AssesmentQueries.create(lesson_id, assessment_data)
+        assessment = DBQT.AssessmentQueries.create(lesson_id, assessment_data)
 
         return {"assessment": assessment}
 

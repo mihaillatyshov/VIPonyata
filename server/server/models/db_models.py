@@ -1,4 +1,5 @@
 import datetime
+import json
 from typing import Any, Type, TypeVar
 
 from sqlalchemy import (Boolean, Column, Date, DateTime, ForeignKey, Integer, String, Table, Text, Time,
@@ -54,6 +55,16 @@ class User(Base):
 
     users_dictionary: list["UserDictionary"] = relationship("UserDictionary", back_populates="user")
 
+    def __json__(self):
+        return {"name": self.name,
+                "nickname": self.nickname,
+                "birthday": self.birthday,
+                "theme": self.theme,
+                "level": self.level,
+                "avatar": self.avatar,
+                "form": self.form,
+                }
+
     def __repr__(self):
         return f"<User: (id={self.id}, nickname={self.nickname}, level={self.level})>"
 
@@ -106,6 +117,12 @@ class Lesson(Base):
 
     assessment: "Assessment" = relationship("Assessment", uselist=False)
     final_boss: "FinalBoss" = relationship("FinalBoss", uselist=False)
+
+    def __json__(self):
+        data = {}
+        for column in self.__table__.columns:
+            data[column.name] = getattr(self, column.name)
+        return data
 
     def __repr__(self):
         return f"<Lesson: (id={self.id}, name={self.name})>"
@@ -349,6 +366,12 @@ class AbstractAssessmentTry(AbstractActivityTry):
     done_tasks: str = Column(Text, nullable=False)
     checked_tasks = Column(Text)
 
+    def __json__(self):
+        data = super().__json__()
+        data["done_tasks"] = json.loads(self.done_tasks)
+        data["checked_tasks"] = json.loads(self.checked_tasks)
+        return data
+
 
 #########################################################################################################################
 ################ Assessment #############################################################################################
@@ -407,13 +430,9 @@ class NotificationStudentToTeacher(Base):
     def __json__(self):
         data = {"message": self.message, "type": None}
         for activity_try_name in ["drilling_try", "hieroglyph_try", "assessment_try", "final_boss_try"]:
-            if activity_try := getattr(self, activity_try_name):
+            if activity_try_id := getattr(self, f"{activity_try_name}_id"):
                 data["type"] = activity_try_name
-                data["lesson"] = activity_try.base.lesson
-                data["user"] = activity_try.user
-                data["activity_try_id"] = activity_try.id
-                data["activity_try"] = activity_try
-                data["activity"] = activity_try.base
+                data["activity_try_id"] = activity_try_id
                 break
 
         return data
@@ -513,7 +532,7 @@ def create_db_session(url, username, password, host, database):
                            max_overflow=30,
                            pool_timeout=5,
                            pool_pre_ping=True)
-    session_factory = sessionmaker(bind=engine)
+    session_factory = sessionmaker(bind=engine, expire_on_commit=False)
     print("session created succesfully")
     # Base.metadata.create_all(engine)
 

@@ -1,14 +1,21 @@
-from typing import Generic, Type
+from typing import Generic, Literal, Type
+
+from sqlalchemy import select, update
+
+from server.common import DBsession
 from server.exceptions.ApiExceptions import InvalidAPIUsage
 from server.log_lib import LogI
 from server.models.assessment import AssessmentCreateReq
 from server.models.course import CourseCreateReq
-from server.models.db_models import (Assessment, AssessmentTry, Course, Dictionary, Drilling, DrillingCard, DrillingTry,
-                                     Hieroglyph, HieroglyphCard, HieroglyphTry, Lesson, LexisCardType, LexisTryType,
-                                     LexisType, NotificationStudentToTeacher)
+from server.models.db_models import (Assessment, AssessmentTry, AssessmentTryType, AssessmentType, Course,
+                                     Dictionary, Drilling, DrillingCard,
+                                     DrillingTry, FinalBoss, FinalBossTry, Hieroglyph, HieroglyphCard,
+                                     HieroglyphTry, Lesson, LexisCardType,
+                                     LexisTryType, LexisType,
+                                     NotificationStudentToTeacher, User)
+from server.models.dictionary import (DictionaryCreateReq,
+                                      DictionaryCreateReqItem)
 from server.models.lesson import LessonCreateReq
-from server.common import DBsession
-from server.models.dictionary import DictionaryCreateReq, DictionaryCreateReqItem
 from server.models.lexis import LexisCardCreateReq, LexisCreateReq
 
 
@@ -16,36 +23,41 @@ from server.models.lexis import LexisCardCreateReq, LexisCreateReq
 ################ Course and Lesson ######################################################################################
 #########################################################################################################################
 def get_all_courses() -> list[Course]:
-    return DBsession.query(Course).order_by(Course.sort).all()
+    with DBsession.begin() as session:
+        return session.scalars(select(Course).order_by(Course.sort)).all()
 
 
 def get_course_by_id(course_id: int) -> Course | None:
-    return DBsession.query(Course).filter(Course.id == course_id).one_or_none()
+    with DBsession.begin() as session:
+        return session.scalars(select(Course).where(Course.id == course_id)).one_or_none()
 
 
 def create_course(course_data: CourseCreateReq) -> Course:
-    course = Course(**course_data.model_dump())
-    DBsession.add(course)
-    DBsession.commit()
+    with DBsession.begin() as session:
+        course = Course(**course_data.model_dump())
 
-    LogI(course)
-    return course
+        session.add(course)
+
+        return course
 
 
 def get_lessons_by_course_id(course_id: int) -> list[Lesson]:
-    return DBsession.query(Lesson).filter(Lesson.course_id == course_id).all()
+    with DBsession.begin() as session:
+        return session.scalars(select(Lesson).where(Lesson.course_id == course_id)).all()
 
 
 def get_lesson_by_id(lesson_id: int) -> Lesson | None:
-    return DBsession.query(Lesson).filter(Lesson.id == lesson_id).one_or_none()
+    with DBsession.begin() as session:
+        return session.scalars(select(Lesson).where(Lesson.id == lesson_id)).one_or_none()
 
 
 def create_lesson(course_id: int, lesson_data: LessonCreateReq) -> Lesson:
-    lesson = Lesson(course_id=course_id, **lesson_data.model_dump())
-    DBsession.add(lesson)
-    DBsession.commit()
+    with DBsession.begin() as session:
+        lesson = Lesson(course_id=course_id, **lesson_data.model_dump())
 
-    return lesson
+        session.add(lesson)
+
+        return lesson
 
 
 #########################################################################################################################
@@ -64,121 +76,173 @@ class LexisQueries(Generic[LexisType, LexisTryType, LexisCardType]):
         self.lexis_card_type = lexis_card_type
 
     def GetByLessonId(self, lessondId: int) -> LexisType | None:
-        return DBsession.query(self.lexis_type).filter(self.lexis_type.lesson_id == lessondId).one_or_none()
+        with DBsession.begin() as session:
+            return session.scalars(select(self.lexis_type).where(self.lexis_type.lesson_id == lessondId)).one_or_none()
 
     def GetById(self, lexisId: int) -> LexisType | None:
-        return DBsession.query(self.lexis_type).filter(self.lexis_type.id == lexisId).one_or_none()
+        with DBsession.begin() as session:
+            return session.scalars(select(self.lexis_type).where(self.lexis_type.id == lexisId)).one_or_none()
 
     def create_cards(self, lexis_id: int, cards_data: LexisCardCreateReq):
-        cards: list[LexisCardType] = []
-        for item in cards_data.cards:
-            cards.append(self.lexis_card_type(base_id=lexis_id, **item.model_dump()))
+        with DBsession.begin() as session:
+            cards: list[LexisCardType] = []
+            for item in cards_data.cards:
+                cards.append(self.lexis_card_type(base_id=lexis_id, **item.model_dump()))
 
-        DBsession.add_all(cards)
-        DBsession.commit()
+            session.add_all(cards)
 
     def create(self, lesson_id: int, lexis_data: LexisCreateReq) -> LexisType:
-        lexis = self.lexis_type(lesson_id=lesson_id, **lexis_data.model_dump())
-        DBsession.add(lexis)
-        DBsession.commit()
+        with DBsession.begin() as session:
+            lexis = self.lexis_type(lesson_id=lesson_id, **lexis_data.model_dump())
 
-        return lexis
+            session.add(lexis)
+
+            return lexis
+
+    def get_user_by_try_id(self, lexis_try_id: int) -> int | None:
+        with DBsession.begin() as session:
+            return session.scalars(
+                select(User)
+                .join(self.lexis_try_type)
+                .where(self.lexis_try_type.id == lexis_try_id)
+            ).one_or_none()
+
+    def get_try_by_id(self, lexis_try_id: int) -> LexisTryType | None:
+        with DBsession.begin() as session:
+            return session.scalars(
+                select(self.lexis_try_type)
+                .where(self.lexis_try_type.id == lexis_try_id)
+            ).one_or_none()
 
 
 DrillingQueries = LexisQueries(Drilling, DrillingTry, DrillingCard)
 HieroglyphQueries = LexisQueries(Hieroglyph, HieroglyphTry, HieroglyphCard)
 
 
-class AssessmentQueriesClass:
-    assessment_type: type[Assessment]
-    assessment_try_type: type[AssessmentTry]
+class AssessmentQueriesClass(Generic[AssessmentType, AssessmentTryType]):
+    assessment_type: type[AssessmentType]
+    assessment_try_type: type[AssessmentTryType]
 
-    def __init__(self, assessment_type: type[Assessment], assessment_try_type: type[AssessmentTry]):
+    def __init__(self, assessment_type: type[AssessmentType], assessment_try_type: type[AssessmentTryType]):
         self.assessment_type = assessment_type
         self.assessment_try_type = assessment_try_type
 
+    def GetById(self, assessmentId: int) -> LexisType | None:
+        with DBsession.begin() as session:
+            return session.scalars(
+                select(self.assessment_type).where(self.assessment_type.id == assessmentId)).one_or_none()
+
     def get_by_lesson_id(self, lesson_id: int) -> Assessment | None:
-        return DBsession.query(self.assessment_type).filter(self.assessment_type.lesson_id == lesson_id).one_or_none()
+        with DBsession.begin() as session:
+            return session.scalars(
+                select(self.assessment_type)
+                .where(self.assessment_type.lesson_id == lesson_id)
+            ).one_or_none()
 
     def create(self, lesson_id: int, assessment_data: AssessmentCreateReq):
-        assessment = self.assessment_type(lesson_id=lesson_id, **assessment_data.model_dump())
-        DBsession.add(assessment)
-        DBsession.commit()
+        with DBsession.begin() as session:
+            assessment = self.assessment_type(lesson_id=lesson_id, **assessment_data.model_dump())
 
-        return assessment
+            session.add(assessment)
+
+            return assessment
+
+    def get_user_by_try_id(self, assessment_try_id: int) -> int | None:
+        with DBsession.begin() as session:
+            return session.scalars(
+                select(User)
+                .join(self.assessment_try_type)
+                .where(self.assessment_try_type.id == assessment_try_id)
+            ).one_or_none()
+
+    def get_try_by_id(self, assessment_try_id: int) -> LexisTryType | None:
+        with DBsession.begin() as session:
+            return session.scalars(
+                select(self.assessment_try_type)
+                .where(self.assessment_try_type.id == assessment_try_id)
+            ).one_or_none()
 
 
-AssesmentQueries = AssessmentQueriesClass(Assessment, AssessmentTry)
+AssessmentQueries = AssessmentQueriesClass(Assessment, AssessmentTry)
+FinalBossQueries = AssessmentQueriesClass(FinalBoss, FinalBossTry)
 
 
 #########################################################################################################################
 ################ Dictionary #############################################################################################
 #########################################################################################################################
 def get_dictionary() -> list[Dictionary]:
-    return DBsession.query(Dictionary).all()
+    with DBsession.begin() as session:
+        return session.scalars(select(Dictionary)).all()
 
 
 def get_dictionary_item(item: DictionaryCreateReqItem) -> Dictionary | None:
-    base_filter = DBsession.query(Dictionary).filter(Dictionary.ru == item.ru)
-    filter_char_jp = base_filter.filter(Dictionary.char_jp == item.char_jp)
-    filter_word_jp = base_filter.filter(Dictionary.word_jp == item.word_jp)
-    filter_full_jp = filter_char_jp.filter(Dictionary.word_jp == item.word_jp)
+    with DBsession.begin() as session:
+        base_filter = select(Dictionary).where(Dictionary.ru == item.ru)
+        filter_char_jp = base_filter.where(Dictionary.char_jp == item.char_jp)
+        filter_word_jp = base_filter.where(Dictionary.word_jp == item.word_jp)
+        filter_full_jp = filter_char_jp.where(Dictionary.word_jp == item.word_jp)
 
-    if item.word_jp is not None and item.char_jp is not None:
-        if res := filter_full_jp.one_or_none():
-            return res
-    if item.char_jp is not None:
-        if res := filter_char_jp.one_or_none():
-            return res
-    if item.word_jp is not None:
-        if res := filter_word_jp.one_or_none():
-            return res
+        if item.word_jp is not None and item.char_jp is not None:
+            if res := session.scalars(filter_full_jp).one_or_none():
+                return res
+        if item.char_jp is not None:
+            if res := session.scalars(filter_char_jp).one_or_none():
+                return res
+        if item.word_jp is not None:
+            if res := session.scalars(filter_word_jp).one_or_none():
+                return res
 
-    return base_filter.one_or_none()
+        return session.scalars(base_filter).one_or_none()
 
 
 def create_or_get_dictionary(dictionary_data: DictionaryCreateReq) -> list[Dictionary]:
-    result: list[Dictionary] = []
+    with DBsession.begin() as session:
+        result: list[Dictionary] = []
 
-    for item in dictionary_data.items:
-        dictionary_item = get_dictionary_item(item)
-        if dictionary_item is None:
-            dictionary_item = Dictionary(**item.model_dump())
-            DBsession.add(dictionary_item)
-            DBsession.commit()
-        need_commit = False
-        if (dictionary_item.char_jp is None and item.char_jp is not None):
-            dictionary_item.char_jp = item.char_jp
-            need_commit = True
-        if (dictionary_item.word_jp is None and item.word_jp is not None):
-            dictionary_item.word_jp = item.word_jp
-            need_commit = True
-        if need_commit:
-            DBsession.commit()
+        for item in dictionary_data.items:
+            dictionary_item = get_dictionary_item(item)
 
-        result.append(dictionary_item)
+            if dictionary_item is None:
+                dictionary_item = Dictionary(**item.model_dump())
+                session.add(dictionary_item)
 
-    return result
+            if (dictionary_item.char_jp is None and item.char_jp is not None):
+                dictionary_item.char_jp = item.char_jp
+
+            if (dictionary_item.word_jp is None and item.word_jp is not None):
+                dictionary_item.word_jp = item.word_jp
+
+            result.append(dictionary_item)
+
+        return result
 
 
 def add_img_to_dictionary(id: int, url: str):
-    dictionary_item: Dictionary = DBsession.query(Dictionary).filter(Dictionary.id == id).one_or_none()
+    with DBsession.begin() as session:
+        dictionary_item: Dictionary = session.scalars(select(Dictionary).where(Dictionary.id == id)).one_or_none()
 
-    if dictionary_item is None:
-        raise InvalidAPIUsage(f"Can't find dict item with id {id}", 404)
+        if dictionary_item is None:
+            raise InvalidAPIUsage(f"Can't find dict item with id {id}", 404)
 
-    dictionary_item.img = url
-    DBsession.commit()
+        dictionary_item.img = url
 
 
 #########################################################################################################################
 ################ Notifications ##########################################################################################
 #########################################################################################################################
-def get_notifications():
-    return (                                                                                                            #
-        DBsession                                                                                                       #
-        .query(NotificationStudentToTeacher)                                                                            #
-        .filter(NotificationStudentToTeacher.deleted == False)                                                          #
-        .order_by(NotificationStudentToTeacher.creation_datetime.desc())                                                #
-        .all()                                                                                                          #
-    )
+def get_notifications() -> list[NotificationStudentToTeacher]:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(NotificationStudentToTeacher)
+            .where(NotificationStudentToTeacher.deleted == False)
+            .order_by(NotificationStudentToTeacher.creation_datetime.desc())
+        ).all()
+
+
+# def get_notification_activity_try(
+#         activity_try_type:
+#             Literal["drilling_try"] |
+#             Literal["hieroglyph_try"] |
+#             Literal["assessment_try"] |
+#             Literal["final_boss_try"],
+#         activity_try_id: int):

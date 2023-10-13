@@ -86,9 +86,9 @@ def check_task_req(tasks: list[dict]) -> list[dict]:
 class AssessmentFuncsClass(ActivityFuncs[AssessmentType, AssessmentTryType]):
     _activityQueries: DBQS.AssessmentQueriesClass[AssessmentType, AssessmentTryType]
 
-    def start_new_try(self, activity_d: int):
-        activity = self._activityQueries.GetById(activity_d, get_current_user_id())
-        activity_tries = self._activityQueries.GetTriesByActivityId(activity_d, get_current_user_id())
+    def start_new_try(self, activity_id: int):
+        activity = self._activityQueries.GetById(activity_id, get_current_user_id())
+        activity_tries = self._activityQueries.GetTriesByActivityId(activity_id, get_current_user_id())
 
         if activity_tries and activity_tries[-1].end_datetime == None:
             return {"message": "Lexis try already Exists"}, 409
@@ -96,7 +96,7 @@ class AssessmentFuncsClass(ActivityFuncs[AssessmentType, AssessmentTryType]):
         new_tasks = parse_new_tasks(activity.tasks)
         checked_tasks = check_task_req(new_tasks)
         new_activity_try = self._activityQueries.add_assessment_new_try(
-            len(activity_tries) + 1, activity_d, get_current_user_id(), json.dumps(new_tasks),
+            len(activity_tries) + 1, activity_id, get_current_user_id(), json.dumps(new_tasks),
             json.dumps(checked_tasks))
 
         if activity.time_limit and new_activity_try:
