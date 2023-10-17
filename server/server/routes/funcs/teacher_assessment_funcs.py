@@ -2,11 +2,18 @@ import json
 
 from flask import request
 from pydantic import ValidationError
+from pydantic_core import ErrorDetails
+from server.models.utils import validate_req
 
 import server.queries.TeacherDBqueries as DBQT
 from server.exceptions.ApiExceptions import InvalidAPIUsage, InvalidRequestJson
-from server.models.assessment import (Aliases, AssessmentCreateReq, AssessmentTaskName, BaseModelTask)
-from server.models.db_models import Assessment
+from server.models.assessment import (Aliases, AssessmentCreateReq, AssessmentCreateReqStr,
+                                      BaseModelTask)
+
+
+def format_model_error(pydantic_errors: list[ErrorDetails]) -> dict:
+    error = pydantic_errors[0]
+    return {"message": error["msg"], "type": error["type"]}
 
 
 def parse_task(task: dict) -> BaseModelTask:
@@ -21,33 +28,31 @@ class IAssessmentFuncs:
         return {}
 
     def create(self, lesson_id: int):
-        if not request.json:
-            raise InvalidRequestJson()
+        assessment_req_data = validate_req(AssessmentCreateReq, request.json, 422)
 
         lesson = DBQT.get_lesson_by_id(lesson_id)
         if lesson is None:
             raise InvalidAPIUsage("No lesson in db!", 404)
 
-        req_tasks = request.json.get("tasks")
-        if req_tasks is None or not isinstance(req_tasks, list):
-            raise InvalidRequestJson()
-
         tasks: list[str] = []
-        errors: dict[int, list] = {}
+        errors: dict[int, dict] = {}
 
-        for i, task in enumerate(req_tasks):
+        for i, task in enumerate(assessment_req_data.tasks):
             try:
-                tasks.append(json.dumps(parse_task(task).model_dump()))
+                tasks.append(json.dumps(parse_task(task.model_dump()).model_dump()))
             except ValidationError as ex:
-                print(ex.errors())
-                errors[i] = ex.errors()
+                print("ex.errors():", ex.errors())
+                errors[i] = format_model_error(ex.errors())
+            except Exception as ex:
+                print("ex:", ex)
 
         if len(errors.keys()) != 0:
+            print("errors:", errors)
             return {"errors": errors}, 422
 
-        assessment_data = AssessmentCreateReq(time_limit=request.json.get("time_limit"),
-                                              description=request.json.get("description"),
-                                              tasks=f"[{','.join(tasks)}]")
+        assessment_data = AssessmentCreateReqStr(time_limit=assessment_req_data.time_limit,
+                                                 description=assessment_req_data.description,
+                                                 tasks=f"[{','.join(tasks)}]")
 
         assessment = DBQT.AssessmentQueries.create(lesson_id, assessment_data)
 

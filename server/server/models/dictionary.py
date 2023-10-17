@@ -1,6 +1,17 @@
+from typing import TypedDict
+
 from pydantic import BaseModel, model_validator
 
 from server.models.utils import StrExtraSpaceRemove
+
+
+class DictionaryItemDict(TypedDict):
+    id: int
+    ru: str
+    word_jp: str | None
+    char_jp: str | None
+    association: str | None
+    img: str | None
 
 
 class DictionaryCreateReqItem(BaseModel):

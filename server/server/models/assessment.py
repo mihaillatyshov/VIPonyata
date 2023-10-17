@@ -128,7 +128,7 @@ class SingleTestTaskTeacherBase(SingleTestTaskBase):
 
 
 class SingleTestTaskStudentReq(SingleTestTaskBase):
-    answer: int | None = None                                                                                           #or (self.answer > 0 and self.answer < len(self.opt))
+    answer: int | None = None  # or (self.answer > 0 and self.answer < len(self.opt))
 
 
 class SingleTestTaskRes(SingleTestTaskTeacherBase, BaseModelRes):
@@ -256,7 +256,7 @@ def find_pair_fs_validation_base(first: list[StrExtraSpaceRemove], second: list[
         raise ValueError(f"Первый и второй стоблец разной длины (f:{len(first)}, s:{len(second)})")
 
     if len(first) < 2:
-        raise ValueError(f"Слишком мало полей {len(first)}")
+        raise ValueError(f"Слишком мало полей ({len(first)})")
 
 
 class FindPairTaskStudentReq(FindPairTaskBase):
@@ -688,7 +688,7 @@ class OpenQuestionTaskCheck(BaseModelCheck):
 
 
 #########################################################################################################################
-################ Img ###################################################################################################
+################ Img ####################################################################################################
 #########################################################################################################################
 class ImgTaskBase(BaseModelTask):
     @field_validator("name")
@@ -724,7 +724,7 @@ class ImgTaskCheck(BaseModelCheck):
 
 
 #########################################################################################################################
-################ Audio ###################################################################################################
+################ Audio ##################################################################################################
 #########################################################################################################################
 class AudioTaskBase(BaseModelTask):
     @field_validator("name")
@@ -800,7 +800,16 @@ for name in AssessmentTaskName:
         raise KeyError(f"Alias {name} not found")
 
 
-class AssessmentCreateReq(BaseModel):
+#########################################################################################################################
+################ Requests ###############################################################################################
+#########################################################################################################################
+class BaseModelTaskReq(BaseModel):
+    name: AssessmentTaskName
+
+    model_config = ConfigDict(extra="allow")
+
+
+class AssessmentCreateReqStr(BaseModel):
     tasks: str
     description: StrExtraSpaceRemove | None = None
     time_limit: datetime.time | None = None
@@ -811,3 +820,16 @@ class AssessmentCreateReq(BaseModel):
         if v is None:
             return None
         return datetime.datetime.strptime(v, '%H:%M:%S').time()
+
+
+class AssessmentCreateReq(BaseModel):
+    tasks: list[BaseModelTaskReq]
+    description: StrExtraSpaceRemove | None = None
+    time_limit: datetime.time | None = None
+
+    @model_validator(mode="after")
+    def tasks_validation(self) -> "AssessmentCreateReq":
+        if len(self.tasks) == 0:
+            raise ValueError("Нет заданий")
+
+        return self

@@ -1,8 +1,8 @@
 """main
 
-Revision ID: fce31128f03b
+Revision ID: 1153146a5434
 Revises: 
-Create Date: 2023-10-12 22:03:33.982110
+Create Date: 2023-10-17 02:25:26.530050
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'fce31128f03b'
+revision: str = '1153146a5434'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -28,7 +28,7 @@ def upgrade() -> None:
     sa.Column('sort', sa.Integer(), nullable=False),
     sa.Column('description', sa.String(length=2048), nullable=True),
     sa.Column('img', sa.String(length=1024), nullable=True),
-    sa.Column('creation_datetime', sa.DateTime(), nullable=True),
+    sa.Column('creation_datetime', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('dictionary',
@@ -49,7 +49,7 @@ def upgrade() -> None:
     sa.Column('level', sa.Integer(), nullable=False),
     sa.Column('avatar', sa.String(length=1024), nullable=True),
     sa.Column('form', sa.Text(), nullable=True),
-    sa.Column('registration_date', sa.DateTime(), nullable=True),
+    sa.Column('registration_date', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('nickname')
     )
@@ -59,7 +59,7 @@ def upgrade() -> None:
     sa.Column('number', sa.Integer(), nullable=False),
     sa.Column('description', sa.String(length=2048), nullable=True),
     sa.Column('img', sa.String(length=1024), nullable=True),
-    sa.Column('creation_datetime', sa.DateTime(), nullable=True),
+    sa.Column('creation_datetime', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('course_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['course_id'], ['courses.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -136,7 +136,7 @@ def upgrade() -> None:
     sa.Column('end_datetime', sa.DateTime(), nullable=True),
     sa.Column('done_tasks', sa.Text(), nullable=False),
     sa.Column('checked_tasks', sa.Text(), nullable=True),
-    sa.Column('base_id', sa.Integer(), nullable=True),
+    sa.Column('base_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['base_id'], ['assessments.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
@@ -171,7 +171,7 @@ def upgrade() -> None:
     sa.Column('end_datetime', sa.DateTime(), nullable=True),
     sa.Column('done_tasks', sa.Text(), nullable=False),
     sa.Column('checked_tasks', sa.Text(), nullable=True),
-    sa.Column('base_id', sa.Integer(), nullable=True),
+    sa.Column('base_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['base_id'], ['final_bosses.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
@@ -208,7 +208,7 @@ def upgrade() -> None:
     sa.Column('hieroglyph_try_id', sa.Integer(), nullable=True),
     sa.Column('assessment_try_id', sa.Integer(), nullable=True),
     sa.Column('final_boss_try_id', sa.Integer(), nullable=True),
-    sa.Column('creation_datetime', sa.DateTime(), nullable=True),
+    sa.Column('creation_datetime', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['assessment_try_id'], ['assessment_tries.id'], ),
     sa.ForeignKeyConstraint(['drilling_try_id'], ['drilling_tries.id'], ),
     sa.ForeignKeyConstraint(['final_boss_try_id'], ['final_boss_tries.id'], ),
@@ -224,7 +224,7 @@ def upgrade() -> None:
     sa.Column('lesson_id', sa.Integer(), nullable=True),
     sa.Column('assessment_try_id', sa.Integer(), nullable=True),
     sa.Column('final_boss_try_id', sa.Integer(), nullable=True),
-    sa.Column('creation_datetime', sa.DateTime(), nullable=True),
+    sa.Column('creation_datetime', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['assessment_try_id'], ['assessment_tries.id'], ),
     sa.ForeignKeyConstraint(['course_id'], ['courses.id'], ),
     sa.ForeignKeyConstraint(['final_boss_try_id'], ['final_boss_tries.id'], ),

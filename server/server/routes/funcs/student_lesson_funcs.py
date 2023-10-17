@@ -9,13 +9,20 @@ def get_lessons_by_course_id(course_id: int):
 
 def get_lesson_activities(lesson_id: int):
     lesson = DBQS.get_lesson_by_id(lesson_id, get_current_user_id())
-    if dril := DBQS.DrillingQueries.GetByLessonId(lesson_id, get_current_user_id()):
-        dril.tries = DBQS.DrillingQueries.GetTriesByActivityId(dril.id, get_current_user_id())
+    if drilling := DBQS.DrillingQueries.get_by_lesson_id(lesson_id, get_current_user_id()):
+        drilling.tries = DBQS.DrillingQueries.GetTriesByActivityId(drilling.id, get_current_user_id())
 
-    if asse := DBQS.AssessmentQueries.GetByLessonId(lesson_id, get_current_user_id()):
-        asse.tries = DBQS.AssessmentQueries.GetTriesByActivityId(asse.id, get_current_user_id())
+    if assessment := DBQS.AssessmentQueries.get_by_lesson_id(lesson_id, get_current_user_id()):
+        assessment.tries = DBQS.AssessmentQueries.GetTriesByActivityId(assessment.id, get_current_user_id())
 
-    if hier := DBQS.HieroglyphQueries.GetByLessonId(lesson_id, get_current_user_id()):
-        hier.tries = DBQS.HieroglyphQueries.GetTriesByActivityId(hier.id, get_current_user_id())
+    if hieroglyph := DBQS.HieroglyphQueries.get_by_lesson_id(lesson_id, get_current_user_id()):
+        hieroglyph.tries = DBQS.HieroglyphQueries.GetTriesByActivityId(hieroglyph.id, get_current_user_id())
 
-    return {"lesson": lesson, "items": {"drilling": dril, "assessment": asse, "hieroglyph": hier}}
+    if final_boss := DBQS.FinalBossQueries.get_by_lesson_id(lesson_id, get_current_user_id()):
+        final_boss.tries = DBQS.FinalBossQueries.GetTriesByActivityId(final_boss.id, get_current_user_id())
+
+    return {"lesson": lesson,
+            "items": {"drilling": drilling,
+                      "assessment": assessment,
+                      "hieroglyph": hieroglyph,
+                      "final_boss": final_boss}}

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { PyError } from "libs/PyError";
+import { fixPyErrorMessage, PyError } from "libs/PyError";
 import {
     assessmentTaskRusNameAliases,
     TAssessmentItemBase,
@@ -17,10 +17,10 @@ interface TeacherAssessmentTypeBaseProps {
     taskName: TAssessmentTaskName;
     removeTask: () => void;
     children: React.ReactNode;
-    errors?: PyError[];
+    error?: PyError;
 }
 
-const TeacherAssessmentTypeBase = ({ taskName, removeTask, children, errors }: TeacherAssessmentTypeBaseProps) => {
+const TeacherAssessmentTypeBase = ({ taskName, removeTask, children, error }: TeacherAssessmentTypeBaseProps) => {
     return (
         <div className="my-card">
             <div className="my-card-header">
@@ -35,12 +35,10 @@ const TeacherAssessmentTypeBase = ({ taskName, removeTask, children, errors }: T
             </div>
             <div className="my-card-body">
                 {children}
-                <div className={errors !== undefined ? "mt-3" : ""}>
-                    {errors?.map((error, i) => (
-                        <div key={i} className="text-danger">
-                            {error.msg}
-                        </div>
-                    ))}
+                <div className={error !== undefined ? "mt-3" : ""}>
+                    <div className="text-danger">
+                        {fixPyErrorMessage(error !== undefined ? error.message || "" : "")}
+                    </div>
                 </div>
             </div>
         </div>

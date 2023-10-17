@@ -67,11 +67,12 @@ def on_restart_server_check_tasks_timers_by_type(
     LogI(f"on_restart_server_check_tasks_timers ==== START ==== {activity_type.__name__}")
     activity_tries = DBQO.get_activity_check_tasks_timers(activity_type, activity_try_type)
     LogI("on_restart_server_check_tasks_timers:", activity_tries)
-    for activity_try in activity_tries:
-        if activity_try.base.time_limit is None:
+    for activity, activity_try in activity_tries:
+
+        if activity.time_limit is None:
             continue
         time_remaining = (
-            activity_try.start_datetime + time_limit_to_timedelta(activity_try.base.time_limit)) - datetime.now()
+            activity_try.start_datetime + time_limit_to_timedelta(activity.time_limit)) - datetime.now()
         LogI("on_restart_server_check_tasks_timers:", time_remaining)
         start_activity_timer_limit(time_remaining, activity_try.id, activity_try_type)
     LogI(f"on_restart_server_check_tasks_timers ==== END ==== {activity_type.__name__}")

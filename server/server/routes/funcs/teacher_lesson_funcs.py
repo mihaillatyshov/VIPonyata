@@ -16,9 +16,10 @@ def get_lesson_activities(lesson_id: int):
     if lesson := DBQT.get_lesson_by_id(lesson_id):
 
         return {"lesson": lesson,
-                "items": {"drilling": lesson.drilling,
-                          "assessment": lesson.assessment,
-                          "hieroglyph": lesson.hieroglyph}}
+                "items": {"drilling": DBQT.DrillingQueries.get_by_lesson_id(lesson_id),
+                          "assessment": DBQT.AssessmentQueries.get_by_lesson_id(lesson_id),
+                          "hieroglyph": DBQT.HieroglyphQueries.get_by_lesson_id(lesson_id),
+                          "final_boss": DBQT.FinalBossQueries.get_by_lesson_id(lesson_id)}}
 
     return {"lesson": None, "items": None}, 404
 

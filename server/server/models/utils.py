@@ -14,8 +14,17 @@ StrExtraSpaceRemove = Annotated[str, AfterValidator(lambda x: _RE_COMBINE_WHITES
 T = TypeVar("T", bound=BaseModel)
 
 
-def foramt_errors(pydantic_errors: list[ErrorDetails]) -> dict:
-    return {"errors": {error["loc"][0]: {"msg": error["msg"], "type": error["type"]} for error in pydantic_errors}}
+def format_errors(pydantic_errors: list[ErrorDetails]) -> tuple[dict, str | None]:
+    result: dict = {"errors": {}}
+    message: str | None = None
+
+    for error in pydantic_errors:
+        if len(error["loc"]) > 0:
+            result["errors"][error["loc"][0]] = {"message": error["msg"], "type": error["type"]}
+        else:
+            message = error["msg"]
+
+    return result, message
 
 
 def validate_req(req_type: Type[T], req_data: dict | None,
@@ -32,7 +41,8 @@ def validate_req(req_type: Type[T], req_data: dict | None,
         return req_type(**req_data, **other_data)
     except ValidationError as e:
         print(e.errors())
-        print(foramt_errors(e.errors()))
-        raise InvalidAPIUsage(validation_message, validation_code, foramt_errors(e.errors()))
+        print(format_errors(e.errors()))
+        parsed_errors, message = format_errors(e.errors())
+        raise InvalidAPIUsage(message if message is not None else validation_message, validation_code, parsed_errors)
     except ValueError as e:
         raise InvalidAPIUsage(value_message, value_code)

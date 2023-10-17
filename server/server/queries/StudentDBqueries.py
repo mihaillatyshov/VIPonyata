@@ -12,9 +12,9 @@ from server.log_lib import LogI
 from server.models.db_models import (ActivityTryType, ActivityType, Assessment,
                                      AssessmentTry, AssessmentTryType,
                                      AssessmentType, Course, Dictionary,
-                                     Drilling, DrillingTry, FinalBoss,
-                                     FinalBossTry, Hieroglyph, HieroglyphTry,
-                                     Lesson, LexisTryType, LexisType,
+                                     Drilling, DrillingCard, DrillingTry, FinalBoss,
+                                     FinalBossTry, Hieroglyph, HieroglyphCard, HieroglyphTry,
+                                     Lesson, LexisCardType, LexisTryType, LexisType,
                                      NotificationStudentToTeacher,
                                      NotificationTeacherToStudent, User,
                                      UserDictionary)
@@ -92,18 +92,18 @@ class ActivityQueries(Generic[ActivityType, ActivityTryType]):
     _activity_type: type[ActivityType]
     _activityTry_type: type[ActivityTryType]
 
-    def __init__(self, activity_type: type[ActivityType], activityTry_type: type[ActivityTryType]):
+    def __init__(self, activity_type: type[ActivityType], activity_try_type: type[ActivityTryType]):
         self._activity_type = activity_type
-        self._activityTry_type = activityTry_type
+        self._activityTry_type = activity_try_type
 
-    def GetByLessonId(self, lessonId: int, userId: int) -> ActivityType | None:
+    def get_by_lesson_id(self, lesson_id: int, user_id: int) -> ActivityType | None:
         with DBsession.begin() as session:
             return session.scalars(
                 select(self._activity_type)
                 .join(self._activity_type.lesson)
-                .where(Lesson.id == lessonId)
+                .where(Lesson.id == lesson_id)
                 .join(Lesson.users)
-                .where(User.id == userId)
+                .where(User.id == user_id)
             ).one_or_none()
 
     def GetById(self, activityId: int, userId: int) -> ActivityType:
@@ -143,17 +143,6 @@ class ActivityQueries(Generic[ActivityType, ActivityTryType]):
                 .order_by(self._activityTry_type.try_number)
             ).all()
 
-    def AddNewTry(self, tryNumber: int, activityId: int, userId: int) -> ActivityTryType | None:
-        with DBsession.begin() as session:
-            LogI(f"Add New Activity Try {self._activityTry_type.__name__}: ", tryNumber, activityId, userId)
-
-            new_activity_try = self._activityTry_type(try_number=tryNumber,
-                                                      start_datetime=datetime.now(),
-                                                      user_id=userId,
-                                                      base_id=activityId)
-            session.add(new_activity_try)
-            return new_activity_try
-
     def GetUnfinishedTryByActivityId(self, activityId: int, userId: int) -> ActivityTryType:
         with DBsession.begin() as session:
             activity_try = session.scalars(
@@ -184,9 +173,25 @@ class ActivityQueries(Generic[ActivityType, ActivityTryType]):
 #########################################################################################################################
 ################ Lexis ##################################################################################################
 #########################################################################################################################
-class LexisQueries(ActivityQueries[LexisType, LexisTryType]):
-    _activity_type: type[LexisType]
-    _activityTry_type: type[LexisTryType]
+class LexisQueries(ActivityQueries[LexisType, LexisTryType], Generic[LexisType, LexisTryType, LexisCardType]):
+    _lexis_card_type: type[LexisCardType]
+
+    def __init__(self, lexis_type: type[LexisType],
+                 lexis_try_type: type[LexisTryType],
+                 lexis_card_type: type[LexisCardType]):
+        super().__init__(lexis_type, lexis_try_type)
+        self._lexis_card_type = lexis_card_type
+
+    def add_new_try(self, try_number: int, activity_id: int, user_id: int) -> LexisTryType:
+        with DBsession.begin() as session:
+            LogI(f"Add New Activity Try {self._activityTry_type.__name__}: ", try_number, activity_id, user_id)
+
+            new_activity_try = self._activityTry_type(try_number=try_number,
+                                                      start_datetime=datetime.now(),
+                                                      user_id=user_id,
+                                                      base_id=activity_id)
+            session.add(new_activity_try)
+            return new_activity_try
 
     def set_done_tasks_in_try(self, activity_try_id: int, done_tasks: str) -> None:
         with DBsession.begin() as session:
@@ -196,12 +201,19 @@ class LexisQueries(ActivityQueries[LexisType, LexisTryType]):
                 .values(done_tasks=done_tasks)
             )
 
+    def get_cards_by_activity_id(self, activity_id: int) -> list[LexisCardType]:
+        with DBsession.begin() as session:
+            return session.scalars(
+                select(self._lexis_card_type)
+                .where(self._lexis_card_type.base_id == activity_id)
+            ).all()
+
 
 #########################################################################################################################
 ################ Drilling and Hieroglyph ################################################################################
 #########################################################################################################################
-DrillingQueries = LexisQueries[Drilling, DrillingTry](Drilling, DrillingTry)
-HieroglyphQueries = LexisQueries[Hieroglyph, HieroglyphTry](Hieroglyph, HieroglyphTry)
+DrillingQueries = LexisQueries(Drilling, DrillingTry, DrillingCard)
+HieroglyphQueries = LexisQueries(Hieroglyph, HieroglyphTry, HieroglyphCard)
 
 
 #########################################################################################################################
@@ -224,8 +236,13 @@ class AssessmentQueriesClass(ActivityQueries[AssessmentType, AssessmentTryType])
             session.add(new_activity_try)
             return new_activity_try
 
-    # TODO
-    # def add_done_and_check_tasks(self, activity_id: int)
+    def add_done_and_check_tasks(self, activity_id: int, done_tasks, checked_tasks):
+        with DBsession.begin() as session:
+            session.execute(
+                update(self._activityTry_type)
+                .where(self._activityTry_type.id == activity_id)
+                .values(done_tasks=done_tasks, checked_tasks=checked_tasks)
+            )
 
 
 AssessmentQueries = AssessmentQueriesClass[Assessment, AssessmentTry](Assessment, AssessmentTry)
@@ -235,7 +252,7 @@ FinalBossQueries = AssessmentQueriesClass[FinalBoss, FinalBossTry](FinalBoss, Fi
 #########################################################################################################################
 ################ Dictionary #############################################################################################
 #########################################################################################################################
-def add_user_dictionary_if_not_exists(user_id: int, dictionary_id: int) -> UserDictionary:
+def add_user_dictionary_if_not_exists(dictionary_id: int, user_id: int) -> UserDictionary:
     with DBsession.begin() as session:
         dictinary = session.scalars(
             select(UserDictionary)
@@ -250,24 +267,36 @@ def add_user_dictionary_if_not_exists(user_id: int, dictionary_id: int) -> UserD
         return dictinary
 
 
-def get_dictionary(user_id: int) -> list[Dictionary]:
+def get_ditcionary_item(dictionary_id: int, user_id: int) -> tuple[Dictionary, UserDictionary]:
     with DBsession.begin() as session:
-        return session.scalars(
+        result = session.execute(
             select(Dictionary, UserDictionary)
-            .where(Dictionary.id == UserDictionary.dictionary_id)
+            .join(UserDictionary.dictionary)
+            .where(Dictionary.id == dictionary_id)
+            .where(UserDictionary.user_id == user_id)
+        ).one_or_none()
+        print(result)
+        return result
+
+
+def get_dictionary(user_id: int) -> list[tuple[Dictionary, UserDictionary]]:
+    with DBsession.begin() as session:
+        return session.execute(
+            select(Dictionary, UserDictionary)
+            .join(UserDictionary.dictionary)
             .where(UserDictionary.user_id == user_id)
         ).all()
 
 
 def add_img_to_dictionary(dictionary_img_req: DictionaryImgReq, user_id: int):
-    dictionary_item = add_user_dictionary_if_not_exists(user_id, dictionary_img_req.dictionary_id)
+    dictionary_item = add_user_dictionary_if_not_exists(dictionary_img_req.dictionary_id, user_id)
 
     with DBsession.begin() as _:
         dictionary_item.img = dictionary_img_req.url
 
 
 def add_assosiation_to_dictionary(dictionary_assosiation_req: DictionaryAssosiationReq, user_id: int):
-    dictionary_item = add_user_dictionary_if_not_exists(user_id, dictionary_assosiation_req.dictionary_id)
+    dictionary_item = add_user_dictionary_if_not_exists(dictionary_assosiation_req.dictionary_id, user_id)
 
     with DBsession.begin() as _:
         dictionary_item.img = dictionary_assosiation_req.assosiation

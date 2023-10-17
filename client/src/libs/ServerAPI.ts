@@ -1,7 +1,7 @@
 interface HandleStatusData {
     isOk: boolean;
     status: number;
-    data: any | undefined;
+    data: any;
 }
 
 interface AnyServerAPIParams {
@@ -38,11 +38,28 @@ const getStrFromParams = (rawParams: Object | undefined) => {
         : "";
 };
 
-type ServerError = {
+interface ServerErrorCheck {
+    response?: Response;
+}
+
+interface ServerError {
     isServerError: boolean;
     message: string;
     response: Response;
+}
+
+export interface ProcessableServerError<T> {
+    isServerError: false;
+    json: T;
+    response: Response;
+}
+
+const isErrorHasResponse = (e: any): e is ServerErrorCheck => e.response !== undefined;
+
+export const isProcessableError = <T>(e: any): e is ProcessableServerError<T> => {
+    return e.isServerError !== undefined && e.isServerError === false;
 };
+
 const Ajax = async <T>({ method, url, urlParams, body, headers }: ServerAPIParams): Promise<T> => {
     try {
         const response = await fetch(url + getStrFromParams(urlParams), {
@@ -60,15 +77,15 @@ const Ajax = async <T>({ method, url, urlParams, body, headers }: ServerAPIParam
 
             const error = { isServerError: false, json: json, response: response };
             throw error;
-        } catch (e: any) {
-            if (e.response !== undefined) {
+        } catch (e: unknown) {
+            if (isErrorHasResponse(e)) {
                 throw e;
             }
             const error: ServerError = { isServerError: true, message: "JSON Error!", response: response };
             throw error;
         }
-    } catch (e: any) {
-        if (e.response !== undefined) {
+    } catch (e: unknown) {
+        if (isErrorHasResponse(e)) {
             throw e;
         }
 

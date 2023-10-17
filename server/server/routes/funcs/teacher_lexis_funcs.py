@@ -37,7 +37,7 @@ class LexisFuncs(Generic[LexisType]):
         if lesson is None:
             raise InvalidAPIUsage("No lesson in db!", 404)
 
-        if self.lexis_queries.GetByLessonId(lesson.id) is not None:
+        if self.lexis_queries.get_by_lesson_id(lesson.id) is not None:
             raise InvalidAPIUsage("Lexis exists!", 403, {"lesson_id": lesson_id})
 
         cards_data = LexisCardCreateReq(cards=request.json.get("cards"))

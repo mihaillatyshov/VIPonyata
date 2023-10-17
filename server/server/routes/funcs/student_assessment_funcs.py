@@ -6,12 +6,16 @@ from server.common import DBsession
 from server.exceptions.ApiExceptions import InvalidAPIUsage, InvalidRequestJson
 from server.log_lib import LogE, LogW
 from server.models.assessment import Aliases
-from server.models.db_models import (Assessment, AssessmentTry, AssessmentTryType, AssessmentType, FinalBoss,
-                                     FinalBossTry, time_limit_to_timedelta)
+from server.models.db_models import (Assessment, AssessmentTry,
+                                     AssessmentTryType, AssessmentType,
+                                     FinalBoss, FinalBossTry,
+                                     time_limit_to_timedelta)
 from server.queries import StudentDBqueries as DBQS
 from server.routes.funcs.assessment_auto_checks import CheckAliases
 from server.routes.funcs.student_activity_funcs import ActivityFuncs
-from server.routes.routes_utils import (activity_end_time_handler, get_current_user_id, start_activity_timer_limit)
+from server.routes.routes_utils import (activity_end_time_handler,
+                                        get_current_user_id,
+                                        start_activity_timer_limit)
 
 
 def parse_new_tasks(data_str: str) -> list[dict]:
@@ -104,7 +108,7 @@ class AssessmentFuncsClass(ActivityFuncs[AssessmentType, AssessmentTryType]):
                                        self._activityQueries._activityTry_type)
         return {"message": "Lexis try successfully created"}
 
-    def _SetDoneTasks(self, req_data: dict, activity_id: int):
+    def _set_done_tasks(self, req_data: dict, activity_id: int):
         done_tasks_json = req_data.get("done_tasks")
         if not done_tasks_json:
             raise InvalidAPIUsage("No done tasks!")
@@ -114,13 +118,11 @@ class AssessmentFuncsClass(ActivityFuncs[AssessmentType, AssessmentTryType]):
         db_done_tasks = json.loads(activity_try.done_tasks)
 
         done_tasks_list = parse_student_req(done_tasks_json, db_done_tasks)
-        activity_try.done_tasks = json.dumps(done_tasks_list)
-
         checked_tasks_list = check_task_req(done_tasks_list)
-        activity_try.checked_tasks = json.dumps(checked_tasks_list)
 
-        DBsession.add(activity_try)
-        DBsession.commit()
+        self._activityQueries.add_done_and_check_tasks(activity_try.id,
+                                                       json.dumps(done_tasks_list),
+                                                       json.dumps(checked_tasks_list))
 
         return activity_try
 
@@ -128,7 +130,7 @@ class AssessmentFuncsClass(ActivityFuncs[AssessmentType, AssessmentTryType]):
         if not request.json:
             raise InvalidRequestJson()
 
-        self._SetDoneTasks(request.json, activity_id)
+        self._set_done_tasks(request.json, activity_id)
 
         return {"message": "ok"}
 
@@ -136,7 +138,7 @@ class AssessmentFuncsClass(ActivityFuncs[AssessmentType, AssessmentTryType]):
         if not request.json:
             raise InvalidRequestJson()
 
-        activity_try = self._SetDoneTasks(request.json, activity_id)
+        activity_try = self._set_done_tasks(request.json, activity_id)
 
         activity_end_time_handler(activity_try.id, self._activityQueries._activityTry_type)
         return {"message": "Successfully closed"}

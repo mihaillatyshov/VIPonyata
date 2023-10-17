@@ -1,89 +1,513 @@
-2023-10-13 20:57:37,578 werkzeug INFO     WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+2023-10-18 00:00:35,784 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:00:35] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:00:41,202 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:00:41] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:01:35,785 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:01:35] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:01:41,204 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:01:41] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:02:35,787 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:02:35] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:02:41,217 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:02:41] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:03:35,785 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:03:35] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:03:36,834 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:03:36] "POST /api/assessment/101 HTTP/1.1" 200 -
+2023-10-18 00:03:37,017 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:03:37] "GET /api/lessons/101 HTTP/1.1" 200 -
+2023-10-18 00:03:37,207 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:03:37] "GET /api/lessons/101 HTTP/1.1" 200 -
+2023-10-18 00:03:41,190 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:03:41] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:04:35,784 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:04:35] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:04:41,189 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:04:41] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:05:15,518 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:05:15] "POST /api/dictionary HTTP/1.1" 200 -
+2023-10-18 00:05:29,106 PIL.PngImagePlugin DEBUG    STREAM b'IHDR' 16 13
+2023-10-18 00:05:29,106 PIL.PngImagePlugin DEBUG    STREAM b'sBIT' 41 4
+2023-10-18 00:05:29,107 PIL.PngImagePlugin DEBUG    b'sBIT' 41 4 (unknown)
+2023-10-18 00:05:29,107 PIL.PngImagePlugin DEBUG    STREAM b'tEXt' 57 25
+2023-10-18 00:05:29,107 PIL.PngImagePlugin DEBUG    STREAM b'iTXt' 94 46
+2023-10-18 00:05:29,107 PIL.PngImagePlugin DEBUG    STREAM b'IDAT' 152 8192
+2023-10-18 00:05:29,196 PIL.Image DEBUG    Importing BlpImagePlugin
+2023-10-18 00:05:29,206 PIL.Image DEBUG    Importing BmpImagePlugin
+2023-10-18 00:05:29,206 PIL.Image DEBUG    Importing BufrStubImagePlugin
+2023-10-18 00:05:29,207 PIL.Image DEBUG    Importing CurImagePlugin
+2023-10-18 00:05:29,207 PIL.Image DEBUG    Importing DcxImagePlugin
+2023-10-18 00:05:29,209 PIL.Image DEBUG    Importing DdsImagePlugin
+2023-10-18 00:05:29,210 PIL.Image DEBUG    Importing EpsImagePlugin
+2023-10-18 00:05:29,211 PIL.Image DEBUG    Importing FitsImagePlugin
+2023-10-18 00:05:29,212 PIL.Image DEBUG    Importing FliImagePlugin
+2023-10-18 00:05:29,212 PIL.Image DEBUG    Importing FpxImagePlugin
+2023-10-18 00:05:29,213 PIL.Image DEBUG    Image: failed to import FpxImagePlugin: No module named 'olefile'
+2023-10-18 00:05:29,213 PIL.Image DEBUG    Importing FtexImagePlugin
+2023-10-18 00:05:29,213 PIL.Image DEBUG    Importing GbrImagePlugin
+2023-10-18 00:05:29,214 PIL.Image DEBUG    Importing GifImagePlugin
+2023-10-18 00:05:29,214 PIL.Image DEBUG    Importing GribStubImagePlugin
+2023-10-18 00:05:29,214 PIL.Image DEBUG    Importing Hdf5StubImagePlugin
+2023-10-18 00:05:29,215 PIL.Image DEBUG    Importing IcnsImagePlugin
+2023-10-18 00:05:29,216 PIL.Image DEBUG    Importing IcoImagePlugin
+2023-10-18 00:05:29,217 PIL.Image DEBUG    Importing ImImagePlugin
+2023-10-18 00:05:29,217 PIL.Image DEBUG    Importing ImtImagePlugin
+2023-10-18 00:05:29,218 PIL.Image DEBUG    Importing IptcImagePlugin
+2023-10-18 00:05:29,218 PIL.Image DEBUG    Importing JpegImagePlugin
+2023-10-18 00:05:29,218 PIL.Image DEBUG    Importing Jpeg2KImagePlugin
+2023-10-18 00:05:29,218 PIL.Image DEBUG    Importing McIdasImagePlugin
+2023-10-18 00:05:29,219 PIL.Image DEBUG    Importing MicImagePlugin
+2023-10-18 00:05:29,219 PIL.Image DEBUG    Image: failed to import MicImagePlugin: No module named 'olefile'
+2023-10-18 00:05:29,219 PIL.Image DEBUG    Importing MpegImagePlugin
+2023-10-18 00:05:29,220 PIL.Image DEBUG    Importing MpoImagePlugin
+2023-10-18 00:05:29,233 PIL.Image DEBUG    Importing MspImagePlugin
+2023-10-18 00:05:29,233 PIL.Image DEBUG    Importing PalmImagePlugin
+2023-10-18 00:05:29,235 PIL.Image DEBUG    Importing PcdImagePlugin
+2023-10-18 00:05:29,235 PIL.Image DEBUG    Importing PcxImagePlugin
+2023-10-18 00:05:29,235 PIL.Image DEBUG    Importing PdfImagePlugin
+2023-10-18 00:05:29,275 PIL.Image DEBUG    Importing PixarImagePlugin
+2023-10-18 00:05:29,276 PIL.Image DEBUG    Importing PngImagePlugin
+2023-10-18 00:05:29,276 PIL.Image DEBUG    Importing PpmImagePlugin
+2023-10-18 00:05:29,276 PIL.Image DEBUG    Importing PsdImagePlugin
+2023-10-18 00:05:29,276 PIL.Image DEBUG    Importing QoiImagePlugin
+2023-10-18 00:05:29,277 PIL.Image DEBUG    Importing SgiImagePlugin
+2023-10-18 00:05:29,278 PIL.Image DEBUG    Importing SpiderImagePlugin
+2023-10-18 00:05:29,279 PIL.Image DEBUG    Importing SunImagePlugin
+2023-10-18 00:05:29,280 PIL.Image DEBUG    Importing TgaImagePlugin
+2023-10-18 00:05:29,280 PIL.Image DEBUG    Importing TiffImagePlugin
+2023-10-18 00:05:29,280 PIL.Image DEBUG    Importing WebPImagePlugin
+2023-10-18 00:05:29,326 PIL.Image DEBUG    Importing WmfImagePlugin
+2023-10-18 00:05:29,346 PIL.Image DEBUG    Importing XbmImagePlugin
+2023-10-18 00:05:29,355 PIL.Image DEBUG    Importing XpmImagePlugin
+2023-10-18 00:05:29,363 PIL.Image DEBUG    Importing XVThumbImagePlugin
+2023-10-18 00:05:29,692 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:05:29] "POST /api/upload/img HTTP/1.1" 200 -
+2023-10-18 00:05:29,813 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:05:29] "POST /api/dictionary/3/img HTTP/1.1" 200 -
+2023-10-18 00:05:29,901 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:05:29] "GET /api/uploads/img/c4/cd/e810ee4f67d78b5234b62630df43bd562a4110871015ab75f7b03fa97bf84181861117de6ee07695cd7f81f3efbb884be9b41f273265678937620f27e1fa.webp HTTP/1.1" 200 -
+2023-10-18 00:05:34,108 PIL.PngImagePlugin DEBUG    STREAM b'IHDR' 16 13
+2023-10-18 00:05:34,108 PIL.PngImagePlugin DEBUG    STREAM b'sBIT' 41 4
+2023-10-18 00:05:34,108 PIL.PngImagePlugin DEBUG    b'sBIT' 41 4 (unknown)
+2023-10-18 00:05:34,108 PIL.PngImagePlugin DEBUG    STREAM b'tEXt' 57 25
+2023-10-18 00:05:34,108 PIL.PngImagePlugin DEBUG    STREAM b'iTXt' 94 46
+2023-10-18 00:05:34,108 PIL.PngImagePlugin DEBUG    STREAM b'IDAT' 152 8192
+2023-10-18 00:05:35,008 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:05:35] "POST /api/upload/img HTTP/1.1" 200 -
+2023-10-18 00:05:35,128 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:05:35] "POST /api/dictionary/4/img HTTP/1.1" 200 -
+2023-10-18 00:05:35,162 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:05:35] "GET /api/uploads/img/bb/6f/669267ea72da80a482e1bc983d57b7584ca1ddaea806a02432cc8e403335124323f488f374c1acf5785b313187cee5f6aeb58a41d19210a74723c38dd126.webp HTTP/1.1" 200 -
+2023-10-18 00:05:35,786 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:05:35] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:05:41,213 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:05:41] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:05:46,257 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:05:46] "POST /api/drilling/101 HTTP/1.1" 200 -
+2023-10-18 00:05:46,293 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:05:46] "GET /api/lessons/101 HTTP/1.1" 200 -
+2023-10-18 00:05:46,296 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:05:46] "GET /api/lessons/101 HTTP/1.1" 200 -
+2023-10-18 00:06:10,709 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:06:10] "GET /api/courses/1 HTTP/1.1" 200 -
+2023-10-18 00:06:10,800 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:06:10] "GET /api/courses/1 HTTP/1.1" 200 -
+2023-10-18 00:06:10,879 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:06:10] "GET /api/uploads/img/95/79/366bed154844cf8f405c685a5689e021f05cf124a42b6508cba14240e3393aee7094158a9dbce8816b855ff9ca8049949135e67c2ce5f4f71f02da67c6c9.webp HTTP/1.1" 200 -
+2023-10-18 00:06:17,639 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:06:17] "GET /api/courses HTTP/1.1" 200 -
+2023-10-18 00:06:17,680 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:06:17] "GET /api/courses HTTP/1.1" 200 -
+2023-10-18 00:06:17,994 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:06:17] "GET /api/uploads/img/90/a4/302da2d91fd28f58a0a5b401aa5ee7e9032e27b35dfdb3b8d0f514a82b1ec3b372ed0791edab0dd2c439695cc59ba1260dd52e6a7c12a8be1e0b364a8554.webp HTTP/1.1" 200 -
+2023-10-18 00:06:17,994 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:06:17] "GET /api/uploads/img/49/1f/f25b45f440387cceeb53293f71180d15d2aca755906927eb10d01950126674a9e4f61f3dc249866669ff0f2bfda623e502faca00f92d70e01e609f6cee3e.webp HTTP/1.1" 200 -
+2023-10-18 00:06:18,000 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:06:18] "GET /api/uploads/img/a4/9c/fcb311b317a139cdaf91d26a2571538ab661f9b2cd767038568a1bde78e25d3732cbb8ad81c9c2827456533cfff0be5e580e6d8b3e4dce1141ebc41af6fb.webp HTTP/1.1" 200 -
+2023-10-18 00:06:35,831 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:06:35] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:06:41,214 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:06:41] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:07:14,158 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:14] "GET /api/islogin HTTP/1.1" 200 -
+2023-10-18 00:07:14,159 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:14] "GET /api/islogin HTTP/1.1" 200 -
+2023-10-18 00:07:14,287 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:14] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:07:14,297 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:14] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:07:14,300 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:14] "GET /api/dictionary HTTP/1.1" 200 -
+2023-10-18 00:07:14,303 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:14] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:07:14,616 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:14] "GET /api/dictionary HTTP/1.1" 200 -
+2023-10-18 00:07:17,334 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:17] "GET /api/courses HTTP/1.1" 200 -
+2023-10-18 00:07:17,393 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:17] "GET /api/courses HTTP/1.1" 200 -
+2023-10-18 00:07:18,591 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:18] "GET /api/courses/1 HTTP/1.1" 200 -
+2023-10-18 00:07:18,592 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:18] "GET /api/courses/1 HTTP/1.1" 200 -
+2023-10-18 00:07:19,403 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:19] "GET /api/lessons/1 HTTP/1.1" 200 -
+2023-10-18 00:07:19,404 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:19] "GET /api/lessons/1 HTTP/1.1" 200 -
+2023-10-18 00:07:20,631 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:20] "POST /api/drilling/1/newtry HTTP/1.1" 200 -
+2023-10-18 00:07:20,663 server.start_server ERROR    Exception on /api/drilling/1 [GET]
+Traceback (most recent call last):
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1822, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask_cors/extension.py", line 165, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1820, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1796, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/routes.py", line 107, in get_drilling_by_id
+    return user_selector_function(
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/routes_utils.py", line 40, in user_selector_function
+    return student_func(*args, **kwargs)
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/funcs/student_lexis_funcs.py", line 76, in GetById
+    dict_item, dict_user = DBQS.get_ditcionary_item(card.dictionary_id, get_current_user_id())
+TypeError: cannot unpack non-iterable NoneType object
+2023-10-18 00:07:20,663 server.start_server ERROR    Exception on /api/drilling/1 [GET]
+Traceback (most recent call last):
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1822, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask_cors/extension.py", line 165, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1820, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1796, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/routes.py", line 107, in get_drilling_by_id
+    return user_selector_function(
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/routes_utils.py", line 40, in user_selector_function
+    return student_func(*args, **kwargs)
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/funcs/student_lexis_funcs.py", line 76, in GetById
+    dict_item, dict_user = DBQS.get_ditcionary_item(card.dictionary_id, get_current_user_id())
+TypeError: cannot unpack non-iterable NoneType object
+2023-10-18 00:07:20,755 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:20] "[35m[1mGET /api/drilling/1 HTTP/1.1[0m" 500 -
+2023-10-18 00:07:20,756 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:20] "[35m[1mGET /api/drilling/1 HTTP/1.1[0m" 500 -
+2023-10-18 00:07:33,095 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:33] "GET /api/islogin HTTP/1.1" 200 -
+2023-10-18 00:07:33,096 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:33] "GET /api/islogin HTTP/1.1" 200 -
+2023-10-18 00:07:33,149 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:33] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:07:33,153 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:33] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:07:33,167 server.start_server ERROR    Exception on /api/drilling/1 [GET]
+Traceback (most recent call last):
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1822, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask_cors/extension.py", line 165, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1820, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1796, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/routes.py", line 107, in get_drilling_by_id
+    return user_selector_function(
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/routes_utils.py", line 40, in user_selector_function
+    return student_func(*args, **kwargs)
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/funcs/student_lexis_funcs.py", line 76, in GetById
+    dict_item, dict_user = DBQS.get_ditcionary_item(card.dictionary_id, get_current_user_id())
+TypeError: cannot unpack non-iterable NoneType object
+2023-10-18 00:07:33,169 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:33] "[35m[1mGET /api/drilling/1 HTTP/1.1[0m" 500 -
+2023-10-18 00:07:33,170 server.start_server ERROR    Exception on /api/drilling/1 [GET]
+Traceback (most recent call last):
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1822, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask_cors/extension.py", line 165, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1820, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1796, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/routes.py", line 107, in get_drilling_by_id
+    return user_selector_function(
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/routes_utils.py", line 40, in user_selector_function
+    return student_func(*args, **kwargs)
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/funcs/student_lexis_funcs.py", line 76, in GetById
+    dict_item, dict_user = DBQS.get_ditcionary_item(card.dictionary_id, get_current_user_id())
+TypeError: cannot unpack non-iterable NoneType object
+2023-10-18 00:07:33,176 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:33] "[35m[1mGET /api/drilling/1 HTTP/1.1[0m" 500 -
+2023-10-18 00:07:33,204 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:33] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:07:42,147 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:07:42] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:08:33,151 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:08:33] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:08:43,155 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:08:43] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:09:33,149 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:09:33] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:09:44,155 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:09:44] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:10:34,394 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:10:34] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:10:45,143 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:10:45] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:11:35,437 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:11:35] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:11:46,148 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:11:46] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:12:35,436 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:12:35] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:12:47,161 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:12:47] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:13:35,438 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:13:35] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:13:48,156 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:13:48] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:14:00,922 werkzeug INFO     WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
  * Running on all addresses (0.0.0.0)
  * Running on http://127.0.0.1:5000
  * Running on http://10.96.0.10:5000
-2023-10-13 20:57:37,578 werkzeug INFO     Press CTRL+C to quit
-2023-10-13 20:57:40,724 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:57:40] "GET /api/islogin HTTP/1.1" 200 -
-2023-10-13 20:57:40,735 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:57:40] "GET /api/islogin HTTP/1.1" 200 -
-2023-10-13 20:57:40,940 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:57:40] "GET /api/courses/1 HTTP/1.1" 200 -
-2023-10-13 20:57:40,987 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:57:40] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 20:57:41,026 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:57:41] "GET /api/courses/1 HTTP/1.1" 200 -
-2023-10-13 20:57:41,031 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:57:41] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 20:57:41,052 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:57:41] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 20:58:02,806 werkzeug INFO     WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+2023-10-18 00:14:00,922 werkzeug INFO     Press CTRL+C to quit
+2023-10-18 00:14:03,690 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:14:03] "GET /api/islogin HTTP/1.1" 200 -
+2023-10-18 00:14:03,711 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:14:03] "GET /api/islogin HTTP/1.1" 200 -
+2023-10-18 00:14:03,811 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:14:03] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:14:03,850 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:14:03] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:14:03,854 server.start_server ERROR    Exception on /api/drilling/1 [GET]
+Traceback (most recent call last):
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1822, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask_cors/extension.py", line 165, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1820, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1796, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/routes.py", line 107, in get_drilling_by_id
+    return user_selector_function(
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/routes_utils.py", line 40, in user_selector_function
+    return student_func(*args, **kwargs)
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/funcs/student_lexis_funcs.py", line 76, in GetById
+    dict_item, dict_user = DBQS.get_ditcionary_item(card.dictionary_id, get_current_user_id())
+TypeError: cannot unpack non-iterable NoneType object
+2023-10-18 00:14:03,863 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:14:03] "[35m[1mGET /api/drilling/1 HTTP/1.1[0m" 500 -
+2023-10-18 00:14:03,864 server.start_server ERROR    Exception on /api/drilling/1 [GET]
+Traceback (most recent call last):
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1822, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask_cors/extension.py", line 165, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1820, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1796, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/routes.py", line 107, in get_drilling_by_id
+    return user_selector_function(
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/routes_utils.py", line 40, in user_selector_function
+    return student_func(*args, **kwargs)
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/funcs/student_lexis_funcs.py", line 76, in GetById
+    dict_item, dict_user = DBQS.get_ditcionary_item(card.dictionary_id, get_current_user_id())
+TypeError: cannot unpack non-iterable NoneType object
+2023-10-18 00:14:03,867 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:14:03] "[35m[1mGET /api/drilling/1 HTTP/1.1[0m" 500 -
+2023-10-18 00:14:03,892 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:14:03] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:14:23,705 werkzeug INFO     WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
  * Running on all addresses (0.0.0.0)
  * Running on http://127.0.0.1:5000
  * Running on http://10.96.0.10:5000
-2023-10-13 20:58:02,806 werkzeug INFO     Press CTRL+C to quit
-2023-10-13 20:58:05,210 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:58:05] "GET /api/islogin HTTP/1.1" 200 -
-2023-10-13 20:58:05,222 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:58:05] "GET /api/islogin HTTP/1.1" 200 -
-2023-10-13 20:58:05,375 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:58:05] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 20:58:05,379 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:58:05] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 20:58:05,396 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:58:05] "GET /api/courses/1 HTTP/1.1" 200 -
-2023-10-13 20:58:05,432 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:58:05] "GET /api/courses/1 HTTP/1.1" 200 -
-2023-10-13 20:58:05,476 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:58:05] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 20:58:07,761 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:58:07] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 20:59:01,302 werkzeug INFO     WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+2023-10-18 00:14:23,706 werkzeug INFO     Press CTRL+C to quit
+2023-10-18 00:14:24,292 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:14:24] "GET /api/islogin HTTP/1.1" 200 -
+2023-10-18 00:14:24,319 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:14:24] "GET /api/islogin HTTP/1.1" 200 -
+2023-10-18 00:14:24,369 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:14:24] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:14:24,393 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:14:24] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:14:24,402 server.start_server ERROR    Exception on /api/drilling/1 [GET]
+Traceback (most recent call last):
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1822, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask_cors/extension.py", line 165, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1820, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1796, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/routes.py", line 107, in get_drilling_by_id
+    return user_selector_function(
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/routes_utils.py", line 40, in user_selector_function
+    return student_func(*args, **kwargs)
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/funcs/student_lexis_funcs.py", line 76, in GetById
+    dict_item, dict_user = DBQS.get_ditcionary_item(card.dictionary_id, get_current_user_id())
+TypeError: cannot unpack non-iterable NoneType object
+2023-10-18 00:14:24,402 server.start_server ERROR    Exception on /api/drilling/1 [GET]
+Traceback (most recent call last):
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1822, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask_cors/extension.py", line 165, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1820, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1796, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/routes.py", line 107, in get_drilling_by_id
+    return user_selector_function(
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/routes_utils.py", line 40, in user_selector_function
+    return student_func(*args, **kwargs)
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/funcs/student_lexis_funcs.py", line 76, in GetById
+    dict_item, dict_user = DBQS.get_ditcionary_item(card.dictionary_id, get_current_user_id())
+TypeError: cannot unpack non-iterable NoneType object
+2023-10-18 00:14:24,409 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:14:24] "[35m[1mGET /api/drilling/1 HTTP/1.1[0m" 500 -
+2023-10-18 00:14:24,408 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:14:24] "[35m[1mGET /api/drilling/1 HTTP/1.1[0m" 500 -
+2023-10-18 00:14:24,412 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:14:24] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:14:49,148 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:14:49] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:15:24,361 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:15:24] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:15:50,149 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:15:50] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:16:24,378 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:16:24] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:16:47,618 werkzeug INFO     WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
  * Running on all addresses (0.0.0.0)
  * Running on http://127.0.0.1:5000
  * Running on http://10.96.0.10:5000
-2023-10-13 20:59:01,302 werkzeug INFO     Press CTRL+C to quit
-2023-10-13 20:59:04,812 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:59:04] "GET /api/islogin HTTP/1.1" 200 -
-2023-10-13 20:59:04,829 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:59:04] "GET /api/islogin HTTP/1.1" 200 -
-2023-10-13 20:59:05,068 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:59:05] "GET /api/courses HTTP/1.1" 200 -
-2023-10-13 20:59:05,078 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:59:05] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 20:59:05,079 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:59:05] "GET /api/courses HTTP/1.1" 200 -
-2023-10-13 20:59:05,083 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:59:05] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 20:59:05,109 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:59:05] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 20:59:07,784 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:59:07] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 20:59:51,694 werkzeug INFO     WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
- * Running on all addresses (0.0.0.0)
- * Running on http://127.0.0.1:5000
- * Running on http://10.96.0.10:5000
-2023-10-13 20:59:51,694 werkzeug INFO     Press CTRL+C to quit
-2023-10-13 20:59:54,978 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:59:54] "GET /api/islogin HTTP/1.1" 200 -
-2023-10-13 20:59:55,000 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:59:55] "GET /api/islogin HTTP/1.1" 200 -
-2023-10-13 20:59:55,110 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:59:55] "GET /api/courses HTTP/1.1" 200 -
-2023-10-13 20:59:55,153 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:59:55] "GET /api/courses HTTP/1.1" 200 -
-2023-10-13 20:59:55,166 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:59:55] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 20:59:55,173 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:59:55] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 20:59:55,304 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 20:59:55] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:00:07,784 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:00:07] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:00:55,237 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:00:55] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:01:07,923 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:01:07] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:01:55,271 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:01:55] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:02:07,972 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:02:07] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:02:55,263 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:02:55] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:03:08,028 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:03:08] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:03:19,444 werkzeug INFO     WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
- * Running on all addresses (0.0.0.0)
- * Running on http://127.0.0.1:5000
- * Running on http://10.96.0.10:5000
-2023-10-13 21:03:19,445 werkzeug INFO     Press CTRL+C to quit
-2023-10-13 21:03:21,758 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:03:21] "GET /api/islogin HTTP/1.1" 200 -
-2023-10-13 21:03:21,764 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:03:21] "GET /api/islogin HTTP/1.1" 200 -
-2023-10-13 21:03:21,883 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:03:21] "GET /api/courses HTTP/1.1" 200 -
-2023-10-13 21:03:21,916 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:03:21] "GET /api/courses HTTP/1.1" 200 -
-2023-10-13 21:03:21,919 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:03:21] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:03:21,938 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:03:21] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:03:21,953 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:03:21] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:04:08,029 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:04:08] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:04:21,914 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:04:21] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:05:08,173 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:05:08] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:05:21,917 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:05:21] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:06:08,200 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:06:08] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:06:21,925 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:06:21] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:07:08,202 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:07:08] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:07:21,925 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:07:21] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:08:08,349 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:08:08] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:08:21,914 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:08:21] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:09:08,350 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:09:08] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:09:21,913 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:09:21] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:10:08,350 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:10:08] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:10:21,914 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:10:21] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:11:08,539 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:11:08] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:11:21,915 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:11:21] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:12:08,600 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:12:08] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:12:21,915 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:12:21] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:13:08,601 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:13:08] "GET /api/notifications HTTP/1.1" 200 -
-2023-10-13 21:13:21,931 werkzeug INFO     127.0.0.1 - - [13/Oct/2023 21:13:21] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:16:47,618 werkzeug INFO     Press CTRL+C to quit
+2023-10-18 00:16:49,126 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:16:49] "GET /api/islogin HTTP/1.1" 200 -
+2023-10-18 00:16:49,151 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:16:49] "GET /api/islogin HTTP/1.1" 200 -
+2023-10-18 00:16:49,447 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:16:49] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:16:49,555 server.start_server ERROR    Exception on /api/drilling/1 [GET]
+Traceback (most recent call last):
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/mysql/connector/connection_cext.py", line 565, in cmd_query
+    self._cmysql.query(
+_mysql_connector.MySQLInterfaceError: Duplicate entry '1-1' for key 'idx_user_dictionary'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/engine/base.py", line 1900, in _execute_context
+    self.dialect.do_execute(
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/engine/default.py", line 736, in do_execute
+    cursor.execute(statement, parameters)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/mysql/connector/cursor_cext.py", line 279, in execute
+    result = self._cnx.cmd_query(
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/mysql/connector/connection_cext.py", line 573, in cmd_query
+    raise get_mysql_exception(
+mysql.connector.errors.IntegrityError: 1062 (23000): Duplicate entry '1-1' for key 'idx_user_dictionary'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1822, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask_cors/extension.py", line 165, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1820, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask/app.py", line 1796, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/routes.py", line 107, in get_drilling_by_id
+    return user_selector_function(
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/routes_utils.py", line 40, in user_selector_function
+    return student_func(*args, **kwargs)
+  File "/home/lm/coding/WEB/VIPonyata/server/server/routes/funcs/student_lexis_funcs.py", line 76, in GetById
+    DBQS.add_user_dictionary_if_not_exists(card.dictionary_id, get_current_user_id())
+  File "/home/lm/coding/WEB/VIPonyata/server/server/queries/StudentDBqueries.py", line 256, in add_user_dictionary_if_not_exists
+    with DBsession.begin() as session:
+  File "/usr/lib/python3.10/contextlib.py", line 142, in __exit__
+    next(self.gen)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/orm/session.py", line 1172, in _maker_context_manager
+    with self.begin():
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/engine/util.py", line 235, in __exit__
+    with util.safe_reraise():
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/util/langhelpers.py", line 70, in __exit__
+    compat.raise_(
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/util/compat.py", line 211, in raise_
+    raise exception
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/engine/util.py", line 233, in __exit__
+    self.commit()
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/orm/session.py", line 829, in commit
+    self._prepare_impl()
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/orm/session.py", line 808, in _prepare_impl
+    self.session.flush()
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/orm/session.py", line 3444, in flush
+    self._flush(objects)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/orm/session.py", line 3583, in _flush
+    with util.safe_reraise():
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/util/langhelpers.py", line 70, in __exit__
+    compat.raise_(
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/util/compat.py", line 211, in raise_
+    raise exception
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/orm/session.py", line 3544, in _flush
+    flush_context.execute()
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/orm/unitofwork.py", line 456, in execute
+    rec.execute(self)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/orm/unitofwork.py", line 630, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/orm/persistence.py", line 245, in save_obj
+    _emit_insert_statements(
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/orm/persistence.py", line 1238, in _emit_insert_statements
+    result = connection._execute_20(
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/engine/base.py", line 1705, in _execute_20
+    return meth(self, args_10style, kwargs_10style, execution_options)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/sql/elements.py", line 334, in _execute_on_connection
+    return connection._execute_clauseelement(
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/engine/base.py", line 1572, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/engine/base.py", line 1943, in _execute_context
+    self._handle_dbapi_exception(
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/engine/base.py", line 2124, in _handle_dbapi_exception
+    util.raise_(
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/util/compat.py", line 211, in raise_
+    raise exception
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/engine/base.py", line 1900, in _execute_context
+    self.dialect.do_execute(
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/sqlalchemy/engine/default.py", line 736, in do_execute
+    cursor.execute(statement, parameters)
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/mysql/connector/cursor_cext.py", line 279, in execute
+    result = self._cnx.cmd_query(
+  File "/home/lm/coding/WEB/VIPonyata/server/venv/lib/python3.10/site-packages/mysql/connector/connection_cext.py", line 573, in cmd_query
+    raise get_mysql_exception(
+sqlalchemy.exc.IntegrityError: (mysql.connector.errors.IntegrityError) 1062 (23000): Duplicate entry '1-1' for key 'idx_user_dictionary'
+[SQL: INSERT INTO users_dictionary (img, association, user_id, dictionary_id) VALUES (%(img)s, %(association)s, %(user_id)s, %(dictionary_id)s)]
+[parameters: {'img': None, 'association': None, 'user_id': 1, 'dictionary_id': 1}]
+(Background on this error at: https://sqlalche.me/e/14/gkpj)
+2023-10-18 00:16:49,564 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:16:49] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:16:49,616 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:16:49] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:16:49,675 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:16:49] "[35m[1mGET /api/drilling/1 HTTP/1.1[0m" 500 -
+2023-10-18 00:16:49,676 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:16:49] "GET /api/drilling/1 HTTP/1.1" 200 -
+2023-10-18 00:16:51,147 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:16:51] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:17:07,240 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:07] "POST /api/drilling/1/newdonetask HTTP/1.1" 200 -
+2023-10-18 00:17:10,896 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:10] "POST /api/drilling/1/newdonetask HTTP/1.1" 200 -
+2023-10-18 00:17:11,679 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:11] "POST /api/drilling/1/newdonetask HTTP/1.1" 200 -
+2023-10-18 00:17:12,730 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:12] "POST /api/drilling/1/endtry HTTP/1.1" 200 -
+2023-10-18 00:17:12,884 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:12] "GET /api/lessons/1 HTTP/1.1" 200 -
+2023-10-18 00:17:12,885 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:12] "GET /api/lessons/1 HTTP/1.1" 200 -
+2023-10-18 00:17:15,278 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:15] "POST /api/assessment/1/newtry HTTP/1.1" 200 -
+2023-10-18 00:17:15,342 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:15] "GET /api/assessment/1 HTTP/1.1" 200 -
+2023-10-18 00:17:15,344 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:15] "GET /api/assessment/1 HTTP/1.1" 200 -
+2023-10-18 00:17:18,811 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:18] "POST /api/assessment/1/newdonetasks HTTP/1.1" 200 -
+2023-10-18 00:17:20,098 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:20] "GET /api/islogin HTTP/1.1" 200 -
+2023-10-18 00:17:20,129 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:20] "GET /api/islogin HTTP/1.1" 200 -
+2023-10-18 00:17:20,166 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:20] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:17:20,191 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:20] "GET /api/assessment/1 HTTP/1.1" 200 -
+2023-10-18 00:17:20,195 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:20] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:17:20,200 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:20] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:17:20,234 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:20] "GET /api/assessment/1 HTTP/1.1" 200 -
+2023-10-18 00:17:22,420 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:22] "POST /api/assessment/1/newdonetasks HTTP/1.1" 200 -
+2023-10-18 00:17:23,776 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:23] "POST /api/assessment/1/endtry HTTP/1.1" 200 -
+2023-10-18 00:17:23,829 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:23] "GET /api/lessons/1 HTTP/1.1" 200 -
+2023-10-18 00:17:23,869 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:23] "GET /api/lessons/1 HTTP/1.1" 200 -
+2023-10-18 00:17:25,060 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:25] "POST /api/assessment/1/newtry HTTP/1.1" 200 -
+2023-10-18 00:17:25,121 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:25] "GET /api/assessment/1 HTTP/1.1" 200 -
+2023-10-18 00:17:25,138 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:25] "GET /api/assessment/1 HTTP/1.1" 200 -
+2023-10-18 00:17:27,234 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:27] "POST /api/assessment/1/newdonetasks HTTP/1.1" 200 -
+2023-10-18 00:17:29,395 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:29] "POST /api/assessment/1/newdonetasks HTTP/1.1" 200 -
+2023-10-18 00:17:32,444 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:32] "POST /api/assessment/1/endtry HTTP/1.1" 200 -
+2023-10-18 00:17:32,517 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:32] "GET /api/lessons/1 HTTP/1.1" 200 -
+2023-10-18 00:17:32,550 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:32] "GET /api/lessons/1 HTTP/1.1" 200 -
+2023-10-18 00:17:33,827 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:33] "POST /api/hieroglyph/1/newtry HTTP/1.1" 200 -
+2023-10-18 00:17:33,917 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:33] "GET /api/hieroglyph/1 HTTP/1.1" 200 -
+2023-10-18 00:17:33,925 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:33] "GET /api/hieroglyph/1 HTTP/1.1" 200 -
+2023-10-18 00:17:35,109 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:35] "POST /api/hieroglyph/1/newdonetask HTTP/1.1" 200 -
+2023-10-18 00:17:36,057 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:36] "POST /api/hieroglyph/1/newdonetask HTTP/1.1" 200 -
+2023-10-18 00:17:36,599 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:36] "POST /api/hieroglyph/1/newdonetask HTTP/1.1" 200 -
+2023-10-18 00:17:37,465 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:37] "POST /api/hieroglyph/1/endtry HTTP/1.1" 200 -
+2023-10-18 00:17:37,540 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:37] "GET /api/lessons/1 HTTP/1.1" 200 -
+2023-10-18 00:17:37,572 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:37] "GET /api/lessons/1 HTTP/1.1" 200 -
+2023-10-18 00:17:39,868 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:39] "GET /api/dictionary HTTP/1.1" 200 -
+2023-10-18 00:17:39,888 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:39] "GET /api/dictionary HTTP/1.1" 200 -
+2023-10-18 00:17:40,757 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:40] "GET /api/courses HTTP/1.1" 200 -
+2023-10-18 00:17:40,777 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:40] "GET /api/courses HTTP/1.1" 200 -
+2023-10-18 00:17:41,902 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:41] "GET /api/courses/2 HTTP/1.1" 200 -
+2023-10-18 00:17:41,949 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:41] "GET /api/courses/2 HTTP/1.1" 200 -
+2023-10-18 00:17:42,705 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:42] "GET /api/lessons/12 HTTP/1.1" 200 -
+2023-10-18 00:17:42,757 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:42] "GET /api/lessons/12 HTTP/1.1" 200 -
+2023-10-18 00:17:45,982 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:45] "POST /api/logout HTTP/1.1" 200 -
+2023-10-18 00:17:47,650 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:47] "POST /api/login HTTP/1.1" 200 -
+2023-10-18 00:17:47,692 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:47] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:17:47,701 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:47] "GET /api/courses HTTP/1.1" 200 -
+2023-10-18 00:17:47,708 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:47] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:17:47,716 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:47] "GET /api/courses HTTP/1.1" 200 -
+2023-10-18 00:17:48,456 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:48] "GET /api/courses/1 HTTP/1.1" 200 -
+2023-10-18 00:17:48,477 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:48] "GET /api/courses/1 HTTP/1.1" 200 -
+2023-10-18 00:17:49,134 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:49] "GET /api/lessons/1 HTTP/1.1" 200 -
+2023-10-18 00:17:49,161 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:49] "GET /api/lessons/1 HTTP/1.1" 200 -
+2023-10-18 00:17:50,462 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:50] "GET /api/courses/1 HTTP/1.1" 200 -
+2023-10-18 00:17:50,501 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:50] "GET /api/courses/1 HTTP/1.1" 200 -
+2023-10-18 00:17:52,175 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:17:52] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:18:48,703 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:18:48] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:18:53,163 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:18:53] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:19:48,703 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:19:48] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:19:54,170 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:19:54] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:20:48,702 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:20:48] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:20:54,173 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:20:54] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:21:48,704 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:21:48] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:21:54,168 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:21:54] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:22:48,703 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:22:48] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:22:54,168 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:22:54] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:23:48,704 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:23:48] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:23:54,169 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:23:54] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:24:48,703 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:24:48] "GET /api/notifications HTTP/1.1" 200 -
+2023-10-18 00:24:54,165 werkzeug INFO     127.0.0.1 - - [18/Oct/2023 00:24:54] "GET /api/notifications HTTP/1.1" 200 -

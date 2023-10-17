@@ -16,13 +16,16 @@ from server.queries.StudentDBqueries import (add_assessment_notification, add_dr
 ################ On Restart #############################################################################################
 #########################################################################################################################
 def get_activity_check_tasks_timers(activity_type: type[ActivityType],
-                                    activity_try_type: type[ActivityTryType]) -> list[ActivityTryType]:
+                                    activity_try_type: type[ActivityTryType]) -> list[tuple[ActivityType, ActivityTryType]]:
     LogW("GetActivityCheckTasksTimers", activity_type.__name__, activity_try_type.__name__)
 
     with DBsession.begin() as session:
-        return (session.scalars(
-            select(activity_try_type).where(activity_try_type.end_datetime == None).join(
-                activity_try_type.base).where(activity_type.time_limit != None))).all()
+        return session.execute(
+            select(activity_type, activity_try_type)
+            .where(activity_try_type.end_datetime == None)
+            .join(activity_try_type.base)
+            .where(activity_type.time_limit != None)
+        ).all()
 
 
 def get_activity_try_by_id(activity_try_id: int, activity_try_type: type[ActivityTryType]) -> ActivityTryType | None:
@@ -71,4 +74,4 @@ def add_user_dictionary_from_try(activity_try: LexisTryType):
     lexis = activity_try.base
 
     for card in lexis.cards:
-        add_user_dictionary_if_not_exists(activity_try.user_id, card.dictionary_id)
+        add_user_dictionary_if_not_exists(card.dictionary_id, activity_try.user_id)

@@ -1,9 +1,10 @@
 import React, { useRef, useState } from "react";
 
 import PageTitle from "components/Common/PageTitle";
+import InputError from "components/Form/InputError";
 import InputTextArea from "components/Form/InputTextArea";
 import InputTime from "components/Form/InputTime";
-import { PyErrorResponse } from "libs/PyError";
+import { PyErrorDict } from "libs/PyError";
 import { AjaxPost } from "libs/ServerAPI";
 import { uuid } from "libs/uuid";
 import {
@@ -74,7 +75,7 @@ const IAssessmentCreatePage = ({ title }: IAssessmentCreatePageProps) => {
     const [tasks, setTasks] = useState<TTeacherAssessmentItems>([]);
     const [timelimit, setTimelimit] = useState<string>("00:00:00");
     const [description, setDescription] = useState<string>("");
-    const [errors, setErrors] = useState<PyErrorResponse>({});
+    const [errors, setErrors] = useState<PyErrorDict>({ errors: {}, message: "" });
 
     const openModal = (id: number) => {
         setTaskIdToAdd(id);
@@ -126,7 +127,8 @@ const IAssessmentCreatePage = ({ title }: IAssessmentCreatePageProps) => {
             })
             .catch(({ isServerError, json, response }) => {
                 if (!isServerError) {
-                    if (response.status === 422) setErrors(json.errors);
+                    console.log(json, response);
+                    if (response.status === 422) setErrors(json);
                     if (response.status === 404 || response.status === 403) navigate("/");
                 }
             });
@@ -165,7 +167,7 @@ const IAssessmentCreatePage = ({ title }: IAssessmentCreatePageProps) => {
                     <TeacherAssessmentTypeBase
                         taskName={item.name}
                         removeTask={() => removeTask(i)}
-                        errors={errors[`${i}`]}
+                        error={errors.errors[`${i}`] || ""}
                     >
                         <div>{drawItem(item, i, tasksHashes.current[i])}</div>
                     </TeacherAssessmentTypeBase>
@@ -173,6 +175,7 @@ const IAssessmentCreatePage = ({ title }: IAssessmentCreatePageProps) => {
             ))}
             <AddTaskButton insertId={tasks.length} handleClick={openModal} />
 
+            <InputError message={errors.message} />
             <input type="button" className="btn btn-success w-100 mt-5" onClick={submitHandler} value={"Создать"} />
             <SelectTypeModal
                 isShow={isShowSelectTypeModal}
