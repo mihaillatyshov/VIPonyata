@@ -1,8 +1,10 @@
 import React from "react";
-import { StudentAssessmentTypeProps } from "./StudentAssessmentTypeProps";
+
+import { TAssessmentTestMulti } from "models/Activity/Items/TAssessmentItems";
 import { useAppDispatch } from "redux/hooks";
 import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
-import { TAssessmentTestMulti } from "models/Activity/Items/TAssessmentItems";
+
+import { StudentAssessmentTypeProps } from "./StudentAssessmentTypeProps";
 
 const StudentAssessmentTestMulti = ({ data, taskId }: StudentAssessmentTypeProps<TAssessmentTestMulti>) => {
     const dispatch = useAppDispatch();
@@ -14,7 +16,6 @@ const StudentAssessmentTestMulti = ({ data, taskId }: StudentAssessmentTypeProps
         } else {
             data.answers.push(fieldId);
         }
-        // TODO Add message to server
         dispatch(setAssessmentTaskData({ id: taskId, data: data }));
     };
 

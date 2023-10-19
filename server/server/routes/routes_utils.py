@@ -13,10 +13,6 @@ from server.models.db_models import (ActivityTryType, ActivityType, Assessment,
                                      HieroglyphTry, time_limit_to_timedelta)
 
 
-def get_uploads_folder_from_config():
-    return load_config("config.json")["uploads"]
-
-
 def get_current_user_id() -> int:
     return current_user.GetId()
 

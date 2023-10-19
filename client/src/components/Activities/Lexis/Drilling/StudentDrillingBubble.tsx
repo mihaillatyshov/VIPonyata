@@ -1,7 +1,8 @@
 import React from "react";
-import { useDispatch } from "react-redux";
-import { setDrillingEndByTime } from "redux/slices/drillingSlice";
+
 import StudentActivityBubble from "components/Activities/Bouble/StudentActivityBouble";
+import { useDispatch } from "react-redux";
+import { setLexisEndByTime } from "redux/slices/drillingSlice";
 
 type StudentDrillingBubbleProps = {
     drilling: any; // TODO: Remove any
@@ -15,7 +16,7 @@ const StudentDrillingBubble = ({ drilling }: StudentDrillingBubbleProps) => {
             title="Лексика"
             info={drilling.info}
             name="drilling"
-            onDeadline={() => dispatch(setDrillingEndByTime())}
+            onDeadline={() => dispatch(setLexisEndByTime())}
         />
     );
 };

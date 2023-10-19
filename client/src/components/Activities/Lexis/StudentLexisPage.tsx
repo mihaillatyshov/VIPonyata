@@ -1,52 +1,53 @@
 import React, { useEffect } from "react";
-import { Route, Routes, useNavigate, useParams } from "react-router-dom";
-import { AjaxGet, AjaxPost } from "libs/ServerAPI";
-import NavigateToElement from "components/NavigateToElement";
-import StudentLexisNav from "./Nav/StudentLexisNav";
-import StudentLexisCard from "./Types/StudentLexisCard";
-import StudentLexisFindPair from "./Types/StudentLexisFindPair";
+
 import StudentProgress from "components/Activities/StudentProgress";
-import StudentLexisHub from "./StudentLexisHub";
-import { LexisName, StudentLexisTaskProps } from "./Types/LexisUtils";
-import StudentLexisScramble from "./Types/StudentLexisScramble";
-import StudentLexisTranslate from "./Types/StudentLexisTranslate";
-import StudentLexisSpace from "./Types/StudentLexisSpace";
-import StudentActivityPageHeader from "../StudentActivityPageHeader";
-import { TDrilling } from "models/Activity/TDrilling";
-import { THieroglyph } from "models/Activity/THieroglyph";
-import { DrillingState } from "redux/slices/drillingSlice";
-import { HieroglyphState } from "redux/slices/hieroglyphSlice";
+import NavigateToElement from "components/NavigateToElement";
+import { AjaxGet, AjaxPost } from "libs/ServerAPI";
+import { TLexisDoneTasks } from "models/Activity/DoneTasks/TLexisDoneTasks";
+import { LexisTaskName } from "models/Activity/ILexis";
 import {
-    TLexisAnyItem,
     TCardItem,
     TFindPair,
+    TLexisAnyItem,
     TLexisItems,
     TScramble,
     TSpace,
     TTranslate,
 } from "models/Activity/Items/TLexisItems";
-import { TLexisDoneTasks } from "models/Activity/DoneTasks/TLexisDoneTasks";
+import { TDrilling } from "models/Activity/TDrilling";
+import { THieroglyph } from "models/Activity/THieroglyph";
 import { Button } from "react-bootstrap";
+import { Route, Routes, useNavigate, useParams } from "react-router-dom";
+import { LexisState } from "redux/slices/lexis";
 
-type ResponseData = {
-    drilling?: TDrilling;
-    hieroglyph?: THieroglyph;
+import StudentActivityPageHeader from "../StudentActivityPageHeader";
+import StudentLexisNav from "./Nav/StudentLexisNav";
+import StudentLexisHub from "./StudentLexisHub";
+import { LexisName, StudentLexisTaskProps } from "./Types/LexisUtils";
+import StudentLexisCard from "./Types/StudentLexisCard";
+import StudentLexisFindPair from "./Types/StudentLexisFindPair";
+import StudentLexisScramble from "./Types/StudentLexisScramble";
+import StudentLexisSpace from "./Types/StudentLexisSpace";
+import StudentLexisTranslate from "./Types/StudentLexisTranslate";
+
+type ResponseData<T extends TDrilling | THieroglyph> = {
+    lexis: T;
     items: TLexisItems;
 };
 
 interface StudentLexisPageRouteProps<T> {
-    taskName: string;
+    taskName: LexisTaskName;
     path: string;
     component: (props: StudentLexisTaskProps<T>) => JSX.Element;
 }
 
-type StudentLexisPageProps = {
+interface StudentLexisPageProps<T extends TDrilling | THieroglyph> {
     name: LexisName;
-    lexis: DrillingState | HieroglyphState;
-    setLexisInfoCallback: (info: TDrilling | THieroglyph | undefined) => void;
+    lexis: LexisState<T>;
+    setLexisInfoCallback: (info: T | undefined) => void;
     setLexisItemsCallback: (items: TLexisItems | undefined) => void;
     setLexisDoneTaskCallback: (doneTasks: TLexisDoneTasks | undefined) => void;
-};
+}
 
 interface TRouteElements {
     card: StudentLexisPageRouteProps<TCardItem>;
@@ -56,22 +57,22 @@ interface TRouteElements {
     space: StudentLexisPageRouteProps<TSpace>;
 }
 
-const StudentLexisPage = ({
+const StudentLexisPage = <T extends TDrilling | THieroglyph>({
     name,
     lexis,
     setLexisInfoCallback,
     setLexisItemsCallback,
     setLexisDoneTaskCallback,
-}: StudentLexisPageProps) => {
+}: StudentLexisPageProps<T>) => {
     const { id } = useParams();
     const navigate = useNavigate();
 
     const routeElements: TRouteElements = {
-        card: { taskName: "card", path: "/card/:cardId", component: StudentLexisCard },
-        findpair: { taskName: "findpair", path: "/findpair", component: StudentLexisFindPair },
-        scramble: { taskName: "scramble", path: "/scramble", component: StudentLexisScramble },
-        translate: { taskName: "translate", path: "/translate", component: StudentLexisTranslate },
-        space: { taskName: "space", path: "/space", component: StudentLexisSpace },
+        card: { taskName: LexisTaskName.CARD, path: "/card/:cardId", component: StudentLexisCard },
+        findpair: { taskName: LexisTaskName.FINDPAIR, path: "/findpair", component: StudentLexisFindPair },
+        scramble: { taskName: LexisTaskName.SCRAMBLE, path: "/scramble", component: StudentLexisScramble },
+        translate: { taskName: LexisTaskName.TRANSLATE, path: "/translate", component: StudentLexisTranslate },
+        space: { taskName: LexisTaskName.SPACE, path: "/space", component: StudentLexisSpace },
     };
 
     const goToUndoneTask = (items: TLexisItems, doneTasks: TLexisDoneTasks) => {
@@ -97,13 +98,13 @@ const StudentLexisPage = ({
 
     useEffect(() => {
         setLexisInfoCallback(undefined);
-        AjaxGet<ResponseData>({ url: `/api/${name}/${id}` })
+        AjaxGet<ResponseData<T>>({ url: `/api/${name}/${id}` })
             .then((json) => {
-                const LexisInfo = json[name];
-                if (LexisInfo !== undefined) {
-                    setLexisInfoCallback(LexisInfo);
+                const lexisInfo = json.lexis;
+                if (lexisInfo !== undefined) {
+                    setLexisInfoCallback(lexisInfo);
                     setLexisItemsCallback(json.items);
-                    goToUndoneTask(json.items, LexisInfo.try.done_tasks);
+                    goToUndoneTask(json.items, lexisInfo.try.done_tasks);
                 }
             })
             .catch(({ isServerError, json, response }) => {
@@ -114,11 +115,23 @@ const StudentLexisPage = ({
             });
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+    const { info, items } = lexis;
+
+    if (
+        info === undefined ||
+        info === null ||
+        info.try === undefined ||
+        info.try === null ||
+        items === undefined ||
+        items === null
+    )
+        return <div> Loading... </div>;
+
     const goToNextTaskHandle = (taskTypeName: string, percent: number) => {
         if (lexis.items === undefined) return;
 
         console.log("Go to next Task Handle", taskTypeName, percent);
-        const newDoneTasks = Object.assign(structuredClone(lexis.info.try.done_tasks), { [taskTypeName]: percent });
+        const newDoneTasks = Object.assign(structuredClone(info.try.done_tasks), { [taskTypeName]: percent });
         console.log(newDoneTasks);
         setLexisDoneTaskCallback(newDoneTasks);
 
@@ -128,29 +141,20 @@ const StudentLexisPage = ({
     };
 
     const backToLessonHandle = () => {
-        navigate(`/lessons/${lexis.info.lesson_id}`);
+        navigate(`/lessons/${info.lesson_id}`);
     };
-
-    if (
-        lexis.info === undefined ||
-        lexis.info.try === undefined ||
-        lexis.info.try === null ||
-        lexis.items === undefined
-    ) {
-        return <div> Loading... </div>;
-    }
 
     return (
         <div className="container">
-            <StudentActivityPageHeader activityInfo={lexis.info} backToLessonCallback={backToLessonHandle} />
-            <Button onClick={() => navigate(`/${name}/${lexis.info.id}`)}> Хаб </Button>
+            <StudentActivityPageHeader activityInfo={info} backToLessonCallback={backToLessonHandle} />
+            <Button onClick={() => navigate(`/${name}/${info.id}`)}> Хаб </Button>
 
             <div className="my-2">
                 <StudentProgress
-                    percent={(Object.keys(lexis.info.try.done_tasks).length / Object.keys(lexis.items).length) * 100}
+                    percent={(Object.keys(info.try.done_tasks).length / Object.keys(items).length) * 100}
                 />
             </div>
-            <StudentLexisNav items={lexis.items} doneTasks={lexis.info.try.done_tasks} />
+            <StudentLexisNav items={lexis.items} doneTasks={info.try.done_tasks} />
 
             <Routes>
                 <Route
@@ -164,7 +168,7 @@ const StudentLexisPage = ({
                         path={element.path}
                         element={React.createElement(element.component, {
                             name: name,
-                            inData: lexis.items[element.taskName],
+                            inData: items[element.taskName] as any,
                             goToNextTaskCallback: goToNextTaskHandle,
                         })}
                     />

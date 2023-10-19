@@ -1,9 +1,10 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "redux/store";
 
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+
 export interface AssessmentState {
-    info: any | undefined | null; // TODO: RemoveAny
-    items: any | undefined;
+    info: any; // TODO: RemoveAny
+    items: any;
 }
 
 const initialState: AssessmentState = {
@@ -19,8 +20,13 @@ export const assessmentSlice = createSlice({
             state.info = action.payload;
         },
         setAssessmentEndByTime: (state) => {
-            state.info.tries[state.info.tries.length - 1].end_datetime = state.info.deadline;
-            state.info.deadline = undefined;
+            if (state?.info?.tries) {
+                const lastTry = state.info.tries[state.info.tries.length - 1];
+                if (lastTry.end_datetime === null) {
+                    lastTry.end_datetime = state.info.deadline;
+                }
+                state.info.deadline = null;
+            }
         },
         setAssessmentTaskData: (state, action: PayloadAction<{ id: number; data: any }>) => {
             state.items[action.payload.id] = action.payload.data;

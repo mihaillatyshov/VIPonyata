@@ -1,14 +1,25 @@
 import json
+from typing import Generic
 
 from flask import request
 from pydantic import ValidationError
 from pydantic_core import ErrorDetails
+from server.models.db_models import Assessment, AssessmentTry, AssessmentTryType, AssessmentType, FinalBoss, FinalBossTry
 from server.models.utils import validate_req
 
 import server.queries.TeacherDBqueries as DBQT
-from server.exceptions.ApiExceptions import InvalidAPIUsage, InvalidRequestJson
+from server.exceptions.ApiExceptions import InvalidAPIUsage, LessonNotFoundException
 from server.models.assessment import (Aliases, AssessmentCreateReq, AssessmentCreateReqStr,
                                       BaseModelTask)
+
+
+def get_assessment_data(assessment_type: type[AssessmentType]) -> DBQT.IAssessmentQueries:
+    if assessment_type == Assessment:
+        return DBQT.AssessmentQueries
+    if assessment_type == FinalBoss:
+        return DBQT.FinalBossQueries
+
+    raise InvalidAPIUsage("Check server get_assessment_data()", 500)
 
 
 def format_model_error(pydantic_errors: list[ErrorDetails]) -> dict:
@@ -23,7 +34,12 @@ def parse_task(task: dict) -> BaseModelTask:
     raise InvalidAPIUsage(f"No parser for task: {task['name']}")
 
 
-class IAssessmentFuncs:
+class IAssessmentHandlers(Generic[AssessmentType, AssessmentTryType]):
+    _activity_queries: DBQT.IAssessmentQueries[AssessmentType, AssessmentTryType]
+
+    def __init__(self, activity_type: type[AssessmentType]):
+        self._activity_queries = get_assessment_data(activity_type)
+
     def GetById(self, assessmentId: int):
         return {}
 
@@ -32,7 +48,7 @@ class IAssessmentFuncs:
 
         lesson = DBQT.get_lesson_by_id(lesson_id)
         if lesson is None:
-            raise InvalidAPIUsage("No lesson in db!", 404)
+            raise LessonNotFoundException()
 
         tasks: list[str] = []
         errors: dict[int, dict] = {}
@@ -54,9 +70,10 @@ class IAssessmentFuncs:
                                                  description=assessment_req_data.description,
                                                  tasks=f"[{','.join(tasks)}]")
 
-        assessment = DBQT.AssessmentQueries.create(lesson_id, assessment_data)
+        assessment = self._activity_queries.create(lesson_id, assessment_data)
 
         return {"assessment": assessment}
 
 
-AssessmentFuncs = IAssessmentFuncs()
+AssessmentHandlers = IAssessmentHandlers[Assessment, AssessmentTry](Assessment)
+FinalBossHandlers = IAssessmentHandlers[FinalBoss, FinalBossTry](FinalBoss)

@@ -4,12 +4,21 @@ export interface TCreateCardItem {
     dictionary_id: number;
 }
 
+interface CardWord {
+    ru: string;
+    word_jp: string;
+    char_jp: string;
+    img: string | null;
+    association: string | null;
+}
+
 export interface TSingleCardItem {
     id: number;
     sentence: string;
     answer: string;
     base_id: number;
     dictionary_id: number;
+    word: CardWord;
 }
 
 export type TCardItem = TSingleCardItem[];

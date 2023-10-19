@@ -1,5 +1,3 @@
-from server.exceptions.ApiExceptions import InvalidAPIUsage
-from server.models.db_models import (Drilling, DrillingTry, Hieroglyph, HieroglyphTry, LexisType)
 
 
 class LexisTaskName:

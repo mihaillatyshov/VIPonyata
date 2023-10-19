@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
+
 import { useDispatch, useSelector } from "react-redux";
-import { setDrillingSelectedItem, setDrillingSelectedItemField } from "redux/slices/drillingSlice";
+import { setLexisSelectedItem } from "redux/slices/drillingSlice";
 
 const StudentDrillingListen = ({ words }) => {
     const dispatch = useDispatch();
@@ -14,7 +15,7 @@ const StudentDrillingListen = ({ words }) => {
         if (pairs) {
             console.log(pairs);
             dispatch(
-                setDrillingSelectedItem({
+                setLexisSelectedItem({
                     ...pairs,
                     type: taskTypeName,
                     selectedField: { id: -1, type: "None" },

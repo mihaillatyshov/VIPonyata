@@ -119,7 +119,7 @@ DrillingQueries = LexisQueries(Drilling, DrillingTry, DrillingCard)
 HieroglyphQueries = LexisQueries(Hieroglyph, HieroglyphTry, HieroglyphCard)
 
 
-class AssessmentQueriesClass(Generic[AssessmentType, AssessmentTryType]):
+class IAssessmentQueries(Generic[AssessmentType, AssessmentTryType]):
     assessment_type: type[AssessmentType]
     assessment_try_type: type[AssessmentTryType]
 
@@ -163,8 +163,8 @@ class AssessmentQueriesClass(Generic[AssessmentType, AssessmentTryType]):
             ).one_or_none()
 
 
-AssessmentQueries = AssessmentQueriesClass(Assessment, AssessmentTry)
-FinalBossQueries = AssessmentQueriesClass(FinalBoss, FinalBossTry)
+AssessmentQueries = IAssessmentQueries(Assessment, AssessmentTry)
+FinalBossQueries = IAssessmentQueries(FinalBoss, FinalBossTry)
 
 
 #########################################################################################################################

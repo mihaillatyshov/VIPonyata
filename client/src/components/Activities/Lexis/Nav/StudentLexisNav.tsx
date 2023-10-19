@@ -1,8 +1,11 @@
 import React from "react";
-import StudentLexisNavItem from "./StudentLexisNavItem";
+
 import { LexisImages } from "models/Activity/ILexis";
 
+import StudentLexisNavItem from "./StudentLexisNavItem";
+
 export type StudentLexisNavProps = {
+    // TODO: Remove any
     items: any;
     doneTasks: any;
 };

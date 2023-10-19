@@ -7,27 +7,17 @@
 }
 
 div.lexisCardDiv {
-    height: 300px;
+    min-height: 300px;
 }
 
 div.lexisCardImgDiv {
-    width: 300px;
-    min-width: 300px;
-    max-width: 600px;
-    height: 300px;
+    min-width: 260px;
+    max-width: 280px;
 }
 
 .lexisCardImg {
-    max-width: 300px;
+    max-width: 280px;
     max-height: 300px;
-}
-
-.lexisCardWords {
-    margin-bottom: 40px;
-}
-
-.lexisCardSentence {
-    margin-bottom: 10px;
 }
 
 .lexisCardLimit {

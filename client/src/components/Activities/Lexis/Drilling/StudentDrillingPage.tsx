@@ -1,6 +1,8 @@
 import React from "react";
-import { selectDrilling, setDrillingDoneTask, setDrillingInfo, setDrillingItems } from "redux/slices/drillingSlice";
+
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { selectDrilling, setLexisDoneTask, setLexisInfo, setLexisItems } from "redux/slices/drillingSlice";
+
 import StudentLexisPage from "../StudentLexisPage";
 
 const StudentDrillingPage = () => {
@@ -8,15 +10,15 @@ const StudentDrillingPage = () => {
     const drilling = useAppSelector(selectDrilling);
 
     const setDrillingInfoHandler = (info: any) => {
-        dispatch(setDrillingInfo(info));
+        dispatch(setLexisInfo(info));
     };
 
     const setDrillingItemsHandler = (items: any) => {
-        dispatch(setDrillingItems(items));
+        dispatch(setLexisItems(items));
     };
 
     const setDrillingDoneTaskHandler = (doneTasks: any) => {
-        dispatch(setDrillingDoneTask(doneTasks));
+        dispatch(setLexisDoneTask(doneTasks));
     };
 
     return (

@@ -8,7 +8,12 @@ from PIL import Image
 from werkzeug.datastructures import FileStorage
 
 from server.exceptions.ApiExceptions import InvalidAPIUsage
-from server.routes.routes_utils import get_uploads_folder_from_config
+from server.load_config import load_config
+
+
+def get_uploads_folder_from_config():
+    return load_config("config.json")["uploads"]
+
 
 UPLOAD_FOLDER = get_uploads_folder_from_config()
 ALLOWED_IMG_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}

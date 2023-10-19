@@ -7,26 +7,25 @@ from server.models.db_models import (ActivityTryType, ActivityType, Assessment,
 from server.routes.routes_utils import get_current_user_id
 
 
-def get_activity_data(activity_type: type[ActivityType]) -> tuple[DBQS.ActivityQueries, str]:
+def get_activity_data(activity_type: type[ActivityType]) -> DBQS.ActivityQueries:
     if activity_type == Drilling:
-        return DBQS.DrillingQueries, "drilling"
+        return DBQS.DrillingQueries
     if activity_type == Hieroglyph:
-        return DBQS.HieroglyphQueries, "hieroglyph"
+        return DBQS.HieroglyphQueries
     if activity_type == Assessment:
-        return DBQS.AssessmentQueries, "assessment"
+        return DBQS.AssessmentQueries
     if activity_type == FinalBoss:
-        return DBQS.FinalBossQueries, "final_boss"
+        return DBQS.FinalBossQueries
 
     raise InvalidAPIUsage("Check server get_activity_data(activity_type: ActivityType)", 500)
 
 
-class ActivityFuncs(Generic[ActivityType, ActivityTryType]):
-    _activityQueries: DBQS.ActivityQueries[ActivityType, ActivityTryType]
-    _activityName: str
+class ActivityHandlers(Generic[ActivityType, ActivityTryType]):
+    _activity_queries: DBQS.ActivityQueries[ActivityType, ActivityTryType]
 
     def __init__(self, activity_type: type[ActivityType]):
-        self._activityQueries, self._activityName = get_activity_data(activity_type)
+        self._activity_queries = get_activity_data(activity_type)
 
     def continue_try(self, activity_id: int):
-        self._activityQueries.GetUnfinishedTryByActivityId(activity_id, get_current_user_id())
+        self._activity_queries.GetUnfinishedTryByActivityId(activity_id, get_current_user_id())
         return {"message": "Successfully continue"}

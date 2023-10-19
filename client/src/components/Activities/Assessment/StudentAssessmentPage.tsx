@@ -90,7 +90,7 @@ const StudentAssessmentPage = () => {
     const endAssessmentHandle = () => {
         AjaxPost({
             url: `/api/assessment/${id}/endtry`,
-            body: { done_tasks: assessment.items }, // TODO FIXIT (TEST MESSAGE)
+            body: { done_tasks: assessment.items },
         }).then(() => {
             backToLessonHandle();
         });

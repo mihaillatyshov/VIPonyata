@@ -64,7 +64,7 @@ if user:
                 Drilling(description="Drilling with limit",
                          lesson_id=lessons[0].id,
                          tasks="findpair,scramble",
-                         time_limit=time(minute=10)),
+                         time_limit=time(second=10)),
                 Drilling(description="Drilling with NO limit",
                          lesson_id=lessons[1].id,
                          tasks="findpair,scramble,translate,space"),

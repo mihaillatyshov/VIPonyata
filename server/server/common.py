@@ -1,7 +1,7 @@
 from datetime import datetime, time, timedelta
 
 from flask import Blueprint, json
-from flask_login import LoginManager
+from flask_login import LoginManager  # type: ignore
 from sqlalchemy.ext.declarative import DeclarativeMeta
 
 from server.models.db_models import create_db_session_from_json_config_file

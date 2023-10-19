@@ -1,17 +1,24 @@
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-
-import { selectDrilling, setDrillingSelectedItem, setDrillingSelectedItemField } from "redux/slices/drillingSlice";
+import {
+    selectDrilling,
+    setLexisCardAssociation as setDrillingCardAssociation,
+    setLexisCardImg as setDrillingCardImg,
+    setLexisSelectedItem as setDrillingSelectedItem,
+    setLexisSelectedItemField as setDrillingSelectedItemField,
+} from "redux/slices/drillingSlice";
 import {
     selectHieroglyph,
-    setHieroglyphSelectedItem,
-    setHieroglyphSelectedItemField,
+    setLexisCardAssociation as setHieroglyphCardAssociation,
+    setLexisCardImg as setHieroglyphCardImg,
+    setLexisSelectedItem as setHieroglyphSelectedItem,
+    setLexisSelectedItemField as setHieroglyphSelectedItemField,
 } from "redux/slices/hieroglyphSlice";
 
 export const LexisNameDrilling = "drilling";
 export const LexisNameHieroglyph = "hieroglyph";
 export type LexisName = typeof LexisNameDrilling | typeof LexisNameHieroglyph;
 
-export const NameTo_dril_or_hier = (name: LexisName, dril: any, hier: any) => {
+export const NameTo_dril_or_hier = <D, H>(name: LexisName, dril: D, hier: H) => {
     switch (name) {
         case LexisNameDrilling:
             return dril;
@@ -39,6 +46,29 @@ export const useLexisItem = (name: LexisName) => {
     const hieroglyph = useAppSelector(selectHieroglyph).selectedItem;
 
     return NameTo_dril_or_hier(name, drilling, hieroglyph);
+};
+
+export const useSetLexisCardExtras = (name: LexisName) => {
+    const dispatch = useAppDispatch();
+    return NameTo_dril_or_hier(
+        name,
+        {
+            setCardImg: (img: string, id: number) => {
+                dispatch(setDrillingCardImg({ img, cardId: id }));
+            },
+            setCardAssociation: (association: string, id: number) => {
+                dispatch(setDrillingCardAssociation({ association, cardId: id }));
+            },
+        },
+        {
+            setCardImg: (img: string, id: number) => {
+                dispatch(setHieroglyphCardImg({ img, cardId: id }));
+            },
+            setCardAssociation: (association: string, id: number) => {
+                dispatch(setHieroglyphCardAssociation({ association, cardId: id }));
+            },
+        }
+    );
 };
 
 export const useSetLexisSelectedItem = (name: LexisName) => {

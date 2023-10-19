@@ -4,37 +4,37 @@ from flask import request
 
 import server.queries.StudentDBqueries as DBQS
 from server.exceptions.ApiExceptions import InvalidAPIUsage, InvalidRequestJson
+from server.handlers.common.additional_lexis_handlers import (
+    LexisTaskName, LexisTaskNameList)
+from server.handlers.student.activity_handlers import ActivityHandlers
+from server.handlers.student.additional_lexis_handlers import (
+    create_find_pair, create_scramble, create_space, create_translate)
+from server.handlers.student.dictionary_handlers import combine_dictionary
 from server.models.db_models import (Drilling, DrillingCard, DrillingTry,
                                      Hieroglyph, HieroglyphCard, HieroglyphTry,
                                      LexisCardType, LexisTryType, LexisType,
                                      time_limit_to_timedelta)
-from server.routes.funcs.additional_lexis_funcs import (LexisTaskName,
-                                                        LexisTaskNameList)
-from server.routes.funcs.student_activity_funcs import ActivityFuncs
-from server.routes.funcs.student_additional_lexis_funcs import (
-    create_find_pair, create_scramble, create_space, create_translate)
-from server.routes.funcs.student_dictionary_funcs import combine_dictionary
 from server.routes.routes_utils import (activity_end_time_handler,
                                         get_current_user_id,
                                         start_activity_timer_limit)
 
 
-class LexisFuncs(ActivityFuncs[LexisType, LexisTryType], Generic[LexisType, LexisTryType, LexisCardType]):
-    _activityQueries: DBQS.LexisQueries[LexisType, LexisTryType, LexisCardType]
+class LexisHandlers(ActivityHandlers[LexisType, LexisTryType], Generic[LexisType, LexisTryType, LexisCardType]):
+    _activity_queries: DBQS.LexisQueries[LexisType, LexisTryType, LexisCardType]
 
     def start_new_try(self, activity_id: int):
-        activity = self._activityQueries.GetById(activity_id, get_current_user_id())
-        activity_tries = self._activityQueries.GetTriesByActivityId(activity_id, get_current_user_id())
+        activity = self._activity_queries.GetById(activity_id, get_current_user_id())
+        activity_tries = self._activity_queries.GetTriesByActivityId(activity_id, get_current_user_id())
 
         if activity_tries and activity_tries[-1].end_datetime == None:
             return {"message": "Lexis try already Exists"}, 409
 
-        new_activity_try = self._activityQueries.add_new_try(
+        new_activity_try = self._activity_queries.add_new_try(
             len(activity_tries) + 1, activity_id, get_current_user_id())
 
         if activity.time_limit and new_activity_try:
             start_activity_timer_limit(time_limit_to_timedelta(activity.time_limit), new_activity_try.id,
-                                       self._activityQueries._activityTry_type)
+                                       self._activity_queries._activityTry_type)
         return {"message": "Lexis try successfully created"}
 
     def add_new_done_tasks(self, activity_id: int):
@@ -45,7 +45,7 @@ class LexisFuncs(ActivityFuncs[LexisType, LexisTryType], Generic[LexisType, Lexi
         if not (in_done_tasks and isinstance(in_done_tasks, dict)):
             raise InvalidAPIUsage("Wrong data format", 403)
 
-        lexis_try = self._activityQueries.GetUnfinishedTryByActivityId(activity_id, get_current_user_id())
+        lexis_try = self._activity_queries.GetUnfinishedTryByActivityId(activity_id, get_current_user_id())
         done_tasks = lexis_try.get_done_tasks_dict()
         for name, value in in_done_tasks.items():
             try:
@@ -55,20 +55,20 @@ class LexisFuncs(ActivityFuncs[LexisType, LexisTryType], Generic[LexisType, Lexi
             if isinstance(name, str) and name in LexisTaskNameList:
                 done_tasks[name] = value
         done_tasks_str = ",".join([f"{name}: {value}" for name, value in done_tasks.items()])
-        self._activityQueries.set_done_tasks_in_try(lexis_try.id, done_tasks_str)
+        self._activity_queries.set_done_tasks_in_try(lexis_try.id, done_tasks_str)
         return {"message": "Tasks updated!"}
 
     def end_try(self, activity_id: int):
-        activity_try = self._activityQueries.GetUnfinishedTryByActivityId(activity_id, get_current_user_id())
-        activity_end_time_handler(activity_try.id, self._activityQueries._activityTry_type)
+        activity_try = self._activity_queries.GetUnfinishedTryByActivityId(activity_id, get_current_user_id())
+        activity_end_time_handler(activity_try.id, self._activity_queries._activityTry_type)
         return {"message": "Successfully closed"}
 
     def GetById(self, activityId: int):
-        lexis = self._activityQueries.GetById(activityId, get_current_user_id())
-        lexis.now_try = self._activityQueries.GetUnfinishedTryByActivityId(activityId, get_current_user_id())
+        lexis = self._activity_queries.GetById(activityId, get_current_user_id())
+        lexis.now_try = self._activity_queries.GetUnfinishedTryByActivityId(activityId, get_current_user_id())
 
         tasks: dict = {}
-        tasks[LexisTaskName.CARD] = self._activityQueries.get_cards_by_activity_id(activityId)
+        tasks[LexisTaskName.CARD] = self._activity_queries.get_cards_by_activity_id(activityId)
         words_ru: list[str] = []
         words_jp: list[str] = []
         chars_jp: list[str] = []
@@ -97,10 +97,10 @@ class LexisFuncs(ActivityFuncs[LexisType, LexisTryType], Generic[LexisType, Lexi
 
         if LexisTaskName.SPACE in tasks_names:
             tasks[LexisTaskName.SPACE] = create_space(
-                words_ru, words_jp, chars_jp, self._activityQueries._activity_type)
+                words_ru, words_jp, chars_jp, self._activity_queries._activity_type)
 
-        return {self._activityName: lexis, "items": tasks}
+        return {"lexis": lexis, "items": tasks}
 
 
-DrillingFuncs = LexisFuncs[Drilling, DrillingTry, DrillingCard](Drilling)
-HieroglyphFuncs = LexisFuncs[Hieroglyph, HieroglyphTry, HieroglyphCard](Hieroglyph)
+DrillingHandlers = LexisHandlers[Drilling, DrillingTry, DrillingCard](Drilling)
+HieroglyphHandlers = LexisHandlers[Hieroglyph, HieroglyphTry, HieroglyphCard](Hieroglyph)

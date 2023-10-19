@@ -2,7 +2,7 @@ from flask import request
 
 import server.queries.StudentDBqueries as DBQS
 from server.models.db_models import Dictionary, UserDictionary
-from server.models.dictionary import DictionaryAssosiationReq, DictionaryImgReq
+from server.models.dictionary import DictionaryAssociationReq, DictionaryImgReq
 from server.models.utils import validate_req
 from server.routes.routes_utils import get_current_user_id
 
@@ -34,9 +34,9 @@ def add_img_to_dictionary(id: int) -> dict:
     return {"message": "ok"}
 
 
-def add_assosiation_to_dictionary(id: int):
-    assosiation_req_data = validate_req(DictionaryAssosiationReq, request.json, other_data={"dictionary_id": id})
+def add_association_to_dictionary(id: int):
+    association_req_data = validate_req(DictionaryAssociationReq, request.json, other_data={"dictionary_id": id})
 
-    DBQS.add_assosiation_to_dictionary(assosiation_req_data, get_current_user_id())
+    DBQS.add_association_to_dictionary(association_req_data, get_current_user_id())
 
     return {"message": "ok"}

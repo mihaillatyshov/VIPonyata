@@ -1,13 +1,15 @@
 import React from "react";
-import { Button } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
-import { AjaxPost } from "libs/ServerAPI";
+
 import StudentTimeRemaining from "components/Activities/StudentTimeRemaining";
-import ActivityBouble from "./ActivityBouble";
-import { ActivityName } from "../ActivityUtils";
+import { AjaxPost } from "libs/ServerAPI";
+import { TAssessment } from "models/Activity/TAssessment";
 import { TDrilling } from "models/Activity/TDrilling";
 import { THieroglyph } from "models/Activity/THieroglyph";
-import { TAssessment } from "models/Activity/TAssessment";
+import { Button } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+
+import { ActivityName } from "../ActivityUtils";
+import ActivityBouble from "./ActivityBouble";
 
 type StudentActivityBubbleProps = {
     title: string;
@@ -20,7 +22,7 @@ const StudentActivityBubble = ({ info, title, name, onDeadline }: StudentActivit
     const navigate = useNavigate();
 
     const isInProgress = () => {
-        if (info.tries && info.tries.length !== 0) {
+        if (info.tries.length !== 0) {
             return info.tries[info.tries.length - 1].end_datetime === null;
         }
         return false;

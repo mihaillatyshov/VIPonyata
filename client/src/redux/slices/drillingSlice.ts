@@ -1,19 +1,11 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { TLexisDoneTasks } from "models/Activity/DoneTasks/TLexisDoneTasks";
-import { TLexisItems } from "models/Activity/Items/TLexisItems";
 import { TDrilling } from "models/Activity/TDrilling";
 import { RootState } from "redux/store";
 
-type InfoType = TDrilling | undefined | null;
-type ItemsType = TLexisItems | undefined;
+import { createSlice } from "@reduxjs/toolkit";
 
-export interface DrillingState {
-    info: InfoType;
-    items: ItemsType;
-    selectedItem: any | undefined;
-}
+import { lexisReducers, LexisState } from "./lexis";
 
-const initialState: DrillingState = {
+const initialState: LexisState<TDrilling> = {
     info: undefined,
     items: undefined,
     selectedItem: undefined,
@@ -22,45 +14,20 @@ const initialState: DrillingState = {
 export const drillingSlice = createSlice({
     name: "drilling",
     initialState,
-    reducers: {
-        setDrillingInfo: (state, action: PayloadAction<InfoType>) => {
-            state.info = action.payload;
-        },
-        setDrillingEndByTime: (state) => {
-            if (state.info && state.info.tries) {
-                let lastTry = state.info.tries[state.info.tries.length - 1];
-                if (lastTry.end_datetime) {
-                    lastTry.end_datetime = state.info.deadline;
-                }
-                state.info.deadline = null;
-            }
-        },
-        setDrillingDoneTask: (state, action: PayloadAction<TLexisDoneTasks>) => {
-            if (state.info && state.info.try) {
-                state.info.try.done_tasks = action.payload;
-            }
-        },
-        setDrillingItems: (state, action: PayloadAction<ItemsType>) => {
-            state.items = action.payload;
-        },
-        setDrillingSelectedItem: (state, action) => {
-            state.selectedItem = action.payload;
-        },
-        setDrillingSelectedItemField: (state, action) => {
-            for (const key in action.payload) state.selectedItem[key] = action.payload[key];
-        },
-    },
+    reducers: { ...lexisReducers<TDrilling>() },
 });
 
 export const selectDrilling = (state: RootState) => state.drilling;
 
 export const {
-    setDrillingInfo,
-    setDrillingEndByTime,
-    setDrillingDoneTask,
-    setDrillingItems,
-    setDrillingSelectedItem,
-    setDrillingSelectedItemField,
+    setLexisInfo,
+    setLexisEndByTime,
+    setLexisDoneTask,
+    setLexisItems,
+    setLexisCardImg,
+    setLexisCardAssociation,
+    setLexisSelectedItem,
+    setLexisSelectedItemField,
 } = drillingSlice.actions;
 
 export default drillingSlice.reducer;

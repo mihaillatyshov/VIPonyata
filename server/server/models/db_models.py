@@ -263,6 +263,10 @@ class AbstractActivityTry(Base):
 #########################################################################################################################
 class AbstractLexis(AbstractActivity):
     __abstract__ = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
     tasks: Mapped[str] = Column(String(2048), nullable=False)
 
     cards: list["AbstractLexisCard"]
@@ -273,6 +277,10 @@ class AbstractLexis(AbstractActivity):
 
 class AbstractLexisCard(Base):
     __abstract__ = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
     id: Mapped[int] = Column(Integer, primary_key=True)
 
     sentence: Mapped[str] = Column(String(256), nullable=False)
@@ -367,6 +375,9 @@ class HieroglyphCard(AbstractLexisCard):
 #########################################################################################################################
 class AbstractAssessment(AbstractActivity):
     __abstract__ = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     tasks: Mapped[str] = Column(Text, nullable=False)
 

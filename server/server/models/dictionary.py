@@ -43,6 +43,6 @@ class DictionaryImgReq(BaseModel):
     url: StrExtraSpaceRemove
 
 
-class DictionaryAssosiationReq(BaseModel):
+class DictionaryAssociationReq(BaseModel):
     dictionary_id: int
-    assosiation: StrExtraSpaceRemove | None = None
+    association: StrExtraSpaceRemove | None = None

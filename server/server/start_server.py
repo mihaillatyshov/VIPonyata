@@ -1,5 +1,6 @@
 from flask import Flask
 
+from server.activities import check_activity_routes
 from server.common import CustomJSONEncoder, base_blueprint, login_manager
 from server.load_config import load_config
 from server.routes.common import on_start_app
@@ -22,6 +23,8 @@ def create_app():
     login_manager.init_app(app)
 
     app.register_blueprint(base_blueprint)
+
+    check_activity_routes(app.url_map)
 
     on_start_app()
 

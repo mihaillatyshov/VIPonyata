@@ -1,8 +1,10 @@
 import React from "react";
-import { StudentAssessmentTypeProps } from "./StudentAssessmentTypeProps";
+
 import { TAssessmentOpenQuestion } from "models/Activity/Items/TAssessmentItems";
 import { useAppDispatch } from "redux/hooks";
 import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
+
+import { StudentAssessmentTypeProps } from "./StudentAssessmentTypeProps";
 
 const StudentAssessmentOpenQuestion = ({ data, taskId }: StudentAssessmentTypeProps<TAssessmentOpenQuestion>) => {
     const dispatch = useAppDispatch();
@@ -10,7 +12,6 @@ const StudentAssessmentOpenQuestion = ({ data, taskId }: StudentAssessmentTypePr
     const onChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
         console.log(e.target.value);
         data.answer = e.target.value;
-        // TODO Add message to server
         dispatch(setAssessmentTaskData({ id: taskId, data: data }));
     };
 

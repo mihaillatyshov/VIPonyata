@@ -1,11 +1,20 @@
 from typing import Callable
 
-from server.models.assessment import (AssessmentTaskName, AudioTaskCheck, AudioTaskRes, ClassificationTaskCheck,
-                                      ClassificationTaskRes, CreateSentenceTaskRes, FillSpacesByHandTaskRes,
-                                      FillSpacesExistsTaskRes, FindPairTaskCheck, FindPairTaskRes, IFillSpacesTaskCheck,
-                                      ImgTaskCheck, ImgTaskRes, IOrderTaskCheck, MultiTestTaskCheck, MultiTestTaskRes,
-                                      OpenQuestionTaskCheck, OpenQuestionTaskRes, SentenceOrderTaskRes,
-                                      SingleTestTaskCheck, SingleTestTaskRes, TextTaskCheck, TextTaskRes)
+from server.models.assessment import (AssessmentTaskName, AudioTaskCheck,
+                                      AudioTaskRes, ClassificationTaskCheck,
+                                      ClassificationTaskRes,
+                                      CreateSentenceTaskRes,
+                                      FillSpacesByHandTaskRes,
+                                      FillSpacesExistsTaskRes,
+                                      FindPairTaskCheck, FindPairTaskRes,
+                                      IFillSpacesTaskCheck, ImgTaskCheck,
+                                      ImgTaskRes, IOrderTaskCheck,
+                                      MultiTestTaskCheck, MultiTestTaskRes,
+                                      OpenQuestionTaskCheck,
+                                      OpenQuestionTaskRes,
+                                      SentenceOrderTaskRes,
+                                      SingleTestTaskCheck, SingleTestTaskRes,
+                                      TextTaskCheck, TextTaskRes)
 
 
 def text_task_check(_: TextTaskRes) -> TextTaskCheck:

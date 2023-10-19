@@ -1,11 +1,8 @@
 import React from "react";
-import {
-    selectHieroglyph,
-    setHieroglyphDoneTask,
-    setHieroglyphInfo,
-    setHieroglyphItems,
-} from "redux/slices/hieroglyphSlice";
+
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { selectHieroglyph, setLexisDoneTask, setLexisInfo, setLexisItems } from "redux/slices/hieroglyphSlice";
+
 import StudentLexisPage from "../StudentLexisPage";
 
 const StudentHieroglyphPage = () => {
@@ -13,15 +10,15 @@ const StudentHieroglyphPage = () => {
     const hieroglyph = useAppSelector(selectHieroglyph);
 
     const setHieroglyphInfoHandler = (info: any) => {
-        dispatch(setHieroglyphInfo(info));
+        dispatch(setLexisInfo(info));
     };
 
     const setHieroglyphItemsHandler = (items: any) => {
-        dispatch(setHieroglyphItems(items));
+        dispatch(setLexisItems(items));
     };
 
     const setHieroglyphDoneTaskHandler = (doneTasks: any) => {
-        dispatch(setHieroglyphDoneTask(doneTasks));
+        dispatch(setLexisDoneTask(doneTasks));
     };
 
     return (

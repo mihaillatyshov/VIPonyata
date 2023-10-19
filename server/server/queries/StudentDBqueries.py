@@ -18,7 +18,7 @@ from server.models.db_models import (ActivityTryType, ActivityType, Assessment,
                                      NotificationStudentToTeacher,
                                      NotificationTeacherToStudent, User,
                                      UserDictionary)
-from server.models.dictionary import DictionaryAssosiationReq, DictionaryImgReq
+from server.models.dictionary import DictionaryAssociationReq, DictionaryImgReq
 
 
 #########################################################################################################################
@@ -291,15 +291,23 @@ def get_dictionary(user_id: int) -> list[tuple[Dictionary, UserDictionary]]:
 def add_img_to_dictionary(dictionary_img_req: DictionaryImgReq, user_id: int):
     dictionary_item = add_user_dictionary_if_not_exists(dictionary_img_req.dictionary_id, user_id)
 
-    with DBsession.begin() as _:
-        dictionary_item.img = dictionary_img_req.url
+    with DBsession.begin() as session:
+        session.execute(
+            update(UserDictionary)
+            .where(UserDictionary.id == dictionary_item.id)
+            .values(img=dictionary_img_req.url)
+        )
 
 
-def add_assosiation_to_dictionary(dictionary_assosiation_req: DictionaryAssosiationReq, user_id: int):
-    dictionary_item = add_user_dictionary_if_not_exists(dictionary_assosiation_req.dictionary_id, user_id)
+def add_association_to_dictionary(dictionary_association_req: DictionaryAssociationReq, user_id: int):
+    dictionary_item = add_user_dictionary_if_not_exists(dictionary_association_req.dictionary_id, user_id)
 
-    with DBsession.begin() as _:
-        dictionary_item.img = dictionary_assosiation_req.assosiation
+    with DBsession.begin() as session:
+        session.execute(
+            update(UserDictionary)
+            .where(UserDictionary.id == dictionary_item.id)
+            .values(association=dictionary_association_req.association)
+        )
 
 
 #########################################################################################################################
