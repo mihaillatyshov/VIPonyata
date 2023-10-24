@@ -1,6 +1,9 @@
 import React from "react";
-import { useDroppable } from "@dnd-kit/core";
+
 import CSS from "csstype";
+
+import { useDroppable } from "@dnd-kit/core";
+
 import styles from "../StyleAssessmentType.module.css";
 import Draggable, { FieldData } from "./Draggable";
 
@@ -22,7 +25,7 @@ const Droppable = ({ id, width, str }: DroppableProps) => {
         maxWidth: `calc(${width}em * 0.8)`,
     };
 
-    const className = `d-flex ${isOver ? styles.fillSpaceExistsDroppableOver : ""} ${
+    const className = `d-flex mt-1 ${isOver ? styles.fillSpaceExistsDroppableOver : ""} ${
         !str ? styles.fillSpaceExistsDroppable : styles.fillSpaceExistsDroppableNone
     }`;
 

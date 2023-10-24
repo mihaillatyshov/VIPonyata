@@ -318,6 +318,8 @@ class AbstractLexisTry(AbstractActivityTry):
                 res[key] = val
         return res
 
+    base: Union["Drilling", "Hieroglyph"]
+
     def __json__(self):
         data = super().__json__()
         data["done_tasks"] = self.get_done_tasks_dict()
@@ -392,6 +394,8 @@ class AbstractAssessmentTry(AbstractActivityTry):
 
     done_tasks: Mapped[str] = Column(Text, nullable=False)
     checked_tasks: Mapped[Optional[str]] = Column(Text)  # TODO : check type
+
+    base: Union["Assessment", "FinalBoss"]
 
     def __json__(self):
         data = super().__json__()

@@ -90,8 +90,8 @@ class IAssessmentHandlers(ActivityHandlers[AssessmentType, AssessmentTryType]):
     _activity_queries: DBQS.AssessmentQueriesClass[AssessmentType, AssessmentTryType]
 
     def start_new_try(self, activity_id: int):
-        activity = self._activity_queries.GetById(activity_id, get_current_user_id())
-        activity_tries = self._activity_queries.GetTriesByActivityId(activity_id, get_current_user_id())
+        activity = self._activity_queries.get_by_id(activity_id, get_current_user_id())
+        activity_tries = self._activity_queries.get_tries_by_activity_id(activity_id, get_current_user_id())
 
         if activity_tries and activity_tries[-1].end_datetime == None:
             return {"message": "Lexis try already Exists"}, 409
@@ -112,7 +112,7 @@ class IAssessmentHandlers(ActivityHandlers[AssessmentType, AssessmentTryType]):
         if not done_tasks_json:
             raise InvalidAPIUsage("No done tasks!")
 
-        activity_try = self._activity_queries.GetUnfinishedTryByActivityId(activity_id, get_current_user_id())
+        activity_try = self._activity_queries.get_unfinished_try_by_activity_id(activity_id, get_current_user_id())
 
         db_done_tasks = json.loads(activity_try.done_tasks)
 
@@ -142,9 +142,10 @@ class IAssessmentHandlers(ActivityHandlers[AssessmentType, AssessmentTryType]):
         activity_end_time_handler(activity_try.id, self._activity_queries._activityTry_type)
         return {"message": "Successfully closed"}
 
-    def GetById(self, activityId: int):
-        assessment = self._activity_queries.GetById(activityId, get_current_user_id())
-        assessment.now_try = self._activity_queries.GetUnfinishedTryByActivityId(activityId, get_current_user_id())
+    def get_by_id(self, activity_id: int):
+        assessment = self._activity_queries.get_by_id(activity_id, get_current_user_id())
+        assessment.now_try = self._activity_queries.get_unfinished_try_by_activity_id(
+            activity_id, get_current_user_id())
         tasks = parse_student_tasks(assessment.now_try.done_tasks)
         return {"assessment": assessment, "items": tasks}
 

@@ -4,11 +4,14 @@ from sqlalchemy import select
 
 from server.common import DBsession
 from server.log_lib import LogW
-from server.models.db_models import (ActivityTryType, ActivityType, AssessmentTry, DrillingTry, FinalBossTry,
+from server.models.db_models import (ActivityTryType, ActivityType,
+                                     AssessmentTry, DrillingTry, FinalBossTry,
                                      HieroglyphTry, LexisTryType, User)
 from server.models.user import UserRegisterReq
-from server.queries.StudentDBqueries import (add_assessment_notification, add_drilling_notification,
-                                             add_final_boss_notification, add_hieroglyph_notification,
+from server.queries.StudentDBqueries import (add_assessment_notification,
+                                             add_drilling_notification,
+                                             add_final_boss_notification,
+                                             add_hieroglyph_notification,
                                              add_user_dictionary_if_not_exists)
 
 

@@ -2,6 +2,6 @@ venv/
 .vscode
 .trunk
 log/
-*logs/*
+logs/
 /server/config.json
 /uploads

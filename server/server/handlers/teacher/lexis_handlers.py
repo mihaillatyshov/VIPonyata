@@ -23,8 +23,8 @@ class LexisHandlers(Generic[LexisType, LexisTryType, LexisCardType]):
     def __init__(self, lexis_type: type[LexisType]):
         self._activity_queries = get_lexis_data(lexis_type)
 
-    def GetById(self, activityId: int):
-        return {"lexis": self._activity_queries.GetById(activityId)}
+    def get_by_id(self, activity_id: int):
+        return {"lexis": self._activity_queries.get_by_id(activity_id)}
 
     def create(self, lesson_id: int):
         if not request.json:

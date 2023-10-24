@@ -1,35 +1,37 @@
-import React, { useLayoutEffect } from "react";
-import { useAppDispatch, useAppSelector } from "./redux/hooks";
-import { AjaxGet } from "./libs/ServerAPI";
-import { UserDataType, selectUser, setUserData } from "./redux/slices/userSlice";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Loading from "./components/Common/Loading";
-import LoginPage from "./components/Authentication/LoginPage";
-import RegisterPage from "./components/Authentication/RegisterPage";
-import StudentMainPage from "./components/MainPage/StudentMainPage";
-import TestUpload from "./components/TestUpload";
-import NavigateHome from "./components/NavigateHome";
-import CoursePage from "./components/Courses/CoursePage";
-import NavBar from "./components/NavBar";
-import StudentDrillingPage from "./components/Activities/Lexis/Drilling/StudentDrillingPage";
-import StudentLessonPage from "./components/Lessons/StudentLessonPage";
-import StudentHieroglyphPage from "components/Activities/Lexis/Hieroglyph/StudentHieroglyphPage";
-import StudentAssessmentPage from "components/Activities/Assessment/StudentAssessmentPage";
-import StudentProfilePage from "components/Authentication/StudentProfilePage";
-import CourseCreatePage from "components/Courses/CourseCreatePage";
-import LessonCreatePage from "components/Lessons/LessonCreatePage";
-import DictionaryPage from "components/Dictionary/DictionaryPage";
-import TeacherLessonPage from "components/Lessons/TeacherLessonPage";
-import DrillingCreatePage from "components/Activities/Lexis/Drilling/DrillingCreatePage";
-import { AssessmentCreatePage } from "components/Activities/Assessment/CreatePage";
-import HieroglyphCreatePage from "components/Activities/Lexis/Hieroglyph/HieroglyphCreatePage";
-import { LoadStatus } from "libs/Status";
-import { isTeacher } from "redux/funcs/user";
-import ErrorPage from "components/ErrorPages/ErrorPage";
-
-import styleThemes from "./themes/StyleThemes.module.css";
 import "./App.css";
 import "./RoundBlock.css";
+
+import React, { useLayoutEffect } from "react";
+
+import { AssessmentCreatePage } from "components/Activities/Assessment/CreatePage";
+import StudentAssessmentPage from "components/Activities/Assessment/StudentAssessmentPage";
+import DrillingCreatePage from "components/Activities/Lexis/Drilling/DrillingCreatePage";
+import HieroglyphCreatePage from "components/Activities/Lexis/Hieroglyph/HieroglyphCreatePage";
+import StudentHieroglyphPage from "components/Activities/Lexis/Hieroglyph/StudentHieroglyphPage";
+import StudentProfilePage from "components/Authentication/StudentProfilePage";
+import CourseCreatePage from "components/Courses/CourseCreatePage";
+import DictionaryPage from "components/Dictionary/DictionaryPage";
+import ErrorPage from "components/ErrorPages/ErrorPage";
+import LessonCreatePage from "components/Lessons/LessonCreatePage";
+import TeacherLessonPage from "components/Lessons/TeacherLessonPage";
+import { LoadStatus } from "libs/Status";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { isTeacher } from "redux/funcs/user";
+
+import StudentDrillingPage from "./components/Activities/Lexis/Drilling/StudentDrillingPage";
+import LoginPage from "./components/Authentication/LoginPage";
+import RegisterPage from "./components/Authentication/RegisterPage";
+import Loading from "./components/Common/Loading";
+import CoursePage from "./components/Courses/CoursePage";
+import StudentLessonPage from "./components/Lessons/StudentLessonPage";
+import StudentMainPage from "./components/MainPage/StudentMainPage";
+import NavBar from "./components/NavBar";
+import NavigateHome from "./components/NavigateHome";
+import TestUpload from "./components/TestUpload";
+import { AjaxGet } from "./libs/ServerAPI";
+import { useAppDispatch, useAppSelector } from "./redux/hooks";
+import { selectUser, setUserData, UserDataType } from "./redux/slices/userSlice";
+import styleThemes from "./themes/StyleThemes.module.css";
 
 const App = () => {
     const user = useAppSelector(selectUser).data;

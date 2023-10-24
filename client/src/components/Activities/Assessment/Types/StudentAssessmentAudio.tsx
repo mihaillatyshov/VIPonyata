@@ -6,8 +6,8 @@ import { StudentAssessmentTypeProps } from "./StudentAssessmentTypeProps";
 
 const StudentAssessmentAudio = ({ data, taskId }: StudentAssessmentTypeProps<TAssessmentAudio>) => {
     return (
-        <div>
-            <audio controls>
+        <div className="w-100">
+            <audio className="w-100" controls>
                 <source src={data.url} type="audio/mpeg"></source>
                 Your browser does not support the audio.
             </audio>

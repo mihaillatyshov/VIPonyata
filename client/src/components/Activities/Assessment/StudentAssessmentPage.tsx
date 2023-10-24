@@ -112,14 +112,14 @@ const StudentAssessmentPage = () => {
     };
 
     return (
-        <div>
+        <div className="container">
             <StudentActivityPageHeader activityInfo={assessment.info} backToLessonCallback={backToLessonHandle} />
 
             <div>
                 <Button onClick={endAssessmentHandle}> Завершить </Button>
             </div>
             <hr />
-            <div className="container">
+            <div>
                 {assessment.items.map((item: any, i: number) => (
                     <div key={i}>
                         {drawItem(JSON.parse(JSON.stringify(item)), i)}

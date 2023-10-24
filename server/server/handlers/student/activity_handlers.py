@@ -27,5 +27,5 @@ class ActivityHandlers(Generic[ActivityType, ActivityTryType]):
         self._activity_queries = get_activity_data(activity_type)
 
     def continue_try(self, activity_id: int):
-        self._activity_queries.GetUnfinishedTryByActivityId(activity_id, get_current_user_id())
+        self._activity_queries.get_unfinished_try_by_activity_id(activity_id, get_current_user_id())
         return {"message": "Successfully continue"}

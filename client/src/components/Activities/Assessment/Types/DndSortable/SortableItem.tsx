@@ -1,7 +1,10 @@
 import React from "react";
+
+import CSS from "csstype";
+
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS as DNDCSS } from "@dnd-kit/utilities";
-import CSS from "csstype";
+
 import styles from "../StyleAssessmentType.module.css";
 
 interface SortableItemProps {
@@ -31,7 +34,7 @@ const SortableItem = ({ id, str, customData, width }: SortableItemProps) => {
             {...listeners}
             className={`d-flex ${styles.createSentenceItem}`}
         >
-            <div className="mx-auto">{str}</div>
+            <div className="mx-auto dnd-prevent-select">{str}</div>
         </div>
     );
 };

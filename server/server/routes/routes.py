@@ -104,7 +104,7 @@ def add_drilling_new_done_tasks(id):
 @login_required
 def get_drilling_by_id(id):
     return user_selector_function(
-        teacher_funcs.DrillingHandlers.GetById, student_funcs.DrillingHandlers.GetById, activityId=id)
+        teacher_funcs.DrillingHandlers.get_by_id, student_funcs.DrillingHandlers.get_by_id, activity_id=id)
 
 
 @routes_bp.route("/drilling/<lesson_id>", methods=["POST"])
@@ -143,9 +143,9 @@ def add_hieroglyph_new_done_tasks(id):
 @routes_bp.route("/hieroglyph/<id>", methods=["GET"])
 @login_required
 def get_hieroglyph_by_id(id):
-    return user_selector_function(teacher_funcs.HieroglyphHandlers.GetById,
-                                  student_funcs.HieroglyphHandlers.GetById,
-                                  activityId=id)
+    return user_selector_function(teacher_funcs.HieroglyphHandlers.get_by_id,
+                                  student_funcs.HieroglyphHandlers.get_by_id,
+                                  activity_id=id)
 
 
 @routes_bp.route("/hieroglyph/<lesson_id>", methods=["POST"])
@@ -184,9 +184,9 @@ def add_assessment_new_done_tasks(id):
 @routes_bp.route("/assessment/<id>", methods=["GET"])
 @login_required
 def get_assessment_by_id(id):
-    return user_selector_function(teacher_funcs.AssessmentHandlers.GetById,
-                                  student_funcs.AssessmentHandlers.GetById,
-                                  activityId=id)
+    return user_selector_function(teacher_funcs.AssessmentHandlers.get_by_id,
+                                  student_funcs.AssessmentHandlers.get_by_id,
+                                  activity_id=id)
 
 
 @routes_bp.route("/assessment/<lesson_id>", methods=["POST"])

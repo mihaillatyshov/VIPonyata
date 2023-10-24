@@ -1,8 +1,10 @@
 import React from "react";
-import { StudentAssessmentTypeProps } from "./StudentAssessmentTypeProps";
+
+import { TAssessmentFillSpacesByHand } from "models/Activity/Items/TAssessmentItems";
 import { useAppDispatch } from "redux/hooks";
 import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
-import { TAssessmentFillSpacesByHand } from "models/Activity/Items/TAssessmentItems";
+
+import { StudentAssessmentTypeProps } from "./StudentAssessmentTypeProps";
 
 const StudentAssessmentFillSpacesByHand = ({
     data,
@@ -19,20 +21,22 @@ const StudentAssessmentFillSpacesByHand = ({
     return (
         <div>
             <div className="d-flex">
-                {data.separates.map((element: string, i: number) => (
-                    <div key={i} className="d-flex">
-                        <div>{element}</div>
-                        {i < data.separates.length - 1 && (
-                            <input
-                                className="mx-2"
-                                style={{ height: "1.5rem" }}
-                                type="text"
-                                value={data.answers[i]}
-                                onChange={(e) => onChangeHandler(e, i)}
-                            />
-                        )}
-                    </div>
-                ))}
+                <div className="d-flex flex-wrap">
+                    {data.separates.map((element: string, i: number) => (
+                        <div key={i} className="d-flex flex-wrap">
+                            <div>{element}</div>
+                            {i < data.separates.length - 1 && (
+                                <input
+                                    className="mx-2"
+                                    style={{ height: "1.5rem" }}
+                                    type="text"
+                                    value={data.answers[i]}
+                                    onChange={(e) => onChangeHandler(e, i)}
+                                />
+                            )}
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );

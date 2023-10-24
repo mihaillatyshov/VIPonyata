@@ -35,7 +35,7 @@ const DictionaryImage = ({ initValue, className, dictionary_id, onSuccessSave }:
     return (
         <InputImage
             className={className}
-            htmlId="card_img"
+            htmlId={`dictionary_img_${dictionary_id}`}
             value={img}
             onChangeHandler={uploadImg}
             placeholder="card_img"

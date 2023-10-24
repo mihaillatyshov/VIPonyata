@@ -1,22 +1,26 @@
 import React, { useEffect, useState } from "react";
+
 import { TAssessmentClassification } from "models/Activity/Items/TAssessmentItems";
-import { StudentAssessmentTypeProps } from "../StudentAssessmentTypeProps";
-import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
 import { useAppDispatch } from "redux/hooks";
+import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
+
 import {
     DndContext,
-    useSensors,
-    PointerSensor,
-    KeyboardSensor,
-    useSensor,
+    DragEndEvent,
+    DragOverEvent,
     DragOverlay,
     DragStartEvent,
-    DragOverEvent,
-    DragEndEvent,
-    UniqueIdentifier,
+    KeyboardSensor,
+    MouseSensor,
     pointerWithin,
+    TouchSensor,
+    UniqueIdentifier,
+    useSensor,
+    useSensors,
 } from "@dnd-kit/core";
-import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import { arrayMove } from "@dnd-kit/sortable";
+
+import { StudentAssessmentTypeProps } from "../StudentAssessmentTypeProps";
 import Container from "./Container";
 import { Item } from "./SortableItem";
 
@@ -54,12 +58,7 @@ const StudentAssessmentClassification = ({ data, taskId }: StudentAssessmentType
 
     const [active, setActive] = useState<ItemState | null>(null);
 
-    const sensors = useSensors(
-        useSensor(PointerSensor),
-        useSensor(KeyboardSensor, {
-            coordinateGetter: sortableKeyboardCoordinates,
-        })
-    );
+    const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor), useSensor(KeyboardSensor));
 
     const findContainer = (id: UniqueIdentifier): number => {
         if (Number.isInteger(id)) {
@@ -162,25 +161,25 @@ const StudentAssessmentClassification = ({ data, taskId }: StudentAssessmentType
     };
 
     return (
-        <div>
-            <DndContext
-                sensors={sensors}
-                collisionDetection={pointerWithin}
-                onDragStart={handleDragStart}
-                onDragOver={handleDragOver}
-                onDragEnd={handleDragEnd}
-            >
-                <div>
-                    <Container id={0} items={items[0]} type="inputs" strWidth={strWidth} />
-                </div>
-                <div className="d-flex flex-wrap justify-content-center">
-                    {items.slice(1).map((col, i) => (
-                        <Container key={i + 1} id={i + 1} items={col} type="answer" strWidth={strWidth} />
-                    ))}
-                </div>
-                <DragOverlay>{active ? <Item str={active.str} width={strWidth} /> : null}</DragOverlay>
-            </DndContext>
-        </div>
+        <DndContext
+            sensors={sensors}
+            collisionDetection={pointerWithin}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+        >
+            <div className="d-flex justify-content-center">
+                <Container id={0} items={items[0]} type="inputs" strWidth={strWidth} />
+            </div>
+            <div className="d-flex flex-wrap justify-content-center">
+                {items.slice(1).map((col, i) => (
+                    <Container key={i + 1} id={i + 1} items={col} type="answer" strWidth={strWidth} />
+                ))}
+            </div>
+            <DragOverlay style={{ opacity: "60%" }}>
+                {active ? <Item str={active.str} width={strWidth} /> : null}
+            </DragOverlay>
+        </DndContext>
     );
 };
 

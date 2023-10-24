@@ -40,7 +40,7 @@ class IAssessmentHandlers(Generic[AssessmentType, AssessmentTryType]):
     def __init__(self, activity_type: type[AssessmentType]):
         self._activity_queries = get_assessment_data(activity_type)
 
-    def GetById(self, assessmentId: int):
+    def get_by_id(self, assessment_id: int):
         return {}
 
     def create(self, lesson_id: int):

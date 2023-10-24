@@ -1,7 +1,10 @@
 import React from "react";
+
+import CSS from "csstype";
+
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS as DNDCSS } from "@dnd-kit/utilities";
-import CSS from "csstype";
+
 import styles from "../StyleAssessmentType.module.css";
 
 interface ItemProps {
@@ -23,13 +26,13 @@ export function Item({ str, width }: ItemProps) {
         justifyContent: "center",
         border: "1px solid black",
         margin: "10px 0",
-        padding: "15px",
+        padding: "6px",
         background: "white",
         minWidth: `calc(${width}em * 1)`,
     };
 
     return (
-        <div className={styles.classificationItem} style={style}>
+        <div className={`dnd-prevent-select ${styles.classificationItem}`} style={style}>
             {str}
         </div>
     );

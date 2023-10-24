@@ -23,8 +23,8 @@ class LexisHandlers(ActivityHandlers[LexisType, LexisTryType], Generic[LexisType
     _activity_queries: DBQS.LexisQueries[LexisType, LexisTryType, LexisCardType]
 
     def start_new_try(self, activity_id: int):
-        activity = self._activity_queries.GetById(activity_id, get_current_user_id())
-        activity_tries = self._activity_queries.GetTriesByActivityId(activity_id, get_current_user_id())
+        activity = self._activity_queries.get_by_id(activity_id, get_current_user_id())
+        activity_tries = self._activity_queries.get_tries_by_activity_id(activity_id, get_current_user_id())
 
         if activity_tries and activity_tries[-1].end_datetime == None:
             return {"message": "Lexis try already Exists"}, 409
@@ -45,7 +45,7 @@ class LexisHandlers(ActivityHandlers[LexisType, LexisTryType], Generic[LexisType
         if not (in_done_tasks and isinstance(in_done_tasks, dict)):
             raise InvalidAPIUsage("Wrong data format", 403)
 
-        lexis_try = self._activity_queries.GetUnfinishedTryByActivityId(activity_id, get_current_user_id())
+        lexis_try = self._activity_queries.get_unfinished_try_by_activity_id(activity_id, get_current_user_id())
         done_tasks = lexis_try.get_done_tasks_dict()
         for name, value in in_done_tasks.items():
             try:
@@ -59,16 +59,16 @@ class LexisHandlers(ActivityHandlers[LexisType, LexisTryType], Generic[LexisType
         return {"message": "Tasks updated!"}
 
     def end_try(self, activity_id: int):
-        activity_try = self._activity_queries.GetUnfinishedTryByActivityId(activity_id, get_current_user_id())
+        activity_try = self._activity_queries.get_unfinished_try_by_activity_id(activity_id, get_current_user_id())
         activity_end_time_handler(activity_try.id, self._activity_queries._activityTry_type)
         return {"message": "Successfully closed"}
 
-    def GetById(self, activityId: int):
-        lexis = self._activity_queries.GetById(activityId, get_current_user_id())
-        lexis.now_try = self._activity_queries.GetUnfinishedTryByActivityId(activityId, get_current_user_id())
+    def get_by_id(self, activity_id: int):
+        lexis = self._activity_queries.get_by_id(activity_id, get_current_user_id())
+        lexis.now_try = self._activity_queries.get_unfinished_try_by_activity_id(activity_id, get_current_user_id())
 
         tasks: dict = {}
-        tasks[LexisTaskName.CARD] = self._activity_queries.get_cards_by_activity_id(activityId)
+        tasks[LexisTaskName.CARD] = self._activity_queries.get_cards_by_activity_id(activity_id)
         words_ru: list[str] = []
         words_jp: list[str] = []
         chars_jp: list[str] = []

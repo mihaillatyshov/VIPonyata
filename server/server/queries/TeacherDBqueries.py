@@ -1,4 +1,4 @@
-from typing import Generic, Literal, Type
+from typing import Generic, Type
 
 from sqlalchemy import select, update
 
@@ -7,12 +7,14 @@ from server.exceptions.ApiExceptions import InvalidAPIUsage
 from server.log_lib import LogI
 from server.models.assessment import AssessmentCreateReqStr
 from server.models.course import CourseCreateReq
-from server.models.db_models import (Assessment, AssessmentTry, AssessmentTryType, AssessmentType, Course,
+from server.models.db_models import (Assessment, AssessmentTry,
+                                     AssessmentTryType, AssessmentType, Course,
                                      Dictionary, Drilling, DrillingCard,
-                                     DrillingTry, FinalBoss, FinalBossTry, Hieroglyph, HieroglyphCard,
-                                     HieroglyphTry, Lesson, LexisCardType,
-                                     LexisTryType, LexisType,
-                                     NotificationStudentToTeacher, User)
+                                     DrillingTry, FinalBoss, FinalBossTry,
+                                     Hieroglyph, HieroglyphCard, HieroglyphTry,
+                                     Lesson, LexisCardType, LexisTryType,
+                                     LexisType, NotificationStudentToTeacher,
+                                     User)
 from server.models.dictionary import (DictionaryCreateReq,
                                       DictionaryCreateReqItem)
 from server.models.lesson import LessonCreateReq
@@ -79,9 +81,9 @@ class LexisQueries(Generic[LexisType, LexisTryType, LexisCardType]):
         with DBsession.begin() as session:
             return session.scalars(select(self.lexis_type).where(self.lexis_type.lesson_id == lessond_id)).one_or_none()
 
-    def GetById(self, lexisId: int) -> LexisType | None:
+    def get_by_id(self, lexis_id: int) -> LexisType | None:
         with DBsession.begin() as session:
-            return session.scalars(select(self.lexis_type).where(self.lexis_type.id == lexisId)).one_or_none()
+            return session.scalars(select(self.lexis_type).where(self.lexis_type.id == lexis_id)).one_or_none()
 
     def create_cards(self, lexis_id: int, cards_data: LexisCardCreateReq):
         with DBsession.begin() as session:
@@ -93,7 +95,7 @@ class LexisQueries(Generic[LexisType, LexisTryType, LexisCardType]):
 
     def create(self, lesson_id: int, lexis_data: LexisCreateReq) -> LexisType:
         with DBsession.begin() as session:
-            lexis = self.lexis_type(lesson_id=lesson_id, **lexis_data.model_dump())
+            lexis: LexisType = self.lexis_type(lesson_id=lesson_id, **lexis_data.model_dump())
 
             session.add(lexis)
 
@@ -127,10 +129,10 @@ class IAssessmentQueries(Generic[AssessmentType, AssessmentTryType]):
         self.assessment_type = assessment_type
         self.assessment_try_type = assessment_try_type
 
-    def GetById(self, assessmentId: int) -> LexisType | None:
+    def get_by_id(self, assessment_id: int) -> LexisType | None:
         with DBsession.begin() as session:
             return session.scalars(
-                select(self.assessment_type).where(self.assessment_type.id == assessmentId)).one_or_none()
+                select(self.assessment_type).where(self.assessment_type.id == assessment_id)).one_or_none()
 
     def get_by_lesson_id(self, lesson_id: int) -> Assessment | None:
         with DBsession.begin() as session:

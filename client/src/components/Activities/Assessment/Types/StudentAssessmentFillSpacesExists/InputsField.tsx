@@ -1,4 +1,6 @@
 import React from "react";
+
+import style from "../StyleAssessmentType.module.css";
 import Draggable from "./Draggable";
 
 interface InputsFieldProps {
@@ -8,9 +10,9 @@ interface InputsFieldProps {
 
 const InputsField = ({ inputFields, width }: InputsFieldProps) => {
     return (
-        <div className="d-flex gap-3 flex-wrap">
+        <div className={`d-flex gap-3 flex-wrap ${style.fillSpaceExistsInputs}`}>
             {inputFields.map((item, id) => (
-                <Draggable key={id} id={id} str={item} width={width} type="inputs"></Draggable>
+                <Draggable key={id} id={id} str={item} width={width} type="inputs" />
             ))}
         </div>
     );

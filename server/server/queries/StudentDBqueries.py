@@ -12,9 +12,10 @@ from server.log_lib import LogI
 from server.models.db_models import (ActivityTryType, ActivityType, Assessment,
                                      AssessmentTry, AssessmentTryType,
                                      AssessmentType, Course, Dictionary,
-                                     Drilling, DrillingCard, DrillingTry, FinalBoss,
-                                     FinalBossTry, Hieroglyph, HieroglyphCard, HieroglyphTry,
-                                     Lesson, LexisCardType, LexisTryType, LexisType,
+                                     Drilling, DrillingCard, DrillingTry,
+                                     FinalBoss, FinalBossTry, Hieroglyph,
+                                     HieroglyphCard, HieroglyphTry, Lesson,
+                                     LexisCardType, LexisTryType, LexisType,
                                      NotificationStudentToTeacher,
                                      NotificationTeacherToStudent, User,
                                      UserDictionary)
@@ -106,14 +107,14 @@ class ActivityQueries(Generic[ActivityType, ActivityTryType]):
                 .where(User.id == user_id)
             ).one_or_none()
 
-    def GetById(self, activityId: int, userId: int) -> ActivityType:
+    def get_by_id(self, activity_id: int, user_id: int) -> ActivityType:
         with DBsession.begin() as session:
             activity = session.scalars(
                 select(self._activity_type)
-                .where(self._activity_type.id == activityId)
+                .where(self._activity_type.id == activity_id)
                 .join(self._activity_type.lesson)
                 .join(Lesson.users)
-                .where(User.id == userId)
+                .where(User.id == user_id)
             ).one_or_none()
 
             # TODO move code after to Upper Layer
@@ -122,7 +123,7 @@ class ActivityQueries(Generic[ActivityType, ActivityTryType]):
 
             activity = session.scalars(
                 select(self._activity_type)
-                .where(self._activity_type.id == activityId)
+                .where(self._activity_type.id == activity_id)
             ).one_or_none()
 
             if activity is not None:
@@ -131,27 +132,27 @@ class ActivityQueries(Generic[ActivityType, ActivityTryType]):
 
             raise ActivityNotFoundException(self._activity_type.__name__)
 
-    def GetTriesByActivityId(self, activityId: int, userId: int) -> list[ActivityTryType]:
+    def get_tries_by_activity_id(self, activity_id: int, user_id: int) -> list[ActivityTryType]:
         with DBsession.begin() as session:
             return session.scalars(
                 select(self._activityTry_type)
                 .join(self._activityTry_type.base)
-                .where(self._activity_type.id == activityId)
+                .where(self._activity_type.id == activity_id)
                 .join(self._activity_type.lesson)
                 .join(Lesson.users)
-                .where(User.id == userId)
+                .where(User.id == user_id)
                 .order_by(self._activityTry_type.try_number)
             ).all()
 
-    def GetUnfinishedTryByActivityId(self, activityId: int, userId: int) -> ActivityTryType:
+    def get_unfinished_try_by_activity_id(self, activity_id: int, user_id: int) -> ActivityTryType:
         with DBsession.begin() as session:
             activity_try = session.scalars(
                 select(self._activityTry_type)
                 .where(self._activityTry_type.end_datetime == None)
                 .join(self._activityTry_type.base)
-                .where(self._activity_type.id == activityId)
+                .where(self._activity_type.id == activity_id)
                 .join(self._activity_type.lesson)
-                .join(Lesson.users).where(User.id == userId)
+                .join(Lesson.users).where(User.id == user_id)
             ).one_or_none()
 
             # TODO move code after to Upper Layer
@@ -160,7 +161,7 @@ class ActivityQueries(Generic[ActivityType, ActivityTryType]):
 
             activity = session.scalars(
                 select(self._activity_type)
-                .where(self._activity_type.id == activityId)
+                .where(self._activity_type.id == activity_id)
             ).one_or_none()
 
             if activity_try is not None:

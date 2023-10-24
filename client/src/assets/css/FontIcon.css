@@ -7,6 +7,19 @@
     color: #666666;
 }
 
+.font-icon-button-bg {
+    background-color: #cccccc;
+    border-radius: 50%;
+    color: #000000;
+    cursor: pointer;
+    aspect-ratio: 1 / 1;
+}
+
+.font-icon-button-bg:hover {
+    background-color: #ffffff;
+    color: #666666;
+}
+
 .font-icon-button-danger:hover {
     cursor: pointer;
     color: #ff0000;

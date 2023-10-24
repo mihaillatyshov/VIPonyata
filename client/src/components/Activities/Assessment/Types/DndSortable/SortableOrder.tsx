@@ -1,8 +1,20 @@
 import React, { useMemo } from "react";
-import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
-import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
-import SortableItem from "./SortableItem";
+
 import { TAssessmentCreateSentence, TAssessmentSentenceOrder } from "models/Activity/Items/TAssessmentItems";
+
+import {
+    closestCenter,
+    DndContext,
+    DragEndEvent,
+    KeyboardSensor,
+    MouseSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
+} from "@dnd-kit/core";
+import { rectSortingStrategy, SortableContext } from "@dnd-kit/sortable";
+
+import SortableItem from "./SortableItem";
 
 interface TLocalPart {
     strId: string;
@@ -17,6 +29,8 @@ interface SortableOrderProps {
 }
 
 const SortableOrder = ({ handleDragEnd, order, data }: SortableOrderProps) => {
+    const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor), useSensor(KeyboardSensor));
+
     const sortContextClassName = `d-flex mx-auto ${order === "horizontal" ? "flex-wrap" : "flex-column"} gap-3`;
 
     const localParts: TLocalPart[] = useMemo(() => {
@@ -30,7 +44,7 @@ const SortableOrder = ({ handleDragEnd, order, data }: SortableOrderProps) => {
     const itemWidth = Math.max(...localParts.map((item) => item.str.length), 3);
 
     return (
-        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors} autoScroll={false}>
             <div className="container">
                 <SortableContext items={localParts.map((item) => item.strId)} strategy={rectSortingStrategy}>
                     <div className={sortContextClassName}>

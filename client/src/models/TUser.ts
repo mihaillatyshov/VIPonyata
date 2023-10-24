@@ -6,3 +6,8 @@ export interface TUserData {
     form: string;
     level: number;
 }
+
+export interface TShareUsers {
+    inside: TUserData[];
+    outside: TUserData[];
+}

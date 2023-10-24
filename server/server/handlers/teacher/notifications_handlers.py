@@ -31,10 +31,10 @@ def _get_notifications_try(activity_try_id: int, activity_try_type: str):
 
 def _get_notifications_activity(activity_id: int, activity_try_type: str):
     return _get_notifications_data(activity_try_type, {
-        "drilling_try": DBQT.DrillingQueries.GetById,
-        "hieroglyph_try": DBQT.HieroglyphQueries.GetById,
-        "assessment_try": DBQT.AssessmentQueries.GetById,
-        "final_boss_try": DBQT.FinalBossQueries.GetById,
+        "drilling_try": DBQT.DrillingQueries.get_by_id,
+        "hieroglyph_try": DBQT.HieroglyphQueries.get_by_id,
+        "assessment_try": DBQT.AssessmentQueries.get_by_id,
+        "final_boss_try": DBQT.FinalBossQueries.get_by_id,
     }, activity_id)
 
 
