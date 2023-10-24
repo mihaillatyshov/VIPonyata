@@ -59,7 +59,8 @@ class User(Base):
     __mapper_args__ = {'eager_defaults': True}
 
     def __json__(self):
-        return {"name": self.name,
+        return {"id": self.id,
+                "name": self.name,
                 "nickname": self.nickname,
                 "birthday": self.birthday,
                 "theme": self.theme,

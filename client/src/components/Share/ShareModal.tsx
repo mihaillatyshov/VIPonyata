@@ -1,9 +1,10 @@
-import React, { useLayoutEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
-import { AjaxGet, isProcessableError } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
-import { TShareUsers } from "models/TUser";
 import { Modal } from "react-bootstrap";
+import { GetShareUsersDataType, requestGetShareUsers } from "requests/User";
+
+import ShareModalContent from "./ShareModalContent";
 
 interface ShareModalProps {
     id: number;
@@ -13,35 +14,26 @@ interface ShareModalProps {
     close: () => void;
 }
 
-interface ShareError {
-    message: string;
-}
-
 const ShareModal = ({ id, name, type, isShow, close }: ShareModalProps) => {
-    const [users, setUsers] = useState<LoadStatus.DataDoneOrNotDone<{ data: TShareUsers }>>({
+    const [users, setUsers] = useState<GetShareUsersDataType>({
         loadStatus: LoadStatus.NONE,
     });
     const [error, setError] = useState<string>("");
 
-    useLayoutEffect(() => {
-        AjaxGet<TShareUsers>({ url: `/api/${type}/${id}/users` })
-            .then((json) => {
-                setUsers({ loadStatus: LoadStatus.DONE, data: json });
-            })
-            .catch((error) => {
-                if (isProcessableError<ShareError>(error)) {
-                    setError(error.json.message);
-                    setUsers({ loadStatus: LoadStatus.ERROR });
-                }
-            });
-    }, []);
+    useEffect(() => {
+        if (isShow) {
+            requestGetShareUsers({ id, type, setUsers, setError });
+        }
+    }, [isShow, id, type]);
 
     return (
         <Modal size="xl" show={isShow} onHide={close} dialogClassName="modal-dialog">
             <Modal.Header closeButton className="modal-bg">
-                <Modal.Title>Доступ для ({name})</Modal.Title>
+                <Modal.Title>{name}</Modal.Title>
             </Modal.Header>
-            <Modal.Body className="modal-bg"></Modal.Body>
+            <Modal.Body className="modal-bg">
+                <ShareModalContent users={users} errorMessage={error} />
+            </Modal.Body>
         </Modal>
     );
 };

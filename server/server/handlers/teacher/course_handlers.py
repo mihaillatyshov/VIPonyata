@@ -16,3 +16,11 @@ def create_course():
     course_data = CourseCreateReq(**request.json)
 
     return {"course": DBQT.create_course(course_data)}
+
+
+def get_course_users(course_id):
+    iside_users = DBQT.get_users_inside_course(course_id)
+    all_users = DBQT.get_all_users()
+    outside_users = [user for user in all_users if user not in iside_users]
+
+    return {"inside": iside_users, "outside": outside_users}

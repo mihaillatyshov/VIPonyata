@@ -22,7 +22,20 @@ from server.models.lexis import LexisCardCreateReq, LexisCreateReq
 
 
 #########################################################################################################################
-################ Course and Lesson ######################################################################################
+################ User ###################################################################################################
+#########################################################################################################################
+def get_all_users() -> list[User]:
+    with DBsession.begin() as session:
+        return session.scalars(select(User)).all()
+
+
+# def get_all_users_ids() -> list[int]:
+#     with DBsession.begin() as session:
+#         return session.scalars(select(User.c.id)).all()
+
+
+#########################################################################################################################
+################ Course #################################################################################################
 #########################################################################################################################
 def get_all_courses() -> list[Course]:
     with DBsession.begin() as session:
@@ -43,6 +56,18 @@ def create_course(course_data: CourseCreateReq) -> Course:
         return course
 
 
+def get_users_inside_course(course_id: int) -> list[User]:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(User)
+            .join(User.courses)
+            .where(Course.id == course_id)
+        ).all()
+
+
+#########################################################################################################################
+################ Lesson #################################################################################################
+#########################################################################################################################
 def get_lessons_by_course_id(course_id: int) -> list[Lesson]:
     with DBsession.begin() as session:
         return session.scalars(select(Lesson).where(Lesson.course_id == course_id)).all()

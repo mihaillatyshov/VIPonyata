@@ -1,5 +1,6 @@
 import React from "react";
 
+import ShareModal from "components/Share/ShareModal";
 import { useUserIsTeacher } from "redux/funcs/user";
 
 const FONT_SIZE = "32px";
@@ -8,8 +9,9 @@ interface CourseCardFooterProps {
     id: number;
 }
 
-const CourseCardFooter = ({ id }:CourseCardFooterProps) => {
+const CourseCardFooter = ({ id }: CourseCardFooterProps) => {
     const isTeacher = useUserIsTeacher();
+    const [isShareModalShow, setIsShareModalShow] = React.useState<boolean>(false);
 
     if (!isTeacher) {
         return null;
@@ -18,7 +20,7 @@ const CourseCardFooter = ({ id }:CourseCardFooterProps) => {
     const onShareClick = (e: React.MouseEvent<HTMLElement>) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log(`Share ${id}`);
+        setIsShareModalShow(true);
     };
 
     return (
@@ -26,6 +28,15 @@ const CourseCardFooter = ({ id }:CourseCardFooterProps) => {
             <i className="bi bi-pencil-square" style={{ fontSize: FONT_SIZE }} />
             <i className="bi bi-reply font-icon-button" style={{ fontSize: FONT_SIZE }} onClick={onShareClick} />
             <i className="bi bi-graph-up" style={{ fontSize: FONT_SIZE }} />
+            <div onClick={(e) => e.preventDefault()}>
+                <ShareModal
+                    id={id}
+                    isShow={isShareModalShow}
+                    name="Открыть доступ к уроку"
+                    type="courses"
+                    close={() => setIsShareModalShow(false)}
+                />
+            </div>
         </div>
     );
 };
