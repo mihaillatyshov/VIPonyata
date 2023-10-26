@@ -1,6 +1,8 @@
 import React from "react";
+
 import { useNavigate } from "react-router-dom";
-import style from "./StyleLexisNav.module.css";
+
+import styles from "./StyleLexisNav.module.css";
 
 export type StudentLexisNavItemProps = {
     to: string;
@@ -16,7 +18,7 @@ const Mistake = ({ mistakeCount }: MistakeProps) => {
     }
 
     const getClassName = () => {
-        return style.navBadge + " " + (mistakeCount > 0 ? style.navBadgeOther : style.navBadgeZero);
+        return styles.navBadge + " " + (mistakeCount > 0 ? styles.navBadgeOther : styles.navBadgeZero);
     };
 
     return <div className={getClassName()}>{mistakeCount}</div>;
@@ -31,7 +33,7 @@ const StudentLexisNavItem = ({ to, name, img, mistakeCount }: StudentLexisNavIte
 
     return (
         <div className="col-auto text-center">
-            <div className={style.navItem} onClick={onClickHandle}>
+            <div className={styles.navItem} onClick={onClickHandle}>
                 <div className="px-auto">
                     <img src={img} width="32px" alt={name} />
                 </div>

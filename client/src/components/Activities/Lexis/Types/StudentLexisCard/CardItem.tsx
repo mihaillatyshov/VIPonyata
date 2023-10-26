@@ -4,7 +4,7 @@ import DictionaryAssociation from "components/Dictionary/DictionaryAssociation";
 import DictionaryImage from "components/Dictionary/DictionaryImage";
 import { TSingleCardItem } from "models/Activity/Items/TLexisItems";
 
-import style from "../../StyleLexis.module.css";
+import styles from "../../StyleLexis.module.css";
 
 interface CardItemProps {
     data: TSingleCardItem;
@@ -43,10 +43,10 @@ const CardItem = ({
     };
 
     return (
-        <div className={style.lexisCard}>
+        <div className={styles.lexisCard}>
             <div className="row">
                 <div className="col-auto">
-                    <div className={style.lexisCardDiv}>
+                    <div className={styles.lexisCardDiv}>
                         <div className="mb-4">
                             <div className="d-flex align-content-center align-items-center">
                                 <div>{data.word[aliasJP]}</div>
@@ -88,7 +88,7 @@ const CardItem = ({
                 <div className="col-auto">
                     <DictionaryImage
                         initValue={data.word.img}
-                        className={style.lexisCardImgDiv}
+                        className={styles.lexisCardImgDiv}
                         dictionary_id={data.dictionary_id}
                         onSuccessSave={setLexisCardImg}
                     />

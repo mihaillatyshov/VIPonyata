@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+
+import CSS from "csstype";
 import { LoadStatus } from "libs/Status";
 import { getMinutes, getSeconds, getVV } from "libs/useTimer";
-import CSS from "csstype";
 
-import style from "./StyleAudio.module.css";
+import styles from "./StyleAudio.module.css";
 
 const ICON_SIZE = "32px";
 
@@ -41,19 +42,11 @@ function AudioPlayer({ url }: AudioPlayerProps) {
         }));
     }, []);
 
-    // const onPlayCallback = useCallback(() => setAudioData({ ...audioData }), []);
-    // const onPauseCallback = useCallback(() => setAudioData({ ...audioData }), []);
-
     useEffect(() => {
         audioElement.addEventListener("loadeddata", onLoadedDataCallback);
-        // audioElement.addEventListener("play", onPlayCallback);
-        // audioElement.addEventListener("pause", onPauseCallback);
-
         return () => {
             audioElement.pause();
             audioElement.removeEventListener("loadeddata", onLoadedDataCallback);
-            // audioElement.removeEventListener("play", onPlayCallback);
-            // audioElement.removeEventListener("pause", onPauseCallback);
         };
     }, []);
 
@@ -61,7 +54,7 @@ function AudioPlayer({ url }: AudioPlayerProps) {
         const interval = setInterval(updateCurrentTime, 25);
 
         return () => clearInterval(interval);
-    }, [audioData]);
+    }, [audioData, updateCurrentTime]);
 
     if (audioData.loadStatus !== LoadStatus.DONE) {
         console.log("testLoading");
@@ -102,16 +95,16 @@ function AudioPlayer({ url }: AudioPlayerProps) {
         return getVV(getMinutes(currentTime)) + ":" + getVV(getSeconds(currentTime));
     };
 
-    const styles = { "--range-progress": `${(audioData.currentTime / audioData.duration) * 100}%` } as CSS.Properties;
+    const style = { "--range-progress": `${(audioData.currentTime / audioData.duration) * 100}%` } as CSS.Properties;
 
     return (
         <div>
             <div className="d-flex align-items-center">
                 <div className="me-3">{getCurrentTimeStr()}</div>
                 <input
-                    className={style.progressBar}
+                    className={styles.progressBar}
                     type="range"
-                    style={{ ...styles }}
+                    style={{ ...style }}
                     min={0}
                     max={audioData.duration}
                     step={0.0001}

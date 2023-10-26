@@ -1,7 +1,8 @@
 import React from "react";
 
-import style from "./StyleCommon.module.css";
 import { useNavigate } from "react-router-dom";
+
+import styles from "./StyleCommon.module.css";
 
 interface BackProps {
     urlBack?: string;
@@ -15,7 +16,7 @@ const Back = ({ urlBack }: BackProps) => {
     }
 
     return (
-        <div onClick={() => navigate(urlBack)} className={style.pageTitleBack}>
+        <div onClick={() => navigate(urlBack)} className={styles.pageTitleBack}>
             <i className="bi bi-arrow-bar-left" />
         </div>
     );
@@ -28,7 +29,7 @@ interface PageTitleProps extends BackProps {
 const PageTitle = ({ title, urlBack }: PageTitleProps) => {
     return (
         <>
-            <div className={style.pageTitle}>
+            <div className={styles.pageTitle}>
                 <Back urlBack={urlBack} />
                 {title !== undefined ? (
                     <div className="mx-auto pe-2">{title}</div>

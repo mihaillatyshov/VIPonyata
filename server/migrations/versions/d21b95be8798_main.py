@@ -1,8 +1,8 @@
 """main
 
-Revision ID: 1153146a5434
+Revision ID: d21b95be8798
 Revises: 
-Create Date: 2023-10-17 02:25:26.530050
+Create Date: 2023-10-24 23:52:48.015446
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '1153146a5434'
+revision: str = 'd21b95be8798'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -85,37 +85,37 @@ def upgrade() -> None:
     sa.UniqueConstraint('user_id', 'dictionary_id', name='idx_user_dictionary')
     )
     op.create_table('assessments',
+    sa.Column('tasks', sa.Text(), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('description', sa.String(length=2048), nullable=True),
     sa.Column('time_limit', sa.Time(), nullable=True),
-    sa.Column('tasks', sa.Text(), nullable=False),
     sa.Column('lesson_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['lesson_id'], ['lessons.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('drillings',
+    sa.Column('tasks', sa.String(length=2048), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('description', sa.String(length=2048), nullable=True),
     sa.Column('time_limit', sa.Time(), nullable=True),
-    sa.Column('tasks', sa.String(length=2048), nullable=False),
     sa.Column('lesson_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['lesson_id'], ['lessons.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('final_bosses',
+    sa.Column('tasks', sa.Text(), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('description', sa.String(length=2048), nullable=True),
     sa.Column('time_limit', sa.Time(), nullable=True),
-    sa.Column('tasks', sa.Text(), nullable=False),
     sa.Column('lesson_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['lesson_id'], ['lessons.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('hieroglyphs',
+    sa.Column('tasks', sa.String(length=2048), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('description', sa.String(length=2048), nullable=True),
     sa.Column('time_limit', sa.Time(), nullable=True),
-    sa.Column('tasks', sa.String(length=2048), nullable=False),
     sa.Column('lesson_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['lesson_id'], ['lessons.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -130,70 +130,70 @@ def upgrade() -> None:
     sa.UniqueConstraint('user_id', 'lesson_id', name='idx_user_lesson')
     )
     op.create_table('assessment_tries',
+    sa.Column('base_id', sa.Integer(), nullable=False),
+    sa.Column('done_tasks', sa.Text(), nullable=False),
+    sa.Column('checked_tasks', sa.Text(), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('try_number', sa.Integer(), nullable=False),
     sa.Column('start_datetime', sa.DateTime(), nullable=False),
     sa.Column('end_datetime', sa.DateTime(), nullable=True),
-    sa.Column('done_tasks', sa.Text(), nullable=False),
-    sa.Column('checked_tasks', sa.Text(), nullable=True),
-    sa.Column('base_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['base_id'], ['assessments.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('drilling_cards',
+    sa.Column('base_id', sa.Integer(), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('sentence', sa.String(length=256), nullable=False),
     sa.Column('answer', sa.String(length=256), nullable=False),
-    sa.Column('base_id', sa.Integer(), nullable=False),
     sa.Column('dictionary_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['base_id'], ['drillings.id'], ),
     sa.ForeignKeyConstraint(['dictionary_id'], ['dictionary.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('drilling_tries',
+    sa.Column('base_id', sa.Integer(), nullable=False),
+    sa.Column('done_tasks', sa.String(length=2048), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('try_number', sa.Integer(), nullable=False),
     sa.Column('start_datetime', sa.DateTime(), nullable=False),
     sa.Column('end_datetime', sa.DateTime(), nullable=True),
-    sa.Column('done_tasks', sa.String(length=2048), nullable=True),
-    sa.Column('base_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['base_id'], ['drillings.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('final_boss_tries',
+    sa.Column('base_id', sa.Integer(), nullable=False),
+    sa.Column('done_tasks', sa.Text(), nullable=False),
+    sa.Column('checked_tasks', sa.Text(), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('try_number', sa.Integer(), nullable=False),
     sa.Column('start_datetime', sa.DateTime(), nullable=False),
     sa.Column('end_datetime', sa.DateTime(), nullable=True),
-    sa.Column('done_tasks', sa.Text(), nullable=False),
-    sa.Column('checked_tasks', sa.Text(), nullable=True),
-    sa.Column('base_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['base_id'], ['final_bosses.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('hieroglyph_cards',
+    sa.Column('base_id', sa.Integer(), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('sentence', sa.String(length=256), nullable=False),
     sa.Column('answer', sa.String(length=256), nullable=False),
-    sa.Column('base_id', sa.Integer(), nullable=False),
     sa.Column('dictionary_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['base_id'], ['hieroglyphs.id'], ),
     sa.ForeignKeyConstraint(['dictionary_id'], ['dictionary.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('hieroglyph_tries',
+    sa.Column('base_id', sa.Integer(), nullable=False),
+    sa.Column('done_tasks', sa.String(length=2048), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('try_number', sa.Integer(), nullable=False),
     sa.Column('start_datetime', sa.DateTime(), nullable=False),
     sa.Column('end_datetime', sa.DateTime(), nullable=True),
-    sa.Column('done_tasks', sa.String(length=2048), nullable=True),
-    sa.Column('base_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['base_id'], ['hieroglyphs.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),

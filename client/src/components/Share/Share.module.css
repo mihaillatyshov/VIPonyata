@@ -1,0 +1,37 @@
+.shareUser {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 10px;
+    border: 1px solid #aaaaaa;
+}
+
+.userAvatar {
+    width: 100%;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.userLink:hover {
+    color: #555555;
+}
+
+.shareAddButton {
+    color: #059a05;
+    cursor: pointer;
+}
+
+.shareAddButton:hover {
+    color: rgb(4, 193, 4);
+}
+
+.shareRemoveButton {
+    color: #8f0101;
+    cursor: pointer;
+}
+
+.shareRemoveButton:hover {
+    color: #bf0000;
+}

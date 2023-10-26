@@ -4,6 +4,8 @@ import Loading from "components/Common/Loading";
 import { LoadStatus } from "libs/Status";
 import { GetShareUsersDataType } from "requests/User";
 
+import ShareUserList from "./ShareUserList";
+
 interface ShareModalContentProps {
     users: GetShareUsersDataType;
     errorMessage: string;
@@ -25,22 +27,10 @@ const ShareModalContent = ({ users, errorMessage }: ShareModalContentProps) => {
     return (
         <div className="row">
             <div className="col-6">
-                {users.data.inside.map((user) => (
-                    <div key={user.id} className="d-flex">
-                        <div className="me-2">{user.id}</div>
-                        <div className="me-2">{user.name}</div>
-                        <div>{user.nickname}</div>
-                    </div>
-                ))}
+                <ShareUserList users={users.data.outside} usersType="outside" />
             </div>
             <div className="col-6">
-                {users.data.outside.map((user) => (
-                    <div key={user.id} className="d-flex">
-                        <div className="me-2">{user.id}</div>
-                        <div className="me-2">{user.name}</div>
-                        <div>{user.nickname}</div>
-                    </div>
-                ))}
+                <ShareUserList users={users.data.inside} usersType="inside" />
             </div>
         </div>
     );

@@ -1,6 +1,6 @@
 from typing import Generic, Type
 
-from sqlalchemy import select, update
+from sqlalchemy import select
 
 from server.common import DBsession
 from server.exceptions.ApiExceptions import InvalidAPIUsage
@@ -24,14 +24,9 @@ from server.models.lexis import LexisCardCreateReq, LexisCreateReq
 #########################################################################################################################
 ################ User ###################################################################################################
 #########################################################################################################################
-def get_all_users() -> list[User]:
+def get_all_students() -> list[User]:
     with DBsession.begin() as session:
-        return session.scalars(select(User)).all()
-
-
-# def get_all_users_ids() -> list[int]:
-#     with DBsession.begin() as session:
-#         return session.scalars(select(User.c.id)).all()
+        return session.scalars(select(User).where(User.level == User.Level.STUDENT)).all()
 
 
 #########################################################################################################################
@@ -56,10 +51,11 @@ def create_course(course_data: CourseCreateReq) -> Course:
         return course
 
 
-def get_users_inside_course(course_id: int) -> list[User]:
+def get_students_inside_course(course_id: int) -> list[User]:
     with DBsession.begin() as session:
         return session.scalars(
             select(User)
+            .where(User.level == User.Level.STUDENT)
             .join(User.courses)
             .where(Course.id == course_id)
         ).all()

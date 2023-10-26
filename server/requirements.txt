@@ -34,8 +34,7 @@ PyYAML==6.0
 rfc3339==6.2
 rich==13.4.2
 six==1.16.0
-SQLAlchemy==1.4.45
-sqlalchemy2-stubs==0.0.2a35
+SQLAlchemy==2.0.22
 tomli==2.0.1
 tomlkit==0.11.6
 typer==0.9.0

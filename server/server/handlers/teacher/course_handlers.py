@@ -19,8 +19,9 @@ def create_course():
 
 
 def get_course_users(course_id):
-    iside_users = DBQT.get_users_inside_course(course_id)
-    all_users = DBQT.get_all_users()
-    outside_users = [user for user in all_users if user not in iside_users]
+    inside_students = DBQT.get_students_inside_course(course_id)
+    inside_students_ids = [user.id for user in inside_students]
+    all_students = DBQT.get_all_students()
+    outside_students = [user for user in all_students if user.id not in inside_students_ids]
 
-    return {"inside": iside_users, "outside": outside_users}
+    return {"inside": inside_students, "outside": outside_students}

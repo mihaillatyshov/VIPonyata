@@ -1,6 +1,8 @@
 import React from "react";
+
 import { useNavigate } from "react-router-dom";
-import style from "./StyleError.module.css";
+
+import styles from "./StyleError.module.css";
 
 interface ErrorPageProps {
     errorImg: string;
@@ -15,10 +17,10 @@ const ErrorPage = ({ errorImg, textMain, textDisabled, needReload }: ErrorPagePr
     needReload = needReload ?? true;
 
     return (
-        <div className={style.errorBlock}>
+        <div className={styles.errorBlock}>
             <img src={errorImg} alt="" />
-            <div className={style.errorBlockTextMain}> {textMain} </div>
-            <div className={style.errorBlockTextDisabled}> {textDisabled} </div>
+            <div className={styles.errorBlockTextMain}> {textMain} </div>
+            <div className={styles.errorBlockTextDisabled}> {textDisabled} </div>
             {needReload && (
                 <input
                     className="button button--second"
