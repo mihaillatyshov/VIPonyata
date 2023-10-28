@@ -1,13 +1,15 @@
 import React from "react";
-import { Button } from "react-bootstrap";
-import StudentLexisTaskInterface from "./StudentLexisTaskInterface";
-import { NameTo_words_or_chars, StudentLexisTaskProps, useLexisItem, useSetLexisSelectedItemField } from "./LexisUtils";
+
 import { TTranslate } from "models/Activity/Items/TLexisItems";
+import { Button } from "react-bootstrap";
+
+import { StudentLexisTaskProps, useLexisItem, useLexisWordsOrChars, useSetLexisSelectedItemField } from "./LexisUtils";
+import StudentLexisTaskInterface from "./StudentLexisTaskInterface";
 
 const StudentLexisTranslate = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps<TTranslate>) => {
     const item = useLexisItem(name);
     const setLexisSelectedItemField = useSetLexisSelectedItemField(name);
-    const aliasJP = NameTo_words_or_chars(name);
+    const aliasJP = useLexisWordsOrChars(name);
 
     const getObjectData = (id: number) => {
         return {

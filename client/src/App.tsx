@@ -27,7 +27,6 @@ import StudentLessonPage from "./components/Lessons/StudentLessonPage";
 import StudentMainPage from "./components/MainPage/StudentMainPage";
 import NavBar from "./components/NavBar";
 import NavigateHome from "./components/NavigateHome";
-import TestUpload from "./components/TestUpload";
 import { AjaxGet } from "./libs/ServerAPI";
 import { useAppDispatch, useAppSelector } from "./redux/hooks";
 import { selectUser, setUserData, UserDataType } from "./redux/slices/userSlice";
@@ -74,7 +73,7 @@ const App = () => {
     const getRoute = (
         teacherRoute: React.ReactNode,
         studentRoute: React.ReactNode,
-        unloggedRoute: React.ReactNode = <NavigateHome />
+        unloggedRoute: React.ReactNode = <NavigateHome />,
     ) => {
         if (user.isAuth) {
             return isTeacher(user.userData) ? teacherRoute : studentRoute;
@@ -126,8 +125,16 @@ const App = () => {
                     <Route path="/profile" element={getRoute(<StudentProfilePage />, <StudentProfilePage />)} />
 
                     <Route path="/dictionary" element={getLoggedRoute(<DictionaryPage />)} />
-
-                    <Route path="/upload" element={<TestUpload />} />
+                    <Route
+                        path="*"
+                        element={
+                            <ErrorPage
+                                errorImg="/svg/SomethingWrong.svg"
+                                textMain="Такой страницы не существует"
+                                needReload={false}
+                            />
+                        }
+                    />
                 </Routes>
             </BrowserRouter>
         </div>

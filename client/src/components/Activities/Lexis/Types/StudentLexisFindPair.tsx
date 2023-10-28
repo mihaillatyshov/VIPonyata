@@ -1,8 +1,11 @@
 import React from "react";
-import { Card } from "react-bootstrap";
-import StudentLexisTaskInterface from "./StudentLexisTaskInterface";
-import { NameTo_words_or_chars, StudentLexisTaskProps, useLexisItem, useSetLexisSelectedItemField } from "./LexisUtils";
+
 import { TFindPair } from "models/Activity/Items/TLexisItems";
+import { Card } from "react-bootstrap";
+
+import { StudentLexisTaskProps, useLexisItem, useLexisWordsOrChars, useSetLexisSelectedItemField } from "./LexisUtils";
+import StudentLexisTaskInterface from "./StudentLexisTaskInterface";
+
 //import MD5 from "crypto-js/md5";
 
 type AvailTypes = "words_jp" | "words_ru" | "chars_jp";
@@ -10,7 +13,7 @@ type AvailTypes = "words_jp" | "words_ru" | "chars_jp";
 const StudentLexisFindPair = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps<TFindPair>) => {
     const item = useLexisItem(name);
     const strRU = "words_ru";
-    const strJP = NameTo_words_or_chars(name);
+    const strJP = useLexisWordsOrChars(name);
     const setLexisSelectedItemField = useSetLexisSelectedItemField(name);
 
     const deselectField = () => {
@@ -34,7 +37,7 @@ const StudentLexisFindPair = ({ name, inData, goToNextTaskCallback }: StudentLex
             inData.answers[type][typeId],
             otherType,
             otherTypeId,
-            inData.answers[otherType][otherTypeId]
+            inData.answers[otherType][otherTypeId],
         );
         if (type === strRU) {
             return inData.answers[otherType][otherTypeId] === typeId;
@@ -73,13 +76,13 @@ const StudentLexisFindPair = ({ name, inData, goToNextTaskCallback }: StudentLex
             otherType,
             inData.answers[otherType].indexOf(inData.answers[otherType][item.selectedField.id]),
             type,
-            inData.answers[type].indexOf(inData.answers[type][id])
+            inData.answers[type].indexOf(inData.answers[type][id]),
         );
         console.log(
             otherType,
             inData.answers[otherType].indexOf(inData.answers[type][id]),
             type,
-            inData.answers[type].indexOf(inData.answers[otherType][item.selectedField.id])
+            inData.answers[type].indexOf(inData.answers[otherType][item.selectedField.id]),
         );
         // 3. Clicked field with correct id of other type in answers
         // if (

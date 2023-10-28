@@ -18,7 +18,7 @@ export const LexisNameDrilling = "drilling";
 export const LexisNameHieroglyph = "hieroglyph";
 export type LexisName = typeof LexisNameDrilling | typeof LexisNameHieroglyph;
 
-export const NameTo_dril_or_hier = <D, H>(name: LexisName, dril: D, hier: H) => {
+export const useLexisDrilOrHier = <D, H>(name: LexisName, dril: D, hier: H) => {
     switch (name) {
         case LexisNameDrilling:
             return dril;
@@ -27,30 +27,28 @@ export const NameTo_dril_or_hier = <D, H>(name: LexisName, dril: D, hier: H) => 
     }
 };
 
-export const NameTo_word_or_char = (name: LexisName): "word_jp" | "char_jp" => {
-    return NameTo_dril_or_hier(name, "word_jp", "char_jp");
+export const useLexisWordOrChar = (name: LexisName): "word_jp" | "char_jp" => {
+    return useLexisDrilOrHier(name, "word_jp", "char_jp");
 };
 
-export const NameTo_words_or_chars = (name: LexisName): "words_jp" | "chars_jp" => {
-    return NameTo_dril_or_hier(name, "words_jp", "chars_jp");
+export const useLexisWordsOrChars = (name: LexisName): "words_jp" | "chars_jp" => {
+    return useLexisDrilOrHier(name, "words_jp", "chars_jp");
 };
 
-export const NameToScrambe_word_or_char = (
-    name: LexisName
-): ["word_words", "word_chars"] | ["char_words", "char_chars"] => {
-    return NameTo_dril_or_hier(name, ["word_words", "word_chars"], ["char_words", "char_chars"]);
+export const useScrambeWordOrChar = (name: LexisName): ["word_words", "word_chars"] | ["char_words", "char_chars"] => {
+    return useLexisDrilOrHier(name, ["word_words", "word_chars"], ["char_words", "char_chars"]);
 };
 
 export const useLexisItem = (name: LexisName) => {
     const drilling = useAppSelector(selectDrilling).selectedItem;
     const hieroglyph = useAppSelector(selectHieroglyph).selectedItem;
 
-    return NameTo_dril_or_hier(name, drilling, hieroglyph);
+    return useLexisDrilOrHier(name, drilling, hieroglyph);
 };
 
 export const useSetLexisCardExtras = (name: LexisName) => {
     const dispatch = useAppDispatch();
-    return NameTo_dril_or_hier(
+    return useLexisDrilOrHier(
         name,
         {
             setCardImg: (img: string, id: number) => {
@@ -67,35 +65,35 @@ export const useSetLexisCardExtras = (name: LexisName) => {
             setCardAssociation: (association: string, id: number) => {
                 dispatch(setHieroglyphCardAssociation({ association, cardId: id }));
             },
-        }
+        },
     );
 };
 
 export const useSetLexisSelectedItem = (name: LexisName) => {
     const dispatch = useAppDispatch();
 
-    return NameTo_dril_or_hier(
+    return useLexisDrilOrHier(
         name,
         (data: any) => {
             dispatch(setDrillingSelectedItem(data));
         },
         (data: any) => {
             dispatch(setHieroglyphSelectedItem(data));
-        }
+        },
     );
 };
 
 export const useSetLexisSelectedItemField = (name: LexisName) => {
     const dispatch = useAppDispatch();
 
-    return NameTo_dril_or_hier(
+    return useLexisDrilOrHier(
         name,
         (data: any) => {
             dispatch(setDrillingSelectedItemField(data));
         },
         (data: any) => {
             dispatch(setHieroglyphSelectedItemField(data));
-        }
+        },
     );
 };
 

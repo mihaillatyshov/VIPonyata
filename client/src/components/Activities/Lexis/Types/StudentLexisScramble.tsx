@@ -1,18 +1,15 @@
 import React from "react";
-import { Button } from "react-bootstrap";
-import StudentLexisTaskInterface from "./StudentLexisTaskInterface";
-import {
-    NameToScrambe_word_or_char,
-    StudentLexisTaskProps,
-    useLexisItem,
-    useSetLexisSelectedItemField,
-} from "./LexisUtils";
+
 import { TScramble } from "models/Activity/Items/TLexisItems";
+import { Button } from "react-bootstrap";
+
+import { StudentLexisTaskProps, useLexisItem, useScrambeWordOrChar, useSetLexisSelectedItemField } from "./LexisUtils";
+import StudentLexisTaskInterface from "./StudentLexisTaskInterface";
 
 const StudentLexisScramble = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps<TScramble>) => {
     const item = useLexisItem(name);
     const setLexisSelectedItemField = useSetLexisSelectedItemField(name);
-    const [full, symb] = NameToScrambe_word_or_char(name);
+    const [full, symb] = useScrambeWordOrChar(name);
 
     const setNewWord = (id: number) => {
         return {

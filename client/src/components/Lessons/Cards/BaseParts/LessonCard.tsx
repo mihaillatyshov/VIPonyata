@@ -11,7 +11,7 @@ export const Description = ({ description }: DescriptionProps) => {
 export const TitlePlaceholder = () => {
     return (
         <div className="placeholder-wave ">
-            <span className="placeholder w-25 bg-secondary rounded"></span>
+            <span className="placeholder w-25 bg-placeholder rounded"></span>
         </div>
     );
 };
@@ -19,12 +19,12 @@ export const TitlePlaceholder = () => {
 export const DescriptionPlaceholder = () => {
     return (
         <div className="placeholder-wave">
-            <span className="placeholder bg-secondary me-3 rounded" style={{ width: "40px" }}></span>
-            <span className="placeholder bg-secondary me-3 rounded" style={{ width: "60px" }}></span>
-            <span className="placeholder bg-secondary me-3 rounded" style={{ width: "40px" }}></span>
-            <span className="placeholder bg-secondary me-3 rounded" style={{ width: "60px" }}></span>
-            <span className="placeholder bg-secondary me-3 rounded" style={{ width: "40px" }}></span>
-            <span className="placeholder bg-secondary me-3 rounded" style={{ width: "40px" }}></span>
+            <span className="placeholder bg-placeholder me-3 rounded" style={{ width: "40px" }}></span>
+            <span className="placeholder bg-placeholder me-3 rounded" style={{ width: "60px" }}></span>
+            <span className="placeholder bg-placeholder me-3 rounded" style={{ width: "40px" }}></span>
+            <span className="placeholder bg-placeholder me-3 rounded" style={{ width: "60px" }}></span>
+            <span className="placeholder bg-placeholder me-3 rounded" style={{ width: "40px" }}></span>
+            <span className="placeholder bg-placeholder me-3 rounded" style={{ width: "40px" }}></span>
         </div>
     );
 };

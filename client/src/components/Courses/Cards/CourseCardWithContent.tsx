@@ -28,7 +28,7 @@ const CourseCardWithContent = ({ course }: CourseCardWithContentProps) => {
                         ) : null}
                     </div>
                 </div>
-                <CourseCardFooter id={course.id} />
+                <CourseCardFooter id={course.id} courseName={course.name} />
             </CourseCardBase>
         </Link>
     );

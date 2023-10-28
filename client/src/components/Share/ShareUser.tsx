@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 
+import Loading from "components/Common/Loading";
 import { TUserData } from "models/TUser";
 import { Link } from "react-router-dom";
 
@@ -7,23 +8,52 @@ import styles from "./Share.module.css";
 
 export type TShareUserType = "inside" | "outside";
 
-interface ShareUserButtonProps {
-    userType: TShareUserType;
+export interface ShareResponse {
+    message: string;
 }
 
-const ShareUserButton = ({ userType }: ShareUserButtonProps) => {
-    if (userType === "inside") {
-        return <i className={`bi bi-x-lg ${styles.shareRemoveButton}`} style={{ fontSize: "28px" }} />;
+interface ShareUserButtonProps {
+    userType: TShareUserType;
+    share: () => Promise<ShareResponse>;
+    onShare: (type: TShareUserType) => void;
+}
+
+const ShareUserButton = ({ userType, share, onShare }: ShareUserButtonProps) => {
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
+    const onClickHandler = () => {
+        setIsLoading(true);
+        share()
+            .then(() => onShare(userType))
+            .finally(() => setIsLoading(false));
+    };
+
+    if (isLoading) {
+        return <Loading size={32} />;
     }
-    return <i className={`bi bi-plus-lg ${styles.shareAddButton}`} style={{ fontSize: "32px" }} />;
+
+    if (userType === "inside") {
+        return (
+            <i
+                className={`bi bi-x-lg ${styles.shareRemoveButton}`}
+                style={{ fontSize: "28px" }}
+                onClick={onClickHandler}
+            />
+        );
+    }
+    return (
+        <i className={`bi bi-plus-lg ${styles.shareAddButton}`} style={{ fontSize: "32px" }} onClick={onClickHandler} />
+    );
 };
 
 interface ShareUserProps {
     user: TUserData;
     userType: TShareUserType;
+    share: (userId: number) => Promise<ShareResponse>;
+    onShare: (userId: number, type: TShareUserType) => void;
 }
 
-const ShareUser = ({ user, userType }: ShareUserProps) => {
+const ShareUser = ({ user, userType, share, onShare }: ShareUserProps) => {
     return (
         <div key={user.id} className={`d-flex align-items-center ${styles.shareUser}`}>
             <Link to={`/profile/${user.id}`} className={`d-flex a-link align-items-center ${styles.userLink}`}>
@@ -39,7 +69,11 @@ const ShareUser = ({ user, userType }: ShareUserProps) => {
                     <div className="me-2">{user.name}</div>
                 </div>
             </Link>
-            <ShareUserButton userType={userType} />
+            <ShareUserButton
+                userType={userType}
+                share={() => share(user.id)}
+                onShare={(type: TShareUserType) => onShare(user.id, type)}
+            />
         </div>
     );
 };

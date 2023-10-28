@@ -8,9 +8,10 @@ export type StudentLexisNavProps = {
     // TODO: Remove any
     items: any;
     doneTasks: any;
+    habUrl: string;
 };
 
-const StudentLexisNav = ({ items, doneTasks }: StudentLexisNavProps) => {
+const StudentLexisNav = ({ items, doneTasks, habUrl }: StudentLexisNavProps) => {
     const createItem = (taskName: string, name: string, to: string, imgSrc: string) => {
         return {
             [taskName]: {
@@ -23,16 +24,17 @@ const StudentLexisNav = ({ items, doneTasks }: StudentLexisNavProps) => {
     };
 
     const itemsData = {
-        ...createItem("card", "Card", "card/0", LexisImages["card"]),
-        ...createItem("findpair", "Find Pair", "findpair", LexisImages["findpair"]),
-        ...createItem("scramble", "Scramble", "scramble", LexisImages["scramble"]),
-        ...createItem("space", "Space", "space", LexisImages["space"]),
-        ...createItem("translate", "Translate", "translate", LexisImages["translate"]),
+        ...createItem("card", "カード", "card/0", LexisImages["card"]),
+        ...createItem("findpair", "ペア", "findpair", LexisImages["findpair"]),
+        ...createItem("scramble", "争う", "scramble", LexisImages["scramble"]),
+        ...createItem("space", "欠落", "space", LexisImages["space"]),
+        ...createItem("translate", "翻訳", "translate", LexisImages["translate"]),
     };
 
     return (
-        <div className="container-fluid mx-0">
-            <div className="row text-center align-items-center justify-content-center  mx-0">
+        <div className="container-fluid mx-0 mt-4">
+            <div className="row text-center align-items-center justify-content-center mx-0">
+                <StudentLexisNavItem to={habUrl} img="/img/Activity/Lexis/nav/hub.png" name="ハブ" />
                 {Object.keys(items).map((taskName) => (
                     <StudentLexisNavItem key={taskName} {...itemsData[taskName]} />
                 ))}

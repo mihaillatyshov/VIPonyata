@@ -35,7 +35,7 @@ const PageTitle = ({ title, urlBack }: PageTitleProps) => {
                     <div className="mx-auto pe-2">{title}</div>
                 ) : (
                     <div className="placeholder-wave w-100">
-                        <span className="placeholder w-100 bg-light rounded"></span>
+                        <span className="placeholder w-100 bg-placeholder rounded"></span>
                     </div>
                 )}
             </div>

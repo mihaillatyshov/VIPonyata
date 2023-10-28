@@ -1,19 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { LexisName } from "components/Activities/Lexis/Types/LexisUtils";
-import Tasks, { SelectableTask } from "./Tasks";
+
+import { LexisName, useLexisWordOrChar } from "components/Activities/Lexis/Types/LexisUtils";
+import PageTitle from "components/Common/PageTitle";
+import InputError from "components/Form/InputError";
+import InputTextArea from "components/Form/InputTextArea";
+import InputTime from "components/Form/InputTime";
+import { AjaxPost } from "libs/ServerAPI";
 import { LexisTaskName } from "models/Activity/ILexis";
+import { TCreateCardItem } from "models/Activity/Items/TLexisItems";
+import { TDictionaryItem, TDictionaryItemCreate } from "models/TDictionary";
+import { useNavigate, useParams } from "react-router-dom";
+
 import { DragEndEvent } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-import NewWordsModal from "./NewWordsModal";
-import PageTitle from "components/Common/PageTitle";
-import { AjaxPost } from "libs/ServerAPI";
-import { useNavigate, useParams } from "react-router-dom";
-import InputError from "components/Form/InputError";
-import InputTime from "components/Form/InputTime";
-import InputTextArea from "components/Form/InputTextArea";
-import { TDictionaryItem, TDictionaryItemCreate } from "models/TDictionary";
-import { TCreateCardItem } from "models/Activity/Items/TLexisItems";
+
 import CreatePageLexisCard from "./CreatePageLexisCard";
+import NewWordsModal from "./NewWordsModal";
+import Tasks, { SelectableTask } from "./Tasks";
 
 interface LexisCreatePageProps {
     title: string;
@@ -181,7 +184,7 @@ const LexisCreatePage = ({ title, name }: LexisCreatePageProps) => {
                 isShow={isShowNewWordsModal}
                 close={() => setIsShowNewWordsModal(false)}
                 createNewWords={createNewWords}
-                colToCheck={name === "drilling" ? "word_jp" : "char_jp"}
+                colToCheck={useLexisWordOrChar(name)}
             />
         </div>
     );

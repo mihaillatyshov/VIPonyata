@@ -51,7 +51,7 @@ def get_course_by_id(course_id: int, user_id: int) -> Course:
         if session.scalars(select(Course).where(Course.id == course_id)).one_or_none():
             raise InvalidAPIUsage("You do not have access to this course!", 403)
 
-        raise CourseNotFoundException()
+        raise CourseNotFoundException(course_id)
 
 
 def get_lessons_by_course_id(course_id: int, user_id: int) -> list[Lesson]:
@@ -83,7 +83,7 @@ def get_lesson_by_id(lesson_id: int, user_id: int) -> Lesson:
         if lesson is not None:
             raise InvalidAPIUsage("You do not have access to this lesson!", 403, {"course_id": lesson.course_id})
 
-        raise LessonNotFoundException()
+        raise LessonNotFoundException(lesson_id)
 
 
 #########################################################################################################################

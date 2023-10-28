@@ -3,10 +3,11 @@ import { LoadStatus } from "libs/Status";
 import { TShareUsers } from "models/TUser";
 
 export type GetShareUsersDataType = LoadStatus.DataDoneOrNotDone<{ data: TShareUsers }>;
+export type ShareType = "courses" | "lessons";
 
 interface GetShareUsersProps {
     id: number;
-    type: "courses" | "lessons";
+    type: ShareType;
     setUsers: (user: GetShareUsersDataType) => void;
     setError: (error: string) => void;
 }

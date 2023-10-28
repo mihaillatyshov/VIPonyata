@@ -1,14 +1,16 @@
 import React from "react";
-import { Navigate, useParams } from "react-router-dom";
-import { useRequestLesson } from "requests/Lesson";
-import { useAppSelector } from "redux/hooks";
-import { selectLessons } from "redux/slices/lessonsSlice";
-import { selectDrilling } from "redux/slices/drillingSlice";
-import { selectAssessment } from "redux/slices/assessmentSlice";
-import { selectHieroglyph } from "redux/slices/hieroglyphSlice";
-import PageTitle from "components/Common/PageTitle";
-import TeacherLexisBouble from "components/Activities/Bouble/Teacher/TeacherLexisBouble";
+
 import ITeacherAsssessmentBouble from "components/Activities/Bouble/Teacher/ITeacherAsssessmentBouble";
+import TeacherLexisBouble from "components/Activities/Bouble/Teacher/TeacherLexisBouble";
+import PageDescription from "components/Common/PageDescription";
+import PageTitle from "components/Common/PageTitle";
+import { Navigate, useParams } from "react-router-dom";
+import { useAppSelector } from "redux/hooks";
+import { selectAssessment } from "redux/slices/assessmentSlice";
+import { selectDrilling } from "redux/slices/drillingSlice";
+import { selectHieroglyph } from "redux/slices/hieroglyphSlice";
+import { selectLessons } from "redux/slices/lessonsSlice";
+import { useRequestLesson } from "requests/Lesson";
 
 const TeacherLessonPage = () => {
     const { id } = useParams();
@@ -31,6 +33,8 @@ const TeacherLessonPage = () => {
                 title={lesson?.name}
                 urlBack={lesson === undefined ? undefined : `/courses/${lesson.course_id}`}
             />
+            <PageDescription description={lesson?.description} />
+
             <div className="d-flex justify-content-around flex-wrap mt-5">
                 <TeacherLexisBouble title="Лексика" name="drilling" lessonId={lessonId} info={drilling.info} />
 

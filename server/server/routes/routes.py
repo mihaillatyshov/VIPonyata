@@ -65,6 +65,14 @@ def get_course_users(id):
                                   course_id=id)
 
 
+@routes_bp.route("/courses/<id>/users", methods=["POST"])
+@login_required
+def add_or_remove_user_from_course(id):
+    return user_selector_function(teacher_funcs.add_or_remove_user_from_course,
+                                  None,
+                                  course_id=id)
+
+
 #########################################################################################################################
 ################ Lesson #################################################################################################
 #########################################################################################################################
@@ -79,6 +87,22 @@ def get_lesson_activities(id):
 @login_required
 def create_lesson(course_id):
     return user_selector_function(teacher_funcs.create_lesson, None, course_id=course_id)
+
+
+@routes_bp.route("/lessons/<id>/users", methods=["GET"])
+@login_required
+def get_lesson_users(id):
+    return user_selector_function(teacher_funcs.get_lesson_users,
+                                  None,
+                                  lesson_id=id)
+
+
+@routes_bp.route("/lessons/<id>/users", methods=["POST"])
+@login_required
+def add_or_remove_user_from_lesson(id):
+    return user_selector_function(teacher_funcs.arr_or_remove_user_from_lesson,
+                                  None,
+                                  lesson_id=id)
 
 
 #########################################################################################################################

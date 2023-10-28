@@ -18,7 +18,7 @@ export const Description = ({ description }: DescriptionProps) => {
 export const TitlePlaceholder = () => {
     return (
         <div className="placeholder-wave ">
-            <span className="placeholder w-75 bg-secondary rounded"></span>
+            <span className="placeholder w-75 bg-placeholder rounded"></span>
         </div>
     );
 };
@@ -34,15 +34,15 @@ export const DifficultyPlaceholder = () => {
 export const DescriptionPlaceholder = () => {
     return (
         <div className="placeholder-wave">
-            <span className="placeholder w-50 bg-secondary me-3 rounded"></span>
-            <span className="placeholder w-25 bg-secondary rounded"></span>
+            <span className="placeholder w-50 bg-placeholder me-3 rounded"></span>
+            <span className="placeholder w-25 bg-placeholder rounded"></span>
 
-            <span className="placeholder w-25 bg-secondary me-3 rounded"></span>
-            <span className="placeholder w-25 bg-secondary me-3 rounded"></span>
-            <span className="placeholder w-25 bg-secondary me-3 rounded"></span>
+            <span className="placeholder w-25 bg-placeholder me-3 rounded"></span>
+            <span className="placeholder w-25 bg-placeholder me-3 rounded"></span>
+            <span className="placeholder w-25 bg-placeholder me-3 rounded"></span>
 
-            <span className="placeholder w-25 bg-secondary me-3 rounded"></span>
-            <span className="placeholder w-50 bg-secondary rounded"></span>
+            <span className="placeholder w-25 bg-placeholder me-3 rounded"></span>
+            <span className="placeholder w-50 bg-placeholder rounded"></span>
         </div>
     );
 };

@@ -8,10 +8,10 @@ export type StudentLexisNavItemProps = {
     to: string;
     name: string;
     img: string;
-    mistakeCount: number | undefined;
+    mistakeCount?: number;
 };
 
-type MistakeProps = { mistakeCount: number | undefined };
+type MistakeProps = { mistakeCount?: number };
 const Mistake = ({ mistakeCount }: MistakeProps) => {
     if (mistakeCount === undefined) {
         return <></>;
@@ -32,7 +32,7 @@ const StudentLexisNavItem = ({ to, name, img, mistakeCount }: StudentLexisNavIte
     };
 
     return (
-        <div className="col-auto text-center">
+        <div className="col-auto text-center mb-4">
             <div className={styles.navItem} onClick={onClickHandle}>
                 <div className="px-auto">
                     <img src={img} width="32px" alt={name} />

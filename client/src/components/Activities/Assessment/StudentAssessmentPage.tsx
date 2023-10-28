@@ -1,20 +1,17 @@
 import React, { useEffect } from "react";
 
+import PageDescription from "components/Common/PageDescription";
+import PageTitle from "components/Common/PageTitle";
 import { AjaxGet, AjaxPost } from "libs/ServerAPI";
 import {
-    TAssessmentAnyItem,
-    TAssessmentItemBase,
-    TAssessmentItems,
-    TAssessmentTaskName,
-    TGetStudentTypeByName,
+    TAssessmentAnyItem, TAssessmentItemBase, TAssessmentItems, TAssessmentTaskName, TGetStudentTypeByName,
 } from "models/Activity/Items/TAssessmentItems";
 import { TAssessment } from "models/Activity/TAssessment";
-import { Button } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { selectAssessment, setAssessmentInfo, setAssessmentItems } from "redux/slices/assessmentSlice";
 
-import StudentActivityPageHeader from "../StudentActivityPageHeader";
+import StudentActivityDeadline from "../StudentActivityDeadline";
 import StudentAssessmentAudio from "./Types/StudentAssessmentAudio";
 import StudentAssessmentClassification from "./Types/StudentAssessmentClassification";
 import StudentAssessmentCreateSentence from "./Types/StudentAssessmentCreateSentence";
@@ -112,12 +109,11 @@ const StudentAssessmentPage = () => {
     };
 
     return (
-        <div className="container">
-            <StudentActivityPageHeader activityInfo={assessment.info} backToLessonCallback={backToLessonHandle} />
+        <div className="container pb-5">
+            <PageTitle title={"Assessment"} urlBack={`/lessons/${assessment.info.lesson_id}`} />
+            <PageDescription description={assessment.info.description} className="mb-3" />
+            <StudentActivityDeadline activityInfo={assessment.info} />
 
-            <div>
-                <Button onClick={endAssessmentHandle}> Завершить </Button>
-            </div>
             <hr />
             <div>
                 {assessment.items.map((item: any, i: number) => (
@@ -127,6 +123,7 @@ const StudentAssessmentPage = () => {
                     </div>
                 ))}
             </div>
+            <input type="button" className="btn btn-primary mb-5" onClick={endAssessmentHandle} value="Завершить" />
         </div>
     );
 };

@@ -1,8 +1,13 @@
 from flask import request
 
+import server.queries.OtherDBqueries as DBQO
 import server.queries.TeacherDBqueries as DBQT
-from server.exceptions.ApiExceptions import InvalidRequestJson
+from server.exceptions.ApiExceptions import (CourseNotFoundException,
+                                             InvalidRequestJson,
+                                             UserNotFoundException)
 from server.models.course import CourseCreateReq
+from server.models.user import ShareUserReq
+from server.models.utils import validate_req
 
 
 def get_all_courses():
@@ -25,3 +30,20 @@ def get_course_users(course_id):
     outside_students = [user for user in all_students if user.id not in inside_students_ids]
 
     return {"inside": inside_students, "outside": outside_students}
+
+
+def add_or_remove_user_from_course(course_id):
+    user_req_data = validate_req(ShareUserReq, request.json)
+
+    if DBQT.get_course_by_id(course_id) is None:
+        raise CourseNotFoundException(course_id)
+
+    if DBQO.get_user_by_id(user_req_data.user_id) is None:
+        raise UserNotFoundException(user_req_data.user_id)
+
+    if DBQT.is_student_inside_course(course_id, user_req_data.user_id):
+        DBQT.remove_user_from_course(course_id, user_req_data.user_id)
+    else:
+        DBQT.add_user_to_course(course_id, user_req_data.user_id)
+
+    return {"message": "User added to course"}

@@ -31,3 +31,7 @@ class UserRegisterReq(BaseModel):
 class UserLoginReq(BaseModel):
     nickname: StrExtraSpaceRemove
     password: str
+
+
+class ShareUserReq(BaseModel):
+    user_id: int

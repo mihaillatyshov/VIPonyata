@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 
+import PageDescription from "components/Common/PageDescription";
 import PageTitle from "components/Common/PageTitle";
 import LessonsList from "components/Lessons/LessonsList";
 import { AjaxGet } from "libs/ServerAPI";
@@ -36,9 +37,12 @@ const CoursePage = () => {
             });
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+    console.log(course?.description);
+
     return (
         <div className="container" style={{ maxWidth: "800px" }}>
             <PageTitle title={course?.name} urlBack="/" />
+            <PageDescription description={course?.description} />
             <LessonsList />
         </div>
     );

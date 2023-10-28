@@ -1,26 +1,22 @@
 import React, { useEffect } from "react";
 
 import StudentProgress from "components/Activities/StudentProgress";
+import PageDescription from "components/Common/PageDescription";
+import PageTitle from "components/Common/PageTitle";
 import NavigateToElement from "components/NavigateToElement";
 import { AjaxGet, AjaxPost } from "libs/ServerAPI";
 import { TLexisDoneTasks } from "models/Activity/DoneTasks/TLexisDoneTasks";
 import { LexisTaskName } from "models/Activity/ILexis";
 import {
-    TCardItem,
-    TFindPair,
-    TLexisAnyItem,
-    TLexisItems,
-    TScramble,
-    TSpace,
-    TTranslate,
+    TCardItem, TFindPair, TLexisAnyItem, TLexisItems, TScramble,
+    TSpace, TTranslate,
 } from "models/Activity/Items/TLexisItems";
 import { TDrilling } from "models/Activity/TDrilling";
 import { THieroglyph } from "models/Activity/THieroglyph";
-import { Button } from "react-bootstrap";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import { LexisState } from "redux/slices/lexis";
 
-import StudentActivityPageHeader from "../StudentActivityPageHeader";
+import StudentActivityDeadline from "../StudentActivityDeadline";
 import StudentLexisNav from "./Nav/StudentLexisNav";
 import StudentLexisHub from "./StudentLexisHub";
 import { LexisName, StudentLexisTaskProps } from "./Types/LexisUtils";
@@ -44,6 +40,7 @@ interface StudentLexisPageRouteProps<T> {
 interface StudentLexisPageProps<T extends TDrilling | THieroglyph> {
     name: LexisName;
     lexis: LexisState<T>;
+    title: string;
     setLexisInfoCallback: (info: T | undefined) => void;
     setLexisItemsCallback: (items: TLexisItems | undefined) => void;
     setLexisDoneTaskCallback: (doneTasks: TLexisDoneTasks | undefined) => void;
@@ -60,6 +57,7 @@ interface TRouteElements {
 const StudentLexisPage = <T extends TDrilling | THieroglyph>({
     name,
     lexis,
+    title,
     setLexisInfoCallback,
     setLexisItemsCallback,
     setLexisDoneTaskCallback,
@@ -144,18 +142,19 @@ const StudentLexisPage = <T extends TDrilling | THieroglyph>({
         navigate(`/lessons/${info.lesson_id}`);
     };
 
+    const habUrl = `/${name}/${info.id}`;
+
     return (
         <div className="container">
-            <StudentActivityPageHeader activityInfo={info} backToLessonCallback={backToLessonHandle} />
-            <Button onClick={() => navigate(`/${name}/${info.id}`)}> Хаб </Button>
+            <PageTitle title={title} urlBack={`/lessons/${info.lesson_id}`} />
+            <PageDescription description={info.description} className="mb-3" />
 
-            <div className="my-2">
-                <StudentProgress
-                    percent={(Object.keys(info.try.done_tasks).length / Object.keys(items).length) * 100}
-                />
-            </div>
-            <StudentLexisNav items={lexis.items} doneTasks={info.try.done_tasks} />
-
+            <StudentProgress percent={(Object.keys(info.try.done_tasks).length / Object.keys(items).length) * 100}>
+                <div className="position-absolute w-100 d-flex justify-content-center" style={{ top: "0px" }}>
+                    <StudentActivityDeadline activityInfo={info} />
+                </div>
+            </StudentProgress>
+            <StudentLexisNav items={lexis.items} doneTasks={info.try.done_tasks} habUrl={habUrl} />
             <Routes>
                 <Route
                     path="/"

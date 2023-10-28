@@ -34,7 +34,7 @@ const LessonCardWithContent = ({ lesson }: LessonCardWithContentProps) => {
                             ) : null}
                         </div>
                     </div>
-                    <LessonCardFooter />
+                    <LessonCardFooter id={lesson.id} lessonName={lesson.name} />
                 </div>
             </Link>
             <LessonCardSkill />

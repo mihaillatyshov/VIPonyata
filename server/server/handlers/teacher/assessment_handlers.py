@@ -48,7 +48,7 @@ class IAssessmentHandlers(Generic[AssessmentType, AssessmentTryType]):
 
         lesson = DBQT.get_lesson_by_id(lesson_id)
         if lesson is None:
-            raise LessonNotFoundException()
+            raise LessonNotFoundException(lesson_id)
 
         tasks: list[str] = []
         errors: dict[int, dict] = {}

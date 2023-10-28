@@ -7,7 +7,7 @@ from server.exceptions.ApiExceptions import InvalidAPIUsage
 from server.log_lib import LogI
 from server.models.assessment import AssessmentCreateReqStr
 from server.models.course import CourseCreateReq
-from server.models.db_models import (Assessment, AssessmentTry,
+from server.models.db_models import (a_users_courses, a_users_lessons, Assessment, AssessmentTry,
                                      AssessmentTryType, AssessmentType, Course,
                                      Dictionary, Drilling, DrillingCard,
                                      DrillingTry, FinalBoss, FinalBossTry,
@@ -45,9 +45,7 @@ def get_course_by_id(course_id: int) -> Course | None:
 def create_course(course_data: CourseCreateReq) -> Course:
     with DBsession.begin() as session:
         course = Course(**course_data.model_dump())
-
         session.add(course)
-
         return course
 
 
@@ -59,6 +57,31 @@ def get_students_inside_course(course_id: int) -> list[User]:
             .join(User.courses)
             .where(Course.id == course_id)
         ).all()
+
+
+def is_student_inside_course(course_id: int, user_id: int) -> bool:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(User)
+            .join(User.courses)
+            .where(Course.id == course_id)
+            .where(User.id == user_id)
+        ).one_or_none() is not None
+
+
+def add_user_to_course(course_id: int, user_id: int):
+    with DBsession.begin() as session:
+        session.execute(a_users_courses
+                        .insert()
+                        .values(course_id=course_id, user_id=user_id))
+
+
+def remove_user_from_course(course_id: int, user_id: int):
+    with DBsession.begin() as session:
+        session.execute(a_users_courses
+                        .delete()
+                        .where(a_users_courses.c.course_id == course_id)
+                        .where(a_users_courses.c.user_id == user_id))
 
 
 #########################################################################################################################
@@ -77,10 +100,43 @@ def get_lesson_by_id(lesson_id: int) -> Lesson | None:
 def create_lesson(course_id: int, lesson_data: LessonCreateReq) -> Lesson:
     with DBsession.begin() as session:
         lesson = Lesson(course_id=course_id, **lesson_data.model_dump())
-
         session.add(lesson)
-
         return lesson
+
+
+def get_students_inside_lesson(lesson_id: int) -> list[User]:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(User)
+            .where(User.level == User.Level.STUDENT)
+            .join(User.lessons)
+            .where(Lesson.id == lesson_id)
+        ).all()
+
+
+def is_student_inside_lesson(lesson_id: int, user_id: int) -> bool:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(User)
+            .join(User.lessons)
+            .where(Lesson.id == lesson_id)
+            .where(User.id == user_id)
+        ).one_or_none() is not None
+
+
+def add_user_to_lesson(lesson_id: int, user_id: int):
+    with DBsession.begin() as session:
+        session.execute(a_users_lessons
+                        .insert()
+                        .values(lesson_id=lesson_id, user_id=user_id))
+
+
+def remove_user_from_lesson(lesson_id: int, user_id: int):
+    with DBsession.begin() as session:
+        session.execute(a_users_lessons
+                        .delete()
+                        .where(a_users_lessons.c.lesson_id == lesson_id)
+                        .where(a_users_lessons.c.user_id == user_id))
 
 
 #########################################################################################################################

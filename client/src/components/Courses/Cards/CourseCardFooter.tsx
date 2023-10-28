@@ -7,9 +7,10 @@ const FONT_SIZE = "32px";
 
 interface CourseCardFooterProps {
     id: number;
+    courseName: string;
 }
 
-const CourseCardFooter = ({ id }: CourseCardFooterProps) => {
+const CourseCardFooter = ({ id, courseName }: CourseCardFooterProps) => {
     const isTeacher = useUserIsTeacher();
     const [isShareModalShow, setIsShareModalShow] = React.useState<boolean>(false);
 
@@ -32,7 +33,7 @@ const CourseCardFooter = ({ id }: CourseCardFooterProps) => {
                 <ShareModal
                     id={id}
                     isShow={isShareModalShow}
-                    name="Открыть доступ к уроку"
+                    name={`Доступ к курсу (${courseName})`}
                     type="courses"
                     close={() => setIsShareModalShow(false)}
                 />

@@ -82,3 +82,7 @@ button.scrambleItem {
     -ms-user-select: none;
     user-select: none;
 }
+
+.bg-placeholder {
+    color: #6f6f6f;
+}
