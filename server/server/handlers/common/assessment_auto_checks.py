@@ -105,7 +105,10 @@ def classification_task_check(data: ClassificationTaskRes) -> ClassificationTask
     return ClassificationTaskCheck(mistakes_count=mistakes_count + len(data.inputs), mistake_answers=mistake_answers)
 
 
-def open_question_task_check(_: OpenQuestionTaskRes) -> OpenQuestionTaskCheck:
+def open_question_task_check(data: OpenQuestionTaskRes) -> OpenQuestionTaskCheck:
+    if data.meta_answer != None and data.meta_answer != "":
+        return OpenQuestionTaskCheck(mistakes_count=1 if data.meta_answer != data.answer else 0, cheked=True)
+
     return OpenQuestionTaskCheck()
 
 

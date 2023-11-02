@@ -26,7 +26,7 @@ class AssessmentTaskName(str, Enum):
 
 
 ANSWER_CANT_BE_EMPTY = "Ответ не может быть пустым"
-QESTION_CANT_BE_EMPTY = "Вопрос не может быть пустым"
+QUESTION_CANT_BE_EMPTY = "Вопрос не может быть пустым"
 
 
 #########################################################################################################################
@@ -73,6 +73,7 @@ class BaseModelRes(BaseModelTask, abc.ABC):
 
 class BaseModelCheck(BaseModel):
     mistakes_count: int = 0
+    cheked: bool = True
 
 
 #########################################################################################################################
@@ -152,7 +153,7 @@ class SingleTestTaskTeacherReq(SingleTestTaskTeacherBase):
             raise ValueError(f"Выбран недопустимый вариант ответа ({self.meta_answer + 1})")
 
         if not self.question:
-            raise ValueError(QESTION_CANT_BE_EMPTY)
+            raise ValueError(QUESTION_CANT_BE_EMPTY)
 
         for option in self.options:
             if not option:
@@ -220,7 +221,7 @@ class MultiTestTaskTeacherReq(MultiTestTaskTeacherBase):
                 raise ValueError(f"Варианты ответа вне диапазона ({self.meta_answers})")
 
         if not self.question:
-            raise ValueError(QESTION_CANT_BE_EMPTY)
+            raise ValueError(QUESTION_CANT_BE_EMPTY)
 
         for option in self.options:
             if not option:
@@ -423,10 +424,30 @@ class SentenceOrderTaskCheck(IOrderTaskCheck):
     pass
 
 
-# TODO combine 2 classes of FillSpaces<...>
 #########################################################################################################################
 ################ IFillSpaces ############################################################################################
 #########################################################################################################################
+class IFillSpacesTaskTeacherBase(BaseModelTask):
+    separates: list[StrExtraSpaceRemove]
+    meta_answers: list[StrExtraSpaceRemove]
+
+
+class IFillSpacesTaskTeacherReq(IFillSpacesTaskTeacherBase):
+    @model_validator(mode="after")
+    def validate_on_create(self) -> "IFillSpacesTaskTeacherReq":
+        if len(self.meta_answers) < 1:
+            raise ValueError(f"Слишком мало полей ({len(self.meta_answers)})")
+
+        for answer in self.meta_answers:
+            if not answer:
+                raise ValueError(ANSWER_CANT_BE_EMPTY)
+
+        if (len(self.separates) - 1) != len(self.meta_answers):
+            raise ValueError(
+                f"Ответов должно быть на 1 меньше, чем разделителей (s:{len(self.separates)}, a:{len(self.meta_answers)})"
+            )
+
+        return self
 
 
 class IFillSpacesTaskCheck(BaseModelCheck):
@@ -443,17 +464,12 @@ class FillSpacesExistsTaskBase(BaseModelTask):
         return validate_name(v, AssessmentTaskName.FILL_SPACES_EXISTS)
 
 
-class FillSpacesExistsTaskTeacherBase(FillSpacesExistsTaskBase):
-    separates: list[StrExtraSpaceRemove]
-    meta_answers: list[StrExtraSpaceRemove]
-
-
 class FillSpacesExistsTaskStudentReq(FillSpacesExistsTaskBase):
     answers: list[StrExtraSpaceRemove | None]
     inputs: list[StrExtraSpaceRemove]
 
 
-class FillSpacesExistsTaskRes(FillSpacesExistsTaskTeacherBase, BaseModelRes):
+class FillSpacesExistsTaskRes(FillSpacesExistsTaskBase, IFillSpacesTaskTeacherBase, BaseModelRes):
     answers: list[StrExtraSpaceRemove | None] = []
     inputs: list[StrExtraSpaceRemove] = []
 
@@ -480,22 +496,8 @@ class FillSpacesExistsTaskRes(FillSpacesExistsTaskTeacherBase, BaseModelRes):
         return combo_answers == meta_answers
 
 
-class FillSpacesExistsTaskTeacherReq(FillSpacesExistsTaskTeacherBase):
-    @model_validator(mode="after")
-    def validate_on_create(self) -> "FillSpacesExistsTaskTeacherReq":
-        if len(self.meta_answers) < 2:
-            raise ValueError(f"Слишком мало полей ({len(self.meta_answers)})")
-
-        for answer in self.meta_answers:
-            if not answer:
-                raise ValueError(ANSWER_CANT_BE_EMPTY)
-
-        if (len(self.separates) - 1) != len(self.meta_answers):
-            raise ValueError(
-                f"Ответов должно быть на 1 меньше, чем разделителей (s:{len(self.separates)}, a:{len(self.meta_answers)})"
-            )
-
-        return self
+class FillSpacesExistsTaskTeacherReq(FillSpacesExistsTaskBase, IFillSpacesTaskTeacherReq):
+    pass
 
 
 class FillSpacesExistsTaskCheck(IFillSpacesTaskCheck):
@@ -520,14 +522,8 @@ class FillSpacesByHandTaskTeacherBase(FillSpacesByHandTaskBase):
 class FillSpacesByHandTaskStudentReq(FillSpacesByHandTaskBase):
     answers: list[StrExtraSpaceRemove]
 
-    @model_validator(mode="after")
-    def answers_validation(self) -> "FillSpacesByHandTaskStudentReq":
-        # TODO: Add check for answers count
 
-        return self
-
-
-class FillSpacesByHandTaskRes(FillSpacesByHandTaskTeacherBase, BaseModelRes):
+class FillSpacesByHandTaskRes(FillSpacesByHandTaskBase, IFillSpacesTaskTeacherBase, BaseModelRes):
     answers: list[StrExtraSpaceRemove] = []
 
     @model_validator(mode="after")
@@ -542,22 +538,8 @@ class FillSpacesByHandTaskRes(FillSpacesByHandTaskTeacherBase, BaseModelRes):
         return len(self.answers) == len(self.meta_answers)
 
 
-class FillSpacesByHandTaskTeacherReq(FillSpacesByHandTaskTeacherBase):
-    @model_validator(mode="after")
-    def validate_on_create(self) -> "FillSpacesByHandTaskTeacherReq":
-        if len(self.meta_answers) < 1:
-            raise ValueError(f"Слишком мало полей ({len(self.meta_answers)})")
-
-        for answer in self.meta_answers:
-            if not answer:
-                raise ValueError(ANSWER_CANT_BE_EMPTY)
-
-        if (len(self.separates) - 1) != len(self.meta_answers):
-            raise ValueError(
-                f"Ответов должно быть на 1 меньше, чем разделителей (s:{len(self.separates)}, a:{len(self.meta_answers)})"
-            )
-
-        return self
+class FillSpacesByHandTaskTeacherReq(FillSpacesByHandTaskBase, IFillSpacesTaskTeacherReq):
+    pass
 
 
 class FillSpacesByHandTaskCheck(IFillSpacesTaskCheck):
@@ -656,6 +638,7 @@ class OpenQuestionTaskBase(BaseModelTask):
 
 class OpenQuestionTaskTeacherBase(OpenQuestionTaskBase):
     question: StrExtraSpaceRemove
+    meta_answer: StrExtraSpaceRemove | None = None
 
 
 class OpenQuestionTaskStudentReq(OpenQuestionTaskBase):
@@ -678,13 +661,13 @@ class OpenQuestionTaskTeacherReq(OpenQuestionTaskTeacherBase):
     @model_validator(mode="after")
     def validate_on_create(self) -> "OpenQuestionTaskTeacherReq":
         if not self.question:
-            raise ValueError(QESTION_CANT_BE_EMPTY)
+            raise ValueError(QUESTION_CANT_BE_EMPTY)
 
         return self
 
 
 class OpenQuestionTaskCheck(BaseModelCheck):
-    pass
+    cheked: bool = False
 
 
 #########################################################################################################################

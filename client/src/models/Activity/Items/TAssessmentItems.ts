@@ -153,7 +153,9 @@ interface TAssessmentOpenQuestionBase extends TAssessmentItemBase {
 export interface TAssessmentOpenQuestion extends TAssessmentOpenQuestionBase {
     answer: string;
 }
-export interface TTeacherAssessmentOpenQuestion extends TAssessmentOpenQuestionBase {}
+export interface TTeacherAssessmentOpenQuestion extends TAssessmentOpenQuestionBase {
+    meta_answer: string;
+}
 
 // * ==========================================================================
 // * ========== Img ===========================================================
@@ -232,7 +234,7 @@ const teacherAssessmentTaskDefaultDataAliases: TTeacherAssessmentTaskDefaultData
         meta_answers: [],
     }),
     sentence_order: () => ({ name: TAssessmentTaskName.SENTENCE_ORDER, meta_parts: [] }),
-    open_question: () => ({ name: TAssessmentTaskName.OPEN_QUESTION, answer: "", question: "" }),
+    open_question: () => ({ name: TAssessmentTaskName.OPEN_QUESTION, meta_answer: "", question: "" }),
     img: () => ({ name: TAssessmentTaskName.IMG, url: "" }),
     audio: () => ({ name: TAssessmentTaskName.AUDIO, url: "" }),
 };

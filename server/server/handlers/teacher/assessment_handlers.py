@@ -74,6 +74,9 @@ class IAssessmentHandlers(Generic[AssessmentType, AssessmentTryType]):
 
         return {"assessment": assessment}
 
+    def get_done_tasks(self, assessment_id: int):
+        return {}
+
 
 AssessmentHandlers = IAssessmentHandlers[Assessment, AssessmentTry](Assessment)
 FinalBossHandlers = IAssessmentHandlers[FinalBoss, FinalBossTry](FinalBoss)

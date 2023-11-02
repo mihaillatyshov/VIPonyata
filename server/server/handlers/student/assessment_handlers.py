@@ -7,7 +7,7 @@ from server.handlers.common.assessment_auto_checks import CheckAliases
 from server.handlers.student.activity_handlers import ActivityHandlers
 from server.log_lib import LogE, LogW
 from server.models.assessment import Aliases
-from server.models.db_models import (Assessment, AssessmentTry,
+from server.models.db_models import (AbstractAssessmentTry, Assessment, AssessmentTry,
                                      AssessmentTryType, AssessmentType,
                                      FinalBoss, FinalBossTry,
                                      time_limit_to_timedelta)
@@ -86,6 +86,16 @@ def check_task_req(tasks: list[dict]) -> list[dict]:
     return checks
 
 
+def calc_mistakes_count(activity_try: AbstractAssessmentTry) -> int:
+    checked_tasks = json.loads(activity_try.checked_tasks or "[]")
+    return sum(check_task.get("mistakes_count", 0) for check_task in checked_tasks)
+
+
+def calc_is_checked(activity_try: AbstractAssessmentTry) -> bool:
+    checked_tasks = json.loads(activity_try.checked_tasks or "[]")
+    return all(check_task.get("cheked", False) for check_task in checked_tasks)
+
+
 class IAssessmentHandlers(ActivityHandlers[AssessmentType, AssessmentTryType]):
     _activity_queries: DBQS.AssessmentQueriesClass[AssessmentType, AssessmentTryType]
 
@@ -148,6 +158,20 @@ class IAssessmentHandlers(ActivityHandlers[AssessmentType, AssessmentTryType]):
             activity_id, get_current_user_id())
         tasks = parse_student_tasks(assessment.now_try.done_tasks)
         return {"assessment": assessment, "items": tasks}
+
+    def get_done_tasks(self, activity_id: int):
+        self._activity_queries.get_by_id(activity_id, get_current_user_id())
+
+        done_tries = self._activity_queries.get_done_tries_by_activity_id(activity_id, get_current_user_id())
+
+        result = []
+        for done_try in done_tries:
+            result.append(
+                {**done_try.__json__(),
+                 "mistakes_count": calc_mistakes_count(done_try),
+                 "is_checked": calc_is_checked(done_try)})
+            done_try.done_tasks = parse_student_tasks(done_try.done_tasks)
+        return {"done_tries": result}
 
 
 AssessmentHandlers = IAssessmentHandlers[Assessment, AssessmentTry](Assessment)

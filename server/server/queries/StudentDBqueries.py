@@ -245,6 +245,19 @@ class AssessmentQueriesClass(ActivityQueries[AssessmentType, AssessmentTryType])
                 .values(done_tasks=done_tasks, checked_tasks=checked_tasks)
             )
 
+    def get_done_tries_by_activity_id(self, activity_id: int, user_id: int) -> list[AssessmentTryType]:
+        with DBsession.begin() as session:
+            return session.scalars(
+                select(self._activityTry_type)
+                .where(self._activityTry_type.end_datetime != None)
+                .join(self._activityTry_type.base)
+                .where(self._activity_type.id == activity_id)
+                .join(self._activity_type.lesson)
+                .join(Lesson.users)
+                .where(User.id == user_id)
+                .order_by(self._activityTry_type.try_number.desc())
+            ).all()
+
 
 AssessmentQueries = AssessmentQueriesClass[Assessment, AssessmentTry](Assessment, AssessmentTry)
 FinalBossQueries = AssessmentQueriesClass[FinalBoss, FinalBossTry](FinalBoss, FinalBossTry)

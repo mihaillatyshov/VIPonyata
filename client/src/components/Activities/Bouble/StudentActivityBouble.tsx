@@ -5,10 +5,10 @@ import { AjaxPost } from "libs/ServerAPI";
 import { TAssessment } from "models/Activity/TAssessment";
 import { TDrilling } from "models/Activity/TDrilling";
 import { THieroglyph } from "models/Activity/THieroglyph";
-import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
 import { ActivityName } from "../ActivityUtils";
+import StudentViewDoneTryButton from "../ViewTry/StudentViewDoneTryButton";
 import ActivityBouble from "./ActivityBouble";
 
 type StudentActivityBubbleProps = {
@@ -60,9 +60,12 @@ const StudentActivityBubble = ({ info, title, name, onDeadline }: StudentActivit
     return (
         <ActivityBouble title={title}>
             <div>{getTextInfo()}</div>
-            <Button type="button" onClick={onButtonClick}>
-                {getButtonText()}
-            </Button>
+            <div>
+                <input type="button" className="btn btn-primary" onClick={onButtonClick} value={getButtonText()} />
+            </div>
+            <div>
+                <StudentViewDoneTryButton name={name} id={info.id} />
+            </div>
         </ActivityBouble>
     );
 };

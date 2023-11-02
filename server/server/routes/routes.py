@@ -189,6 +189,14 @@ def create_hieroglyph(lesson_id):
 #########################################################################################################################
 ################ Assessment #############################################################################################
 #########################################################################################################################
+@routes_bp.route("/assessment/<id>/donetries", methods=["GET"])
+@login_required
+def get_assessment_done_tries(id):
+    return user_selector_function(
+        teacher_funcs.AssessmentHandlers.get_done_tasks, student_funcs.AssessmentHandlers.get_done_tasks,
+        activity_id=id)
+
+
 @routes_bp.route("/assessment/<id>/newtry", methods=["POST"])
 @login_required
 def start_new_assessment_try(id):
