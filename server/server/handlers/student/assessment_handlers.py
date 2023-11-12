@@ -7,9 +7,9 @@ from server.handlers.common.assessment_auto_checks import CheckAliases
 from server.handlers.student.activity_handlers import ActivityHandlers
 from server.log_lib import LogE, LogW
 from server.models.assessment import Aliases
-from server.models.db_models import (AbstractAssessmentTry, Assessment, AssessmentTry,
-                                     AssessmentTryType, AssessmentType,
-                                     FinalBoss, FinalBossTry,
+from server.models.db_models import (AbstractAssessmentTry, Assessment,
+                                     AssessmentTry, AssessmentTryType,
+                                     AssessmentType, FinalBoss, FinalBossTry,
                                      time_limit_to_timedelta)
 from server.queries import StudentDBqueries as DBQS
 from server.routes.routes_utils import (activity_end_time_handler,
@@ -159,7 +159,7 @@ class IAssessmentHandlers(ActivityHandlers[AssessmentType, AssessmentTryType]):
         tasks = parse_student_tasks(assessment.now_try.done_tasks)
         return {"assessment": assessment, "items": tasks}
 
-    def get_done_tasks(self, activity_id: int):
+    def get_done_tries(self, activity_id: int):
         self._activity_queries.get_by_id(activity_id, get_current_user_id())
 
         done_tries = self._activity_queries.get_done_tries_by_activity_id(activity_id, get_current_user_id())
@@ -172,6 +172,11 @@ class IAssessmentHandlers(ActivityHandlers[AssessmentType, AssessmentTryType]):
                  "is_checked": calc_is_checked(done_try)})
             done_try.done_tasks = parse_student_tasks(done_try.done_tasks)
         return {"done_tries": result}
+
+    def get_done_try(self, done_try_id: int):
+        done_try = self._activity_queries.get_done_try_by_id(done_try_id, get_current_user_id())
+
+        return {"done_try": done_try}
 
 
 AssessmentHandlers = IAssessmentHandlers[Assessment, AssessmentTry](Assessment)

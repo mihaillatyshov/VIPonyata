@@ -1,10 +1,10 @@
 import React from "react";
-import { TTeacherAssessmentTestMulti } from "models/Activity/Items/TAssessmentItems";
-import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
-import InputCheckSingle from "components/Form/InputCheckSingle";
 
-import styles from "./Style.module.css";
+import InputCheckSingle from "components/Form/InputCheckSingle";
+import { TTeacherAssessmentTestMulti } from "models/Activity/Items/TAssessmentItems";
+
 import TeacherAssessmentTestBase from "./TeacherAssessmentTestBase";
+import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
 
 const TeacherAssessmentTestMulti = ({
     data,
@@ -37,10 +37,9 @@ const TeacherAssessmentTestMulti = ({
             onRemoveOption={removeOption}
             selectorNode={(id: number) => (
                 <InputCheckSingle
-                    blockName={taskUUID}
                     htmlId={taskUUID}
                     id={id}
-                    className={`input-group-text ${styles.bigCheck}`}
+                    className="input-group-text big-check"
                     placeholder={""}
                     selectedIds={data.meta_answers}
                     onChange={changeAnswerHandler}

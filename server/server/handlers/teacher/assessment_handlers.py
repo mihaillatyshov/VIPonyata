@@ -74,7 +74,10 @@ class IAssessmentHandlers(Generic[AssessmentType, AssessmentTryType]):
 
         return {"assessment": assessment}
 
-    def get_done_tasks(self, assessment_id: int):
+    def get_done_tries(self, assessment_id: int):
+        return {}
+
+    def get_done_try(self, done_try_id: int):
         return {}
 
 

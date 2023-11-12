@@ -19,7 +19,7 @@ const StudentAssessmentOpenQuestion = ({ data, taskId }: StudentAssessmentTypePr
         <div>
             <div>{data.question}</div>
             <div>
-                <input type="text" value={data.answer} onChange={onChangeHandler} />
+                <input type="text" className="form-control mt-2" value={data.answer} onChange={onChangeHandler} />
             </div>
         </div>
     );

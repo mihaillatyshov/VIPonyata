@@ -5,8 +5,6 @@ import CSS from "csstype";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS as DNDCSS } from "@dnd-kit/utilities";
 
-import styles from "../StyleAssessmentType.module.css";
-
 interface SortableItemProps {
     id: string;
     str: string;
@@ -27,14 +25,8 @@ const SortableItem = ({ id, str, customData, width }: SortableItemProps) => {
     };
 
     return (
-        <div
-            ref={setNodeRef}
-            style={style}
-            {...attributes}
-            {...listeners}
-            className={`d-flex ${styles.createSentenceItem}`}
-        >
-            <div className="mx-auto dnd-prevent-select">{str}</div>
+        <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="d-flex dnd__sortable-item">
+            <div className="mx-auto prevent-select">{str}</div>
         </div>
     );
 };

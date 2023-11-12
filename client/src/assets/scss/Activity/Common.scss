@@ -1,0 +1,9 @@
+.done-try-preview {
+    @extend .box-shadow-main;
+
+    border: 1px solid #444444;
+    padding: 8px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    cursor: pointer;
+}

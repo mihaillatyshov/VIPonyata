@@ -1,11 +1,13 @@
 import React from "react";
+
+import CSS from "csstype";
+import { getTextWidth } from "libs/fontSize";
 import {
     TTeacherAssessmentCreateSentence,
     TTeacherAssessmentSentenceOrder,
 } from "models/Activity/Items/TAssessmentItems";
+
 import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
-import { getTextWidth } from "libs/fontSize";
-import CSS from "csstype";
 
 type TTeacherAssessmentFillSpaceType = TTeacherAssessmentCreateSentence | TTeacherAssessmentSentenceOrder;
 
@@ -21,8 +23,8 @@ const Input = ({ value, id, onChange, isCompact }: InputProps) => {
         100,
         getTextWidth(
             value,
-            `bold 1rem arial system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans","Liberation Sans",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"`
-        ) + 50
+            `bold 1rem arial system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans","Liberation Sans",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"`,
+        ) + 50,
     );
     const style: CSS.Properties = isCompact
         ? {
@@ -49,10 +51,15 @@ interface AddButtonProps {
 }
 
 const AddButton = ({ addLine, isCompact }: AddButtonProps) => {
+    const addLineHandler = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        addLine();
+    };
+
     const style: CSS.Properties = isCompact ? { fontSize: "1.5em", margin: "0 6px" } : {};
     return (
         <div className="d-mb-3">
-            <button className={`btn btn-outline-dark ${isCompact ? "p-0" : ""}`} onClick={addLine}>
+            <button type="submit" className={`btn btn-outline-dark ${isCompact ? "p-0" : ""}`} onClick={addLineHandler}>
                 <i className="bi bi-plus-lg" style={style} />
                 {isCompact ? "" : "Добавить предложение"}
             </button>
@@ -90,7 +97,7 @@ const ITeacherAssessmentOrderTask = <T extends TTeacherAssessmentFillSpaceType>(
     const className = isCompact ? "d-flex flex-wrap" : "";
 
     return (
-        <div className={className}>
+        <form className={className}>
             {data.meta_parts.map((item, i) => (
                 <div key={i} className="input-group mb-3 me-3 w-auto">
                     <Input value={item} onChange={onTextChange} id={i} isCompact={isCompact} />
@@ -104,7 +111,7 @@ const ITeacherAssessmentOrderTask = <T extends TTeacherAssessmentFillSpaceType>(
                 </div>
             ))}
             <AddButton addLine={addLine} isCompact={isCompact} />
-        </div>
+        </form>
     );
 };
 

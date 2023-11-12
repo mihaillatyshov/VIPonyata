@@ -1,24 +1,34 @@
 import { useCallback } from "react";
-import { ActivityName } from "components/Activities/ActivityUtils";
-import { useAppDispatch } from "redux/hooks";
-import { TLessonResponse } from "models/TLesson";
+
+import { IAssessmentName, LexisName } from "models/Activity/IActivity";
+import { TAssessment } from "models/Activity/TAssessment";
 import { TDrilling } from "models/Activity/TDrilling";
 import { THieroglyph } from "models/Activity/THieroglyph";
-import { TAssessment } from "models/Activity/TAssessment";
+import { TLessonResponse } from "models/TLesson";
+import { useAppDispatch } from "redux/hooks";
 
-export const useSetActivityInfo = () => {
+export const useSetLexisInfo = () => {
     const dispatch = useAppDispatch();
 
-    const setActivityInfo = useCallback(
-        (
-            name: ActivityName,
-            data: TLessonResponse,
-            setInfoCallback: (info: TDrilling | THieroglyph | TAssessment) => any
-        ) => {
+    const setLexisInfo = useCallback(
+        (name: LexisName, data: TLessonResponse, setInfoCallback: (info: TDrilling | THieroglyph) => any) => {
             dispatch(setInfoCallback(data.items[name]));
         },
-        [dispatch]
+        [dispatch],
     );
 
-    return setActivityInfo;
+    return setLexisInfo;
+};
+
+export const useSetAssessmentInfo = () => {
+    const dispatch = useAppDispatch();
+
+    const setAssessmentInfo = useCallback(
+        (name: IAssessmentName, data: TLessonResponse, setInfoCallback: (info: TAssessment) => any) => {
+            dispatch(setInfoCallback(data.items[name]));
+        },
+        [dispatch],
+    );
+
+    return setAssessmentInfo;
 };

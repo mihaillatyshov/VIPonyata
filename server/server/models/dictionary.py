@@ -28,12 +28,12 @@ class DictionaryCreateReqItem(BaseModel):
 
 
 class DictionaryCreateReq(BaseModel):
-    items: list[DictionaryCreateReqItem]
+    words: list[DictionaryCreateReqItem]
 
     @model_validator(mode="after")
     def items_validation(self) -> "DictionaryCreateReq":
-        if len(self.items) < 2:
-            raise ValueError(f"В уроке должно быть больше одного слова ({len(self.items)})")
+        if len(self.words) < 2:
+            raise ValueError(f"В уроке должно быть больше одного слова ({len(self.words)})")
 
         return self
 

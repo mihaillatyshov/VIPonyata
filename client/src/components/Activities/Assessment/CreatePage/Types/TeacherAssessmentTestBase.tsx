@@ -1,7 +1,9 @@
-import { TTeacherAssessmentTestMulti, TTeacherAssessmentTestSingle } from "models/Activity/Items/TAssessmentItems";
 import React from "react";
-import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
+
 import InputTextArea from "components/Form/InputTextArea";
+import { TTeacherAssessmentTestMulti, TTeacherAssessmentTestSingle } from "models/Activity/Items/TAssessmentItems";
+
+import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
 
 type TTeacherAssessmentTestType = TTeacherAssessmentTestSingle | TTeacherAssessmentTestMulti;
 
@@ -18,7 +20,10 @@ const TeacherAssessmentTestBase = <T extends TTeacherAssessmentTestType>({
     selectorNode,
 }: TeacherAssessmentTestBaseProps<T>) => {
     const changeQuestionHandler = (newValue: string) => onChangeTask({ ...data, question: newValue });
-    const addOption = () => onChangeTask({ ...data, options: [...data.options, ""] });
+    const addOption = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        onChangeTask({ ...data, options: [...data.options, ""] });
+    };
     const changeOptionHandler = (newValue: string, id: number) => {
         const newOptions = [...data.options];
         newOptions[id] = newValue;
@@ -35,29 +40,31 @@ const TeacherAssessmentTestBase = <T extends TTeacherAssessmentTestType>({
                 className="mb-3"
                 noErrorField={true}
             />
-            {data.options.map((option, i) => (
-                <div key={i} className="input-group mb-3 w-auto">
-                    {selectorNode(i)}
-                    <input
-                        type="text"
-                        className="form-control"
-                        value={option}
-                        onChange={(e) => changeOptionHandler(e.target.value, i)}
-                        autoFocus={true}
-                    />
-                    <span className="input-group-text w-auto p-0">
-                        <i
-                            className="bi bi-x font-icon-height-0 font-icon-button-danger"
-                            style={{ fontSize: "2em", margin: "0 2px" }}
-                            onClick={() => onRemoveOption(i)}
+            <form>
+                {data.options.map((option, i) => (
+                    <div key={i} className="input-group mb-3 w-auto">
+                        {selectorNode(i)}
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={option}
+                            onChange={(e) => changeOptionHandler(e.target.value, i)}
+                            autoFocus={true}
                         />
-                    </span>
-                </div>
-            ))}
-            <button className="btn btn-outline-dark btn-sm d-flex" onClick={addOption}>
-                <i className="bi bi-plus-lg" />
-                Добавить ответ
-            </button>
+                        <span className="input-group-text w-auto p-0">
+                            <i
+                                className="bi bi-x font-icon-height-0 font-icon-button-danger"
+                                style={{ fontSize: "2em", margin: "0 2px" }}
+                                onClick={() => onRemoveOption(i)}
+                            />
+                        </span>
+                    </div>
+                ))}
+                <button type="submit" className="btn btn-outline-dark btn-sm d-flex" onClick={addOption}>
+                    <i className="bi bi-plus-lg" />
+                    Добавить ответ
+                </button>
+            </form>
         </div>
     );
 };

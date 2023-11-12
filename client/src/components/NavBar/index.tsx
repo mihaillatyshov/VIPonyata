@@ -1,14 +1,15 @@
 import React, { useLayoutEffect, useState } from "react";
-import StudentDictionary from "./Dictionary/StudentDictionary";
-import Profile from "./Profile";
-import { Link } from "react-router-dom";
-import Notifications from "components/Notifications/Notifications";
 
-import styles from "./StyleNavBar.module.css";
+import Notifications from "components/Notifications/Notifications";
 import { AjaxGet } from "libs/ServerAPI";
 import { TAnyNotification } from "models/TNotification";
+import { Link } from "react-router-dom";
 import { useAppSelector } from "redux/hooks";
 import { selectUser } from "redux/slices/userSlice";
+
+import StudentDictionary from "./Dictionary/StudentDictionary";
+import Profile from "./Profile";
+import styles from "./StyleNavBar.module.css";
 
 const NavBar = () => {
     const [showNotifications, setShowNotifications] = useState<boolean>(false);
@@ -50,7 +51,7 @@ const NavBar = () => {
                         <img className="d-block d-lg-none" src="/svg/LogoSmall.svg" alt="Главная" height={60} />
                     </Link>
                 </div>
-                <div className="col-6 col-sm-4 mx-auto d-flex flex-column align-items-center">
+                <div className="col-6 col-sm-4 mx-auto d-flex align-items-center">
                     <StudentDictionary />
                 </div>
                 <div className="col-4 align-items-end">

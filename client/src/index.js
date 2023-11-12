@@ -1,12 +1,6 @@
-import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/scss/bootstrap.scss";
 import "bootstrap-icons/font/bootstrap-icons.min.css";
-import "./assets/css/Table.css";
-import "./assets/css/Modal.css";
-import "./assets/css/FontIcon.css";
-import "./assets/css/MyCard.css";
-import "./assets/css/CardMain.css";
-import "./assets/css/Form.css";
-import "./assets/css/DND.css";
+import "./assets/scss/index.scss";
 
 import React from "react";
 
@@ -23,7 +17,7 @@ root.render(
         <Provider store={store}>
             <App />
         </Provider>
-    </React.StrictMode>
+    </React.StrictMode>,
 );
 
 // If you want to start measuring performance in your app, pass a function

@@ -1,21 +1,9 @@
-.s_fillSpaceExists {
-    background-color: "#228823";
-    width: "min-content";
-    border-radius: "1000px 1000px 1000px 1000px";
-}
-
-.createSentenceItem {
-    border: 1px solid black;
-    border-radius: 5px;
-    padding: 5px;
-    background-color: white;
-}
-
 .fillSpaceExistsDraggable {
     border: 1px solid black;
     border-radius: 5px;
     padding: 5px;
     background-color: white;
+    height: fit-content;
 }
 
 .fillSpaceExistsDroppable {
@@ -39,14 +27,16 @@
 
 .fillSpaceExistsInputs {
     width: 100%;
-    background-color: #aaaaaa;
-    min-height: 48px;
-    padding: 4px;
+    min-height: 80px;
+}
+
+.classificationColumnTitle {
+    font-size: 1.2em;
 }
 
 .classificationInputs {
     flex: 1 0;
-    min-height: 60px;
+    min-height: 80px;
     overflow: hidden;
 }
 

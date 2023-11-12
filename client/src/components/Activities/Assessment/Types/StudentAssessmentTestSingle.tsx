@@ -1,5 +1,6 @@
 import React from "react";
 
+import InputRadioSingle from "components/Form/InputRadioSingle";
 import { TAssessmentTestSingle } from "models/Activity/Items/TAssessmentItems";
 import { useAppDispatch } from "redux/hooks";
 import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
@@ -17,18 +18,19 @@ const StudentAssessmentTestSingle = ({ data, taskId }: StudentAssessmentTypeProp
 
     return (
         <div>
-            <div>{data.question}</div>
+            <div className="mb-3">{data.question}</div>
             {data.options.map((answer: string, fieldId: number) => (
-                <div key={fieldId}>
-                    <input
-                        className="form-check-input me-2"
-                        type="radio"
-                        checked={fieldId === data.answer}
-                        onChange={() => onChangeHandler(fieldId)}
-                        name={`radio_${taskId}`}
-                        id={`radio_${taskId}_${fieldId}`}
+                <div key={fieldId} className="input-group mt-1">
+                    <InputRadioSingle
+                        key={fieldId}
+                        htmlId={`radio_${taskId}_${fieldId}`}
+                        id={fieldId}
+                        className="input-group-text big-check"
+                        placeholder={""}
+                        selectedId={data.answer ?? -1}
+                        onChange={onChangeHandler}
                     />
-                    <label htmlFor={`radio_${taskId}_${fieldId}`}>{answer}</label>
+                    <span className="form-control prevent-select">{answer}</span>
                 </div>
             ))}
         </div>

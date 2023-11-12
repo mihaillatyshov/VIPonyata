@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 
 import { LoadStatus } from "libs/Status";
+import { ActivityName } from "models/Activity/IActivity";
 import Modal from "react-bootstrap/Modal";
+import { useNavigate } from "react-router-dom";
 import { GetActivityDoneTriesDataType, requestGetActivityDoneTries } from "requests/Activity/Activity";
 
-import { ActivityName } from "../ActivityUtils";
 import StudentViewDoneTryModalContent from "./StudentViewDoneTryModalContent";
 
 interface StudentViewDoneTryModalProps {
@@ -15,6 +16,8 @@ interface StudentViewDoneTryModalProps {
 }
 
 const StudentViewDoneTryModal = ({ isShow, close, id, name }: StudentViewDoneTryModalProps) => {
+    const navigate = useNavigate();
+
     const [doneTries, setDoneTries] = useState<GetActivityDoneTriesDataType>({
         loadStatus: LoadStatus.NONE,
     });
@@ -26,13 +29,18 @@ const StudentViewDoneTryModal = ({ isShow, close, id, name }: StudentViewDoneTry
         }
     }, [isShow, id, name]);
 
+    const openTryPage = (id: number) => {
+        close();
+        navigate(`/${name}/try/${id}`);
+    };
+
     return (
         <Modal size="xl" show={isShow} onHide={close} dialogClassName="modal-dialog">
             <Modal.Header closeButton className="modal-bg">
                 <Modal.Title>Результаты</Modal.Title>
             </Modal.Header>
             <Modal.Body className="modal-bg">
-                <StudentViewDoneTryModalContent name={name} doneTries={doneTries} errorMessage={error} />
+                <StudentViewDoneTryModalContent openTryPage={openTryPage} doneTries={doneTries} errorMessage={error} />
             </Modal.Body>
         </Modal>
     );

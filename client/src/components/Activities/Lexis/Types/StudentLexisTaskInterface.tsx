@@ -1,7 +1,9 @@
 import React, { useEffect } from "react";
+
+import { LexisName } from "models/Activity/IActivity";
 import { Button } from "react-bootstrap";
-import { GoToNextTaskCallbackType, LexisName, useLexisItem, useSetLexisSelectedItem } from "./LexisUtils";
-//import MD5 from "crypto-js/md5";
+
+import { GoToNextTaskCallbackType, useLexisItem, useSetLexisSelectedItem } from "./LexisUtils";
 
 export type StudentLexisTaskInterfaceProps = {
     name: LexisName;
@@ -47,7 +49,7 @@ const StudentLexisTaskInterface = ({
         if (isTaskDone()) {
             goToNextTaskCallback(
                 taskTypeName,
-                item.mistakeCount //Math.max(0, 100 - Math.round((100 / item.doneFields.length) * item.mistakeCount))
+                item.mistakeCount, //Math.max(0, 100 - Math.round((100 / item.doneFields.length) * item.mistakeCount))
             );
         }
     }, [item]); // eslint-disable-line react-hooks/exhaustive-deps

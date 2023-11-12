@@ -1,0 +1,10 @@
+.dnd__sortable-item {
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 5px 8px;
+    background-color: white;
+
+    &.wrong {
+        background-color: #f4b8b8;
+    }
+}

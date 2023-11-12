@@ -46,6 +46,16 @@ body {
     padding-bottom: 4px;
 }
 
+.a-clear,
+.a-clear:link,
+.a-clear:visited,
+.a-clear:focus,
+.a-clear:hover,
+.a-clear:active {
+    outline: none;
+    text-decoration: none;
+}
+
 .a-link,
 .a-link:link,
 .a-link:visited,
@@ -69,7 +79,7 @@ div.findPairCorrect {
     background: rgb(0, 255, 0);
 }
 
-button.scrambleItem {
+.scrambleItem {
     width: 3em;
     height: 3em;
 }

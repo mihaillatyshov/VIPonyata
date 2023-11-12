@@ -1,13 +1,15 @@
 import React from "react";
-import LoadingBouble from "../LoadingBouble";
-import ActivityBouble from "../ActivityBouble";
+
+import { IAssessmentName } from "models/Activity/IActivity";
 import { TAssessment } from "models/Activity/TAssessment";
-import { AssessmentName } from "components/Activities/ActivityUtils";
+
+import ActivityBouble from "../ActivityBouble";
+import LoadingBouble from "../LoadingBouble";
 import TeacherActivityBoubleChild from "./TeacherActivityBoubleChild";
 
 export interface ITeacherAsssessmentBoubleProps {
     title: string;
-    name: AssessmentName;
+    name: IAssessmentName;
     lessonId: number;
     info: TAssessment | undefined | null;
 }

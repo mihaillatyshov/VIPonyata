@@ -1,10 +1,10 @@
 import React from "react";
-import { TTeacherAssessmentTestSingle } from "models/Activity/Items/TAssessmentItems";
-import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
-import InputRadioSingle from "components/Form/InputRadioSingle";
 
-import styles from "./Style.module.css";
+import InputRadioSingle from "components/Form/InputRadioSingle";
+import { TTeacherAssessmentTestSingle } from "models/Activity/Items/TAssessmentItems";
+
 import TeacherAssessmentTestBase from "./TeacherAssessmentTestBase";
+import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
 
 const TeacherAssessmentTestSingle = ({
     data,
@@ -33,10 +33,9 @@ const TeacherAssessmentTestSingle = ({
             onRemoveOption={removeOption}
             selectorNode={(id: number) => (
                 <InputRadioSingle
-                    blockName={taskUUID}
                     htmlId={taskUUID}
                     id={id}
-                    className={`input-group-text ${styles.bigCheck}`}
+                    className="input-group-text big-check"
                     placeholder={""}
                     selectedId={data.meta_answer ?? -1}
                     onChange={changeAnswerHandler}

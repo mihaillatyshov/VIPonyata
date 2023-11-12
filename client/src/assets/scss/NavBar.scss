@@ -1,0 +1,22 @@
+.navbar-profile {
+    @extend .font-icon-height-0;
+    // color: #a119d2;
+}
+
+.navbar-dictionary-title {
+    font-size: 28px;
+    color: #1a8400;
+    cursor: pointer;
+}
+
+.navbar-dictionary-title:hover {
+    color: #1f9b00;
+}
+
+.navbar-profile-name {
+    position: absolute;
+    bottom: -1.5rem;
+    overflow: hidden;
+    width: 40px;
+    font-size: 12px;
+}

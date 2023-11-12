@@ -6,10 +6,16 @@ import PageTitle from "components/Common/PageTitle";
 import NavigateToElement from "components/NavigateToElement";
 import { AjaxGet, AjaxPost } from "libs/ServerAPI";
 import { TLexisDoneTasks } from "models/Activity/DoneTasks/TLexisDoneTasks";
+import { LexisName } from "models/Activity/IActivity";
 import { LexisTaskName } from "models/Activity/ILexis";
 import {
-    TCardItem, TFindPair, TLexisAnyItem, TLexisItems, TScramble,
-    TSpace, TTranslate,
+    TCardItem,
+    TFindPair,
+    TLexisAnyItem,
+    TLexisItems,
+    TScramble,
+    TSpace,
+    TTranslate,
 } from "models/Activity/Items/TLexisItems";
 import { TDrilling } from "models/Activity/TDrilling";
 import { THieroglyph } from "models/Activity/THieroglyph";
@@ -19,7 +25,7 @@ import { LexisState } from "redux/slices/lexis";
 import StudentActivityDeadline from "../StudentActivityDeadline";
 import StudentLexisNav from "./Nav/StudentLexisNav";
 import StudentLexisHub from "./StudentLexisHub";
-import { LexisName, StudentLexisTaskProps } from "./Types/LexisUtils";
+import { StudentLexisTaskProps } from "./Types/LexisUtils";
 import StudentLexisCard from "./Types/StudentLexisCard";
 import StudentLexisFindPair from "./Types/StudentLexisFindPair";
 import StudentLexisScramble from "./Types/StudentLexisScramble";
@@ -64,6 +70,7 @@ const StudentLexisPage = <T extends TDrilling | THieroglyph>({
 }: StudentLexisPageProps<T>) => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const [selectedTask, setSelectedTask] = React.useState<LexisTaskName>();
 
     const routeElements: TRouteElements = {
         card: { taskName: LexisTaskName.CARD, path: "/card/:cardId", component: StudentLexisCard },
@@ -80,6 +87,7 @@ const StudentLexisPage = <T extends TDrilling | THieroglyph>({
                 console.log("in", taskName, Object.keys(doneTasks));
                 continue;
             }
+            setSelectedTask(taskName as LexisTaskName);
             navigate(taskName);
             break;
         }
@@ -91,6 +99,7 @@ const StudentLexisPage = <T extends TDrilling | THieroglyph>({
 
         if (Object.keys(doneTasks).length === Object.keys(items).length) {
             navigate("");
+            setSelectedTask(undefined);
         }
     };
 
@@ -154,7 +163,13 @@ const StudentLexisPage = <T extends TDrilling | THieroglyph>({
                     <StudentActivityDeadline activityInfo={info} />
                 </div>
             </StudentProgress>
-            <StudentLexisNav items={lexis.items} doneTasks={info.try.done_tasks} habUrl={habUrl} />
+            <StudentLexisNav
+                items={lexis.items}
+                doneTasks={info.try.done_tasks}
+                habUrl={habUrl}
+                selectedTask={selectedTask}
+                setSelectedTaskCallback={setSelectedTask}
+            />
             <Routes>
                 <Route
                     path="/"

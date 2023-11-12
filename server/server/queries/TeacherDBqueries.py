@@ -1,6 +1,6 @@
 from typing import Generic, Type
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from server.common import DBsession
 from server.exceptions.ApiExceptions import InvalidAPIUsage
@@ -278,7 +278,7 @@ def create_or_get_dictionary(dictionary_data: DictionaryCreateReq) -> list[Dicti
     with DBsession.begin() as session:
         result: list[Dictionary] = []
 
-        for item in dictionary_data.items:
+        for item in dictionary_data.words:
             dictionary_item = get_dictionary_item(item)
 
             if dictionary_item is None:
@@ -286,9 +286,19 @@ def create_or_get_dictionary(dictionary_data: DictionaryCreateReq) -> list[Dicti
                 session.add(dictionary_item)
 
             if (dictionary_item.char_jp is None and item.char_jp is not None):
+                session.execute(
+                    update(Dictionary)
+                    .where(Dictionary.id == dictionary_item.id)
+                    .values(char_jp=item.char_jp)
+                )
                 dictionary_item.char_jp = item.char_jp
 
             if (dictionary_item.word_jp is None and item.word_jp is not None):
+                session.execute(
+                    update(Dictionary)
+                    .where(Dictionary.id == dictionary_item.id)
+                    .values(word_jp=item.word_jp)
+                )
                 dictionary_item.word_jp = item.word_jp
 
             result.append(dictionary_item)

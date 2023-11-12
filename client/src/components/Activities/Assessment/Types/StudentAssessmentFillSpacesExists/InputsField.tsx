@@ -10,7 +10,7 @@ interface InputsFieldProps {
 
 const InputsField = ({ inputFields, width }: InputsFieldProps) => {
     return (
-        <div className={`d-flex gap-3 flex-wrap ${styles.fillSpaceExistsInputs}`}>
+        <div className={`d-flex gap-3 flex-wrap my-card ${styles.fillSpaceExistsInputs}`}>
             {inputFields.map((item, id) => (
                 <Draggable key={id} id={id} str={item} width={width} type="inputs" />
             ))}

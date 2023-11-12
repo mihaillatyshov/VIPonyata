@@ -39,11 +39,9 @@ export interface TScramble {
 
 export interface TSpace {
     words: {
-        spaces: number;
-        word_end: string;
         word_or_char_jp: string;
         word_ru: string;
-        word_start: string;
+        parts: string[];
     }[];
 }
 

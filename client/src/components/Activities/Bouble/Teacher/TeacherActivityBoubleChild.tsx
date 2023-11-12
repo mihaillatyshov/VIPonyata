@@ -1,4 +1,4 @@
-import { ActivityName } from "components/Activities/ActivityUtils";
+import { ActivityName } from "models/Activity/IActivity";
 import { TAssessment } from "models/Activity/TAssessment";
 import { TDrilling } from "models/Activity/TDrilling";
 import { THieroglyph } from "models/Activity/THieroglyph";

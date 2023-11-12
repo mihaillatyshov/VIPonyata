@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
-import { ActivityName } from "../ActivityUtils";
+import { ActivityName } from "models/Activity/IActivity";
+
 import StudentViewDoneTryModal from "./StudentViewDoneTryModal";
 
 interface StudentViewTryButtonProps {

@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { StudentAssessmentTypeProps } from "../StudentAssessmentTypeProps";
+
 import { TAssessmentFindPair } from "models/Activity/Items/TAssessmentItems";
-import FieldsColumn from "./FieldsColumn";
 import { useAppDispatch } from "redux/hooks";
 import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
+
+import { StudentAssessmentTypeProps } from "../StudentAssessmentTypeProps";
+import { FieldRow } from "./FieldRow";
 
 const StudentAssessmentFindPair = ({ data, taskId }: StudentAssessmentTypeProps<TAssessmentFindPair>) => {
     const [selectedFirst, setSelectedFirst] = useState<number | undefined>(undefined);
@@ -37,19 +39,24 @@ const StudentAssessmentFindPair = ({ data, taskId }: StudentAssessmentTypeProps<
     }, [selectedFirst, selectedSecond]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
-        <div className="row mx-0">
-            <FieldsColumn
-                fields={data.first}
-                selectedId={selectedFirst}
-                setSelectedId={setSelectedFirst}
-                pars_created={data.pars_created}
-            />
-            <FieldsColumn
-                fields={data.second}
-                selectedId={selectedSecond}
-                setSelectedId={setSelectedSecond}
-                pars_created={data.pars_created}
-            />
+        <div>
+            {data.first.map((first, i) => (
+                <FieldRow
+                    key={i}
+                    id={i}
+                    parsCreated={data.pars_created}
+                    first={{
+                        field: first,
+                        setSelected: setSelectedFirst,
+                        selectedId: selectedFirst,
+                    }}
+                    second={{
+                        field: data.second[i],
+                        setSelected: setSelectedSecond,
+                        selectedId: selectedSecond,
+                    }}
+                />
+            ))}
         </div>
     );
 };

@@ -35,14 +35,14 @@ const StudentAssessmentClassification = ({ data, taskId }: StudentAssessmentType
     const [items, setItems] = useState<ItemState[][]>(() => {
         const inputs: ItemState[] = data.inputs.map((str, i) => ({ strId: `id_${i}`, str }));
         const answers: ItemState[][] = data.answers.map((col, i) =>
-            col.map((str, j) => ({ strId: `id_${i}_${j}`, str }))
+            col.map((str, j) => ({ strId: `id_${i}_${j}`, str })),
         );
         return [inputs, ...answers];
     });
 
     const strWidth = Math.max(
         ...[data.inputs, ...data.answers].map((col) => Math.max(...col.map((str) => str.length))),
-        5
+        5,
     );
     console.log(strWidth);
 
@@ -153,7 +153,7 @@ const StudentAssessmentClassification = ({ data, taskId }: StudentAssessmentType
                 Object.assign([], {
                     ...items,
                     [overContainer]: arrayMove(items[overContainer], activeIndex, overIndex),
-                })
+                }),
             );
         }
 
@@ -173,7 +173,14 @@ const StudentAssessmentClassification = ({ data, taskId }: StudentAssessmentType
             </div>
             <div className="d-flex flex-wrap justify-content-center">
                 {items.slice(1).map((col, i) => (
-                    <Container key={i + 1} id={i + 1} items={col} type="answer" strWidth={strWidth} />
+                    <Container
+                        key={i + 1}
+                        id={i + 1}
+                        items={col}
+                        type="answer"
+                        strWidth={strWidth}
+                        title={data.titles[i]}
+                    />
                 ))}
             </div>
             <DragOverlay style={{ opacity: "60%" }}>

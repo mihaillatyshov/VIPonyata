@@ -1,0 +1,37 @@
+.student-assessment-find-pair__item {
+    @extend .prevent-select;
+
+    padding: 4px 6px;
+    border: 1px solid black;
+    border-radius: 6px;
+    background-color: #ffffffaa;
+    height: 100%;
+    cursor: pointer;
+
+    &.selected {
+        border-color: #ffff00;
+        background-color: #ffff7288;
+    }
+    &.done {
+        border-color: #00cc00;
+        background-color: #44cc4488;
+    }
+    &.right {
+        text-align: end;
+    }
+
+    &.wrong {
+        background-color: #f4b8b8;
+        border-color: #ea7979;
+    }
+}
+
+.student-assessment-find-pair__item-connector {
+    position: absolute;
+    border-bottom: 2px solid #00ff00;
+    justify-content: center;
+    height: 50%;
+    width: 24px;
+    inset: 50%;
+    transform: translate(-50%, -100%);
+}

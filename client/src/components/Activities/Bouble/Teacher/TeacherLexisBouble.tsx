@@ -1,10 +1,11 @@
 import React from "react";
-import { TDrilling } from "models/Activity/TDrilling";
-import { THieroglyph } from "models/Activity/THieroglyph";
+
 import ActivityBouble from "components/Activities/Bouble/ActivityBouble";
 import LoadingBouble from "components/Activities/Bouble/LoadingBouble";
+import { LexisName } from "models/Activity/IActivity";
 import { LexisImages } from "models/Activity/ILexis";
-import { LexisName } from "components/Activities/Lexis/Types/LexisUtils";
+import { TDrilling } from "models/Activity/TDrilling";
+import { THieroglyph } from "models/Activity/THieroglyph";
 
 import styles from "./StylesTeacherBouble.module.css";
 import TeacherActivityBoubleChild from "./TeacherActivityBoubleChild";

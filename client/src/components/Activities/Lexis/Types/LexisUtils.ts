@@ -1,3 +1,4 @@
+import { LexisName, LexisNameDrilling, LexisNameHieroglyph } from "models/Activity/IActivity";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
     selectDrilling,
@@ -13,10 +14,6 @@ import {
     setLexisSelectedItem as setHieroglyphSelectedItem,
     setLexisSelectedItemField as setHieroglyphSelectedItemField,
 } from "redux/slices/hieroglyphSlice";
-
-export const LexisNameDrilling = "drilling";
-export const LexisNameHieroglyph = "hieroglyph";
-export type LexisName = typeof LexisNameDrilling | typeof LexisNameHieroglyph;
 
 export const useLexisDrilOrHier = <D, H>(name: LexisName, dril: D, hier: H) => {
     switch (name) {

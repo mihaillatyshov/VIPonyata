@@ -58,10 +58,10 @@ def create_scramble(words_ru: list[str], words_jp: list[str], chars_jp: list[str
     word_chars = []
     char_chars = []
     for word in shuffle_words_jp:
-        word_chars.append(list(word))
+        word_chars.append(list(str(word)))
         random.shuffle(word_chars[-1])
     for char in shuffle_chars_jp:
-        char_chars.append(list(char))
+        char_chars.append(list(str(char)))
         random.shuffle(char_chars[-1])
 
     return {
@@ -76,17 +76,38 @@ def create_translate(words_ru: list[str], words_jp: list[str], chars_jp: list[st
     return {"words_ru": words_ru, "words_jp": words_jp, "chars_jp": chars_jp}
 
 
+space_filter = ["っ", "ょ", "ゃ", "ゅ", "ッ", "ョ", "ャ", "ュ"]
+
+
 def __get_space_from_array(words_ru: list[str], jp: list[str]) -> dict:
     spaces = []
-    for i in range(len(jp)):
-        word_or_char_jp = jp[i]
+    for ru, word_or_char_jp in zip(words_ru, jp):
         length = len(word_or_char_jp)
+        if length < 1:
+            continue
+
+        parts = list(word_or_char_jp)
+
+        spaces_count = max(1, length // 2)
+        spaces_ids = set()
+
+        tries_count = 0
+        while len(spaces_ids) < spaces_count and tries_count < 1000:
+            tries_count += 1
+            rand_id = random.randint(0, length - 1)
+            if parts[rand_id] in space_filter:
+                continue
+            spaces_ids.add(rand_id)
+
+        for i in spaces_ids:
+            if parts[i] in space_filter:
+                continue
+            parts[i] = ""
+
         spaces.append({
             "word_or_char_jp": word_or_char_jp,
-            "word_ru": words_ru[i],
-            "word_start": word_or_char_jp[0] if length > 2 else "",
-            "word_end": word_or_char_jp[-1] if length > 1 else "",
-            "spaces": length - 2 if length > 2 else 1
+            "word_ru": ru,
+            "parts": parts
         })
 
     return {"words": spaces}

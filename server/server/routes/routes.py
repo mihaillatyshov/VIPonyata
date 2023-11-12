@@ -189,12 +189,20 @@ def create_hieroglyph(lesson_id):
 #########################################################################################################################
 ################ Assessment #############################################################################################
 #########################################################################################################################
-@routes_bp.route("/assessment/<id>/donetries", methods=["GET"])
+@routes_bp.route("/assessment/<int:id>/donetries", methods=["GET"])
 @login_required
 def get_assessment_done_tries(id):
     return user_selector_function(
-        teacher_funcs.AssessmentHandlers.get_done_tasks, student_funcs.AssessmentHandlers.get_done_tasks,
+        teacher_funcs.AssessmentHandlers.get_done_tries, student_funcs.AssessmentHandlers.get_done_tries,
         activity_id=id)
+
+
+@routes_bp.route("/assessment/donetries/<int:done_try_id>", methods=["GET"])
+@login_required
+def get_assessment_done_try(done_try_id):
+    return user_selector_function(
+        teacher_funcs.AssessmentHandlers.get_done_try, student_funcs.AssessmentHandlers.get_done_try,
+        done_try_id=done_try_id)
 
 
 @routes_bp.route("/assessment/<id>/newtry", methods=["POST"])

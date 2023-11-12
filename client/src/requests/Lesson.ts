@@ -3,7 +3,7 @@ import { useLayoutEffect } from "react";
 import { AjaxGet } from "libs/ServerAPI";
 import { TLessonResponse } from "models/TLesson";
 import { useNavigate } from "react-router-dom";
-import { useSetActivityInfo } from "redux/funcs/activity";
+import { useSetAssessmentInfo, useSetLexisInfo } from "redux/funcs/activity";
 import { useAppDispatch } from "redux/hooks";
 import { setAssessmentInfo } from "redux/slices/assessmentSlice";
 import { setLexisInfo as setDrillingInfo } from "redux/slices/drillingSlice";
@@ -13,7 +13,8 @@ import { setSelectedLesson } from "redux/slices/lessonsSlice";
 export const useRequestLesson = (lessonId: string | undefined) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const setActivityInfo = useSetActivityInfo();
+    const setILexisInfo = useSetLexisInfo();
+    const setIAssessmentInfo = useSetAssessmentInfo();
 
     useLayoutEffect(() => {
         dispatch(setSelectedLesson(undefined));
@@ -24,9 +25,9 @@ export const useRequestLesson = (lessonId: string | undefined) => {
         AjaxGet<TLessonResponse>({ url: `/api/lessons/${lessonId}` })
             .then((json) => {
                 dispatch(setSelectedLesson(json.lesson));
-                setActivityInfo("drilling", json, setDrillingInfo);
-                setActivityInfo("hieroglyph", json, setHieroglyphInfo);
-                setActivityInfo("assessment", json, setAssessmentInfo);
+                setILexisInfo("drilling", json, setDrillingInfo);
+                setILexisInfo("hieroglyph", json, setHieroglyphInfo);
+                setIAssessmentInfo("assessment", json, setAssessmentInfo);
             })
             .catch(({ isServerError, response, json }) => {
                 console.log(isServerError, response.status, json);

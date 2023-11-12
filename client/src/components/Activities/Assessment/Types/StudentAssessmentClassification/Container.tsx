@@ -13,10 +13,11 @@ interface ContainerProps {
     id: number;
     items: ItemState[];
     type: "inputs" | "answer";
+    title?: string;
     strWidth: number;
 }
 
-export default function Container({ id, items, type, strWidth }: ContainerProps) {
+export default function Container({ id, items, title, type, strWidth }: ContainerProps) {
     const { setNodeRef } = useDroppable({ id });
 
     const style: CSS.Properties = {
@@ -31,11 +32,9 @@ export default function Container({ id, items, type, strWidth }: ContainerProps)
 
     return (
         <SortableContext id={`${id}`} items={items.map(({ strId }) => strId)} strategy={rectSortingStrategy}>
-            <div
-                ref={setNodeRef}
-                className={`p-2 bg-secondary d-flex ${className}`}
-                style={type === "inputs" ? {} : style}
-            >
+            <div ref={setNodeRef} className={`p-2 d-flex my-card ${className}`} style={type === "inputs" ? {} : style}>
+                <div className={`${styles.classificationColumnTitle}`}>{title}</div>
+                {title ? <hr className="m-0" /> : null}
                 {items.map(({ str, strId }) => (
                     <SortableItem key={strId} id={strId} str={str} strWidth={strWidth} />
                 ))}

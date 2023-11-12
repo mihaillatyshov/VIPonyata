@@ -29,7 +29,7 @@ const StudentLessonPage = () => {
                     title={lesson?.name}
                     urlBack={lesson === undefined ? undefined : `/courses/${lesson.course_id}`}
                 />
-                <PageDescription description={lesson?.description} />
+                <PageDescription description={lesson?.description} isCentered={true} />
 
                 <div className="d-flex justify-content-around flex-wrap">
                     {drilling?.info && <StudentDrillingBubble drilling={drilling} />}

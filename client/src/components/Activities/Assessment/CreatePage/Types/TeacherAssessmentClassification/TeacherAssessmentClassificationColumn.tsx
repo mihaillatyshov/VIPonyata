@@ -77,6 +77,11 @@ const TeacherAssessmentClassificationColumn = ({
     removeCol,
     removeRow,
 }: TeacherAssessmentClassificationColumnProps) => {
+    const addRawHandler = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        addRow(colId);
+    };
+
     return (
         <div className={`col`}>
             <div className={`${styles.classificationCol} d-flex flex-column`}>
@@ -90,25 +95,27 @@ const TeacherAssessmentClassificationColumn = ({
                         />
                     </div>
                 </div>
-                <div className="flex-grow-1">
-                    {fields.map((field, i) => (
-                        <Cell
-                            key={i}
-                            field={field}
-                            colId={colId}
-                            rowId={i}
-                            onAnswerChange={onAnswerChange}
-                            removeRow={removeRow}
-                        />
-                    ))}
-                </div>
+                <form>
+                    <div className="flex-grow-1">
+                        {fields.map((field, i) => (
+                            <Cell
+                                key={i}
+                                field={field}
+                                colId={colId}
+                                rowId={i}
+                                onAnswerChange={onAnswerChange}
+                                removeRow={removeRow}
+                            />
+                        ))}
+                    </div>
 
-                <div className="d-flex justify-content-center mt-3">
-                    <button className="btn btn-outline-dark btn-sm d-flex" onClick={() => addRow(colId)}>
-                        <i className="bi bi-plus-lg" />
-                        Добавить строку
-                    </button>
-                </div>
+                    <div className="d-flex justify-content-center mt-3">
+                        <button className="btn btn-outline-dark btn-sm d-flex" onClick={addRawHandler}>
+                            <i className="bi bi-plus-lg" />
+                            Добавить строку
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     );

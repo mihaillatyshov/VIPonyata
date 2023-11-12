@@ -4,7 +4,11 @@ import PageDescription from "components/Common/PageDescription";
 import PageTitle from "components/Common/PageTitle";
 import { AjaxGet, AjaxPost } from "libs/ServerAPI";
 import {
-    TAssessmentAnyItem, TAssessmentItemBase, TAssessmentItems, TAssessmentTaskName, TGetStudentTypeByName,
+    TAssessmentItemBase,
+    TAssessmentTaskName,
+    TGetStudentTypeByName,
+    TStudentAssessmentAnyItem,
+    TStudentAssessmentItems,
 } from "models/Activity/Items/TAssessmentItems";
 import { TAssessment } from "models/Activity/TAssessment";
 import { useNavigate, useParams } from "react-router-dom";
@@ -28,7 +32,7 @@ import { StudentAssessmentTypeProps } from "./Types/StudentAssessmentTypeProps";
 
 type ResponseData = {
     assessment: TAssessment;
-    items: TAssessmentItems;
+    items: TStudentAssessmentItems;
 };
 
 type TAliasProp<T extends TAssessmentItemBase> = (props: StudentAssessmentTypeProps<T>) => JSX.Element;
@@ -102,7 +106,7 @@ const StudentAssessmentPage = () => {
         return <div> Loading... </div>;
     }
 
-    const drawItem = <T extends TAssessmentAnyItem>(item: T, id: number) => {
+    const drawItem = <T extends TStudentAssessmentAnyItem>(item: T, id: number) => {
         const component = aliases[item.name] as TAliasProp<T>;
 
         return React.createElement(component, { data: item, taskId: id });

@@ -1,0 +1,51 @@
+.student-lexis-find-pair-item {
+    @extend .prevent-select;
+
+    width: fit-content;
+    padding: 4px 8px;
+}
+
+.student-lexis-scramble__item {
+    @extend .prevent-select;
+
+    width: 48px;
+    height: 48px;
+    padding: 8px 8px;
+    border: 1px solid #444444;
+    border-radius: 8px;
+    background-color: var(--css-var-bg);
+    cursor: pointer;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &:hover {
+        opacity: 0.6;
+    }
+}
+
+.student-lexis-nav__item {
+    @extend .prevent-select;
+
+    border: 1px solid #000000;
+    font-size: 12px;
+    border-radius: 8px;
+    padding: 10px 8px 8px 8px;
+    width: 70px;
+    height: 70px;
+    position: relative;
+    cursor: pointer;
+
+    &.selected {
+        background-color: #00ff0044;
+    }
+
+    &:hover {
+        opacity: 0.8;
+    }
+}
+
+input.student-lexis-space__input {
+    width: 5rem !important;
+}

@@ -1,28 +1,29 @@
 import React from "react";
-import { Link } from "react-router-dom";
+
+import { useNavigate } from "react-router-dom";
 import { useGetAuthorizedUserSafe } from "redux/funcs/user";
 
 import styles from "./StyleNavBar.module.css";
 
 const Profile = () => {
+    const navigate = useNavigate();
     const user = useGetAuthorizedUserSafe();
 
     return (
         <div className="col-auto">
-            <Link to={"/profile"}>
-                <div className={`d-flex align-items-center ${styles.profileBlock}`}>
-                    <div className={styles.profileImgWrapper}>
-                        {user.userData.avatar ? (
-                            <img className={styles.profileImg} alt="profile" src={user.userData.avatar} />
-                        ) : (
-                            <i className="bi bi-person-circle font-icon-height-0 a-link" style={{ fontSize: "48px" }} />
-                        )}
-                    </div>
-                    <div className="ms-1 d-none d-md-block">
-                        <div className="mx-auto"> {user.userData.name} </div>
-                    </div>
+            <div
+                className={`d-flex flex-column align-items-center ${styles.profileBlock}`}
+                onClick={() => navigate("/profile")}
+            >
+                <div className={styles.profileImgWrapper}>
+                    {user.userData.avatar ? (
+                        <img className={styles.profileImg} alt="profile" src={user.userData.avatar} />
+                    ) : (
+                        <i className="bi bi-person-circle a-clear navbar-profile" style={{ fontSize: "40px" }} />
+                    )}
                 </div>
-            </Link>
+                <div className="ms-1 d-none d-md-block navbar-profile-name text-center">{user.userData.name}</div>
+            </div>
         </div>
     );
 };

@@ -1,11 +1,14 @@
 import React from "react";
-import { StudentAssessmentTypeProps } from "./StudentAssessmentTypeProps";
+
 import { TAssessmentCreateSentence } from "models/Activity/Items/TAssessmentItems";
+import { useAppDispatch } from "redux/hooks";
+import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
+
 import { DragEndEvent } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
-import { useAppDispatch } from "redux/hooks";
+
 import SortableOrder from "./DndSortable/SortableOrder";
+import { StudentAssessmentTypeProps } from "./StudentAssessmentTypeProps";
 
 const StudentAssessmentCreateSentence = ({ data, taskId }: StudentAssessmentTypeProps<TAssessmentCreateSentence>) => {
     const dispatch = useAppDispatch();
@@ -18,13 +21,13 @@ const StudentAssessmentCreateSentence = ({ data, taskId }: StudentAssessmentType
             data.parts = arrayMove(
                 data.parts,
                 active.data.current?.arrayId as number,
-                over.data.current?.arrayId as number
+                over.data.current?.arrayId as number,
             );
             dispatch(setAssessmentTaskData({ id: taskId, data: data }));
         }
     };
 
-    return <SortableOrder handleDragEnd={handleDragEnd} data={data} order={"horizontal"} />;
+    return <SortableOrder handleDragEnd={handleDragEnd} data={data} order="horizontal" />;
 };
 
 export default StudentAssessmentCreateSentence;

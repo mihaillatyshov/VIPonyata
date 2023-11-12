@@ -146,6 +146,8 @@ const IAssessmentCreatePage = ({ title }: IAssessmentCreatePageProps) => {
     return (
         <div className="container mb-5 pb-5">
             <PageTitle title={title} />
+            <input type="button" className="btn btn-success w-100 mb-5" onClick={submitHandler} value={"Создать"} />
+
             <InputTime
                 placeholder="Лимит времени"
                 value={timelimit}
@@ -176,7 +178,6 @@ const IAssessmentCreatePage = ({ title }: IAssessmentCreatePageProps) => {
             <AddTaskButton insertId={tasks.length} handleClick={openModal} />
 
             <InputError message={errors.message} />
-            <input type="button" className="btn btn-success w-100 mt-5" onClick={submitHandler} value={"Создать"} />
             <SelectTypeModal
                 isShow={isShowSelectTypeModal}
                 close={() => setIsShowSelectTypeModal(false)}

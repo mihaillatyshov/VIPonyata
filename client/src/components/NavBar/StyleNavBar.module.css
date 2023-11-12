@@ -2,13 +2,18 @@
     cursor: pointer;
 }
 
+.profileBlock {
+    cursor: pointer;
+    position: relative;
+}
+
 .profileBlock:hover {
     opacity: 80%;
 }
 
 .profileImgWrapper {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
 }
 
 .profileImgWrapper:hover {

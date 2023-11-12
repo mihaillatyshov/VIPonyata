@@ -25,5 +25,6 @@ export type TLessonResponse = {
         drilling: TDrilling;
         hieroglyph: THieroglyph;
         assessment: TAssessment;
+        final_boss: TAssessment;
     };
 };

@@ -5,6 +5,7 @@ import { Card } from "react-bootstrap";
 
 import { StudentLexisTaskProps, useLexisItem, useLexisWordsOrChars, useSetLexisSelectedItemField } from "./LexisUtils";
 import StudentLexisTaskInterface from "./StudentLexisTaskInterface";
+import { StudentLexisTaskTitle } from "./StudentLexisTaskTitle";
 
 //import MD5 from "crypto-js/md5";
 
@@ -108,7 +109,7 @@ const StudentLexisFindPair = ({ name, inData, goToNextTaskCallback }: StudentLex
     };
 
     const getCardClassName = (id: number, type: string) => {
-        const defaultClassName = "col-auto noselect ";
+        const defaultClassName = "d-flex student-lexis-find-pair-item noselect ";
         if (isInDoneFields(id, type)) return defaultClassName + "findPairCorrect";
         if (item.selectedField.type === type && item.selectedField.id === id)
             return defaultClassName + "findPairSelected";
@@ -134,37 +135,30 @@ const StudentLexisFindPair = ({ name, inData, goToNextTaskCallback }: StudentLex
                         {
                             // TODO Create other component to left and right columns
                         }
+                        <StudentLexisTaskTitle title="Собери пары" />
                         <div className="row">
-                            <div className="col-6">
-                                <div className="container">
-                                    <div className="row justify-content-end">
-                                        {inData[strJP].map((value: string, key: number) => (
-                                            <Card
-                                                className={getCardClassName(key, strJP)}
-                                                key={key}
-                                                onClick={() => selectField(key, strJP)}
-                                            >
-                                                {value}
-                                            </Card>
-                                        ))}
-                                    </div>
-                                </div>
+                            <div className="col-6 d-flex flex-column align-items-end">
+                                {inData[strJP].map((value: string, key: number) => (
+                                    <Card
+                                        className={getCardClassName(key, strJP)}
+                                        key={key}
+                                        onClick={() => selectField(key, strJP)}
+                                    >
+                                        {value}
+                                    </Card>
+                                ))}
                             </div>
 
-                            <div className="col-6">
-                                <div className="container">
-                                    <div className="row">
-                                        {inData[strRU].map((value: string, key: number) => (
-                                            <Card
-                                                className={getCardClassName(key, strRU)}
-                                                key={key}
-                                                onClick={() => selectField(key, strRU)}
-                                            >
-                                                {value}
-                                            </Card>
-                                        ))}
-                                    </div>
-                                </div>
+                            <div className="col-6 d-flex flex-column">
+                                {inData[strRU].map((value: string, key: number) => (
+                                    <Card
+                                        className={getCardClassName(key, strRU)}
+                                        key={key}
+                                        onClick={() => selectField(key, strRU)}
+                                    >
+                                        {value}
+                                    </Card>
+                                ))}
                             </div>
                         </div>
                     </div>

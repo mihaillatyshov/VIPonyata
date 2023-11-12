@@ -8,3 +8,13 @@ export interface IActivity<TryType> {
     tries: TryType[];
     try: TryType;
 }
+
+export const LexisNameDrilling = "drilling";
+export const LexisNameHieroglyph = "hieroglyph";
+export type LexisName = typeof LexisNameDrilling | typeof LexisNameHieroglyph;
+
+export const AssessmentName = "assessment";
+export const FinalBossName = "final_boss";
+export type IAssessmentName = typeof AssessmentName | typeof FinalBossName;
+
+export type ActivityName = LexisName | IAssessmentName;

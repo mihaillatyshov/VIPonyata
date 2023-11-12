@@ -1,9 +1,9 @@
-import { ActivityName } from "components/Activities/ActivityUtils";
 import { AjaxGet, isProcessableError } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
-import { ActivityDoneTry } from "models/Activity/Try/ActivityDoneTry";
+import { ActivityName } from "models/Activity/IActivity";
+import { IActivityDoneTry } from "models/Activity/Try/IActivityTry";
 
-export type GetActivityDoneTriesDataType = LoadStatus.DataDoneOrNotDone<{ data: ActivityDoneTry[] }>;
+export type GetActivityDoneTriesDataType = LoadStatus.DataDoneOrNotDone<{ data: IActivityDoneTry[] }>;
 
 interface GetActivityDoneTriesProps {
     id: number;
@@ -18,7 +18,7 @@ interface GetActivityDoneTriesError {
 
 export const requestGetActivityDoneTries = ({ id, name, setDoneTries, setError }: GetActivityDoneTriesProps) => {
     setDoneTries({ loadStatus: LoadStatus.LOADING });
-    AjaxGet<{ done_tries: ActivityDoneTry[] }>({ url: `/api/${name}/${id}/donetries` })
+    AjaxGet<{ done_tries: IActivityDoneTry[] }>({ url: `/api/${name}/${id}/donetries` })
         .then((json) => {
             setDoneTries({ loadStatus: LoadStatus.DONE, data: json.done_tries });
         })

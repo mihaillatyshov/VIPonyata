@@ -5,6 +5,8 @@ import React, { useLayoutEffect } from "react";
 
 import { AssessmentCreatePage } from "components/Activities/Assessment/CreatePage";
 import StudentAssessmentPage from "components/Activities/Assessment/StudentAssessmentPage";
+import StudentAssessmentViewDoneTryPage from "components/Activities/Assessment/ViewTry/StudentAssessmentViewDoneTryPage";
+import TeacherAssessmentViewDoneTryPage from "components/Activities/Assessment/ViewTry/TeacherAssessmentViewDoneTryPage";
 import DrillingCreatePage from "components/Activities/Lexis/Drilling/DrillingCreatePage";
 import HieroglyphCreatePage from "components/Activities/Lexis/Hieroglyph/HieroglyphCreatePage";
 import StudentHieroglyphPage from "components/Activities/Lexis/Hieroglyph/StudentHieroglyphPage";
@@ -24,7 +26,7 @@ import RegisterPage from "./components/Authentication/RegisterPage";
 import Loading from "./components/Common/Loading";
 import CoursePage from "./components/Courses/CoursePage";
 import StudentLessonPage from "./components/Lessons/StudentLessonPage";
-import StudentMainPage from "./components/MainPage/StudentMainPage";
+import MainPage from "./components/MainPage/MainPage";
 import NavBar from "./components/NavBar";
 import NavigateHome from "./components/NavigateHome";
 import { AjaxGet } from "./libs/ServerAPI";
@@ -95,7 +97,7 @@ const App = () => {
             <BrowserRouter>
                 {user.isAuth && <NavBar />}
                 <Routes>
-                    <Route path="/" element={getRoute(<StudentMainPage />, <StudentMainPage />, <LoginPage />)} />
+                    <Route path="/" element={getRoute(<MainPage />, <MainPage />, <LoginPage />)} />
                     <Route path="/register" element={<RegisterPage />} />
 
                     <Route path="/courses/:id" element={getLoggedRoute(<CoursePage />)} />
@@ -121,6 +123,10 @@ const App = () => {
                         element={getRoute(<StudentAssessmentPage />, <StudentAssessmentPage />)}
                     />
                     <Route path="/assessment/create/:lessonId" element={getTeacherRoute(<AssessmentCreatePage />)} />
+                    <Route
+                        path="/assessment/try/:id"
+                        element={getRoute(<TeacherAssessmentViewDoneTryPage />, <StudentAssessmentViewDoneTryPage />)}
+                    />
 
                     <Route path="/profile" element={getRoute(<StudentProfilePage />, <StudentProfilePage />)} />
 

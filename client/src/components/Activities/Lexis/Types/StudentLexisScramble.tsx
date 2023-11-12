@@ -1,10 +1,10 @@
 import React from "react";
 
 import { TScramble } from "models/Activity/Items/TLexisItems";
-import { Button } from "react-bootstrap";
 
 import { StudentLexisTaskProps, useLexisItem, useScrambeWordOrChar, useSetLexisSelectedItemField } from "./LexisUtils";
 import StudentLexisTaskInterface from "./StudentLexisTaskInterface";
+import { StudentLexisTaskTitle } from "./StudentLexisTaskTitle";
 
 const StudentLexisScramble = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps<TScramble>) => {
     const item = useLexisItem(name);
@@ -64,36 +64,31 @@ const StudentLexisScramble = ({ name, inData, goToNextTaskCallback }: StudentLex
             }}
             maincontent={() => {
                 return (
-                    <div>
-                        <div> {item.nowId} </div>
-                        <div>
+                    <div className="d-flex flex-column align-items-center">
+                        <StudentLexisTaskTitle title="Собери слово" />
+                        <div className="d-flex">
                             {item.doneWord.map((word: string, key: number) => (
-                                <Button
-                                    className="scrambleItem"
+                                <div
+                                    className="student-lexis-scramble__item"
                                     key={key}
-                                    variant="outline-dark"
                                     onClick={() => doneWordClick(key)}
                                 >
-                                    {" "}
-                                    {word}{" "}
-                                </Button>
+                                    {word}
+                                </div>
                             ))}
                         </div>
-                        <div>
+                        <div className="d-flex mt-2">
                             {item.usedChars.map((char: string, key: number) => (
-                                <Button
-                                    className="scrambleItem"
+                                <div
+                                    className="student-lexis-scramble__item"
                                     key={key}
-                                    variant="outline-dark"
                                     onClick={() => usedCharsClick(key)}
                                 >
-                                    {" "}
-                                    {char}{" "}
-                                </Button>
+                                    {char}
+                                </div>
                             ))}
                         </div>
-                        <div> {inData[full][item.wordId]} </div>
-                        <div> {item.message} </div>
+                        {/* <div> {inData[full][item.wordId]} </div> */}
                     </div>
                 );
             }}

@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 
-import { LexisName, useLexisWordOrChar } from "components/Activities/Lexis/Types/LexisUtils";
+import { useLexisWordOrChar } from "components/Activities/Lexis/Types/LexisUtils";
 import PageTitle from "components/Common/PageTitle";
 import InputError from "components/Form/InputError";
 import InputTextArea from "components/Form/InputTextArea";
 import InputTime from "components/Form/InputTime";
 import { AjaxPost } from "libs/ServerAPI";
+import { LexisName } from "models/Activity/IActivity";
 import { LexisTaskName } from "models/Activity/ILexis";
 import { TCreateCardItem } from "models/Activity/Items/TLexisItems";
 import { TDictionaryItem, TDictionaryItemCreate } from "models/TDictionary";

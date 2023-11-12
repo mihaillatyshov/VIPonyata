@@ -7,7 +7,6 @@ import styles from "../StyleLessons.module.css";
 import { Description, Title } from "./BaseParts/LessonCard";
 import LessonCardBase from "./LessonCardBase";
 import LessonCardFooter from "./LessonCardFooter";
-import LessonCardSkill from "./LessonCardSkill";
 
 type LessonCardWithContentProps = {
     lesson: TLesson;
@@ -37,7 +36,7 @@ const LessonCardWithContent = ({ lesson }: LessonCardWithContentProps) => {
                     <LessonCardFooter id={lesson.id} lessonName={lesson.name} />
                 </div>
             </Link>
-            <LessonCardSkill />
+            {/* <LessonCardSkill /> */}
         </LessonCardBase>
     );
 };

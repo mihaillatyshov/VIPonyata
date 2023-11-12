@@ -1,5 +1,6 @@
 import React from "react";
 
+import InputCheckSingle from "components/Form/InputCheckSingle";
 import { TAssessmentTestMulti } from "models/Activity/Items/TAssessmentItems";
 import { useAppDispatch } from "redux/hooks";
 import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
@@ -21,18 +22,19 @@ const StudentAssessmentTestMulti = ({ data, taskId }: StudentAssessmentTypeProps
 
     return (
         <div>
-            <div>{data.question}</div>
+            <div className="mb-3">{data.question}</div>
             {data.options.map((answer: string, fieldId: number) => (
-                <div key={fieldId}>
-                    <input
-                        className="form-check-input me-2"
-                        type="checkbox"
-                        checked={data.answers.includes(fieldId)}
-                        onChange={() => onChangeHandler(fieldId)}
-                        name={`check_${taskId}`}
-                        id={`check_${taskId}_${fieldId}`}
+                <div key={fieldId} className="input-group mt-1">
+                    <InputCheckSingle
+                        key={fieldId}
+                        htmlId={`radio_${taskId}_${fieldId}`}
+                        id={fieldId}
+                        className="input-group-text big-check"
+                        placeholder={""}
+                        selectedIds={data.answers}
+                        onChange={onChangeHandler}
                     />
-                    <label htmlFor={`check_${taskId}_${fieldId}`}>{answer}</label>
+                    <span className="form-control prevent-select">{answer}</span>
                 </div>
             ))}
         </div>

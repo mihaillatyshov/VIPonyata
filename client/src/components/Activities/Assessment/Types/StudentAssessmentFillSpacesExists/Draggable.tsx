@@ -40,7 +40,7 @@ const Draggable = ({ id, str, width, type }: DraggableProps) => {
 
     return (
         <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={className}>
-            <div className="dnd-prevent-select mx-auto">{str}</div>
+            <div className="prevent-select mx-auto">{str}</div>
         </div>
     );
 };

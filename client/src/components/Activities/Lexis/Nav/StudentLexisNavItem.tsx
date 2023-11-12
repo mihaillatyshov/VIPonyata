@@ -1,15 +1,9 @@
 import React from "react";
 
+import { LexisTaskName } from "models/Activity/ILexis";
 import { useNavigate } from "react-router-dom";
 
 import styles from "./StyleLexisNav.module.css";
-
-export type StudentLexisNavItemProps = {
-    to: string;
-    name: string;
-    img: string;
-    mistakeCount?: number;
-};
 
 type MistakeProps = { mistakeCount?: number };
 const Mistake = ({ mistakeCount }: MistakeProps) => {
@@ -24,16 +18,35 @@ const Mistake = ({ mistakeCount }: MistakeProps) => {
     return <div className={getClassName()}>{mistakeCount}</div>;
 };
 
-const StudentLexisNavItem = ({ to, name, img, mistakeCount }: StudentLexisNavItemProps) => {
+export interface StudentLexisNavItemProps {
+    to: string;
+    name: string;
+    taskName: LexisTaskName;
+    img: string;
+    mistakeCount?: number;
+    isSelected: boolean;
+    setSelectedTaskCallback: (taskName: LexisTaskName) => void;
+}
+
+const StudentLexisNavItem = ({
+    to,
+    name,
+    taskName,
+    img,
+    mistakeCount,
+    isSelected,
+    setSelectedTaskCallback,
+}: StudentLexisNavItemProps) => {
     const navigate = useNavigate();
 
     const onClickHandle = () => {
+        setSelectedTaskCallback(taskName);
         navigate(to);
     };
 
     return (
         <div className="col-auto text-center mb-4">
-            <div className={styles.navItem} onClick={onClickHandle}>
+            <div className={`student-lexis-nav__item ${isSelected ? "selected" : ""}`} onClick={onClickHandle}>
                 <div className="px-auto">
                     <img src={img} width="32px" alt={name} />
                 </div>

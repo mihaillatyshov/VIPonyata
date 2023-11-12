@@ -1,0 +1,27 @@
+.auth-form {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.big-check {
+    margin-left: 2px;
+}
+
+.big-check > input {
+    width: 1.2em;
+    height: 1.2em;
+}
+
+.check-wrong {
+    background-color: #f09393;
+}
+
+.input-wrong {
+    background-color: #f4b8b8;
+}

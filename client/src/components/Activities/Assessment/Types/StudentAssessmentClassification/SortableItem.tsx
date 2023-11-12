@@ -32,7 +32,7 @@ export function Item({ str, width }: ItemProps) {
     };
 
     return (
-        <div className={`dnd-prevent-select ${styles.classificationItem}`} style={style}>
+        <div className={`prevent-select ${styles.classificationItem}`} style={style}>
             {str}
         </div>
     );

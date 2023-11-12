@@ -1,9 +1,7 @@
 import React from "react";
 
 import { AjaxPost } from "libs/ServerAPI";
-import { Button } from "react-bootstrap";
-
-import { LexisName } from "./Types/LexisUtils";
+import { LexisName } from "models/Activity/IActivity";
 
 type StudentLexisHubProps = {
     id: string | undefined;
@@ -19,9 +17,8 @@ const StudentLexisHub = ({ id, name, backToLessonCallback }: StudentLexisHubProp
     };
 
     return (
-        <div>
-            <div>Hub {name}</div>
-            <Button onClick={endLexisHandle}> Завершить </Button>
+        <div className="d-flex flex-column align-items-center">
+            <input type="button" className="btn btn-success" onClick={endLexisHandle} value="Завершить" />
         </div>
     );
 };

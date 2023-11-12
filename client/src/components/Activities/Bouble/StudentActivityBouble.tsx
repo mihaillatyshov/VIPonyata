@@ -1,13 +1,12 @@
 import React from "react";
 
-import StudentTimeRemaining from "components/Activities/StudentTimeRemaining";
 import { AjaxPost } from "libs/ServerAPI";
+import { ActivityName } from "models/Activity/IActivity";
 import { TAssessment } from "models/Activity/TAssessment";
 import { TDrilling } from "models/Activity/TDrilling";
 import { THieroglyph } from "models/Activity/THieroglyph";
 import { useNavigate } from "react-router-dom";
 
-import { ActivityName } from "../ActivityUtils";
 import StudentViewDoneTryButton from "../ViewTry/StudentViewDoneTryButton";
 import ActivityBouble from "./ActivityBouble";
 
@@ -44,26 +43,12 @@ const StudentActivityBubble = ({ info, title, name, onDeadline }: StudentActivit
         return isInProgress() ? "Продолжить" : "Начать";
     };
 
-    const getTextInfo = () => {
-        if (isInProgress()) {
-            if (info.deadline) {
-                return <StudentTimeRemaining deadline={info.deadline} onDeadline={onDeadline} />;
-            }
-            return "Продолжить выполнение можно в любой момент";
-        }
-        if (info.time_limit) {
-            return `Время на выполнение теста: ${info.time_limit}`;
-        }
-        return "Нет ограничений по времени выполнения";
-    };
-
     return (
         <ActivityBouble title={title}>
-            <div>{getTextInfo()}</div>
-            <div>
-                <input type="button" className="btn btn-primary" onClick={onButtonClick} value={getButtonText()} />
+            <div className="mt-5">
+                <input type="button" className="btn btn-success" onClick={onButtonClick} value={getButtonText()} />
             </div>
-            <div>
+            <div className="mt-5">
                 <StudentViewDoneTryButton name={name} id={info.id} />
             </div>
         </ActivityBouble>

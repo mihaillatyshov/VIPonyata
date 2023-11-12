@@ -1,10 +1,11 @@
 import React from "react";
 
+import InputText from "components/Form/InputText";
 import { TTranslate } from "models/Activity/Items/TLexisItems";
-import { Button } from "react-bootstrap";
 
 import { StudentLexisTaskProps, useLexisItem, useLexisWordsOrChars, useSetLexisSelectedItemField } from "./LexisUtils";
 import StudentLexisTaskInterface from "./StudentLexisTaskInterface";
+import { StudentLexisTaskTitle } from "./StudentLexisTaskTitle";
 
 const StudentLexisTranslate = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps<TTranslate>) => {
     const item = useLexisItem(name);
@@ -19,11 +20,12 @@ const StudentLexisTranslate = ({ name, inData, goToNextTaskCallback }: StudentLe
         };
     };
 
-    const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setLexisSelectedItemField({ inputText: e.target.value });
+    const handleTextChange = (value: string) => {
+        setLexisSelectedItemField({ inputText: value });
     };
 
-    const nextWord = () => {
+    const nextWord = (e: React.MouseEvent<HTMLInputElement>) => {
+        e.preventDefault();
         console.log(inData.words_ru, item.inputText.trim());
         if (inData.words_ru[item.wordId] === item.inputText.trim())
             setLexisSelectedItemField({ ...getObjectData(item.wordId + 1) });
@@ -40,13 +42,19 @@ const StudentLexisTranslate = ({ name, inData, goToNextTaskCallback }: StudentLe
             }}
             maincontent={() => {
                 return (
-                    <div>
-                        <div>{item.wordJP}</div>
-                        <div>
-                            <input type="text" value={item.inputText} onChange={handleTextChange} />
-                            <Button onClick={nextWord}> Next </Button>
-                        </div>
-                    </div>
+                    <form className="d-flex flex-column align-items-center">
+                        <StudentLexisTaskTitle title="Переведи" />
+                        <div className="mb-2">{item.wordJP}</div>
+                        <InputText
+                            htmlId="translate"
+                            value={item.inputText}
+                            onChangeHandler={handleTextChange}
+                            placeholder="Перевод"
+                            autoFocus={true}
+                            noErrorField={true}
+                        />
+                        <input type="submit" className="btn btn-success mt-4" onClick={nextWord} value="次" />
+                    </form>
                 );
             }}
         />
