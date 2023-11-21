@@ -205,6 +205,12 @@ def get_assessment_done_try(done_try_id):
         done_try_id=done_try_id)
 
 
+@routes_bp.route("/assessment/donetries/<int:done_try_id>", methods=["PATCH"])
+@login_required
+def set_assessment_done_try_checks(done_try_id):
+    return user_selector_function(teacher_funcs.AssessmentHandlers.set_done_try_check, None, done_try_id=done_try_id)
+
+
 @routes_bp.route("/assessment/<id>/newtry", methods=["POST"])
 @login_required
 def start_new_assessment_try(id):

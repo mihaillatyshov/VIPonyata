@@ -19,7 +19,7 @@ export interface TAssessmentItemBase {
 
 export interface TAssessmentCheckedItemBase {
     mistakes_count: number;
-    is_checked: boolean;
+    cheked: boolean;
 }
 
 // * ==========================================================================
@@ -107,6 +107,8 @@ export interface TAssessmentCheckedCreateSentence extends TAssessmentCheckedItem
 // * ==========================================================================
 // * ========== FillSpacesExists ==============================================
 // * ==========================================================================
+export const TAssessmentFillSpacesExistsEmpty = "Пусто";
+
 interface TAssessmentFillSpacesExistsBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.FILL_SPACES_EXISTS;
     separates: string[];

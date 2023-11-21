@@ -1,13 +1,13 @@
 from datetime import datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from server.common import DBsession
 from server.log_lib import LogW
 from server.models.db_models import (ActivityTryType, ActivityType,
                                      AssessmentTry, DrillingTry, FinalBossTry,
                                      HieroglyphTry, LexisTryType, User)
-from server.models.user import UserRegisterReq
+from server.models.user import UserDataUpdateReq, UserRegisterReq
 from server.queries.StudentDBqueries import (add_assessment_notification,
                                              add_drilling_notification,
                                              add_final_boss_notification,
@@ -73,6 +73,21 @@ def create_new_user(user_data: UserRegisterReq, hash_pwd):
 def get_user_by_id(user_id: int) -> User | None:
     with DBsession.begin() as session:
         return session.scalars(select(User).where(User.id == user_id)).one_or_none()
+
+
+def user_data_update(user_data: UserDataUpdateReq, user_id: int):
+    with DBsession.begin() as session:
+        session.execute(update(User).where(User.id == user_id).values(**user_data.model_dump()))
+
+
+def user_password_update(hash_pwd: str, user_id: int):
+    with DBsession.begin() as session:
+        session.execute(update(User).where(User.id == user_id).values(password=hash_pwd))
+
+
+def user_avatar_update(url: str, user_id: int):
+    with DBsession.begin() as session:
+        session.execute(update(User).where(User.id == user_id).values(avatar=url))
 
 
 #########################################################################################################################

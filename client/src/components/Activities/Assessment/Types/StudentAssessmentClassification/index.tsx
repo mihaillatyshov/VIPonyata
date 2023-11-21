@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
+import { FindMaxStr } from "libs/Autisize";
 import { TAssessmentClassification } from "models/Activity/Items/TAssessmentItems";
 import { useAppDispatch } from "redux/hooks";
 import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
@@ -40,11 +41,10 @@ const StudentAssessmentClassification = ({ data, taskId }: StudentAssessmentType
         return [inputs, ...answers];
     });
 
-    const strWidth = Math.max(
-        ...[data.inputs, ...data.answers].map((col) => Math.max(...col.map((str) => str.length))),
-        5,
+    const longestStr = useMemo(
+        () => FindMaxStr([data.inputs, ...data.answers].map(FindMaxStr)),
+        [data.inputs, data.answers],
     );
-    console.log(strWidth);
 
     useEffect(() => {
         const newData = {
@@ -169,22 +169,22 @@ const StudentAssessmentClassification = ({ data, taskId }: StudentAssessmentType
             onDragEnd={handleDragEnd}
         >
             <div className="d-flex justify-content-center">
-                <Container id={0} items={items[0]} type="inputs" strWidth={strWidth} />
+                <Container id={0} items={items[0]} type="inputs" longestStr={longestStr} />
             </div>
-            <div className="d-flex flex-wrap justify-content-center">
+            <div className="d-flex flex-wrap justify-content-center gap-3">
                 {items.slice(1).map((col, i) => (
                     <Container
                         key={i + 1}
                         id={i + 1}
                         items={col}
                         type="answer"
-                        strWidth={strWidth}
+                        longestStr={longestStr}
                         title={data.titles[i]}
                     />
                 ))}
             </div>
             <DragOverlay style={{ opacity: "60%" }}>
-                {active ? <Item str={active.str} width={strWidth} /> : null}
+                {active ? <Item str={active.str} longestStr={longestStr} /> : null}
             </DragOverlay>
         </DndContext>
     );

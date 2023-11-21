@@ -1,5 +1,18 @@
 import React from "react";
 
-export const StudentAssessmentDoneTryAudio = () => {
-    return <div>StudentAssessmentDoneTryAudio</div>;
+import { TAssessmentAudio, TAssessmentCheckedAudio } from "models/Activity/Items/TAssessmentItems";
+
+import { AssessmentDoneTryTaskBaseProps } from "../AssessmentDoneTryTaskBase";
+
+export const StudentAssessmentDoneTryAudio = ({
+    data,
+}: AssessmentDoneTryTaskBaseProps<TAssessmentAudio, TAssessmentCheckedAudio>) => {
+    return (
+        <div className="w-100">
+            <audio className="w-100" controls>
+                <source src={data.url} type="audio/mpeg"></source>
+                Your browser does not support the audio.
+            </audio>
+        </div>
+    );
 };

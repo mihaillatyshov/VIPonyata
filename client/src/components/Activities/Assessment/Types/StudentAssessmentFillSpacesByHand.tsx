@@ -1,5 +1,6 @@
 import React from "react";
 
+import AutosizeInput from "libs/AutosizeInput";
 import { TAssessmentFillSpacesByHand } from "models/Activity/Items/TAssessmentItems";
 import { useAppDispatch } from "redux/hooks";
 import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
@@ -17,27 +18,21 @@ const StudentAssessmentFillSpacesByHand = ({
         dispatch(setAssessmentTaskData({ id: taskId, data: data }));
     };
 
-    const calcWidth = (word: string) => {
-        return Math.min(Math.max(word.length * 0.9, 5), 15) + "rem";
-    };
-
     return (
         <div>
             <div className="d-flex">
-                <div className="d-flex flex-wrap">
+                <div className="d-flex flex-wrap align-items-center">
                     {data.separates.map((element: string, i: number) => (
-                        <div key={i} className="d-flex flex-wrap">
-                            <div className="me-2 mt-1">{element}</div>
+                        <React.Fragment key={i}>
+                            <div className="prevent-select me-2 mt-1">{element}</div>
                             {i < data.separates.length - 1 && (
-                                <input
-                                    className="me-2 mt-1"
-                                    style={{ height: "1.5rem", width: calcWidth(data.answers[i]) }}
-                                    type="text"
+                                <AutosizeInput
                                     value={data.answers[i]}
-                                    onChange={(e) => onChangeHandler(e, i)}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeHandler(e, i)}
+                                    inputClassName="form-control student-assessment-fill-spaces-by-hand__input me-2 mt-1"
                                 />
                             )}
-                        </div>
+                        </React.Fragment>
                     ))}
                 </div>
             </div>

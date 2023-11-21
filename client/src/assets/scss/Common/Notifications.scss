@@ -1,0 +1,20 @@
+.notification__item {
+    white-space: nowrap;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #000000;
+
+    border-radius: 4px;
+
+    padding: 6px;
+
+    background: #ffffff;
+
+    &.wrong {
+        background-color: #f4b8b8;
+        border-color: #ea7979;
+    }
+}

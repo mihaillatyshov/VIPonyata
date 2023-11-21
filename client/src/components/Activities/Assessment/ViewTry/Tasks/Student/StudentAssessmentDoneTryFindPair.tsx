@@ -48,7 +48,6 @@ const FieldRow = ({ id, parsCreated, first, second, isWrong }: FieldRowProps) =>
 export const StudentAssessmentDoneTryFindPair = ({
     data,
     checks,
-    taskId,
 }: AssessmentDoneTryTaskBaseProps<TAssessmentFindPair, TAssessmentCheckedFindPair>) => {
     return (
         <div>

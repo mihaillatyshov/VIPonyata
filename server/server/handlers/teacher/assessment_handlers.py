@@ -8,7 +8,7 @@ from server.models.db_models import Assessment, AssessmentTry, AssessmentTryType
 from server.models.utils import validate_req
 
 import server.queries.TeacherDBqueries as DBQT
-from server.exceptions.ApiExceptions import InvalidAPIUsage, LessonNotFoundException
+from server.exceptions.ApiExceptions import InvalidAPIUsage, InvalidRequestJson, LessonNotFoundException
 from server.models.assessment import (Aliases, AssessmentCreateReq, AssessmentCreateReqStr,
                                       BaseModelTask)
 
@@ -78,7 +78,30 @@ class IAssessmentHandlers(Generic[AssessmentType, AssessmentTryType]):
         return {}
 
     def get_done_try(self, done_try_id: int):
-        return {}
+        done_try = self._activity_queries.get_done_try_by_id(done_try_id)
+
+        if done_try is None:
+            raise InvalidAPIUsage("Done try not found", 404)
+
+        return {"done_try": done_try}
+
+    def set_done_try_check(self, done_try_id: int):
+        if not request.json:
+            raise InvalidRequestJson()
+        checks_json = request.json.get("checks")
+        if not checks_json:
+            raise InvalidAPIUsage("No checks!")
+
+        # TODO: validate checks_json
+
+        done_try = self._activity_queries.get_done_try_by_id(done_try_id)
+
+        if done_try is None:
+            raise InvalidAPIUsage("Done try not found", 404)
+
+        self._activity_queries.set_done_try_checks(done_try_id, json.dumps(checks_json))
+
+        return {"message": "Checks successfully set"}
 
 
 AssessmentHandlers = IAssessmentHandlers[Assessment, AssessmentTry](Assessment)

@@ -35,3 +35,82 @@
     inset: 50%;
     transform: translate(-50%, -100%);
 }
+
+.student-assessment-fill-spaces-by-hand__input {
+    @extend .input-small;
+
+    min-width: 3rem;
+    max-width: 240px;
+
+    &.wrong {
+        background-color: #f4b8b8;
+        border-color: #ea7979;
+    }
+}
+
+.student-assessment-fill-spaces-exists__inputs {
+    @extend .my-card;
+
+    width: 100%;
+    min-height: 80px;
+}
+
+.student-assessment-classification__column-title {
+    font-size: 1.2em;
+}
+
+.student-assessment-classification__inputs {
+    flex: 1 0;
+    min-height: 70px;
+    overflow: hidden;
+    margin-top: 4px !important;
+}
+
+.student-assessment-classification__answers {
+    @extend .my-card;
+
+    flex: 0 1 0;
+    min-height: 60px;
+    padding: 10px;
+    min-width: max(fit-content 100px);
+    margin: 4px 0 !important;
+}
+
+$item-border-size: 1px;
+
+.student-assessment-classification__item {
+    @extend .prevent-select;
+
+    white-space: nowrap;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: $item-border-size solid #000000;
+
+    border-radius: 4px;
+
+    margin: calc($item-border-size);
+    padding: 6px;
+
+    background: #ffffff;
+
+    &.wrong {
+        background-color: #f4b8b8;
+        border-color: #ea7979;
+    }
+}
+
+.student-assessment-classification__item-autosize {
+    margin: calc($item-border-size + 2px);
+    padding: 0 6px;
+}
+
+.student-assessment-task__title-not-checked {
+    background-color: #ffff00;
+    border-color: #ffff00;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 20px;
+    padding: 4px 6px;
+}

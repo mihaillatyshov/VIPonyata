@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 
-import { TAssessmentFillSpacesExists } from "models/Activity/Items/TAssessmentItems";
+import { FindMaxStr } from "libs/Autisize";
+import { TAssessmentFillSpacesExists, TAssessmentFillSpacesExistsEmpty } from "models/Activity/Items/TAssessmentItems";
 import { useAppDispatch } from "redux/hooks";
 import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
 
@@ -73,23 +74,27 @@ const StudentAssessmentFillSpacesExists = ({
         dispatch(setAssessmentTaskData({ id: taskId, data: data }));
     };
 
-    const itemWidth = Math.max(
-        ...data.inputs.map((item) => item.length),
-        ...data.answers.map((item) => (item ? item.length : 0)),
-        5
+    const longestStr = useMemo(
+        () =>
+            FindMaxStr(
+                [...data.inputs, ...data.answers, TAssessmentFillSpacesExistsEmpty].filter(
+                    (item) => item !== null,
+                ) as string[],
+            ),
+        [data.inputs, data.answers],
     );
 
     return (
         <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
-            <InputsField inputFields={data.inputs} width={itemWidth} />
-            <div className="d-flex flex-wrap mt-3">
+            <InputsField inputFields={data.inputs} longestStr={longestStr} />
+            <div className="d-flex flex-wrap align-items-center mt-3">
                 {data.separates.map((element: string, fieldId: number) => (
-                    <div key={fieldId} className="d-flex flex-wrap">
-                        <div className="mx-2 mt-2">{element}</div>
+                    <React.Fragment key={fieldId}>
+                        <div className="prevent-select me-2 mt-2">{element}</div>
                         {fieldId < data.separates.length - 1 && (
-                            <Droppable id={fieldId} width={itemWidth} str={data.answers[fieldId]} />
+                            <Droppable id={fieldId} longestStr={longestStr} str={data.answers[fieldId]} />
                         )}
-                    </div>
+                    </React.Fragment>
                 ))}
             </div>
         </DndContext>

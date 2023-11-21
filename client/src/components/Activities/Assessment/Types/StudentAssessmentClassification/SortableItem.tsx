@@ -1,44 +1,33 @@
 import React from "react";
 
-import CSS from "csstype";
+import AutosizeDiv from "libs/AutosizeDiv";
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS as DNDCSS } from "@dnd-kit/utilities";
 
-import styles from "../StyleAssessmentType.module.css";
-
 interface ItemProps {
     str: string;
-    width: number;
+    longestStr: string;
 }
 
 interface SortableItemProps {
     id: string;
     str: string;
-    strWidth: number;
+    longestStr: string;
 }
 
-export function Item({ str, width }: ItemProps) {
-    const style: CSS.Properties = {
-        width: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        border: "1px solid black",
-        margin: "10px 0",
-        padding: "6px",
-        background: "white",
-        minWidth: `calc(${width}em * 1)`,
-    };
-
+export function Item({ str, longestStr }: ItemProps) {
     return (
-        <div className={`prevent-select ${styles.classificationItem}`} style={style}>
-            {str}
-        </div>
+        <AutosizeDiv
+            value={str}
+            valueToCalcSize={longestStr}
+            inputClassName="student-assessment-classification__item text-center"
+            className="student-assessment-classification__item-autosize"
+        />
     );
 }
 
-export default function SortableItem({ id, str, strWidth }: SortableItemProps) {
+export default function SortableItem({ id, str, longestStr }: SortableItemProps) {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
 
     const style = {
@@ -48,7 +37,7 @@ export default function SortableItem({ id, str, strWidth }: SortableItemProps) {
 
     return (
         <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-            <Item str={str} width={strWidth} />
+            <Item str={str} longestStr={longestStr} />
         </div>
     );
 }

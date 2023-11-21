@@ -1,5 +1,15 @@
 import React from "react";
 
-export const StudentAssessmentDoneTryImg = () => {
-    return <div>StudentAssessmentDoneTryImg</div>;
+import { TAssessmentCheckedImg, TAssessmentImg } from "models/Activity/Items/TAssessmentItems";
+
+import { AssessmentDoneTryTaskBaseProps } from "../AssessmentDoneTryTaskBase";
+
+export const StudentAssessmentDoneTryImg = ({
+    data,
+}: AssessmentDoneTryTaskBaseProps<TAssessmentImg, TAssessmentCheckedImg>) => {
+    return (
+        <div className="d-flex w-100 justify-content-center">
+            <img alt="Img" className="img-base" src={data.url} />
+        </div>
+    );
 };

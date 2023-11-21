@@ -1,18 +1,17 @@
 import React from "react";
 
-import styles from "../StyleAssessmentType.module.css";
 import Draggable from "./Draggable";
 
 interface InputsFieldProps {
     inputFields: string[];
-    width: number;
+    longestStr: string;
 }
 
-const InputsField = ({ inputFields, width }: InputsFieldProps) => {
+const InputsField = ({ inputFields, longestStr }: InputsFieldProps) => {
     return (
-        <div className={`d-flex gap-3 flex-wrap my-card ${styles.fillSpaceExistsInputs}`}>
+        <div className="d-flex gap-3 flex-wrap student-assessment-fill-spaces-exists__inputs">
             {inputFields.map((item, id) => (
-                <Draggable key={id} id={id} str={item} width={width} type="inputs" />
+                <Draggable key={id} id={id} str={item} longestStr={longestStr} type="inputs" />
             ))}
         </div>
     );

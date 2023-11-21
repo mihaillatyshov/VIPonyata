@@ -18,7 +18,7 @@ const StudentAssessmentTestSingle = ({ data, taskId }: StudentAssessmentTypeProp
 
     return (
         <div>
-            <div className="mb-3">{data.question}</div>
+            <div className="prevent-select mb-3">{data.question}</div>
             {data.options.map((answer: string, fieldId: number) => (
                 <div key={fieldId} className="input-group mt-1">
                     <InputRadioSingle

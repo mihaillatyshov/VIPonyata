@@ -1,10 +1,37 @@
-.dnd__sortable-item {
+$dnd-border-radius: 5px;
+
+.dnd__item-base {
+    @extend .prevent-select;
+
     border: 1px solid black;
-    border-radius: 5px;
-    padding: 5px 8px;
-    background-color: white;
+    border-radius: $dnd-border-radius;
+    padding: 0 6px;
+    height: fit-content;
+}
+
+.dnd__sortable-item {
+    @extend .dnd__item-base;
+
+    background-color: #ffffff;
 
     &.wrong {
         background-color: #f4b8b8;
+    }
+}
+
+.dnd__droppable {
+    @extend .dnd__item-base;
+
+    background-color: #ffffff;
+    color: #aaaaaa;
+
+    &-wrapper {
+        background-color: #ffffff;
+        border-radius: $dnd-border-radius;
+    }
+
+    &-over {
+        opacity: 50%;
+        background-color: #ffffff;
     }
 }

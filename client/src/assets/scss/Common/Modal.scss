@@ -6,3 +6,20 @@
 .modal-bg {
     background-color: #eaeaea;
 }
+
+.loading-modal-fs {
+    width: 100vw;
+    height: 100vh;
+
+    top: 0;
+    left: 0;
+    position: absolute;
+
+    background-color: #00000033;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    overflow: hidden;
+}

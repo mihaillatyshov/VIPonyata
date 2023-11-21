@@ -1,38 +1,39 @@
 import React from "react";
 
-import CSS from "csstype";
+import AutosizeDiv from "libs/AutosizeDiv";
+import { TAssessmentFillSpacesExistsEmpty } from "models/Activity/Items/TAssessmentItems";
 
 import { useDroppable } from "@dnd-kit/core";
 
-import styles from "../StyleAssessmentType.module.css";
 import Draggable, { FieldData } from "./Draggable";
 
 interface DroppableProps {
     id: number;
-    width: number;
+    longestStr: string;
     str: string | null;
 }
 
-const Droppable = ({ id, width, str }: DroppableProps) => {
+const Droppable = ({ id, longestStr, str }: DroppableProps) => {
     const data: FieldData = { fieldId: id, type: "answer" };
     const { setNodeRef, isOver } = useDroppable({
         id: `${id}`,
         data: data,
     });
 
-    const style: CSS.Properties = {
-        minWidth: `calc(${width}em * 0.8)`,
-        maxWidth: `calc(${width}em * 0.8)`,
-    };
-
-    const className = `d-flex mt-1 ${isOver ? styles.fillSpaceExistsDroppableOver : ""} ${
-        !str ? styles.fillSpaceExistsDroppable : styles.fillSpaceExistsDroppableNone
-    }`;
-
     return (
-        <div ref={setNodeRef} className={className} style={style}>
-            <div className="d-flex mx-auto">
-                {str ? <Draggable id={id} str={str} type="answer" width={width} /> : "Пусто"}
+        <div ref={setNodeRef}>
+            <div className={`d-flex mt-2 me-2 dnd__droppable-wrapper ${isOver ? "dnd__droppable-over" : ""}`}>
+                {str ? (
+                    <Draggable id={id} str={str} type="answer" longestStr={longestStr} />
+                ) : (
+                    <div className="d-flex dnd__droppable">
+                        <AutosizeDiv
+                            value={TAssessmentFillSpacesExistsEmpty}
+                            valueToCalcSize={longestStr}
+                            inputClassName="prevent-select text-center"
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );

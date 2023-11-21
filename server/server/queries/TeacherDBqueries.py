@@ -241,6 +241,22 @@ class IAssessmentQueries(Generic[AssessmentType, AssessmentTryType]):
                 .where(self.assessment_try_type.id == assessment_try_id)
             ).one_or_none()
 
+    def get_done_try_by_id(self, assessment_id: int) -> AssessmentTryType | None:
+        with DBsession.begin() as session:
+            return session.scalars(
+                select(self.assessment_try_type)
+                .where(self.assessment_try_type.id == assessment_id)
+                .where(self.assessment_try_type.end_datetime != None)
+            ).one_or_none()
+
+    def set_done_try_checks(self, assessment_try_id: int, checks_json: str):
+        with DBsession.begin() as session:
+            session.execute(
+                update(self.assessment_try_type)
+                .where(self.assessment_try_type.id == assessment_try_id)
+                .values(checked_tasks=checks_json)
+            )
+
 
 AssessmentQueries = IAssessmentQueries(Assessment, AssessmentTry)
 FinalBossQueries = IAssessmentQueries(FinalBoss, FinalBossTry)

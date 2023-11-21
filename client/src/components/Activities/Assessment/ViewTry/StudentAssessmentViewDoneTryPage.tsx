@@ -56,6 +56,23 @@ interface DoneTryResponse {
     done_try: TAssessmentDoneTry;
 }
 
+interface TaskTitleProps {
+    cheked: boolean;
+    mistakes_count: number;
+}
+
+const TaskTitle = ({ cheked, mistakes_count }: TaskTitleProps) => {
+    if (!cheked) {
+        return <div className="student-assessment-task__title-not-checked">Не проверено</div>;
+    }
+
+    if (mistakes_count > 0) {
+        return <div>Ошибок: {mistakes_count}</div>;
+    }
+
+    return <div>Ошибок нет</div>;
+};
+
 const StudentAssessmentViewDoneTryPage = () => {
     const { id } = useParams();
     const [doneTry, setDoneTry] = useState<LoadStatus.DataDoneOrNotDone<{ data: TAssessmentDoneTry }>>({
@@ -66,11 +83,11 @@ const StudentAssessmentViewDoneTryPage = () => {
         setDoneTry({ loadStatus: LoadStatus.LOADING });
         AjaxGet<DoneTryResponse>({ url: `/api/assessment/donetries/${id}` })
             .then((json) => {
-                console.log(json);
                 setDoneTry({ loadStatus: LoadStatus.DONE, data: json.done_try });
             })
             .catch((err) => {
                 isProcessableError(err) && console.log(err);
+                setDoneTry({ loadStatus: LoadStatus.ERROR });
             });
     }, [id]);
 
@@ -106,9 +123,7 @@ const StudentAssessmentViewDoneTryPage = () => {
             <PageTitle title="Урок" urlBack={`/lessons/${doneTry.data.base_id}`} />
             {doneTry.data.done_tasks.map((doneTask, i) => (
                 <div key={i}>
-                    {doneTry.data.checked_tasks[i].mistakes_count > 0 && (
-                        <div>Ошибок: {doneTry.data.checked_tasks[i].mistakes_count} </div>
-                    )}
+                    <TaskTitle {...doneTry.data.checked_tasks[i]} />
                     {drawItem(doneTask, doneTry.data.checked_tasks[i], i)}
                     <hr />
                 </div>
