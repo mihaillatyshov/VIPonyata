@@ -258,6 +258,12 @@ def get_dictionary():
     return user_selector_function(teacher_funcs.get_dictionary, student_funcs.get_dictionary)
 
 
+@routes_bp.route("/dictionary/count", methods=["GET"])
+@login_required
+def get_dictionary_count():
+    return user_selector_function(None, student_funcs.get_dictionary_count)
+
+
 @routes_bp.route("/dictionary", methods=["POST"])
 @login_required
 def create_dictionary():

@@ -3,6 +3,7 @@ import React, { useLayoutEffect, useState } from "react";
 import Loading from "components/Common/Loading";
 import PageTitle from "components/Common/PageTitle";
 import ErrorPage from "components/ErrorPages/ErrorPage";
+import InputError from "components/Form/InputError";
 import { AjaxGet, AjaxPatch } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
 import {
@@ -13,7 +14,7 @@ import {
     TGetStudentTypeByName,
 } from "models/Activity/Items/TAssessmentItems";
 import { TAssessmentDoneTry } from "models/Activity/Try/TAssessmentTry";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { TeacherAssessmentDoneTryTaskProps } from "./Tasks/AssessmentDoneTryTaskBase";
 import { StudentAssessmentDoneTryAudio } from "./Tasks/Student/StudentAssessmentDoneTryAudio";
@@ -75,10 +76,11 @@ const TaskTitle = ({ cheked, mistakes_count }: TaskTitleProps) => {
 
 const TeacherAssessmentViewDoneTryPage = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [doneTry, setDoneTry] = useState<LoadStatus.DataDoneOrNotDone<{ data: TAssessmentDoneTry }>>({
         loadStatus: LoadStatus.NONE,
     });
-    const [doneTryUpdate, setDoneTryUpdate] = useState<LoadStatus.Type>(LoadStatus.NONE);
+    const [saveStatus, setSaveStatus] = useState<LoadStatus.Type>(LoadStatus.NONE);
 
     useLayoutEffect(() => {
         setDoneTry({ loadStatus: LoadStatus.LOADING });
@@ -106,18 +108,24 @@ const TeacherAssessmentViewDoneTryPage = () => {
     }
 
     const changeTask = <K extends TAssessmentCheckedItemBase>(taskId: number, checks: K) => {
-        const newData = { ...doneTry.data, checked_tasks: { ...doneTry.data.checked_tasks, [taskId]: checks } };
-        setDoneTryUpdate(LoadStatus.LOADING);
-        AjaxPatch<DoneTryResponse>({ url: `/api/assessment/donetries/${id}`, body: { checks: newData.checked_tasks } })
+        const newChecks = [...doneTry.data.checked_tasks];
+        newChecks[taskId] = checks;
+        setDoneTry({
+            ...doneTry,
+            data: { ...doneTry.data, checked_tasks: newChecks },
+        });
+    };
+    console.log(doneTry.data.checked_tasks);
+
+    const saveChangesAndClose = () => {
+        setSaveStatus(LoadStatus.LOADING);
+        AjaxPatch({ url: `/api/assessment/donetries/${id}`, body: { checks: doneTry.data.checked_tasks } })
             .then(() => {
-                setDoneTry({
-                    ...doneTry,
-                    data: newData,
-                });
-                setDoneTryUpdate(LoadStatus.DONE);
+                setSaveStatus(LoadStatus.DONE);
+                navigate(`/`);
             })
-            .catch((err) => {
-                setDoneTryUpdate(LoadStatus.ERROR);
+            .catch(() => {
+                setSaveStatus(LoadStatus.ERROR);
             });
     };
 
@@ -136,7 +144,7 @@ const TeacherAssessmentViewDoneTryPage = () => {
     };
 
     return (
-        <div className="container">
+        <div className="container mb-5 pb-5">
             <PageTitle title="Урок" urlBack={`/lessons/${doneTry.data.base_id}`} />
             {doneTry.data.done_tasks.map((doneTask, i) => (
                 <div key={i}>
@@ -145,11 +153,19 @@ const TeacherAssessmentViewDoneTryPage = () => {
                     <hr />
                 </div>
             ))}
-            {doneTryUpdate === LoadStatus.LOADING && (
-                <div className="loading-modal-fs">
-                    <Loading size="xxl" />
-                </div>
+            {saveStatus !== LoadStatus.LOADING ? (
+                <input
+                    type="button"
+                    value="Сохранить и закрыть"
+                    className="btn btn-success"
+                    onClick={saveChangesAndClose}
+                />
+            ) : (
+                <button className="btn btn-success" disabled>
+                    <Loading size="s" />
+                </button>
             )}
+            {saveStatus === LoadStatus.ERROR && <InputError message="Не удалось сохранить данные" />}
         </div>
     );
 };

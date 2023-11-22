@@ -34,9 +34,13 @@ def add_img_to_dictionary(id: int) -> dict:
     return {"message": "ok"}
 
 
-def add_association_to_dictionary(id: int):
+def add_association_to_dictionary(id: int) -> dict:
     association_req_data = validate_req(DictionaryAssociationReq, request.json, other_data={"dictionary_id": id})
 
     DBQS.add_association_to_dictionary(association_req_data, get_current_user_id())
 
     return {"message": "ok"}
+
+
+def get_dictionary_count() -> dict:
+    return {"count": DBQS.get_dictionary_count(get_current_user_id())}

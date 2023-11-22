@@ -1,7 +1,7 @@
 .inputFile {
     position: relative;
-    width: fit-content;
     margin: 0 auto;
+    min-width: min(800px, 100%);
 }
 
 .inputFileBorderError {
@@ -42,13 +42,16 @@
 
 .inputFileEmptyLabel {
     cursor: pointer;
-    min-height: 160px;
-    min-width: 240px;
+    aspect-ratio: 4/3;
+    width: 100%;
+    min-width: min(300px, 100%);
+    max-width: min(300px, 100%);
     background-color: #ffffff88;
     border-radius: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
+    margin: 0 auto;
 }
 
 .inputFileEmptyLabel:hover {

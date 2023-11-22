@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Generic
 
 from sqlalchemy import select, update
+from sqlalchemy.sql.expression import func
 
 from server.common import DBsession
 from server.exceptions.ApiExceptions import (ActivityNotFoundException,
@@ -301,7 +302,6 @@ def get_ditcionary_item(dictionary_id: int, user_id: int) -> tuple[Dictionary, U
             .where(Dictionary.id == dictionary_id)
             .where(UserDictionary.user_id == user_id)
         ).one_or_none()
-        print(result)
         return result
 
 
@@ -333,6 +333,13 @@ def add_association_to_dictionary(dictionary_association_req: DictionaryAssociat
             update(UserDictionary)
             .where(UserDictionary.id == dictionary_item.id)
             .values(association=dictionary_association_req.association)
+        )
+
+
+def get_dictionary_count(user_id: int) -> int:
+    with DBsession.begin() as session:
+        return session.scalar(
+            select(func.count()).select_from(UserDictionary).where(UserDictionary.user_id == user_id)
         )
 
 

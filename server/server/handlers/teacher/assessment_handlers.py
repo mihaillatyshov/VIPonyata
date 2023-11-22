@@ -4,13 +4,17 @@ from typing import Generic
 from flask import request
 from pydantic import ValidationError
 from pydantic_core import ErrorDetails
-from server.models.db_models import Assessment, AssessmentTry, AssessmentTryType, AssessmentType, FinalBoss, FinalBossTry
-from server.models.utils import validate_req
 
 import server.queries.TeacherDBqueries as DBQT
-from server.exceptions.ApiExceptions import InvalidAPIUsage, InvalidRequestJson, LessonNotFoundException
-from server.models.assessment import (Aliases, AssessmentCreateReq, AssessmentCreateReqStr,
-                                      BaseModelTask)
+from server.exceptions.ApiExceptions import (InvalidAPIUsage,
+                                             InvalidRequestJson,
+                                             LessonNotFoundException)
+from server.models.assessment import (Aliases, AssessmentCreateReq,
+                                      AssessmentCreateReqStr, BaseModelTask)
+from server.models.db_models import (Assessment, AssessmentTry,
+                                     AssessmentTryType, AssessmentType,
+                                     FinalBoss, FinalBossTry)
+from server.models.utils import validate_req
 
 
 def get_assessment_data(assessment_type: type[AssessmentType]) -> DBQT.IAssessmentQueries:
@@ -32,6 +36,13 @@ def parse_task(task: dict) -> BaseModelTask:
         return handler["create"](**task)
 
     raise InvalidAPIUsage(f"No parser for task: {task['name']}")
+
+
+def add_notification(activity_try_id: int, activity_try_type: type[AssessmentTryType]):
+    if activity_try_type == FinalBossTry:
+        DBQT.add_final_boss_notification(activity_try_id)
+    elif activity_try_type == AssessmentTry:
+        DBQT.add_assessment_notification(activity_try_id)
 
 
 class IAssessmentHandlers(Generic[AssessmentType, AssessmentTryType]):
@@ -57,13 +68,13 @@ class IAssessmentHandlers(Generic[AssessmentType, AssessmentTryType]):
             try:
                 tasks.append(json.dumps(parse_task(task.model_dump()).model_dump()))
             except ValidationError as ex:
-                print("ex.errors():", ex.errors())
+                # print("ex.errors():", ex.errors())
                 errors[i] = format_model_error(ex.errors())
             except Exception as ex:
-                print("ex:", ex)
+                print("ex", ex)
 
         if len(errors.keys()) != 0:
-            print("errors:", errors)
+            # print("errors:", errors)
             return {"errors": errors}, 422
 
         assessment_data = AssessmentCreateReqStr(time_limit=assessment_req_data.time_limit,
@@ -99,9 +110,27 @@ class IAssessmentHandlers(Generic[AssessmentType, AssessmentTryType]):
         if done_try is None:
             raise InvalidAPIUsage("Done try not found", 404)
 
+        db_checks = json.loads(done_try.checked_tasks)
+
+        if len(db_checks) != len(checks_json):
+            raise InvalidAPIUsage("Invalid checks count")
+
         self._activity_queries.set_done_try_checks(done_try_id, json.dumps(checks_json))
 
+        if self.is_try_checked(done_try_id):
+            add_notification(done_try_id, self._activity_queries.assessment_try_type)
+
         return {"message": "Checks successfully set"}
+
+    def is_try_checked(self, done_try_id: int) -> bool:
+        done_try = self._activity_queries.get_done_try_by_id(done_try_id)
+
+        if done_try is None:
+            raise InvalidAPIUsage("Done try not found", 404)
+
+        db_checks = json.loads(done_try.checked_tasks or "[]")
+
+        return all(check_task.get("cheked", False) for check_task in db_checks)
 
 
 AssessmentHandlers = IAssessmentHandlers[Assessment, AssessmentTry](Assessment)

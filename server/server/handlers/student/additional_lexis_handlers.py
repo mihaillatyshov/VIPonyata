@@ -34,11 +34,6 @@ def create_find_pair(words_ru: list[str], words_jp: list[str], chars_jp: list[st
     shuffle_words_ru = create_shuffle_list_with_id(words_ru)
     shuffle_words_jp = create_shuffle_list_with_id(words_jp)
     shuffle_chars_jp = create_shuffle_list_with_id(chars_jp)
-    print(
-        shuffle_words_ru,
-        shuffle_words_jp,
-        shuffle_chars_jp,
-    )
     answers = {
         "words_ru": list(map(lambda x: x['id'], shuffle_words_ru)),
         "words_jp": list(map(lambda x: x['id'], shuffle_words_jp)),

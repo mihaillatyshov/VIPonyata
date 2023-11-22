@@ -7,14 +7,10 @@ from server.exceptions.ApiExceptions import InvalidAPIUsage
 from server.log_lib import LogI
 from server.models.assessment import AssessmentCreateReqStr
 from server.models.course import CourseCreateReq
-from server.models.db_models import (a_users_courses, a_users_lessons, Assessment, AssessmentTry,
-                                     AssessmentTryType, AssessmentType, Course,
-                                     Dictionary, Drilling, DrillingCard,
-                                     DrillingTry, FinalBoss, FinalBossTry,
-                                     Hieroglyph, HieroglyphCard, HieroglyphTry,
-                                     Lesson, LexisCardType, LexisTryType,
-                                     LexisType, NotificationStudentToTeacher,
-                                     User)
+from server.models.db_models import (
+    NotificationTeacherToStudent, a_users_courses, a_users_lessons, Assessment, AssessmentTry, AssessmentTryType,
+    AssessmentType, Course, Dictionary, Drilling, DrillingCard, DrillingTry, FinalBoss, FinalBossTry, Hieroglyph,
+    HieroglyphCard, HieroglyphTry, Lesson, LexisCardType, LexisTryType, LexisType, NotificationStudentToTeacher, User)
 from server.models.dictionary import (DictionaryCreateReq,
                                       DictionaryCreateReqItem)
 from server.models.lesson import LessonCreateReq
@@ -342,6 +338,16 @@ def get_notifications() -> list[NotificationStudentToTeacher]:
             .where(NotificationStudentToTeacher.deleted == False)
             .order_by(NotificationStudentToTeacher.creation_datetime.desc())
         ).all()
+
+
+def add_final_boss_notification(final_boss_try_id: int):
+    with DBsession.begin() as session:
+        session.add(NotificationTeacherToStudent(final_boss_try_id=final_boss_try_id))
+
+
+def add_assessment_notification(assessment_try_id: int):
+    with DBsession.begin() as session:
+        session.add(NotificationTeacherToStudent(assessment_try_id=assessment_try_id))
 
 
 # def get_notification_activity_try(

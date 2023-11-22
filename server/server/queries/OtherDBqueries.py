@@ -2,22 +2,21 @@ from datetime import datetime
 
 from sqlalchemy import select, update
 
+import server.queries.StudentDBqueries as DBQS
+import server.queries.TeacherDBqueries as DBQT
+import server.handlers.teacher.assessment_handlers as TAH
 from server.common import DBsession
 from server.log_lib import LogW
 from server.models.db_models import (ActivityTryType, ActivityType,
                                      AssessmentTry, DrillingTry, FinalBossTry,
                                      HieroglyphTry, LexisTryType, User)
 from server.models.user import UserDataUpdateReq, UserRegisterReq
-from server.queries.StudentDBqueries import (add_assessment_notification,
-                                             add_drilling_notification,
-                                             add_final_boss_notification,
-                                             add_hieroglyph_notification,
-                                             add_user_dictionary_if_not_exists)
-
 
 #########################################################################################################################
 ################ On Restart #############################################################################################
 #########################################################################################################################
+
+
 def get_activity_check_tasks_timers(activity_type: type[ActivityType],
                                     activity_try_type: type[ActivityTryType]) -> list[tuple[ActivityType, ActivityTryType]]:
     LogW("GetActivityCheckTasksTimers", activity_type.__name__, activity_try_type.__name__)
@@ -44,15 +43,19 @@ def update_activity_try_end_time(activity_try_id: int, end_time: datetime,
         if activity_try is None:
             return
         if activity_try_type == FinalBossTry:
-            add_final_boss_notification(activity_try_id)
+            DBQS.add_final_boss_notification(activity_try_id)
+            if TAH.FinalBossHandlers.is_try_checked(activity_try_id):
+                DBQT.add_final_boss_notification()
         if activity_try_type == AssessmentTry:
-            add_assessment_notification(activity_try_id)
+            DBQS.add_assessment_notification(activity_try_id)
+            if TAH.AssessmentHandlers.is_try_checked(activity_try_id):
+                DBQT.add_assessment_notification()
         elif activity_try_type == DrillingTry and isinstance(activity_try, DrillingTry):
-            add_drilling_notification(activity_try_id)
-            add_user_dictionary_from_try(activity_try)
+            DBQS.add_drilling_notification(activity_try_id)
+            DBQS.add_user_dictionary_from_try(activity_try)
         elif activity_try_type == HieroglyphTry and isinstance(activity_try, HieroglyphTry):
-            add_hieroglyph_notification(activity_try_id)
-            add_user_dictionary_from_try(activity_try)
+            DBQS.add_hieroglyph_notification(activity_try_id)
+            DBQS.add_user_dictionary_from_try(activity_try)
 
         activity_try.end_datetime = end_time
 
@@ -97,4 +100,4 @@ def add_user_dictionary_from_try(activity_try: LexisTryType):
     lexis = activity_try.base
 
     for card in lexis.cards:
-        add_user_dictionary_if_not_exists(card.dictionary_id, activity_try.user_id)
+        DBQS.add_user_dictionary_if_not_exists(card.dictionary_id, activity_try.user_id)

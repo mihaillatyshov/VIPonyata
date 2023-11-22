@@ -40,8 +40,6 @@ def validate_req(req_type: Type[T], req_data: dict | None,
     try:
         return req_type(**req_data, **other_data)
     except ValidationError as e:
-        print(e.errors())
-        print(format_errors(e.errors()))
         parsed_errors, message = format_errors(e.errors())
         raise InvalidAPIUsage(message if message is not None else validation_message, validation_code, parsed_errors)
     except ValueError as e:
