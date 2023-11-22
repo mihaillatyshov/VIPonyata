@@ -61,7 +61,9 @@ const StudentLexisTaskInterface = ({
     return (
         <div>
             {maincontent()}
-            <Button onClick={() => goToNextTaskCallback(taskTypeName, item.mistakeCount)}>Test Task Done</Button>
+            {!process.env.NODE_ENV || process.env.NODE_ENV === "development" ? (
+                <Button onClick={() => goToNextTaskCallback(taskTypeName, item.mistakeCount)}>Test Task Done</Button>
+            ) : null}
         </div>
     );
 };
