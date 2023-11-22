@@ -44,11 +44,11 @@ export interface FormState<T extends TAvail> {
 export const useFormState = <T extends TAvail>(
     defaults: T,
     inHandlers: ChangeHandlersInput<T> = {},
-    inValidators: ValidatorsInput<T> = {}
+    inValidators: ValidatorsInput<T> = {},
 ): FormState<T> => {
     const [inputs, setInputs] = useState<T>(defaults);
     const [clientErrors, setClientErrors] = useState<ErrorType<T>>({});
-    const [serverErrors, setServerErrors] = useState<ErrorType<T>>({});
+    // const [serverErrors, _] = useState<ErrorType<T>>({});
 
     const handlers: ChangeHandlersResult<T> = Object.fromEntries(
         Object.keys(defaults).map((key) => {
@@ -62,7 +62,7 @@ export const useFormState = <T extends TAvail>(
                     });
                 },
             ];
-        })
+        }),
     ) as ChangeHandlersResult<T>;
 
     const validators: ValidatorsResult<T> = Object.fromEntries(
@@ -78,7 +78,7 @@ export const useFormState = <T extends TAvail>(
                     return res === undefined;
                 },
             ];
-        })
+        }),
     ) as ValidatorsResult<T>;
 
     const inputProps: InputPropsType<T> = Object.fromEntries(
@@ -88,11 +88,11 @@ export const useFormState = <T extends TAvail>(
                 {
                     value: inputs[key],
                     onChangeHandler: handlers[key],
-                    errorMessage: clientErrors[key] || serverErrors[key],
+                    errorMessage: clientErrors[key] /* || serverErrors[key]*/,
                     customValidation: validators[key],
                 },
             ];
-        })
+        }),
     ) as InputPropsType<T>;
 
     const validateForm = () => {
@@ -109,7 +109,7 @@ export const useFormState = <T extends TAvail>(
         handlers,
         validators: validators,
         validateForm,
-        errors: { ...clientErrors, ...serverErrors },
+        errors: { ...clientErrors /*...serverErrors*/ },
         inputProps: inputProps,
     };
 };

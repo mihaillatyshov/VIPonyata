@@ -30,22 +30,6 @@ const StudentLexisFindPair = ({ name, inData, goToNextTaskCallback }: StudentLex
         return false;
     };
 
-    const isPairCorrect = (type: AvailTypes, typeId: number, otherType: AvailTypes, otherTypeId: number): boolean => {
-        console.log(
-            "New: ",
-            type,
-            typeId,
-            inData.answers[type][typeId],
-            otherType,
-            otherTypeId,
-            inData.answers[otherType][otherTypeId],
-        );
-        if (type === strRU) {
-            return inData.answers[otherType][otherTypeId] === typeId;
-        }
-        return inData.answers[type][typeId] === otherTypeId;
-    };
-
     const selectField = (id: number, type: AvailTypes) => {
         console.log("clicked", id, type);
 

@@ -5,6 +5,26 @@ import { AjaxGet } from "libs/ServerAPI";
 import { Link } from "react-router-dom";
 import { useUserIsTeacher } from "redux/funcs/user";
 
+interface CounterProps {
+    count: number | undefined;
+}
+
+const Counter = ({ count }: CounterProps) => {
+    if (count === undefined) {
+        return (
+            <div className="font-icon-height-0 mt-1 mb-2">
+                <Loading size={28} />
+            </div>
+        );
+    }
+
+    return (
+        <div className="font-icon-height-0 mt-3 mb-4" style={{ fontSize: "22px" }}>
+            {count}
+        </div>
+    );
+};
+
 const StudentDictionary = () => {
     const [count, setCount] = useState<number | undefined>(undefined);
     const isTeacher = useUserIsTeacher();
@@ -28,15 +48,7 @@ const StudentDictionary = () => {
             <Link className="a-clear navbar-dictionary-title" to="/dictionary">
                 じしょ
             </Link>
-            {isTeacher ? null : count ? (
-                <div className="font-icon-height-0 mt-3 mb-4" style={{ fontSize: "22px" }}>
-                    {count}
-                </div>
-            ) : (
-                <div className="font-icon-height-0 mt-1 mb-2">
-                    <Loading size={28} />
-                </div>
-            )}
+            {isTeacher ? null : <Counter count={count} />}
         </div>
     );
 };
