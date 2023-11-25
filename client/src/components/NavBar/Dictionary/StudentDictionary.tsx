@@ -42,7 +42,7 @@ const StudentDictionary = () => {
         let timerId = setInterval(getCount, 30_000);
 
         return () => clearInterval(timerId);
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <div className="d-flex mx-auto flex-column align-items-center">

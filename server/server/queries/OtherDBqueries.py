@@ -41,24 +41,26 @@ def update_activity_try_end_time(activity_try_id: int, end_time: datetime,
     with DBsession.begin() as session:
         activity_try: ActivityTryType = session.scalars(
             select(activity_try_type).where(activity_try_type.id == activity_try_id)).one_or_none()
+
         if activity_try is None:
             return
-        if activity_try_type == FinalBossTry:
-            DBQS.add_final_boss_notification(activity_try_id)
-            if TAH.FinalBossHandlers.is_try_checked(activity_try_id):
-                DBQT.add_final_boss_notification()
-        if activity_try_type == AssessmentTry:
-            DBQS.add_assessment_notification(activity_try_id)
-            if TAH.AssessmentHandlers.is_try_checked(activity_try_id):
-                DBQT.add_assessment_notification()
-        elif activity_try_type == DrillingTry and isinstance(activity_try, DrillingTry):
-            DBQS.add_drilling_notification(activity_try_id)
-            DBQO.add_user_dictionary_from_try(activity_try)
-        elif activity_try_type == HieroglyphTry and isinstance(activity_try, HieroglyphTry):
-            DBQS.add_hieroglyph_notification(activity_try_id)
-            DBQO.add_user_dictionary_from_try(activity_try)
 
         activity_try.end_datetime = end_time
+
+    if activity_try_type == FinalBossTry:
+        DBQS.add_final_boss_notification(activity_try_id)
+        if TAH.FinalBossHandlers.is_try_checked(activity_try_id):
+            DBQT.add_final_boss_notification(activity_try_id)
+    if activity_try_type == AssessmentTry:
+        DBQS.add_assessment_notification(activity_try_id)
+        if TAH.AssessmentHandlers.is_try_checked(activity_try_id):
+            DBQT.add_assessment_notification(activity_try_id)
+    elif activity_try_type == DrillingTry and isinstance(activity_try, DrillingTry):
+        DBQS.add_drilling_notification(activity_try_id)
+        DBQO.add_user_dictionary_from_try(activity_try)
+    elif activity_try_type == HieroglyphTry and isinstance(activity_try, HieroglyphTry):
+        DBQS.add_hieroglyph_notification(activity_try_id)
+        DBQO.add_user_dictionary_from_try(activity_try)
 
 
 #########################################################################################################################
