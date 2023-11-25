@@ -43,7 +43,7 @@ const RegisterPage = () => {
             password2: ValidateEmpty,
             name: ValidateEmpty,
             birthday: ValidateEmpty,
-        }
+        },
     );
 
     useEffect(() => {
@@ -67,7 +67,6 @@ const RegisterPage = () => {
                 navigate("/");
             })
             .catch(({ isServerError, json, response }) => {
-                console.log(json);
                 if (!isServerError) {
                     if (response.status === 422) {
                         setServerError(json.message);

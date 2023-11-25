@@ -37,8 +37,6 @@ const CoursePage = () => {
             });
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    console.log(course?.description);
-
     return (
         <div className="container" style={{ maxWidth: "800px" }}>
             <PageTitle title={course?.name} urlBack="/" />

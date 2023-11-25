@@ -11,7 +11,6 @@ const StudentAssessmentTestSingle = ({ data, taskId }: StudentAssessmentTypeProp
     const dispatch = useAppDispatch();
 
     const onChangeHandler = (newId: number) => {
-        console.log("newId: ", newId);
         data.answer = newId;
         dispatch(setAssessmentTaskData({ id: taskId, data: data }));
     };

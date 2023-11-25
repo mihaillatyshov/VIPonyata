@@ -23,4 +23,26 @@ jobs:
               uses: actions/upload-artifact@v3
               with:
                   name: build-data
-                  path: dist
+                  path: build
+
+    deploy:
+        needs: [build]
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Download build data
+              uses: actions/download-artifact@v3
+              with:
+                  name: build-data
+                  path: .
+
+            - name: Push build data (Deploy)
+              uses: appleboy/scp-action@v0.1.4
+              with:
+                  host: jp.lann.ru
+                  port: 22752
+                  username: japan
+                  overwrite: true
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  source: "build/*"
+                  target: /home/japan/www/client

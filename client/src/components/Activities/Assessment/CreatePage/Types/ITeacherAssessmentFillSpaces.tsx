@@ -1,13 +1,14 @@
 import React from "react";
+
+import CSS from "csstype";
+import { getTextWidth } from "libs/fontSize";
 import {
     TTeacherAssessmentFillSpacesByHand,
     TTeacherAssessmentFillSpacesExists,
 } from "models/Activity/Items/TAssessmentItems";
-import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
-import { getTextWidth } from "libs/fontSize";
-import CSS from "csstype";
 
 import styles from "./Style.module.css";
+import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
 
 type TItemNames = "separates" | "meta_answers";
 type TTeacherAssessmentFillSpaceType = TTeacherAssessmentFillSpacesExists | TTeacherAssessmentFillSpacesByHand;
@@ -27,8 +28,8 @@ const Input = ({ value, colName, id, isSingle, onChange }: InputProps) => {
         100,
         getTextWidth(
             value,
-            `bold 1rem arial system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans","Liberation Sans",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"`
-        ) + 50
+            `bold 1rem arial system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans","Liberation Sans",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"`,
+        ) + 50,
     );
     const className = `form-floating px-0 ${isSingle ? "me-3 mb-3" : "mx-0"}`;
     const style: CSS.Properties = {
@@ -136,7 +137,7 @@ const ITeacherAssessmentFillSpaces = <T extends TTeacherAssessmentFillSpaceType>
             </div>
             <div>
                 <div>Результат: </div>
-                <div className="d-flex">
+                <div className="d-flex flex-wrap">
                     &nbsp;
                     {data.meta_answers.map((answer, i) => (
                         <React.Fragment key={i}>

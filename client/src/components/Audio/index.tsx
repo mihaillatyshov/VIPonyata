@@ -57,12 +57,8 @@ function AudioPlayer({ url }: AudioPlayerProps) {
     }, [audioData, updateCurrentTime]);
 
     if (audioData.loadStatus !== LoadStatus.DONE) {
-        console.log("testLoading");
-
         return <div>loading</div>;
     }
-
-    console.log(audioData.currentTime);
 
     const play = () => audioElement.paused && audioElement.play();
     const pause = () => !audioElement.paused && audioElement.pause();
@@ -73,13 +69,11 @@ function AudioPlayer({ url }: AudioPlayerProps) {
     };
 
     const onProgressMouseDownHandler = () => {
-        console.log("mouse down");
         isPausedBefore.current = audioElement.paused;
         audioElement.pause();
     };
 
     const onProgressMouseUpHandler = () => {
-        console.log("mouse up");
         if (!isPausedBefore.current) {
             audioElement.play();
         }

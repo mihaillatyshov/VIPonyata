@@ -7,8 +7,11 @@ import { AssessmentCreatePage } from "components/Activities/Assessment/CreatePag
 import StudentAssessmentPage from "components/Activities/Assessment/StudentAssessmentPage";
 import StudentAssessmentViewDoneTryPage from "components/Activities/Assessment/ViewTry/StudentAssessmentViewDoneTryPage";
 import TeacherAssessmentViewDoneTryPage from "components/Activities/Assessment/ViewTry/TeacherAssessmentViewDoneTryPage";
-import DrillingCreatePage from "components/Activities/Lexis/Drilling/DrillingCreatePage";
-import HieroglyphCreatePage from "components/Activities/Lexis/Hieroglyph/HieroglyphCreatePage";
+import { DrillingCreatePage, DrillingEditPage } from "components/Activities/Lexis/Drilling/DrillingProcessingPage";
+import {
+    HieroglyphCreatePage,
+    HieroglyphEditPage,
+} from "components/Activities/Lexis/Hieroglyph/HieroglyphProcessingPage";
 import StudentHieroglyphPage from "components/Activities/Lexis/Hieroglyph/StudentHieroglyphPage";
 import StudentProfilePage from "components/Authentication/StudentProfilePage";
 import CourseCreatePage from "components/Courses/CourseCreatePage";
@@ -110,19 +113,21 @@ const App = () => {
                         path="/drilling/:id/*"
                         element={getRoute(<StudentDrillingPage />, <StudentDrillingPage />)}
                     />
-                    <Route path="/drilling/create/:lessonId" element={getTeacherRoute(<DrillingCreatePage />)} />
+                    <Route path="/drilling/create/:id" element={getTeacherRoute(<DrillingCreatePage />)} />
+                    <Route path="/drilling/edit/:id" element={getTeacherRoute(<DrillingEditPage />)} />
 
                     <Route
                         path="/hieroglyph/:id/*"
                         element={getRoute(<StudentHieroglyphPage />, <StudentHieroglyphPage />)}
                     />
-                    <Route path="/hieroglyph/create/:lessonId" element={getTeacherRoute(<HieroglyphCreatePage />)} />
+                    <Route path="/hieroglyph/create/:id" element={getTeacherRoute(<HieroglyphCreatePage />)} />
+                    <Route path="/hieroglyph/create/:id" element={getTeacherRoute(<HieroglyphEditPage />)} />
 
                     <Route
                         path="/assessment/:id/*"
                         element={getRoute(<StudentAssessmentPage />, <StudentAssessmentPage />)}
                     />
-                    <Route path="/assessment/create/:lessonId" element={getTeacherRoute(<AssessmentCreatePage />)} />
+                    <Route path="/assessment/create/:id" element={getTeacherRoute(<AssessmentCreatePage />)} />
                     <Route
                         path="/assessment/try/:id"
                         element={getRoute(<TeacherAssessmentViewDoneTryPage />, <StudentAssessmentViewDoneTryPage />)}

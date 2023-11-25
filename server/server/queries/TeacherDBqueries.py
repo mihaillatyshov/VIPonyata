@@ -1,6 +1,6 @@
 from typing import Generic, Type
 
-from sqlalchemy import select, update
+from sqlalchemy import delete, select, update, Delete, Select
 
 from server.common import DBsession
 from server.exceptions.ApiExceptions import InvalidAPIUsage
@@ -8,9 +8,10 @@ from server.log_lib import LogI
 from server.models.assessment import AssessmentCreateReqStr
 from server.models.course import CourseCreateReq
 from server.models.db_models import (
-    NotificationTeacherToStudent, a_users_courses, a_users_lessons, Assessment, AssessmentTry, AssessmentTryType,
-    AssessmentType, Course, Dictionary, Drilling, DrillingCard, DrillingTry, FinalBoss, FinalBossTry, Hieroglyph,
-    HieroglyphCard, HieroglyphTry, Lesson, LexisCardType, LexisTryType, LexisType, NotificationStudentToTeacher, User)
+    ActivityTryType, NotificationTeacherToStudent, UserDictionary, a_users_courses, a_users_lessons, Assessment,
+    AssessmentTry, AssessmentTryType, AssessmentType, Course, Dictionary, Drilling, DrillingCard, DrillingTry,
+    FinalBoss, FinalBossTry, Hieroglyph, HieroglyphCard, HieroglyphTry, Lesson, LexisCardType, LexisTryType, LexisType,
+    NotificationStudentToTeacher, User)
 from server.models.dictionary import (DictionaryCreateReq,
                                       DictionaryCreateReqItem)
 from server.models.lesson import LessonCreateReq
@@ -136,6 +137,20 @@ def remove_user_from_lesson(lesson_id: int, user_id: int):
 
 
 #########################################################################################################################
+################ Activity ###############################################################################################
+#########################################################################################################################
+def modify_delete_by_activity_try_type(activity_try_type: type[ActivityTryType], query: Delete, ids: Select) -> str:
+    if activity_try_type == DrillingTry:
+        return query.where(NotificationStudentToTeacher.drilling_try_id.in_(ids))
+    if activity_try_type == HieroglyphTry:
+        return query.where(NotificationStudentToTeacher.hieroglyph_try_id.in_(ids))
+    if activity_try_type == AssessmentTry:
+        return query.where(NotificationStudentToTeacher.assessment_try_id.in_(ids))
+    if activity_try_type == FinalBossTry:
+        return query.where(NotificationStudentToTeacher.final_boss_try_id.in_(ids))
+
+
+#########################################################################################################################
 ################ Lexis ##################################################################################################
 #########################################################################################################################
 class LexisQueries(Generic[LexisType, LexisTryType, LexisCardType]):
@@ -158,6 +173,28 @@ class LexisQueries(Generic[LexisType, LexisTryType, LexisCardType]):
         with DBsession.begin() as session:
             return session.scalars(select(self.lexis_type).where(self.lexis_type.id == lexis_id)).one_or_none()
 
+    def get_user_by_try_id(self, lexis_try_id: int) -> int | None:
+        with DBsession.begin() as session:
+            return session.scalars(
+                select(User)
+                .join(self.lexis_try_type)
+                .where(self.lexis_try_type.id == lexis_try_id)
+            ).one_or_none()
+
+    def get_try_by_id(self, lexis_try_id: int) -> LexisTryType | None:
+        with DBsession.begin() as session:
+            return session.scalars(
+                select(self.lexis_try_type)
+                .where(self.lexis_try_type.id == lexis_try_id)
+            ).one_or_none()
+
+    def get_cards_by_activity_id(self, lexis_id: int) -> list[LexisCardType]:
+        with DBsession.begin() as session:
+            return session.scalars(
+                select(self.lexis_card_type)
+                .where(self.lexis_card_type.base_id == lexis_id)
+            ).all()
+
     def create_cards(self, lexis_id: int, cards_data: LexisCardCreateReq):
         with DBsession.begin() as session:
             cards: list[LexisCardType] = []
@@ -174,26 +211,53 @@ class LexisQueries(Generic[LexisType, LexisTryType, LexisCardType]):
 
             return lexis
 
-    def get_user_by_try_id(self, lexis_try_id: int) -> int | None:
+    def update(self, lexis_id: int, lexis_data: LexisCreateReq):
         with DBsession.begin() as session:
-            return session.scalars(
-                select(User)
-                .join(self.lexis_try_type)
-                .where(self.lexis_try_type.id == lexis_try_id)
-            ).one_or_none()
+            session.execute(
+                update(self.lexis_type)
+                .where(self.lexis_type.id == lexis_id)
+                .values(**lexis_data.model_dump())
+            )
 
-    def get_try_by_id(self, lexis_try_id: int) -> LexisTryType | None:
+    def delete_cards_by_activity_id(self, lexis_try_id: int):
         with DBsession.begin() as session:
-            return session.scalars(
-                select(self.lexis_try_type)
-                .where(self.lexis_try_type.id == lexis_try_id)
-            ).one_or_none()
+            session.execute(
+                delete(self.lexis_card_type)
+                .where(self.lexis_card_type.base_id == lexis_try_id)
+            )
+
+    def delete_tries_by_activity_id(self, lexis_try_id: int):
+        with DBsession.begin() as session:
+            session.execute(
+                delete(self.lexis_try_type)
+                .where(self.lexis_try_type.base_id == lexis_try_id)
+            )
+
+    def delete_by_id(self, lexis_id: int):
+        with DBsession.begin() as session:
+            session.execute(
+                delete(self.lexis_type)
+                .where(self.lexis_type.id == lexis_id)
+            )
+
+    def delete_notifications_by_activity_id(self, lexis_id: int):
+        with DBsession.begin() as session:
+            session.execute(
+                modify_delete_by_activity_try_type(
+                    self.lexis_try_type,
+                    delete(NotificationStudentToTeacher),
+                    select(self.lexis_try_type.id).where(self.lexis_try_type.base_id == lexis_id)
+                )
+            )
 
 
 DrillingQueries = LexisQueries(Drilling, DrillingTry, DrillingCard)
 HieroglyphQueries = LexisQueries(Hieroglyph, HieroglyphTry, HieroglyphCard)
 
 
+#########################################################################################################################
+################ Assessment #############################################################################################
+#########################################################################################################################
 class IAssessmentQueries(Generic[AssessmentType, AssessmentTryType]):
     assessment_type: type[AssessmentType]
     assessment_try_type: type[AssessmentTryType]
@@ -266,6 +330,11 @@ def get_dictionary() -> list[Dictionary]:
         return session.scalars(select(Dictionary)).all()
 
 
+def get_dictionary_list(ids: list[int]) -> list[Dictionary]:
+    with DBsession.begin() as session:
+        return session.scalars(select(Dictionary).where(Dictionary.id.in_(ids))).all()
+
+
 def get_dictionary_item(item: DictionaryCreateReqItem) -> Dictionary | None:
     with DBsession.begin() as session:
         base_filter = select(Dictionary).where(Dictionary.ru == item.ru)
@@ -326,6 +395,16 @@ def add_img_to_dictionary(id: int, url: str):
             raise InvalidAPIUsage(f"Can't find dict item with id {id}", 404)
 
         dictionary_item.img = url
+
+
+def clear_dictionary():
+    with DBsession.begin() as session:
+        session.execute(
+            delete(Dictionary)
+            .where(Dictionary.id.not_in(select(DrillingCard.dictionary_id)))
+            .where(Dictionary.id.not_in(select(HieroglyphCard.dictionary_id)))
+            .where(Dictionary.id.not_in(select(UserDictionary.dictionary_id)))
+        )
 
 
 #########################################################################################################################

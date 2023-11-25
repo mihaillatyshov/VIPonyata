@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 
 import StudentProgress from "components/Activities/StudentProgress";
+import Loading from "components/Common/Loading";
 import PageDescription from "components/Common/PageDescription";
 import PageTitle from "components/Common/PageTitle";
 import NavigateToElement from "components/NavigateToElement";
@@ -82,9 +83,7 @@ const StudentLexisPage = <T extends TDrilling | THieroglyph>({
 
     const goToUndoneTask = (items: TLexisItems, doneTasks: TLexisDoneTasks) => {
         for (const taskName of Object.keys(items)) {
-            console.log("for", taskName);
             if (Object.keys(doneTasks).includes(taskName)) {
-                console.log("in", taskName, Object.keys(doneTasks));
                 continue;
             }
             setSelectedTask(taskName as LexisTaskName);
@@ -131,19 +130,21 @@ const StudentLexisPage = <T extends TDrilling | THieroglyph>({
         info.try === null ||
         items === undefined ||
         items === null
-    )
-        return <div> Loading... </div>;
+    ) {
+        return (
+            <div className="container d-flex flex-column justify-content-center align-items-center">
+                <PageTitle title={title} />
+                <Loading size="xxl" />
+            </div>
+        );
+    }
 
     const goToNextTaskHandle = (taskTypeName: string, percent: number) => {
         if (lexis.items === undefined) return;
 
-        console.log("Go to next Task Handle", taskTypeName, percent);
         const newDoneTasks = Object.assign(structuredClone(info.try.done_tasks), { [taskTypeName]: percent });
-        console.log(newDoneTasks);
         setLexisDoneTaskCallback(newDoneTasks);
 
-        console.log("NDT", Object.keys(newDoneTasks));
-        console.log("DI", Object.keys(lexis.items));
         goToUndoneTask(lexis.items, newDoneTasks);
     };
 

@@ -65,7 +65,7 @@ const aliases: TAliases = {
 };
 
 const IAssessmentCreatePage = ({ title }: IAssessmentCreatePageProps) => {
-    const { lessonId } = useParams();
+    const { id } = useParams();
     const navigate = useNavigate();
 
     const [isShowSelectTypeModal, setIsShowSelectTypeModal] = useState<boolean>(false);
@@ -115,7 +115,7 @@ const IAssessmentCreatePage = ({ title }: IAssessmentCreatePageProps) => {
 
     const submitHandler = () => {
         AjaxPost<TAssessmentCreateResponse>({
-            url: `/api/assessment/${lessonId}`,
+            url: `/api/assessment/${id}`,
             body: {
                 tasks: tasks,
                 time_limit: timelimit === "00:00:00" || timelimit === "" ? null : timelimit,
@@ -127,7 +127,6 @@ const IAssessmentCreatePage = ({ title }: IAssessmentCreatePageProps) => {
             })
             .catch(({ isServerError, json, response }) => {
                 if (!isServerError) {
-                    console.log(json, response);
                     if (response.status === 422) setErrors(json);
                     if (response.status === 404 || response.status === 403) navigate("/");
                 }
@@ -164,7 +163,6 @@ const IAssessmentCreatePage = ({ title }: IAssessmentCreatePageProps) => {
 
             {tasks.map((item, i) => (
                 <React.Fragment key={tasksHashes.current[i]}>
-                    {tasksHashes.current[i]}
                     <AddTaskButton insertId={i} handleClick={openModal} />
                     <TeacherAssessmentTypeBase
                         taskName={item.name}

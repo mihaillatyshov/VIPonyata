@@ -30,7 +30,6 @@ export const useRequestLesson = (lessonId: string | undefined) => {
                 setIAssessmentInfo("assessment", json, setAssessmentInfo);
             })
             .catch(({ isServerError, response, json }) => {
-                console.log(isServerError, response.status, json);
                 if (!isServerError) {
                     if (response.status === 404) navigate("/", { replace: true });
                     if (response.status === 403) navigate(`/courses/${json.course_id}`, { replace: true });

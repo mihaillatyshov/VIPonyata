@@ -17,8 +17,6 @@ const StudentLexisSpace = ({ name, inData, goToNextTaskCallback }: StudentLexisT
     const setLexisSelectedItemField = useSetLexisSelectedItemField(name);
     const inputElement = useRef<HTMLInputElement>(null);
 
-    console.log("Space", inData);
-
     const getWordData = (id: number): SpaceTaskType => {
         const fixedId = id % inData.words.length;
         return {
@@ -55,7 +53,6 @@ const StudentLexisSpace = ({ name, inData, goToNextTaskCallback }: StudentLexisT
     };
 
     const isFirst = (id: number, in_parts: string[]) => {
-        console.log("getIsFirst", in_parts.indexOf("") === id, in_parts.indexOf(""), id);
         return in_parts.indexOf("") === id;
     };
 

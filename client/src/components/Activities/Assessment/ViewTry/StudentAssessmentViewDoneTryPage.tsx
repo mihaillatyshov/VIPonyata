@@ -3,7 +3,7 @@ import React, { useLayoutEffect, useState } from "react";
 import Loading from "components/Common/Loading";
 import PageTitle from "components/Common/PageTitle";
 import ErrorPage from "components/ErrorPages/ErrorPage";
-import { AjaxGet, isProcessableError } from "libs/ServerAPI";
+import { AjaxGet } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
 import {
     TAssessmentCheckedItemBase,
@@ -86,7 +86,6 @@ const StudentAssessmentViewDoneTryPage = () => {
                 setDoneTry({ loadStatus: LoadStatus.DONE, data: json.done_try });
             })
             .catch((err) => {
-                isProcessableError(err) && console.log(err);
                 setDoneTry({ loadStatus: LoadStatus.ERROR });
             });
     }, [id]);

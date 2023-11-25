@@ -52,7 +52,6 @@ const StudentAssessmentFillSpacesExists = ({
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
-        console.log(active, over);
         const activeData = active.data.current;
         if (!isFieldData(activeData)) {
             return;

@@ -2,7 +2,7 @@ import { ActivityName } from "models/Activity/IActivity";
 import { TAssessment } from "models/Activity/TAssessment";
 import { TDrilling } from "models/Activity/TDrilling";
 import { THieroglyph } from "models/Activity/THieroglyph";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import styles from "./StylesTeacherBouble.module.css";
 
@@ -14,6 +14,8 @@ interface TeacherActivityBoubleChildProps {
 }
 
 const TeacherActivityBoubleChild = ({ name, lessonId, info, children }: TeacherActivityBoubleChildProps) => {
+    const navigate = useNavigate();
+
     const footerItemSize = "32px";
 
     if (info === null) {
@@ -24,12 +26,22 @@ const TeacherActivityBoubleChild = ({ name, lessonId, info, children }: TeacherA
         );
     }
 
+    const onEditClick = (e: React.MouseEvent<HTMLElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        navigate(`/${name}/edit/${info.id}`);
+    };
+
     return (
         <div className="mt-2">
             <div>Лимит: {info.time_limit ?? "Нет"}</div>
             {children}
             <div className={`d-flex justify-content-center w-100 ${styles.teacherBoubleFooter}`}>
-                <i className="mx-3 bi bi-pencil-square" style={{ fontSize: footerItemSize }} />
+                <i
+                    className="mx-3 bi bi-pencil-square font-icon-button"
+                    style={{ fontSize: footerItemSize }}
+                    onClick={onEditClick}
+                />
                 <i className="mx-3 bi bi-graph-up" style={{ fontSize: footerItemSize }} />
             </div>
         </div>

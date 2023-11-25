@@ -1,9 +1,11 @@
 import React, { useState } from "react";
-import { StudentAssessmentTypeProps } from "../StudentAssessmentTypeProps";
+
 import { TAssessmentCreateSentence, TAssessmentSentenceOrder } from "models/Activity/Items/TAssessmentItems";
-import DragItem from "./DragItem";
 import { useAppDispatch } from "redux/hooks";
 import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
+
+import { StudentAssessmentTypeProps } from "../StudentAssessmentTypeProps";
+import DragItem from "./DragItem";
 
 interface MoveDragAndDropProps<T extends TAssessmentSentenceOrder | TAssessmentCreateSentence>
     extends StudentAssessmentTypeProps<T> {
@@ -19,11 +21,9 @@ const MoveDragAndDrop = <T extends TAssessmentSentenceOrder>({ data, taskId, fle
     const flexTypeClassName = `flex-${flexType}`;
 
     const updateFields = () => {
-        console.log("END", fakeFieldId, selectedFieldId);
         if (selectedFieldId !== undefined && fakeFieldId !== undefined) {
             const fieldText = data.parts.splice(selectedFieldId, 1)[0];
             const insertId = fakeFieldId > selectedFieldId ? fakeFieldId - 1 : fakeFieldId;
-            console.log(fieldText, insertId);
             data.parts.splice(insertId, 0, fieldText);
         }
         setSelectedFieldId(undefined);

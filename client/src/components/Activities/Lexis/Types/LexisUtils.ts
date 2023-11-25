@@ -15,7 +15,7 @@ import {
     setLexisSelectedItemField as setHieroglyphSelectedItemField,
 } from "redux/slices/hieroglyphSlice";
 
-export const useLexisDrilOrHier = <D, H>(name: LexisName, dril: D, hier: H) => {
+export const pickLexisDrilOrHier = <D, H>(name: LexisName, dril: D, hier: H) => {
     switch (name) {
         case LexisNameDrilling:
             return dril;
@@ -24,28 +24,29 @@ export const useLexisDrilOrHier = <D, H>(name: LexisName, dril: D, hier: H) => {
     }
 };
 
-export const useLexisWordOrChar = (name: LexisName): "word_jp" | "char_jp" => {
-    return useLexisDrilOrHier(name, "word_jp", "char_jp");
+export const pickLexisWordOrChar = (name: LexisName): "word_jp" | "char_jp" => {
+    return pickLexisDrilOrHier(name, "word_jp", "char_jp");
 };
 
-export const useLexisWordsOrChars = (name: LexisName): "words_jp" | "chars_jp" => {
-    return useLexisDrilOrHier(name, "words_jp", "chars_jp");
+export const pickLexisWordsOrChars = (name: LexisName): "words_jp" | "chars_jp" => {
+    return pickLexisDrilOrHier(name, "words_jp", "chars_jp");
 };
 
-export const useScrambeWordOrChar = (name: LexisName): ["word_words", "word_chars"] | ["char_words", "char_chars"] => {
-    return useLexisDrilOrHier(name, ["word_words", "word_chars"], ["char_words", "char_chars"]);
+export const pickScrambeWordOrChar = (name: LexisName): ["word_words", "word_chars"] | ["char_words", "char_chars"] => {
+    return pickLexisDrilOrHier(name, ["word_words", "word_chars"], ["char_words", "char_chars"]);
 };
 
 export const useLexisItem = (name: LexisName) => {
     const drilling = useAppSelector(selectDrilling).selectedItem;
     const hieroglyph = useAppSelector(selectHieroglyph).selectedItem;
 
-    return useLexisDrilOrHier(name, drilling, hieroglyph);
+    return pickLexisDrilOrHier(name, drilling, hieroglyph);
 };
 
 export const useSetLexisCardExtras = (name: LexisName) => {
     const dispatch = useAppDispatch();
-    return useLexisDrilOrHier(
+
+    return pickLexisDrilOrHier(
         name,
         {
             setCardImg: (img: string, id: number) => {
@@ -69,7 +70,7 @@ export const useSetLexisCardExtras = (name: LexisName) => {
 export const useSetLexisSelectedItem = (name: LexisName) => {
     const dispatch = useAppDispatch();
 
-    return useLexisDrilOrHier(
+    return pickLexisDrilOrHier(
         name,
         (data: any) => {
             dispatch(setDrillingSelectedItem(data));
@@ -83,7 +84,7 @@ export const useSetLexisSelectedItem = (name: LexisName) => {
 export const useSetLexisSelectedItemField = (name: LexisName) => {
     const dispatch = useAppDispatch();
 
-    return useLexisDrilOrHier(
+    return pickLexisDrilOrHier(
         name,
         (data: any) => {
             dispatch(setDrillingSelectedItemField(data));

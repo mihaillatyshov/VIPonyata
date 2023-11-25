@@ -30,9 +30,10 @@ const StudentDictionary = () => {
     const isTeacher = useUserIsTeacher();
 
     const getCount = () => {
+        if (isTeacher) return;
+
         AjaxGet<{ count: number }>({ url: "/api/dictionary/count" }).then((json) => {
             setCount(json.count);
-            console.log(json.count);
         });
     };
 

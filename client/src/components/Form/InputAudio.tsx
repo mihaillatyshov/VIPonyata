@@ -94,7 +94,6 @@ const InputAudio = ({
 
     const handler = (e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
-        console.log(e.target.value, e.target.files);
         if (e.target.files && e.target.files.length > 0) {
             onChangeHandler({
                 loadStatus: LoadStatus.LOADING,

@@ -3,14 +3,14 @@ import React from "react";
 import InputText from "components/Form/InputText";
 import { TTranslate } from "models/Activity/Items/TLexisItems";
 
-import { StudentLexisTaskProps, useLexisItem, useLexisWordsOrChars, useSetLexisSelectedItemField } from "./LexisUtils";
+import { pickLexisWordsOrChars, StudentLexisTaskProps, useLexisItem, useSetLexisSelectedItemField } from "./LexisUtils";
 import StudentLexisTaskInterface from "./StudentLexisTaskInterface";
 import { StudentLexisTaskTitle } from "./StudentLexisTaskTitle";
 
 const StudentLexisTranslate = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps<TTranslate>) => {
     const item = useLexisItem(name);
     const setLexisSelectedItemField = useSetLexisSelectedItemField(name);
-    const aliasJP = useLexisWordsOrChars(name);
+    const aliasJP = pickLexisWordsOrChars(name);
 
     const getObjectData = (id: number) => {
         return {
@@ -26,7 +26,6 @@ const StudentLexisTranslate = ({ name, inData, goToNextTaskCallback }: StudentLe
 
     const nextWord = (e: React.MouseEvent<HTMLInputElement>) => {
         e.preventDefault();
-        console.log(inData.words_ru, item.inputText.trim());
         if (inData.words_ru[item.wordId] === item.inputText.trim())
             setLexisSelectedItemField({ ...getObjectData(item.wordId + 1) });
     };

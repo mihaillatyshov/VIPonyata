@@ -87,19 +87,19 @@ def check_rule(rule: str, method: str, url_map: Map):
 
 def check_activity_routes(url_map: Map):
     for lexis in activities_data["lexis"]:
-        check_rule(f"/api/{lexis['name']}/<id>/newtry", "POST", url_map)
-        check_rule(f"/api/{lexis['name']}/<id>/continuetry", "POST", url_map)
-        check_rule(f"/api/{lexis['name']}/<id>/endtry", "POST", url_map)
-        check_rule(f"/api/{lexis['name']}/<id>/newdonetask", "POST", url_map)
-        check_rule(f"/api/{lexis['name']}/<id>", "GET", url_map)
-        check_rule(f"/api/{lexis['name']}/<lesson_id>", "POST", url_map)
+        check_rule(f"/api/{lexis['name']}/<int:id>/newtry", "POST", url_map)
+        check_rule(f"/api/{lexis['name']}/<int:id>/continuetry", "POST", url_map)
+        check_rule(f"/api/{lexis['name']}/<int:id>/endtry", "POST", url_map)
+        check_rule(f"/api/{lexis['name']}/<int:id>/newdonetask", "POST", url_map)
+        check_rule(f"/api/{lexis['name']}/<int:id>", "GET", url_map)
+        check_rule(f"/api/{lexis['name']}/<int:lesson_id>", "POST", url_map)
 
     for assessment in activities_data["assessment"]:
         if assessment["name"] == "final_boss":
             continue
-        check_rule(f"/api/{assessment['name']}/<id>/newtry", "POST", url_map)
-        check_rule(f"/api/{assessment['name']}/<id>/continuetry", "POST", url_map)
-        check_rule(f"/api/{assessment['name']}/<id>/endtry", "POST", url_map)
-        check_rule(f"/api/{assessment['name']}/<id>/newdonetasks", "POST", url_map)
-        check_rule(f"/api/{assessment['name']}/<id>", "GET", url_map)
-        check_rule(f"/api/{assessment['name']}/<lesson_id>", "POST", url_map)
+        check_rule(f"/api/{assessment['name']}/<int:id>/newtry", "POST", url_map)
+        check_rule(f"/api/{assessment['name']}/<int:id>/continuetry", "POST", url_map)
+        check_rule(f"/api/{assessment['name']}/<int:id>/endtry", "POST", url_map)
+        check_rule(f"/api/{assessment['name']}/<int:id>/newdonetasks", "POST", url_map)
+        check_rule(f"/api/{assessment['name']}/<int:id>", "GET", url_map)
+        check_rule(f"/api/{assessment['name']}/<int:lesson_id>", "POST", url_map)

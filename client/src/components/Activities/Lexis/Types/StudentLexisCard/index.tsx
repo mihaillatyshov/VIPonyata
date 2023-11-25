@@ -3,7 +3,7 @@ import React from "react";
 import { TCardItem } from "models/Activity/Items/TLexisItems";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { StudentLexisTaskProps, useLexisWordOrChar, useSetLexisCardExtras } from "../LexisUtils";
+import { pickLexisWordOrChar, StudentLexisTaskProps, useSetLexisCardExtras } from "../LexisUtils";
 import CardItem from "./CardItem";
 
 const StudentLexisCard = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps<TCardItem>) => {
@@ -39,7 +39,7 @@ const StudentLexisCard = ({ name, inData, goToNextTaskCallback }: StudentLexisTa
             isLast={cardIdInt === inData.length - 1}
             setLexisCardImg={(url: string) => setCardImg(url, inData[cardIdInt].id)}
             setLexisCardAssociation={(association: string) => setCardAssociation(association, inData[cardIdInt].id)}
-            aliasJP={useLexisWordOrChar(name)}
+            aliasJP={pickLexisWordOrChar(name)}
         />
     );
 };

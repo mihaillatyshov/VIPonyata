@@ -2,14 +2,14 @@ import React from "react";
 
 import { TScramble } from "models/Activity/Items/TLexisItems";
 
-import { StudentLexisTaskProps, useLexisItem, useScrambeWordOrChar, useSetLexisSelectedItemField } from "./LexisUtils";
+import { pickScrambeWordOrChar, StudentLexisTaskProps, useLexisItem, useSetLexisSelectedItemField } from "./LexisUtils";
 import StudentLexisTaskInterface from "./StudentLexisTaskInterface";
 import { StudentLexisTaskTitle } from "./StudentLexisTaskTitle";
 
 const StudentLexisScramble = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps<TScramble>) => {
     const item = useLexisItem(name);
     const setLexisSelectedItemField = useSetLexisSelectedItemField(name);
-    const [full, symb] = useScrambeWordOrChar(name);
+    const [full, symb] = pickScrambeWordOrChar(name);
 
     const setNewWord = (id: number) => {
         return {
@@ -42,7 +42,6 @@ const StudentLexisScramble = ({ name, inData, goToNextTaskCallback }: StudentLex
         setLexisSelectedItemField({ doneWord: newDoneWord, usedChars: newUsedChars });
 
         for (let i = 0; i < newDoneWord.length; i++) {
-            console.log("NDW", newDoneWord, inData[full][item.wordId][i]);
             if (newDoneWord[i] !== inData[full][item.wordId][i]) {
                 return;
             }

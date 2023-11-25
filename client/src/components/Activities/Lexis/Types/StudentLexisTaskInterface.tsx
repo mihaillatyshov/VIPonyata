@@ -35,7 +35,6 @@ const StudentLexisTaskInterface = ({
     const setLexisSelectedItem = useSetLexisSelectedItem(name);
 
     useEffect(() => {
-        console.log("setLexisSelectedItem FindPair");
         setLexisSelectedItem({
             ...newObjectData,
             type: taskTypeName,

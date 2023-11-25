@@ -11,16 +11,14 @@ const StudentDrillingListen = ({ words }) => {
     const strWordsJP = "WordsJP";
 
     useEffect(() => {
-        console.log("setDrillingSelectedItem Listen");
         if (pairs) {
-            console.log(pairs);
             dispatch(
                 setLexisSelectedItem({
                     ...pairs,
                     type: taskTypeName,
                     selectedField: { id: -1, type: "None" },
                     doneFields: [],
-                })
+                }),
             );
         }
     }, []);

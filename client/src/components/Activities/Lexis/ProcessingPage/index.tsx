@@ -1,28 +1,28 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 
-import { pickLexisWordOrChar } from "components/Activities/Lexis/Types/LexisUtils";
+import Loading from "components/Common/Loading";
 import PageTitle from "components/Common/PageTitle";
+import ErrorPage from "components/ErrorPages/ErrorPage";
 import InputError from "components/Form/InputError";
 import InputTextArea from "components/Form/InputTextArea";
 import InputTime from "components/Form/InputTime";
-import { AjaxPost } from "libs/ServerAPI";
+import { AjaxDelete, AjaxPatch, AjaxPost } from "libs/ServerAPI";
+import { LoadStatus } from "libs/Status";
 import { LexisName } from "models/Activity/IActivity";
 import { LexisTaskName } from "models/Activity/ILexis";
 import { TCreateCardItem } from "models/Activity/Items/TLexisItems";
+import { TProcessingType } from "models/Processing";
 import { TDictionaryItem, TDictionaryItemCreate } from "models/TDictionary";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { DragEndEvent } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 
-import CreatePageLexisCard from "./CreatePageLexisCard";
-import NewWordsModal from "./NewWordsModal";
-import Tasks, { SelectableTask } from "./Tasks";
-
-interface LexisCreatePageProps {
-    title: string;
-    name: LexisName;
-}
+import CreatePageLexisCard from "../CreatePage/CreatePageLexisCard";
+import NewWordsModal from "../CreatePage/NewWordsModal";
+import Tasks from "../CreatePage/Tasks";
+import { pickLexisWordOrChar } from "../Types/LexisUtils";
+import { getModalDefaultText, getProcessingData, SelectableTask } from "./LexisProcessingUtils";
 
 interface TLexisCreateResponse {
     lexis: {
@@ -30,51 +30,83 @@ interface TLexisCreateResponse {
     };
 }
 
-const getDefaultTasksArray = (): SelectableTask[] => {
-    return Object.values(LexisTaskName)
-        .filter((taskName) => taskName !== "card")
-        .map((taskName) => ({ name: taskName, isSelected: false }));
-};
+interface LexisProcessingPageProps {
+    title: string;
+    name: LexisName;
+    processingType: TProcessingType;
+}
 
-const LexisCreatePage = ({ title, name }: LexisCreatePageProps) => {
-    const { id } = useParams();
+export const LexisProcessingPage = ({ title, name, processingType }: LexisProcessingPageProps) => {
+    const { id: idStr } = useParams();
+    const id = parseInt(idStr as string);
+
     const navigate = useNavigate();
 
-    const [tasks, setTasks] = useState<SelectableTask[]>(getDefaultTasksArray());
+    const [loadStatus, setLoadStatus] = useState<LoadStatus.Type>(LoadStatus.NONE);
+    const [error, setError] = useState<string>("");
+
     const [isShowNewWordsModal, setIsShowNewWordsModal] = useState<boolean>(false);
+
+    const [tasks, setTasks] = useState<SelectableTask[]>([]);
     const [dictionaryWords, setDictionaryWords] = useState<TDictionaryItem[]>([]);
     const [lexisCards, setLexisCards] = useState<TCreateCardItem[]>([]);
     const [timelimit, setTimelimit] = useState<string>("00:00:00");
     const [description, setDescription] = useState<string>("");
-    const [error, setError] = useState<string>("");
+    const [lessonId, setLessonId] = useState<number>(0);
 
     useEffect(() => {
         setError("");
     }, [tasks]);
 
-    const findIndex = (inTaskName: string): number => {
-        return Object.values(tasks).findIndex(({ name }) => name === inTaskName);
+    useLayoutEffect(() => {
+        setLoadStatus(LoadStatus.LOADING);
+
+        getProcessingData(processingType, name, id).then((data) => {
+            if (data.loadStatus === LoadStatus.ERROR) {
+                setError(data.message);
+                setLoadStatus(LoadStatus.ERROR);
+                if (data.needExitPage) {
+                    navigate("/");
+                }
+                return;
+            }
+
+            setLoadStatus(LoadStatus.DONE);
+            setTasks(data.tasks);
+            setDictionaryWords(data.dictionaryWords);
+            setLexisCards(data.lexisCards);
+            setTimelimit(data.timelimit);
+            setDescription(data.description);
+            setLessonId(data.lessonId);
+        });
+    }, [id, name, processingType, navigate]);
+
+    if (loadStatus === LoadStatus.ERROR) {
+        return (
+            <ErrorPage
+                errorImg="/svg/SomethingWrong.svg"
+                textMain={error}
+                textDisabled="Попробуйте перезагрузить страницу"
+            />
+        );
+    }
+
+    if (loadStatus !== LoadStatus.DONE) {
+        return (
+            <div className="container d-flex flex-column justify-content-center align-items-center">
+                <PageTitle title={title} />
+                <Loading size="xxl" />
+            </div>
+        );
+    }
+
+    const handleDelete = () => {
+        AjaxDelete({ url: `/api/${name}/${id}` }).then(() => {
+            navigate(`/lessons/${lessonId}`);
+        });
     };
 
-    const onSelectedChange = (taskName: LexisTaskName, checked: boolean) => {
-        const newTasks = [...tasks];
-        newTasks[findIndex(taskName)] = { name: taskName, isSelected: checked };
-        setTasks(newTasks);
-    };
-
-    const handleDragEnd = (event: DragEndEvent) => {
-        const { active, over } = event;
-        if (over === null) return;
-
-        if (active?.data?.current?.taskName !== over?.data?.current?.taskName) {
-            const activeId = findIndex(active?.data?.current?.taskName);
-            const overId = findIndex(over?.data?.current?.taskName);
-
-            setTasks(arrayMove(tasks, activeId, overId));
-        }
-    };
-
-    const createHandler = () => {
+    const handleProcessing = () => {
         if (dictionaryWords.length < 1) {
             setError("Не добавлены слова");
             return;
@@ -89,7 +121,9 @@ const LexisCreatePage = ({ title, name }: LexisCreatePageProps) => {
             return;
         }
 
-        AjaxPost<TLexisCreateResponse>({
+        const ajaxMethod = processingType === "edit" ? AjaxPatch : AjaxPost;
+
+        ajaxMethod<TLexisCreateResponse>({
             url: `/api/${name}/${id}`,
             body: {
                 lexis: {
@@ -108,6 +142,28 @@ const LexisCreatePage = ({ title, name }: LexisCreatePageProps) => {
                     if (response.status === 404 || response.status === 403) navigate("/");
                 }
             });
+    };
+
+    const findIndex = (inTaskName: string): number => {
+        return Object.values(tasks).findIndex(({ name }) => name === inTaskName);
+    };
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (over === null) return;
+
+        if (active?.data?.current?.taskName !== over?.data?.current?.taskName) {
+            const activeId = findIndex(active?.data?.current?.taskName);
+            const overId = findIndex(over?.data?.current?.taskName);
+
+            setTasks(arrayMove(tasks, activeId, overId));
+        }
+    };
+
+    const onSelectedChange = (taskName: LexisTaskName, checked: boolean) => {
+        const newTasks = [...tasks];
+        newTasks[findIndex(taskName)] = { name: taskName, isSelected: checked };
+        setTasks(newTasks);
     };
 
     const createNewWords = (words: TDictionaryItemCreate[], setModalError: (message: string) => void) => {
@@ -134,9 +190,7 @@ const LexisCreatePage = ({ title, name }: LexisCreatePageProps) => {
                 newDictionaryWords[id].img = url;
                 setDictionaryWords(newDictionaryWords);
             })
-            .catch(() => {
-                setDictError();
-            });
+            .catch(() => setDictError());
     };
 
     const setCardData = (value: string, fieldName: "sentence" | "answer", id: number) => {
@@ -146,8 +200,8 @@ const LexisCreatePage = ({ title, name }: LexisCreatePageProps) => {
     };
 
     return (
-        <div className="container">
-            <PageTitle title={title} urlBack={`/lessons/${id}`} />
+        <div className="container mb-5 pb-5">
+            <PageTitle title={title} urlBack={`/lessons/${lessonId}`} />
             <input
                 type="button"
                 className="btn btn-primary w-100"
@@ -180,17 +234,30 @@ const LexisCreatePage = ({ title, name }: LexisCreatePageProps) => {
             ))}
 
             <InputError message={error} className="mt-4" />
-            <input type="button" className="btn btn-success w-100 mt-2" onClick={createHandler} value={"Создать"} />
+            <div className="processing-page__button-block">
+                <input
+                    type="button"
+                    className="btn btn-success processing-page__button-success"
+                    onClick={handleProcessing}
+                    value={processingType === "edit" ? "Сохранить" : "Создать"}
+                />
+                {processingType === "edit" && (
+                    <input
+                        type="button"
+                        className="btn btn-danger processing-page__button-delete"
+                        value="Удалить"
+                        onClick={handleDelete}
+                    />
+                )}
+            </div>
             <NewWordsModal
                 isShow={isShowNewWordsModal}
                 close={() => setIsShowNewWordsModal(false)}
                 createNewWords={createNewWords}
                 colToCheck={pickLexisWordOrChar(name)}
-                defaultText={""}
-                defaultPreview={[]}
+                defaultText={getModalDefaultText(dictionaryWords)}
+                defaultPreview={dictionaryWords}
             />
         </div>
     );
 };
-
-export default LexisCreatePage;

@@ -2,6 +2,7 @@ from datetime import datetime
 
 from sqlalchemy import select, update
 
+import server.queries.OtherDBqueries as DBQO
 import server.queries.StudentDBqueries as DBQS
 import server.queries.TeacherDBqueries as DBQT
 import server.handlers.teacher.assessment_handlers as TAH
@@ -52,10 +53,10 @@ def update_activity_try_end_time(activity_try_id: int, end_time: datetime,
                 DBQT.add_assessment_notification()
         elif activity_try_type == DrillingTry and isinstance(activity_try, DrillingTry):
             DBQS.add_drilling_notification(activity_try_id)
-            DBQS.add_user_dictionary_from_try(activity_try)
+            DBQO.add_user_dictionary_from_try(activity_try)
         elif activity_try_type == HieroglyphTry and isinstance(activity_try, HieroglyphTry):
             DBQS.add_hieroglyph_notification(activity_try_id)
-            DBQS.add_user_dictionary_from_try(activity_try)
+            DBQO.add_user_dictionary_from_try(activity_try)
 
         activity_try.end_datetime = end_time
 

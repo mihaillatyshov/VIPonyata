@@ -49,7 +49,7 @@ def create_course():
     return user_selector_function(teacher_funcs.create_course, None)
 
 
-@routes_bp.route("/courses/<id>", methods=["GET"])
+@routes_bp.route("/courses/<int:id>", methods=["GET"])
 @login_required
 def get_lessons_by_course_id(id):
     return user_selector_function(teacher_funcs.get_lessons_by_course_id,
@@ -57,7 +57,7 @@ def get_lessons_by_course_id(id):
                                   course_id=id)
 
 
-@routes_bp.route("/courses/<id>/users", methods=["GET"])
+@routes_bp.route("/courses/<int:id>/users", methods=["GET"])
 @login_required
 def get_course_users(id):
     return user_selector_function(teacher_funcs.get_course_users,
@@ -65,7 +65,7 @@ def get_course_users(id):
                                   course_id=id)
 
 
-@routes_bp.route("/courses/<id>/users", methods=["POST"])
+@routes_bp.route("/courses/<int:id>/users", methods=["POST"])
 @login_required
 def add_or_remove_user_from_course(id):
     return user_selector_function(teacher_funcs.add_or_remove_user_from_course,
@@ -76,20 +76,20 @@ def add_or_remove_user_from_course(id):
 #########################################################################################################################
 ################ Lesson #################################################################################################
 #########################################################################################################################
-@routes_bp.route("/lessons/<id>", methods=["GET"])
+@routes_bp.route("/lessons/<int:id>", methods=["GET"])
 @login_required
 def get_lesson_activities(id):
     return user_selector_function(
         teacher_funcs.get_lesson_activities, student_funcs.get_lesson_activities, lesson_id=id)
 
 
-@routes_bp.route("/lessons/<course_id>", methods=["POST"])
+@routes_bp.route("/lessons/<int:course_id>", methods=["POST"])
 @login_required
 def create_lesson(course_id):
     return user_selector_function(teacher_funcs.create_lesson, None, course_id=course_id)
 
 
-@routes_bp.route("/lessons/<id>/users", methods=["GET"])
+@routes_bp.route("/lessons/<int:id>/users", methods=["GET"])
 @login_required
 def get_lesson_users(id):
     return user_selector_function(teacher_funcs.get_lesson_users,
@@ -97,7 +97,7 @@ def get_lesson_users(id):
                                   lesson_id=id)
 
 
-@routes_bp.route("/lessons/<id>/users", methods=["POST"])
+@routes_bp.route("/lessons/<int:id>/users", methods=["POST"])
 @login_required
 def add_or_remove_user_from_lesson(id):
     return user_selector_function(teacher_funcs.arr_or_remove_user_from_lesson,
@@ -108,38 +108,52 @@ def add_or_remove_user_from_lesson(id):
 #########################################################################################################################
 ################ Drilling ###############################################################################################
 #########################################################################################################################
-@routes_bp.route("/drilling/<id>/newtry", methods=["POST"])
+@routes_bp.route("/drilling/<int:id>/newtry", methods=["POST"])
 @login_required
 def start_new_drilling_try(id):
     return user_selector_function(None, student_funcs.DrillingHandlers.start_new_try, activity_id=id)
 
 
-@routes_bp.route("/drilling/<id>/continuetry", methods=["POST"])
+@routes_bp.route("/drilling/<int:id>/continuetry", methods=["POST"])
 @login_required
 def continue_drilling_try(id):
     return user_selector_function(None, student_funcs.DrillingHandlers.continue_try, activity_id=id)
 
 
-@routes_bp.route("/drilling/<id>/endtry", methods=["POST"])
+@routes_bp.route("/drilling/<int:id>/endtry", methods=["POST"])
 @login_required
 def end_drilling_try(id):
     return user_selector_function(None, student_funcs.DrillingHandlers.end_try, activity_id=id)
 
 
-@routes_bp.route("/drilling/<id>/newdonetask", methods=["POST"])
+@routes_bp.route("/drilling/<int:id>/newdonetask", methods=["POST"])
 @login_required
 def add_drilling_new_done_tasks(id):
     return user_selector_function(None, student_funcs.DrillingHandlers.add_new_done_tasks, activity_id=id)
 
 
-@routes_bp.route("/drilling/<id>", methods=["GET"])
+@routes_bp.route("/drilling/<int:id>", methods=["GET"])
 @login_required
 def get_drilling_by_id(id):
     return user_selector_function(
         teacher_funcs.DrillingHandlers.get_by_id, student_funcs.DrillingHandlers.get_by_id, activity_id=id)
 
 
-@routes_bp.route("/drilling/<lesson_id>", methods=["POST"])
+@routes_bp.route("/drilling/<int:id>", methods=["PATCH"])
+@login_required
+def update_drilling(id):
+    return user_selector_function(
+        teacher_funcs.DrillingHandlers.update, None, activity_id=id)
+
+
+@routes_bp.route("/drilling/<int:id>", methods=["DELETE"])
+@login_required
+def delete_drilling_by_id(id):
+    return user_selector_function(
+        teacher_funcs.DrillingHandlers.delete_by_id, None, activity_id=id)
+
+
+@routes_bp.route("/drilling/<int:lesson_id>", methods=["POST"])
 @login_required
 def create_drilling(lesson_id):
     return user_selector_function(teacher_funcs.DrillingHandlers.create, None, lesson_id=lesson_id)
@@ -148,31 +162,31 @@ def create_drilling(lesson_id):
 #########################################################################################################################
 ################ Hieroglyph #############################################################################################
 #########################################################################################################################
-@routes_bp.route("/hieroglyph/<id>/newtry", methods=["POST"])
+@routes_bp.route("/hieroglyph/<int:id>/newtry", methods=["POST"])
 @login_required
 def start_new_hieroglyph_try(id):
     return user_selector_function(None, student_funcs.HieroglyphHandlers.start_new_try, activity_id=id)
 
 
-@routes_bp.route("/hieroglyph/<id>/continuetry", methods=["POST"])
+@routes_bp.route("/hieroglyph/<int:id>/continuetry", methods=["POST"])
 @login_required
 def continue_hieroglyph_try(id):
     return user_selector_function(None, student_funcs.HieroglyphHandlers.continue_try, activity_id=id)
 
 
-@routes_bp.route("/hieroglyph/<id>/endtry", methods=["POST"])
+@routes_bp.route("/hieroglyph/<int:id>/endtry", methods=["POST"])
 @login_required
 def end_hieroglyph_try(id):
     return user_selector_function(None, student_funcs.HieroglyphHandlers.end_try, activity_id=id)
 
 
-@routes_bp.route("/hieroglyph/<id>/newdonetask", methods=["POST"])
+@routes_bp.route("/hieroglyph/<int:id>/newdonetask", methods=["POST"])
 @login_required
 def add_hieroglyph_new_done_tasks(id):
     return user_selector_function(None, student_funcs.HieroglyphHandlers.add_new_done_tasks, activity_id=id)
 
 
-@routes_bp.route("/hieroglyph/<id>", methods=["GET"])
+@routes_bp.route("/hieroglyph/<int:id>", methods=["GET"])
 @login_required
 def get_hieroglyph_by_id(id):
     return user_selector_function(teacher_funcs.HieroglyphHandlers.get_by_id,
@@ -180,7 +194,21 @@ def get_hieroglyph_by_id(id):
                                   activity_id=id)
 
 
-@routes_bp.route("/hieroglyph/<lesson_id>", methods=["POST"])
+@routes_bp.route("/hieroglyph/<int:id>", methods=["PATCH"])
+@login_required
+def update_hieroglyph(id):
+    return user_selector_function(
+        teacher_funcs.HieroglyphHandlers.update, None, activity_id=id)
+
+
+@routes_bp.route("/hieroglyph/<int:id>", methods=["DELETE"])
+@login_required
+def delete_hieroglyph_by_id(id):
+    return user_selector_function(
+        teacher_funcs.HieroglyphHandlers.delete_by_id, None, activity_id=id)
+
+
+@routes_bp.route("/hieroglyph/<int:lesson_id>", methods=["POST"])
 @login_required
 def create_hieroglyph(lesson_id):
     return user_selector_function(teacher_funcs.HieroglyphHandlers.create, None, lesson_id=lesson_id)
@@ -211,31 +239,31 @@ def set_assessment_done_try_checks(done_try_id):
     return user_selector_function(teacher_funcs.AssessmentHandlers.set_done_try_check, None, done_try_id=done_try_id)
 
 
-@routes_bp.route("/assessment/<id>/newtry", methods=["POST"])
+@routes_bp.route("/assessment/<int:id>/newtry", methods=["POST"])
 @login_required
 def start_new_assessment_try(id):
     return user_selector_function(None, student_funcs.AssessmentHandlers.start_new_try, activity_id=id)
 
 
-@routes_bp.route("/assessment/<id>/continuetry", methods=["POST"])
+@routes_bp.route("/assessment/<int:id>/continuetry", methods=["POST"])
 @login_required
 def continue_assessment_try(id):
     return user_selector_function(None, student_funcs.AssessmentHandlers.continue_try, activity_id=id)
 
 
-@routes_bp.route("/assessment/<id>/endtry", methods=["POST"])
+@routes_bp.route("/assessment/<int:id>/endtry", methods=["POST"])
 @login_required
 def end_assessment_try(id):
     return user_selector_function(None, student_funcs.AssessmentHandlers.end_try, activity_id=id)
 
 
-@routes_bp.route("/assessment/<id>/newdonetasks", methods=["POST"])
+@routes_bp.route("/assessment/<int:id>/newdonetasks", methods=["POST"])
 @login_required
 def add_assessment_new_done_tasks(id):
     return user_selector_function(None, student_funcs.AssessmentHandlers.add_new_done_tasks, activity_id=id)
 
 
-@routes_bp.route("/assessment/<id>", methods=["GET"])
+@routes_bp.route("/assessment/<int:id>", methods=["GET"])
 @login_required
 def get_assessment_by_id(id):
     return user_selector_function(teacher_funcs.AssessmentHandlers.get_by_id,
@@ -243,7 +271,7 @@ def get_assessment_by_id(id):
                                   activity_id=id)
 
 
-@routes_bp.route("/assessment/<lesson_id>", methods=["POST"])
+@routes_bp.route("/assessment/<int:lesson_id>", methods=["POST"])
 @login_required
 def create_assessment(lesson_id):
     return user_selector_function(teacher_funcs.AssessmentHandlers.create, None, lesson_id=lesson_id)
@@ -270,13 +298,19 @@ def create_dictionary():
     return user_selector_function(teacher_funcs.create_dictionary, None)
 
 
+@routes_bp.route("/dictionary/clear", methods=["DELETE"])
+@login_required
+def clear_dictionary():
+    return user_selector_function(teacher_funcs.clear_dictionary, None)
+
+
 @routes_bp.route("/dictionary/<int:id>/img", methods=["POST"])
 @login_required
 def add_img_to_dictionary(id):
     return user_selector_function(teacher_funcs.add_img_to_dictionary, student_funcs.add_img_to_dictionary, id=id)
 
 
-@routes_bp.route("/dictionary/<id>/association", methods=["POST"])
+@routes_bp.route("/dictionary/<int:id>/association", methods=["POST"])
 @login_required
 def add_association_to_dictionary(id):
     return user_selector_function(None, student_funcs.add_association_to_dictionary, id=id)

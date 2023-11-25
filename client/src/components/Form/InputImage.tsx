@@ -1,10 +1,11 @@
 import React, { useEffect } from "react";
+
+import Loading from "components/Common/Loading";
 import { LoadStatus } from "libs/Status";
 import { ImageState } from "models/Img";
-import InputError from "./InputError";
-import Loading from "components/Common/Loading";
-import { InputBaseProps } from "./InputBase";
 
+import { InputBaseProps } from "./InputBase";
+import InputError from "./InputError";
 import styles from "./Styles.module.css";
 
 export interface InputImageProps extends InputBaseProps {
@@ -79,7 +80,6 @@ const InputImage = ({
 
     const handler = (e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
-        console.log(e.target.value, e.target.files);
         if (e.target.files && e.target.files.length > 0) {
             onChangeHandler({
                 loadStatus: LoadStatus.LOADING,

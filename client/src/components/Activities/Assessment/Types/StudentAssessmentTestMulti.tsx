@@ -11,7 +11,6 @@ const StudentAssessmentTestMulti = ({ data, taskId }: StudentAssessmentTypeProps
     const dispatch = useAppDispatch();
 
     const onChangeHandler = (fieldId: number) => {
-        console.log("newId: ", fieldId, data.answers.includes(fieldId));
         if (data.answers.includes(fieldId)) {
             data.answers.splice(data.answers.indexOf(fieldId), 1);
         } else {

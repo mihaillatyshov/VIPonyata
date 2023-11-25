@@ -115,7 +115,6 @@ const TeacherAssessmentViewDoneTryPage = () => {
             data: { ...doneTry.data, checked_tasks: newChecks },
         });
     };
-    console.log(doneTry.data.checked_tasks);
 
     const saveChangesAndClose = () => {
         setSaveStatus(LoadStatus.LOADING);

@@ -1,0 +1,16 @@
+.processing-page__button-block {
+    display: flex;
+    margin-top: 20px;
+    gap: 16px;
+}
+
+.processing-page__button-success {
+    display: flex;
+    justify-content: center;
+    flex: 1 0 auto;
+}
+
+.processing-page__button-delete {
+    display: flex;
+    flex: 0 1 auto;
+}

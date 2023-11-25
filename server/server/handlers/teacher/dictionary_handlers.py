@@ -1,9 +1,9 @@
 from flask import request
-from server.models.utils import validate_req
 
 import server.queries.TeacherDBqueries as DBQT
 from server.exceptions.ApiExceptions import InvalidRequestJson
 from server.models.dictionary import DictionaryCreateReq
+from server.models.utils import validate_req
 
 
 def get_dictionary() -> dict:
@@ -17,7 +17,6 @@ def create_dictionary() -> dict:
 
 
 def add_img_to_dictionary(id: int) -> dict:
-
     if not request.json:
         raise InvalidRequestJson()
 
@@ -27,4 +26,9 @@ def add_img_to_dictionary(id: int) -> dict:
 
     DBQT.add_img_to_dictionary(id, url)
 
+    return {"message": "ok"}
+
+
+def clear_dictionary() -> dict:
+    DBQT.clear_dictionary()
     return {"message": "ok"}

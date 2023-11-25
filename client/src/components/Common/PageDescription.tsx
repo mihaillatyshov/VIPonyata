@@ -11,8 +11,6 @@ const PageDescription = ({ description, className = "mb-5", isCentered }: PageDe
         className += " text-center";
     }
 
-    console.log("description: ", description);
-
     return (
         <div className={`${className}`}>
             {description !== undefined ? (
