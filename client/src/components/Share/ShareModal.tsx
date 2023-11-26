@@ -48,15 +48,22 @@ const ShareModal = ({ id, name, type, isShow, close }: ShareModalProps) => {
         setUsers({ ...users });
     };
 
+    const fixOtherClicks = (e: React.MouseEvent<HTMLElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
     return (
-        <Modal size="xl" show={isShow} onHide={close} dialogClassName="modal-dialog">
-            <Modal.Header closeButton className="modal-bg">
-                <Modal.Title>{name}</Modal.Title>
-            </Modal.Header>
-            <Modal.Body className="modal-bg">
-                <ShareModalContent users={users} errorMessage={error} share={share} onShare={onShareHandler} />
-            </Modal.Body>
-        </Modal>
+        <div onClick={fixOtherClicks}>
+            <Modal size="xl" show={isShow} onHide={close} dialogClassName="modal-dialog">
+                <Modal.Header closeButton className="modal-bg">
+                    <Modal.Title>{name}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="modal-bg">
+                    <ShareModalContent users={users} errorMessage={error} share={share} onShare={onShareHandler} />
+                </Modal.Body>
+            </Modal>
+        </div>
     );
 };
 

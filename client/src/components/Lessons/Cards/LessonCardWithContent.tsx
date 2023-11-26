@@ -1,9 +1,8 @@
 import React from "react";
 
 import { TLesson } from "models/TLesson";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-import styles from "../StyleLessons.module.css";
 import { Description, Title } from "./BaseParts/LessonCard";
 import LessonCardBase from "./LessonCardBase";
 import LessonCardFooter from "./LessonCardFooter";
@@ -13,29 +12,24 @@ type LessonCardWithContentProps = {
 };
 
 const LessonCardWithContent = ({ lesson }: LessonCardWithContentProps) => {
+    const navigate = useNavigate();
+
     return (
         <LessonCardBase>
-            <Link to={`/lessons/${lesson.id}`} className={"col a-link box-shadow-main " + styles.linkLesson}>
-                <div className={`d-flex flex-column h-100 ${styles.cardLesson}`}>
-                    <div className="d-flex">
-                        <div>
-                            <Title title={lesson.name} />
-                            <Description description={lesson.description} />
-                        </div>
-
-                        <div className="ms-auto position-relative">
-                            {lesson.img !== null ? (
-                                <img
-                                    src={lesson.img}
-                                    alt=""
-                                    style={{ maxHeight: "120px", maxWidth: "120px", position: "absolute", right: "0" }}
-                                />
-                            ) : null}
-                        </div>
+            <div
+                className="col d-flex flex-column lesson__card-inner"
+                onClick={() => navigate(`/lessons/${lesson.id}`)}
+            >
+                <div className="d-flex">
+                    <div className="lesson__card-text-block">
+                        <Title title={lesson.name} />
+                        <Description description={lesson.description} />
                     </div>
-                    <LessonCardFooter id={lesson.id} lessonName={lesson.name} />
+
+                    {lesson.img !== null ? <img src={lesson.img} alt="" className="lesson__card-img" /> : null}
                 </div>
-            </Link>
+                <LessonCardFooter id={lesson.id} lessonName={lesson.name} />
+            </div>
             {/* <LessonCardSkill /> */}
         </LessonCardBase>
     );

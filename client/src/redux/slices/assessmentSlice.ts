@@ -1,10 +1,11 @@
+import { TTeacherAssessmentItems } from "models/Activity/Items/TAssessmentItems";
 import { RootState } from "redux/store";
 
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface AssessmentState {
     info: any; // TODO: RemoveAny
-    items: any;
+    items: TTeacherAssessmentItems | undefined;
 }
 
 const initialState: AssessmentState = {
@@ -29,6 +30,10 @@ export const assessmentSlice = createSlice({
             }
         },
         setAssessmentTaskData: (state, action: PayloadAction<{ id: number; data: any }>) => {
+            if (state.items === undefined) {
+                return;
+            }
+
             state.items[action.payload.id] = action.payload.data;
         },
         setAssessmentItems: (state, action) => {

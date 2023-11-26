@@ -4,6 +4,7 @@ import PageDescription from "components/Common/PageDescription";
 import PageTitle from "components/Common/PageTitle";
 import { AjaxGet, AjaxPost } from "libs/ServerAPI";
 import {
+    studentAssessmentTaskRusNameAliases,
     TAssessmentItemBase,
     TAssessmentTaskName,
     TGetStudentTypeByName,
@@ -120,8 +121,12 @@ const StudentAssessmentPage = () => {
 
             <hr />
             <div>
-                {assessment.items.map((item: any, i: number) => (
+                {assessment.items.map((item, i: number) => (
                     <div key={i}>
+                        <div className="my-card-header-title mb-3">
+                            {studentAssessmentTaskRusNameAliases[item.name]}
+                        </div>
+
                         {drawItem(JSON.parse(JSON.stringify(item)), i)}
                         <hr />
                     </div>

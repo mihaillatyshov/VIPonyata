@@ -1,0 +1,39 @@
+.lesson__card {
+    --var-card-img-width: 120px;
+    margin: 40px 0;
+    padding: 0;
+    height: 170px;
+}
+
+.lesson__card-inner {
+    @extend .box-shadow-main;
+
+    cursor: pointer;
+
+    padding: 10px;
+    border: 2px solid #000000;
+    border-top-right-radius: 25px;
+    background: var(--css-var-card-bg);
+    height: 100%;
+    position: relative;
+}
+
+.lesson__card-title {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.lesson__card-img {
+    max-height: 120px;
+    max-width: var(--var-card-img-width);
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translate(-10px, -50%);
+}
+
+.lesson__card-text-block {
+    height: 110px;
+    max-width: calc(100% - 130px);
+    overflow: hidden;
+}

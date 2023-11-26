@@ -2,10 +2,10 @@ from datetime import datetime
 
 from sqlalchemy import select, update
 
+import server.handlers.teacher.assessment_handlers as TAH
 import server.queries.OtherDBqueries as DBQO
 import server.queries.StudentDBqueries as DBQS
 import server.queries.TeacherDBqueries as DBQT
-import server.handlers.teacher.assessment_handlers as TAH
 from server.common import DBsession
 from server.log_lib import LogW
 from server.models.db_models import (ActivityTryType, ActivityType,
@@ -13,11 +13,10 @@ from server.models.db_models import (ActivityTryType, ActivityType,
                                      HieroglyphTry, LexisTryType, User)
 from server.models.user import UserDataUpdateReq, UserRegisterReq
 
+
 #########################################################################################################################
 ################ On Restart #############################################################################################
 #########################################################################################################################
-
-
 def get_activity_check_tasks_timers(activity_type: type[ActivityType],
                                     activity_try_type: type[ActivityTryType]) -> list[tuple[ActivityType, ActivityTryType]]:
     LogW("GetActivityCheckTasksTimers", activity_type.__name__, activity_try_type.__name__)

@@ -34,7 +34,7 @@ jobs:
               uses: actions/download-artifact@v3
               with:
                   name: build-data
-                  path: .
+                  path: build
 
             - name: Push build data (Deploy)
               uses: appleboy/scp-action@v0.1.4

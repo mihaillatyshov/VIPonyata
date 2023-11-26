@@ -29,15 +29,13 @@ const CourseCardFooter = ({ id, courseName }: CourseCardFooterProps) => {
             <i className="bi bi-pencil-square" style={{ fontSize: FONT_SIZE }} />
             <i className="bi bi-reply font-icon-button" style={{ fontSize: FONT_SIZE }} onClick={onShareClick} />
             <i className="bi bi-graph-up" style={{ fontSize: FONT_SIZE }} />
-            <div onClick={(e) => e.preventDefault()}>
-                <ShareModal
-                    id={id}
-                    isShow={isShareModalShow}
-                    name={`Доступ к курсу (${courseName})`}
-                    type="courses"
-                    close={() => setIsShareModalShow(false)}
-                />
-            </div>
+            <ShareModal
+                id={id}
+                isShow={isShareModalShow}
+                name={`Доступ к курсу (${courseName})`}
+                type="courses"
+                close={() => setIsShareModalShow(false)}
+            />
         </div>
     );
 };

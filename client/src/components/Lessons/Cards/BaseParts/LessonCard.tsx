@@ -1,11 +1,13 @@
+import { TextWithLinks } from "components/Common/TextWithLinks";
+
 type TitleProps = { title: string };
 export const Title = ({ title }: TitleProps) => {
-    return <div> {title} </div>;
+    return <div className="lesson__card-title"> {title} </div>;
 };
 
 type DescriptionProps = { description: string | null };
 export const Description = ({ description }: DescriptionProps) => {
-    return <div> {description ?? ""} </div>;
+    return <TextWithLinks text={description ?? ""} linkMaxChars={40} />;
 };
 
 export const TitlePlaceholder = () => {

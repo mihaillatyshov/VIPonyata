@@ -299,8 +299,8 @@ type TAssessmentTaskRusNameAliases = { [key in TAssessmentTaskName]: string };
 export const assessmentTaskRusNameAliases: TAssessmentTaskRusNameAliases = {
     text: "Текст",
     test_single: "Тест с одним ответом",
-    test_multi: "Тест с множеством ответов",
-    find_pair: "Найди  пару",
+    test_multi: "Тест со множеством ответов",
+    find_pair: "Найди пары",
     create_sentence: "Создай предложение",
     fill_spaces_exists: "Заполнить пропуски известными словами",
     fill_spaces_by_hand: "Заполнить пропуски своими словами",
@@ -309,4 +309,19 @@ export const assessmentTaskRusNameAliases: TAssessmentTaskRusNameAliases = {
     open_question: "Открытый вопрос",
     img: "Картинка",
     audio: "Аудио",
+};
+
+export const studentAssessmentTaskRusNameAliases: TAssessmentTaskRusNameAliases = {
+    text: "Прочитай текст",
+    test_single: "Тест с одним ответом",
+    test_multi: "Тест со множеством ответов",
+    find_pair: "Найди пары",
+    create_sentence: "Создай предложение",
+    fill_spaces_exists: "Заполни пропуски известными словами",
+    fill_spaces_by_hand: "Заполни пропуски своими словами",
+    classification: "Распредели по колонкам",
+    sentence_order: "Расставь предложения по порядку",
+    open_question: "Ответь на вопрос",
+    img: "Картинка :3",
+    audio: "Прослушай аудио",
 };

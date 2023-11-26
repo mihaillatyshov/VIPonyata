@@ -2,7 +2,7 @@ import React from "react";
 
 type TitleProps = { title: string };
 export const Title = ({ title }: TitleProps) => {
-    return <div> {title} </div>;
+    return <div className="course__card-title"> {title} </div>;
 };
 
 type DifficultyProps = { difficulty: string };
