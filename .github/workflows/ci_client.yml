@@ -49,3 +49,5 @@ jobs:
                   key: ${{ secrets.SSH_PRIVATE_KEY }}
                   source: "client/build/*"
                   target: /home/japan/www/client
+                  strip_components: 2
+                  rm: true
