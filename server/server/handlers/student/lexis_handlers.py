@@ -34,7 +34,7 @@ class LexisHandlers(ActivityHandlers[LexisType, LexisTryType], Generic[LexisType
 
         if activity.time_limit and new_activity_try:
             start_activity_timer_limit(time_limit_to_timedelta(activity.time_limit), new_activity_try.id,
-                                       self._activity_queries._activityTry_type)
+                                       self._activity_queries._activity_try_type)
         return {"message": "Lexis try successfully created"}
 
     def add_new_done_tasks(self, activity_id: int):
@@ -60,7 +60,7 @@ class LexisHandlers(ActivityHandlers[LexisType, LexisTryType], Generic[LexisType
 
     def end_try(self, activity_id: int):
         activity_try = self._activity_queries.get_unfinished_try_by_activity_id(activity_id, get_current_user_id())
-        activity_end_time_handler(activity_try.id, self._activity_queries._activityTry_type)
+        activity_end_time_handler(activity_try.id, self._activity_queries._activity_try_type)
         return {"message": "Successfully closed"}
 
     def get_by_id(self, activity_id: int):

@@ -92,11 +92,11 @@ def get_lesson_by_id(lesson_id: int, user_id: int) -> Lesson:
 #########################################################################################################################
 class ActivityQueries(Generic[ActivityType, ActivityTryType]):
     _activity_type: type[ActivityType]
-    _activityTry_type: type[ActivityTryType]
+    _activity_try_type: type[ActivityTryType]
 
     def __init__(self, activity_type: type[ActivityType], activity_try_type: type[ActivityTryType]):
         self._activity_type = activity_type
-        self._activityTry_type = activity_try_type
+        self._activity_try_type = activity_try_type
 
     def get_by_lesson_id(self, lesson_id: int, user_id: int) -> ActivityType | None:
         with DBsession.begin() as session:
@@ -136,24 +136,27 @@ class ActivityQueries(Generic[ActivityType, ActivityTryType]):
     def get_tries_by_activity_id(self, activity_id: int, user_id: int) -> list[ActivityTryType]:
         with DBsession.begin() as session:
             return session.scalars(
-                select(self._activityTry_type)
-                .join(self._activityTry_type.base)
+                select(self._activity_try_type)
+                .where(self._activity_try_type.user_id == user_id)
+                .join(self._activity_try_type.base)
                 .where(self._activity_type.id == activity_id)
                 .join(self._activity_type.lesson)
                 .join(Lesson.users)
                 .where(User.id == user_id)
-                .order_by(self._activityTry_type.try_number)
+                .order_by(self._activity_try_type.try_number)
             ).all()
 
     def get_unfinished_try_by_activity_id(self, activity_id: int, user_id: int) -> ActivityTryType:
         with DBsession.begin() as session:
             activity_try = session.scalars(
-                select(self._activityTry_type)
-                .where(self._activityTry_type.end_datetime == None)
-                .join(self._activityTry_type.base)
+                select(self._activity_try_type)
+                .where(self._activity_try_type.end_datetime == None)
+                .where(self._activity_try_type.user_id == user_id)
+                .join(self._activity_try_type.base)
                 .where(self._activity_type.id == activity_id)
                 .join(self._activity_type.lesson)
-                .join(Lesson.users).where(User.id == user_id)
+                .join(Lesson.users)
+                .where(User.id == user_id)
             ).one_or_none()
 
             # TODO move code after to Upper Layer
@@ -186,20 +189,20 @@ class LexisQueries(ActivityQueries[LexisType, LexisTryType], Generic[LexisType, 
 
     def add_new_try(self, try_number: int, activity_id: int, user_id: int) -> LexisTryType:
         with DBsession.begin() as session:
-            LogI(f"Add New Activity Try {self._activityTry_type.__name__}: ", try_number, activity_id, user_id)
+            LogI(f"Add New Activity Try {self._activity_try_type.__name__}: ", try_number, activity_id, user_id)
 
-            new_activity_try = self._activityTry_type(try_number=try_number,
-                                                      start_datetime=datetime.now(),
-                                                      user_id=user_id,
-                                                      base_id=activity_id)
+            new_activity_try = self._activity_try_type(try_number=try_number,
+                                                       start_datetime=datetime.now(),
+                                                       user_id=user_id,
+                                                       base_id=activity_id)
             session.add(new_activity_try)
             return new_activity_try
 
     def set_done_tasks_in_try(self, activity_try_id: int, done_tasks: str) -> None:
         with DBsession.begin() as session:
             session.execute(
-                update(self._activityTry_type)
-                .where(self._activityTry_type.id == activity_try_id)
+                update(self._activity_try_type)
+                .where(self._activity_try_type.id == activity_try_id)
                 .values(done_tasks=done_tasks)
             )
 
@@ -229,43 +232,45 @@ class AssessmentQueriesClass(ActivityQueries[AssessmentType, AssessmentTryType])
                                tasks: str = "",
                                checked_tasks: str = "") -> AssessmentTryType | None:
         with DBsession.begin() as session:
-            new_activity_try = self._activityTry_type(try_number=try_number,
-                                                      start_datetime=datetime.now(),
-                                                      user_id=user_id,
-                                                      done_tasks=tasks,
-                                                      checked_tasks=checked_tasks,
-                                                      base_id=activity_id)
+            new_activity_try = self._activity_try_type(try_number=try_number,
+                                                       start_datetime=datetime.now(),
+                                                       user_id=user_id,
+                                                       done_tasks=tasks,
+                                                       checked_tasks=checked_tasks,
+                                                       base_id=activity_id)
             session.add(new_activity_try)
             return new_activity_try
 
-    def add_done_and_check_tasks(self, activity_id: int, done_tasks, checked_tasks):
+    def add_done_and_check_tasks(self, activity_try_id: int, done_tasks, checked_tasks):
         with DBsession.begin() as session:
             session.execute(
-                update(self._activityTry_type)
-                .where(self._activityTry_type.id == activity_id)
+                update(self._activity_try_type)
+                .where(self._activity_try_type.id == activity_try_id)
                 .values(done_tasks=done_tasks, checked_tasks=checked_tasks)
             )
 
     def get_done_tries_by_activity_id(self, activity_id: int, user_id: int) -> list[AssessmentTryType]:
         with DBsession.begin() as session:
             return session.scalars(
-                select(self._activityTry_type)
-                .where(self._activityTry_type.end_datetime != None)
-                .join(self._activityTry_type.base)
+                select(self._activity_try_type)
+                .where(self._activity_try_type.end_datetime != None)
+                .where(self._activity_try_type.user_id == user_id)
+                .join(self._activity_try_type.base)
                 .where(self._activity_type.id == activity_id)
                 .join(self._activity_type.lesson)
                 .join(Lesson.users)
                 .where(User.id == user_id)
-                .order_by(self._activityTry_type.try_number.desc())
+                .order_by(self._activity_try_type.try_number.desc())
             ).all()
 
     def get_done_try_by_id(self, activity_try_id: int, user_id: int) -> AssessmentTryType:
         with DBsession.begin() as session:
             return session.scalars(
-                select(self._activityTry_type)
-                .where(self._activityTry_type.id == activity_try_id)
-                .where(self._activityTry_type.end_datetime != None)
-                .join(self._activityTry_type.base)
+                select(self._activity_try_type)
+                .where(self._activity_try_type.id == activity_try_id)
+                .where(self._activity_try_type.end_datetime != None)
+                .where(self._activity_try_type.user_id == user_id)
+                .join(self._activity_try_type.base)
                 .join(self._activity_type.lesson)
                 .join(Lesson.users)
                 .where(User.id == user_id)
