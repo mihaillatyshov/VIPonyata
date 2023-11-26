@@ -10,7 +10,7 @@ export const TeacherAssessmentDoneTryOpenQuestion = ({
     taskId,
     changeTask,
 }: TeacherAssessmentDoneTryTaskProps<TAssessmentDoneTryOpenQuestion, TAssessmentCheckedOpenQuestion>) => {
-    const className = `form-control mt-2 ${checks.cheked && checks.mistakes_count > 0 ? "input-wrong" : ""}`;
+    const className = `form-control mt-2 ${checks.cheked && checks.mistakes_count > 0 ? "" : "input-good"}`;
 
     const handleClick = (mistakes_count: number) => {
         changeTask(taskId, { ...checks, mistakes_count: mistakes_count, cheked: true });
