@@ -47,5 +47,5 @@ jobs:
                   username: japan
                   overwrite: true
                   key: ${{ secrets.SSH_PRIVATE_KEY }}
-                  source: "build/*"
+                  source: "client/build/*"
                   target: /home/japan/www/client
