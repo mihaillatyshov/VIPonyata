@@ -15,3 +15,5 @@ export interface TeacherAssessmentDoneTryTaskProps<
     taskId: number;
     changeTask: (taskId: number, checks: K) => void;
 }
+
+export type TValidationStr = "wrong" | "good" | undefined | null;

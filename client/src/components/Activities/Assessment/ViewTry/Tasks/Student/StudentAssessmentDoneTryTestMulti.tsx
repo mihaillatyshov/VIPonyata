@@ -1,14 +1,14 @@
 import React from "react";
 
 import InputCheckSingle from "components/Form/InputCheckSingle";
-import { TAssessmentCheckedTestMulti, TAssessmentTestMulti } from "models/Activity/Items/TAssessmentItems";
+import { TAssessmentCheckedTestMulti, TAssessmentDoneTryTestMulti } from "models/Activity/Items/TAssessmentItems";
 
-import { AssessmentDoneTryTaskBaseProps } from "../AssessmentDoneTryTaskBase";
+import { AssessmentDoneTryTaskBaseProps, TValidationStr } from "../AssessmentDoneTryTaskBase";
 
 interface StudentAssessmentDoneTryTestTaskItemProps {
     option: string;
     selectedAnswers: number[];
-    isValid: boolean;
+    validationStr: TValidationStr;
     taskId: number;
     fieldId: number;
 }
@@ -16,23 +16,26 @@ interface StudentAssessmentDoneTryTestTaskItemProps {
 const StudentAssessmentDoneTryTestTaskItem = ({
     option,
     selectedAnswers,
-    isValid,
+    validationStr,
     taskId,
     fieldId,
 }: StudentAssessmentDoneTryTestTaskItemProps) => {
+    const validationCheckClassName = validationStr ? `check-${validationStr}` : "";
+    const validationTextClassName = validationStr ? `input-${validationStr}` : "";
+
     return (
         <div key={fieldId} className="input-group mt-1">
             <InputCheckSingle
                 key={fieldId}
                 htmlId={`radio_${taskId}_${fieldId}`}
                 id={fieldId}
-                className={`input-group-text big-check ${isValid ? "" : "check-wrong"}`}
+                className={`input-group-text big-check ${validationCheckClassName}`}
                 placeholder={""}
                 selectedIds={selectedAnswers}
                 isDisabled={true}
                 onChange={() => {}}
             />
-            <span className={`form-control prevent-select ${isValid ? "" : "input-wrong"}`}>{option}</span>
+            <span className={`form-control prevent-select ${validationTextClassName}`}>{option}</span>
         </div>
     );
 };
@@ -41,12 +44,18 @@ export const StudentAssessmentDoneTryTestMulti = ({
     data,
     checks,
     taskId,
-}: AssessmentDoneTryTaskBaseProps<TAssessmentTestMulti, TAssessmentCheckedTestMulti>) => {
+}: AssessmentDoneTryTaskBaseProps<TAssessmentDoneTryTestMulti, TAssessmentCheckedTestMulti>) => {
+    const getValidationStr = (fieldId: number): TValidationStr => {
+        if (checks.mistake_answers.includes(fieldId)) {
+            return "wrong";
+        }
+        if (data.meta_answers.includes(fieldId)) {
+            return "good";
+        }
+    };
+
     return (
         <div>
-            {/* {checks.mistakes_count > 0 && checks.mistake_answer === null && (
-                <div className="text-danger">Ответ не выбран</div>
-            )} */}
             {data.options.map((option, fieldId) => (
                 <StudentAssessmentDoneTryTestTaskItem
                     key={fieldId}
@@ -54,7 +63,7 @@ export const StudentAssessmentDoneTryTestMulti = ({
                     selectedAnswers={data.answers}
                     fieldId={fieldId}
                     taskId={taskId}
-                    isValid={!checks.mistake_answers.includes(fieldId)}
+                    validationStr={getValidationStr(fieldId)}
                 />
             ))}
         </div>

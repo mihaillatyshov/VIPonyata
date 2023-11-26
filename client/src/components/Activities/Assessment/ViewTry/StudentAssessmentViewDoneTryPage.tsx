@@ -10,7 +10,7 @@ import {
     TAssessmentItemBase,
     TAssessmentTaskName,
     TGetAsseessmentCheckTypeByName,
-    TGetStudentTypeByName,
+    TGetAsseessmentDoneTryTypeByName,
 } from "models/Activity/Items/TAssessmentItems";
 import { TAssessmentDoneTry } from "models/Activity/Try/TAssessmentTry";
 import { useParams } from "react-router-dom";
@@ -34,7 +34,10 @@ type TAliasProp<T extends TAssessmentItemBase, K extends TAssessmentCheckedItemB
 ) => JSX.Element;
 
 type TAliases = {
-    [key in TAssessmentTaskName]: TAliasProp<TGetStudentTypeByName[key], TGetAsseessmentCheckTypeByName[key]>;
+    [key in TAssessmentTaskName]: TAliasProp<
+        TGetAsseessmentDoneTryTypeByName[key],
+        TGetAsseessmentCheckTypeByName[key]
+    >;
 };
 
 const aliases: TAliases = {

@@ -7,7 +7,7 @@ import {
     studentAssessmentTaskRusNameAliases,
     TAssessmentItemBase,
     TAssessmentTaskName,
-    TGetStudentTypeByName,
+    TGetAssessmentStudentTypeByName,
     TStudentAssessmentAnyItem,
     TStudentAssessmentItems,
 } from "models/Activity/Items/TAssessmentItems";
@@ -39,7 +39,7 @@ type ResponseData = {
 type TAliasProp<T extends TAssessmentItemBase> = (props: StudentAssessmentTypeProps<T>) => JSX.Element;
 
 type TAliases = {
-    [key in TAssessmentTaskName]: TAliasProp<TGetStudentTypeByName[key]>;
+    [key in TAssessmentTaskName]: TAliasProp<TGetAssessmentStudentTypeByName[key]>;
 };
 
 const aliases: TAliases = {

@@ -11,7 +11,7 @@ import {
     getTeacherAssessmentTaskDefaultData,
     TAssessmentItemBase,
     TAssessmentTaskName,
-    TGetTeacherTypeByName,
+    TGetAsseessmentTeacherTypeByName,
     TTeacherAssessmentAnyItem,
     TTeacherAssessmentItems,
 } from "models/Activity/Items/TAssessmentItems";
@@ -46,7 +46,7 @@ interface TAssessmentCreateResponse {
 type TAliasProp<T extends TAssessmentItemBase> = (props: TeacherAssessmentTypeProps<T>) => JSX.Element;
 
 type TAliases = {
-    [key in TAssessmentTaskName]: TAliasProp<TGetTeacherTypeByName[key]>;
+    [key in TAssessmentTaskName]: TAliasProp<TGetAsseessmentTeacherTypeByName[key]>;
 };
 
 const aliases: TAliases = {

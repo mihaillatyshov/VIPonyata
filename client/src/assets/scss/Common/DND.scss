@@ -17,6 +17,10 @@ $dnd-border-radius: 5px;
     &.wrong {
         background-color: #f4b8b8;
     }
+
+    &.good {
+        background-color: #b8f4b8;
+    }
 }
 
 .dnd__droppable {

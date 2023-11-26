@@ -1,14 +1,14 @@
 import React from "react";
 
 import InputRadioSingle from "components/Form/InputRadioSingle";
-import { TAssessmentCheckedTestSingle, TAssessmentTestSingle } from "models/Activity/Items/TAssessmentItems";
+import { TAssessmentCheckedTestSingle, TAssessmentDoneTryTestSingle } from "models/Activity/Items/TAssessmentItems";
 
-import { AssessmentDoneTryTaskBaseProps } from "../AssessmentDoneTryTaskBase";
+import { AssessmentDoneTryTaskBaseProps, TValidationStr } from "../AssessmentDoneTryTaskBase";
 
 interface StudentAssessmentDoneTryTestTaskItemProps {
     option: string;
     selectedAnswer: number | null;
-    isValid: boolean;
+    validationStr: TValidationStr;
     taskId: number;
     fieldId: number;
 }
@@ -16,23 +16,26 @@ interface StudentAssessmentDoneTryTestTaskItemProps {
 const StudentAssessmentDoneTryTestTaskItem = ({
     option,
     selectedAnswer,
-    isValid,
+    validationStr,
     taskId,
     fieldId,
 }: StudentAssessmentDoneTryTestTaskItemProps) => {
+    const validationCheckClassName = validationStr ? `check-${validationStr}` : "";
+    const validationTextClassName = validationStr ? `input-${validationStr}` : "";
+
     return (
         <div key={fieldId} className="input-group mt-1">
             <InputRadioSingle
                 key={fieldId}
                 htmlId={`radio_${taskId}_${fieldId}`}
                 id={fieldId}
-                className={`input-group-text big-check ${isValid ? "" : "check-wrong"}`}
+                className={`input-group-text big-check ${validationCheckClassName}`}
                 placeholder={""}
                 selectedId={selectedAnswer ?? -1}
                 isDisabled={true}
                 onChange={() => {}}
             />
-            <span className={`form-control prevent-select ${isValid ? "" : "input-wrong"}`}>{option}</span>
+            <span className={`form-control prevent-select ${validationTextClassName}`}>{option}</span>
         </div>
     );
 };
@@ -41,7 +44,16 @@ export const StudentAssessmentDoneTryTestSingle = ({
     data,
     checks,
     taskId,
-}: AssessmentDoneTryTaskBaseProps<TAssessmentTestSingle, TAssessmentCheckedTestSingle>) => {
+}: AssessmentDoneTryTaskBaseProps<TAssessmentDoneTryTestSingle, TAssessmentCheckedTestSingle>) => {
+    const getValidationStr = (fieldId: number): TValidationStr => {
+        if (checks.mistake_answer === fieldId || (checks.mistakes_count > 0 && data.meta_answer === fieldId)) {
+            return "wrong";
+        }
+        if (data.meta_answer === fieldId && data.answer === data.meta_answer) {
+            return "good";
+        }
+    };
+
     return (
         <div>
             {checks.mistakes_count > 0 && checks.mistake_answer === null && (
@@ -54,7 +66,7 @@ export const StudentAssessmentDoneTryTestSingle = ({
                     selectedAnswer={data.answer}
                     fieldId={fieldId}
                     taskId={taskId}
-                    isValid={checks.mistake_answer !== fieldId}
+                    validationStr={getValidationStr(fieldId)}
                 />
             ))}
         </div>

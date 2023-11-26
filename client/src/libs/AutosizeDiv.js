@@ -176,6 +176,7 @@ class AutosizeDiv extends Component {
         inputProps.className = this.props.inputClassName;
         inputProps.id = this.state.inputId;
         inputProps.style = inputStyle;
+        delete inputProps.valueToCalcSize;
 
         return (
             <div className={this.props.className} style={wrapperStyle}>

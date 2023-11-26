@@ -15,7 +15,7 @@ interface ContainerProps {
 
 const Container = ({ items, longestStr, title, wrongItems }: ContainerProps) => {
     const getItemClassName = (i: number) => {
-        return `student-assessment-classification__item text-center ${wrongItems.includes(i) ? "wrong" : ""}`;
+        return `student-assessment-classification__item text-center ${wrongItems.includes(i) ? "wrong" : "good"}`;
     };
 
     return (

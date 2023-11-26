@@ -22,9 +22,9 @@ export interface TAssessmentCheckedItemBase {
     cheked: boolean;
 }
 
-// * ==========================================================================
-// * ========== Text ==========================================================
-// * ==========================================================================
+// * ==================================================================================================================
+// * ========== Text ==================================================================================================
+// * ==================================================================================================================
 interface TAssessmentTextBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.TEXT;
     text: string;
@@ -32,10 +32,11 @@ interface TAssessmentTextBase extends TAssessmentItemBase {
 export interface TAssessmentText extends TAssessmentTextBase {}
 export interface TTeacherAssessmentText extends TAssessmentTextBase {}
 export interface TAssessmentCheckedText extends TAssessmentCheckedItemBase {}
+export type TAssessmentDoneTryText = TAssessmentText & TTeacherAssessmentText;
 
-// * ==========================================================================
-// * ========== TestSingle ====================================================
-// * ==========================================================================
+// * ==================================================================================================================
+// * ========== TestSingle ============================================================================================
+// * ==================================================================================================================
 interface TAssessmentTestSingleBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.TEST_SINGLE;
     options: string[];
@@ -50,10 +51,11 @@ export interface TTeacherAssessmentTestSingle extends TAssessmentTestSingleBase 
 export interface TAssessmentCheckedTestSingle extends TAssessmentCheckedItemBase {
     mistake_answer: number | null;
 }
+export type TAssessmentDoneTryTestSingle = TAssessmentTestSingle & TTeacherAssessmentTestSingle;
 
-// * ==========================================================================
-// * ========== TestMulti =====================================================
-// * ==========================================================================
+// * ==================================================================================================================
+// * ========== TestMulti =============================================================================================
+// * ==================================================================================================================
 interface TAssessmentTestMultiBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.TEST_MULTI;
     options: string[];
@@ -68,10 +70,11 @@ export interface TTeacherAssessmentTestMulti extends TAssessmentTestMultiBase {
 export interface TAssessmentCheckedTestMulti extends TAssessmentCheckedItemBase {
     mistake_answers: number[];
 }
+export type TAssessmentDoneTryTestMulti = TAssessmentTestMulti & TTeacherAssessmentTestMulti;
 
-// * ==========================================================================
-// * ========== FindPair ======================================================
-// * ==========================================================================
+// * ==================================================================================================================
+// * ========== FindPair ==============================================================================================
+// * ==================================================================================================================
 interface TAssessmentFindPairBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.FIND_PAIR;
 }
@@ -87,10 +90,11 @@ export interface TTeacherAssessmentFindPair extends TAssessmentFindPairBase {
 export interface TAssessmentCheckedFindPair extends TAssessmentCheckedItemBase {
     mistake_lines: number[];
 }
+export type TAssessmentDoneTryFindPair = TAssessmentFindPair & TTeacherAssessmentFindPair;
 
-// * ==========================================================================
-// * ========== CreateSentence ================================================
-// * ==========================================================================
+// * ==================================================================================================================
+// * ========== CreateSentence ========================================================================================
+// * ==================================================================================================================
 interface TAssessmentCreateSentenceBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.CREATE_SENTENCE;
 }
@@ -103,10 +107,11 @@ export interface TTeacherAssessmentCreateSentence extends TAssessmentCreateSente
 export interface TAssessmentCheckedCreateSentence extends TAssessmentCheckedItemBase {
     mistake_parts: number[];
 }
+export type TAssessmentDoneTryCreateSentence = TAssessmentCreateSentence & TTeacherAssessmentCreateSentence;
 
-// * ==========================================================================
-// * ========== FillSpacesExists ==============================================
-// * ==========================================================================
+// * ==================================================================================================================
+// * ========== FillSpacesExists ======================================================================================
+// * ==================================================================================================================
 export const TAssessmentFillSpacesExistsEmpty = "Пусто";
 
 interface TAssessmentFillSpacesExistsBase extends TAssessmentItemBase {
@@ -123,10 +128,11 @@ export interface TTeacherAssessmentFillSpacesExists extends TAssessmentFillSpace
 export interface TAssessmentCheckedFillSpacesExists extends TAssessmentCheckedItemBase {
     mistake_answers: number[];
 }
+export type TAssessmentDoneTryFillSpacesExists = TAssessmentFillSpacesExists & TTeacherAssessmentFillSpacesExists;
 
-// * ==========================================================================
-// * ========== FillSpacesByHand ==============================================
-// * ==========================================================================
+// * ==================================================================================================================
+// * ========== FillSpacesByHand ======================================================================================
+// * ==================================================================================================================
 interface TAssessmentFillSpacesByHandBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.FILL_SPACES_BY_HAND;
     separates: string[];
@@ -140,10 +146,11 @@ export interface TTeacherAssessmentFillSpacesByHand extends TAssessmentFillSpace
 export interface TAssessmentCheckedFillSpacesByHand extends TAssessmentCheckedItemBase {
     mistake_answers: number[];
 }
+export type TAssessmentDoneTryFillSpacesByHand = TAssessmentFillSpacesByHand & TTeacherAssessmentFillSpacesByHand;
 
-// * ==========================================================================
-// * ========== Classification ================================================
-// * ==========================================================================
+// * ==================================================================================================================
+// * ========== Classification ========================================================================================
+// * ==================================================================================================================
 interface TAssessmentClassificationBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.CLASSIFICATION;
     inputs: string[];
@@ -158,10 +165,11 @@ export interface TTeacherAssessmentClassification extends TAssessmentClassificat
 export interface TAssessmentCheckedClassification extends TAssessmentCheckedItemBase {
     mistake_answers: number[][];
 }
+export type TAssessmentDoneTryClassification = TAssessmentClassification & TTeacherAssessmentClassification;
 
-// * ==========================================================================
-// * ========== SentenceOrder =================================================
-// * ==========================================================================
+// * ==================================================================================================================
+// * ========== SentenceOrder =========================================================================================
+// * ==================================================================================================================
 interface TAssessmentSentenceOrderBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.SENTENCE_ORDER;
 }
@@ -174,10 +182,11 @@ export interface TTeacherAssessmentSentenceOrder extends TAssessmentSentenceOrde
 export interface TAssessmentCheckedSentenceOrder extends TAssessmentCheckedItemBase {
     mistake_parts: number[];
 }
+export type TAssessmentDoneTrySentenceOrder = TAssessmentSentenceOrder & TTeacherAssessmentSentenceOrder;
 
-// * ==========================================================================
-// * ========== OpenQuestion ==================================================
-// * ==========================================================================
+// * ==================================================================================================================
+// * ========== OpenQuestion ==========================================================================================
+// * ==================================================================================================================
 interface TAssessmentOpenQuestionBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.OPEN_QUESTION;
     question: string;
@@ -189,10 +198,11 @@ export interface TTeacherAssessmentOpenQuestion extends TAssessmentOpenQuestionB
     meta_answer: string;
 }
 export interface TAssessmentCheckedOpenQuestion extends TAssessmentCheckedItemBase {}
+export type TAssessmentDoneTryOpenQuestion = TAssessmentOpenQuestion & TTeacherAssessmentOpenQuestion;
 
-// * ==========================================================================
-// * ========== Img ===========================================================
-// * ==========================================================================
+// * ==================================================================================================================
+// * ========== Img ===================================================================================================
+// * ==================================================================================================================
 interface TAssessmentImgBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.IMG;
     url: string;
@@ -200,10 +210,11 @@ interface TAssessmentImgBase extends TAssessmentItemBase {
 export interface TAssessmentImg extends TAssessmentImgBase {}
 export interface TTeacherAssessmentImg extends TAssessmentImgBase {}
 export interface TAssessmentCheckedImg extends TAssessmentCheckedItemBase {}
+export type TAssessmentDoneTryImg = TAssessmentImg & TTeacherAssessmentImg;
 
-// * ==========================================================================
-// * ========== Audio =========================================================
-// * ==========================================================================
+// * ==================================================================================================================
+// * ========== Audio =================================================================================================
+// * ==================================================================================================================
 interface TAssessmentAudioBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.AUDIO;
     url: string;
@@ -211,8 +222,12 @@ interface TAssessmentAudioBase extends TAssessmentItemBase {
 export interface TAssessmentAudio extends TAssessmentAudioBase {}
 export interface TTeacherAssessmentAudio extends TAssessmentAudioBase {}
 export interface TAssessmentCheckedAudio extends TAssessmentCheckedItemBase {}
+export type TAssessmentDoneTryAudio = TAssessmentAudio & TTeacherAssessmentAudio;
 
-export interface TGetStudentTypeByName {
+// * ==================================================================================================================
+// * ========== Combinations ==========================================================================================
+// * ==================================================================================================================
+export interface TGetAssessmentStudentTypeByName {
     [TAssessmentTaskName.TEXT]: TAssessmentText;
     [TAssessmentTaskName.TEST_SINGLE]: TAssessmentTestSingle;
     [TAssessmentTaskName.TEST_MULTI]: TAssessmentTestMulti;
@@ -227,7 +242,7 @@ export interface TGetStudentTypeByName {
     [TAssessmentTaskName.AUDIO]: TAssessmentAudio;
 }
 
-export interface TGetTeacherTypeByName {
+export interface TGetAsseessmentTeacherTypeByName {
     [TAssessmentTaskName.TEXT]: TTeacherAssessmentText;
     [TAssessmentTaskName.TEST_SINGLE]: TTeacherAssessmentTestSingle;
     [TAssessmentTaskName.TEST_MULTI]: TTeacherAssessmentTestMulti;
@@ -257,15 +272,33 @@ export interface TGetAsseessmentCheckTypeByName {
     [TAssessmentTaskName.AUDIO]: TAssessmentCheckedAudio;
 }
 
-export type TStudentAssessmentAnyItem = TGetStudentTypeByName[keyof TGetStudentTypeByName];
-export type TTeacherAssessmentAnyItem = TGetTeacherTypeByName[keyof TGetTeacherTypeByName];
-export type TAssessmentAnyCheckedItem = TGetAsseessmentCheckTypeByName[keyof TGetTeacherTypeByName];
+export interface TGetAsseessmentDoneTryTypeByName {
+    [TAssessmentTaskName.TEXT]: TAssessmentDoneTryText;
+    [TAssessmentTaskName.TEST_SINGLE]: TAssessmentDoneTryTestSingle;
+    [TAssessmentTaskName.TEST_MULTI]: TAssessmentDoneTryTestMulti;
+    [TAssessmentTaskName.FIND_PAIR]: TAssessmentDoneTryFindPair;
+    [TAssessmentTaskName.CREATE_SENTENCE]: TAssessmentDoneTryCreateSentence;
+    [TAssessmentTaskName.FILL_SPACES_EXISTS]: TAssessmentDoneTryFillSpacesExists;
+    [TAssessmentTaskName.FILL_SPACES_BY_HAND]: TAssessmentDoneTryFillSpacesByHand;
+    [TAssessmentTaskName.CLASSIFICATION]: TAssessmentDoneTryClassification;
+    [TAssessmentTaskName.SENTENCE_ORDER]: TAssessmentDoneTrySentenceOrder;
+    [TAssessmentTaskName.OPEN_QUESTION]: TAssessmentDoneTryOpenQuestion;
+    [TAssessmentTaskName.IMG]: TAssessmentDoneTryImg;
+    [TAssessmentTaskName.AUDIO]: TAssessmentDoneTryAudio;
+}
+
+export type TStudentAssessmentAnyItem = TGetAssessmentStudentTypeByName[keyof TGetAssessmentStudentTypeByName];
+export type TTeacherAssessmentAnyItem = TGetAsseessmentTeacherTypeByName[keyof TGetAsseessmentTeacherTypeByName];
+export type TAssessmentAnyCheckedItem = TGetAsseessmentCheckTypeByName[keyof TGetAsseessmentCheckTypeByName];
+export type TAssessmentAnyDoneTryItem = TGetAsseessmentDoneTryTypeByName[keyof TGetAsseessmentDoneTryTypeByName];
 
 export type TStudentAssessmentItems = TStudentAssessmentAnyItem[];
 export type TTeacherAssessmentItems = TTeacherAssessmentAnyItem[];
 export type TAssessmentCheckedItems = TAssessmentAnyCheckedItem[];
 
-type TTeacherAssessmentTaskDefaultDataAliases = { [key in TAssessmentTaskName]: () => TGetTeacherTypeByName[key] };
+type TTeacherAssessmentTaskDefaultDataAliases = {
+    [key in TAssessmentTaskName]: () => TGetAsseessmentTeacherTypeByName[key];
+};
 const teacherAssessmentTaskDefaultDataAliases: TTeacherAssessmentTaskDefaultDataAliases = {
     text: () => ({ name: TAssessmentTaskName.TEXT, text: "" }),
     test_single: () => ({ name: TAssessmentTaskName.TEST_SINGLE, meta_answer: null, options: [], question: "" }),

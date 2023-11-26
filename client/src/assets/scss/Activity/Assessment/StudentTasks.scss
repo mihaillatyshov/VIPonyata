@@ -41,10 +41,26 @@
 
     min-width: 3rem;
     max-width: 240px;
+    width: fit-content;
+    text-align: center;
 
     &.wrong {
         background-color: #f4b8b8;
         border-color: #ea7979;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    &.good {
+        border-color: #00cc00;
+        background-color: #44cc4488;
+    }
+
+    &.wrong-good {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-color: #00cc00;
+        background-color: #44cc4488;
     }
 }
 
@@ -98,6 +114,11 @@ $item-border-size: 1px;
     &.wrong {
         background-color: #f4b8b8;
         border-color: #ea7979;
+    }
+
+    &.good {
+        border-color: #00cc00;
+        background-color: #44cc4488;
     }
 }
 
