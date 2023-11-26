@@ -23,7 +23,7 @@ jobs:
               uses: actions/upload-artifact@v3
               with:
                   name: build-data
-                  path: build
+                  path: client/build
 
     deploy:
         needs: [build]
@@ -37,7 +37,7 @@ jobs:
               uses: actions/download-artifact@v3
               with:
                   name: build-data
-                  path: build
+                  path: client/build
 
             - name: Push build data (Deploy)
               uses: appleboy/scp-action@v0.1.4

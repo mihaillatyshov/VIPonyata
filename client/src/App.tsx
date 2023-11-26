@@ -3,6 +3,7 @@ import "./RoundBlock.css";
 
 import React, { useLayoutEffect } from "react";
 
+import { AssessmentEditPage } from "components/Activities/Assessment/Assessment/AssessmentProcessingPage";
 import { AssessmentCreatePage } from "components/Activities/Assessment/CreatePage";
 import StudentAssessmentPage from "components/Activities/Assessment/StudentAssessmentPage";
 import StudentAssessmentViewDoneTryPage from "components/Activities/Assessment/ViewTry/StudentAssessmentViewDoneTryPage";
@@ -128,6 +129,7 @@ const App = () => {
                         element={getRoute(<StudentAssessmentPage />, <StudentAssessmentPage />)}
                     />
                     <Route path="/assessment/create/:id" element={getTeacherRoute(<AssessmentCreatePage />)} />
+                    <Route path="/assessment/edit/:id" element={getTeacherRoute(<AssessmentEditPage />)} />
                     <Route
                         path="/assessment/try/:id"
                         element={getRoute(<TeacherAssessmentViewDoneTryPage />, <StudentAssessmentViewDoneTryPage />)}
