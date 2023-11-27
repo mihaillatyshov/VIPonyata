@@ -100,7 +100,7 @@ def get_lesson_users(id):
 @routes_bp.route("/lessons/<int:id>/users", methods=["POST"])
 @login_required
 def add_or_remove_user_from_lesson(id):
-    return user_selector_function(teacher_funcs.arr_or_remove_user_from_lesson,
+    return user_selector_function(teacher_funcs.add_or_remove_user_from_lesson,
                                   None,
                                   lesson_id=id)
 

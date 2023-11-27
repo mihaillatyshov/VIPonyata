@@ -1,17 +1,23 @@
 from typing import Generic, Type
 
-from sqlalchemy import delete, select, update, Delete, Select
+from sqlalchemy import Delete, Select, delete, select, update
 
 from server.common import DBsession
 from server.exceptions.ApiExceptions import InvalidAPIUsage
 from server.log_lib import LogI
 from server.models.assessment import AssessmentCreateReqStr
 from server.models.course import CourseCreateReq
-from server.models.db_models import (
-    ActivityTryType, NotificationTeacherToStudent, UserDictionary, a_users_courses, a_users_lessons, Assessment,
-    AssessmentTry, AssessmentTryType, AssessmentType, Course, Dictionary, Drilling, DrillingCard, DrillingTry,
-    FinalBoss, FinalBossTry, Hieroglyph, HieroglyphCard, HieroglyphTry, Lesson, LexisCardType, LexisTryType, LexisType,
-    NotificationStudentToTeacher, User)
+from server.models.db_models import (ActivityTryType, Assessment,
+                                     AssessmentTry, AssessmentTryType,
+                                     AssessmentType, Course, Dictionary,
+                                     Drilling, DrillingCard, DrillingTry,
+                                     FinalBoss, FinalBossTry, Hieroglyph,
+                                     HieroglyphCard, HieroglyphTry, Lesson,
+                                     LexisCardType, LexisTryType, LexisType,
+                                     NotificationStudentToTeacher,
+                                     NotificationTeacherToStudent, User,
+                                     UserDictionary, a_users_courses,
+                                     a_users_lessons)
 from server.models.dictionary import (DictionaryCreateReq,
                                       DictionaryCreateReqItem)
 from server.models.lesson import LessonCreateReq
@@ -417,6 +423,16 @@ def get_notifications() -> list[NotificationStudentToTeacher]:
             .where(NotificationStudentToTeacher.deleted == False)
             .order_by(NotificationStudentToTeacher.creation_datetime.desc())
         ).all()
+
+
+def add_course_notification(course_id: int, student_id: int):
+    with DBsession.begin() as session:
+        session.add(NotificationTeacherToStudent(course_id=course_id, student_id=student_id))
+
+
+def add_lesson_notification(lesson_id: int, student_id: int):
+    with DBsession.begin() as session:
+        session.add(NotificationTeacherToStudent(lesson_id=lesson_id, student_id=student_id))
 
 
 def add_final_boss_notification(final_boss_try_id: int):

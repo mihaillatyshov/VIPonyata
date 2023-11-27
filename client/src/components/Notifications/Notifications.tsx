@@ -1,6 +1,6 @@
 import React from "react";
 
-import { TAnyNotification, TStudentNotification, TTeacherNotification } from "models/TNotification";
+import { TAnyNotifications, TStudentNotification, TTeacherNotification } from "models/TNotification";
 import { Modal } from "react-bootstrap";
 import { isTeacher, useGetAuthorizedUserSafe } from "redux/funcs/user";
 
@@ -18,14 +18,14 @@ const Content = ({ notifications, closeModal }: ContentProps) => {
     return isTeacher(user.userData) ? (
         <TeacherNotificationsContent notifications={notifications as TTeacherNotification[]} closeModal={closeModal} />
     ) : (
-        <StudentNotificationsContent notifications={notifications as TStudentNotification[]} />
+        <StudentNotificationsContent notifications={notifications as TStudentNotification[]} closeModal={closeModal} />
     );
 };
 
 interface NotificationsProps {
     isShow: boolean;
     close: () => void;
-    notifications: TAnyNotification[];
+    notifications: TAnyNotifications;
 }
 
 const Notifications = ({ isShow, close, notifications }: NotificationsProps) => {

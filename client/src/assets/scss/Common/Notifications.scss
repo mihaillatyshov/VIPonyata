@@ -1,15 +1,15 @@
 .notification__item {
-    white-space: nowrap;
     cursor: pointer;
 
     display: flex;
     align-items: center;
-    justify-content: center;
     border: 1px solid #000000;
 
     border-radius: 4px;
 
-    padding: 6px;
+    gap: 16px;
+
+    padding: 6px 8px;
 
     background: #ffffff;
 
@@ -17,4 +17,20 @@
         background-color: #f4b8b8;
         border-color: #ea7979;
     }
+}
+
+.notification__item-time-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    width: 120px;
+}
+
+.notification__item-user-avatar {
+    width: 48px;
+
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    object-fit: cover;
 }

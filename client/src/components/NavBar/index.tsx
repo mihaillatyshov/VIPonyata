@@ -2,7 +2,7 @@ import React, { useLayoutEffect, useState } from "react";
 
 import Notifications from "components/Notifications/Notifications";
 import { AjaxGet } from "libs/ServerAPI";
-import { TAnyNotification } from "models/TNotification";
+import { TAnyNotifications } from "models/TNotification";
 import { Link } from "react-router-dom";
 import { useAppSelector } from "redux/hooks";
 import { selectUser } from "redux/slices/userSlice";
@@ -13,15 +13,16 @@ import styles from "./StyleNavBar.module.css";
 
 const NavBar = () => {
     const [showNotifications, setShowNotifications] = useState<boolean>(false);
-    const [notifications, setNotifications] = useState<TAnyNotification[]>([]);
+    const [notifications, setNotifications] = useState<TAnyNotifications>([]);
     const user = useAppSelector(selectUser);
 
     const openNotifications = () => setShowNotifications(true);
     const closeNotifications = () => setShowNotifications(false);
 
     const getNotifications = () => {
-        AjaxGet<{ notifications: TAnyNotification[] }>({ url: "/api/notifications" })
+        AjaxGet<{ notifications: TAnyNotifications }>({ url: "/api/notifications" })
             .then((json) => {
+                console.log(json);
                 setNotifications(json.notifications);
             })
             .catch((data) => {

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Generic
 
-from sqlalchemy import select, update
+from sqlalchemy import select, union_all, update
 from sqlalchemy.sql.expression import func
 
 from server.common import DBsession
@@ -36,6 +36,16 @@ def get_available_courses(user_id: int) -> list[Course]:
         ).all()
 
 
+def get_course_by_id_new(course_id: int, user_id: int) -> Course | None:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(Course)
+            .where(Course.id == course_id)
+            .join(Course.users)
+            .where(User.id == user_id)
+        ).one_or_none()
+
+
 def get_course_by_id(course_id: int, user_id: int) -> Course:
     with DBsession.begin() as session:
         course = session.scalars(
@@ -64,6 +74,16 @@ def get_lessons_by_course_id(course_id: int, user_id: int) -> list[Lesson]:
             .where(User.id == user_id)
             .order_by(Lesson.number)
         ).all()
+
+
+def get_lesson_by_id_new(lesson_id: int, user_id: int) -> Lesson | None:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(Lesson)
+            .where(Lesson.id == lesson_id)
+            .join(Lesson.users)
+            .where(User.id == user_id)
+        ).one_or_none()
 
 
 def get_lesson_by_id(lesson_id: int, user_id: int) -> Lesson:
@@ -108,6 +128,16 @@ class ActivityQueries(Generic[ActivityType, ActivityTryType]):
                 .where(User.id == user_id)
             ).one_or_none()
 
+    def get_by_id_new(self, activity_id: int, user_id: int) -> ActivityType | None:
+        with DBsession.begin() as session:
+            return session.scalars(
+                select(self._activity_type)
+                .where(self._activity_type.id == activity_id)
+                .join(self._activity_type.lesson)
+                .join(Lesson.users)
+                .where(User.id == user_id)
+            ).one_or_none()
+
     def get_by_id(self, activity_id: int, user_id: int) -> ActivityType:
         with DBsession.begin() as session:
             activity = session.scalars(
@@ -140,9 +170,6 @@ class ActivityQueries(Generic[ActivityType, ActivityTryType]):
                 .where(self._activity_try_type.user_id == user_id)
                 .join(self._activity_try_type.base)
                 .where(self._activity_type.id == activity_id)
-                .join(self._activity_type.lesson)
-                .join(Lesson.users)
-                .where(User.id == user_id)
                 .order_by(self._activity_try_type.try_number)
             ).all()
 
@@ -154,9 +181,6 @@ class ActivityQueries(Generic[ActivityType, ActivityTryType]):
                 .where(self._activity_try_type.user_id == user_id)
                 .join(self._activity_try_type.base)
                 .where(self._activity_type.id == activity_id)
-                .join(self._activity_type.lesson)
-                .join(Lesson.users)
-                .where(User.id == user_id)
             ).one_or_none()
 
             # TODO move code after to Upper Layer
@@ -257,9 +281,6 @@ class AssessmentQueriesClass(ActivityQueries[AssessmentType, AssessmentTryType])
                 .where(self._activity_try_type.user_id == user_id)
                 .join(self._activity_try_type.base)
                 .where(self._activity_type.id == activity_id)
-                .join(self._activity_type.lesson)
-                .join(Lesson.users)
-                .where(User.id == user_id)
                 .order_by(self._activity_try_type.try_number.desc())
             ).all()
 
@@ -270,10 +291,6 @@ class AssessmentQueriesClass(ActivityQueries[AssessmentType, AssessmentTryType])
                 .where(self._activity_try_type.id == activity_try_id)
                 .where(self._activity_try_type.end_datetime != None)
                 .where(self._activity_try_type.user_id == user_id)
-                .join(self._activity_try_type.base)
-                .join(self._activity_type.lesson)
-                .join(Lesson.users)
-                .where(User.id == user_id)
             ).one_or_none()
 
 
@@ -351,15 +368,34 @@ def get_dictionary_count(user_id: int) -> int:
 #########################################################################################################################
 ################ Notifications ##########################################################################################
 #########################################################################################################################
-def get_notifications(user_id: int):
-    return []
-    return (                                                                                                            #
-        DBsession                                                                                                       #
-        .query(NotificationTeacherToStudent)                                                                            #
-        .filter(NotificationTeacherToStudent.deleted == False)                                                          #
-        .order_by(NotificationTeacherToStudent.creation_datetime)                                                       #
-        .all()                                                                                                          #
-    )
+def get_notifications(user_id: int) -> list[NotificationTeacherToStudent]:
+    with DBsession.begin() as session:
+        select_query_student = (
+            select(NotificationTeacherToStudent)
+            .where(NotificationTeacherToStudent.deleted == False)
+            .where(NotificationTeacherToStudent.student_id == user_id)
+        )
+
+        select_query_assessment_try = (
+            select(NotificationTeacherToStudent)
+            .where(NotificationTeacherToStudent.deleted == False)
+            .join(NotificationTeacherToStudent.assessment_try)
+            .where(AssessmentTry.user_id == user_id)
+        )
+
+        select_query_final_boss_try = (
+            select(NotificationTeacherToStudent)
+            .where(NotificationTeacherToStudent.deleted == False)
+            .join(NotificationTeacherToStudent.final_boss_try)
+            .where(FinalBossTry.user_id == user_id)
+        )
+
+        return session.scalars(
+            select(NotificationTeacherToStudent).from_statement(
+                union_all(select_query_student, select_query_assessment_try, select_query_final_boss_try)
+                .order_by(NotificationTeacherToStudent.creation_datetime.desc())
+            )
+        ).all()
 
 
 def add_final_boss_notification(final_boss_try_id: int):

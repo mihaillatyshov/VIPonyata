@@ -45,5 +45,6 @@ def add_or_remove_user_from_course(course_id):
         DBQT.remove_user_from_course(course_id, user_req_data.user_id)
     else:
         DBQT.add_user_to_course(course_id, user_req_data.user_id)
+        DBQT.add_course_notification(course_id, user_req_data.user_id)
 
     return {"message": "User added to course"}

@@ -462,11 +462,12 @@ class NotificationStudentToTeacher(Base):
     __mapper_args__ = {'eager_defaults': True}
 
     def __json__(self):
-        data = {"message": self.message, "type": None}
+        data = {"message": self.message, "type": None, "creation_datetime": self.creation_datetime}
         for activity_try_name in ["drilling_try", "hieroglyph_try", "assessment_try", "final_boss_try"]:
             if activity_try_id := getattr(self, f"{activity_try_name}_id"):
                 data["type"] = activity_try_name
                 data["activity_try_id"] = activity_try_id
+
                 break
 
         return data
@@ -493,29 +494,28 @@ class NotificationTeacherToStudent(Base):
     final_boss_try_id: Mapped[int] = Column(Integer, ForeignKey("final_boss_tries.id"))
     final_boss_try: Mapped["FinalBossTry"] = relationship("FinalBossTry", uselist=False)
 
+    student_id: Mapped[int] = Column(Integer, ForeignKey("users.id"))
+    student: Mapped["User"] = relationship("User", uselist=False)
+
     creation_datetime: Mapped[datetime.datetime] = Column(DateTime, server_default=func.now(), nullable=False)
 
     __mapper_args__ = {'eager_defaults': True}
 
     def __json__(self):
-        data = {"message": self.message, "type": None}
+        data = {"message": self.message, "type": None, "creation_datetime": self.creation_datetime}
         for activity_try_name in ["assessment_try", "final_boss_try"]:
-            if activity_try := getattr(self, activity_try_name):
+            if activity_try_id := getattr(self, f"{activity_try_name}_id"):
                 data["type"] = activity_try_name
-                data["lesson"] = activity_try.base.lesson
-                data["user"] = activity_try.user
-                data["activity_try_id"] = activity_try.id
-                data["activity_try"] = activity_try
-                data["activity"] = activity_try.base
+                data["activity_try_id"] = activity_try_id
                 break
 
-        if self.course is not None:
+        if self.course_id is not None:
             data["type"] = "course"
-            data["course"] = self.course
+            data["course_id"] = self.course_id
 
-        if self.lesson is not None:
+        if self.lesson_id is not None:
             data["type"] = "lesson"
-            data["lesson"] = self.lesson
+            data["lesson_id"] = self.lesson_id
 
         return data
 

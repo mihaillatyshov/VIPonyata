@@ -59,7 +59,7 @@ def get_lesson_users(lesson_id: int):
     return {"inside": inside_students, "outside": outside_students}
 
 
-def arr_or_remove_user_from_lesson(lesson_id: int):
+def add_or_remove_user_from_lesson(lesson_id: int):
     user_req_data = validate_req(ShareUserReq, request.json)
 
     if DBQT.get_lesson_by_id(lesson_id) is None:
@@ -72,5 +72,6 @@ def arr_or_remove_user_from_lesson(lesson_id: int):
         DBQT.remove_user_from_lesson(lesson_id, user_req_data.user_id)
     else:
         DBQT.add_user_to_lesson(lesson_id, user_req_data.user_id)
+        DBQT.add_lesson_notification(lesson_id, user_req_data.user_id)
 
     return {"message": "User added to lesson"}
