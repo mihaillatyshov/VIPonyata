@@ -94,7 +94,9 @@ class IAssessmentHandlers(Generic[AssessmentType, AssessmentTryType]):
         if done_try is None:
             raise InvalidAPIUsage("Done try not found", 404)
 
-        return {"done_try": done_try}
+        activity = self._activity_queries.get_by_id(done_try.base_id)
+
+        return {"done_try": done_try, "lesson_id": activity.lesson_id}
 
     def set_done_try_check(self, done_try_id: int):
         if not request.json:

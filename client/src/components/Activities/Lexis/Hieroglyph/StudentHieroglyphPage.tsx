@@ -25,7 +25,7 @@ const StudentHieroglyphPage = () => {
         <StudentLexisPage
             name="hieroglyph"
             lexis={hieroglyph}
-            title="Иероглифы"
+            title="かんじ"
             setLexisInfoCallback={setHieroglyphInfoHandler}
             setLexisItemsCallback={setHieroglyphItemsHandler}
             setLexisDoneTaskCallback={setHieroglyphDoneTaskHandler}

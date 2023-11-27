@@ -1,7 +1,5 @@
 import React from "react";
 
-import styles from "../StyleCourses.module.css";
-
 type CourseCardBaseProps = {
     children: React.ReactNode;
 };
@@ -9,8 +7,8 @@ type CourseCardBaseProps = {
 const CourseCardBase = ({ children }: CourseCardBaseProps) => {
     // TODO: Add img ???
     return (
-        <div className={`${styles.cardCourse} box-shadow-main`}>
-            <div className="d-flex flex-column h-100">{children}</div>
+        <div className="course__card">
+            <div className="d-flex flex-column h-100 position-relative">{children}</div>
         </div>
     );
 };

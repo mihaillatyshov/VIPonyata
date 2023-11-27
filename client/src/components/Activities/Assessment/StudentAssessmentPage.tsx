@@ -115,7 +115,7 @@ const StudentAssessmentPage = () => {
 
     return (
         <div className="container pb-5">
-            <PageTitle title={"Assessment"} urlBack={`/lessons/${assessment.info.lesson_id}`} />
+            <PageTitle title="タスク" urlBack={`/lessons/${assessment.info.lesson_id}`} />
             <PageDescription description={assessment.info.description} className="mb-3" />
             <StudentActivityDeadline activityInfo={assessment.info} />
 

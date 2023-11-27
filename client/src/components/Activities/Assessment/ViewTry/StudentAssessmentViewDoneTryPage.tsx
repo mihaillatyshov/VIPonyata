@@ -57,6 +57,7 @@ const aliases: TAliases = {
 
 interface DoneTryResponse {
     done_try: TAssessmentDoneTry;
+    lesson_id: number;
 }
 
 interface TaskTitleProps {
@@ -81,12 +82,14 @@ const StudentAssessmentViewDoneTryPage = () => {
     const [doneTry, setDoneTry] = useState<LoadStatus.DataDoneOrNotDone<{ data: TAssessmentDoneTry }>>({
         loadStatus: LoadStatus.NONE,
     });
+    const [lessonId, setLessonId] = useState<number>();
 
     useLayoutEffect(() => {
         setDoneTry({ loadStatus: LoadStatus.LOADING });
         AjaxGet<DoneTryResponse>({ url: `/api/assessment/donetries/${id}` })
             .then((json) => {
                 setDoneTry({ loadStatus: LoadStatus.DONE, data: json.done_try });
+                setLessonId(json.lesson_id);
             })
             .catch((err) => {
                 setDoneTry({ loadStatus: LoadStatus.ERROR });
@@ -122,7 +125,7 @@ const StudentAssessmentViewDoneTryPage = () => {
 
     return (
         <div className="container">
-            <PageTitle title="Урок" urlBack={`/lessons/${doneTry.data.base_id}`} />
+            <PageTitle title="タスク" urlBack={lessonId !== undefined ? `/lessons/${lessonId}` : undefined} />
             {doneTry.data.done_tasks.map((doneTask, i) => (
                 <div key={i}>
                     <TaskTitle {...doneTry.data.checked_tasks[i]} />

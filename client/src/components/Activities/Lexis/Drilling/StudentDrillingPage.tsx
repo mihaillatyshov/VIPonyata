@@ -25,7 +25,7 @@ const StudentDrillingPage = () => {
         <StudentLexisPage
             name="drilling"
             lexis={drilling}
-            title="Дриллинг"
+            title="ごい"
             setLexisInfoCallback={setDrillingInfoHandler}
             setLexisItemsCallback={setDrillingItemsHandler}
             setLexisDoneTaskCallback={setDrillingDoneTaskHandler}

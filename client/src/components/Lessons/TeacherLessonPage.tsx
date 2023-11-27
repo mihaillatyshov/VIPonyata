@@ -36,13 +36,18 @@ const TeacherLessonPage = () => {
             <PageDescription description={lesson?.description} />
 
             <div className="d-flex justify-content-around flex-wrap mt-5">
-                <TeacherLexisBouble title="Лексика" name="drilling" lessonId={lessonId} info={drilling.info} />
+                <TeacherLexisBouble title="ごい" name="drilling" lessonId={lessonId} info={drilling.info} />
 
-                <ITeacherAsssessmentBouble title="Урок" name="assessment" lessonId={lessonId} info={assessment.info} />
+                <ITeacherAsssessmentBouble
+                    title="タスク"
+                    name="assessment"
+                    lessonId={lessonId}
+                    info={assessment.info}
+                />
                 {/* <ActivityBouble title="Урок">
                     <i className="bi bi-plus-lg" style={{ fontSize: "140px" }} />
                 </ActivityBouble> */}
-                <TeacherLexisBouble title="Иероглифы" name="hieroglyph" lessonId={lessonId} info={hieroglyph.info} />
+                <TeacherLexisBouble title="かんじ" name="hieroglyph" lessonId={lessonId} info={hieroglyph.info} />
             </div>
         </div>
     );

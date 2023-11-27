@@ -33,6 +33,7 @@ def get_available_courses(user_id: int) -> list[Course]:
             .join(Course.users)
             .where(User.id == user_id)
             .order_by(Course.sort)
+            .order_by(Course.id)
         ).all()
 
 
@@ -73,6 +74,7 @@ def get_lessons_by_course_id(course_id: int, user_id: int) -> list[Lesson]:
             .join(Lesson.users)
             .where(User.id == user_id)
             .order_by(Lesson.number)
+            .order_by(Lesson.id)
         ).all()
 
 
@@ -213,8 +215,6 @@ class LexisQueries(ActivityQueries[LexisType, LexisTryType], Generic[LexisType, 
 
     def add_new_try(self, try_number: int, activity_id: int, user_id: int) -> LexisTryType:
         with DBsession.begin() as session:
-            LogI(f"Add New Activity Try {self._activity_try_type.__name__}: ", try_number, activity_id, user_id)
-
             new_activity_try = self._activity_try_type(try_number=try_number,
                                                        start_datetime=datetime.now(),
                                                        user_id=user_id,

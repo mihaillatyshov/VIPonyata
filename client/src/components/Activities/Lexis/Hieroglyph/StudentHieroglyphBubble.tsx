@@ -13,7 +13,7 @@ const StudentHieroglyphBubble = ({ hieroglyph }: StudentHieroglyphBubbleProps) =
 
     return (
         <StudentActivityBubble
-            title="Иероглифы"
+            title="かんじ"
             info={hieroglyph.info}
             name="hieroglyph"
             onDeadline={() => dispatch(setLexisEndByTime())}

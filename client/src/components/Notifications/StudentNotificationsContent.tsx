@@ -17,7 +17,7 @@ const getTypeName = (item: TStudentNotification) => {
         case "lesson":
             return "урок";
         case "assessment_try":
-            return "Ассессмент";
+            return "タスク";
         case "final_boss_try":
             return "Финальный босс";
     }

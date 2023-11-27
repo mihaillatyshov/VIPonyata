@@ -34,6 +34,16 @@
 
 .lesson__card-text-block {
     height: 110px;
-    max-width: calc(100% - 130px);
     overflow: hidden;
+
+    &.with-img {
+        max-width: calc(100% - var(--var-card-img-width) - 10px);
+    }
+}
+
+.lesson__card-sort {
+    position: absolute;
+    right: 10px;
+    bottom: 0;
+    color: #444444;
 }

@@ -185,4 +185,4 @@ const IAssessmentCreatePage = ({ title }: IAssessmentCreatePageProps) => {
     );
 };
 
-export const AssessmentCreatePage = () => <IAssessmentCreatePage title="Урок" />;
+export const AssessmentCreatePage = () => <IAssessmentCreatePage title="タスク" />;

@@ -10,17 +10,17 @@ import { NotificationUser } from "./Items/NotificationUser";
 const getTypeName = (item: TTeacherNotificationWithActivity) => {
     switch (item.type) {
         case "drilling_try":
-            return "Дриллинг";
+            return "ごい";
         case "hieroglyph_try":
-            return "Иероглифы";
+            return "かんじ";
         case "assessment_try":
-            return "Ассессмент";
+            return "タスク";
         case "final_boss_try":
             return "Финальный босс";
     }
 };
 
-const hasLink = (item: TTeacherNotificationWithActivity) => {
+const hasLink = (item: TTeacherNotificationWithActivity): boolean => {
     switch (item.type) {
         case "drilling_try":
         case "hieroglyph_try":
@@ -74,7 +74,7 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
             <NotificationDateTime datetime={item.creation_datetime} />
             <NotificationUser userData={item.user} />
             <div className="d-flex gap-1 flex-wrap">
-                <span> выполнил {getTypeName(item)} </span>
+                <span> Выполнил {getTypeName(item)} </span>
                 <span> из урока "{item.lesson.name}" </span>
                 <span> за {getStrHHMMSS(elapsedTime)} </span>
             </div>

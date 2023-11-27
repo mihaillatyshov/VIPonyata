@@ -38,8 +38,10 @@ def get_activity_try_by_id(activity_try_id: int, activity_try_type: type[Activit
 def update_activity_try_end_time(activity_try_id: int, end_time: datetime,
                                  activity_try_type: type[ActivityTryType]) -> None:
     with DBsession.begin() as session:
-        activity_try: ActivityTryType = session.scalars(
-            select(activity_try_type).where(activity_try_type.id == activity_try_id)).one_or_none()
+        activity_try = session.scalars(
+            select(activity_try_type)
+            .where(activity_try_type.id == activity_try_id)
+        ).one_or_none()
 
         if activity_try is None:
             return
@@ -56,10 +58,10 @@ def update_activity_try_end_time(activity_try_id: int, end_time: datetime,
             DBQT.add_assessment_notification(activity_try_id)
     elif activity_try_type == DrillingTry and isinstance(activity_try, DrillingTry):
         DBQS.add_drilling_notification(activity_try_id)
-        DBQO.add_user_dictionary_from_try(activity_try)
+        # DBQO.add_user_dictionary_from_try(activity_try)
     elif activity_try_type == HieroglyphTry and isinstance(activity_try, HieroglyphTry):
         DBQS.add_hieroglyph_notification(activity_try_id)
-        DBQO.add_user_dictionary_from_try(activity_try)
+        # DBQO.add_user_dictionary_from_try(activity_try)
 
 
 #########################################################################################################################
@@ -98,8 +100,8 @@ def user_avatar_update(url: str, user_id: int):
 #########################################################################################################################
 ################ Dictionary #############################################################################################
 #########################################################################################################################
-def add_user_dictionary_from_try(activity_try: LexisTryType):
-    lexis = activity_try.base
+# def add_user_dictionary_from_try(activity_try: LexisTryType):
+#     lexis = activity_try.base
 
-    for card in lexis.cards:
-        DBQS.add_user_dictionary_if_not_exists(card.dictionary_id, activity_try.user_id)
+#     for card in lexis.cards:
+#         DBQS.add_user_dictionary_if_not_exists(card.dictionary_id, activity_try.user_id)

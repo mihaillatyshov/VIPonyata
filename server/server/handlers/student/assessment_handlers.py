@@ -176,7 +176,12 @@ class IAssessmentHandlers(ActivityHandlers[AssessmentType, AssessmentTryType]):
     def get_done_try(self, done_try_id: int):
         done_try = self._activity_queries.get_done_try_by_id(done_try_id, get_current_user_id())
 
-        return {"done_try": done_try}
+        if done_try is None:
+            raise InvalidAPIUsage("Done try not found", 404)
+
+        activity = self._activity_queries.get_by_id(done_try.base_id, get_current_user_id())
+
+        return {"done_try": done_try, "lesson_id": activity.lesson_id}
 
 
 AssessmentHandlers = IAssessmentHandlers[Assessment, AssessmentTry](Assessment)

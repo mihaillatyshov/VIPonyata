@@ -37,7 +37,7 @@ def get_all_students() -> list[User]:
 #########################################################################################################################
 def get_all_courses() -> list[Course]:
     with DBsession.begin() as session:
-        return session.scalars(select(Course).order_by(Course.sort)).all()
+        return session.scalars(select(Course).order_by(Course.sort).order_by(Course.id)).all()
 
 
 def get_course_by_id(course_id: int) -> Course | None:
@@ -92,7 +92,8 @@ def remove_user_from_course(course_id: int, user_id: int):
 #########################################################################################################################
 def get_lessons_by_course_id(course_id: int) -> list[Lesson]:
     with DBsession.begin() as session:
-        return session.scalars(select(Lesson).where(Lesson.course_id == course_id)).all()
+        return session.scalars(
+            select(Lesson).where(Lesson.course_id == course_id).order_by(Lesson.number).order_by(Lesson.id)).all()
 
 
 def get_lesson_by_id(lesson_id: int) -> Lesson | None:
@@ -272,12 +273,12 @@ class IAssessmentQueries(Generic[AssessmentType, AssessmentTryType]):
         self.assessment_type = assessment_type
         self.assessment_try_type = assessment_try_type
 
-    def get_by_id(self, assessment_id: int) -> LexisType | None:
+    def get_by_id(self, assessment_id: int) -> AssessmentType | None:
         with DBsession.begin() as session:
             return session.scalars(
                 select(self.assessment_type).where(self.assessment_type.id == assessment_id)).one_or_none()
 
-    def get_by_lesson_id(self, lesson_id: int) -> Assessment | None:
+    def get_by_lesson_id(self, lesson_id: int) -> AssessmentType | None:
         with DBsession.begin() as session:
             return session.scalars(
                 select(self.assessment_type)

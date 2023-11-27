@@ -13,7 +13,7 @@ const StudentDrillingBubble = ({ drilling }: StudentDrillingBubbleProps) => {
 
     return (
         <StudentActivityBubble
-            title="Лексика"
+            title="ごい"
             info={drilling.info}
             name="drilling"
             onDeadline={() => dispatch(setLexisEndByTime())}

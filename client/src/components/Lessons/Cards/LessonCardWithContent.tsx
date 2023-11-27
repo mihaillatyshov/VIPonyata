@@ -2,6 +2,7 @@ import React from "react";
 
 import { TLesson } from "models/TLesson";
 import { useNavigate } from "react-router-dom";
+import { useUserIsTeacher } from "redux/funcs/user";
 
 import { Description, Title } from "./BaseParts/LessonCard";
 import LessonCardBase from "./LessonCardBase";
@@ -14,14 +15,17 @@ type LessonCardWithContentProps = {
 const LessonCardWithContent = ({ lesson }: LessonCardWithContentProps) => {
     const navigate = useNavigate();
 
+    const isTeacher = useUserIsTeacher();
+
     return (
         <LessonCardBase>
             <div
                 className="col d-flex flex-column lesson__card-inner"
                 onClick={() => navigate(`/lessons/${lesson.id}`)}
             >
+                {isTeacher && <div className="lesson__card-sort">{lesson.number}</div>}
                 <div className="d-flex">
-                    <div className="lesson__card-text-block">
+                    <div className={`lesson__card-text-block ${lesson.img !== null ? "with-img" : ""}`}>
                         <Title title={lesson.name} />
                         <Description description={lesson.description} />
                     </div>
