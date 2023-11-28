@@ -31,7 +31,7 @@ const LessonsList = () => {
             <ErrorPage
                 errorImg="/svg/SomethingWrong.svg"
                 textMain="Нет доступных уроков"
-                textDisabled="Попросите Машу открыть вам досутуп к урокам :3"
+                textDisabled="Попросите Машу открыть вам доступ к урокам :3"
                 needReload={false}
             />
         );

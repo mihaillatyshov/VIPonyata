@@ -1,0 +1,56 @@
+.dictionary__card {
+    @extend .my-card-base;
+    height: 100%;
+    --var-content-height: 140px;
+}
+
+.directory__card-content {
+    display: flex;
+    height: var(--var-content-height);
+
+    @media screen and (max-width: 450px) {
+        flex-direction: column;
+        height: auto;
+    }
+}
+
+.dictionary__card-img-block {
+    height: var(--var-content-height);
+}
+
+.dictionary__card-img {
+    width: 160px;
+    height: 100% !important;
+}
+
+.dictionary__card-word-block {
+    width: 100%;
+    height: var(--var-content-height);
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.dictionary__card-word {
+    padding: 6px 10px;
+    margin-left: 8px;
+
+    width: calc(100% - 20px);
+    text-align: center;
+    overflow-wrap: break-word;
+
+    &.ru {
+        border-bottom: 0.5px solid #999999;
+    }
+
+    &.w_jp {
+        border-bottom: 0.5px solid #999999;
+    }
+}
+
+.dictionary__card-association-block {
+    margin-top: 10px;
+}

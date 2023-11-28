@@ -83,7 +83,7 @@ const TeacherAssessmentClassificationColumn = ({
     };
 
     return (
-        <div className={`col`}>
+        <div className="col">
             <div className={`${styles.classificationCol} d-flex flex-column`}>
                 <div className="d-flex justify-content-center align-items-center">
                     <Title value={title} colId={colId} onChange={onTitleChange} />

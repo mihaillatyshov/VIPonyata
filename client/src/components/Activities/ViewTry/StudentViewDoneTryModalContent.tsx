@@ -18,7 +18,15 @@ const StudentViewDoneTryModalContent = ({
     errorMessage,
 }: StudentViewDoneTryModalContentProps) => {
     if (doneTries.loadStatus === LoadStatus.ERROR) {
-        return <h2 className="text-center">{errorMessage}</h2>;
+        return (
+            <h2 className="text-center">
+                <img src="/img/cat.jpg" alt="WIP" style={{ maxHeight: "400px", maxWidth: "100%" }} />
+                <div>Я Машин программист</div>
+                <div>У меня лапки</div>
+                <div>Скоро все будет</div>
+                {/* <div>{errorMessage}</div> */}
+            </h2>
+        );
     }
 
     if (doneTries.loadStatus !== LoadStatus.DONE) {

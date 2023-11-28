@@ -1,7 +1,9 @@
 import React from "react";
+
 import { TTeacherAssessmentClassification } from "models/Activity/Items/TAssessmentItems";
+
 import { TeacherAssessmentTypeProps } from "../TeacherAssessmentTypeBase";
-import { default as Column } from "./TeacherAssessmentClassificationColumn";
+import Column from "./TeacherAssessmentClassificationColumn";
 
 const TeacherAssessmentClassification = ({
     data,

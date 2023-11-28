@@ -1,12 +1,17 @@
-.my-card {
-    width: 100%;
-    min-height: 100px;
+.my-card-base {
     border-radius: 16px;
     border: 1px solid #444444;
     padding: 16px;
-    margin: 20px 0;
     background-color: var(--css-var-bg);
     box-shadow: 3px 3px 10px 5px rgba(0, 0, 0, 0.2);
+}
+
+.my-card {
+    @extend .my-card-base;
+
+    width: 100%;
+    min-height: 100px;
+    margin: 20px 0;
 }
 
 .my-card-header {

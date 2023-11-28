@@ -1,5 +1,6 @@
 import React, { useLayoutEffect } from "react";
 
+import ErrorPage from "components/ErrorPages/ErrorPage";
 import { AjaxGet } from "libs/ServerAPI";
 import { TCourse } from "models/TCourse";
 import { useUserIsTeacher } from "redux/funcs/user";
@@ -43,7 +44,14 @@ const CoursesList = () => {
     }
 
     if (!isTeacher && courses.items.length === 0) {
-        return <div>No Items</div>; // TODO: add placeholder
+        return (
+            <ErrorPage
+                errorImg="/svg/SomethingWrong.svg"
+                textMain="Нет доступных курсов"
+                textDisabled="Попросите Машу открыть вам доступ :3"
+                needReload={false}
+            />
+        );
     }
 
     return (

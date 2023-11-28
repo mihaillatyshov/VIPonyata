@@ -10,7 +10,7 @@ const ActivityBouble = ({ title, children }: ActivityBoubleProps) => {
         <div className="wrapperActivity mb-4">
             <div className="textActivity">
                 <div className="box-shadow-main rounded-circle">
-                    <div className="pt-5"> {title} </div>
+                    <div className="bouble__title"> {title} </div>
                     {children}
                 </div>
             </div>

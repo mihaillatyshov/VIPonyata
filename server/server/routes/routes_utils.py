@@ -1,7 +1,7 @@
 import threading
 from datetime import datetime, timedelta
 
-from flask_login import current_user
+from flask_login import current_user  # type: ignore
 
 import server.queries.OtherDBqueries as DBQO
 from server.exceptions.ApiExceptions import InvalidAPIUsage
