@@ -127,7 +127,7 @@ const TeacherAssessmentViewDoneTryPage = () => {
         AjaxPatch({ url: `/api/assessment/donetries/${id}`, body: { checks: doneTry.data.checked_tasks } })
             .then(() => {
                 setSaveStatus(LoadStatus.DONE);
-                navigate(`/`);
+                navigate(`/lessons/${lessonId}`);
             })
             .catch(() => {
                 setSaveStatus(LoadStatus.ERROR);
@@ -166,9 +166,7 @@ const TeacherAssessmentViewDoneTryPage = () => {
                     onClick={saveChangesAndClose}
                 />
             ) : (
-                <button className="btn btn-success" disabled>
-                    <Loading size="s" />
-                </button>
+                <Loading size={32} />
             )}
             {saveStatus === LoadStatus.ERROR && <InputError message="Не удалось сохранить данные" />}
         </div>
