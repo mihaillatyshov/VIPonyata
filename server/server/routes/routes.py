@@ -271,6 +271,19 @@ def get_assessment_by_id(id):
                                   activity_id=id)
 
 
+@routes_bp.route("/assessment/<int:id>", methods=["PATCH"])
+@login_required
+def update_assessment(id):
+    return user_selector_function(teacher_funcs.AssessmentHandlers.update, None, activity_id=id)
+
+
+@routes_bp.route("/assessment/<int:id>", methods=["DELETE"])
+@login_required
+def delete_assessment_by_id(id):
+    return user_selector_function(
+        teacher_funcs.AssessmentHandlers.delete_by_id, None, activity_id=id)
+
+
 @routes_bp.route("/assessment/<int:lesson_id>", methods=["POST"])
 @login_required
 def create_assessment(lesson_id):

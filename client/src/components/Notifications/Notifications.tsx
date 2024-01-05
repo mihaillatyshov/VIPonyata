@@ -30,7 +30,7 @@ interface NotificationsProps {
 
 const Notifications = ({ isShow, close, notifications }: NotificationsProps) => {
     return (
-        <Modal size="xl" show={isShow} onHide={close} dialogClassName="modal-dialog">
+        <Modal size="xl" show={isShow} onHide={close}>
             <Modal.Header closeButton className="modal-bg">
                 <Modal.Title>Уведомления</Modal.Title>
             </Modal.Header>

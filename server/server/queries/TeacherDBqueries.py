@@ -225,6 +225,13 @@ class LexisQueries(Generic[LexisType, LexisTryType, LexisCardType]):
                 .values(**lexis_data.model_dump())
             )
 
+    def delete_by_id(self, lexis_id: int):
+        with DBsession.begin() as session:
+            session.execute(
+                delete(self.lexis_type)
+                .where(self.lexis_type.id == lexis_id)
+            )
+
     def delete_cards_by_activity_id(self, lexis_try_id: int):
         with DBsession.begin() as session:
             session.execute(
@@ -237,13 +244,6 @@ class LexisQueries(Generic[LexisType, LexisTryType, LexisCardType]):
             session.execute(
                 delete(self.lexis_try_type)
                 .where(self.lexis_try_type.base_id == lexis_try_id)
-            )
-
-    def delete_by_id(self, lexis_id: int):
-        with DBsession.begin() as session:
-            session.execute(
-                delete(self.lexis_type)
-                .where(self.lexis_type.id == lexis_id)
             )
 
     def delete_notifications_by_activity_id(self, lexis_id: int):
@@ -292,6 +292,14 @@ class IAssessmentQueries(Generic[AssessmentType, AssessmentTryType]):
 
             return assessment
 
+    def update(self, assessment_id: int, assessment_data: AssessmentCreateReqStr):
+        with DBsession.begin() as session:
+            session.execute(
+                update(self.assessment_type)
+                .where(self.assessment_type.id == assessment_id)
+                .values(**assessment_data.model_dump())
+            )
+
     def get_user_by_try_id(self, assessment_try_id: int) -> int | None:
         with DBsession.begin() as session:
             return session.scalars(
@@ -321,6 +329,43 @@ class IAssessmentQueries(Generic[AssessmentType, AssessmentTryType]):
                 update(self.assessment_try_type)
                 .where(self.assessment_try_type.id == assessment_try_id)
                 .values(checked_tasks=checks_json)
+            )
+
+    def delete_by_id(self, assessment_id: int):
+        with DBsession.begin() as session:
+            session.execute(
+                delete(self.assessment_type)
+                .where(self.assessment_type.id == assessment_id)
+            )
+
+    def delete_tries_by_activity_id(self, assessment_id: int):
+        with DBsession.begin() as session:
+            session.execute(
+                delete(self.assessment_try_type)
+                .where(self.assessment_try_type.base_id == assessment_id)
+            )
+
+    def modify_delete_checks_notifications(self, query: Delete, ids: Select):
+        if self.assessment_try_type == AssessmentTry:
+            return query.where(NotificationTeacherToStudent.assessment_try_id.in_(ids))
+        if self.assessment_try_type == FinalBossTry:
+            return query.where(NotificationTeacherToStudent.final_boss_try_id.in_(ids))
+
+    def delete_notifications_by_activity_id(self, assessment_id: int):
+        with DBsession.begin() as session:
+            session.execute(
+                modify_delete_by_activity_try_type(
+                    self.assessment_try_type,
+                    delete(NotificationStudentToTeacher),
+                    select(self.assessment_try_type.id).where(self.assessment_try_type.base_id == assessment_id)
+                )
+            )
+
+            session.execute(
+                self.modify_delete_checks_notifications(
+                    delete(NotificationTeacherToStudent),
+                    select(self.assessment_try_type.id).where(self.assessment_try_type.base_id == assessment_id)
+                )
             )
 
 

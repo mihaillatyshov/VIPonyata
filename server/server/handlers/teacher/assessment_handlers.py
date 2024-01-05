@@ -6,7 +6,7 @@ from pydantic import ValidationError
 from pydantic_core import ErrorDetails
 
 import server.queries.TeacherDBqueries as DBQT
-from server.exceptions.ApiExceptions import (InvalidAPIUsage,
+from server.exceptions.ApiExceptions import (ActivityNotFoundException, InvalidAPIUsage,
                                              InvalidRequestJson,
                                              LessonNotFoundException)
 from server.models.assessment import (Aliases, AssessmentCreateReq,
@@ -51,15 +51,29 @@ class IAssessmentHandlers(Generic[AssessmentType, AssessmentTryType]):
     def __init__(self, activity_type: type[AssessmentType]):
         self._activity_queries = get_assessment_data(activity_type)
 
-    def get_by_id(self, assessment_id: int):
-        return {}
+    def get_by_id(self, activity_id: int):
+        assessment = self._activity_queries.get_by_id(activity_id)
+        return {"assessment": assessment, "tasks": json.loads(assessment.tasks)}
 
     def create(self, lesson_id: int):
-        assessment_req_data = validate_req(AssessmentCreateReq, request.json, 422)
-
-        lesson = DBQT.get_lesson_by_id(lesson_id)
-        if lesson is None:
+        if DBQT.get_lesson_by_id(lesson_id) is None:
             raise LessonNotFoundException(lesson_id)
+
+        assessment_data = self.prepare_processing_data()
+        assessment = self._activity_queries.create(lesson_id, assessment_data)
+
+        return {"assessment": assessment}
+
+    def update(self, activity_id: int):
+        if self._activity_queries.get_by_id(activity_id) is None:
+            raise ActivityNotFoundException("Assessment")
+
+        self._activity_queries.update(activity_id, self.prepare_processing_data())
+
+        return {"assessment": self._activity_queries.get_by_id(activity_id)}
+
+    def prepare_processing_data(self) -> AssessmentCreateReqStr:
+        assessment_req_data = validate_req(AssessmentCreateReq, request.json, 422)
 
         tasks: list[str] = []
         errors: dict[int, dict] = {}
@@ -68,22 +82,23 @@ class IAssessmentHandlers(Generic[AssessmentType, AssessmentTryType]):
             try:
                 tasks.append(json.dumps(parse_task(task.model_dump()).model_dump()))
             except ValidationError as ex:
-                # print("ex.errors():", ex.errors())
                 errors[i] = format_model_error(ex.errors())
             except Exception as ex:
                 print("ex", ex)
 
         if len(errors.keys()) != 0:
-            # print("errors:", errors)
             return {"errors": errors}, 422
 
-        assessment_data = AssessmentCreateReqStr(time_limit=assessment_req_data.time_limit,
-                                                 description=assessment_req_data.description,
-                                                 tasks=f"[{','.join(tasks)}]")
+        return AssessmentCreateReqStr(time_limit=assessment_req_data.time_limit,
+                                      description=assessment_req_data.description,
+                                      tasks=f"[{','.join(tasks)}]")
 
-        assessment = self._activity_queries.create(lesson_id, assessment_data)
+    def delete_by_id(self, activity_id: int):
+        self._activity_queries.delete_notifications_by_activity_id(activity_id)
+        self._activity_queries.delete_tries_by_activity_id(activity_id)
+        self._activity_queries.delete_by_id(activity_id)
 
-        return {"assessment": assessment}
+        return {"message": "ok"}
 
     def get_done_tries(self, assessment_id: int):
         return {}

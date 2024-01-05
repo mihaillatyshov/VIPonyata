@@ -104,7 +104,7 @@ class IAssessmentHandlers(ActivityHandlers[AssessmentType, AssessmentTryType]):
         activity_tries = self._activity_queries.get_tries_by_activity_id(activity_id, get_current_user_id())
 
         if activity_tries and activity_tries[-1].end_datetime == None:
-            return {"message": "Lexis try already Exists"}, 409
+            return {"message": "Assessment try already Exists"}, 409
 
         new_tasks = parse_new_tasks(activity.tasks)
         checked_tasks = check_task_req(new_tasks)
@@ -115,7 +115,7 @@ class IAssessmentHandlers(ActivityHandlers[AssessmentType, AssessmentTryType]):
         if activity.time_limit and new_activity_try:
             start_activity_timer_limit(time_limit_to_timedelta(activity.time_limit), new_activity_try.id,
                                        self._activity_queries._activity_try_type)
-        return {"message": "Lexis try successfully created"}
+        return {"message": "Assessment try successfully created"}
 
     def _set_done_tasks(self, req_data: dict, activity_id: int):
         done_tasks_json = req_data.get("done_tasks")

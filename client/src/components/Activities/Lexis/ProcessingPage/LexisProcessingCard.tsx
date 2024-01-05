@@ -1,23 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { TCreateCardItem } from "models/Activity/Items/TLexisItems";
-import { TDictionaryItem } from "models/TDictionary";
+
 import InputImage from "components/Form/InputImage";
-import { ImageState } from "models/Img";
-import { LoadStatus } from "libs/Status";
-
-import styles from "./StylesCreatePage.module.css";
 import InputTextArea from "components/Form/InputTextArea";
+import { LoadStatus } from "libs/Status";
+import { TCreateCardItem } from "models/Activity/Items/TLexisItems";
+import { ImageState } from "models/Img";
+import { TDictionaryItem } from "models/TDictionary";
 
-interface CreatePageLexisCardProps {
+import styles from "./StylesLexisProcessing.module.css";
+
+interface LexisProcessingCardProps {
     dict: TDictionaryItem;
     card: TCreateCardItem;
     setDictImg: (url: string | null, setError: () => void) => void;
     setCardData: (value: string, fieldName: "sentence" | "answer") => void;
 }
 
-const CreatePageLexisCard = ({ dict, card, setDictImg, setCardData }: CreatePageLexisCardProps) => {
+export const LexisProcessingCard = ({ dict, card, setDictImg, setCardData }: LexisProcessingCardProps) => {
     const [img, setImg] = useState<ImageState>(
-        dict.img === null ? { loadStatus: LoadStatus.NONE } : { loadStatus: LoadStatus.DONE, url: dict.img }
+        dict.img === null ? { loadStatus: LoadStatus.NONE } : { loadStatus: LoadStatus.DONE, url: dict.img },
     );
 
     useEffect(() => {
@@ -78,5 +79,3 @@ const CreatePageLexisCard = ({ dict, card, setDictImg, setCardData }: CreatePage
         </div>
     );
 };
-
-export default CreatePageLexisCard;

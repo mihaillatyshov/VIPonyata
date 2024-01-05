@@ -1,10 +1,12 @@
 import React from "react";
-import { CSS as DNDCSS } from "@dnd-kit/utilities";
-import { useSortable } from "@dnd-kit/sortable";
+
 import CSS from "csstype";
 import { LexisImages, LexisTaskName } from "models/Activity/ILexis";
 
-import styles from "./StylesCreatePage.module.css";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS as DNDCSS } from "@dnd-kit/utilities";
+
+import styles from "./StylesLexisProcessing.module.css";
 
 interface SortableTaskItemProps {
     taskName: LexisTaskName;

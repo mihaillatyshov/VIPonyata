@@ -1,6 +1,14 @@
 .modal-dialog {
     width: 90vw;
-    min-height: 80vh;
+}
+
+.modal-content {
+    min-height: 50vh;
+    max-height: 90vh;
+}
+
+.modal-body {
+    overflow-y: scroll;
 }
 
 .modal-bg {

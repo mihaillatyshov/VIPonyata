@@ -14,17 +14,18 @@ import { TCreateCardItem } from "models/Activity/Items/TLexisItems";
 import { TProcessingType } from "models/Processing";
 import { TDictionaryItem, TDictionaryItemCreate } from "models/TDictionary";
 import { useNavigate, useParams } from "react-router-dom";
+import { ProcessingButtonBlock } from "ui/Processing/ProcessingButtonBlock";
 
 import { DragEndEvent } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 
-import CreatePageLexisCard from "../CreatePage/CreatePageLexisCard";
-import NewWordsModal from "../CreatePage/NewWordsModal";
-import Tasks from "../CreatePage/Tasks";
 import { pickLexisWordOrChar } from "../Types/LexisUtils";
+import { LexisProcessingCard } from "./LexisProcessingCard";
 import { getModalDefaultText, getProcessingData, SelectableTask } from "./LexisProcessingUtils";
+import NewWordsModal from "./NewWordsModal";
+import Tasks from "./Tasks";
 
-interface TLexisCreateResponse {
+interface TLexisProcessingResponse {
     lexis: {
         lesson_id: number;
     };
@@ -123,7 +124,7 @@ export const LexisProcessingPage = ({ title, name, processingType }: LexisProces
 
         const ajaxMethod = processingType === "edit" ? AjaxPatch : AjaxPost;
 
-        ajaxMethod<TLexisCreateResponse>({
+        ajaxMethod<TLexisProcessingResponse>({
             url: `/api/${name}/${id}`,
             body: {
                 lexis: {
@@ -222,9 +223,8 @@ export const LexisProcessingPage = ({ title, name, processingType }: LexisProces
                 onChangeHandler={setDescription}
                 value={description}
             />
-
             {lexisCards.map((card, i) => (
-                <CreatePageLexisCard
+                <LexisProcessingCard
                     key={i}
                     card={card}
                     dict={dictionaryWords[i]}
@@ -234,22 +234,12 @@ export const LexisProcessingPage = ({ title, name, processingType }: LexisProces
             ))}
 
             <InputError message={error} className="mt-4" />
-            <div className="processing-page__button-block">
-                <input
-                    type="button"
-                    className="btn btn-success processing-page__button-success"
-                    onClick={handleProcessing}
-                    value={processingType === "edit" ? "Сохранить" : "Создать"}
-                />
-                {processingType === "edit" && (
-                    <input
-                        type="button"
-                        className="btn btn-danger processing-page__button-delete"
-                        value="Удалить"
-                        onClick={handleDelete}
-                    />
-                )}
-            </div>
+            <ProcessingButtonBlock
+                onSubmit={handleProcessing}
+                onDelete={handleDelete}
+                processingType={processingType}
+            />
+
             <NewWordsModal
                 isShow={isShowNewWordsModal}
                 close={() => setIsShowNewWordsModal(false)}

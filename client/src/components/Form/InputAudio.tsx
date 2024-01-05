@@ -40,7 +40,7 @@ const InputAudioLabel = ({ htmlId, value, placeholder }: InputAudioLabelProps) =
                 </div>
                 <label
                     htmlFor={htmlId}
-                    className={`${styles.inputFilePrev} ${borderClassName}`}
+                    className={`${styles.inputFilePrev} ${styles.inputFilePrevAudioLabel} ${borderClassName}`}
                     style={{ height: "100px", width: "100%" }}
                 >
                     {/* <img src={value.url} alt={placeholder} className={styles.inputFilePrevAudio} /> */}

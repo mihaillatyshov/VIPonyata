@@ -1,7 +1,8 @@
 import React from "react";
+
 import { TDictionaryItemCreate } from "models/TDictionary";
 
-import styles from "./StylesCreatePage.module.css";
+import styles from "./StylesLexisProcessing.module.css";
 
 interface WordsTableProps {
     words: TDictionaryItemCreate[];
