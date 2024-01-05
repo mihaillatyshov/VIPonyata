@@ -1,4 +1,4 @@
-from flask_login import UserMixin
+from flask_login import UserMixin  # type: ignore
 from sqlalchemy import select
 
 from server.common import DBsession

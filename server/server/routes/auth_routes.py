@@ -1,5 +1,6 @@
 from flask import Blueprint, request
-from flask_login import current_user, login_required, login_user, logout_user
+from flask_login import (current_user, login_required,  # type: ignore
+                         login_user, logout_user)
 from werkzeug.security import check_password_hash, generate_password_hash
 
 import server.queries.OtherDBqueries as DBQO

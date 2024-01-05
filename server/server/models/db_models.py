@@ -2,8 +2,9 @@ import datetime
 import json
 from typing import Any, Optional, Type, TypeVar, Union
 
-from sqlalchemy import (Boolean, Column, Date, DateTime, ForeignKey, Integer, String, Table, Text, Time,
-                        UniqueConstraint, create_engine)
+from sqlalchemy import (Boolean, Column, Date, DateTime, ForeignKey, Integer,
+                        String, Table, Text, Time, UniqueConstraint,
+                        create_engine)
 from sqlalchemy.engine import URL
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import Mapped, relationship, sessionmaker
@@ -543,6 +544,15 @@ ActivityType = TypeVar("ActivityType", bound=AbstractActivity)
 ActivityTryType = TypeVar("ActivityTryType", bound=AbstractActivityTry)
 
 
+def create_db_engine(db_config: URL):
+    return create_engine(db_config,
+                         pool_recycle=3600,
+                         pool_size=20,
+                         max_overflow=30,
+                         pool_timeout=5,
+                         pool_pre_ping=True)
+
+
 def create_db_session(url, username, password, host, database):
     db_config = URL.create(
         url,
@@ -552,12 +562,8 @@ def create_db_session(url, username, password, host, database):
         database=database,
     )
 
-    engine = create_engine(db_config,
-                           pool_recycle=3600,
-                           pool_size=20,
-                           max_overflow=30,
-                           pool_timeout=5,
-                           pool_pre_ping=True)
+    engine = create_db_engine(db_config)
+
     session_factory = sessionmaker(bind=engine, expire_on_commit=False)
     print("session created succesfully")
     return session_factory

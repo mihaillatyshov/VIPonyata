@@ -4,7 +4,6 @@ from sqlalchemy import Delete, Select, delete, select, update
 
 from server.common import DBsession
 from server.exceptions.ApiExceptions import InvalidAPIUsage
-from server.log_lib import LogI
 from server.models.assessment import AssessmentCreateReqStr
 from server.models.course import CourseCreateReq
 from server.models.db_models import (ActivityTryType, Assessment,

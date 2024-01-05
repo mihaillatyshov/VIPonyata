@@ -5,8 +5,6 @@ import os
 import click
 from flask_cors import CORS
 
-from server.common import DBsession
-from server.exceptions.ApiExceptions import InvalidAPIUsage
 from server.start_server import create_app, get_logs_folder_from_config
 
 logs_folder = get_logs_folder_from_config()
@@ -27,14 +25,8 @@ class RemoveColorFilter(logging.Filter):
 remove_color_filter = RemoveColorFilter()
 logging.getLogger("werkzeug").addFilter(remove_color_filter)
 
-app = create_app()
-CORS(app)
-
-
-@app.errorhandler(InvalidAPIUsage)
-def app_error_handler(exception: InvalidAPIUsage):
-    return exception.to_dict(), exception.status_code
-
 
 if __name__ == "__main__":
+    app = create_app()
+    CORS(app)
     app.run(host="0.0.0.0")

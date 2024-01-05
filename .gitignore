@@ -3,5 +3,6 @@ venv/
 .trunk
 log/
 logs/
-/server/config.json
 /uploads
+.pytest_cache/
+.mypy_cache/

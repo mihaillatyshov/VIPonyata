@@ -25,10 +25,4 @@ def LogE(*args):
     print(bcolors.FAIL, "[ ERROR ]:", *args, bcolors.ENDC)
 
 
-var_int = 10
-var_str = "io"
-LogI("Test:", var_int, var_str)
-LogW("Test:", var_int, var_str)
-LogE("Test:", var_int, var_str)
-
 logger = logging.getLogger("werkzeug")
