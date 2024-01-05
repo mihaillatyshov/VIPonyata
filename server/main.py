@@ -26,7 +26,9 @@ remove_color_filter = RemoveColorFilter()
 logging.getLogger("werkzeug").addFilter(remove_color_filter)
 
 
+app = create_app()
+CORS(app)
+
+
 if __name__ == "__main__":
-    app = create_app()
-    CORS(app)
     app.run(host="0.0.0.0")
