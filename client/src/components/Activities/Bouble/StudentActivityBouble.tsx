@@ -45,11 +45,13 @@ const StudentActivityBubble = ({ info, title, name, onDeadline }: StudentActivit
 
     return (
         <ActivityBouble title={title}>
-            <div className="mt-5">
-                <input type="button" className="btn btn-success" onClick={onButtonClick} value={getButtonText()} />
-            </div>
-            <div className="mt-5">
-                <StudentViewDoneTryButton name={name} id={info.id} />
+            <div className="d-flex flex-column justify-content-center align-items-center">
+                <div className="mt-5 bg-warning">
+                    <input type="button" className="btn btn-success" onClick={onButtonClick} value={getButtonText()} />
+                </div>
+                <div className="mt-5">
+                    <StudentViewDoneTryButton name={name} id={info.id} />
+                </div>
             </div>
         </ActivityBouble>
     );

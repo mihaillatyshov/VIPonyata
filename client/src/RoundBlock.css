@@ -27,7 +27,7 @@
     font-size: 21px;
     line-height: 1.25;
     padding: 0;
-    text-align: center;
+    flex-direction: column;
     text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.3);
 }
 

@@ -2,10 +2,10 @@
     font-size: 32px;
     padding: 5px 5px 5px 13px;
     /* background-color: var(--css-var-title); */
+    overflow-wrap: anywhere;
     min-width: 160px;
     width: fit-content;
     margin: 20px auto;
-    text-align: center;
     display: flex;
     border-radius: 2px;
 }
@@ -17,4 +17,6 @@
     cursor: pointer;
     margin-right: 10px;
     margin-left: -5px;
+    display: flex;
+    align-items: center;
 }

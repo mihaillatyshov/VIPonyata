@@ -9,7 +9,7 @@ import { TDictionary } from "models/TDictionary";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { selectDictionary, setDictionary } from "redux/slices/dictionarySlice";
 
-import DictionaryItem from "./DictionaryItem";
+import { DictionaryPageViewTable } from "./DictionaryPageView/Table";
 
 const TeacherDictionaryPage = () => {
     const { dictionary } = useAppSelector(selectDictionary);
@@ -47,38 +47,12 @@ const TeacherDictionaryPage = () => {
         return <Loading />;
     }
 
-    // return (
-    //     <div className="container">
-    //         <div className="table-container" role="table" aria-label="Destinations">
-    //             <div className="flex-table header" role="rowgroup">
-    //                 <div className="flex-row first" role="columnheader">
-    //                     れんそう
-    //                 </div>
-    //                 <div className="flex-row" role="columnheader">
-    //                     ほんやく
-    //                 </div>
-    //                 <div className="flex-row" role="columnheader">
-    //                     ことば
-    //                 </div>
-    //                 <div className="flex-row" role="columnheader">
-    //                     かんじ
-    //                 </div>
-    //             </div>
-    //             {dictionary.items.map((item) => (
-    //                 <DictionaryItem key={item.id} item={item} />
-    //             ))}
-    //         </div>
-    //     </div>
-    // );
+    // TODO: Select dictionary view type
     return (
         <div className="container">
             <PageTitle title="じしょ" />
 
-            <div className="row row-cols-1 row-cols-md-2 row-cols-lg-2 row-cols-xl-3 g-3">
-                {dictionary.items.map((item) => (
-                    <DictionaryItem key={item.id} item={item} />
-                ))}
-            </div>
+            <DictionaryPageViewTable dictionary={dictionary.items} />
         </div>
     );
 };

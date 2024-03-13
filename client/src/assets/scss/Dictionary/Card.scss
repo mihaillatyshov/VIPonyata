@@ -1,3 +1,5 @@
+@use "../Common";
+
 .dictionary__card {
     @extend .my-card-base;
     height: 100%;

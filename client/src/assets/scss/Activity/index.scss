@@ -1,4 +1,4 @@
-@import "Common.scss";
+@use "Common";
 
-@import "Lexis/";
-@import "Assessment/";
+@use "Lexis";
+@use "Assessment";

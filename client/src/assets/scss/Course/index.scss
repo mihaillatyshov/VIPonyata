@@ -1,3 +1,5 @@
+@use "../Common";
+
 .course__card {
     @extend .box-shadow-main;
     --var-card-img-width: 110px;

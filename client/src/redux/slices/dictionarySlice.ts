@@ -1,7 +1,8 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { LoadStatus } from "libs/Status";
 import { TDictionary } from "models/TDictionary";
 import { RootState } from "redux/store";
+
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 type DictionaryType = LoadStatus.DataDoneOrNotDone<{ items: TDictionary }>;
 

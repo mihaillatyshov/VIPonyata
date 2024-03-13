@@ -1,9 +1,9 @@
-// @import "bootstrap";
+// @use "bootstrap";
 
-@import "Common/";
-@import "Activity/";
+@use "Common";
+@use "Activity";
 
-@import "NavBar";
-@import "Course";
-@import "Lesson";
-@import "Dictionary";
+@use "NavBar";
+@use "Course";
+@use "Lesson";
+@use "Dictionary";

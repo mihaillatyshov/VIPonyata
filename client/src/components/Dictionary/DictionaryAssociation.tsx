@@ -1,7 +1,4 @@
-import React, {
-    useRef,
-    useState,
-} from "react";
+import React, { useRef, useState } from "react";
 
 import InputError from "components/Form/InputError";
 import { AjaxPost } from "libs/ServerAPI";
@@ -11,9 +8,10 @@ interface DictionaryAssociationProps {
     initValue: string | null;
     dictionary_id: number;
     onSuccessSave: (association: string) => void;
+    className?: string;
 }
 
-const DictionaryAssociation = ({ initValue, dictionary_id, onSuccessSave }: DictionaryAssociationProps) => {
+const DictionaryAssociation = ({ initValue, dictionary_id, onSuccessSave, className }: DictionaryAssociationProps) => {
     const [isAssociationEdit, setIsAssociationEdit] = useState<boolean>(false);
 
     const [tmpAssociation, setTmpAssociation] = useState<string>(() => initValue ?? "");
@@ -35,18 +33,19 @@ const DictionaryAssociation = ({ initValue, dictionary_id, onSuccessSave }: Dict
                     setIsAssociationEdit(false);
                 })
                 .catch(() => {
-                    setAssociationError("Ошибка при сохранении ассоциации");
+                    setAssociationError("Ошибка сервера");
                 });
         } else {
             setIsAssociationEdit(true);
         }
     };
     return (
-        <div>
+        <div className={className}>
             <div className="input-group">
                 <textarea
                     className="form-control"
                     value={tmpAssociation}
+                    placeholder="Твоя ассоциация"
                     onChange={(e) => {
                         setTmpAssociation(e.target.value);
                     }}
