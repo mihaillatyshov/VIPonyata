@@ -1,14 +1,14 @@
-import React from "react";
+import React from 'react';
 
 import {
     TStudentNotification,
     TStudentNotificationActivity,
     TStudentNotificationCustom,
     TStudentNotificationShareAny,
-} from "models/TNotification";
-import { useNavigate } from "react-router-dom";
+} from 'models/TNotification';
+import { useNavigate } from 'react-router-dom';
 
-import { NotificationDateTime } from "./Items/NotificationDateTime";
+import { NotificationDateTime } from './Items/NotificationDateTime';
 
 const getTypeName = (item: TStudentNotification) => {
     switch (item.type) {
