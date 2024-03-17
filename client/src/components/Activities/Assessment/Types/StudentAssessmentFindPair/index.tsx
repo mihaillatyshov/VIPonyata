@@ -39,7 +39,7 @@ const StudentAssessmentFindPair = ({ data, taskId }: StudentAssessmentTypeProps<
     }, [selectedFirst, selectedSecond]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
-        <div>
+        <div className="student-assessment-find-pair__col">
             {data.first.map((first, i) => (
                 <FieldRow
                     key={i}

@@ -16,22 +16,25 @@ const StudentAssessmentTestSingle = ({ data, taskId }: StudentAssessmentTypeProp
     };
 
     return (
-        <div>
-            <div className="prevent-select mb-3">{data.question}</div>
-            {data.options.map((answer: string, fieldId: number) => (
-                <div key={fieldId} className="input-group mt-1">
-                    <InputRadioSingle
-                        key={fieldId}
-                        htmlId={`radio_${taskId}_${fieldId}`}
-                        id={fieldId}
-                        className="input-group-text big-check"
-                        placeholder={""}
-                        selectedId={data.answer ?? -1}
-                        onChange={onChangeHandler}
-                    />
-                    <span className="form-control prevent-select">{answer}</span>
-                </div>
-            ))}
+        <div className="student-assessment-test">
+            <div className="prevent-select">{data.question}</div>
+
+            <div className="student-assessment-test__options">
+                {data.options.map((answer: string, fieldId: number) => (
+                    <div key={fieldId} className="input-group">
+                        <InputRadioSingle
+                            key={fieldId}
+                            htmlId={`radio_${taskId}_${fieldId}`}
+                            id={fieldId}
+                            className="input-group-text big-check"
+                            placeholder={""}
+                            selectedId={data.answer ?? -1}
+                            onChange={onChangeHandler}
+                        />
+                        <span className="form-control prevent-select">{answer}</span>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 };

@@ -12,16 +12,14 @@ export const StudentAssessmentDoneTrySentenceOrder = ({
     checks,
 }: AssessmentDoneTryTaskBaseProps<TAssessmentDoneTrySentenceOrder, TAssessmentCheckedSentenceOrder>) => {
     const getClassName = (id: number) => {
-        return `dnd__sortable-item d-flex justify-content-center ${
-            checks.mistake_parts.includes(id) ? "wrong" : "good"
-        }`;
+        return `student-assessment-view-sortable-order__item ${checks.mistake_parts.includes(id) ? "wrong" : "good"}`;
     };
 
-    const rowClassName = `mt-2 row row-cols-1 ${checks.mistakes_count > 0 ? "row-cols-sm-2 g-4" : ""}`;
+    const rowClassName = `row mt-0 row-cols-1 ${checks.mistakes_count > 0 ? "row-cols-sm-2 g-4" : ""}`;
 
     return (
         <div className={rowClassName}>
-            <div className="d-flex mx-auto flex-column gap-3">
+            <div className="student-assessment-sortable-order vertical">
                 {data.parts.map((item, id) => (
                     <div key={id} className={getClassName(id)}>
                         {item}
@@ -29,9 +27,9 @@ export const StudentAssessmentDoneTrySentenceOrder = ({
                 ))}
             </div>
             {checks.mistakes_count > 0 && (
-                <div className="d-flex mx-auto flex-column gap-3">
+                <div className="student-assessment-sortable-order vertical">
                     {data.meta_parts.map((item, id) => (
-                        <div key={id} className="dnd__sortable-item d-flex justify-content-center good">
+                        <div key={id} className="student-assessment-view-sortable-order__item good">
                             {item}
                         </div>
                     ))}

@@ -12,7 +12,7 @@ export const StudentAssessmentDoneTryOpenQuestion = ({
 }: AssessmentDoneTryTaskBaseProps<TAssessmentDoneTryOpenQuestion, TAssessmentCheckedOpenQuestion>) => {
     console.log("StudentAssessmentDoneTryOpenQuestion", data, checks);
 
-    const diffChars: any[] = Diff.diffChars(data.meta_answer, data.answer);
+    const diffChars: any[] = Diff.diffChars(data.meta_answer || "", data.answer);
 
     console.log(diffChars);
 
@@ -23,24 +23,24 @@ export const StudentAssessmentDoneTryOpenQuestion = ({
     };
 
     return (
-        <div className="mt-2">
+        <div className="student-assessment-view-open-question__container">
             <div className="prevent-select">{data.question}</div>
             {/* <div>
                 <span className={className}>{data.answer} &nbsp;</span>
             </div> */}
-            <div className="mt-2">
-                <div className="">Твой ответ:</div>
-                <span className="form-control mt-2">{data.answer} &nbsp;</span>
+            <div className="student-assessment-view-open-question__wrapper">
+                <div>Твой ответ:</div>
+                <span className="form-control">{data.answer} &nbsp;</span>
             </div>
             {data.meta_answer ? (
                 <>
-                    <div className="mt-2">
-                        <div className="">Правильный ответ:</div>
-                        <span className="form-control mt-1 input-good">{data.meta_answer} &nbsp;</span>
+                    <div className="student-assessment-open-question__wrapper">
+                        <div>Правильный ответ:</div>
+                        <span className="form-control input-good">{data.meta_answer} &nbsp;</span>
                     </div>
 
-                    <div className="mt-2">
-                        <div className="">Отличия:</div>
+                    <div className="student-assessment-open-question__wrapper">
+                        <div>Отличия:</div>
                         <div className="form-control">
                             {diffChars.map((diffItem, i) => (
                                 <span key={i} style={{ color: getDiffItemColor(diffItem) }}>

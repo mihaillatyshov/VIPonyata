@@ -31,7 +31,9 @@ interface SortableOrderProps {
 const SortableOrder = ({ handleDragEnd, order, data }: SortableOrderProps) => {
     const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor), useSensor(KeyboardSensor));
 
-    const sortContextClassName = `d-flex mx-auto ${order === "horizontal" ? "flex-wrap" : "flex-column"} gap-3`;
+    const sortContextClassName = `student-assessment-sortable-order ${
+        order === "horizontal" ? "horizontal" : "vertical"
+    } `;
 
     const localParts: TLocalPart[] = useMemo(() => {
         return data.parts.map((item, id) => ({
@@ -45,21 +47,19 @@ const SortableOrder = ({ handleDragEnd, order, data }: SortableOrderProps) => {
 
     return (
         <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors} autoScroll={false}>
-            <div className="container">
-                <SortableContext items={localParts.map((item) => item.strId)} strategy={rectSortingStrategy}>
-                    <div className={sortContextClassName}>
-                        {localParts.map((item) => (
-                            <SortableItem
-                                key={item.strId}
-                                id={item.strId}
-                                str={item.str}
-                                customData={{ arrayId: item.arrayId }}
-                                width={itemWidth}
-                            />
-                        ))}
-                    </div>
-                </SortableContext>
-            </div>
+            <SortableContext items={localParts.map((item) => item.strId)} strategy={rectSortingStrategy}>
+                <div className={sortContextClassName}>
+                    {localParts.map((item) => (
+                        <SortableItem
+                            key={item.strId}
+                            id={item.strId}
+                            str={item.str}
+                            customData={{ arrayId: item.arrayId }}
+                            width={itemWidth}
+                        />
+                    ))}
+                </div>
+            </SortableContext>
         </DndContext>
     );
 };

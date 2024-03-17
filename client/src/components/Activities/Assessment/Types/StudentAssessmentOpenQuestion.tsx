@@ -19,11 +19,11 @@ const StudentAssessmentOpenQuestion = ({ data, taskId }: StudentAssessmentTypePr
     };
 
     return (
-        <div>
+        <div className="student-assessment-open-question__wrapper">
             <div className="prevent-select">{data.question}</div>
             <div>
                 <textarea
-                    className="form-control mt-2"
+                    className="form-control"
                     ref={textAreaRef}
                     value={data.answer}
                     onChange={onChangeHandler}

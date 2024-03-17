@@ -21,7 +21,7 @@ export function Item({ str, longestStr }: ItemProps) {
         <AutosizeDiv
             value={str}
             valueToCalcSize={longestStr}
-            inputClassName="student-assessment-classification__item text-center"
+            inputClassName="student-assessment-classification__item"
             className="student-assessment-classification__item-autosize"
         />
     );

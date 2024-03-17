@@ -168,20 +168,20 @@ const StudentAssessmentClassification = ({ data, taskId }: StudentAssessmentType
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
         >
-            <div className="d-flex justify-content-center">
+            <div className="student-assessment-classification__container">
                 <Container id={0} items={items[0]} type="inputs" longestStr={longestStr} />
-            </div>
-            <div className="d-flex flex-wrap justify-content-center gap-3">
-                {items.slice(1).map((col, i) => (
-                    <Container
-                        key={i + 1}
-                        id={i + 1}
-                        items={col}
-                        type="answer"
-                        longestStr={longestStr}
-                        title={data.titles[i]}
-                    />
-                ))}
+                <div className="student-assessment-classification__answers-wrapper">
+                    {items.slice(1).map((col, i) => (
+                        <Container
+                            key={i + 1}
+                            id={i + 1}
+                            items={col}
+                            type="answer"
+                            longestStr={longestStr}
+                            title={data.titles[i]}
+                        />
+                    ))}
+                </div>
             </div>
             <DragOverlay style={{ opacity: "60%" }}>
                 {active ? <Item str={active.str} longestStr={longestStr} /> : null}

@@ -8,7 +8,7 @@ export const StudentAssessmentDoneTryImg = ({
     data,
 }: AssessmentDoneTryTaskBaseProps<TAssessmentImg, TAssessmentCheckedImg>) => {
     return (
-        <div className="d-flex w-100 justify-content-center">
+        <div className="d-flex w-100 justify-content-center mt-2">
             <img alt="Img" className="img-base" src={data.url} />
         </div>
     );

@@ -1,5 +1,41 @@
 @use "../../Common";
 
+.student-assessment-task-title {
+    @extend .my-card-header-title;
+
+    line-height: 1;
+}
+
+.student-assessment-tasks {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.student-assessment-task__wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.student-assessment-view-task__wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.student-assessment-test {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.student-assessment-test__options {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
 .student-assessment-find-pair__item {
     @extend .prevent-select;
 
@@ -28,6 +64,17 @@
     }
 }
 
+.student-assessment-find-pair__row {
+    position: relative;
+}
+
+.student-assessment-find-pair__col {
+    display: flex;
+    flex-direction: column;
+    row-gap: 8px;
+    margin-top: 4px;
+}
+
 .student-assessment-find-pair__item-connector {
     position: absolute;
     border-bottom: 2px solid #00ff00;
@@ -36,6 +83,39 @@
     width: 24px;
     inset: 50%;
     transform: translate(-50%, -100%);
+}
+
+.student-assessment-sortable-order {
+    display: flex;
+    row-gap: 12px;
+    column-gap: 8px;
+    margin-top: 4px;
+
+    &.horizontal {
+        flex-wrap: wrap;
+    }
+
+    &.vertical {
+        flex-direction: column;
+    }
+}
+
+.student-assessment-view-sortable-order__container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.student-assessment-view-sortable-order__wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.student-assessment-view-sortable-order__item {
+    @extend .dnd__sortable-item;
+    display: flex;
+    justify-content: center;
 }
 
 .student-assessment-fill-spaces-by-hand__input {
@@ -66,6 +146,21 @@
     }
 }
 
+.student-assessment-fill-spaces__container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.student-assessment-fill-spaces {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 6px;
+    row-gap: 4px;
+}
+
 .student-assessment-fill-spaces-exists__inputs {
     @extend .my-card;
 
@@ -73,28 +168,54 @@
     min-height: 80px;
 }
 
+.student-assessment-classification__container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-top: 4px;
+}
+
 .student-assessment-classification__column-title {
-    font-size: 1.2em;
+    font-size: 1.1em;
 }
 
-.student-assessment-classification__inputs {
-    flex: 1 0;
-    min-height: 70px;
-    overflow: hidden;
-    margin-top: 4px !important;
+.student-assessment-classification__answers-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    column-gap: 12px;
+    row-gap: 16px;
 }
 
-.student-assessment-classification__answers {
+.student-assessment-classification__card {
     @extend .my-card;
 
-    flex: 0 1 0;
-    min-height: 60px;
+    display: flex;
+
     padding: 10px;
-    min-width: max(fit-content 100px);
-    margin: 4px 0 !important;
+    gap: 8px;
+    min-height: 64px;
+
+    &.inputs {
+        flex: 1 0;
+
+        overflow: hidden;
+    }
+
+    &.answers {
+        flex-direction: column;
+        flex: 0 1 0;
+        min-width: max(fit-content 100px);
+    }
+}
+
+.student-assessment-classification__hr {
+    display: flex;
+    flex-direction: column;
 }
 
 $item-border-size: 1px;
+$item-padding: 6px;
 
 .student-assessment-classification__item {
     @extend .prevent-select;
@@ -105,11 +226,12 @@ $item-border-size: 1px;
     align-items: center;
     justify-content: center;
     border: $item-border-size solid #000000;
+    text-align: center;
 
     border-radius: 4px;
 
     margin: calc($item-border-size);
-    padding: 6px;
+    padding: $item-padding;
 
     background: #ffffff;
 
@@ -125,8 +247,20 @@ $item-border-size: 1px;
 }
 
 .student-assessment-classification__item-autosize {
-    margin: calc($item-border-size + 2px);
-    padding: 0 6px;
+    margin: 0 calc($item-border-size + 2px);
+    padding: 0 $item-padding;
+}
+
+.student-assessment-open-question__wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.student-assessment-view-open-question__container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .student-assessment-task__title-not-checked {

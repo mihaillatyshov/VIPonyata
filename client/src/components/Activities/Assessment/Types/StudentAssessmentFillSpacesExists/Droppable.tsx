@@ -22,7 +22,7 @@ const Droppable = ({ id, longestStr, str }: DroppableProps) => {
 
     return (
         <div ref={setNodeRef}>
-            <div className={`d-flex mt-2 me-2 dnd__droppable-wrapper ${isOver ? "dnd__droppable-over" : ""}`}>
+            <div className={`d-flex dnd__droppable-wrapper ${isOver ? "dnd__droppable-over" : ""}`}>
                 {str ? (
                     <Draggable id={id} str={str} type="answer" longestStr={longestStr} />
                 ) : (

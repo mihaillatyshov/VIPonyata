@@ -24,7 +24,7 @@ const StudentAssessmentDoneTryTestTaskItem = ({
     const validationTextClassName = validationStr ? `input-${validationStr}` : "";
 
     return (
-        <div key={fieldId} className="input-group mt-1">
+        <div key={fieldId} className="input-group">
             <InputRadioSingle
                 key={fieldId}
                 htmlId={`radio_${taskId}_${fieldId}`}
@@ -55,20 +55,27 @@ export const StudentAssessmentDoneTryTestSingle = ({
     };
 
     return (
-        <div>
+        <>
             {checks.mistakes_count > 0 && checks.mistake_answer === null && (
                 <div className="text-danger">Ответ не выбран</div>
             )}
-            {data.options.map((option, fieldId) => (
-                <StudentAssessmentDoneTryTestTaskItem
-                    key={fieldId}
-                    option={option}
-                    selectedAnswer={data.answer}
-                    fieldId={fieldId}
-                    taskId={taskId}
-                    validationStr={getValidationStr(fieldId)}
-                />
-            ))}
-        </div>
+
+            <div className="student-assessment-test">
+                <div className="prevent-select">{data.question}</div>
+
+                <div className="student-assessment-test__options">
+                    {data.options.map((option, fieldId) => (
+                        <StudentAssessmentDoneTryTestTaskItem
+                            key={fieldId}
+                            option={option}
+                            selectedAnswer={data.answer}
+                            fieldId={fieldId}
+                            taskId={taskId}
+                            validationStr={getValidationStr(fieldId)}
+                        />
+                    ))}
+                </div>
+            </div>
+        </>
     );
 };

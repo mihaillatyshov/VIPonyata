@@ -85,16 +85,18 @@ const StudentAssessmentFillSpacesExists = ({
 
     return (
         <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
-            <InputsField inputFields={data.inputs} longestStr={longestStr} />
-            <div className="d-flex flex-wrap align-items-center mt-3">
-                {data.separates.map((element: string, fieldId: number) => (
-                    <React.Fragment key={fieldId}>
-                        <div className="prevent-select me-2 mt-2">{element}</div>
-                        {fieldId < data.separates.length - 1 && (
-                            <Droppable id={fieldId} longestStr={longestStr} str={data.answers[fieldId]} />
-                        )}
-                    </React.Fragment>
-                ))}
+            <div className="student-assessment-fill-spaces__container">
+                <InputsField inputFields={data.inputs} longestStr={longestStr} />
+                <div className="student-assessment-fill-spaces">
+                    {data.separates.map((element: string, fieldId: number) => (
+                        <React.Fragment key={fieldId}>
+                            <div className="prevent-select">{element}</div>
+                            {fieldId < data.separates.length - 1 && (
+                                <Droppable id={fieldId} longestStr={longestStr} str={data.answers[fieldId]} />
+                            )}
+                        </React.Fragment>
+                    ))}
+                </div>
             </div>
         </DndContext>
     );

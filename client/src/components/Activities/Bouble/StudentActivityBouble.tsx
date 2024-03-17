@@ -1,14 +1,14 @@
-import React from "react";
+import React from 'react';
 
-import { AjaxPost } from "libs/ServerAPI";
-import { ActivityName } from "models/Activity/IActivity";
-import { TAssessment } from "models/Activity/TAssessment";
-import { TDrilling } from "models/Activity/TDrilling";
-import { THieroglyph } from "models/Activity/THieroglyph";
-import { useNavigate } from "react-router-dom";
+import { AjaxPost } from 'libs/ServerAPI';
+import { ActivityName } from 'models/Activity/IActivity';
+import { TAssessment } from 'models/Activity/TAssessment';
+import { TDrilling } from 'models/Activity/TDrilling';
+import { THieroglyph } from 'models/Activity/THieroglyph';
+import { useNavigate } from 'react-router-dom';
 
-import StudentViewDoneTryButton from "../ViewTry/StudentViewDoneTryButton";
-import ActivityBouble from "./ActivityBouble";
+import StudentViewDoneTryButton from '../ViewTry/StudentViewDoneTryButton';
+import ActivityBouble from './ActivityBouble';
 
 type StudentActivityBubbleProps = {
     title: string;
@@ -46,7 +46,7 @@ const StudentActivityBubble = ({ info, title, name, onDeadline }: StudentActivit
     return (
         <ActivityBouble title={title}>
             <div className="d-flex flex-column justify-content-center align-items-center">
-                <div className="mt-5 bg-warning">
+                <div className="mt-5">
                     <input type="button" className="btn btn-success" onClick={onButtonClick} value={getButtonText()} />
                 </div>
                 <div className="mt-5">

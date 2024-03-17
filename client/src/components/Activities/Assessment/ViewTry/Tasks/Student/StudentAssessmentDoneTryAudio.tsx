@@ -9,7 +9,7 @@ export const StudentAssessmentDoneTryAudio = ({
 }: AssessmentDoneTryTaskBaseProps<TAssessmentAudio, TAssessmentCheckedAudio>) => {
     return (
         <div className="w-100">
-            <audio className="w-100" controls>
+            <audio className="w-100 mt-2" controls>
                 <source src={data.url} type="audio/mpeg"></source>
                 Your browser does not support the audio.
             </audio>

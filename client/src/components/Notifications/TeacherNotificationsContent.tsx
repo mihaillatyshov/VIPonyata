@@ -1,11 +1,14 @@
-import React from "react";
+import React from 'react';
 
-import { getStrHHMMSS } from "libs/useTimer";
-import { TTeacherNotification, TTeacherNotificationWithActivity } from "models/TNotification";
-import { useNavigate } from "react-router-dom";
+import { getStrHHMMSS } from 'libs/useTimer';
+import {
+    TTeacherNotification,
+    TTeacherNotificationWithActivity,
+} from 'models/TNotification';
+import { useNavigate } from 'react-router-dom';
 
-import { NotificationDateTime } from "./Items/NotificationDateTime";
-import { NotificationUser } from "./Items/NotificationUser";
+import { NotificationDateTime } from './Items/NotificationDateTime';
+import { NotificationUser } from './Items/NotificationUser';
 
 const getTypeName = (item: TTeacherNotificationWithActivity) => {
     switch (item.type) {
@@ -64,6 +67,10 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
         }
     };
 
+    const isMessageItem = (item: TTeacherNotification): boolean => {
+        return item.type === null || item.type === undefined;
+    };
+
     const endDatetime = item.activity_try.end_datetime
         ? new Date(item.activity_try.end_datetime).getTime()
         : Date.now();
@@ -71,13 +78,18 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
 
     return (
         <div className="notification__item" onClick={handleClick}>
-            <NotificationDateTime datetime={item.creation_datetime} />
-            <NotificationUser userData={item.user} />
-            <div className="d-flex gap-1 flex-wrap">
-                <span> Выполнил {getTypeName(item)} </span>
-                <span> из урока "{item.lesson.name}" </span>
-                <span> за {getStrHHMMSS(elapsedTime)} </span>
+            <div className="d-flex justify-content-center">
+                <NotificationDateTime datetime={item.creation_datetime} />
+                <NotificationUser userData={item.user} />
             </div>
+            <div>
+                Выполнил {getTypeName(item)} из урока "{item.lesson.name}" за {getStrHHMMSS(elapsedTime)}
+            </div>
+            {!isMessageItem(item) && hasLink(item) ? (
+                <div className="notification__item-button-block">
+                    <input type="button" className="btn btn-primary" value={"Перейти"} onClick={handleClick} />
+                </div>
+            ) : null}
         </div>
     );
 };

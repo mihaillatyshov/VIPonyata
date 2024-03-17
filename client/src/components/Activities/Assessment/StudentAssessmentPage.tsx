@@ -116,20 +116,22 @@ const StudentAssessmentPage = () => {
     return (
         <div className="container pb-5">
             <PageTitle title="タスク" urlBack={`/lessons/${assessment.info.lesson_id}`} />
-            <PageDescription description={assessment.info.description} className="mb-3" />
+            <PageDescription description={assessment.info.description} className="mb-1" />
             <StudentActivityDeadline activityInfo={assessment.info} />
 
             <hr />
-            <div>
+            <div className="student-assessment-tasks">
                 {assessment.items.map((item, i: number) => (
-                    <div key={i}>
-                        <div className="my-card-header-title mb-3">
-                            {studentAssessmentTaskRusNameAliases[item.name]}
-                        </div>
+                    <>
+                        <div key={i} className="student-assessment-task__wrapper">
+                            <div className="student-assessment-task-title">
+                                {studentAssessmentTaskRusNameAliases[item.name]}
+                            </div>
 
-                        {drawItem(JSON.parse(JSON.stringify(item)), i)}
-                        <hr />
-                    </div>
+                            {drawItem(JSON.parse(JSON.stringify(item)), i)}
+                        </div>
+                        <hr className="my-0 py-0" />
+                    </>
                 ))}
             </div>
             <input type="button" className="btn btn-primary mb-5" onClick={endAssessmentHandle} value="Завершить" />

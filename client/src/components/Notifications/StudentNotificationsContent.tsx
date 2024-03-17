@@ -53,10 +53,8 @@ interface ActivityItemContentProps {
 
 const ActivityItemContent = ({ item }: ActivityItemContentProps) => {
     return (
-        <div className="d-flex gap-1 flex-wrap">
-            <span> Проверен {getTypeName(item)} </span>
-            <span> из урока "{item.lesson.name}" </span>
-            <span> выполненный {item.activity_try.end_datetime} </span>
+        <div className="notification__item-content">
+            Проверен {getTypeName(item)} из урока "{item.lesson.name}" выполненный {item.activity_try.end_datetime}
         </div>
     );
 };
@@ -69,9 +67,8 @@ const ShareItemContent = ({ item }: ShareItemContentProps) => {
     const name = item.type === "course" ? item.course.name : item.lesson.name;
 
     return (
-        <div className="d-flex gap-1 flex-wrap">
-            <span> Открыт новый {getTypeName(item)}: </span>
-            <span> "{name}" </span>
+        <div className="notification__item-content">
+            Открыт новый {getTypeName(item)}: "{name}"
         </div>
     );
 };
@@ -99,11 +96,21 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
         return item.type === "assessment_try" || item.type === "final_boss_try";
     };
 
+    const isMessageItem = (item: TStudentNotification): boolean => {
+        return item.type === null || item.type === undefined;
+    };
+
     return (
         <div className="notification__item" onClick={handleClick}>
             <NotificationDateTime datetime={item.creation_datetime} />
-            {isShareItem(item) && <ShareItemContent item={item} />}
-            {isActivityItem(item) && <ActivityItemContent item={item} />}
+            {isShareItem(item) ? <ShareItemContent item={item} /> : null}
+            {isActivityItem(item) ? <ActivityItemContent item={item} /> : null}
+            {isMessageItem(item) ? <div className="notification__item-content">{item.message}</div> : null}
+            {!isMessageItem(item) ? (
+                <div className="notification__item-button-block">
+                    <input type="button" className="btn btn-primary" value={"Перейти"} onClick={handleClick} />
+                </div>
+            ) : null}
         </div>
     );
 };

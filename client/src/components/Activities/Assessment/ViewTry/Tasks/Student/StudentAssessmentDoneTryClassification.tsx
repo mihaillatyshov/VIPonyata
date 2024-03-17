@@ -15,22 +15,22 @@ interface ContainerProps {
 
 const Container = ({ items, longestStr, title, wrongItems }: ContainerProps) => {
     const getItemClassName = (i: number) => {
-        return `student-assessment-classification__item text-center ${wrongItems.includes(i) ? "wrong" : "good"}`;
+        return `student-assessment-classification__item ${wrongItems.includes(i) ? "wrong" : "good"}`;
     };
 
     return (
-        <div className="p-2 d-flex flex-column student-assessment-classification__answers">
+        <div className="student-assessment-classification__card answers">
             <div className="student-assessment-classification__column-title">{title}</div>
             {title ? (
-                <>
+                <div className="student-assessment-classification__hr">
                     <AutosizeDiv
                         value={""}
                         valueToCalcSize={longestStr}
                         inputClassName="student-assessment-classification__item-autosize"
                         className="student-assessment-classification__item-autosize"
                     />
-                    <hr className="m-0 mb-2" />
-                </>
+                    <hr className="m-0 p-0" />
+                </div>
             ) : null}
             {items.map((str, i) => (
                 <AutosizeDiv
@@ -54,7 +54,7 @@ export const StudentAssessmentDoneTryClassification = ({
     );
 
     return (
-        <div className="d-flex flex-wrap justify-content-center gap-3">
+        <div className="student-assessment-classification__answers-wrapper">
             {data.answers.map((col, i) => (
                 <Container
                     key={i + 1}

@@ -38,7 +38,7 @@ const StudentViewDoneTryModalContent = ({
     }
 
     return (
-        <div>
+        <div className="view-done-try">
             {doneTries.data.map((doneTry) => (
                 <StudentDoneTryPreview key={doneTry.id} doneTry={doneTry} openTryPage={openTryPage} />
             ))}

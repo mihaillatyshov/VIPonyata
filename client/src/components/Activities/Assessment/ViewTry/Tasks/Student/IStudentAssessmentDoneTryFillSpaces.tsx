@@ -21,12 +21,12 @@ export const IStudentAssessmentDoneTryFillSpaces = ({
     };
 
     return (
-        <div className="d-flex flex-wrap align-items-center mt-2">
+        <div className="student-assessment-fill-spaces">
             {data.separates.map((element: string, i: number) => (
                 <React.Fragment key={i}>
-                    <div className="prevent-select me-2 mt-1">{element}</div>
+                    <div className="prevent-select">{element}</div>
                     {i < data.separates.length - 1 && (
-                        <div className="me-2 mt-1 d-flex">
+                        <div className="d-flex">
                             <span className={getClassName(i)}>{data.answers[i]}</span>
                             {checks.mistake_answers.includes(i) && (
                                 <span className="form-control student-assessment-fill-spaces-by-hand__input wrong-good">

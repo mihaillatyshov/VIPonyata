@@ -18,7 +18,7 @@ export const TeacherAssessmentDoneTryOpenQuestion = ({
         changeTask(taskId, { ...checks, mistakes_count: mistakes_count, cheked: true });
     };
 
-    const diffChars: any[] = Diff.diffChars(data.meta_answer, data.answer);
+    const diffChars: any[] = Diff.diffChars(data.meta_answer || "", data.answer);
 
     console.log(diffChars);
 

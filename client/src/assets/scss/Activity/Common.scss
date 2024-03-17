@@ -1,13 +1,34 @@
 @use "../Common";
 
+.view-done-try {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
 .done-try-preview {
     @extend .box-shadow-main;
 
     border: 1px solid #444444;
     padding: 8px;
     border-radius: 8px;
-    margin-bottom: 16px;
     cursor: pointer;
+
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+
+    gap: 8px;
+}
+
+.done-try-preview__description {
+    display: flex;
+    flex-direction: column;
+}
+
+.done-try-preview__button-block {
+    display: flex;
+    align-items: center;
 }
 
 .bouble__title {

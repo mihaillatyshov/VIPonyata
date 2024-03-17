@@ -25,8 +25,14 @@ const SortableItem = ({ id, str, customData, width }: SortableItemProps) => {
     };
 
     return (
-        <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="d-flex dnd__sortable-item">
-            <div className="mx-auto prevent-select">{str}</div>
+        <div
+            ref={setNodeRef}
+            style={style}
+            {...attributes}
+            {...listeners}
+            className="student-assessment-view-sortable-order__item"
+        >
+            <div className="prevent-select">{str}</div>
         </div>
     );
 };

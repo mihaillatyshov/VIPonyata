@@ -21,7 +21,7 @@ const FieldRowItem = ({ id, field, parsCreated, alignRight, isWrong }: FieldRowI
     };
 
     return (
-        <div className="col-6 my-2">
+        <div className="col-6">
             <div className={getClassName()}>{field}</div>
         </div>
     );
@@ -37,7 +37,7 @@ interface FieldRowProps {
 
 const FieldRow = ({ id, parsCreated, first, second, isWrong }: FieldRowProps) => {
     return (
-        <div className="row position-relative">
+        <div className="row student-assessment-find-pair__row">
             <FieldRowItem field={first} id={id} parsCreated={parsCreated} alignRight={true} isWrong={isWrong} />
             {id < parsCreated && <div className="student-assessment-find-pair__item-connector" />}
             <FieldRowItem field={second} id={id} parsCreated={parsCreated} isWrong={isWrong} />
@@ -49,11 +49,11 @@ export const StudentAssessmentDoneTryFindPair = ({
     data,
     checks,
 }: AssessmentDoneTryTaskBaseProps<TAssessmentDoneTryFindPair, TAssessmentCheckedFindPair>) => {
-    const rowClassName = `row row-cols-1 ${checks.mistakes_count > 0 ? "row-cols-md-2 g-4" : ""}`;
+    const rowClassName = `row row-cols-1 mt-0 ${checks.mistakes_count > 0 ? "row-cols-md-2 g-4" : ""}`;
 
     return (
         <div className={rowClassName}>
-            <div className="col">
+            <div className="col student-assessment-find-pair__col">
                 {data.first.map((first, i) => (
                     <FieldRow
                         key={i}
@@ -67,7 +67,7 @@ export const StudentAssessmentDoneTryFindPair = ({
             </div>
 
             {checks.mistakes_count > 0 && (
-                <div className="col">
+                <div className="col student-assessment-find-pair__col">
                     {data.meta_first.map((first, i) => (
                         <FieldRow
                             key={i}

@@ -6,6 +6,7 @@ import ErrorPage from "components/ErrorPages/ErrorPage";
 import { AjaxGet } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
 import {
+    studentAssessmentTaskRusNameAliases,
     TAssessmentCheckedItemBase,
     TAssessmentItemBase,
     TAssessmentTaskName,
@@ -67,14 +68,14 @@ interface TaskTitleProps {
 
 const TaskTitle = ({ cheked, mistakes_count }: TaskTitleProps) => {
     if (!cheked) {
-        return <div className="student-assessment-task__title-not-checked">Не проверено</div>;
+        return <div className="student-assessment-task__title-not-checked fst-italic">Не проверено</div>;
     }
 
     if (mistakes_count > 0) {
-        return <div>Ошибок: {mistakes_count}</div>;
+        return <div className="fst-italic">Ошибок: {mistakes_count}</div>;
     }
 
-    return <div>Ошибок нет</div>;
+    return <div className="fst-italic">Ошибок нет</div>;
 };
 
 const StudentAssessmentViewDoneTryPage = () => {
@@ -126,13 +127,21 @@ const StudentAssessmentViewDoneTryPage = () => {
     return (
         <div className="container">
             <PageTitle title="タスク" urlBack={lessonId !== undefined ? `/lessons/${lessonId}` : undefined} />
-            {doneTry.data.done_tasks.map((doneTask, i) => (
-                <div key={i}>
-                    <TaskTitle {...doneTry.data.checked_tasks[i]} />
-                    {drawItem(doneTask, doneTry.data.checked_tasks[i], i)}
-                    <hr />
-                </div>
-            ))}
+            <hr />
+            <div className="student-assessment-tasks">
+                {doneTry.data.done_tasks.map((doneTask, i) => (
+                    <>
+                        <div className="student-assessment-view-task__wrapper" key={i}>
+                            <div className="student-assessment-task-title">
+                                {studentAssessmentTaskRusNameAliases[doneTask.name]}
+                            </div>
+                            <TaskTitle {...doneTry.data.checked_tasks[i]} />
+                            {drawItem(doneTask, doneTry.data.checked_tasks[i], i)}
+                        </div>
+                        <hr className="my-0 py-0" />
+                    </>
+                ))}
+            </div>
         </div>
     );
 };

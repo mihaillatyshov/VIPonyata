@@ -19,23 +19,19 @@ const StudentAssessmentFillSpacesByHand = ({
     };
 
     return (
-        <div>
-            <div className="d-flex">
-                <div className="d-flex flex-wrap align-items-center">
-                    {data.separates.map((element: string, i: number) => (
-                        <React.Fragment key={i}>
-                            <div className="prevent-select me-2 mt-1">{element}</div>
-                            {i < data.separates.length - 1 && (
-                                <AutosizeInput
-                                    value={data.answers[i]}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeHandler(e, i)}
-                                    inputClassName="form-control student-assessment-fill-spaces-by-hand__input me-2 mt-1"
-                                />
-                            )}
-                        </React.Fragment>
-                    ))}
-                </div>
-            </div>
+        <div className="student-assessment-fill-spaces">
+            {data.separates.map((element: string, i: number) => (
+                <React.Fragment key={i}>
+                    <div className="prevent-select">{element}</div>
+                    {i < data.separates.length - 1 && (
+                        <AutosizeInput
+                            value={data.answers[i]}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeHandler(e, i)}
+                            inputClassName="form-control student-assessment-fill-spaces-by-hand__input"
+                        />
+                    )}
+                </React.Fragment>
+            ))}
         </div>
     );
 };
