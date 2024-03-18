@@ -1,6 +1,7 @@
 import React from "react";
 
 import { TFindPair } from "models/Activity/Items/TLexisItems";
+import { TStudentLexisTryFindPairTask } from "models/Activity/Try/TLexisTry";
 import { Card } from "react-bootstrap";
 
 import { pickLexisWordsOrChars, StudentLexisTaskProps, useLexisItem, useSetLexisSelectedItemField } from "./LexisUtils";
@@ -10,10 +11,10 @@ import { StudentLexisTaskTitle } from "./StudentLexisTaskTitle";
 type AvailTypes = "words_jp" | "words_ru" | "chars_jp";
 
 const StudentLexisFindPair = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps<TFindPair>) => {
-    const item = useLexisItem(name);
+    const item = useLexisItem<TStudentLexisTryFindPairTask>(name);
     const strRU = "words_ru";
     const strJP = pickLexisWordsOrChars(name);
-    const setLexisSelectedItemField = useSetLexisSelectedItemField(name);
+    const setLexisSelectedItemField = useSetLexisSelectedItemField<TStudentLexisTryFindPairTask>(name);
 
     const deselectField = () => {
         setLexisSelectedItemField({ selectedField: { id: -1, type: "None" } });

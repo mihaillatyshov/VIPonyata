@@ -18,7 +18,8 @@ const StudentLexisHub = ({ id, name, backToLessonCallback }: StudentLexisHubProp
 
     return (
         <div className="d-flex flex-column align-items-center">
-            <input type="button" className="btn btn-success" onClick={endLexisHandle} value="Завершить" />
+            <div className="">Все задания выполнены!!!</div>
+            <input type="button" className="btn btn-success mt-3" onClick={endLexisHandle} value="Завершить" />
         </div>
     );
 };

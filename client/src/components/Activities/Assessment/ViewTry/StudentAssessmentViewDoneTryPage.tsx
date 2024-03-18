@@ -66,7 +66,7 @@ interface TaskTitleProps {
     mistakes_count: number;
 }
 
-const TaskTitle = ({ cheked, mistakes_count }: TaskTitleProps) => {
+const TaskMistakes = ({ cheked, mistakes_count }: TaskTitleProps) => {
     if (!cheked) {
         return <div className="student-assessment-task__title-not-checked fst-italic">Не проверено</div>;
     }
@@ -124,6 +124,15 @@ const StudentAssessmentViewDoneTryPage = () => {
         });
     };
 
+    const hasMistakesMessage = (task_name: TAssessmentTaskName): boolean => {
+        const noMistakesArray: TAssessmentTaskName[] = [
+            TAssessmentTaskName.TEXT,
+            TAssessmentTaskName.IMG,
+            TAssessmentTaskName.AUDIO,
+        ];
+        return !noMistakesArray.includes(task_name);
+    };
+
     return (
         <div className="container">
             <PageTitle title="タスク" urlBack={lessonId !== undefined ? `/lessons/${lessonId}` : undefined} />
@@ -135,7 +144,9 @@ const StudentAssessmentViewDoneTryPage = () => {
                             <div className="student-assessment-task-title">
                                 {studentAssessmentTaskRusNameAliases[doneTask.name]}
                             </div>
-                            <TaskTitle {...doneTry.data.checked_tasks[i]} />
+                            {hasMistakesMessage(doneTask.name) ? (
+                                <TaskMistakes {...doneTry.data.checked_tasks[i]} />
+                            ) : null}
                             {drawItem(doneTask, doneTry.data.checked_tasks[i], i)}
                         </div>
                         <hr className="my-0 py-0" />

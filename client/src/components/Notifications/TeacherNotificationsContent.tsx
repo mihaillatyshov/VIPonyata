@@ -1,14 +1,11 @@
-import React from 'react';
+import React from "react";
 
-import { getStrHHMMSS } from 'libs/useTimer';
-import {
-    TTeacherNotification,
-    TTeacherNotificationWithActivity,
-} from 'models/TNotification';
-import { useNavigate } from 'react-router-dom';
+import { getStrHHMMSS } from "libs/useTimer";
+import { TTeacherNotification, TTeacherNotificationWithActivity } from "models/TNotification";
+import { useNavigate } from "react-router-dom";
 
-import { NotificationDateTime } from './Items/NotificationDateTime';
-import { NotificationUser } from './Items/NotificationUser';
+import { NotificationDateTime } from "./Items/NotificationDateTime";
+import { NotificationUser } from "./Items/NotificationUser";
 
 const getTypeName = (item: TTeacherNotificationWithActivity) => {
     switch (item.type) {
@@ -87,7 +84,7 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
             </div>
             {!isMessageItem(item) && hasLink(item) ? (
                 <div className="notification__item-button-block">
-                    <input type="button" className="btn btn-primary" value={"Перейти"} onClick={handleClick} />
+                    <input type="button" className="btn btn-violet" value={"Перейти"} onClick={handleClick} />
                 </div>
             ) : null}
         </div>

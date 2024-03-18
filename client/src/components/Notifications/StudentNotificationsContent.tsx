@@ -1,14 +1,14 @@
-import React from 'react';
+import React from "react";
 
 import {
     TStudentNotification,
     TStudentNotificationActivity,
     TStudentNotificationCustom,
     TStudentNotificationShareAny,
-} from 'models/TNotification';
-import { useNavigate } from 'react-router-dom';
+} from "models/TNotification";
+import { useNavigate } from "react-router-dom";
 
-import { NotificationDateTime } from './Items/NotificationDateTime';
+import { NotificationDateTime } from "./Items/NotificationDateTime";
 
 const getTypeName = (item: TStudentNotification) => {
     switch (item.type) {
@@ -108,7 +108,7 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
             {isMessageItem(item) ? <div className="notification__item-content">{item.message}</div> : null}
             {!isMessageItem(item) ? (
                 <div className="notification__item-button-block">
-                    <input type="button" className="btn btn-primary" value={"Перейти"} onClick={handleClick} />
+                    <input type="button" className="btn btn-violet" value={"Перейти"} onClick={handleClick} />
                 </div>
             ) : null}
         </div>

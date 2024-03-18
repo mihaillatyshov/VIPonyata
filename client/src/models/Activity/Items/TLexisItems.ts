@@ -31,9 +31,9 @@ export interface TFindPair {
 }
 
 export interface TScramble {
-    char_chars: string[];
+    char_chars: string[][];
     char_words: string[];
-    word_chars: string[];
+    word_chars: string[][];
     word_words: string[];
 }
 

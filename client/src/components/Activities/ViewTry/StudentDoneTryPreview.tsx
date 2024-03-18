@@ -19,7 +19,7 @@ const StudentDoneTryPreview = ({ doneTry, openTryPage }: StudentDoneTryPreviewPr
             <div className="done-try-preview__button-block">
                 <input
                     type="button"
-                    className="btn btn-primary done-try-preview__button"
+                    className="btn btn-violet done-try-preview__button"
                     value="Посмотреть результаты"
                     onClick={() => openTryPage(doneTry.id)}
                 />

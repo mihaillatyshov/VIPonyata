@@ -36,7 +36,7 @@ export const pickScrambeWordOrChar = (name: LexisName): ["word_words", "word_cha
     return pickLexisDrilOrHier(name, ["word_words", "word_chars"], ["char_words", "char_chars"]);
 };
 
-export const useLexisItem = (name: LexisName) => {
+export const useLexisItem = <T>(name: LexisName): T => {
     const drilling = useAppSelector(selectDrilling).selectedItem;
     const hieroglyph = useAppSelector(selectHieroglyph).selectedItem;
 
@@ -81,15 +81,15 @@ export const useSetLexisSelectedItem = (name: LexisName) => {
     );
 };
 
-export const useSetLexisSelectedItemField = (name: LexisName) => {
+export const useSetLexisSelectedItemField = <T>(name: LexisName) => {
     const dispatch = useAppDispatch();
 
     return pickLexisDrilOrHier(
         name,
-        (data: any) => {
+        (data: Partial<T>) => {
             dispatch(setDrillingSelectedItemField(data));
         },
-        (data: any) => {
+        (data: Partial<T>) => {
             dispatch(setHieroglyphSelectedItemField(data));
         },
     );

@@ -1,28 +1,29 @@
 import React, { useEffect } from "react";
 
 import { LexisName } from "models/Activity/IActivity";
+import { TStudentLexisTryBase } from "models/Activity/Try/TLexisTry";
 import { Button } from "react-bootstrap";
 
 import { GoToNextTaskCallbackType, useLexisItem, useSetLexisSelectedItem } from "./LexisUtils";
 
-export type StudentLexisTaskInterfaceProps = {
+export type StudentLexisTaskInterfaceProps<T extends TStudentLexisTryBase> = {
     name: LexisName;
     maincontent: () => React.ReactNode;
-    newObjectData: any;
+    newObjectData: Omit<T, "type" | "mistakeCount">;
     goToNextTaskCallback: GoToNextTaskCallbackType;
     isTaskDone: () => boolean;
     taskTypeName: string;
-    checkItem?: (item: any, taskTypeName: string) => boolean;
+    checkItem?: (item: T, taskTypeName: string) => item is T;
 };
 
-const StudentLexisTaskInterface = ({
+const StudentLexisTaskInterface = <T extends TStudentLexisTryBase>({
     name,
     maincontent,
     newObjectData,
     goToNextTaskCallback,
     isTaskDone,
     taskTypeName,
-    checkItem = (item, taskTypeName) => {
+    checkItem = (item, taskTypeName): item is T => {
         if (item) {
             if (item.type === taskTypeName) {
                 return true;
@@ -30,8 +31,8 @@ const StudentLexisTaskInterface = ({
         }
         return false;
     },
-}: StudentLexisTaskInterfaceProps) => {
-    const item = useLexisItem(name);
+}: StudentLexisTaskInterfaceProps<T>) => {
+    const item = useLexisItem<T>(name);
     const setLexisSelectedItem = useSetLexisSelectedItem(name);
 
     useEffect(() => {

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 
 import { TSpace } from "models/Activity/Items/TLexisItems";
+import { TStudentLexisTrySpaceTask } from "models/Activity/Try/TLexisTry";
 
 import { StudentLexisTaskProps, useLexisItem, useSetLexisSelectedItemField } from "./LexisUtils";
 import StudentLexisTaskInterface from "./StudentLexisTaskInterface";
@@ -13,8 +14,8 @@ interface SpaceTaskType {
 }
 
 const StudentLexisSpace = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps<TSpace>) => {
-    const item = useLexisItem(name) as SpaceTaskType;
-    const setLexisSelectedItemField = useSetLexisSelectedItemField(name);
+    const item = useLexisItem<TStudentLexisTrySpaceTask>(name);
+    const setLexisSelectedItemField = useSetLexisSelectedItemField<TStudentLexisTrySpaceTask>(name);
     const inputElement = useRef<HTMLInputElement>(null);
 
     const getWordData = (id: number): SpaceTaskType => {
