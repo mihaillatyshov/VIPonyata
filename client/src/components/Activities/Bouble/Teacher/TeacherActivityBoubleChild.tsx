@@ -33,8 +33,8 @@ const TeacherActivityBoubleChild = ({ name, lessonId, info, children }: TeacherA
     };
 
     return (
-        <div className="mt-2">
-            <div>Лимит: {info.time_limit ?? "Нет"}</div>
+        <>
+            <div className="text-nowrap">Лимит: {info.time_limit ?? "Нет"}</div>
             {children}
             <div className={`d-flex justify-content-center w-100 ${styles.teacherBoubleFooter}`}>
                 <i
@@ -44,7 +44,7 @@ const TeacherActivityBoubleChild = ({ name, lessonId, info, children }: TeacherA
                 />
                 <i className="mx-3 bi bi-graph-up" style={{ fontSize: footerItemSize }} />
             </div>
-        </div>
+        </>
     );
 };
 

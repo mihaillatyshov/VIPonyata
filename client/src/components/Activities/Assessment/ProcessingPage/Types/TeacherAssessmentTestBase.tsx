@@ -1,6 +1,6 @@
 import React from "react";
 
-import InputTextArea from "components/Form/InputTextArea";
+import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import { TTeacherAssessmentTestMulti, TTeacherAssessmentTestSingle } from "models/Activity/Items/TAssessmentItems";
 
 import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
@@ -32,11 +32,12 @@ const TeacherAssessmentTestBase = <T extends TTeacherAssessmentTestType>({
 
     return (
         <div>
-            <InputTextArea
+            <FloatingLabelTextareaAutosize
                 htmlId={taskUUID}
                 placeholder="Вопрос"
                 value={data.question}
                 onChangeHandler={changeQuestionHandler}
+                rows={5}
                 className="mb-3"
                 noErrorField={true}
             />

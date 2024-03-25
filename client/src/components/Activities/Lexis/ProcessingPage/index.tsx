@@ -3,8 +3,8 @@ import React, { useEffect, useLayoutEffect, useState } from "react";
 import Loading from "components/Common/Loading";
 import PageTitle from "components/Common/PageTitle";
 import ErrorPage from "components/ErrorPages/ErrorPage";
+import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import InputError from "components/Form/InputError";
-import InputTextArea from "components/Form/InputTextArea";
 import InputTime from "components/Form/InputTime";
 import { AjaxDelete, AjaxPatch, AjaxPost } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
@@ -203,51 +203,57 @@ export const LexisProcessingPage = ({ title, name, processingType }: LexisProces
     return (
         <div className="container mb-5 pb-5">
             <PageTitle title={title} urlBack={`/lessons/${lessonId}`} />
-            <input
-                type="button"
-                className="btn btn-primary w-100"
-                onClick={() => setIsShowNewWordsModal(true)}
-                value={"Импортировать слова"}
-            />
-            <Tasks tasks={tasks} handleDragEnd={handleDragEnd} setSelected={onSelectedChange} />
-            <InputTime
-                placeholder="Лимит времени"
-                value={timelimit}
-                onChangeHandler={setTimelimit}
-                htmlId="timelimit"
-            />
-            <InputTextArea
-                htmlId="description"
-                placeholder="Описание"
-                rows={5}
-                onChangeHandler={setDescription}
-                value={description}
-            />
-            {lexisCards.map((card, i) => (
-                <LexisProcessingCard
-                    key={i}
-                    card={card}
-                    dict={dictionaryWords[i]}
-                    setDictImg={(url, setError) => setDictImg(url, setError, i)}
-                    setCardData={(value, fieldName) => setCardData(value, fieldName, i)}
+            <div className="processing-page">
+                <div className="processing-page__header">
+                    <input
+                        type="button"
+                        className="btn btn-primary w-100"
+                        onClick={() => setIsShowNewWordsModal(true)}
+                        value={"Импортировать слова"}
+                    />
+                    <Tasks tasks={tasks} handleDragEnd={handleDragEnd} setSelected={onSelectedChange} />
+                    <InputTime
+                        placeholder="Лимит времени"
+                        value={timelimit}
+                        onChangeHandler={setTimelimit}
+                        htmlId="timelimit"
+                    />
+                    <FloatingLabelTextareaAutosize
+                        htmlId="description"
+                        placeholder="Описание"
+                        rows={6}
+                        onChangeHandler={setDescription}
+                        value={description}
+                    />
+                </div>
+                <div className="processing-page__content">
+                    {lexisCards.map((card, i) => (
+                        <LexisProcessingCard
+                            key={i}
+                            card={card}
+                            dict={dictionaryWords[i]}
+                            setDictImg={(url, setError) => setDictImg(url, setError, i)}
+                            setCardData={(value, fieldName) => setCardData(value, fieldName, i)}
+                        />
+                    ))}
+                </div>
+                <div>
+                    <ProcessingButtonBlock
+                        onSubmit={handleProcessing}
+                        onDelete={handleDelete}
+                        processingType={processingType}
+                    />
+                    <InputError message={error} />
+                </div>
+                <NewWordsModal
+                    isShow={isShowNewWordsModal}
+                    close={() => setIsShowNewWordsModal(false)}
+                    createNewWords={createNewWords}
+                    colToCheck={pickLexisWordOrChar(name)}
+                    defaultText={getModalDefaultText(dictionaryWords)}
+                    defaultPreview={dictionaryWords}
                 />
-            ))}
-
-            <InputError message={error} className="mt-4" />
-            <ProcessingButtonBlock
-                onSubmit={handleProcessing}
-                onDelete={handleDelete}
-                processingType={processingType}
-            />
-
-            <NewWordsModal
-                isShow={isShowNewWordsModal}
-                close={() => setIsShowNewWordsModal(false)}
-                createNewWords={createNewWords}
-                colToCheck={pickLexisWordOrChar(name)}
-                defaultText={getModalDefaultText(dictionaryWords)}
-                defaultPreview={dictionaryWords}
-            />
+            </div>
         </div>
     );
 };

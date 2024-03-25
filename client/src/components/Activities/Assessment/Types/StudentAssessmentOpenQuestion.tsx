@@ -1,6 +1,6 @@
-import React, { useRef } from "react";
+import React from "react";
 
-import useAutosizeTextArea from "libs/useAutosizeTextArea";
+import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import { TAssessmentOpenQuestion } from "models/Activity/Items/TAssessmentItems";
 import { useAppDispatch } from "redux/hooks";
 import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
@@ -10,11 +10,8 @@ import { StudentAssessmentTypeProps } from "./StudentAssessmentTypeProps";
 const StudentAssessmentOpenQuestion = ({ data, taskId }: StudentAssessmentTypeProps<TAssessmentOpenQuestion>) => {
     const dispatch = useAppDispatch();
 
-    const textAreaRef = useRef<HTMLTextAreaElement>(null);
-    useAutosizeTextArea(textAreaRef.current, data.answer);
-
-    const onChangeHandler = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        data.answer = e.target.value;
+    const onChangeHandler = (value: string) => {
+        data.answer = value;
         dispatch(setAssessmentTaskData({ id: taskId, data: data }));
     };
 
@@ -22,12 +19,13 @@ const StudentAssessmentOpenQuestion = ({ data, taskId }: StudentAssessmentTypePr
         <div className="student-assessment-open-question__wrapper">
             <div className="prevent-select">{data.question}</div>
             <div>
-                <textarea
+                <FloatingLabelTextareaAutosize
                     className="form-control"
-                    ref={textAreaRef}
                     value={data.answer}
-                    onChange={onChangeHandler}
-                    style={{ resize: "none" }}
+                    onChangeHandler={onChangeHandler}
+                    htmlId={`open_question_${taskId}`}
+                    placeholder="Ответ"
+                    rows={5}
                 />
             </div>
         </div>

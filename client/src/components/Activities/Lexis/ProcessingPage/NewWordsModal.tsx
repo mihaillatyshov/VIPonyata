@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 import InputError from "components/Form/InputError";
+import { TextareaAutosize } from "libs/TextareaAutosize";
 import { TDictionaryItemCreate } from "models/TDictionary";
 import Modal from "react-bootstrap/Modal";
 
@@ -82,13 +83,13 @@ const NewWordsModal = ({
                 <Modal.Title>Импорт слов</Modal.Title>
             </Modal.Header>
             <Modal.Body className="modal-bg">
-                <textarea
+                <TextareaAutosize
                     rows={10}
                     onChange={testParseExcel}
                     className="form-control"
                     placeholder={textareaPlaceholder}
                     value={text}
-                ></textarea>
+                />
                 <WordsTable words={preview} />
                 <InputError message={error} className="mb-4" />
                 <input className="btn btn-success" type="button" value="Добавить" onClick={onClickHandler} />

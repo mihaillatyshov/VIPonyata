@@ -3,8 +3,8 @@ import React, { useLayoutEffect, useRef, useState } from "react";
 import Loading from "components/Common/Loading";
 import PageTitle from "components/Common/PageTitle";
 import ErrorPage from "components/ErrorPages/ErrorPage";
+import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import InputError from "components/Form/InputError";
-import InputTextArea from "components/Form/InputTextArea";
 import InputTime from "components/Form/InputTime";
 import { PyErrorDict } from "libs/PyError";
 import { AjaxDelete, AjaxPatch, AjaxPost } from "libs/ServerAPI";
@@ -78,11 +78,13 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
             setLessonId(data.lessonId);
 
             while (tasksHashes.current.length < data.tasks.length) {
-                const id = uuid();
-                if (tasksHashes.current.includes(id)) continue;
+                while (true) {
+                    const id = uuid();
+                    if (tasksHashes.current.includes(id)) continue;
 
-                tasksHashes.current.push(id);
-                break;
+                    tasksHashes.current.push(id);
+                    break;
+                }
             }
         });
     }, [id, name, processingType, navigate]);
@@ -182,46 +184,56 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
         <div className="container mb-5 pb-5">
             <PageTitle title={title} />
             {/* <input type="button" className="btn btn-success w-100 mb-5" onClick={submitHandler} value={"Создать"} /> */}
-            <ProcessingButtonBlock
-                onSubmit={handleProcessing}
-                onDelete={handleDelete}
-                processingType={processingType}
-            />
+            <div className="processing-page">
+                <div className="processing-page__header">
+                    <div>
+                        <ProcessingButtonBlock
+                            onSubmit={handleProcessing}
+                            onDelete={handleDelete}
+                            processingType={processingType}
+                        />
+                        <InputError message={errors.message} />
+                    </div>
 
-            <InputTime
-                placeholder="Лимит времени"
-                value={timelimit}
-                onChangeHandler={setTimelimit}
-                htmlId="timelimit"
-            />
-            <InputTextArea
-                htmlId="description"
-                placeholder="Описание"
-                rows={5}
-                onChangeHandler={setDescription}
-                value={description}
-            />
+                    <div>
+                        <InputTime
+                            placeholder="Лимит времени"
+                            value={timelimit}
+                            onChangeHandler={setTimelimit}
+                            htmlId="timelimit"
+                        />
+                    </div>
+                    <FloatingLabelTextareaAutosize
+                        htmlId="description"
+                        placeholder="Описание"
+                        rows={6}
+                        onChangeHandler={setDescription}
+                        value={description}
+                    />
+                </div>
 
-            {tasks.map((item, i) => (
-                <React.Fragment key={tasksHashes.current[i]}>
-                    <AddTaskButton insertId={i} handleClick={openModal} />
-                    <TeacherAssessmentTypeBase
-                        taskName={item.name}
-                        removeTask={() => removeTask(i)}
-                        error={errors.errors[`${i}`] || ""}
-                    >
-                        <div>{drawItem(item, i, tasksHashes.current[i])}</div>
-                    </TeacherAssessmentTypeBase>
-                </React.Fragment>
-            ))}
-            <AddTaskButton insertId={tasks.length} handleClick={openModal} />
+                <div className="processing-page__content">
+                    {tasks.map((item, i) => (
+                        <React.Fragment key={tasksHashes.current[i]}>
+                            <AddTaskButton insertId={i} handleClick={openModal} />
+                            <TeacherAssessmentTypeBase
+                                taskName={item.name}
+                                removeTask={() => removeTask(i)}
+                                error={errors.errors[`${i}`] || ""}
+                            >
+                                <div>{drawItem(item, i, tasksHashes.current[i])}</div>
+                            </TeacherAssessmentTypeBase>
+                        </React.Fragment>
+                    ))}
+                    <AddTaskButton insertId={tasks.length} handleClick={openModal} />
+                </div>
 
-            <InputError message={errors.message} />
-            <SelectTypeModal
-                isShow={isShowSelectTypeModal}
-                close={() => setIsShowSelectTypeModal(false)}
-                addTask={addTask}
-            />
+                <SelectTypeModal
+                    isShow={isShowSelectTypeModal}
+                    close={() => setIsShowSelectTypeModal(false)}
+                    addTask={addTask}
+                />
+            </div>
         </div>
     );
 };

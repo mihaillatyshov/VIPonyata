@@ -1,7 +1,6 @@
 import React from "react";
 
-import InputText from "components/Form/InputText";
-import InputTextArea from "components/Form/InputTextArea";
+import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import { TTeacherAssessmentOpenQuestion } from "models/Activity/Items/TAssessmentItems";
 
 import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
@@ -13,21 +12,22 @@ const TeacherAssessmentOpenQuestion = ({
 }: TeacherAssessmentTypeProps<TTeacherAssessmentOpenQuestion>) => {
     return (
         <div>
-            <InputTextArea
-                htmlId={taskUUID}
+            <FloatingLabelTextareaAutosize
+                htmlId={`question_${taskUUID}`}
                 placeholder="Вопрос"
                 value={data.question}
                 onChangeHandler={(newValue: string) => onChangeTask({ ...data, question: newValue })}
-                className=""
-                autoFocus={true}
+                rows={6}
                 noErrorField={true}
+                autoFocus={true}
             />
-            <InputText
-                htmlId={taskUUID}
+            <FloatingLabelTextareaAutosize
+                htmlId={`answer_${taskUUID}`}
                 placeholder="Ответ"
                 value={data.meta_answer}
                 onChangeHandler={(newValue) => onChangeTask({ ...data, meta_answer: newValue })}
                 className="mt-4"
+                rows={5}
                 noErrorField={true}
             />
         </div>

@@ -1,8 +1,8 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 
 import InputError from "components/Form/InputError";
 import { AjaxPost } from "libs/ServerAPI";
-import useAutosizeTextArea from "libs/useAutosizeTextArea";
+import { TextareaAutosize } from "libs/TextareaAutosize";
 
 interface DictionaryAssociationProps {
     initValue: string | null;
@@ -16,10 +16,6 @@ const DictionaryAssociation = ({ initValue, dictionary_id, onSuccessSave, classN
 
     const [tmpAssociation, setTmpAssociation] = useState<string>(() => initValue ?? "");
     const [associationError, setAssociationError] = useState<string>(() => "");
-
-    const textAreaRef = useRef<HTMLTextAreaElement>(null);
-
-    useAutosizeTextArea(textAreaRef.current, tmpAssociation);
 
     const handleChangeIsAssociationEdit = () => {
         if (isAssociationEdit) {
@@ -42,15 +38,15 @@ const DictionaryAssociation = ({ initValue, dictionary_id, onSuccessSave, classN
     return (
         <div className={className}>
             <div className="input-group">
-                <textarea
+                <TextareaAutosize
                     className="form-control"
                     value={tmpAssociation}
                     placeholder="Твоя ассоциация"
                     onChange={(e) => {
-                        setTmpAssociation(e.target.value);
+                        setTmpAssociation(e.currentTarget.value);
                     }}
                     disabled={!isAssociationEdit}
-                    ref={textAreaRef}
+                    // ref={textAreaRef}
                     style={{ resize: "none" }}
                 />
                 <i

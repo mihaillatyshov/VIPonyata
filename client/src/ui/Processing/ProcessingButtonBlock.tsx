@@ -2,8 +2,8 @@ import React from "react";
 
 import { TProcessingType } from "models/Processing";
 
-import { ProcessingDelete } from "./ProcessingDelete";
-import { ProcessingSubmit } from "./ProcessingSubmit";
+import { ProcessingDeleteButton } from "./ProcessingDeleteButton";
+import { ProcessingSubmitButton } from "./ProcessingSubmitButton";
 
 interface ProcessingButtonBlockProps {
     onSubmit: () => void;
@@ -14,8 +14,8 @@ interface ProcessingButtonBlockProps {
 export const ProcessingButtonBlock = ({ onSubmit, onDelete, processingType }: ProcessingButtonBlockProps) => {
     return (
         <div className="processing-page__button-block">
-            <ProcessingSubmit text={processingType === "edit" ? "Сохранить" : "Создать"} onSubmit={onSubmit} />
-            {processingType === "edit" && <ProcessingDelete onDelete={onDelete} />}
+            <ProcessingSubmitButton text={processingType === "edit" ? "Сохранить" : "Создать"} onSubmit={onSubmit} />
+            {processingType === "edit" && <ProcessingDeleteButton onDelete={onDelete} />}
         </div>
     );
 };

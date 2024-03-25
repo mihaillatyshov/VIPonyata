@@ -802,7 +802,7 @@ class AssessmentCreateReqStr(BaseModel):
     def options_validation(cls, v):
         if v is None:
             return None
-        return datetime.datetime.strptime(v, '%H:%M:%S').time()
+        return datetime.datetime.strptime(str(v), '%H:%M:%S').time()
 
 
 class AssessmentCreateReq(BaseModel):

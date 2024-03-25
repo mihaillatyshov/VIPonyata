@@ -1,7 +1,9 @@
 import React from "react";
+
+import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import { TAssessmentTaskName, TTeacherAssessmentText } from "models/Activity/Items/TAssessmentItems";
+
 import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
-import InputTextArea from "components/Form/InputTextArea";
 
 const TeacherAssessmentText = ({
     data,
@@ -13,17 +15,16 @@ const TeacherAssessmentText = ({
     };
 
     return (
-        <div>
-            <InputTextArea
-                htmlId={taskUUID}
-                placeholder="Текст"
-                value={data.text}
-                onChangeHandler={changeTextHandler}
-                className=""
-                autoFocus={true}
-                noErrorField={true}
-            />
-        </div>
+        <FloatingLabelTextareaAutosize
+            htmlId={taskUUID}
+            placeholder="Текст"
+            value={data.text}
+            onChangeHandler={changeTextHandler}
+            className=""
+            rows={6}
+            autoFocus={true}
+            noErrorField={true}
+        />
     );
 };
 

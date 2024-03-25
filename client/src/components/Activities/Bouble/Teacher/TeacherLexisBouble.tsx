@@ -23,6 +23,9 @@ interface TeacherLexisBoubleChildProps {
     info: TDrilling | THieroglyph | null;
 }
 
+const array_chunks = <T extends any>(arr: T[], size: number): T[][] =>
+    Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
+
 const TeacherLexisBoubleChild = ({ name, lessonId, info }: TeacherLexisBoubleChildProps) => {
     const getTasksArray = () => (info ? ["card", ...info.tasks.split(",").map((item) => item.trim())] : []);
 
@@ -37,10 +40,18 @@ const TeacherLexisBoubleChild = ({ name, lessonId, info }: TeacherLexisBoubleChi
 
     return (
         <TeacherActivityBoubleChild name={name} info={info} lessonId={lessonId}>
-            <div className="mt-2">
-                {getTasksArray().map((name) => (
-                    <div className="d-inline" key={name}>
-                        <img className={`m-2 ${styles.teacherBoubleTaskIcon}`} src={getImgSrc(name)} alt={name} />
+            <div className="d-flex flex-wrap gap-2 justify-content-center align-items-center mt-2">
+                {array_chunks(getTasksArray(), 4).map((row, rowId) => (
+                    <div className="d-flex gap-2" key={rowId}>
+                        {row.map((taskName) => (
+                            <div className="d-flex" key={taskName}>
+                                <img
+                                    className={`${styles.teacherBoubleTaskIcon}`}
+                                    src={getImgSrc(taskName)}
+                                    alt={taskName}
+                                />
+                            </div>
+                        ))}
                     </div>
                 ))}
             </div>
@@ -55,7 +66,9 @@ const TeacherLexisBouble = ({ title, name, lessonId, info }: TeacherLexisBoubleP
 
     return (
         <ActivityBouble title={title}>
-            <TeacherLexisBoubleChild name={name} lessonId={lessonId} info={info} />
+            <div className="d-flex flex-column justify-content-center align-items-center mt-1">
+                <TeacherLexisBoubleChild name={name} lessonId={lessonId} info={info} />
+            </div>
         </ActivityBouble>
     );
 };

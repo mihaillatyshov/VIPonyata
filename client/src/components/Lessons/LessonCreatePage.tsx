@@ -1,9 +1,10 @@
 import React from "react";
+
+import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import { GetImg, GetStringOrNull } from "components/Form/InputBase";
 import InputImage from "components/Form/InputImage";
 import InputNumber from "components/Form/InputNumber";
 import InputText from "components/Form/InputText";
-import InputTextArea from "components/Form/InputTextArea";
 import SubmitButton from "components/Form/SubmitButton";
 import { useFormState } from "components/Form/useFormState";
 import { AjaxPost } from "libs/ServerAPI";
@@ -36,7 +37,7 @@ const LessonCreatePage = () => {
         {
             name: ValidateEmpty,
             img: ValidateImgLoading,
-        }
+        },
     );
 
     const onSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
@@ -64,12 +65,12 @@ const LessonCreatePage = () => {
                 className="mt-2"
                 {...inputProps.number}
             />
-            <InputTextArea
+            <FloatingLabelTextareaAutosize
                 htmlId="course-description"
                 {...inputProps.description}
                 placeholder="Описание"
                 className="mt-2"
-                rows={10}
+                rows={6}
             />
             <InputImage htmlId="course-image" placeholder="Картинка" className="mt-2" {...inputProps.img} />
             <SubmitButton value="Создать" className="btn-success mt-4" />

@@ -1,12 +1,12 @@
 import React from "react";
 
-interface ProcessingButtonSubmitProps {
+interface ProcessingSubmitButtonProps {
     text: string;
     onSubmit: () => void;
     extraClassName?: string;
 }
 
-export const ProcessingSubmit = ({ text, onSubmit, extraClassName }: ProcessingButtonSubmitProps) => {
+export const ProcessingSubmitButton = ({ text, onSubmit, extraClassName }: ProcessingSubmitButtonProps) => {
     return (
         <input
             type="button"

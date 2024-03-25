@@ -1,7 +1,5 @@
 .processing-page__button-block {
     display: flex;
-    margin-top: 20px;
-    margin-bottom: 20px;
     gap: 16px;
 }
 
@@ -14,4 +12,22 @@
 .processing-page__button-delete {
     display: flex;
     flex: 0 1 auto;
+}
+
+.processing-page {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.processing-page__header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.processing-page__content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }

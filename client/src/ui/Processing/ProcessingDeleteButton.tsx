@@ -1,11 +1,11 @@
 import React from "react";
 
-interface ProcessingButtonBlockProps {
+interface ProcessingDeleteButtonProps {
     onDelete: () => void;
     extraClassName?: string;
 }
 
-export const ProcessingDelete = ({ onDelete, extraClassName = "" }: ProcessingButtonBlockProps) => {
+export const ProcessingDeleteButton = ({ onDelete, extraClassName = "" }: ProcessingDeleteButtonProps) => {
     return (
         <input
             type="button"

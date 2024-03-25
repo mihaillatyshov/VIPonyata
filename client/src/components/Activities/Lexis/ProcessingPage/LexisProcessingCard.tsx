@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
+import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import InputImage from "components/Form/InputImage";
-import InputTextArea from "components/Form/InputTextArea";
 import { LoadStatus } from "libs/Status";
 import { TCreateCardItem } from "models/Activity/Items/TLexisItems";
 import { ImageState } from "models/Img";
@@ -60,14 +60,14 @@ export const LexisProcessingCard = ({ dict, card, setDictImg, setCardData }: Lex
                 </div>
             </div>
             <div>
-                <InputTextArea
+                <FloatingLabelTextareaAutosize
                     htmlId={`card_sentence_${dict.id}`}
                     value={card.sentence}
                     onChangeHandler={(value) => setCardData(value, "sentence")}
                     placeholder="Предложение на японском"
                     rows={5}
                 />
-                <InputTextArea
+                <FloatingLabelTextareaAutosize
                     htmlId={`card_answer_${dict.id}`}
                     value={card.answer}
                     onChangeHandler={(value) => setCardData(value, "answer")}

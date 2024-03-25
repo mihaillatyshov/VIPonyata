@@ -14,7 +14,7 @@ class UserDataBase(BaseModel):
     @field_validator("birthday", mode="before")
     @classmethod
     def options_validation(cls, v: str):
-        return datetime.datetime.strptime(v, '%Y-%m-%d').date()
+        return datetime.datetime.strptime(str(v), '%Y-%m-%d').date()
 
 
 class UserNewPasswordBase(BaseModel):

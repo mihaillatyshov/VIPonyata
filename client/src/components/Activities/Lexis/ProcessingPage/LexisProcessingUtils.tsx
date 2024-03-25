@@ -44,6 +44,7 @@ export const getProcessingData = async (
 
 const getEditData = async (name: LexisName, id: number): Promise<GetProcessingDataReturnType> => {
     try {
+        console.log({ url: `/api/${name}/${id}` });
         const { lexis, cards, dictionary } = await AjaxGet<GetLexisResponse>({ url: `/api/${name}/${id}` });
         console.log(lexis);
         console.log(cards);

@@ -21,7 +21,9 @@ const ITeacherAsssessmentBouble = ({ title, name, lessonId, info }: ITeacherAsss
 
     return (
         <ActivityBouble title={title}>
-            <TeacherActivityBoubleChild name={name} lessonId={lessonId} info={info} />
+            <div className="d-flex flex-column justify-content-center align-items-center mt-1">
+                <TeacherActivityBoubleChild name={name} lessonId={lessonId} info={info} />
+            </div>
         </ActivityBouble>
     );
 };
