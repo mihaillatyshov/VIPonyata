@@ -68,7 +68,7 @@ const RegisterPage = () => {
             })
             .catch(({ isServerError, json, response }) => {
                 if (!isServerError) {
-                    if (response.status === 422) {
+                    if (response.status >= 400 && json.message !== undefined && json.message !== null) {
                         setServerError(json.message);
                     }
                 }
