@@ -9,6 +9,7 @@ import InputTime from "components/Form/InputTime";
 import { PyErrorDict } from "libs/PyError";
 import { AjaxDelete, AjaxPatch, AjaxPost } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
+import { swapElements } from "libs/swapArrayElements";
 import { uuid } from "libs/uuid";
 import { IAssessmentName } from "models/Activity/IActivity";
 import {
@@ -156,6 +157,23 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
         });
     };
 
+    const moveTask = (taskId: number, direction: "up" | "down") => {
+        const offset = direction === "up" ? -1 : 1;
+        if (taskId + offset < 0 || taskId + offset >= tasks.length) return;
+        swapElements(tasksHashes.current, taskId, taskId + offset);
+        const newTasks = [...tasks];
+        swapElements(newTasks, taskId, taskId + offset);
+        setTasks(newTasks);
+    };
+
+    const moveUp = (taskId: number) => {
+        moveTask(taskId, "up");
+    };
+
+    const moveDown = (taskId: number) => {
+        moveTask(taskId, "down");
+    };
+
     const removeTask = (taskId: number) => {
         tasksHashes.current.splice(taskId, 1);
 
@@ -218,6 +236,8 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
                             <AddTaskButton insertId={i} handleClick={openModal} />
                             <TeacherAssessmentTypeBase
                                 taskName={item.name}
+                                moveUp={() => moveUp(i)}
+                                moveDown={() => moveDown(i)}
                                 removeTask={() => removeTask(i)}
                                 error={errors.errors[`${i}`] || ""}
                             >

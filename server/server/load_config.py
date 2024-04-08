@@ -2,7 +2,5 @@ import json
 
 
 def load_config(filename: str):
-    infile = open(filename)
-    data = json.load(infile)
-    infile.close()
-    return data
+    with open(filename, encoding='utf-8') as infile:
+        return json.load(infile)

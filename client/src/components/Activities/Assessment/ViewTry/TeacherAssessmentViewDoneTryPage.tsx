@@ -7,6 +7,7 @@ import InputError from "components/Form/InputError";
 import { AjaxGet, AjaxPatch } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
 import {
+    studentAssessmentTaskRusNameAliases,
     TAssessmentCheckedItemBase,
     TAssessmentItemBase,
     TAssessmentTaskName,
@@ -16,6 +17,7 @@ import {
 import { TAssessmentDoneTry } from "models/Activity/Try/TAssessmentTry";
 import { useNavigate, useParams } from "react-router-dom";
 
+import { hasMistakesMessage, TaskMistakes } from "./AssessmentViewDoneTryComponents";
 import { TeacherAssessmentDoneTryTaskProps } from "./Tasks/AssessmentDoneTryTaskBase";
 import { StudentAssessmentDoneTryAudio } from "./Tasks/Student/StudentAssessmentDoneTryAudio";
 import { StudentAssessmentDoneTryClassification } from "./Tasks/Student/StudentAssessmentDoneTryClassification";
@@ -60,23 +62,6 @@ interface DoneTryResponse {
     done_try: TAssessmentDoneTry;
     lesson_id: number;
 }
-
-interface TaskTitleProps {
-    cheked: boolean;
-    mistakes_count: number;
-}
-
-const TaskTitle = ({ cheked, mistakes_count }: TaskTitleProps) => {
-    if (!cheked) {
-        return <div className="student-assessment-task__title-not-checked">Не проверено</div>;
-    }
-
-    if (mistakes_count > 0) {
-        return <div>Ошибок: {mistakes_count}</div>;
-    }
-
-    return <div>Ошибок нет</div>;
-};
 
 const TeacherAssessmentViewDoneTryPage = () => {
     const { id } = useParams();
@@ -151,13 +136,29 @@ const TeacherAssessmentViewDoneTryPage = () => {
     return (
         <div className="container mb-5 pb-5">
             <PageTitle title="タスク" urlBack={lessonId !== undefined ? `/lessons/${lessonId}` : undefined} />
-            {doneTry.data.done_tasks.map((doneTask, i) => (
-                <div key={i}>
-                    <TaskTitle {...doneTry.data.checked_tasks[i]} />
-                    {drawItem(doneTask, doneTry.data.checked_tasks[i], i)}
-                    <hr />
-                </div>
-            ))}
+            <hr />
+            <div className="student-assessment-tasks">
+                {doneTry.data.done_tasks.map((doneTask, i) => (
+                    // <div key={i}>
+                    //     <TaskMistakes {...doneTry.data.checked_tasks[i]} />
+                    //     {drawItem(doneTask, doneTry.data.checked_tasks[i], i)}
+                    //     <hr />
+                    // </div>
+
+                    <React.Fragment key={i}>
+                        <div className="student-assessment-view-task__wrapper">
+                            <div className="student-assessment-task-title">
+                                {studentAssessmentTaskRusNameAliases[doneTask.name]}
+                            </div>
+                            {hasMistakesMessage(doneTask.name) ? (
+                                <TaskMistakes {...doneTry.data.checked_tasks[i]} />
+                            ) : null}
+                            {drawItem(doneTask, doneTry.data.checked_tasks[i], i)}
+                        </div>
+                        <hr className="my-0 py-0" />
+                    </React.Fragment>
+                ))}
+            </div>
             {saveStatus !== LoadStatus.LOADING ? (
                 <input
                     type="button"

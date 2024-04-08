@@ -16,6 +16,7 @@ import {
 import { TAssessmentDoneTry } from "models/Activity/Try/TAssessmentTry";
 import { useParams } from "react-router-dom";
 
+import { hasMistakesMessage, TaskMistakes } from "./AssessmentViewDoneTryComponents";
 import { AssessmentDoneTryTaskBaseProps } from "./Tasks/AssessmentDoneTryTaskBase";
 import { StudentAssessmentDoneTryAudio } from "./Tasks/Student/StudentAssessmentDoneTryAudio";
 import { StudentAssessmentDoneTryClassification } from "./Tasks/Student/StudentAssessmentDoneTryClassification";
@@ -60,23 +61,6 @@ interface DoneTryResponse {
     done_try: TAssessmentDoneTry;
     lesson_id: number;
 }
-
-interface TaskTitleProps {
-    cheked: boolean;
-    mistakes_count: number;
-}
-
-const TaskMistakes = ({ cheked, mistakes_count }: TaskTitleProps) => {
-    if (!cheked) {
-        return <div className="student-assessment-task__title-not-checked fst-italic">Не проверено</div>;
-    }
-
-    if (mistakes_count > 0) {
-        return <div className="fst-italic">Ошибок: {mistakes_count}</div>;
-    }
-
-    return <div className="fst-italic">Ошибок нет</div>;
-};
 
 const StudentAssessmentViewDoneTryPage = () => {
     const { id } = useParams();
@@ -124,23 +108,14 @@ const StudentAssessmentViewDoneTryPage = () => {
         });
     };
 
-    const hasMistakesMessage = (task_name: TAssessmentTaskName): boolean => {
-        const noMistakesArray: TAssessmentTaskName[] = [
-            TAssessmentTaskName.TEXT,
-            TAssessmentTaskName.IMG,
-            TAssessmentTaskName.AUDIO,
-        ];
-        return !noMistakesArray.includes(task_name);
-    };
-
     return (
         <div className="container">
             <PageTitle title="タスク" urlBack={lessonId !== undefined ? `/lessons/${lessonId}` : undefined} />
             <hr />
             <div className="student-assessment-tasks">
                 {doneTry.data.done_tasks.map((doneTask, i) => (
-                    <>
-                        <div className="student-assessment-view-task__wrapper" key={i}>
+                    <React.Fragment key={i}>
+                        <div className="student-assessment-view-task__wrapper">
                             <div className="student-assessment-task-title">
                                 {studentAssessmentTaskRusNameAliases[doneTask.name]}
                             </div>
@@ -150,7 +125,7 @@ const StudentAssessmentViewDoneTryPage = () => {
                             {drawItem(doneTask, doneTry.data.checked_tasks[i], i)}
                         </div>
                         <hr className="my-0 py-0" />
-                    </>
+                    </React.Fragment>
                 ))}
             </div>
         </div>

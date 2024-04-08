@@ -15,17 +15,38 @@ export interface TeacherAssessmentTypeProps<T extends TAssessmentItemBase> {
 
 interface TeacherAssessmentTypeBaseProps {
     taskName: TAssessmentTaskName;
+    moveDown: () => void;
+    moveUp: () => void;
     removeTask: () => void;
     children: React.ReactNode;
     error?: PyError;
 }
 
-const TeacherAssessmentTypeBase = ({ taskName, removeTask, children, error }: TeacherAssessmentTypeBaseProps) => {
+const TeacherAssessmentTypeBase = ({
+    taskName,
+    moveDown,
+    moveUp,
+    removeTask,
+    children,
+    error,
+}: TeacherAssessmentTypeBaseProps) => {
     return (
         <div className="my-card">
             <div className="my-card-header">
                 <div className="my-card-header-title">{assessmentTaskRusNameAliases[taskName]}</div>
-                <div className="ms-auto">
+                <div className="ms-auto d-flex gap-3 justify-content-center align-items-center">
+                    <div className="d-flex gap-2">
+                        <i
+                            className="bi bi-arrow-down-circle font-icon-height-0 font-icon-button"
+                            style={{ fontSize: "1.8em" }}
+                            onClick={() => moveDown()}
+                        />
+                        <i
+                            className="bi bi-arrow-up-circle font-icon-height-0 font-icon-button"
+                            style={{ fontSize: "1.8em" }}
+                            onClick={() => moveUp()}
+                        />
+                    </div>
                     <i
                         className="bi bi-x font-icon-height-0 font-icon-button-danger"
                         style={{ fontSize: "2em" }}
