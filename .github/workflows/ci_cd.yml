@@ -69,4 +69,4 @@ jobs:
                   port: 22752
                   username: japan
                   key: ${{ secrets.SSH_PRIVATE_KEY }}
-                  script: cd /home/japan/www/code && ./copy_server.sh
+                  script: cd /home/japan/code && ./copy_server.sh
