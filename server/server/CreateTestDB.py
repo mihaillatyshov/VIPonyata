@@ -1,18 +1,43 @@
 from datetime import datetime, time
 
+from sqlalchemy.engine import URL
+from sqlalchemy.orm import sessionmaker
+
 from werkzeug.security import generate_password_hash
 
 from server.log_lib import LogI
-from server.models.db_models import (Assessment, Course, create_db_session_from_json_config_file, Dictionary, Drilling,
-                                     DrillingCard, Hieroglyph, HieroglyphCard, Lesson, User)
+from server.models.db_models import (Assessment, Course, Dictionary, Drilling, DrillingCard, Hieroglyph, HieroglyphCard,
+                                     Lesson, User)
 
-DBsession = create_db_session_from_json_config_file()
+from server.models.db_models import Base, create_db_engine, load_config
+
+config = load_config("config.json")["db"]
+
+db_config = URL.create(
+    config["url"],
+    username=config["username"],
+    password=config["password"],
+    host=config["host"],
+    database=config["database"],
+)
+
+engine = create_db_engine(db_config)
+
+DBsession = sessionmaker(bind=engine, expire_on_commit=False)
+
+Base.metadata.drop_all(engine)
+Base.metadata.create_all(engine)
+
+# DBsession = create_db_session_from_json_config_file()
 
 with DBsession.begin() as session:
     hashPwd = generate_password_hash("dbnfvbys")
     user = User(name="Mihail", nickname="lm", password=hashPwd, birthday=datetime.now(), level=User.Level.STUDENT)
-    userTeacher = User(name="Mary", nickname="mary", password=hashPwd,
-                       birthday=datetime.now(), level=User.Level.TEACHER)
+    userTeacher = User(name="Mary",
+                       nickname="mary",
+                       password=hashPwd,
+                       birthday=datetime.now(),
+                       level=User.Level.TEACHER)
     session.add_all([user, userTeacher])
     LogI(user)
 

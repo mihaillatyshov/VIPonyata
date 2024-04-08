@@ -11,7 +11,7 @@ const InputError = ({ message, className, isWarning }: InputErrorProps) => {
     className = className ?? "";
     return (
         <div className={`d-flex ${className}`}>
-            <small className={isWarning ? "text-warning" : "text-danger"}> &nbsp; {message}</small>
+            <small className={isWarning ? "text-warning" : "text-danger"}>{message}&nbsp;</small>
         </div>
     );
 };

@@ -35,7 +35,7 @@ const TeacherLessonPage = () => {
             />
             <PageDescription description={lesson?.description} />
 
-            <div className="d-flex justify-content-around flex-wrap mt-5">
+            <div className="d-flex justify-content-center gap-5 flex-wrap mt-5 mb-5">
                 <TeacherLexisBouble title="ごい" name="drilling" lessonId={lessonId} info={drilling.info} />
 
                 <ITeacherAsssessmentBouble

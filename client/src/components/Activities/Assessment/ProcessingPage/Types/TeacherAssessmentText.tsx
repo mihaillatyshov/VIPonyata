@@ -20,7 +20,6 @@ const TeacherAssessmentText = ({
             placeholder="Текст"
             value={data.text}
             onChangeHandler={changeTextHandler}
-            className=""
             rows={6}
             autoFocus={true}
             noErrorField={true}

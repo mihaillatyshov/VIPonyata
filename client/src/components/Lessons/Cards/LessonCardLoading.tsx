@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import styles from "../StyleLessons.module.css";
 import { DescriptionPlaceholder, TitlePlaceholder } from "./BaseParts/LessonCard";
 import LessonCardBase from "./LessonCardBase";
-import LessonCardSkill from "./LessonCardSkill";
 
 const LessonCardLoading = () => {
     return (
@@ -16,7 +15,7 @@ const LessonCardLoading = () => {
                     <DescriptionPlaceholder />
                 </div>
             </Link>
-            <LessonCardSkill />
+            {/* <LessonCardSkill /> */}
         </LessonCardBase>
     );
 };

@@ -1,7 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import PageDescription from "components/Common/PageDescription";
 import PageTitle from "components/Common/PageTitle";
+import InputError from "components/Form/InputError";
+import { PyErrorDict } from "libs/PyError";
 import { AjaxGet, AjaxPost } from "libs/ServerAPI";
 import {
     studentAssessmentTaskRusNameAliases,
@@ -30,6 +32,7 @@ import StudentAssessmentTestMulti from "./Types/StudentAssessmentTestMulti";
 import StudentAssessmentTestSingle from "./Types/StudentAssessmentTestSingle";
 import StudentAssessmentText from "./Types/StudentAssessmentText";
 import { StudentAssessmentTypeProps } from "./Types/StudentAssessmentTypeProps";
+import { validateStudentAssessmentTasksFilled } from "./validation/validateStudentAssessmentTasksFilled";
 
 type ResponseData = {
     assessment: TAssessment;
@@ -62,6 +65,7 @@ const StudentAssessmentPage = () => {
     const dispatch = useAppDispatch();
     const assessment = useAppSelector(selectAssessment);
     const navigate = useNavigate();
+    const [errors, setErrors] = useState<PyErrorDict>({ errors: {}, message: "" });
 
     useEffect(() => {
         dispatch(setAssessmentInfo(undefined));
@@ -90,6 +94,12 @@ const StudentAssessmentPage = () => {
     };
 
     const endAssessmentHandle = () => {
+        const validationFieldsFilledResult = validateStudentAssessmentTasksFilled(assessment.items);
+        if (validationFieldsFilledResult !== undefined) {
+            setErrors(validationFieldsFilledResult);
+            return;
+        }
+        setErrors({ errors: {}, message: "" });
         AjaxPost({
             url: `/api/assessment/${id}/endtry`,
             body: { done_tasks: assessment.items },
@@ -122,19 +132,25 @@ const StudentAssessmentPage = () => {
             <hr />
             <div className="student-assessment-tasks">
                 {assessment.items.map((item, i: number) => (
-                    <>
-                        <div key={i} className="student-assessment-task__wrapper">
+                    <React.Fragment key={i}>
+                        <div className="student-assessment-task__wrapper">
                             <div className="student-assessment-task-title">
                                 {studentAssessmentTaskRusNameAliases[item.name]}
                             </div>
 
                             {drawItem(JSON.parse(JSON.stringify(item)), i)}
                         </div>
+                        {errors.errors[`${i}`] !== undefined ? (
+                            <InputError message={errors.errors[`${i}`].message} />
+                        ) : null}
                         <hr className="my-0 py-0" />
-                    </>
+                    </React.Fragment>
                 ))}
             </div>
-            <input type="button" className="btn btn-primary mb-5" onClick={endAssessmentHandle} value="Завершить" />
+            <div className="mb-5">
+                <input type="button" className="btn btn-primary mt-3" onClick={endAssessmentHandle} value="Завершить" />
+                <InputError className="mt-1" message={errors.message} />
+            </div>
         </div>
     );
 };

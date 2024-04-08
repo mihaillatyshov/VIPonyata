@@ -3,7 +3,7 @@ on:
         branches: [master]
 
 jobs:
-    build:
+    build-client:
         runs-on: ubuntu-latest
         container: node
         defaults:
@@ -25,8 +25,8 @@ jobs:
                   name: build-data
                   path: client/build
 
-    deploy:
-        needs: [build]
+    deploy-client:
+        needs: [build-client]
         runs-on: ubuntu-latest
         defaults:
             run:
@@ -51,3 +51,22 @@ jobs:
                   target: /home/japan/www/client
                   strip_components: 2
                   rm: true
+
+    deploy-server:
+        needs: [build-client]
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: ./server
+
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Deploy server
+              uses: appleboy/ssh-action@v0.1.10
+              with:
+                  host: jp.lann.ru
+                  port: 22752
+                  username: japan
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  script: cd /home/japan/www/code && ./copy_server.sh

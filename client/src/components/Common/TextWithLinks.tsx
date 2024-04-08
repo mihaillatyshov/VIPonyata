@@ -17,7 +17,7 @@ export const TextWithLinks = ({ text, linkMaxChars, target = "_blank" }: TextWit
         return link;
     };
 
-    const fixOtherClicks = (e: React.MouseEvent<HTMLElement>) => {
+    const onLinkClick = (e: React.MouseEvent<HTMLElement>) => {
         e.stopPropagation();
     };
 
@@ -26,7 +26,12 @@ export const TextWithLinks = ({ text, linkMaxChars, target = "_blank" }: TextWit
         (m, link, str) => {
             res.push(
                 link ? (
-                    <a href={(link[0] === "w" ? "//" : "") + link} key={res.length} target={target}>
+                    <a
+                        href={(link[0] === "w" ? "//" : "") + link}
+                        key={res.length}
+                        target={target}
+                        onClick={onLinkClick}
+                    >
                         {getLinkStr(link)}
                     </a>
                 ) : (
@@ -37,9 +42,5 @@ export const TextWithLinks = ({ text, linkMaxChars, target = "_blank" }: TextWit
         },
     );
 
-    return (
-        <div className="user-text" onClick={fixOtherClicks}>
-            {res}
-        </div>
-    );
+    return <div className="user-text">{res}</div>;
 };

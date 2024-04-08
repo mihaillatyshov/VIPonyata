@@ -129,7 +129,7 @@ class SingleTestTaskTeacherBase(SingleTestTaskBase):
 
 
 class SingleTestTaskStudentReq(SingleTestTaskBase):
-    answer: int | None = None  # or (self.answer > 0 and self.answer < len(self.opt))
+    answer: int | None = None                                                                                           # or (self.answer > 0 and self.answer < len(self.opt))
 
 
 class SingleTestTaskRes(SingleTestTaskTeacherBase, BaseModelRes):
@@ -733,7 +733,7 @@ class AudioTaskTeacherReq(AudioTaskTeacherBase):
     @model_validator(mode="after")
     def validate_on_create(self) -> "AudioTaskTeacherReq":
         if not self.url:
-            raise ValueError("Аудио не добавлена")
+            raise ValueError("Аудио не добавлено")
 
         return self
 

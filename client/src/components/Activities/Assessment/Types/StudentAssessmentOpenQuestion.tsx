@@ -18,16 +18,14 @@ const StudentAssessmentOpenQuestion = ({ data, taskId }: StudentAssessmentTypePr
     return (
         <div className="student-assessment-open-question__wrapper">
             <div className="prevent-select">{data.question}</div>
-            <div>
-                <FloatingLabelTextareaAutosize
-                    className="form-control"
-                    value={data.answer}
-                    onChangeHandler={onChangeHandler}
-                    htmlId={`open_question_${taskId}`}
-                    placeholder="Ответ"
-                    rows={5}
-                />
-            </div>
+            <FloatingLabelTextareaAutosize
+                value={data.answer}
+                onChangeHandler={onChangeHandler}
+                htmlId={`open_question_${taskId}`}
+                placeholder="Ответ"
+                rows={5}
+                noErrorField
+            />
         </div>
     );
 };

@@ -6,14 +6,11 @@ from pydantic import ValidationError
 from pydantic_core import ErrorDetails
 
 import server.queries.TeacherDBqueries as DBQT
-from server.exceptions.ApiExceptions import (ActivityNotFoundException, InvalidAPIUsage,
-                                             InvalidRequestJson,
+from server.exceptions.ApiExceptions import (ActivityNotFoundException, InvalidAPIUsage, InvalidRequestJson,
                                              LessonNotFoundException)
-from server.models.assessment import (Aliases, AssessmentCreateReq,
-                                      AssessmentCreateReqStr, BaseModelTask)
-from server.models.db_models import (Assessment, AssessmentTry,
-                                     AssessmentTryType, AssessmentType,
-                                     FinalBoss, FinalBossTry)
+from server.models.assessment import (Aliases, AssessmentCreateReq, AssessmentCreateReqStr, BaseModelTask)
+from server.models.db_models import (Assessment, AssessmentTry, AssessmentTryType, AssessmentType, FinalBoss,
+                                     FinalBossTry)
 from server.models.utils import validate_req
 
 
@@ -87,7 +84,7 @@ class IAssessmentHandlers(Generic[AssessmentType, AssessmentTryType]):
                 print("ex", ex)
 
         if len(errors.keys()) != 0:
-            return {"errors": errors}, 422
+            raise InvalidAPIUsage("Не все поля заполнены", 422, {"errors": errors})
 
         return AssessmentCreateReqStr(time_limit=assessment_req_data.time_limit,
                                       description=assessment_req_data.description,

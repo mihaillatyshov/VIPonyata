@@ -31,7 +31,7 @@ const StudentLessonPage = () => {
                 />
                 <PageDescription description={lesson?.description} isCentered={true} />
 
-                <div className="d-flex justify-content-around flex-wrap">
+                <div className="d-flex justify-content-center gap-5 flex-wrap mt-5 mb-5">
                     {drilling?.info && <StudentDrillingBubble drilling={drilling} />}
                     {assessment?.info && <StudentAssessmentBubble assessment={assessment} />}
                     {hieroglyph?.info && <StudentHieroglyphBubble hieroglyph={hieroglyph} />}

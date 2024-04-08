@@ -7,7 +7,7 @@ export const Title = ({ title }: TitleProps) => {
 
 type DifficultyProps = { difficulty: string };
 export const Difficulty = ({ difficulty }: DifficultyProps) => {
-    return <div className="mb-2 text-muted"> {difficulty} </div>;
+    return <div className="mb-2 text-muted"> Сложность: {difficulty} </div>;
 };
 
 type DescriptionProps = { description: string | null };
