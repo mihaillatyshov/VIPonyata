@@ -143,11 +143,8 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
 
     const addTasks = (name: TAssessmentTaskName, taskData?: TTeacherAssessmentAnyItem[]) => {
         if (taskIdToAdd === undefined) {
-            console.error("taskIdToAdd is undefined");
             return;
         }
-
-        console.log("addTask", name, taskData);
 
         const newHashesCount = taskData === undefined ? 1 : taskData.length;
 
@@ -212,8 +209,6 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
         });
     };
 
-    console.log(tasksHashes.current.length, tasks.length);
-
     return (
         <div className="container mb-5 pb-5">
             <PageTitle title={title} />
@@ -250,7 +245,6 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
                     {tasks.map((item, i) => (
                         <React.Fragment key={tasksHashes.current[i]}>
                             <AddTaskButton insertId={i} handleClick={openModal} />
-                            {tasksHashes.current[i]}
                             <TeacherAssessmentTypeBase
                                 taskName={item.name}
                                 moveUp={() => moveUp(i)}

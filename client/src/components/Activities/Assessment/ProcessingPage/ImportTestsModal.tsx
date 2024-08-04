@@ -32,7 +32,6 @@ export const ImportTestsModalModal = ({
     useEffect(() => {
         const result: (TTeacherAssessmentTestSingle | TTeacherAssessmentTestMulti)[] = [];
         text.split("\n").forEach((line) => {
-            console.log(line);
             const trimmedLine = line.trim();
             if (trimmedLine === "") {
                 return;
