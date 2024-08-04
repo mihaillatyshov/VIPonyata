@@ -24,7 +24,7 @@ const TeacherAssessmentOpenQuestion = ({
             <FloatingLabelTextareaAutosize
                 htmlId={`answer_${taskUUID}`}
                 placeholder="Ответ"
-                value={data.meta_answer}
+                value={data.meta_answer === null ? "" : data.meta_answer}
                 onChangeHandler={(newValue) => onChangeTask({ ...data, meta_answer: newValue })}
                 className="mt-4"
                 rows={5}

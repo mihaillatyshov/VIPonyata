@@ -7,6 +7,11 @@
     max-height: 90vh;
 }
 
+.modal-content-fullscreen {
+    min-height: 100vh !important;
+    max-height: 100vh !important;
+}
+
 .modal-body {
     overflow-y: scroll;
 }

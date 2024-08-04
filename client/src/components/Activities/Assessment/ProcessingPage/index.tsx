@@ -141,18 +141,32 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
         setIsShowSelectTypeModal(true);
     };
 
-    const addTask = (name: TAssessmentTaskName) => {
-        if (taskIdToAdd === undefined) return;
-
-        while (true) {
-            const id = uuid();
-            if (tasksHashes.current.includes(id)) continue;
-
-            tasksHashes.current.splice(taskIdToAdd, 0, id);
-            break;
+    const addTasks = (name: TAssessmentTaskName, taskData?: TTeacherAssessmentAnyItem[]) => {
+        if (taskIdToAdd === undefined) {
+            console.error("taskIdToAdd is undefined");
+            return;
         }
+
+        console.log("addTask", name, taskData);
+
+        const newHashesCount = taskData === undefined ? 1 : taskData.length;
+
+        for (let i = 0; i < newHashesCount; i++) {
+            while (true) {
+                const id = uuid();
+                if (tasksHashes.current.includes(id)) continue;
+
+                tasksHashes.current.splice(taskIdToAdd, 0, id);
+                break;
+            }
+        }
+
         setTasks((prev) => {
-            prev.splice(taskIdToAdd, 0, getTeacherAssessmentTaskDefaultData(name));
+            if (taskData !== undefined) {
+                prev.splice(taskIdToAdd, 0, ...taskData);
+            } else {
+                prev.splice(taskIdToAdd, 0, getTeacherAssessmentTaskDefaultData(name));
+            }
             return [...prev];
         });
     };
@@ -198,6 +212,8 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
         });
     };
 
+    console.log(tasksHashes.current.length, tasks.length);
+
     return (
         <div className="container mb-5 pb-5">
             <PageTitle title={title} />
@@ -234,6 +250,7 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
                     {tasks.map((item, i) => (
                         <React.Fragment key={tasksHashes.current[i]}>
                             <AddTaskButton insertId={i} handleClick={openModal} />
+                            {tasksHashes.current[i]}
                             <TeacherAssessmentTypeBase
                                 taskName={item.name}
                                 moveUp={() => moveUp(i)}
@@ -251,7 +268,7 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
                 <SelectTypeModal
                     isShow={isShowSelectTypeModal}
                     close={() => setIsShowSelectTypeModal(false)}
-                    addTask={addTask}
+                    addTasks={addTasks}
                 />
             </div>
         </div>
