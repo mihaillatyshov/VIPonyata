@@ -31,7 +31,7 @@ const TeacherAssessmentTypeBase = ({
     error,
 }: TeacherAssessmentTypeBaseProps) => {
     return (
-        <div className="my-card">
+        <div className="my-card teacher-assessment-card">
             <div className="my-card-header">
                 <div className="my-card-header-title">{assessmentTaskRusNameAliases[taskName]}</div>
                 <div className="ms-auto d-flex gap-3 justify-content-center align-items-center">

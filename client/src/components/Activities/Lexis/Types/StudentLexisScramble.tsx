@@ -69,7 +69,7 @@ const StudentLexisScramble = ({ name, inData, goToNextTaskCallback }: StudentLex
                         <div className="d-flex">
                             {item.doneWord.map((word: string, key: number) => (
                                 <div
-                                    className="student-lexis-scramble__item"
+                                    className="student-lexis-scramble__item-selected"
                                     key={key}
                                     onClick={() => doneWordClick(key)}
                                 >
@@ -77,7 +77,7 @@ const StudentLexisScramble = ({ name, inData, goToNextTaskCallback }: StudentLex
                                 </div>
                             ))}
                         </div>
-                        <div className="d-flex mt-2">
+                        <div className="d-flex mt-3 gap-2">
                             {item.usedChars.map((char: string, key: number) => (
                                 <div
                                     className="student-lexis-scramble__item"

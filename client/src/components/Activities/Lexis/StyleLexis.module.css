@@ -4,6 +4,7 @@
     width: fit-content;
     display: flex;
     flex-direction: column;
+    background-color: #ffffff66;
 }
 
 div.lexisCardDiv {

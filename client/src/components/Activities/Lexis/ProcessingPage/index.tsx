@@ -207,7 +207,7 @@ export const LexisProcessingPage = ({ title, name, processingType }: LexisProces
                 <div className="processing-page__header">
                     <input
                         type="button"
-                        className="btn btn-primary w-100"
+                        className="btn btn-violet w-100"
                         onClick={() => setIsShowNewWordsModal(true)}
                         value={"Импортировать слова"}
                     />

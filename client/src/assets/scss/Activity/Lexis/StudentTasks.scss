@@ -7,20 +7,37 @@
     padding: 4px 8px;
 }
 
+$student-lexis-scramble__item-border-radius: 8px;
+
 .student-lexis-scramble__item {
     @extend .prevent-select;
 
     width: 48px;
     height: 48px;
     padding: 8px 8px;
-    border: 1px solid #444444;
-    border-radius: 8px;
-    background-color: var(--css-var-bg);
+    border: 1px solid #b8b8b8;
+    background-color: #ffffff66;
     cursor: pointer;
 
     display: flex;
     justify-content: center;
     align-items: center;
+
+    &-selected {
+        @extend .student-lexis-scramble__item;
+    }
+
+    &-selected:first-child {
+        @extend .student-lexis-scramble__item;
+        border-top-left-radius: $student-lexis-scramble__item-border-radius;
+        border-bottom-left-radius: $student-lexis-scramble__item-border-radius;
+    }
+
+    &-selected:last-child {
+        @extend .student-lexis-scramble__item;
+        border-top-right-radius: $student-lexis-scramble__item-border-radius;
+        border-bottom-right-radius: $student-lexis-scramble__item-border-radius;
+    }
 
     &:hover {
         opacity: 0.6;
@@ -28,9 +45,10 @@
 }
 
 .student-lexis-nav__item {
+    @extend .box-shadow-main-mini;
     @extend .prevent-select;
 
-    border: 1px solid #000000;
+    background-color: #ffffff22;
     font-size: 12px;
     border-radius: 8px;
     padding: 10px 8px 8px 8px;

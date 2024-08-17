@@ -1,4 +1,4 @@
-import React from "react";
+import React, { CSSProperties } from "react";
 
 import { ProgressBar } from "react-bootstrap";
 
@@ -8,9 +8,14 @@ type StudentProgressProps = {
 };
 
 const StudentProgress = ({ percent, children }: StudentProgressProps) => {
+    const progressBarStyles: CSSProperties = {
+        border: "1px solid #aaaaaa",
+        height: "24px",
+        "--bs-progress-bar-bg": "rgba(202, 190, 225, 1)",
+    } as CSSProperties;
     return (
         <div className="position-relative">
-            <ProgressBar style={{ border: "1px solid #aaaaaa", height: "24px" }} variant="success" now={percent} />
+            <ProgressBar style={progressBarStyles} now={percent} />
             {children}
         </div>
     );

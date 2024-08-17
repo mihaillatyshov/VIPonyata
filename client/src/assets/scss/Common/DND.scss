@@ -5,7 +5,6 @@ $dnd-border-radius: 5px;
 .dnd__item-base {
     @extend .prevent-select;
 
-    border: 1px solid black;
     border-radius: $dnd-border-radius;
     padding: 0 6px;
     height: fit-content;

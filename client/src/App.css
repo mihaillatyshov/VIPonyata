@@ -3,6 +3,14 @@
 *:after {
     box-sizing: border-box;
 }
+
+@font-face {
+    font-family: "APJapanesefont";
+    src:
+        local("APJapanesefont"),
+        url(./assets/fonts/APJapanesefont.ttf) format("ttf");
+}
+
 html {
     min-width: 100%;
     min-height: 100%;

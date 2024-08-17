@@ -12,7 +12,6 @@ div.skillLesson {
 .linkLesson {
     padding: 10px;
     min-width: 250px;
-    border: 2px solid #000000;
     border-top-right-radius: 25px;
     background: var(--css-var-card-bg);
 }

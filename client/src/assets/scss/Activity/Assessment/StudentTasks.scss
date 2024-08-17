@@ -40,18 +40,15 @@
     @extend .prevent-select;
 
     padding: 4px 6px;
-    border: 1px solid black;
     border-radius: 6px;
     background-color: #ffffffaa;
     height: 100%;
     cursor: pointer;
 
     &.selected {
-        border-color: #ffff00;
         background-color: #ffff7288;
     }
     &.done {
-        border-color: #00cc00;
         background-color: #44cc4488;
     }
     &.right {
@@ -60,7 +57,6 @@
 
     &.wrong {
         background-color: #f4b8b8;
-        border-color: #ea7979;
     }
 }
 
@@ -166,6 +162,7 @@
 
     width: 100%;
     min-height: 80px;
+    background-color: #ffffff66;
 }
 
 .student-assessment-classification__container {
@@ -195,6 +192,7 @@
     padding: 10px;
     gap: 8px;
     min-height: 64px;
+    background-color: #ffffff66;
 
     &.inputs {
         flex: 1 0;
@@ -214,7 +212,7 @@
     flex-direction: column;
 }
 
-$item-border-size: 1px;
+$item-border-size: 0px;
 $item-padding: 6px;
 
 .student-assessment-classification__item {

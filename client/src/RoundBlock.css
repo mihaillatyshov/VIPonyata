@@ -14,8 +14,8 @@
         ellipse at center,
         var(--css-var-card-bg) 0%,
         var(--css-var-card-bg) 69.8%,
-        rgba(0, 0, 0, 1) 70.1%,
-        rgba(0, 0, 0, 1) 70.6%,
+        var(--css-var-card-bg) 70.1%,
+        var(--css-var-card-bg) 70.6%,
         rgba(0, 0, 0, 0) 70.8%
     );
     position: relative;
