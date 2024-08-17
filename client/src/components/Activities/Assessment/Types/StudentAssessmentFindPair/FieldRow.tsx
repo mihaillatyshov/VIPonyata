@@ -11,10 +11,9 @@ interface FieldRowItemProps {
 
 const FieldRowItem = ({ id, field, selectedId, setSelected, parsCreated, alignRight }: FieldRowItemProps) => {
     const getClassName = () => {
-        return `student-assessment-find-pair__item
-        ${alignRight ? "right" : ""}
-        ${id === selectedId ? "selected" : ""}
-        ${id < parsCreated ? "done" : ""} `;
+        return `student-assessment-find-pair__item ${alignRight ? "right" : ""} ${
+            id === selectedId ? "selected" : ""
+        } ${id < parsCreated ? "done" : ""} `;
     };
 
     const onClickHandle = (id: number) => {
@@ -22,10 +21,8 @@ const FieldRowItem = ({ id, field, selectedId, setSelected, parsCreated, alignRi
     };
 
     return (
-        <div className="col-6">
-            <div className={getClassName()} onClick={() => onClickHandle(id)}>
-                {field}
-            </div>
+        <div className={getClassName()} onClick={() => onClickHandle(id)}>
+            {field}
         </div>
     );
 };
@@ -40,10 +37,11 @@ interface FieldRowProps {
 
 export const FieldRow = ({ id, parsCreated, first, second }: FieldRowProps) => {
     return (
-        <div className="row student-assessment-find-pair__row">
+        // <div className="row student-assessment-find-pair__row">
+        // <div className="student-assessment-find-pair__row">
+        <>
             <FieldRowItem {...first} id={id} parsCreated={parsCreated} alignRight={true} />
-            {id < parsCreated && <div className="student-assessment-find-pair__item-connector" />}
             <FieldRowItem {...second} id={id} parsCreated={parsCreated} />
-        </div>
+        </> // </div>
     );
 };

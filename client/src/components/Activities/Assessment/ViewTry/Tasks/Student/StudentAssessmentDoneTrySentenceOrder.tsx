@@ -15,7 +15,7 @@ export const StudentAssessmentDoneTrySentenceOrder = ({
         return `student-assessment-view-sortable-order__item ${checks.mistake_parts.includes(id) ? "wrong" : "good"}`;
     };
 
-    const rowClassName = `row mt-0 row-cols-1 ${checks.mistakes_count > 0 ? "row-cols-sm-2 g-4" : ""}`;
+    const rowClassName = `row mt-0 row-cols-1 mx-auto ${checks.mistakes_count > 0 ? "row-cols-sm-2 g-4" : ""}`;
 
     return (
         <div className={rowClassName}>

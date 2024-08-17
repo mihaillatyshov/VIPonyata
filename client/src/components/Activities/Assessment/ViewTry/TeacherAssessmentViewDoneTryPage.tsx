@@ -134,7 +134,7 @@ const TeacherAssessmentViewDoneTryPage = () => {
     };
 
     return (
-        <div className="container mb-5 pb-5">
+        <div className="container mb-5 pb-5" style={{ maxWidth: "800px" }}>
             <PageTitle title="タスク" urlBack={lessonId !== undefined ? `/lessons/${lessonId}` : undefined} />
             <hr />
             <div className="student-assessment-tasks">

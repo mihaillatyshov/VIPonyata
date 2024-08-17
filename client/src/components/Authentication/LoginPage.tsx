@@ -80,7 +80,9 @@ const LoginPage = () => {
             </div>
 
             <div className="d-flex justify-content-center mt-3">
-                <Link to="/register"> Регистрация </Link>
+                <Link to="/register" className="auth-alter-link">
+                    Регистрация
+                </Link>
             </div>
         </form>
     );

@@ -8,7 +8,7 @@
     font-family: "APJapanesefont";
     src:
         local("APJapanesefont"),
-        url(./assets/fonts/APJapanesefont.ttf) format("ttf");
+        url(./assets/fonts/APJapanesefont.ttf) format("truetype");
 }
 
 html {

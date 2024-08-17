@@ -12,17 +12,13 @@ interface CounterProps {
 const Counter = ({ count }: CounterProps) => {
     if (count === undefined) {
         return (
-            <div className="font-icon-height-0 mt-1 mb-2">
-                <Loading size={28} />
-            </div>
+            <span className="font-icon-height-0 mt-1 mb-2">
+                <Loading size={50} />
+            </span>
         );
     }
 
-    return (
-        <div className="font-icon-height-0 mt-3 mb-4" style={{ fontSize: "22px" }}>
-            {count}
-        </div>
-    );
+    return <span>{count}</span>;
 };
 
 const StudentDictionary = () => {
@@ -45,11 +41,10 @@ const StudentDictionary = () => {
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
-        <div className="d-flex mx-auto flex-column align-items-center">
-            <Link className="a-clear navbar-dictionary-title" to="/dictionary">
-                じしょ
+        <div className="d-flex mx-auto align-items-center">
+            <Link className="d-flex a-clear navbar-dictionary-title ap-japanesefont" to="/dictionary">
+                じしょ{!isTeacher && ":"} {!isTeacher && <Counter count={count} />}
             </Link>
-            {isTeacher ? null : <Counter count={count} />}
         </div>
     );
 };

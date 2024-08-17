@@ -106,7 +106,9 @@ const RegisterPage = () => {
                 <input type="submit" className="btn btn-success mt-2" value={"Зарегистрироваться"} />
             </div>
             <div className="d-flex justify-content-center mt-3">
-                <Link to="/"> Вход </Link>
+                <Link to="/" className="auth-alter-link">
+                    Вход
+                </Link>
             </div>
         </form>
     );

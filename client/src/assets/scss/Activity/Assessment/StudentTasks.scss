@@ -1,15 +1,14 @@
 @use "../../Common";
 
 .student-assessment-task-title {
-    @extend .my-card-header-title;
-
     line-height: 1;
+    color: #868686;
 }
 
 .student-assessment-tasks {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 24px;
 }
 
 .student-assessment-task__wrapper {
@@ -62,23 +61,23 @@
 
 .student-assessment-find-pair__row {
     position: relative;
+    display: contents;
+    border-collapse: collapse;
 }
 
 .student-assessment-find-pair__col {
-    display: flex;
-    flex-direction: column;
-    row-gap: 8px;
-    margin-top: 4px;
-}
+    position: relative;
 
-.student-assessment-find-pair__item-connector {
-    position: absolute;
-    border-bottom: 2px solid #00ff00;
-    justify-content: center;
-    height: 50%;
-    width: 24px;
-    inset: 50%;
-    transform: translate(-50%, -100%);
+    row-gap: 8px;
+    column-gap: 12px;
+
+    display: grid;
+    grid-template-columns: repeat(2, minmax(min-content, auto));
+
+    border-collapse: collapse;
+
+    width: fit-content;
+    align-self: center;
 }
 
 .student-assessment-sortable-order {
@@ -86,6 +85,9 @@
     row-gap: 12px;
     column-gap: 8px;
     margin-top: 4px;
+
+    width: fit-content;
+    align-self: center;
 
     &.horizontal {
         flex-wrap: wrap;

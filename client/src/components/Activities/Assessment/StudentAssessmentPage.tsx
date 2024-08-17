@@ -124,7 +124,7 @@ const StudentAssessmentPage = () => {
     };
 
     return (
-        <div className="container pb-5">
+        <div className="container pb-5" style={{ maxWidth: "800px" }}>
             <PageTitle title="タスク" urlBack={`/lessons/${assessment.info.lesson_id}`} />
             <PageDescription description={assessment.info.description} className="mb-1" />
             <StudentActivityDeadline activityInfo={assessment.info} />
@@ -134,10 +134,11 @@ const StudentAssessmentPage = () => {
                 {assessment.items.map((item, i: number) => (
                     <React.Fragment key={i}>
                         <div className="student-assessment-task__wrapper">
-                            <div className="student-assessment-task-title">
-                                {studentAssessmentTaskRusNameAliases[item.name]}
-                            </div>
-
+                            {item.name !== TAssessmentTaskName.IMG && (
+                                <div className="student-assessment-task-title">
+                                    {studentAssessmentTaskRusNameAliases[item.name]}
+                                </div>
+                            )}
                             {drawItem(JSON.parse(JSON.stringify(item)), i)}
                         </div>
                         {errors.errors[`${i}`] !== undefined ? (
@@ -148,7 +149,7 @@ const StudentAssessmentPage = () => {
                 ))}
             </div>
             <div className="mb-5">
-                <input type="button" className="btn btn-primary mt-3" onClick={endAssessmentHandle} value="Завершить" />
+                <input type="button" className="btn btn-success mt-3" onClick={endAssessmentHandle} value="Завершить" />
                 <InputError className="mt-1" message={errors.message} />
             </div>
         </div>
