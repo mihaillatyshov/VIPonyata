@@ -1,5 +1,7 @@
 .pageTitle {
-    font-size: 32px;
+    font-family: "APJapanesefont";
+    line-height: 1;
+    font-size: var(--var-page-title-size);
     padding: 5px 5px 5px 13px;
     /* background-color: var(--css-var-title); */
     overflow-wrap: anywhere;
@@ -8,9 +10,13 @@
     margin: 20px auto;
     display: flex;
     border-radius: 2px;
+    position: relative;
 }
 
 .pageTitleBack {
+    height: var(--var-page-title-size);
+    font-size: 32px;
+    line-height: 1;
     background-color: #198754;
     border-radius: 4px;
 

@@ -35,7 +35,7 @@ const StudentViewDoneTryModal = ({ isShow, close, id, name }: StudentViewDoneTry
     };
 
     return (
-        <Modal size="xl" show={isShow} onHide={close} dialogClassName="modal-dialog">
+        <Modal size="lg" show={isShow} onHide={close} dialogClassName="modal-dialog">
             <Modal.Header closeButton className="modal-bg">
                 <Modal.Title>Результаты</Modal.Title>
             </Modal.Header>

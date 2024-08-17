@@ -38,9 +38,9 @@ const CoursePage = () => {
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
-        <div className="container" style={{ maxWidth: "800px" }}>
+        <div className="container" style={{ maxWidth: "640px" }}>
             <PageTitle title={course?.name} urlBack="/" />
-            <PageDescription description={course?.description} className="mb-5 text-center" />
+            <PageDescription className="mb-5" description={course?.description} isCentered={true} />
             <LessonsList />
         </div>
     );

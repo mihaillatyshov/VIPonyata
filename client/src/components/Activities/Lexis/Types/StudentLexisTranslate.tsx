@@ -46,16 +46,19 @@ const StudentLexisTranslate = ({ name, inData, goToNextTaskCallback }: StudentLe
                 return (
                     <form className="d-flex flex-column align-items-center">
                         <StudentLexisTaskTitle title="Переведи" />
-                        <div className="mb-2">{item.wordRU}</div>
-                        <InputText
-                            htmlId="translate"
-                            value={item.inputText}
-                            onChangeHandler={handleTextChange}
-                            placeholder="Перевод"
-                            autoFocus={true}
-                            noErrorField={true}
-                        />
-                        <input type="submit" className="btn btn-success mt-4" onClick={nextWord} value="次" />
+
+                        <div className="input-group mb-3 w-auto">
+                            <span className="input-group-text">{item.wordRU}</span>
+                            <input
+                                className="form-control"
+                                value={item.inputText}
+                                onChange={(e) => handleTextChange(e.target.value)}
+                                placeholder="Перевод"
+                                autoFocus={true}
+                            />
+                        </div>
+
+                        <input type="submit" className="btn btn-success" onClick={nextWord} value="次 (дальше)" />
                     </form>
                 );
             }}

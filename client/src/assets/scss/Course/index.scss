@@ -27,7 +27,12 @@
 }
 
 .course__card-text-block {
+    width: 100%;
     height: 210px;
+    overflow: hidden;
+}
+
+.course__card-extra-text-block {
     overflow: hidden;
 
     &.with-img {

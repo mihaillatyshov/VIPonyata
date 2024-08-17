@@ -6,7 +6,7 @@ import CoursesList from "components/Courses/CoursesList";
 const MainPage = () => {
     return (
         <div className="container">
-            <PageTitle className="ap-japanesefont" title="コース" />
+            <PageTitle title="コース" />
             <CoursesList />
         </div>
     );

@@ -21,10 +21,12 @@ const CourseCardWithContent = ({ course }: CourseCardWithContentProps) => {
             <CourseCardBase>
                 {isTeacher && <div className="course__card-sort">{course.sort}</div>}
                 <div className="d-flex">
-                    <div className={`course__card-text-block ${course.img !== null ? "with-img" : ""}`}>
+                    <div className="course__card-text-block">
                         <Title title={course.name} />
-                        <Difficulty difficulty={course.difficulty} />
-                        <Description description={course.description} />
+                        <div className={`course__card-extra-text-block ${course.img !== null ? "with-img" : ""}`}>
+                            <Difficulty difficulty={course.difficulty} />
+                            <Description description={course.description} />
+                        </div>
                     </div>
                     {course.img !== null ? <img src={course.img} alt="" className="course__card-img" /> : null}
                 </div>

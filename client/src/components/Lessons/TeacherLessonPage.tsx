@@ -33,7 +33,7 @@ const TeacherLessonPage = () => {
                 title={lesson?.name}
                 urlBack={lesson === undefined ? undefined : `/courses/${lesson.course_id}`}
             />
-            <PageDescription description={lesson?.description} />
+            <PageDescription description={lesson?.description} isCentered={true} />
 
             <div className="d-flex justify-content-center gap-5 flex-wrap mt-5 mb-5">
                 <TeacherLexisBouble title="ごい" name="drilling" lessonId={lessonId} info={drilling.info} />

@@ -6,6 +6,7 @@ import { TStudentLexisTrySpaceTask } from "models/Activity/Try/TLexisTry";
 import { StudentLexisTaskProps, useLexisItem, useSetLexisSelectedItemField } from "./LexisUtils";
 import StudentLexisTaskInterface from "./StudentLexisTaskInterface";
 import { StudentLexisTaskTitle } from "./StudentLexisTaskTitle";
+import AutosizeInput from "libs/AutosizeInput";
 
 interface SpaceTaskType {
     wordId: number;
@@ -76,14 +77,17 @@ const StudentLexisSpace = ({ name, inData, goToNextTaskCallback }: StudentLexisT
                         <div className="input-group mb-3 w-auto">
                             {item.in_parts.map((part, i) =>
                                 part === "" ? (
-                                    <input
+                                    <AutosizeInput
                                         key={i}
                                         type="text"
-                                        className="form-control student-lexis-space__input"
+                                        className="form-control student-lexis-space__input px-0"
+                                        inputClassName="h-100 px-2 border-0"
+                                        inputStyle={{ minWidth: "16px" }}
                                         value={item.parts[i]}
-                                        onChange={(e) => setPartValue(i, e.target.value)}
-                                        // autoFocus={getIsFirst(i)}
-                                        ref={isFirst(i, item.in_parts) ? inputElement : undefined}
+                                        onChange={(e: any) => setPartValue(i, e.target.value)}
+                                        autoFocus={isFirst(i, item.in_parts)}
+
+                                        // ref={isFirst(i, item.in_parts) ? inputElement : undefined}
                                     />
                                 ) : (
                                     <span className="input-group-text" key={i}>
@@ -92,7 +96,7 @@ const StudentLexisSpace = ({ name, inData, goToNextTaskCallback }: StudentLexisT
                                 ),
                             )}
                         </div>
-                        <input type="submit" className="btn btn-success" onClick={nextWord} value="次" />
+                        <input type="submit" className="btn btn-success" onClick={nextWord} value="次 (дальше)" />
                     </form>
                 );
             }}

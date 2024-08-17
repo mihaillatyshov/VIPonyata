@@ -9,12 +9,16 @@ interface StudentDoneTryPreviewProps {
 
 const StudentDoneTryPreview = ({ doneTry, openTryPage }: StudentDoneTryPreviewProps) => {
     return (
-        <div className="done-try-preview" onClick={() => openTryPage(doneTry.id)}>
+        <div className="done-try-preview">
             <div className="done-try-preview__description">
-                <div>Начало: {doneTry.start_datetime}</div>
-                <div>Окончание: {doneTry.end_datetime}</div>
-                <div>{doneTry.is_checked ? "Проверено" : "Не проверено"}</div>
-                <div>Ошибок: {doneTry.mistakes_count}</div>
+                <div>
+                    <span className="text-nowrap">{doneTry.start_datetime}</span> -{" "}
+                    <span className="text-nowrap">{doneTry.end_datetime}</span>
+                </div>
+                <div>
+                    {doneTry.is_checked ? "Проверено" : "Не проверено"} &nbsp;&nbsp;&nbsp;&nbsp; Ошибок:{" "}
+                    {doneTry.mistakes_count}
+                </div>
             </div>
             <div className="done-try-preview__button-block">
                 <input

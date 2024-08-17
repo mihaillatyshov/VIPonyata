@@ -15,7 +15,12 @@ const Mistake = ({ mistakeCount }: MistakeProps) => {
         return styles.navBadge + " " + (mistakeCount > 0 ? styles.navBadgeOther : styles.navBadgeZero);
     };
 
-    return <div className={getClassName()}>{mistakeCount}</div>;
+    return (
+        <div className={getClassName()}>
+            <i className="bi bi-check-lg text-white" />
+            {/* {mistakeCount} */}
+        </div>
+    );
 };
 
 export interface StudentLexisNavItemProps {

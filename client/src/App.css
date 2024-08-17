@@ -47,6 +47,8 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    --var-page-title-size: 56px;
 }
 
 .mainNavBar {

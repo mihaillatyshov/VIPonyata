@@ -103,7 +103,7 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
     if (loadStatus !== LoadStatus.DONE) {
         return (
             <div className="container d-flex flex-column justify-content-center align-items-center">
-                <PageTitle className="ap-japanesefont" title={title} />
+                <PageTitle title={title} />
                 <Loading size="xxl" />
             </div>
         );
@@ -211,7 +211,7 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
 
     return (
         <div className="container mb-5 pb-5">
-            <PageTitle className="ap-japanesefont" title={title} />
+            <PageTitle title={title} urlBack={`/lessons/${lessonId}`} />
             {/* <input type="button" className="btn btn-success w-100 mb-5" onClick={submitHandler} value={"Создать"} /> */}
             <div className="processing-page">
                 <div className="processing-page__header">
