@@ -40,7 +40,7 @@ const CoursePage = () => {
     return (
         <div className="container" style={{ maxWidth: "800px" }}>
             <PageTitle title={course?.name} urlBack="/" />
-            <PageDescription description={course?.description} />
+            <PageDescription description={course?.description} className="mb-5 text-center" />
             <LessonsList />
         </div>
     );

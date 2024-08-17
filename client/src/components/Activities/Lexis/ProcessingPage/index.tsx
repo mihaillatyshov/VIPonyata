@@ -95,7 +95,7 @@ export const LexisProcessingPage = ({ title, name, processingType }: LexisProces
     if (loadStatus !== LoadStatus.DONE) {
         return (
             <div className="container d-flex flex-column justify-content-center align-items-center">
-                <PageTitle title={title} />
+                <PageTitle className="ap-japanesefont" title={title} />
                 <Loading size="xxl" />
             </div>
         );
@@ -202,7 +202,7 @@ export const LexisProcessingPage = ({ title, name, processingType }: LexisProces
 
     return (
         <div className="container mb-5 pb-5">
-            <PageTitle title={title} urlBack={`/lessons/${lessonId}`} />
+            <PageTitle className="ap-japanesefont" title={title} urlBack={`/lessons/${lessonId}`} />
             <div className="processing-page">
                 <div className="processing-page__header">
                     <input

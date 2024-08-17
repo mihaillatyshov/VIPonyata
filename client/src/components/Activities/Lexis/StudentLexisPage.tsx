@@ -133,7 +133,7 @@ const StudentLexisPage = <T extends TDrilling | THieroglyph>({
     ) {
         return (
             <div className="container d-flex flex-column justify-content-center align-items-center">
-                <PageTitle title={title} />
+                <PageTitle className="ap-japanesefont" title={title} />
                 <Loading size="xxl" />
             </div>
         );
@@ -155,8 +155,8 @@ const StudentLexisPage = <T extends TDrilling | THieroglyph>({
     const habUrl = `/${name}/${info.id}`;
 
     return (
-        <div className="container">
-            <PageTitle title={title} urlBack={`/lessons/${info.lesson_id}`} />
+        <div className="container" style={{ maxWidth: "800px" }}>
+            <PageTitle className="ap-japanesefont" title={title} urlBack={`/lessons/${info.lesson_id}`} />
             <PageDescription description={info.description} className="mb-3" />
 
             <StudentProgress percent={(Object.keys(info.try.done_tasks).length / Object.keys(items).length) * 100}>

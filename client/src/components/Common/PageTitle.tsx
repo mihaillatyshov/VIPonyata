@@ -17,18 +17,19 @@ const Back = ({ urlBack }: BackProps) => {
 
     return (
         <div onClick={() => navigate(urlBack)} className={styles.pageTitleBack}>
-            <i className="bi bi-arrow-bar-left" />
+            <i className="bi bi-arrow-bar-left text-white" />
         </div>
     );
 };
 
 interface PageTitleProps extends BackProps {
     title?: string;
+    className?: string;
 }
 
-const PageTitle = ({ title, urlBack }: PageTitleProps) => {
+const PageTitle = ({ title, urlBack, className = "" }: PageTitleProps) => {
     return (
-        <div className={styles.pageTitle}>
+        <div className={`${className} ${styles.pageTitle}`}>
             <Back urlBack={urlBack} />
             {title !== undefined ? (
                 <div className="mx-auto pe-2">{title}</div>

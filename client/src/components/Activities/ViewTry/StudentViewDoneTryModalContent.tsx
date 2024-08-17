@@ -23,7 +23,7 @@ const StudentViewDoneTryModalContent = ({
                 <img src="/img/cat.jpg" alt="WIP" style={{ maxHeight: "400px", maxWidth: "100%" }} />
                 <div>Я Машин программист</div>
                 <div>У меня лапки</div>
-                <div>Скоро все будет</div>
+                <div>"Скоро" все будет</div>
                 {/* <div>{errorMessage}</div> */}
             </h2>
         );

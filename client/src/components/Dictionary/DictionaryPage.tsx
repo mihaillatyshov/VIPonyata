@@ -50,7 +50,7 @@ const TeacherDictionaryPage = () => {
     // TODO: Select dictionary view type
     return (
         <div className="container">
-            <PageTitle title="じしょ" />
+            <PageTitle className="ap-japanesefont" title="じしょ" />
 
             <DictionaryPageViewTable dictionary={dictionary.items} />
         </div>

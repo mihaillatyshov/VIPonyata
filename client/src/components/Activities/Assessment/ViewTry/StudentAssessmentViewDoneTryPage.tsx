@@ -110,7 +110,11 @@ const StudentAssessmentViewDoneTryPage = () => {
 
     return (
         <div className="container pb-4" style={{ maxWidth: "800px" }}>
-            <PageTitle title="タスク" urlBack={lessonId !== undefined ? `/lessons/${lessonId}` : undefined} />
+            <PageTitle
+                className="ap-japanesefont"
+                title="タスク"
+                urlBack={lessonId !== undefined ? `/lessons/${lessonId}` : undefined}
+            />
             <hr />
             <div className="student-assessment-tasks">
                 {doneTry.data.done_tasks.map((doneTask, i) => (

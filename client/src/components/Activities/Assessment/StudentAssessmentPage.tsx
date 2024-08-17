@@ -125,7 +125,7 @@ const StudentAssessmentPage = () => {
 
     return (
         <div className="container pb-5" style={{ maxWidth: "800px" }}>
-            <PageTitle title="タスク" urlBack={`/lessons/${assessment.info.lesson_id}`} />
+            <PageTitle className="ap-japanesefont" title="タスク" urlBack={`/lessons/${assessment.info.lesson_id}`} />
             <PageDescription description={assessment.info.description} className="mb-1" />
             <StudentActivityDeadline activityInfo={assessment.info} />
 
