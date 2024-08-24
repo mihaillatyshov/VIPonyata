@@ -1,5 +1,6 @@
-import { getDragToSpread } from "libs/DragAndDrop";
 import React from "react";
+
+import { getDragToSpread } from "libs/DragAndDrop";
 
 type FieldIdType = number | undefined;
 type SetFieldIdFuncType = (fieldId: FieldIdType) => void;

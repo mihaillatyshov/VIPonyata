@@ -1,9 +1,8 @@
 import React from "react";
 
+import styles from "../StyleCourses.module.css";
 import { DescriptionPlaceholder, DifficultyPlaceholder, TitlePlaceholder } from "./BaseParts/CourseCard";
 import CourseCardBase from "./CourseCardBase";
-
-import styles from "../StyleCourses.module.css";
 
 const CourseCardLoading = () => {
     // TODO: Add img ???

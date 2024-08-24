@@ -1,13 +1,14 @@
-import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
-import userReducer from "./slices/userSlice";
+import { Action, configureStore, ThunkAction } from "@reduxjs/toolkit";
+
+import assessmentSlice from "./slices/assessmentSlice";
+import coursesSlice from "./slices/coursesSlice";
+import dictionarySlice from "./slices/dictionarySlice";
+import drillingSlice from "./slices/drillingSlice";
+import hieroglyphSlice from "./slices/hieroglyphSlice";
+import lessonsSlice from "./slices/lessonsSlice";
 import loginReducer from "./slices/loginSlice";
 import registerSlice from "./slices/registerSlice";
-import coursesSlice from "./slices/coursesSlice";
-import lessonsSlice from "./slices/lessonsSlice";
-import drillingSlice from "./slices/drillingSlice";
-import assessmentSlice from "./slices/assessmentSlice";
-import hieroglyphSlice from "./slices/hieroglyphSlice";
-import dictionarySlice from "./slices/dictionarySlice";
+import userReducer from "./slices/userSlice";
 
 const store = configureStore({
     reducer: {

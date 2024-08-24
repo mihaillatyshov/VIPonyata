@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 
 import StudentProgress from "components/Activities/StudentProgress";
 import Loading from "components/Common/Loading";
@@ -20,7 +21,6 @@ import {
 } from "models/Activity/Items/TLexisItems";
 import { TDrilling } from "models/Activity/TDrilling";
 import { THieroglyph } from "models/Activity/THieroglyph";
-import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import { LexisState } from "redux/slices/lexis";
 
 import StudentActivityDeadline from "../StudentActivityDeadline";

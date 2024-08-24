@@ -1,8 +1,8 @@
 import React from "react";
+import { Card } from "react-bootstrap";
 
 import { TFindPair } from "models/Activity/Items/TLexisItems";
 import { TStudentLexisTryFindPairTask } from "models/Activity/Try/TLexisTry";
-import { Card } from "react-bootstrap";
 
 import { pickLexisWordsOrChars, StudentLexisTaskProps, useLexisItem, useSetLexisSelectedItemField } from "./LexisUtils";
 import StudentLexisTaskInterface from "./StudentLexisTaskInterface";

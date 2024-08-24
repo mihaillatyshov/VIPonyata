@@ -1,10 +1,10 @@
 import React from "react";
+import { Navigate, useParams } from "react-router-dom";
 
 import ITeacherAsssessmentBouble from "components/Activities/Bouble/Teacher/ITeacherAsssessmentBouble";
 import TeacherLexisBouble from "components/Activities/Bouble/Teacher/TeacherLexisBouble";
 import PageDescription from "components/Common/PageDescription";
 import PageTitle from "components/Common/PageTitle";
-import { Navigate, useParams } from "react-router-dom";
 import { useAppSelector } from "redux/hooks";
 import { selectAssessment } from "redux/slices/assessmentSlice";
 import { selectDrilling } from "redux/slices/drillingSlice";

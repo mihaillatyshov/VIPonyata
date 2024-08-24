@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
+import { Button } from "react-bootstrap";
 
 import { LexisName } from "models/Activity/IActivity";
 import { TStudentLexisTryBase } from "models/Activity/Try/TLexisTry";
-import { Button } from "react-bootstrap";
 
 import { GoToNextTaskCallbackType, useLexisItem, useSetLexisSelectedItem } from "./LexisUtils";
 

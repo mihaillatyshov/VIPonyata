@@ -1,7 +1,7 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 import { LexisTaskName } from "models/Activity/ILexis";
-import { useNavigate } from "react-router-dom";
 
 import styles from "./StyleLexisNav.module.css";
 

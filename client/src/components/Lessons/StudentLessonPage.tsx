@@ -1,11 +1,11 @@
 import React from "react";
+import { useParams } from "react-router-dom";
 
 import StudentAssessmentBubble from "components/Activities/Assessment/StudentAssessmentBubble";
 import StudentDrillingBubble from "components/Activities/Lexis/Drilling/StudentDrillingBubble";
 import StudentHieroglyphBubble from "components/Activities/Lexis/Hieroglyph/StudentHieroglyphBubble";
 import PageDescription from "components/Common/PageDescription";
 import PageTitle from "components/Common/PageTitle";
-import { useParams } from "react-router-dom";
 import { useAppSelector } from "redux/hooks";
 import { selectAssessment } from "redux/slices/assessmentSlice";
 import { selectDrilling } from "redux/slices/drillingSlice";

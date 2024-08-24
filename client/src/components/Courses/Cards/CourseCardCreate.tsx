@@ -2,9 +2,9 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 import { useUserIsTeacher } from "redux/funcs/user";
-import CourseCardBase from "./CourseCardBase";
 
 import styles from "../StyleCourses.module.css";
+import CourseCardBase from "./CourseCardBase";
 
 const CourseCardCreate = () => {
     const isTeacher = useUserIsTeacher();

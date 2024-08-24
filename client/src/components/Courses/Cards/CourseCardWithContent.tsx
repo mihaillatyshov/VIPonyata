@@ -1,7 +1,7 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 import { TCourse } from "models/TCourse";
-import { Link } from "react-router-dom";
 import { useUserIsTeacher } from "redux/funcs/user";
 
 import styles from "../StyleCourses.module.css";

@@ -1,7 +1,7 @@
 import React from "react";
+import { Modal } from "react-bootstrap";
 
 import { TAnyNotifications, TStudentNotification, TTeacherNotification } from "models/TNotification";
-import { Modal } from "react-bootstrap";
 import { isTeacher, useGetAuthorizedUserSafe } from "redux/funcs/user";
 
 import StudentNotificationsContent from "./StudentNotificationsContent";

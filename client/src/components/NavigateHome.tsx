@@ -1,8 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-import { useNavigate } from 'react-router-dom';
-
-import Loading from './Common/Loading';
+import Loading from "./Common/Loading";
 
 const NavigateHome = () => {
     const navigate = useNavigate();

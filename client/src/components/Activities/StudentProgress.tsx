@@ -1,5 +1,4 @@
 import React, { CSSProperties } from "react";
-
 import { ProgressBar } from "react-bootstrap";
 
 type StudentProgressProps = {

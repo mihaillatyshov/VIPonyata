@@ -1,11 +1,11 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 import { AjaxPost } from "libs/ServerAPI";
 import { ActivityName } from "models/Activity/IActivity";
 import { TAssessment } from "models/Activity/TAssessment";
 import { TDrilling } from "models/Activity/TDrilling";
 import { THieroglyph } from "models/Activity/THieroglyph";
-import { useNavigate } from "react-router-dom";
 
 import StudentViewDoneTryButton from "../ViewTry/StudentViewDoneTryButton";
 import ActivityBouble from "./ActivityBouble";
@@ -40,7 +40,13 @@ const StudentActivityBubble = ({ info, title, name, onDeadline }: StudentActivit
     };
 
     const getButtonText = () => {
-        return isInProgress() ? "Продолжить" : "Начать";
+        if (isInProgress()) {
+            return "Продолжить";
+        }
+        if (info.tries.length !== 0) {
+            return "Начать заново";
+        }
+        return "Начать";
     };
 
     return (

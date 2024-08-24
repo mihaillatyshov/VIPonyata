@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { Modal } from "react-bootstrap";
 
 import { AjaxPost } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
-import { Modal } from "react-bootstrap";
 import { GetShareUsersDataType, requestGetShareUsers, ShareType } from "requests/User";
 
 import ShareModalContent from "./ShareModalContent";

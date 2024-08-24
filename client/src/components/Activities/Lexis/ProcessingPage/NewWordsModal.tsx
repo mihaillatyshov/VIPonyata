@@ -1,9 +1,9 @@
 import React, { useState } from "react";
+import Modal from "react-bootstrap/Modal";
 
 import InputError from "components/Form/InputError";
 import { TextareaAutosize } from "libs/TextareaAutosize";
 import { TDictionaryItemCreate } from "models/TDictionary";
-import Modal from "react-bootstrap/Modal";
 
 import WordsTable from "./WordsTable";
 

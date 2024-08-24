@@ -1,6 +1,8 @@
 import React from "react";
-import { InputBaseProps } from "./InputBase";
+
 import CSS from "csstype";
+
+import { InputBaseProps } from "./InputBase";
 import InputError from "./InputError";
 
 interface InputTextAreaProps extends InputBaseProps {

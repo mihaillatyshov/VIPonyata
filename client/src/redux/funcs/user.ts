@@ -1,7 +1,7 @@
-import { TAuthorizedUser, selectUser } from "redux/slices/userSlice";
-import { useAppSelector } from "redux/hooks";
 import { LoadStatus } from "libs/Status";
 import { TUserData } from "models/TUser";
+import { useAppSelector } from "redux/hooks";
+import { selectUser, TAuthorizedUser } from "redux/slices/userSlice";
 
 export const useUserIsTeacher = () => {
     const user = useAppSelector(selectUser).data;

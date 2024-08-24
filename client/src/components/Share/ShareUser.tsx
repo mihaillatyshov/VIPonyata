@@ -1,8 +1,8 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 import Loading from "components/Common/Loading";
 import { TUserData } from "models/TUser";
-import { Link } from "react-router-dom";
 
 import styles from "./Share.module.css";
 

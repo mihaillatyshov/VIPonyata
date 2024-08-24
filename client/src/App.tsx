@@ -1,7 +1,5 @@
-import "./App.css";
-import "./RoundBlock.css";
-
 import React, { useLayoutEffect } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import {
     AssessmentCreatePage,
@@ -23,7 +21,6 @@ import ErrorPage from "components/ErrorPages/ErrorPage";
 import LessonCreatePage from "components/Lessons/LessonCreatePage";
 import TeacherLessonPage from "components/Lessons/TeacherLessonPage";
 import { LoadStatus } from "libs/Status";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { isTeacher } from "redux/funcs/user";
 
 import StudentDrillingPage from "./components/Activities/Lexis/Drilling/StudentDrillingPage";
@@ -39,6 +36,9 @@ import { AjaxGet } from "./libs/ServerAPI";
 import { useAppDispatch, useAppSelector } from "./redux/hooks";
 import { selectUser, setUserData, UserDataType } from "./redux/slices/userSlice";
 import styleThemes from "./themes/StyleThemes.module.css";
+
+import "./RoundBlock.css";
+import "./App.css";
 
 const App = () => {
     const user = useAppSelector(selectUser).data;

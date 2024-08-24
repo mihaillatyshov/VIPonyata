@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import { GetImg, GetStringOrNull } from "components/Form/InputBase";
@@ -11,7 +12,6 @@ import { useFormState } from "components/Form/useFormState";
 import { AjaxPost } from "libs/ServerAPI";
 import { ImageState } from "models/Img";
 import { TCourse, TCourseCreate } from "models/TCourse";
-import { useNavigate } from "react-router-dom";
 import { ValidateEmpty, ValidateImgLoading } from "validators/FormValidators";
 
 const colors: TOption[] = [

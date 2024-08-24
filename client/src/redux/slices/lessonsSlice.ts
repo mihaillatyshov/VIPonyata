@@ -1,6 +1,7 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { TLesson } from "models/TLesson";
 import { RootState } from "redux/store";
+
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 type ItemsType = TLesson[] | undefined;
 type SelectedType = TLesson | undefined;

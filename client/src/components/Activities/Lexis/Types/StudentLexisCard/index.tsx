@@ -1,7 +1,7 @@
 import React from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { TCardItem } from "models/Activity/Items/TLexisItems";
-import { useNavigate, useParams } from "react-router-dom";
 
 import { pickLexisWordOrChar, StudentLexisTaskProps, useSetLexisCardExtras } from "../LexisUtils";
 import CardItem from "./CardItem";

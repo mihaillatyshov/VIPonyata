@@ -1,9 +1,9 @@
 import React, { useLayoutEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import Notifications from "components/Notifications/Notifications";
 import { AjaxGet } from "libs/ServerAPI";
 import { TAnyNotifications } from "models/TNotification";
-import { Link } from "react-router-dom";
 import { useAppSelector } from "redux/hooks";
 import { selectUser } from "redux/slices/userSlice";
 

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
+import Modal from "react-bootstrap/Modal";
+import { useNavigate } from "react-router-dom";
 
 import { LoadStatus } from "libs/Status";
 import { ActivityName } from "models/Activity/IActivity";
-import Modal from "react-bootstrap/Modal";
-import { useNavigate } from "react-router-dom";
 import { GetActivityDoneTriesDataType, requestGetActivityDoneTries } from "requests/Activity/Activity";
 
 import StudentViewDoneTryModalContent from "./StudentViewDoneTryModalContent";

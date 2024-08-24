@@ -1,8 +1,8 @@
 import React, { useLayoutEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import Loading from "components/Common/Loading";
 import { AjaxGet } from "libs/ServerAPI";
-import { Link } from "react-router-dom";
 import { useUserIsTeacher } from "redux/funcs/user";
 
 interface CounterProps {

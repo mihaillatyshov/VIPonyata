@@ -1,8 +1,9 @@
+import { Link, useNavigate } from "react-router-dom";
+
 import { ActivityName } from "models/Activity/IActivity";
 import { TAssessment } from "models/Activity/TAssessment";
 import { TDrilling } from "models/Activity/TDrilling";
 import { THieroglyph } from "models/Activity/THieroglyph";
-import { Link, useNavigate } from "react-router-dom";
 
 import styles from "./StylesTeacherBouble.module.css";
 

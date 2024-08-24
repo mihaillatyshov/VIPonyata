@@ -1,8 +1,8 @@
 import { useLayoutEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { AjaxGet } from "libs/ServerAPI";
 import { TLessonResponse } from "models/TLesson";
-import { useNavigate } from "react-router-dom";
 import { useSetAssessmentInfo, useSetLexisInfo } from "redux/funcs/activity";
 import { useAppDispatch } from "redux/hooks";
 import { setAssessmentInfo } from "redux/slices/assessmentSlice";

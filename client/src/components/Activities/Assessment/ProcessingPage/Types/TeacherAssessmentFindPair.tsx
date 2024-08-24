@@ -1,8 +1,9 @@
 import React from "react";
+
 import { TTeacherAssessmentFindPair } from "models/Activity/Items/TAssessmentItems";
-import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
 
 import styles from "./Style.module.css";
+import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
 
 type TColNames = "meta_first" | "meta_second";
 

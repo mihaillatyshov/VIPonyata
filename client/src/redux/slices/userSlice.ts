@@ -1,7 +1,9 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { RootState } from "../store";
-import { TUserData } from "models/TUser";
 import { LoadStatus } from "libs/Status";
+import { TUserData } from "models/TUser";
+
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+
+import { RootState } from "../store";
 
 export interface TAuthorizedUser {
     isAuth: true;

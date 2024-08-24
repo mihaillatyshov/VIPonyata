@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 import PageDescription from "components/Common/PageDescription";
 import PageTitle from "components/Common/PageTitle";
@@ -6,7 +7,6 @@ import LessonsList from "components/Lessons/LessonsList";
 import { AjaxGet } from "libs/ServerAPI";
 import { TCourse } from "models/TCourse";
 import { TLesson } from "models/TLesson";
-import { useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { selectCourses, setSelectedCourse } from "redux/slices/coursesSlice";
 import { setLessons } from "redux/slices/lessonsSlice";

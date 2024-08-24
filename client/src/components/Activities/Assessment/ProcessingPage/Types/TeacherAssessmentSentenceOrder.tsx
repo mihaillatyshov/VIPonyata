@@ -1,7 +1,9 @@
 import React from "react";
+
 import { TTeacherAssessmentSentenceOrder } from "models/Activity/Items/TAssessmentItems";
-import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
+
 import ITeacherAssessmentOrderTask from "./ITeacherAssessmentOrderTask";
+import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
 
 const TeacherAssessmentSentenceOrder = ({
     data,

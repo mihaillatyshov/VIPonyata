@@ -1,12 +1,12 @@
 import React, { useEffect, useRef } from "react";
 
+import AutosizeInput from "libs/AutosizeInput";
 import { TSpace } from "models/Activity/Items/TLexisItems";
 import { TStudentLexisTrySpaceTask } from "models/Activity/Try/TLexisTry";
 
 import { StudentLexisTaskProps, useLexisItem, useSetLexisSelectedItemField } from "./LexisUtils";
 import StudentLexisTaskInterface from "./StudentLexisTaskInterface";
 import { StudentLexisTaskTitle } from "./StudentLexisTaskTitle";
-import AutosizeInput from "libs/AutosizeInput";
 
 interface SpaceTaskType {
     wordId: number;

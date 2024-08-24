@@ -1,4 +1,7 @@
 import React, { useEffect } from "react";
+import Modal from "react-bootstrap/Modal";
+
+import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import {
     assessmentTaskRusNameAliases,
     TAssessmentTaskName,
@@ -6,8 +9,6 @@ import {
     TTeacherAssessmentTestMulti,
     TTeacherAssessmentTestSingle,
 } from "models/Activity/Items/TAssessmentItems";
-import Modal from "react-bootstrap/Modal";
-import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 
 interface ImportTestsModalProps {
     taskName: TAssessmentTaskName.TEST_SINGLE | TAssessmentTaskName.TEST_MULTI;

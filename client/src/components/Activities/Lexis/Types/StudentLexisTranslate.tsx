@@ -1,6 +1,5 @@
 import React from "react";
 
-import InputText from "components/Form/InputText";
 import { TTranslate } from "models/Activity/Items/TLexisItems";
 import { TStudentLexisTranslateTask } from "models/Activity/Try/TLexisTry";
 

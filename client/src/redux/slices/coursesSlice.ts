@@ -1,6 +1,7 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { TCourse } from "models/TCourse";
 import { RootState } from "redux/store";
+
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 type ItemsType = TCourse[] | undefined;
 type SelectedType = TCourse | undefined;

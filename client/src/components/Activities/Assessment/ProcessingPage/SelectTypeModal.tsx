@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import Modal from "react-bootstrap/Modal";
+
 import {
+    assessmentTaskRusNameAliases,
     TAssessmentTaskName,
     TTeacherAssessmentAnyItem,
-    assessmentTaskRusNameAliases,
 } from "models/Activity/Items/TAssessmentItems";
-import Modal from "react-bootstrap/Modal";
+
 import { ImportTestsModalModal } from "./ImportTestsModal";
 
 interface SelectTypeModalProps {

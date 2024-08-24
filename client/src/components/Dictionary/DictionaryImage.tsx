@@ -14,7 +14,7 @@ interface DictionaryImageProps {
 
 const DictionaryImage = ({ initValue, className, dictionary_id, onSuccessSave }: DictionaryImageProps) => {
     const [img, setImg] = useState<ImageState>(
-        initValue ? { loadStatus: LoadStatus.DONE, url: initValue } : { loadStatus: LoadStatus.NONE }
+        initValue ? { loadStatus: LoadStatus.DONE, url: initValue } : { loadStatus: LoadStatus.NONE },
     );
 
     const uploadImg = (newImg: ImageState) => {
