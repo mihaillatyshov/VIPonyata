@@ -3,7 +3,7 @@
     line-height: 1;
     font-size: var(--var-page-title-size);
     padding: 5px 5px 5px 13px;
-    /* background-color: var(--css-var-title); */
+
     overflow-wrap: anywhere;
     min-width: 160px;
     width: fit-content;
@@ -11,6 +11,9 @@
     display: flex;
     border-radius: 2px;
     position: relative;
+    text-align: center;
+
+    align-items: center;
 }
 
 .pageTitleBack {
