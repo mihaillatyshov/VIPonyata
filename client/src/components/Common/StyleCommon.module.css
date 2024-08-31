@@ -1,5 +1,5 @@
 .pageTitle {
-    font-family: "APJapanesefont";
+    font-family: "APJapanesefont", "CenturyGothicPaneuropean", Arial, Helvetica, sans-serif;
     line-height: 1;
     font-size: var(--var-page-title-size);
     padding: 5px 5px 5px 13px;

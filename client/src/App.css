@@ -5,10 +5,26 @@
 }
 
 @font-face {
+    font-family: "APJapanesefontImportant";
+    src:
+        local("APJapanesefontImportant"),
+        url(./assets/fonts/APJapanesefont.ttf) format("truetype");
+}
+
+@font-face {
     font-family: "APJapanesefont";
+
     src:
         local("APJapanesefont"),
         url(./assets/fonts/APJapanesefont.ttf) format("truetype");
+    unicode-range: U+A5, U+4E00-9FFF, U+30??, U+FF00-FF9F, U+3400-4DB5;
+}
+
+@font-face {
+    font-family: "CenturyGothicPaneuropean";
+    src:
+        local("CenturyGothicPaneuropean"),
+        url(./assets/fonts/CenturyGothicPaneuropeanRegular.ttf) format("truetype");
 }
 
 html {
@@ -18,6 +34,8 @@ html {
 }
 
 body {
+    font-family: "CenturyGothicPaneuropean", Arial, Helvetica, sans-serif;
+
     min-height: 100%;
     height: 100%;
     /* overflow-y: scroll; */
