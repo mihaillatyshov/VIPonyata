@@ -1,4 +1,5 @@
 import React from "react";
+import ReactMarkdown from "react-markdown";
 
 import { TAssessmentCheckedOpenQuestion, TAssessmentDoneTryOpenQuestion } from "models/Activity/Items/TAssessmentItems";
 
@@ -24,10 +25,10 @@ export const StudentAssessmentDoneTryOpenQuestion = ({
 
     return (
         <div className="student-assessment-view-open-question__container">
-            <div className="prevent-select">{data.question}</div>
-            {/* <div>
-                <span className={className}>{data.answer} &nbsp;</span>
-            </div> */}
+            <div className="prevent-select md-last-pad-zero">
+                <ReactMarkdown>{data.question}</ReactMarkdown>
+            </div>
+
             <div className="student-assessment-view-open-question__wrapper">
                 <div>Твой ответ:</div>
                 <span className="form-control">{data.answer} &nbsp;</span>

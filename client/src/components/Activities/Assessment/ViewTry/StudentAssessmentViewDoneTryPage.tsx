@@ -116,9 +116,11 @@ const StudentAssessmentViewDoneTryPage = () => {
                 {doneTry.data.done_tasks.map((doneTask, i) => (
                     <React.Fragment key={i}>
                         <div className="student-assessment-view-task__wrapper">
-                            <div className="student-assessment-task-title">
-                                {studentAssessmentTaskRusNameAliases[doneTask.name]}
-                            </div>
+                            {doneTask.name !== TAssessmentTaskName.IMG && (
+                                <div className="student-assessment-task-title">
+                                    {studentAssessmentTaskRusNameAliases[doneTask.name]}
+                                </div>
+                            )}
                             {hasMistakesMessage(doneTask.name) ? (
                                 <TaskMistakes {...doneTry.data.checked_tasks[i]} />
                             ) : null}

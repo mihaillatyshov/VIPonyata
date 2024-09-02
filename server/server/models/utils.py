@@ -10,6 +10,7 @@ from server.exceptions.ApiExceptions import InvalidAPIUsage, InvalidRequestJson
 _RE_COMBINE_WHITESPACE = re.compile(r"\s+")
 
 StrExtraSpaceRemove = Annotated[str, AfterValidator(lambda x: _RE_COMBINE_WHITESPACE.sub(" ", x).strip())]
+StrStrip = Annotated[str, AfterValidator(lambda x: x.strip())]
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -27,13 +28,13 @@ def format_errors(pydantic_errors: list[ErrorDetails]) -> tuple[dict, str | None
     return result, message
 
 
-def validate_req(req_type: Type[T], req_data: dict | None,
+def validate_req(req_type: Type[T],
+                 req_data: dict | None,
                  validation_code: int = 400,
                  validation_message: str = "",
                  value_code: int = 400,
                  value_message: str = "",
-                 other_data: dict = {}
-                 ) -> T:
+                 other_data: dict = {}) -> T:
     if not req_data:
         raise InvalidRequestJson()
 

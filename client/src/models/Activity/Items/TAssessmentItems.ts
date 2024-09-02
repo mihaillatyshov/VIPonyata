@@ -205,6 +205,7 @@ export type TAssessmentDoneTryOpenQuestion = TAssessmentOpenQuestion & TTeacherA
 // * ==================================================================================================================
 interface TAssessmentImgBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.IMG;
+    description?: string | null;
     url: string;
 }
 export interface TAssessmentImg extends TAssessmentImgBase {}
@@ -217,6 +218,7 @@ export type TAssessmentDoneTryImg = TAssessmentImg & TTeacherAssessmentImg;
 // * ==================================================================================================================
 interface TAssessmentAudioBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.AUDIO;
+    description?: string | null;
     url: string;
 }
 export interface TAssessmentAudio extends TAssessmentAudioBase {}

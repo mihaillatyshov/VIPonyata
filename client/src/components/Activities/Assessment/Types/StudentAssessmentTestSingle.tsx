@@ -1,4 +1,5 @@
 import React from "react";
+import ReactMarkdown from "react-markdown";
 
 import InputRadioSingle from "components/Form/InputRadioSingle";
 import { TAssessmentTestSingle } from "models/Activity/Items/TAssessmentItems";
@@ -17,7 +18,9 @@ const StudentAssessmentTestSingle = ({ data, taskId }: StudentAssessmentTypeProp
 
     return (
         <div className="student-assessment-test">
-            <div className="prevent-select">{data.question}</div>
+            <div className="prevent-select md-last-pad-zero">
+                <ReactMarkdown>{data.question}</ReactMarkdown>
+            </div>
 
             <div className="student-assessment-test__options">
                 {data.options.map((answer: string, fieldId: number) => (

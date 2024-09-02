@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
+import PageTitle from "components/Common/PageTitle";
 import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import { GetImg, GetStringOrNull } from "components/Form/InputBase";
 import InputImage from "components/Form/InputImage";
@@ -71,32 +72,40 @@ const CourseCreatePage = () => {
     };
 
     return (
-        <form className="container mt-5 d-flex flex-column" onSubmit={onSubmitHandler}>
-            <InputText placeholder="Название" htmlId="course-name" className="mt-2" {...inputProps.name} />
-            <div className="row gx-4 mt-2">
-                <div className="col-md">
-                    <InputText placeholder="Сложность" htmlId="course-difficulty" {...inputProps.difficulty} />
+        <div className="container mb-5 pb-5">
+            <PageTitle title="コース" urlBack="/" />
+            <form className="container mt-5 d-flex flex-column" onSubmit={onSubmitHandler}>
+                <InputText placeholder="Название" htmlId="course-name" className="mt-2" {...inputProps.name} />
+                <div className="row gx-4 mt-2">
+                    <div className="col-md">
+                        <InputText placeholder="Сложность" htmlId="course-difficulty" {...inputProps.difficulty} />
+                    </div>
+                    <div className="col-md">
+                        <InputSelect
+                            placeholder="Цвет"
+                            htmlId="course-difficulty-color"
+                            options={colors}
+                            {...inputProps.difficultyColor}
+                        />
+                    </div>
                 </div>
-                <div className="col-md">
-                    <InputSelect
-                        placeholder="Цвет"
-                        htmlId="course-difficulty-color"
-                        options={colors}
-                        {...inputProps.difficultyColor}
-                    />
-                </div>
-            </div>
-            <InputNumber htmlId="course-sort" placeholder="Порядок соритровки" className="mt-2" {...inputProps.sort} />
-            <FloatingLabelTextareaAutosize
-                htmlId="course-description"
-                {...inputProps.description}
-                placeholder="Описание"
-                className="mt-2"
-                rows={6}
-            />
-            <InputImage htmlId="course-image" placeholder="Картинка" className="mt-2" {...inputProps.img} />
-            <SubmitButton value="Создать" className="btn-success mt-4" />
-        </form>
+                <InputNumber
+                    htmlId="course-sort"
+                    placeholder="Порядок соритровки"
+                    className="mt-2"
+                    {...inputProps.sort}
+                />
+                <FloatingLabelTextareaAutosize
+                    htmlId="course-description"
+                    {...inputProps.description}
+                    placeholder="Описание"
+                    className="mt-2"
+                    rows={6}
+                />
+                <InputImage htmlId="course-image" placeholder="Картинка" className="mt-2" {...inputProps.img} />
+                <SubmitButton value="Создать" className="btn-success mt-4" />
+            </form>
+        </div>
     );
 };
 

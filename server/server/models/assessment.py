@@ -7,7 +7,7 @@ from typing import TypedDict
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
-from server.models.utils import StrExtraSpaceRemove
+from server.models.utils import StrExtraSpaceRemove, StrStrip
 
 
 class AssessmentTaskName(str, Enum):
@@ -87,7 +87,7 @@ class TextTaskBase(BaseModelTask):
 
 
 class TextTaskTeacherBase(TextTaskBase):
-    text: StrExtraSpaceRemove
+    text: StrStrip
 
 
 class TextTaskStudentReq(TextTaskBase):
@@ -123,7 +123,7 @@ class SingleTestTaskBase(BaseModelTask):
 
 
 class SingleTestTaskTeacherBase(SingleTestTaskBase):
-    question: StrExtraSpaceRemove
+    question: StrStrip
     options: list[StrExtraSpaceRemove]
     meta_answer: int
 
@@ -177,7 +177,7 @@ class MultiTestTaskBase(BaseModelTask):
 
 
 class MultiTestTaskTeacherBase(MultiTestTaskBase):
-    question: StrExtraSpaceRemove
+    question: StrStrip
     options: list[StrExtraSpaceRemove]
     meta_answers: list[int]
 
@@ -637,7 +637,7 @@ class OpenQuestionTaskBase(BaseModelTask):
 
 
 class OpenQuestionTaskTeacherBase(OpenQuestionTaskBase):
-    question: StrExtraSpaceRemove
+    question: StrStrip
     meta_answer: StrExtraSpaceRemove | None = None
 
 
@@ -681,6 +681,7 @@ class ImgTaskBase(BaseModelTask):
 
 
 class ImgTaskTeacherBase(ImgTaskBase):
+    description: StrStrip | None = None
     url: str
 
 
@@ -717,6 +718,7 @@ class AudioTaskBase(BaseModelTask):
 
 
 class AudioTaskTeacherBase(AudioTaskBase):
+    description: StrStrip | None = None
     url: str
 
 

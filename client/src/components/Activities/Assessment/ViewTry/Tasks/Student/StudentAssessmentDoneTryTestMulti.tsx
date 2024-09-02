@@ -1,4 +1,5 @@
 import React from "react";
+import ReactMarkdown from "react-markdown";
 
 import InputCheckSingle from "components/Form/InputCheckSingle";
 import { TAssessmentCheckedTestMulti, TAssessmentDoneTryTestMulti } from "models/Activity/Items/TAssessmentItems";
@@ -56,7 +57,9 @@ export const StudentAssessmentDoneTryTestMulti = ({
 
     return (
         <div className="student-assessment-test">
-            <div className="prevent-select">{data.question}</div>
+            <div className="prevent-select md-last-pad-zero">
+                <ReactMarkdown>{data.question}</ReactMarkdown>
+            </div>
 
             <div className="student-assessment-test__options">
                 {data.options.map((option, fieldId) => (

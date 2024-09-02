@@ -1,4 +1,5 @@
 import React from "react";
+import ReactMarkdown from "react-markdown";
 
 import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import { TTeacherAssessmentOpenQuestion } from "models/Activity/Items/TAssessmentItems";
@@ -11,7 +12,7 @@ const TeacherAssessmentOpenQuestion = ({
     onChangeTask,
 }: TeacherAssessmentTypeProps<TTeacherAssessmentOpenQuestion>) => {
     return (
-        <div>
+        <>
             <FloatingLabelTextareaAutosize
                 htmlId={`question_${taskUUID}`}
                 placeholder="Вопрос"
@@ -21,16 +22,19 @@ const TeacherAssessmentOpenQuestion = ({
                 noErrorField={true}
                 autoFocus={true}
             />
+
+            <div className="mt-3 mb-2 md-last-pad-zero">
+                <ReactMarkdown>{data.question}</ReactMarkdown>
+            </div>
             <FloatingLabelTextareaAutosize
                 htmlId={`answer_${taskUUID}`}
                 placeholder="Ответ"
                 value={data.meta_answer === null ? "" : data.meta_answer}
                 onChangeHandler={(newValue) => onChangeTask({ ...data, meta_answer: newValue })}
-                className="mt-4"
                 rows={5}
                 noErrorField={true}
             />
-        </div>
+        </>
     );
 };
 

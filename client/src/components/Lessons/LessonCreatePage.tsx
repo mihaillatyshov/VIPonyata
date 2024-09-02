@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import PageTitle from "components/Common/PageTitle";
 import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import { GetImg, GetStringOrNull } from "components/Form/InputBase";
 import InputImage from "components/Form/InputImage";
@@ -57,24 +58,27 @@ const LessonCreatePage = () => {
     };
 
     return (
-        <form className="container mt-5 d-flex flex-column" onSubmit={onSubmitHandler}>
-            <InputText placeholder="Название" htmlId="course-name" className="mt-2" {...inputProps.name} />
-            <InputNumber
-                htmlId="course-sort"
-                placeholder="Порядок соритровки"
-                className="mt-2"
-                {...inputProps.number}
-            />
-            <FloatingLabelTextareaAutosize
-                htmlId="course-description"
-                {...inputProps.description}
-                placeholder="Описание"
-                className="mt-2"
-                rows={6}
-            />
-            <InputImage htmlId="course-image" placeholder="Картинка" className="mt-2" {...inputProps.img} />
-            <SubmitButton value="Создать" className="btn-success mt-4" />
-        </form>
+        <div className="container mb-5 pb-5">
+            <PageTitle title="授業" urlBack={`/courses/${courseId}`} />
+            <form className="container mt-5 d-flex flex-column" onSubmit={onSubmitHandler}>
+                <InputText placeholder="Название" htmlId="course-name" className="mt-2" {...inputProps.name} />
+                <InputNumber
+                    htmlId="course-sort"
+                    placeholder="Порядок соритровки"
+                    className="mt-2"
+                    {...inputProps.number}
+                />
+                <FloatingLabelTextareaAutosize
+                    htmlId="course-description"
+                    {...inputProps.description}
+                    placeholder="Описание"
+                    className="mt-2"
+                    rows={6}
+                />
+                <InputImage htmlId="course-image" placeholder="Картинка" className="mt-2" {...inputProps.img} />
+                <SubmitButton value="Создать" className="btn-success mt-4" />
+            </form>
+        </div>
     );
 };
 

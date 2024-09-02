@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
 
+import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import InputImage from "components/Form/InputImage";
 import { LoadStatus } from "libs/Status";
 import { TTeacherAssessmentImg } from "models/Activity/Items/TAssessmentItems";
@@ -25,13 +27,29 @@ const TeacherAssessmentImg = ({ data, taskUUID, onChangeTask }: TeacherAssessmen
     };
 
     return (
-        <InputImage
-            htmlId={taskUUID}
-            placeholder="Картинка"
-            className="mt-2"
-            value={img}
-            onChangeHandler={setImgHandler}
-        />
+        <>
+            <FloatingLabelTextareaAutosize
+                htmlId={`description_${taskUUID}`}
+                placeholder="Описание"
+                value={data.description || ""}
+                onChangeHandler={(newValue: string) => onChangeTask({ ...data, description: newValue })}
+                rows={5}
+                noErrorField={true}
+                autoFocus={true}
+            />
+            {data.description && (
+                <div className="mt-2 text-center md-last-pad-zero">
+                    <ReactMarkdown>{data.description}</ReactMarkdown>
+                </div>
+            )}
+            <InputImage
+                htmlId={taskUUID}
+                placeholder="Картинка"
+                className="mt-2"
+                value={img}
+                onChangeHandler={setImgHandler}
+            />
+        </>
     );
 };
 

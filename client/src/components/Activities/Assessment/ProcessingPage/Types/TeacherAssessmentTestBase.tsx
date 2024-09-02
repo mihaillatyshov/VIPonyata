@@ -1,4 +1,5 @@
 import React from "react";
+import ReactMarkdown from "react-markdown";
 
 import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import { TTeacherAssessmentTestMulti, TTeacherAssessmentTestSingle } from "models/Activity/Items/TAssessmentItems";
@@ -38,9 +39,11 @@ const TeacherAssessmentTestBase = <T extends TTeacherAssessmentTestType>({
                 value={data.question}
                 onChangeHandler={changeQuestionHandler}
                 rows={5}
-                className="mb-3"
                 noErrorField={true}
             />
+            <div className="mt-3 mb-2 md-last-pad-zero">
+                <ReactMarkdown>{data.question}</ReactMarkdown>
+            </div>
             <form>
                 {data.options.map((option, i) => (
                     <div key={i} className="input-group mb-3 w-auto">

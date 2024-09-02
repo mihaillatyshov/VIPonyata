@@ -1,4 +1,5 @@
 import React from "react";
+import ReactMarkdown from "react-markdown";
 
 import { TAssessmentCheckedOpenQuestion, TAssessmentDoneTryOpenQuestion } from "models/Activity/Items/TAssessmentItems";
 
@@ -30,7 +31,10 @@ export const TeacherAssessmentDoneTryOpenQuestion = ({
 
     return (
         <div className="mt-2">
-            <div className="prevent-select">{data.question}</div>
+            <div className="prevent-select md-last-pad-zero">
+                <ReactMarkdown>{data.question}</ReactMarkdown>
+            </div>
+
             <div>
                 <span className={className}>{data.answer} &nbsp;</span>
             </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import ReactMarkdown from "react-markdown";
 
 import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import { TAssessmentOpenQuestion } from "models/Activity/Items/TAssessmentItems";
@@ -17,7 +18,9 @@ const StudentAssessmentOpenQuestion = ({ data, taskId }: StudentAssessmentTypePr
 
     return (
         <div className="student-assessment-open-question__wrapper">
-            <div className="prevent-select">{data.question}</div>
+            <div className="prevent-select md-last-pad-zero mb-1">
+                <ReactMarkdown>{data.question}</ReactMarkdown>
+            </div>
             <FloatingLabelTextareaAutosize
                 value={data.answer}
                 onChangeHandler={onChangeHandler}

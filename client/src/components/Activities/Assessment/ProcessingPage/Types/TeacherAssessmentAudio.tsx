@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
 
+import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import InputAudio from "components/Form/InputAudio";
 import { LoadStatus } from "libs/Status";
 import { TTeacherAssessmentAudio } from "models/Activity/Items/TAssessmentItems";
@@ -29,13 +31,29 @@ const TeacherAssessmentAudio = ({
     };
 
     return (
-        <InputAudio
-            htmlId={taskUUID}
-            placeholder="Аудио"
-            className="mt-2"
-            value={audio}
-            onChangeHandler={setAudioHandler}
-        />
+        <>
+            <FloatingLabelTextareaAutosize
+                htmlId={`description_${taskUUID}`}
+                placeholder="Описание"
+                value={data.description || ""}
+                onChangeHandler={(newValue: string) => onChangeTask({ ...data, description: newValue })}
+                rows={5}
+                noErrorField={true}
+                autoFocus={true}
+            />
+            {data.description && (
+                <div className="mt-2 text-center md-last-pad-zero">
+                    <ReactMarkdown>{data.description}</ReactMarkdown>
+                </div>
+            )}
+            <InputAudio
+                htmlId={taskUUID}
+                placeholder="Аудио"
+                className="mt-2"
+                value={audio}
+                onChangeHandler={setAudioHandler}
+            />
+        </>
     );
 };
 
