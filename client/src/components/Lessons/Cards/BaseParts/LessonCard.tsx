@@ -1,4 +1,6 @@
-import { TextWithLinks } from "components/Common/TextWithLinks";
+import ReactMarkdown from "react-markdown";
+
+import { ChatUrlLinkMd, TextWithLinksForMd } from "components/Common/TextWithLinks";
 
 type TitleProps = { title: string };
 export const Title = ({ title }: TitleProps) => {
@@ -7,7 +9,13 @@ export const Title = ({ title }: TitleProps) => {
 
 type DescriptionProps = { description: string | null };
 export const Description = ({ description }: DescriptionProps) => {
-    return <TextWithLinks text={description ?? ""} linkMaxChars={40} />;
+    return (
+        <div className="md-last-pad-zero">
+            <ReactMarkdown components={{ a: ChatUrlLinkMd }}>
+                {TextWithLinksForMd({ text: description ?? "", linkMaxChars: 40 })}
+            </ReactMarkdown>
+        </div>
+    );
 };
 
 export const TitlePlaceholder = () => {

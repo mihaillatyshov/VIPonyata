@@ -1,6 +1,7 @@
 import React from "react";
+import ReactMarkdown from "react-markdown";
 
-import { TextWithLinks } from "./TextWithLinks";
+import { ChatUrlLinkMd, TextWithLinksForMd } from "./TextWithLinks";
 
 interface PageDescriptionProps {
     description?: string | null;
@@ -16,7 +17,11 @@ const PageDescription = ({ description, className = "mb-5", isCentered }: PageDe
     return (
         <div className={`${className}`}>
             {description !== undefined ? (
-                <TextWithLinks text={description ?? ""} linkMaxChars={60} />
+                <div className="text-center md-last-pad-zero">
+                    <ReactMarkdown components={{ a: ChatUrlLinkMd }}>
+                        {TextWithLinksForMd({ text: description ?? "", linkMaxChars: 60 })}
+                    </ReactMarkdown>
+                </div>
             ) : (
                 <div className="placeholder-wave w-100">
                     <span className="placeholder w-25 me-2 bg-placeholder rounded"></span>
