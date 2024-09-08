@@ -63,20 +63,15 @@ export const TextWithLinks = ({ text, linkMaxChars, target = "_blank" }: TextWit
 
 export const TextWithLinksForMd = ({ text, linkMaxChars }: TextWithLinksProps) => {
     const getLinkStr = (link: string) => {
-        if (linkMaxChars && link.length > linkMaxChars) {
-            return `[${link.slice(0, linkMaxChars) + "..."}](${link})`;
-        }
-
-        return link;
+        const linkText = linkMaxChars && link.length > linkMaxChars ? link.slice(0, linkMaxChars) + "..." : link;
+        return `[${linkText}](${link})`;
     };
 
     const newText = text.replace(/(^| |\s)((?:https?:\/\/|ftps?:\/\/|\bwww\.))(\S+)($| |\s)/gim, (...args) => {
-        console.log("args", args);
         const link = args[2] + args[3];
-        return args[1] + getLinkStr(link) + args[4];
+        const fixedLink = args[1] + getLinkStr(link) + args[4];
+        return fixedLink;
     });
-
-    console.log("newText", newText);
 
     return newText;
 };
