@@ -79,7 +79,6 @@ export const getProcessingData = async (
 const getEditData = async (name: IAssessmentName, id: number): Promise<GetProcessingDataReturnType> => {
     try {
         const { assessment, tasks } = await AjaxGet<GetAssessmentResponse>({ url: `/api/${name}/${id}` });
-        console.log(assessment, tasks);
         return {
             loadStatus: LoadStatus.DONE,
             tasks: tasks,

@@ -2,9 +2,7 @@ from flask import request
 
 import server.queries.OtherDBqueries as DBQO
 import server.queries.TeacherDBqueries as DBQT
-from server.exceptions.ApiExceptions import (CourseNotFoundException,
-                                             InvalidRequestJson,
-                                             UserNotFoundException)
+from server.exceptions.ApiExceptions import (CourseNotFoundException, InvalidRequestJson, UserNotFoundException)
 from server.models.course import CourseCreateReq
 from server.models.user import ShareUserReq
 from server.models.utils import validate_req
@@ -21,6 +19,29 @@ def create_course():
     course_data = CourseCreateReq(**request.json)
 
     return {"course": DBQT.create_course(course_data)}
+
+
+def update_course(course_id):
+    if not request.json:
+        raise InvalidRequestJson()
+
+    if not DBQT.get_course_by_id(course_id):
+        raise CourseNotFoundException(course_id)
+
+    course_data = CourseCreateReq(**request.json)
+
+    DBQT.update_course(course_id, course_data)
+
+    return {"course": DBQT.get_course_by_id(course_id)}
+
+
+def delete_course_by_id(course_id):
+    if not DBQT.get_course_by_id(course_id):
+        raise CourseNotFoundException(course_id)
+
+    DBQT.delete_course_by_id(course_id)
+
+    return {"message": "Course deleted"}
 
 
 def get_course_users(course_id):
