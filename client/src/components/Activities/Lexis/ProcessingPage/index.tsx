@@ -141,7 +141,8 @@ export const LexisProcessingPage = ({ title, name, processingType }: LexisProces
             .catch(({ isServerError, response, json }) => {
                 if (!isServerError) {
                     if (response.status === 404 || response.status === 403) navigate("/");
-                }
+                    else setError("Неизвестная ошибка");
+                } else setError("Ошибка соединения");
             });
     };
 

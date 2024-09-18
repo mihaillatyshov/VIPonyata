@@ -108,6 +108,7 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
             </div>
         );
     }
+
     const handleProcessing = () => {
         const ajaxMethod = processingType === "edit" ? AjaxPatch : AjaxPost;
 
@@ -125,8 +126,9 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
             .catch(({ isServerError, response, json }) => {
                 if (!isServerError) {
                     if (response.status === 422) setErrors(json);
-                    if (response.status === 404 || response.status === 403) navigate("/");
-                }
+                    else if (response.status === 404 || response.status === 403) navigate("/");
+                    else setErrors({ message: "Неизвестная ошибка", errors: {} });
+                } else setErrors({ message: "Ошибка соединения", errors: {} });
             });
     };
 

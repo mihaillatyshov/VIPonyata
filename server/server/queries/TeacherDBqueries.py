@@ -45,6 +45,16 @@ def create_course(course_data: CourseCreateReq) -> Course:
         return course
 
 
+def update_course(course_id: int, course_data: CourseCreateReq):
+    with DBsession.begin() as session:
+        session.execute(update(Course).where(Course.id == course_id).values(**course_data.model_dump()))
+
+
+def delete_course_by_id(course_id: int):
+    with DBsession.begin() as session:
+        session.execute(delete(Course).where(Course.id == course_id))
+
+
 def get_students_inside_course(course_id: int) -> list[User]:
     with DBsession.begin() as session:
         return session.scalars(
@@ -90,6 +100,16 @@ def create_lesson(course_id: int, lesson_data: LessonCreateReq) -> Lesson:
         return lesson
 
 
+def update_lesson(lesson_id: int, lesson_data: LessonCreateReq):
+    with DBsession.begin() as session:
+        session.execute(update(Lesson).where(Lesson.id == lesson_id).values(**lesson_data.model_dump()))
+
+
+def delete_lesson_by_id(lesson_id: int):
+    with DBsession.begin() as session:
+        session.execute(delete(Lesson).where(Lesson.id == lesson_id))
+
+
 def get_students_inside_lesson(lesson_id: int) -> list[User]:
     with DBsession.begin() as session:
         return session.scalars(
@@ -126,6 +146,8 @@ def modify_delete_by_activity_try_type(activity_try_type: type[ActivityTryType],
         return query.where(NotificationStudentToTeacher.assessment_try_id.in_(ids))
     if activity_try_type == FinalBossTry:
         return query.where(NotificationStudentToTeacher.final_boss_try_id.in_(ids))
+
+    return ""
 
 
 class ActivityForNotificationType(TypedDict):

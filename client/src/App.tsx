@@ -15,10 +15,10 @@ import {
 } from "components/Activities/Lexis/Hieroglyph/HieroglyphProcessingPage";
 import StudentHieroglyphPage from "components/Activities/Lexis/Hieroglyph/StudentHieroglyphPage";
 import StudentProfilePage from "components/Authentication/StudentProfilePage";
-import CourseCreatePage from "components/Courses/CourseCreatePage";
+import { CourseCreatePage, CourseEditPage } from "components/Courses/CourseProcessingPage";
 import DictionaryPage from "components/Dictionary/DictionaryPage";
 import ErrorPage from "components/ErrorPages/ErrorPage";
-import LessonCreatePage from "components/Lessons/LessonCreatePage";
+import { LessonCreatePage, LessonEditPage } from "components/Lessons/LessonProcessingPage";
 import TeacherLessonPage from "components/Lessons/TeacherLessonPage";
 import { LoadStatus } from "libs/Status";
 import { isTeacher } from "redux/funcs/user";
@@ -108,9 +108,11 @@ const App = () => {
 
                     <Route path="/courses/:id" element={getLoggedRoute(<CoursePage />)} />
                     <Route path="/courses/create" element={getTeacherRoute(<CourseCreatePage />)} />
+                    <Route path="/courses/edit/:id" element={getTeacherRoute(<CourseEditPage />)} />
 
                     <Route path="/lessons/:id" element={getRoute(<TeacherLessonPage />, <StudentLessonPage />)} />
-                    <Route path="/lessons/create/:courseId" element={getTeacherRoute(<LessonCreatePage />)} />
+                    <Route path="/lessons/create/:id" element={getTeacherRoute(<LessonCreatePage />)} />
+                    <Route path="/lessons/edit/:id" element={getTeacherRoute(<LessonEditPage />)} />
 
                     <Route
                         path="/drilling/:id/*"
