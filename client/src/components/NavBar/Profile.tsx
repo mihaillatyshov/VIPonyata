@@ -22,7 +22,7 @@ const Profile = () => {
                         <i className="bi bi-person-circle a-clear navbar-profile" style={{ fontSize: "40px" }} />
                     )}
                 </div>
-                <div className="ms-1 d-none d-md-block navbar-profile-name text-center">{user.userData.name}</div>
+                <div className="ms-1 d-none d-lg-block navbar-profile-name text-center">{user.userData.name}</div>
             </div>
         </div>
     );

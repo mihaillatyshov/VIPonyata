@@ -1,4 +1,5 @@
-from typing import Generic, Type
+from datetime import datetime
+from typing import Generic, Type, TypedDict
 
 from sqlalchemy import Delete, Select, delete, select, update
 
@@ -6,19 +7,12 @@ from server.common import DBsession
 from server.exceptions.ApiExceptions import InvalidAPIUsage
 from server.models.assessment import AssessmentCreateReqStr
 from server.models.course import CourseCreateReq
-from server.models.db_models import (ActivityTryType, Assessment,
-                                     AssessmentTry, AssessmentTryType,
-                                     AssessmentType, Course, Dictionary,
-                                     Drilling, DrillingCard, DrillingTry,
-                                     FinalBoss, FinalBossTry, Hieroglyph,
-                                     HieroglyphCard, HieroglyphTry, Lesson,
-                                     LexisCardType, LexisTryType, LexisType,
-                                     NotificationStudentToTeacher,
-                                     NotificationTeacherToStudent, User,
-                                     UserDictionary, a_users_courses,
-                                     a_users_lessons)
-from server.models.dictionary import (DictionaryCreateReq,
-                                      DictionaryCreateReqItem)
+from server.models.db_models import (ActivityTryType, Assessment, AssessmentTry, AssessmentTryType, AssessmentType,
+                                     Course, Dictionary, Drilling, DrillingCard, DrillingTry, FinalBoss, FinalBossTry,
+                                     Hieroglyph, HieroglyphCard, HieroglyphTry, Lesson, LexisCardType, LexisTryType,
+                                     LexisType, NotificationStudentToTeacher, NotificationTeacherToStudent, User,
+                                     UserDictionary, a_users_courses, a_users_lessons)
+from server.models.dictionary import (DictionaryCreateReq, DictionaryCreateReqItem)
 from server.models.lesson import LessonCreateReq
 from server.models.lexis import LexisCardCreateReq, LexisCreateReq
 
@@ -54,36 +48,25 @@ def create_course(course_data: CourseCreateReq) -> Course:
 def get_students_inside_course(course_id: int) -> list[User]:
     with DBsession.begin() as session:
         return session.scalars(
-            select(User)
-            .where(User.level == User.Level.STUDENT)
-            .join(User.courses)
-            .where(Course.id == course_id)
-        ).all()
+            select(User).where(User.level == User.Level.STUDENT).join(
+                User.courses).where(Course.id == course_id)).all()
 
 
 def is_student_inside_course(course_id: int, user_id: int) -> bool:
     with DBsession.begin() as session:
-        return session.scalars(
-            select(User)
-            .join(User.courses)
-            .where(Course.id == course_id)
-            .where(User.id == user_id)
-        ).one_or_none() is not None
+        return session.scalars(select(User).join(
+            User.courses).where(Course.id == course_id).where(User.id == user_id)).one_or_none() is not None
 
 
 def add_user_to_course(course_id: int, user_id: int):
     with DBsession.begin() as session:
-        session.execute(a_users_courses
-                        .insert()
-                        .values(course_id=course_id, user_id=user_id))
+        session.execute(a_users_courses.insert().values(course_id=course_id, user_id=user_id))
 
 
 def remove_user_from_course(course_id: int, user_id: int):
     with DBsession.begin() as session:
-        session.execute(a_users_courses
-                        .delete()
-                        .where(a_users_courses.c.course_id == course_id)
-                        .where(a_users_courses.c.user_id == user_id))
+        session.execute(a_users_courses.delete().where(a_users_courses.c.course_id == course_id).where(
+            a_users_courses.c.user_id == user_id))
 
 
 #########################################################################################################################
@@ -110,36 +93,25 @@ def create_lesson(course_id: int, lesson_data: LessonCreateReq) -> Lesson:
 def get_students_inside_lesson(lesson_id: int) -> list[User]:
     with DBsession.begin() as session:
         return session.scalars(
-            select(User)
-            .where(User.level == User.Level.STUDENT)
-            .join(User.lessons)
-            .where(Lesson.id == lesson_id)
-        ).all()
+            select(User).where(User.level == User.Level.STUDENT).join(
+                User.lessons).where(Lesson.id == lesson_id)).all()
 
 
 def is_student_inside_lesson(lesson_id: int, user_id: int) -> bool:
     with DBsession.begin() as session:
-        return session.scalars(
-            select(User)
-            .join(User.lessons)
-            .where(Lesson.id == lesson_id)
-            .where(User.id == user_id)
-        ).one_or_none() is not None
+        return session.scalars(select(User).join(
+            User.lessons).where(Lesson.id == lesson_id).where(User.id == user_id)).one_or_none() is not None
 
 
 def add_user_to_lesson(lesson_id: int, user_id: int):
     with DBsession.begin() as session:
-        session.execute(a_users_lessons
-                        .insert()
-                        .values(lesson_id=lesson_id, user_id=user_id))
+        session.execute(a_users_lessons.insert().values(lesson_id=lesson_id, user_id=user_id))
 
 
 def remove_user_from_lesson(lesson_id: int, user_id: int):
     with DBsession.begin() as session:
-        session.execute(a_users_lessons
-                        .delete()
-                        .where(a_users_lessons.c.lesson_id == lesson_id)
-                        .where(a_users_lessons.c.user_id == user_id))
+        session.execute(a_users_lessons.delete().where(a_users_lessons.c.lesson_id == lesson_id).where(
+            a_users_lessons.c.user_id == user_id))
 
 
 #########################################################################################################################
@@ -156,6 +128,18 @@ def modify_delete_by_activity_try_type(activity_try_type: type[ActivityTryType],
         return query.where(NotificationStudentToTeacher.final_boss_try_id.in_(ids))
 
 
+class ActivityForNotificationType(TypedDict):
+    id: int
+    lesson_id: int
+
+
+class ActivityTryForNotificationType(TypedDict):
+    id: int
+    base_id: int
+    start_datetime: datetime
+    end_datetime: datetime
+
+
 #########################################################################################################################
 ################ Lexis ##################################################################################################
 #########################################################################################################################
@@ -164,8 +148,7 @@ class LexisQueries(Generic[LexisType, LexisTryType, LexisCardType]):
     lexis_try_type: Type[LexisTryType]
     lexis_card_type: Type[LexisCardType]
 
-    def __init__(self, lexis_type: Type[LexisType],
-                 lexis_try_type: Type[LexisTryType],
+    def __init__(self, lexis_type: Type[LexisType], lexis_try_type: Type[LexisTryType],
                  lexis_card_type: Type[LexisCardType]):
         self.lexis_type = lexis_type
         self.lexis_try_type = lexis_try_type
@@ -179,27 +162,46 @@ class LexisQueries(Generic[LexisType, LexisTryType, LexisCardType]):
         with DBsession.begin() as session:
             return session.scalars(select(self.lexis_type).where(self.lexis_type.id == lexis_id)).one_or_none()
 
+    def get_for_notifications_by_id(self, lexis_id: int) -> ActivityForNotificationType | None:
+        with DBsession.begin() as session:
+            result = session.execute(                                                                                   #
+                select(self.lexis_type.id, self.lexis_type.lesson_id)                                                   #
+                .where(self.lexis_type.id == lexis_id)                                                                  #
+            ).one_or_none()
+
+            if result is None:
+                return None
+
+            return {"id": result[0], "lesson_id": result[1]}
+
     def get_user_by_try_id(self, lexis_try_id: int) -> int | None:
         with DBsession.begin() as session:
             return session.scalars(
-                select(User)
-                .join(self.lexis_try_type)
-                .where(self.lexis_try_type.id == lexis_try_id)
-            ).one_or_none()
+                select(User).join(self.lexis_try_type).where(self.lexis_try_type.id == lexis_try_id)).one_or_none()
 
     def get_try_by_id(self, lexis_try_id: int) -> LexisTryType | None:
         with DBsession.begin() as session:
-            return session.scalars(
-                select(self.lexis_try_type)
-                .where(self.lexis_try_type.id == lexis_try_id)
+            return session.scalars(                                                                                     #
+                select(self.lexis_try_type)                                                                             #
+                .where(self.lexis_try_type.id == lexis_try_id)                                                          #
             ).one_or_none()
+
+    def get_try_for_notifications_by_id(self, lexis_try_id: int) -> ActivityTryForNotificationType | None:
+        with DBsession.begin() as session:
+            result = session.execute(                                                                                   #
+                select(self.lexis_try_type.id, self.lexis_try_type.base_id, self.lexis_try_type.start_datetime,
+                       self.lexis_try_type.end_datetime)                                                                #
+                .where(self.lexis_try_type.id == lexis_try_id)                                                          #
+            ).one_or_none()
+
+            if result is None:
+                return None
+
+            return {"id": result[0], "base_id": result[1], "start_datetime": result[2], "end_datetime": result[3]}
 
     def get_cards_by_activity_id(self, lexis_id: int) -> list[LexisCardType]:
         with DBsession.begin() as session:
-            return session.scalars(
-                select(self.lexis_card_type)
-                .where(self.lexis_card_type.base_id == lexis_id)
-            ).all()
+            return session.scalars(select(self.lexis_card_type).where(self.lexis_card_type.base_id == lexis_id)).all()
 
     def create_cards(self, lexis_id: int, cards_data: LexisCardCreateReq):
         with DBsession.begin() as session:
@@ -220,41 +222,26 @@ class LexisQueries(Generic[LexisType, LexisTryType, LexisCardType]):
     def update(self, lexis_id: int, lexis_data: LexisCreateReq):
         with DBsession.begin() as session:
             session.execute(
-                update(self.lexis_type)
-                .where(self.lexis_type.id == lexis_id)
-                .values(**lexis_data.model_dump())
-            )
+                update(self.lexis_type).where(self.lexis_type.id == lexis_id).values(**lexis_data.model_dump()))
 
     def delete_by_id(self, lexis_id: int):
         with DBsession.begin() as session:
-            session.execute(
-                delete(self.lexis_type)
-                .where(self.lexis_type.id == lexis_id)
-            )
+            session.execute(delete(self.lexis_type).where(self.lexis_type.id == lexis_id))
 
     def delete_cards_by_activity_id(self, lexis_try_id: int):
         with DBsession.begin() as session:
-            session.execute(
-                delete(self.lexis_card_type)
-                .where(self.lexis_card_type.base_id == lexis_try_id)
-            )
+            session.execute(delete(self.lexis_card_type).where(self.lexis_card_type.base_id == lexis_try_id))
 
     def delete_tries_by_activity_id(self, lexis_try_id: int):
         with DBsession.begin() as session:
-            session.execute(
-                delete(self.lexis_try_type)
-                .where(self.lexis_try_type.base_id == lexis_try_id)
-            )
+            session.execute(delete(self.lexis_try_type).where(self.lexis_try_type.base_id == lexis_try_id))
 
     def delete_notifications_by_activity_id(self, lexis_id: int):
         with DBsession.begin() as session:
             session.execute(
                 modify_delete_by_activity_try_type(
-                    self.lexis_try_type,
-                    delete(NotificationStudentToTeacher),
-                    select(self.lexis_try_type.id).where(self.lexis_try_type.base_id == lexis_id)
-                )
-            )
+                    self.lexis_try_type, delete(NotificationStudentToTeacher),
+                    select(self.lexis_try_type.id).where(self.lexis_try_type.base_id == lexis_id)))
 
 
 DrillingQueries = LexisQueries(Drilling, DrillingTry, DrillingCard)
@@ -274,15 +261,25 @@ class IAssessmentQueries(Generic[AssessmentType, AssessmentTryType]):
 
     def get_by_id(self, assessment_id: int) -> AssessmentType | None:
         with DBsession.begin() as session:
-            return session.scalars(
-                select(self.assessment_type).where(self.assessment_type.id == assessment_id)).one_or_none()
+            return session.scalars(select(
+                self.assessment_type).where(self.assessment_type.id == assessment_id)).one_or_none()
+
+    def get_for_notifications_by_id(self, assessment_id: int) -> ActivityForNotificationType | None:
+        with DBsession.begin() as session:
+            result = session.execute(                                                                                   #
+                select(self.assessment_type.id, self.assessment_type.lesson_id)                                         #
+                .where(self.assessment_type.id == assessment_id)                                                        #
+            ).one_or_none()
+
+            if result is None:
+                return None
+
+            return {"id": result[0], "lesson_id": result[1]}
 
     def get_by_lesson_id(self, lesson_id: int) -> AssessmentType | None:
         with DBsession.begin() as session:
-            return session.scalars(
-                select(self.assessment_type)
-                .where(self.assessment_type.lesson_id == lesson_id)
-            ).one_or_none()
+            return session.scalars(select(
+                self.assessment_type).where(self.assessment_type.lesson_id == lesson_id)).one_or_none()
 
     def create(self, lesson_id: int, assessment_data: AssessmentCreateReqStr):
         with DBsession.begin() as session:
@@ -295,55 +292,54 @@ class IAssessmentQueries(Generic[AssessmentType, AssessmentTryType]):
     def update(self, assessment_id: int, assessment_data: AssessmentCreateReqStr):
         with DBsession.begin() as session:
             session.execute(
-                update(self.assessment_type)
-                .where(self.assessment_type.id == assessment_id)
-                .values(**assessment_data.model_dump())
-            )
+                update(self.assessment_type).where(self.assessment_type.id == assessment_id).values(
+                    **assessment_data.model_dump()))
 
     def get_user_by_try_id(self, assessment_try_id: int) -> int | None:
         with DBsession.begin() as session:
             return session.scalars(
-                select(User)
-                .join(self.assessment_try_type)
-                .where(self.assessment_try_type.id == assessment_try_id)
-            ).one_or_none()
+                select(User).join(
+                    self.assessment_try_type).where(self.assessment_try_type.id == assessment_try_id)).one_or_none()
 
-    def get_try_by_id(self, assessment_try_id: int) -> LexisTryType | None:
+    def get_try_by_id(self, assessment_try_id: int) -> AssessmentTryType | None:
         with DBsession.begin() as session:
             return session.scalars(
-                select(self.assessment_try_type)
-                .where(self.assessment_try_type.id == assessment_try_id)
+                select(self.assessment_try_type)                                                                        #
+                .where(self.assessment_try_type.id == assessment_try_id)                                                #
             ).one_or_none()
+
+    def get_try_for_notifications_by_id(self, assessment_try_id: int) -> ActivityTryForNotificationType | None:
+        with DBsession.begin() as session:
+            result = session.execute(                                                                                   #
+                select(self.assessment_try_type.id, self.assessment_try_type.base_id,
+                       self.assessment_try_type.start_datetime, self.assessment_try_type.end_datetime)                  #
+                .where(self.assessment_try_type.id == assessment_try_id)                                                #
+            ).one_or_none()
+
+            if result is None:
+                return None
+
+            return {"id": result[0], "base_id": result[1], "start_datetime": result[2], "end_datetime": result[3]}
 
     def get_done_try_by_id(self, assessment_id: int) -> AssessmentTryType | None:
         with DBsession.begin() as session:
             return session.scalars(
-                select(self.assessment_try_type)
-                .where(self.assessment_try_type.id == assessment_id)
-                .where(self.assessment_try_type.end_datetime != None)
-            ).one_or_none()
+                select(self.assessment_try_type).where(self.assessment_try_type.id == assessment_id).where(
+                    self.assessment_try_type.end_datetime != None)).one_or_none()
 
     def set_done_try_checks(self, assessment_try_id: int, checks_json: str):
         with DBsession.begin() as session:
             session.execute(
-                update(self.assessment_try_type)
-                .where(self.assessment_try_type.id == assessment_try_id)
-                .values(checked_tasks=checks_json)
-            )
+                update(self.assessment_try_type).where(self.assessment_try_type.id == assessment_try_id).values(
+                    checked_tasks=checks_json))
 
     def delete_by_id(self, assessment_id: int):
         with DBsession.begin() as session:
-            session.execute(
-                delete(self.assessment_type)
-                .where(self.assessment_type.id == assessment_id)
-            )
+            session.execute(delete(self.assessment_type).where(self.assessment_type.id == assessment_id))
 
     def delete_tries_by_activity_id(self, assessment_id: int):
         with DBsession.begin() as session:
-            session.execute(
-                delete(self.assessment_try_type)
-                .where(self.assessment_try_type.base_id == assessment_id)
-            )
+            session.execute(delete(self.assessment_try_type).where(self.assessment_try_type.base_id == assessment_id))
 
     def modify_delete_checks_notifications(self, query: Delete, ids: Select):
         if self.assessment_try_type == AssessmentTry:
@@ -355,18 +351,13 @@ class IAssessmentQueries(Generic[AssessmentType, AssessmentTryType]):
         with DBsession.begin() as session:
             session.execute(
                 modify_delete_by_activity_try_type(
-                    self.assessment_try_type,
-                    delete(NotificationStudentToTeacher),
-                    select(self.assessment_try_type.id).where(self.assessment_try_type.base_id == assessment_id)
-                )
-            )
+                    self.assessment_try_type, delete(NotificationStudentToTeacher),
+                    select(self.assessment_try_type.id).where(self.assessment_try_type.base_id == assessment_id)))
 
             session.execute(
                 self.modify_delete_checks_notifications(
                     delete(NotificationTeacherToStudent),
-                    select(self.assessment_try_type.id).where(self.assessment_try_type.base_id == assessment_id)
-                )
-            )
+                    select(self.assessment_try_type.id).where(self.assessment_try_type.base_id == assessment_id)))
 
 
 AssessmentQueries = IAssessmentQueries(Assessment, AssessmentTry)
@@ -419,18 +410,12 @@ def create_or_get_dictionary(dictionary_data: DictionaryCreateReq) -> list[Dicti
 
             if (dictionary_item.char_jp is None and item.char_jp is not None):
                 session.execute(
-                    update(Dictionary)
-                    .where(Dictionary.id == dictionary_item.id)
-                    .values(char_jp=item.char_jp)
-                )
+                    update(Dictionary).where(Dictionary.id == dictionary_item.id).values(char_jp=item.char_jp))
                 dictionary_item.char_jp = item.char_jp
 
             if (dictionary_item.word_jp is None and item.word_jp is not None):
                 session.execute(
-                    update(Dictionary)
-                    .where(Dictionary.id == dictionary_item.id)
-                    .values(word_jp=item.word_jp)
-                )
+                    update(Dictionary).where(Dictionary.id == dictionary_item.id).values(word_jp=item.word_jp))
                 dictionary_item.word_jp = item.word_jp
 
             result.append(dictionary_item)
@@ -451,11 +436,9 @@ def add_img_to_dictionary(id: int, url: str):
 def clear_dictionary():
     with DBsession.begin() as session:
         session.execute(
-            delete(Dictionary)
-            .where(Dictionary.id.not_in(select(DrillingCard.dictionary_id)))
-            .where(Dictionary.id.not_in(select(HieroglyphCard.dictionary_id)))
-            .where(Dictionary.id.not_in(select(UserDictionary.dictionary_id)))
-        )
+            delete(Dictionary).where(Dictionary.id.not_in(select(DrillingCard.dictionary_id))).where(
+                Dictionary.id.not_in(select(HieroglyphCard.dictionary_id))).where(
+                    Dictionary.id.not_in(select(UserDictionary.dictionary_id))))
 
 
 #########################################################################################################################
@@ -464,10 +447,8 @@ def clear_dictionary():
 def get_notifications() -> list[NotificationStudentToTeacher]:
     with DBsession.begin() as session:
         return session.scalars(
-            select(NotificationStudentToTeacher)
-            .where(NotificationStudentToTeacher.deleted == False)
-            .order_by(NotificationStudentToTeacher.creation_datetime.desc())
-        ).all()
+            select(NotificationStudentToTeacher).where(NotificationStudentToTeacher.deleted == False).order_by(
+                NotificationStudentToTeacher.creation_datetime.desc())).all()
 
 
 def add_course_notification(course_id: int, student_id: int):
@@ -488,6 +469,15 @@ def add_final_boss_notification(final_boss_try_id: int):
 def add_assessment_notification(assessment_try_id: int):
     with DBsession.begin() as session:
         session.add(NotificationTeacherToStudent(assessment_try_id=assessment_try_id))
+
+
+def mark_notifications_as_read(notification_ids: list[int]):
+    with DBsession.begin() as session:
+        session.execute(                                                                                                #
+            update(NotificationStudentToTeacher)                                                                        #
+            .where(NotificationStudentToTeacher.id.in_(notification_ids))                                               #
+            .values(viewed=True)                                                                                        #
+        )
 
 
 # def get_notification_activity_try(

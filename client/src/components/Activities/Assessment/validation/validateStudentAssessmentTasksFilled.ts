@@ -37,7 +37,6 @@ const validateTask = (task: TAssessmentItemBase): PyError | undefined => {
     try {
         validateSchemas[task.name].parse(task);
     } catch (error: any) {
-        console.log(error.errors[0].message);
         return { message: error.errors[0].message, type: "value_error" };
     }
     return undefined;
@@ -52,7 +51,6 @@ export const validateStudentAssessmentTasksFilled = (
     const errors: PyErrorDict = { errors: {}, message: "Не все задания были выполнены" };
 
     tasks.forEach((task, i) => {
-        console.log(i, task.name);
         const validateResult = validateTask(task);
         if (validateResult === undefined) {
             return;

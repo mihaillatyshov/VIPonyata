@@ -21,7 +21,7 @@ const Counter = ({ count }: CounterProps) => {
     return <span>{count}</span>;
 };
 
-const StudentDictionary = () => {
+export const Dictionary = () => {
     const [count, setCount] = useState<number | undefined>(undefined);
     const isTeacher = useUserIsTeacher();
 
@@ -49,4 +49,3 @@ const StudentDictionary = () => {
     );
 };
 
-export default StudentDictionary;

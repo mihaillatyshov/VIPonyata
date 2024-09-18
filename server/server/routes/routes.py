@@ -1,14 +1,10 @@
-
 from flask import Blueprint, send_from_directory
-from flask_login import login_required  # type: ignore
+from flask_login import login_required                                                                                  # type: ignore
 
 import server.handlers.student as student_funcs
 import server.handlers.teacher as teacher_funcs
-from server.handlers.common import (ALLOWED_AUDIO_EXTENSIONS,
-                                    ALLOWED_IMG_EXTENSIONS,
-                                    UPLOAD_AUDIO_FOLDER, UPLOAD_FOLDER,
-                                    UPLOAD_IMG_FOLDER, save_audio, save_img,
-                                    upload_file)
+from server.handlers.common import (ALLOWED_AUDIO_EXTENSIONS, ALLOWED_IMG_EXTENSIONS, UPLOAD_AUDIO_FOLDER,
+                                    UPLOAD_FOLDER, UPLOAD_IMG_FOLDER, save_audio, save_img, upload_file)
 from server.routes.routes_utils import user_selector_function
 
 routes_bp = Blueprint("routes", __name__)
@@ -60,17 +56,13 @@ def get_lessons_by_course_id(id):
 @routes_bp.route("/courses/<int:id>/users", methods=["GET"])
 @login_required
 def get_course_users(id):
-    return user_selector_function(teacher_funcs.get_course_users,
-                                  None,
-                                  course_id=id)
+    return user_selector_function(teacher_funcs.get_course_users, None, course_id=id)
 
 
 @routes_bp.route("/courses/<int:id>/users", methods=["POST"])
 @login_required
 def add_or_remove_user_from_course(id):
-    return user_selector_function(teacher_funcs.add_or_remove_user_from_course,
-                                  None,
-                                  course_id=id)
+    return user_selector_function(teacher_funcs.add_or_remove_user_from_course, None, course_id=id)
 
 
 #########################################################################################################################
@@ -79,8 +71,9 @@ def add_or_remove_user_from_course(id):
 @routes_bp.route("/lessons/<int:id>", methods=["GET"])
 @login_required
 def get_lesson_activities(id):
-    return user_selector_function(
-        teacher_funcs.get_lesson_activities, student_funcs.get_lesson_activities, lesson_id=id)
+    return user_selector_function(teacher_funcs.get_lesson_activities,
+                                  student_funcs.get_lesson_activities,
+                                  lesson_id=id)
 
 
 @routes_bp.route("/lessons/<int:course_id>", methods=["POST"])
@@ -92,17 +85,13 @@ def create_lesson(course_id):
 @routes_bp.route("/lessons/<int:id>/users", methods=["GET"])
 @login_required
 def get_lesson_users(id):
-    return user_selector_function(teacher_funcs.get_lesson_users,
-                                  None,
-                                  lesson_id=id)
+    return user_selector_function(teacher_funcs.get_lesson_users, None, lesson_id=id)
 
 
 @routes_bp.route("/lessons/<int:id>/users", methods=["POST"])
 @login_required
 def add_or_remove_user_from_lesson(id):
-    return user_selector_function(teacher_funcs.add_or_remove_user_from_lesson,
-                                  None,
-                                  lesson_id=id)
+    return user_selector_function(teacher_funcs.add_or_remove_user_from_lesson, None, lesson_id=id)
 
 
 #########################################################################################################################
@@ -135,22 +124,21 @@ def add_drilling_new_done_tasks(id):
 @routes_bp.route("/drilling/<int:id>", methods=["GET"])
 @login_required
 def get_drilling_by_id(id):
-    return user_selector_function(
-        teacher_funcs.DrillingHandlers.get_by_id, student_funcs.DrillingHandlers.get_by_id, activity_id=id)
+    return user_selector_function(teacher_funcs.DrillingHandlers.get_by_id,
+                                  student_funcs.DrillingHandlers.get_by_id,
+                                  activity_id=id)
 
 
 @routes_bp.route("/drilling/<int:id>", methods=["PATCH"])
 @login_required
 def update_drilling(id):
-    return user_selector_function(
-        teacher_funcs.DrillingHandlers.update, None, activity_id=id)
+    return user_selector_function(teacher_funcs.DrillingHandlers.update, None, activity_id=id)
 
 
 @routes_bp.route("/drilling/<int:id>", methods=["DELETE"])
 @login_required
 def delete_drilling_by_id(id):
-    return user_selector_function(
-        teacher_funcs.DrillingHandlers.delete_by_id, None, activity_id=id)
+    return user_selector_function(teacher_funcs.DrillingHandlers.delete_by_id, None, activity_id=id)
 
 
 @routes_bp.route("/drilling/<int:lesson_id>", methods=["POST"])
@@ -197,15 +185,13 @@ def get_hieroglyph_by_id(id):
 @routes_bp.route("/hieroglyph/<int:id>", methods=["PATCH"])
 @login_required
 def update_hieroglyph(id):
-    return user_selector_function(
-        teacher_funcs.HieroglyphHandlers.update, None, activity_id=id)
+    return user_selector_function(teacher_funcs.HieroglyphHandlers.update, None, activity_id=id)
 
 
 @routes_bp.route("/hieroglyph/<int:id>", methods=["DELETE"])
 @login_required
 def delete_hieroglyph_by_id(id):
-    return user_selector_function(
-        teacher_funcs.HieroglyphHandlers.delete_by_id, None, activity_id=id)
+    return user_selector_function(teacher_funcs.HieroglyphHandlers.delete_by_id, None, activity_id=id)
 
 
 @routes_bp.route("/hieroglyph/<int:lesson_id>", methods=["POST"])
@@ -220,17 +206,17 @@ def create_hieroglyph(lesson_id):
 @routes_bp.route("/assessment/<int:id>/donetries", methods=["GET"])
 @login_required
 def get_assessment_done_tries(id):
-    return user_selector_function(
-        teacher_funcs.AssessmentHandlers.get_done_tries, student_funcs.AssessmentHandlers.get_done_tries,
-        activity_id=id)
+    return user_selector_function(teacher_funcs.AssessmentHandlers.get_done_tries,
+                                  student_funcs.AssessmentHandlers.get_done_tries,
+                                  activity_id=id)
 
 
 @routes_bp.route("/assessment/donetries/<int:done_try_id>", methods=["GET"])
 @login_required
 def get_assessment_done_try(done_try_id):
-    return user_selector_function(
-        teacher_funcs.AssessmentHandlers.get_done_try, student_funcs.AssessmentHandlers.get_done_try,
-        done_try_id=done_try_id)
+    return user_selector_function(teacher_funcs.AssessmentHandlers.get_done_try,
+                                  student_funcs.AssessmentHandlers.get_done_try,
+                                  done_try_id=done_try_id)
 
 
 @routes_bp.route("/assessment/donetries/<int:done_try_id>", methods=["PATCH"])
@@ -280,8 +266,7 @@ def update_assessment(id):
 @routes_bp.route("/assessment/<int:id>", methods=["DELETE"])
 @login_required
 def delete_assessment_by_id(id):
-    return user_selector_function(
-        teacher_funcs.AssessmentHandlers.delete_by_id, None, activity_id=id)
+    return user_selector_function(teacher_funcs.AssessmentHandlers.delete_by_id, None, activity_id=id)
 
 
 @routes_bp.route("/assessment/<int:lesson_id>", methods=["POST"])
@@ -336,3 +321,9 @@ def add_association_to_dictionary(id):
 @login_required
 def get_notifications():
     return user_selector_function(teacher_funcs.get_notifications, student_funcs.get_notifications)
+
+
+@routes_bp.route("/notifications/read", methods=["POST"])
+@login_required
+def mark_notifications_as_read():
+    return user_selector_function(teacher_funcs.mark_notifications_as_read, student_funcs.mark_notifications_as_read)

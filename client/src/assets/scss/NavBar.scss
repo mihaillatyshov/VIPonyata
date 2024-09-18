@@ -7,7 +7,7 @@
 
 .navbar-dictionary-title {
     line-height: 1;
-    font-size: 64px;
+    font-size: 48px;
     color: #1a8400;
     cursor: pointer;
 }
@@ -22,4 +22,16 @@
     overflow: hidden;
     width: 40px;
     font-size: 12px;
+}
+
+@media (max-width: 576px) {
+    .navbar-dictionary-title {
+        font-size: 32px;
+    }
+}
+
+@media (max-width: 400px) {
+    .navbar-dictionary-title {
+        font-size: 20px;
+    }
 }

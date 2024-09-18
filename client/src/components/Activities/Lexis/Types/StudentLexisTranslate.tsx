@@ -12,8 +12,6 @@ const StudentLexisTranslate = ({ name, inData, goToNextTaskCallback }: StudentLe
     const setLexisSelectedItemField = useSetLexisSelectedItemField<TStudentLexisTranslateTask>(name);
     const aliasJP = pickLexisWordsOrChars(name);
 
-    console.log("StudentLexisTranslate", item);
-
     const getObjectData = (id: number) => {
         return {
             wordId: id,

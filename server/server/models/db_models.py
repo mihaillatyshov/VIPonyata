@@ -2,9 +2,8 @@ import datetime
 import json
 from typing import Any, Optional, Type, TypeVar, Union
 
-from sqlalchemy import (Boolean, Column, Date, DateTime, ForeignKey, Integer,
-                        String, Table, Text, Time, UniqueConstraint,
-                        create_engine)
+from sqlalchemy import (Boolean, Column, Date, DateTime, ForeignKey, Integer, String, Table, Text, Time,
+                        UniqueConstraint, create_engine)
 from sqlalchemy.engine import URL
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import Mapped, relationship, sessionmaker
@@ -60,15 +59,16 @@ class User(Base):
     __mapper_args__ = {'eager_defaults': True}
 
     def __json__(self):
-        return {"id": self.id,
-                "name": self.name,
-                "nickname": self.nickname,
-                "birthday": self.birthday,
-                "theme": self.theme,
-                "level": self.level,
-                "avatar": self.avatar,
-                "form": self.form,
-                }
+        return {
+            "id": self.id,
+            "name": self.name,
+            "nickname": self.nickname,
+            "birthday": self.birthday,
+            "theme": self.theme,
+            "level": self.level,
+            "avatar": self.avatar,
+            "form": self.form,
+        }
 
     def __repr__(self):
         return f"<User: (id={self.id}, nickname={self.nickname}, level={self.level})>"
@@ -179,7 +179,7 @@ class UserDictionary(Base):
     user: Mapped[list["User"]] = relationship("User", back_populates="users_dictionary")
 
     dictionary_id: Mapped[int] = Column(Integer, ForeignKey("dictionary.id"), nullable=False)
-    dictionary:  Mapped[list["Dictionary"]] = relationship("Dictionary", back_populates="users_dictionary")
+    dictionary: Mapped[list["Dictionary"]] = relationship("Dictionary", back_populates="users_dictionary")
 
     __table_args__ = (UniqueConstraint('user_id', 'dictionary_id', name='idx_user_dictionary'), )
 
@@ -209,8 +209,8 @@ class AbstractActivity(Base):
     def lesson(cls) -> Mapped["Lesson"]:
         return relationship("Lesson", overlaps="drilling,hieroglyph,assessment,final_boss")
 
-    tries: list = []  # TODO : fix type
-    now_try: Any | None = None  # TODO : fix type
+    tries: list = []                                                                                                    # TODO : fix type
+    now_try: Any | None = None                                                                                          # TODO : fix type
 
     def calcDeadline(self) -> datetime.datetime | None:
         if not self.time_limit:
@@ -395,7 +395,7 @@ class AbstractAssessmentTry(AbstractActivityTry):
     __abstract__ = True
 
     done_tasks: Mapped[str] = Column(Text, nullable=False)
-    checked_tasks: Mapped[Optional[str]] = Column(Text)  # TODO : check type
+    checked_tasks: Mapped[Optional[str]] = Column(Text)                                                                 # TODO : check type
 
     base: Union["Assessment", "FinalBoss"]
 
@@ -463,7 +463,14 @@ class NotificationStudentToTeacher(Base):
     __mapper_args__ = {'eager_defaults': True}
 
     def __json__(self):
-        data = {"message": self.message, "type": None, "creation_datetime": self.creation_datetime}
+        data = {
+            "id": self.id,
+            "message": self.message,
+            "type": None,
+            "creation_datetime": self.creation_datetime,
+            "viewed": self.viewed,
+            "deleted": self.deleted
+        }
         for activity_try_name in ["drilling_try", "hieroglyph_try", "assessment_try", "final_boss_try"]:
             if activity_try_id := getattr(self, f"{activity_try_name}_id"):
                 data["type"] = activity_try_name
@@ -503,7 +510,14 @@ class NotificationTeacherToStudent(Base):
     __mapper_args__ = {'eager_defaults': True}
 
     def __json__(self):
-        data = {"message": self.message, "type": None, "creation_datetime": self.creation_datetime}
+        data = {
+            "id": self.id,
+            "message": self.message,
+            "type": None,
+            "creation_datetime": self.creation_datetime,
+            "viewed": self.viewed,
+            "deleted": self.deleted
+        }
         for activity_try_name in ["assessment_try", "final_boss_try"]:
             if activity_try_id := getattr(self, f"{activity_try_name}_id"):
                 data["type"] = activity_try_name
@@ -535,10 +549,8 @@ LexisType = TypeVar("LexisType", bound=AbstractLexis)
 LexisTryType = TypeVar("LexisTryType", bound=AbstractLexisTry)
 LexisCardType = TypeVar("LexisCardType", bound=AbstractLexisCard)
 
-
 AssessmentType = TypeVar("AssessmentType", bound=AbstractAssessment)
 AssessmentTryType = TypeVar("AssessmentTryType", bound=AbstractAssessmentTry)
-
 
 ActivityType = TypeVar("ActivityType", bound=AbstractActivity)
 ActivityTryType = TypeVar("ActivityTryType", bound=AbstractActivityTry)

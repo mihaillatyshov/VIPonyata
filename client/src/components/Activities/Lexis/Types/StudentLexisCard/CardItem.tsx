@@ -31,11 +31,10 @@ const CardItem = ({
 
     const handleChangeIsAnswerOpen = () => setIsAnswerOpen(!isAnswerOpen);
 
-    const synth = window.speechSynthesis;
+    // const synth = window.speechSynthesis;
     const sayJP = (sentence: string) => {
-        const voices = synth.getVoices();
-        const result = voices.filter((voice) => voice.lang === "ja-JP");
-        console.log(result);
+        // const voices = synth.getVoices();
+        // const result = voices.filter((voice) => voice.lang === "ja-JP");
         const utterance = new SpeechSynthesisUtterance(sentence);
         utterance.lang = "ja-JP";
         speechSynthesis.speak(utterance);
