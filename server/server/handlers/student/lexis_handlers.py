@@ -4,19 +4,14 @@ from flask import request
 
 import server.queries.StudentDBqueries as DBQS
 from server.exceptions.ApiExceptions import InvalidAPIUsage, InvalidRequestJson
-from server.handlers.common.additional_lexis_handlers import (
-    LexisTaskName, LexisTaskNameList)
+from server.handlers.common.additional_lexis_handlers import (LexisTaskName, LexisTaskNameList)
 from server.handlers.student.activity_handlers import ActivityHandlers
-from server.handlers.student.additional_lexis_handlers import (
-    create_find_pair, create_scramble, create_space, create_translate)
+from server.handlers.student.additional_lexis_handlers import (create_find_pair, create_scramble, create_space,
+                                                               create_translate)
 from server.handlers.student.dictionary_handlers import combine_dictionary
-from server.models.db_models import (Drilling, DrillingCard, DrillingTry,
-                                     Hieroglyph, HieroglyphCard, HieroglyphTry,
-                                     LexisCardType, LexisTryType, LexisType,
-                                     time_limit_to_timedelta)
-from server.routes.routes_utils import (activity_end_time_handler,
-                                        get_current_user_id,
-                                        start_activity_timer_limit)
+from server.models.db_models import (Drilling, DrillingCard, DrillingTry, Hieroglyph, HieroglyphCard, HieroglyphTry,
+                                     LexisCardType, LexisTryType, LexisType, time_limit_to_timedelta)
+from server.routes.routes_utils import (activity_end_time_handler, get_current_user_id, start_activity_timer_limit)
 
 
 class LexisHandlers(ActivityHandlers[LexisType, LexisTryType], Generic[LexisType, LexisTryType, LexisCardType]):
@@ -84,7 +79,7 @@ class LexisHandlers(ActivityHandlers[LexisType, LexisTryType], Generic[LexisType
         if not tasks[LexisTaskName.CARD]:
             raise InvalidAPIUsage("No cards in lexis", 403)
 
-        tasks_names = lexis.getTasksNames()
+        tasks_names = lexis.get_tasks_names()
 
         if LexisTaskName.FINDPAIR in tasks_names:
             tasks[LexisTaskName.FINDPAIR] = create_find_pair(words_ru, words_jp, chars_jp)
@@ -96,8 +91,8 @@ class LexisHandlers(ActivityHandlers[LexisType, LexisTryType], Generic[LexisType
             tasks[LexisTaskName.TRANSLATE] = create_translate(words_ru, words_jp, chars_jp)
 
         if LexisTaskName.SPACE in tasks_names:
-            tasks[LexisTaskName.SPACE] = create_space(
-                words_ru, words_jp, chars_jp, self._activity_queries._activity_type)
+            tasks[LexisTaskName.SPACE] = create_space(words_ru, words_jp, chars_jp,
+                                                      self._activity_queries._activity_type)
 
         return {"lexis": lexis, "items": tasks}
 

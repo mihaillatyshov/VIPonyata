@@ -2,12 +2,12 @@ import datetime
 import json
 from typing import Any, Optional, Type, TypeVar, Union
 
-from sqlalchemy import (Boolean, Column, Date, DateTime, ForeignKey, Integer,
-                        String, Table, Text, Time, UniqueConstraint,
-                        create_engine)
+from sqlalchemy import (Boolean, Column, Date, DateTime, ForeignKey, Integer, String, Table, Text, Time,
+                        UniqueConstraint, create_engine)
 from sqlalchemy.engine import URL
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import Mapped, relationship, sessionmaker
+from sqlalchemy.orm import mapped_column
 from sqlalchemy.sql import func
 
 from server.load_config import load_config
@@ -39,18 +39,18 @@ class User(Base):
         TEACHER = 1
 
     __tablename__ = "users"
-    id: Mapped[int] = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
-    name: Mapped[str] = Column(String(128), nullable=False)
-    nickname: Mapped[str] = Column(String(128), nullable=False, unique=True)
-    password: Mapped[str] = Column(String(512), nullable=False)
-    birthday: Mapped[datetime.date] = Column(Date, nullable=False)
-    theme: Mapped[Optional[str]] = Column(String(128))
-    level: Mapped[int] = Column(Integer, nullable=False)
-    avatar: Mapped[Optional[str]] = Column(String(1024))
-    form: Mapped[Optional[str]] = Column(Text)
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    nickname: Mapped[str] = mapped_column(String(128), nullable=False, unique=True)
+    password: Mapped[str] = mapped_column(String(512), nullable=False)
+    birthday: Mapped[datetime.date] = mapped_column(Date, nullable=False)
+    theme: Mapped[Optional[str]] = mapped_column(String(128))
+    level: Mapped[int] = mapped_column(Integer, nullable=False)
+    avatar: Mapped[Optional[str]] = mapped_column(String(1024))
+    form: Mapped[Optional[str]] = mapped_column(Text)
 
-    registration_date: Mapped[datetime.datetime] = Column(DateTime, server_default=func.now(), nullable=False)
+    registration_date: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)   # pylint: disable=not-callable
 
     courses: Mapped[list["Course"]] = relationship("Course", secondary=a_users_courses, overlaps="courses,user")
     lessons: Mapped[list["Lesson"]] = relationship("Lesson", secondary=a_users_lessons, overlaps="lessons,user")
@@ -60,15 +60,16 @@ class User(Base):
     __mapper_args__ = {'eager_defaults': True}
 
     def __json__(self):
-        return {"id": self.id,
-                "name": self.name,
-                "nickname": self.nickname,
-                "birthday": self.birthday,
-                "theme": self.theme,
-                "level": self.level,
-                "avatar": self.avatar,
-                "form": self.form,
-                }
+        return {
+            "id": self.id,
+            "name": self.name,
+            "nickname": self.nickname,
+            "birthday": self.birthday,
+            "theme": self.theme,
+            "level": self.level,
+            "avatar": self.avatar,
+            "form": self.form,
+        }
 
     def __repr__(self):
         return f"<User: (id={self.id}, nickname={self.nickname}, level={self.level})>"
@@ -79,16 +80,16 @@ class User(Base):
 #########################################################################################################################
 class Course(Base):
     __tablename__ = "courses"
-    id: Mapped[int] = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
-    name: Mapped[str] = Column(String(128), nullable=False)
-    difficulty: Mapped[str] = Column(String(128), nullable=False)
-    difficulty_color: Mapped[Optional[str]] = Column(String(64))
-    sort: Mapped[int] = Column(Integer, default=500, nullable=False)
-    description: Mapped[Optional[str]] = Column(String(2048))
-    img: Mapped[Optional[str]] = Column(String(1024))
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    difficulty: Mapped[str] = mapped_column(String(128), nullable=False)
+    difficulty_color: Mapped[Optional[str]] = mapped_column(String(64))
+    sort: Mapped[int] = mapped_column(Integer, default=500, nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(String(2048))
+    img: Mapped[Optional[str]] = mapped_column(String(1024))
 
-    creation_datetime: Mapped[datetime.datetime] = Column(DateTime, server_default=func.now(), nullable=False)
+    creation_datetime: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)   # pylint: disable=not-callable
 
     users: Mapped[list["User"]] = relationship("User", secondary=a_users_courses, overlaps="courses,user")
     lessons: Mapped[list["Lesson"]] = relationship("Lesson", back_populates="course")
@@ -111,18 +112,18 @@ class Course(Base):
 #########################################################################################################################
 class Lesson(Base):
     __tablename__ = "lessons"
-    id: Mapped[int] = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
-    name: Mapped[str] = Column(String(128), nullable=False)
-    number: Mapped[int] = Column(Integer, nullable=False)
-    description: Mapped[Optional[str]] = Column(String(2048))
-    img: Mapped[Optional[str]] = Column(String(1024))
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    number: Mapped[int] = mapped_column(Integer, nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(String(2048))
+    img: Mapped[Optional[str]] = mapped_column(String(1024))
 
-    creation_datetime: Mapped[datetime.datetime] = Column(DateTime, server_default=func.now(), nullable=False)
+    creation_datetime: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)   # pylint: disable=not-callable
 
     users: Mapped[list["User"]] = relationship("User", secondary=a_users_lessons, overlaps="lessons,user")
 
-    course_id: Mapped[int] = Column(Integer, ForeignKey(COURSES_ID), nullable=False)
+    course_id: Mapped[int] = mapped_column(Integer, ForeignKey(COURSES_ID), nullable=False)
     course: Mapped["Course"] = relationship("Course", back_populates="lessons", uselist=False)
 
     drilling: Mapped[Optional["Drilling"]] = relationship("Drilling", uselist=False)
@@ -148,12 +149,12 @@ class Lesson(Base):
 #########################################################################################################################
 class Dictionary(Base):
     __tablename__ = "dictionary"
-    id: Mapped[int] = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
-    char_jp: Mapped[Optional[str]] = Column(String(128))
-    word_jp: Mapped[Optional[str]] = Column(String(128))
-    ru: Mapped[str] = Column(String(128), nullable=False)
-    img: Mapped[Optional[str]] = Column(String(1024))
+    char_jp: Mapped[Optional[str]] = mapped_column(String(128))
+    word_jp: Mapped[Optional[str]] = mapped_column(String(128))
+    ru: Mapped[str] = mapped_column(String(128), nullable=False)
+    img: Mapped[Optional[str]] = mapped_column(String(1024))
 
     users_dictionary: Mapped[list["UserDictionary"]] = relationship("UserDictionary", back_populates="dictionary")
 
@@ -170,16 +171,16 @@ class Dictionary(Base):
 class UserDictionary(Base):
     __tablename__ = "users_dictionary"
 
-    id: Mapped[int] = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
-    img: Mapped[Optional[str]] = Column(String(1024))
-    association: Mapped[Optional[str]] = Column(String(1024))
+    img: Mapped[Optional[str]] = mapped_column(String(1024))
+    association: Mapped[Optional[str]] = mapped_column(String(1024))
 
-    user_id: Mapped[int] = Column(Integer, ForeignKey(USERS_ID), nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey(USERS_ID), nullable=False)
     user: Mapped[list["User"]] = relationship("User", back_populates="users_dictionary")
 
-    dictionary_id: Mapped[int] = Column(Integer, ForeignKey("dictionary.id"), nullable=False)
-    dictionary:  Mapped[list["Dictionary"]] = relationship("Dictionary", back_populates="users_dictionary")
+    dictionary_id: Mapped[int] = mapped_column(Integer, ForeignKey("dictionary.id"), nullable=False)
+    dictionary: Mapped[list["Dictionary"]] = relationship("Dictionary", back_populates="users_dictionary")
 
     __table_args__ = (UniqueConstraint('user_id', 'dictionary_id', name='idx_user_dictionary'), )
 
@@ -195,24 +196,27 @@ class UserDictionary(Base):
 #########################################################################################################################
 class AbstractActivity(Base):
     __abstract__ = True
-    id: Mapped[int] = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
-    description: Mapped[Optional[str]] = Column(String(2048))
+    description: Mapped[Optional[str]] = mapped_column(String(2048))
 
-    time_limit: Mapped[Optional[datetime.time]] = Column(Time)
+    time_limit: Mapped[Optional[datetime.time]] = mapped_column(Time)
 
     @declared_attr
+    @classmethod
     def lesson_id(cls) -> Mapped[int]:
-        return Column(Integer, ForeignKey(LESSONS_ID), nullable=False)
+        return mapped_column(Integer, ForeignKey(LESSONS_ID), nullable=False)
 
+    # @NoSelf
     @declared_attr
+    @classmethod
     def lesson(cls) -> Mapped["Lesson"]:
         return relationship("Lesson", overlaps="drilling,hieroglyph,assessment,final_boss")
 
-    tries: list = []  # TODO : fix type
-    now_try: Any | None = None  # TODO : fix type
+    tries: list = []                                                                                                    # TODO : fix type
+    now_try: Any | None = None                                                                                          # TODO : fix type
 
-    def calcDeadline(self) -> datetime.datetime | None:
+    def calc_deadline(self) -> datetime.datetime | None:
         if not self.time_limit:
             return None
 
@@ -224,7 +228,7 @@ class AbstractActivity(Base):
         return None
 
     def __json__(self):
-        data = {"tries": self.tries, "deadline": self.calcDeadline(), "try": self.now_try}
+        data = {"tries": self.tries, "deadline": self.calc_deadline(), "try": self.now_try}
         for column in self.__table__.columns:
             data[column.name] = getattr(self, column.name)
         return data
@@ -233,25 +237,27 @@ class AbstractActivity(Base):
 class AbstractActivityTry(Base):
     __abstract__ = True
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):                                                                                # pylint: disable=useless-parent-delegation
         super().__init__(*args, **kwargs)
 
-    id: Mapped[int] = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
-    try_number: Mapped[int] = Column(Integer, nullable=False)
-    start_datetime: Mapped[datetime.datetime] = Column(DateTime, nullable=False)
-    end_datetime: Mapped[Optional[datetime.datetime]] = Column(DateTime)
+    try_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    start_datetime: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
+    end_datetime: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
 
     @declared_attr
+    @classmethod
     def user_id(cls) -> Mapped[int]:
-        return Column(Integer, ForeignKey(USERS_ID), nullable=False)
+        return mapped_column(Integer, ForeignKey(USERS_ID), nullable=False)
 
     @declared_attr
+    @classmethod
     def user(cls) -> Mapped[list["User"]]:
         return relationship("User")
 
-    base_id: int
-    base: Union["Drilling", "Hieroglyph", "Assessment", "FinalBoss"]
+    base_id: Mapped[int]
+    base: Mapped[Union["Drilling", "Hieroglyph", "Assessment", "FinalBoss"]]
 
     def __json__(self):
         data = {}
@@ -266,38 +272,40 @@ class AbstractActivityTry(Base):
 class AbstractLexis(AbstractActivity):
     __abstract__ = True
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):                                                                                # pylint: disable=useless-parent-delegation
         super().__init__(*args, **kwargs)
 
-    tasks: Mapped[str] = Column(String(2048), nullable=False)
+    tasks: Mapped[str] = mapped_column(String(2048), nullable=False)
 
-    cards: list["AbstractLexisCard"]
+    cards: Mapped[list["AbstractLexisCard"]]
 
-    def getTasksNames(self):
+    def get_tasks_names(self):
         return self.tasks.split(",")
 
 
 class AbstractLexisCard(Base):
     __abstract__ = True
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):                                                                                # pylint: disable=useless-parent-delegation
         super().__init__(*args, **kwargs)
 
-    id: Mapped[int] = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
-    sentence: Mapped[str] = Column(String(256), nullable=False)
-    answer: Mapped[str] = Column(String(256), nullable=False)
+    sentence: Mapped[str] = mapped_column(String(256), nullable=False)
+    answer: Mapped[str] = mapped_column(String(256), nullable=False)
 
     @declared_attr
+    @classmethod
     def dictionary_id(cls) -> Mapped[int]:
-        return Column(Integer, ForeignKey("dictionary.id"), nullable=False)
+        return mapped_column(Integer, ForeignKey("dictionary.id"), nullable=False)
 
     @declared_attr
+    @classmethod
     def dictionary(cls) -> Mapped["Dictionary"]:
         return relationship("Dictionary")
 
-    base_id: int
-    base: Union["Drilling", "Hieroglyph", "Assessment", "FinalBoss"]
+    base_id: Mapped[int]
+    base: Mapped[Union["Drilling", "Hieroglyph", "Assessment", "FinalBoss"]]
 
     word: Optional[DictionaryItemDict] = None
 
@@ -310,7 +318,7 @@ class AbstractLexisCard(Base):
 
 class AbstractLexisTry(AbstractActivityTry):
     __abstract__ = True
-    done_tasks: Mapped[str] = Column(String(2048))
+    done_tasks: Mapped[str] = mapped_column(String(2048))
 
     def get_done_tasks_dict(self) -> dict:
         res = {}
@@ -320,7 +328,7 @@ class AbstractLexisTry(AbstractActivityTry):
                 res[key] = val
         return res
 
-    base: Union["Drilling", "Hieroglyph"]
+    base: Mapped[Union["Drilling", "Hieroglyph"]]
 
     def __json__(self):
         data = super().__json__()
@@ -340,14 +348,14 @@ class Drilling(AbstractLexis):
 class DrillingTry(AbstractLexisTry):
     __tablename__ = "drilling_tries"
 
-    base_id: Mapped[int] = Column(Integer, ForeignKey("drillings.id"), nullable=False)
+    base_id: Mapped[int] = mapped_column(Integer, ForeignKey("drillings.id"), nullable=False)
     base: Mapped["Drilling"] = relationship("Drilling", uselist=False)
 
 
 class DrillingCard(AbstractLexisCard):
     __tablename__ = "drilling_cards"
 
-    base_id: Mapped[int] = Column(Integer, ForeignKey("drillings.id"), nullable=False)
+    base_id: Mapped[int] = mapped_column(Integer, ForeignKey("drillings.id"), nullable=False)
     base: Mapped["Drilling"] = relationship("Drilling", back_populates="cards", uselist=False)
 
 
@@ -363,14 +371,14 @@ class Hieroglyph(AbstractLexis):
 class HieroglyphTry(AbstractLexisTry):
     __tablename__ = "hieroglyph_tries"
 
-    base_id: Mapped[int] = Column(Integer, ForeignKey("hieroglyphs.id"), nullable=False)
+    base_id: Mapped[int] = mapped_column(Integer, ForeignKey("hieroglyphs.id"), nullable=False)
     base: Mapped["Hieroglyph"] = relationship("Hieroglyph", uselist=False)
 
 
 class HieroglyphCard(AbstractLexisCard):
     __tablename__ = "hieroglyph_cards"
 
-    base_id: Mapped[int] = Column(Integer, ForeignKey("hieroglyphs.id"), nullable=False)
+    base_id: Mapped[int] = mapped_column(Integer, ForeignKey("hieroglyphs.id"), nullable=False)
     base: Mapped["Hieroglyph"] = relationship("Hieroglyph", back_populates="cards", uselist=False)
 
 
@@ -380,10 +388,10 @@ class HieroglyphCard(AbstractLexisCard):
 class AbstractAssessment(AbstractActivity):
     __abstract__ = True
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):                                                                                # pylint: disable=useless-parent-delegation
         super().__init__(*args, **kwargs)
 
-    tasks: Mapped[str] = Column(Text, nullable=False)
+    tasks: Mapped[str] = mapped_column(Text, nullable=False)
 
     def __json__(self):
         data = super().__json__()
@@ -394,10 +402,10 @@ class AbstractAssessment(AbstractActivity):
 class AbstractAssessmentTry(AbstractActivityTry):
     __abstract__ = True
 
-    done_tasks: Mapped[str] = Column(Text, nullable=False)
-    checked_tasks: Mapped[Optional[str]] = Column(Text)  # TODO : check type
+    done_tasks: Mapped[str] = mapped_column(Text, nullable=False)
+    checked_tasks: Mapped[Optional[str]] = mapped_column(Text)                                                          # TODO : check type
 
-    base: Union["Assessment", "FinalBoss"]
+    base: Mapped[Union["Assessment", "FinalBoss"]]
 
     def __json__(self):
         data = super().__json__()
@@ -416,7 +424,7 @@ class Assessment(AbstractAssessment):
 class AssessmentTry(AbstractAssessmentTry):
     __tablename__ = "assessment_tries"
 
-    base_id: Mapped[int] = Column(Integer, ForeignKey("assessments.id"), nullable=False)
+    base_id: Mapped[int] = mapped_column(Integer, ForeignKey("assessments.id"), nullable=False)
     base: Mapped["Assessment"] = relationship("Assessment", uselist=False)
 
 
@@ -430,7 +438,7 @@ class FinalBoss(AbstractAssessment):
 class FinalBossTry(AbstractAssessmentTry):
     __tablename__ = "final_boss_tries"
 
-    base_id: Mapped[int] = Column(Integer, ForeignKey("final_bosses.id"), nullable=False)
+    base_id: Mapped[int] = mapped_column(Integer, ForeignKey("final_bosses.id"), nullable=False)
     base: Mapped["FinalBoss"] = relationship("FinalBoss", uselist=False)
 
 
@@ -439,26 +447,26 @@ class FinalBossTry(AbstractAssessmentTry):
 #########################################################################################################################
 class NotificationStudentToTeacher(Base):
     __tablename__ = "notifications_student_to_teacher"
-    id: Mapped[int] = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
-    message: Mapped[str] = Column(Text)
+    message: Mapped[str] = mapped_column(Text)
 
-    viewed: Mapped[bool] = Column(Boolean, nullable=False, default=False)
-    deleted: Mapped[bool] = Column(Boolean, nullable=False, default=False)
+    viewed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
-    drilling_try_id: Mapped[Optional[int]] = Column(Integer, ForeignKey("drilling_tries.id"))
+    drilling_try_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("drilling_tries.id"))
     drilling_try: Mapped["DrillingTry"] = relationship("DrillingTry", uselist=False)
 
-    hieroglyph_try_id: Mapped[Optional[int]] = Column(Integer, ForeignKey("hieroglyph_tries.id"))
+    hieroglyph_try_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("hieroglyph_tries.id"))
     hieroglyph_try: Mapped["HieroglyphTry"] = relationship("HieroglyphTry", uselist=False)
 
-    assessment_try_id: Mapped[Optional[int]] = Column(Integer, ForeignKey("assessment_tries.id"))
+    assessment_try_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("assessment_tries.id"))
     assessment_try: Mapped["AssessmentTry"] = relationship("AssessmentTry", uselist=False)
 
-    final_boss_try_id: Mapped[Optional[int]] = Column(Integer, ForeignKey("final_boss_tries.id"))
+    final_boss_try_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("final_boss_tries.id"))
     final_boss_try: Mapped["FinalBossTry"] = relationship("FinalBossTry", uselist=False)
 
-    creation_datetime: Mapped[datetime.datetime] = Column(DateTime, server_default=func.now(), nullable=False)
+    creation_datetime: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)   # pylint: disable=not-callable
 
     __mapper_args__ = {'eager_defaults': True}
 
@@ -476,29 +484,29 @@ class NotificationStudentToTeacher(Base):
 
 class NotificationTeacherToStudent(Base):
     __tablename__ = "notifications_teacher_to_student"
-    id: Mapped[int] = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
-    message: Mapped[str] = Column(Text)
+    message: Mapped[str] = mapped_column(Text)
 
-    viewed: Mapped[bool] = Column(Boolean, nullable=False, default=False)
-    deleted: Mapped[bool] = Column(Boolean, nullable=False, default=False)
+    viewed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
-    course_id: Mapped[int] = Column(Integer, ForeignKey(COURSES_ID))
+    course_id: Mapped[int] = mapped_column(Integer, ForeignKey(COURSES_ID))
     course: Mapped["Course"] = relationship("Course", uselist=False)
 
-    lesson_id: Mapped[int] = Column(Integer, ForeignKey(LESSONS_ID))
+    lesson_id: Mapped[int] = mapped_column(Integer, ForeignKey(LESSONS_ID))
     lesson: Mapped["Lesson"] = relationship("Lesson", uselist=False)
 
-    assessment_try_id: Mapped[int] = Column(Integer, ForeignKey("assessment_tries.id"))
+    assessment_try_id: Mapped[int] = mapped_column(Integer, ForeignKey("assessment_tries.id"))
     assessment_try: Mapped["AssessmentTry"] = relationship("AssessmentTry", uselist=False)
 
-    final_boss_try_id: Mapped[int] = Column(Integer, ForeignKey("final_boss_tries.id"))
+    final_boss_try_id: Mapped[int] = mapped_column(Integer, ForeignKey("final_boss_tries.id"))
     final_boss_try: Mapped["FinalBossTry"] = relationship("FinalBossTry", uselist=False)
 
-    student_id: Mapped[int] = Column(Integer, ForeignKey("users.id"))
+    student_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     student: Mapped["User"] = relationship("User", uselist=False)
 
-    creation_datetime: Mapped[datetime.datetime] = Column(DateTime, server_default=func.now(), nullable=False)
+    creation_datetime: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)   # pylint: disable=not-callable
 
     __mapper_args__ = {'eager_defaults': True}
 
@@ -531,17 +539,15 @@ def time_limit_to_timedelta(time_limit: datetime.time) -> datetime.timedelta:
                               microseconds=time_limit.microsecond)
 
 
-LexisType = TypeVar("LexisType", bound=AbstractLexis)
-LexisTryType = TypeVar("LexisTryType", bound=AbstractLexisTry)
-LexisCardType = TypeVar("LexisCardType", bound=AbstractLexisCard)
+LexisType = TypeVar("LexisType", bound=AbstractLexis)                                                                   # pylint: disable=invalid-name
+LexisTryType = TypeVar("LexisTryType", bound=AbstractLexisTry)                                                          # pylint: disable=invalid-name
+LexisCardType = TypeVar("LexisCardType", bound=AbstractLexisCard)                                                       # pylint: disable=invalid-name
 
+AssessmentType = TypeVar("AssessmentType", bound=AbstractAssessment)                                                    # pylint: disable=invalid-name
+AssessmentTryType = TypeVar("AssessmentTryType", bound=AbstractAssessmentTry)                                           # pylint: disable=invalid-name
 
-AssessmentType = TypeVar("AssessmentType", bound=AbstractAssessment)
-AssessmentTryType = TypeVar("AssessmentTryType", bound=AbstractAssessmentTry)
-
-
-ActivityType = TypeVar("ActivityType", bound=AbstractActivity)
-ActivityTryType = TypeVar("ActivityTryType", bound=AbstractActivityTry)
+ActivityType = TypeVar("ActivityType", bound=AbstractActivity)                                                          # pylint: disable=invalid-name
+ActivityTryType = TypeVar("ActivityTryType", bound=AbstractActivityTry)                                                 # pylint: disable=invalid-name
 
 
 def create_db_engine(db_config: URL):

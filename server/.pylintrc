@@ -4,3 +4,4 @@ ignored-classes=scoped_session,sessionmaker
 init-hook="from pylint.config import find_pylintrc; import os, sys; sys.path.append(os.path.dirname(find_pylintrc()))"
 
 disable=C0116
+disable=W0511

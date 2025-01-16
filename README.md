@@ -17,7 +17,7 @@ In server folder!!!
 
 ### Migrations
 
-- Create migration: `alembic revision --autogenerate -m "main"`
+- Create migration: `alembic revision --autogenerate -m "<migration_name>"`
 - Add migrations to DB: `alembic upgrade heads`
 
 

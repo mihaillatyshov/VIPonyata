@@ -1,8 +1,7 @@
 from flask import Flask
 
 from server.activities import check_activity_routes
-from server.common import (DBsession, NewCustomJSONEncoder, base_blueprint,
-                           login_manager)
+from server.common import (DBsession, NewCustomJSONEncoder, base_blueprint, login_manager)
 from server.exceptions.ApiExceptions import InvalidAPIUsage
 from server.load_config import load_config
 from server.models.db_models import create_db_session_from_json_config_file
@@ -19,6 +18,7 @@ def get_logs_folder_from_config():
 
 def create_app():
     DBsession.init(create_db_session_from_json_config_file())
+    DBsession.create_custom_trigers()
 
     app = Flask(__name__)
     # app.config.from_object('config.Config')
