@@ -345,3 +345,9 @@ def add_association_to_dictionary(id):
 @login_required
 def get_notifications():
     return user_selector_function(teacher_funcs.get_notifications, student_funcs.get_notifications)
+
+
+@routes_bp.route("/notifications/read", methods=["POST"])
+@login_required
+def mark_notifications_as_read():
+    return user_selector_function(teacher_funcs.mark_notifications_as_read, student_funcs.mark_notifications_as_read)

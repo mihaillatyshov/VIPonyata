@@ -21,8 +21,6 @@ export const TeacherAssessmentDoneTryOpenQuestion = ({
 
     const diffChars: any[] = Diff.diffChars(data.meta_answer || "", data.answer);
 
-    console.log(diffChars);
-
     const getDiffItemColor = (diffItem: any) => {
         if (diffItem.added === true) return "#4e0707";
         if (diffItem.removed === true) return "#9b1003";

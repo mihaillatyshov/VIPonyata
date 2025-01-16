@@ -6,8 +6,7 @@ from sqlalchemy import (Boolean, Column, Date, DateTime, ForeignKey, Integer, St
                         UniqueConstraint, create_engine)
 from sqlalchemy.engine import URL
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
-from sqlalchemy.orm import Mapped, relationship, sessionmaker
-from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship, sessionmaker
 from sqlalchemy.sql import func
 
 from server.load_config import load_config
@@ -471,7 +470,14 @@ class NotificationStudentToTeacher(Base):
     __mapper_args__ = {'eager_defaults': True}
 
     def __json__(self):
-        data = {"message": self.message, "type": None, "creation_datetime": self.creation_datetime}
+        data = {
+            "id": self.id,
+            "message": self.message,
+            "type": None,
+            "creation_datetime": self.creation_datetime,
+            "viewed": self.viewed,
+            "deleted": self.deleted
+        }
         for activity_try_name in ["drilling_try", "hieroglyph_try", "assessment_try", "final_boss_try"]:
             if activity_try_id := getattr(self, f"{activity_try_name}_id"):
                 data["type"] = activity_try_name
@@ -511,7 +517,14 @@ class NotificationTeacherToStudent(Base):
     __mapper_args__ = {'eager_defaults': True}
 
     def __json__(self):
-        data = {"message": self.message, "type": None, "creation_datetime": self.creation_datetime}
+        data = {
+            "id": self.id,
+            "message": self.message,
+            "type": None,
+            "creation_datetime": self.creation_datetime,
+            "viewed": self.viewed,
+            "deleted": self.deleted
+        }
         for activity_try_name in ["assessment_try", "final_boss_try"]:
             if activity_try_id := getattr(self, f"{activity_try_name}_id"):
                 data["type"] = activity_try_name

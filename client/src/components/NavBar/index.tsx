@@ -2,12 +2,12 @@ import React, { useLayoutEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import Notifications from "components/Notifications/Notifications";
-import { AjaxGet } from "libs/ServerAPI";
-import { TAnyNotifications } from "models/TNotification";
+import { AjaxGet, AjaxPost } from "libs/ServerAPI";
+import { TAnyNotifications, TNotificationBase } from "models/TNotification";
 import { useAppSelector } from "redux/hooks";
 import { selectUser } from "redux/slices/userSlice";
 
-import StudentDictionary from "./Dictionary/StudentDictionary";
+import { Dictionary } from "./Dictionary";
 import Profile from "./Profile";
 import styles from "./StyleNavBar.module.css";
 
@@ -22,7 +22,6 @@ const NavBar = () => {
     const getNotifications = () => {
         AjaxGet<{ notifications: TAnyNotifications }>({ url: "/api/notifications" })
             .then((json) => {
-                console.log(json);
                 setNotifications(json.notifications);
             })
             .catch((data) => {
@@ -31,29 +30,49 @@ const NavBar = () => {
     };
 
     useLayoutEffect(() => {
-        getNotifications();
-        let timerId = setInterval(getNotifications, 60_000);
+        if (!showNotifications) {
+            getNotifications();
+        }
+        const timerId = setInterval(() => {
+            if (!showNotifications) {
+                getNotifications();
+            }
+        }, 60_000);
 
         return () => clearInterval(timerId);
-    }, [user]);
+    }, [user, showNotifications]);
 
-    const getNotiifcationStr = (): string => {
-        if (notifications.length === 0) return "";
-        if (notifications.length >= 10) return "9+";
-        return notifications.length.toString();
+    useLayoutEffect(() => {
+        if (showNotifications && notifications.length > 0) {
+            const notificationIds = (notifications as TNotificationBase[])
+                .filter((notification) => !notification.viewed && !notification.deleted)
+                .map((notification) => notification.id);
+            if (notificationIds.length > 0) {
+                AjaxPost({ url: "/api/notifications/read", body: { notification_ids: notificationIds } });
+            }
+        }
+    }, [showNotifications, notifications]);
+
+    const getNotificationStr = (): string => {
+        const newNotificationsCount = (notifications as TNotificationBase[]).filter(
+            (notification) => !notification.viewed && !notification.deleted,
+        ).length;
+        if (newNotificationsCount === 0) return "";
+        if (newNotificationsCount >= 10) return "9+";
+        return newNotificationsCount.toString();
     };
 
     return (
         <div className="container mainNavBar">
             <div className="d-flex justify-content-center align-items-center">
-                <div className="col-2 col-sm-4 px-0 align-items-center">
+                <div className="col-2 col-lg-4 px-0 align-items-center">
                     <Link to="/">
                         <img className="d-none d-lg-block" src="/svg/LogoFull.svg" alt="Главная" height={100} />
                         <img className="d-block d-lg-none" src="/svg/LogoSmall.svg" alt="Главная" height={60} />
                     </Link>
                 </div>
-                <div className="col-6 col-sm-4 mx-auto d-flex align-items-center">
-                    <StudentDictionary />
+                <div className="col-6 col-lg-4 mx-auto d-flex align-items-center">
+                    <Dictionary />
                 </div>
                 <div className="col-4 align-items-end">
                     <div className="d-flex justify-content-end align-items-center">
@@ -63,7 +82,7 @@ const NavBar = () => {
                         >
                             <i className="bi bi-bell-fill font-icon-height-0" style={{ fontSize: "32px" }}></i>
                             <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">
-                                {getNotiifcationStr()}
+                                {getNotificationStr()}
                             </span>
                         </div>
                         <Notifications

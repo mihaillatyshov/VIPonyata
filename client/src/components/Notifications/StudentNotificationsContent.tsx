@@ -101,7 +101,7 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
     };
 
     return (
-        <div className="notification__item" onClick={handleClick}>
+        <div className={`notification__item ${item.viewed ? "viewed" : ""}`} onClick={handleClick}>
             <NotificationDateTime datetime={item.creation_datetime} />
             {isShareItem(item) ? <ShareItemContent item={item} /> : null}
             {isActivityItem(item) ? <ActivityItemContent item={item} /> : null}
@@ -121,7 +121,6 @@ interface StudentNotificationsProps {
 }
 
 const StudentNotifications = ({ notifications, closeModal }: StudentNotificationsProps) => {
-    console.log(notifications);
     return (
         <div className="d-flex flex-column gap-3">
             {notifications.map((item, i) => (

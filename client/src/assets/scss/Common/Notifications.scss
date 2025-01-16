@@ -18,6 +18,10 @@
         border-color: #ea7979;
     }
 
+    &.viewed {
+        opacity: 0.6;
+    }
+
     overflow-wrap: break-word;
 
     @media (max-width: 767px) {

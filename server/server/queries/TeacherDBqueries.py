@@ -1,4 +1,5 @@
-from typing import Generic, Type
+from datetime import datetime
+from typing import Generic, Type, TypedDict
 
 from sqlalchemy import Delete, Select, delete, select, update
 
@@ -149,6 +150,18 @@ def modify_delete_by_activity_try_type(activity_try_type: type[ActivityTryType],
     return ""
 
 
+class ActivityForNotificationType(TypedDict):
+    id: int
+    lesson_id: int
+
+
+class ActivityTryForNotificationType(TypedDict):
+    id: int
+    base_id: int
+    start_datetime: datetime
+    end_datetime: datetime
+
+
 #########################################################################################################################
 ################ Lexis ##################################################################################################
 #########################################################################################################################
@@ -171,6 +184,18 @@ class LexisQueries(Generic[LexisType, LexisTryType, LexisCardType]):
         with DBsession.begin() as session:
             return session.scalars(select(self.lexis_type).where(self.lexis_type.id == lexis_id)).one_or_none()
 
+    def get_for_notifications_by_id(self, lexis_id: int) -> ActivityForNotificationType | None:
+        with DBsession.begin() as session:
+            result = session.execute(                                                                                   #
+                select(self.lexis_type.id, self.lexis_type.lesson_id)                                                   #
+                .where(self.lexis_type.id == lexis_id)                                                                  #
+            ).one_or_none()
+
+            if result is None:
+                return None
+
+            return {"id": result[0], "lesson_id": result[1]}
+
     def get_user_by_try_id(self, lexis_try_id: int) -> int | None:
         with DBsession.begin() as session:
             return session.scalars(
@@ -178,8 +203,23 @@ class LexisQueries(Generic[LexisType, LexisTryType, LexisCardType]):
 
     def get_try_by_id(self, lexis_try_id: int) -> LexisTryType | None:
         with DBsession.begin() as session:
-            return session.scalars(select(
-                self.lexis_try_type).where(self.lexis_try_type.id == lexis_try_id)).one_or_none()
+            return session.scalars(                                                                                     #
+                select(self.lexis_try_type)                                                                             #
+                .where(self.lexis_try_type.id == lexis_try_id)                                                          #
+            ).one_or_none()
+
+    def get_try_for_notifications_by_id(self, lexis_try_id: int) -> ActivityTryForNotificationType | None:
+        with DBsession.begin() as session:
+            result = session.execute(                                                                                   #
+                select(self.lexis_try_type.id, self.lexis_try_type.base_id, self.lexis_try_type.start_datetime,
+                       self.lexis_try_type.end_datetime)                                                                #
+                .where(self.lexis_try_type.id == lexis_try_id)                                                          #
+            ).one_or_none()
+
+            if result is None:
+                return None
+
+            return {"id": result[0], "base_id": result[1], "start_datetime": result[2], "end_datetime": result[3]}
 
     def get_cards_by_activity_id(self, lexis_id: int) -> list[LexisCardType]:
         with DBsession.begin() as session:
@@ -246,6 +286,18 @@ class IAssessmentQueries(Generic[AssessmentType, AssessmentTryType]):
             return session.scalars(select(
                 self.assessment_type).where(self.assessment_type.id == assessment_id)).one_or_none()
 
+    def get_for_notifications_by_id(self, assessment_id: int) -> ActivityForNotificationType | None:
+        with DBsession.begin() as session:
+            result = session.execute(                                                                                   #
+                select(self.assessment_type.id, self.assessment_type.lesson_id)                                         #
+                .where(self.assessment_type.id == assessment_id)                                                        #
+            ).one_or_none()
+
+            if result is None:
+                return None
+
+            return {"id": result[0], "lesson_id": result[1]}
+
     def get_by_lesson_id(self, lesson_id: int) -> AssessmentType | None:
         with DBsession.begin() as session:
             return session.scalars(select(
@@ -271,10 +323,25 @@ class IAssessmentQueries(Generic[AssessmentType, AssessmentTryType]):
                 select(User).join(
                     self.assessment_try_type).where(self.assessment_try_type.id == assessment_try_id)).one_or_none()
 
-    def get_try_by_id(self, assessment_try_id: int) -> LexisTryType | None:
+    def get_try_by_id(self, assessment_try_id: int) -> AssessmentTryType | None:
         with DBsession.begin() as session:
             return session.scalars(
-                select(self.assessment_try_type).where(self.assessment_try_type.id == assessment_try_id)).one_or_none()
+                select(self.assessment_try_type)                                                                        #
+                .where(self.assessment_try_type.id == assessment_try_id)                                                #
+            ).one_or_none()
+
+    def get_try_for_notifications_by_id(self, assessment_try_id: int) -> ActivityTryForNotificationType | None:
+        with DBsession.begin() as session:
+            result = session.execute(                                                                                   #
+                select(self.assessment_try_type.id, self.assessment_try_type.base_id,
+                       self.assessment_try_type.start_datetime, self.assessment_try_type.end_datetime)                  #
+                .where(self.assessment_try_type.id == assessment_try_id)                                                #
+            ).one_or_none()
+
+            if result is None:
+                return None
+
+            return {"id": result[0], "base_id": result[1], "start_datetime": result[2], "end_datetime": result[3]}
 
     def get_done_try_by_id(self, assessment_id: int) -> AssessmentTryType | None:
         with DBsession.begin() as session:
@@ -424,6 +491,15 @@ def add_final_boss_notification(final_boss_try_id: int):
 def add_assessment_notification(assessment_try_id: int):
     with DBsession.begin() as session:
         session.add(NotificationTeacherToStudent(assessment_try_id=assessment_try_id))
+
+
+def mark_notifications_as_read(notification_ids: list[int]):
+    with DBsession.begin() as session:
+        session.execute(                                                                                                #
+            update(NotificationStudentToTeacher)                                                                        #
+            .where(NotificationStudentToTeacher.id.in_(notification_ids))                                               #
+            .values(viewed=True)                                                                                        #
+        )
 
 
 # def get_notification_activity_try(

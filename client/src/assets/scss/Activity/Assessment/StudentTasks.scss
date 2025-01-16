@@ -41,7 +41,6 @@
     padding: 4px 6px;
     border-radius: 6px;
     background-color: #ffffffaa;
-    height: 100%;
     cursor: pointer;
 
     &.selected {
@@ -73,6 +72,7 @@
 
     display: grid;
     grid-template-columns: repeat(2, minmax(min-content, auto));
+    grid-template-rows: auto;
 
     border-collapse: collapse;
 

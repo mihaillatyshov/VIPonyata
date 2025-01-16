@@ -31,6 +31,12 @@ html {
     min-width: 100%;
     min-height: 100%;
     height: 100%;
+    width: 100%;
+
+    scrollbar-width: thin;
+    scrollbar-color: rgba(90, 90, 90, 0.3) rgba(0, 0, 0, 0);
+    -webkit-overflow-scrolling: touch;
+    pointer-events: auto;
 }
 
 body {
@@ -38,17 +44,23 @@ body {
 
     min-height: 100%;
     height: 100%;
-    /* overflow-y: scroll; */
-}
-
-#root {
-    height: 100%;
+    margin: 0;
     overflow-y: scroll;
-
     background: linear-gradient(180deg, #ffffff 5%, rgba(255, 255, 255, 0) 75%),
         linear-gradient(0deg, #ffffffc7 0%, rgba(255, 255, 255, 0) 35%),
         linear-gradient(100.24deg, #12d73068 0%, #a084caaf 56%);
+    background-repeat: no-repeat;
     background-attachment: fixed;
+    background-size: cover;
+}
+
+#root {
+    max-width: 100dvw;
+    background-attachment: fixed;
+
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: 100%;
 }
 
 .App {

@@ -11,11 +11,7 @@ export const StudentAssessmentDoneTryOpenQuestion = ({
     data,
     checks,
 }: AssessmentDoneTryTaskBaseProps<TAssessmentDoneTryOpenQuestion, TAssessmentCheckedOpenQuestion>) => {
-    console.log("StudentAssessmentDoneTryOpenQuestion", data, checks);
-
     const diffChars: any[] = Diff.diffChars(data.meta_answer || "", data.answer);
-
-    console.log(diffChars);
 
     const getDiffItemColor = (diffItem: any) => {
         if (diffItem.added === true) return "#4e0707";

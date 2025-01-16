@@ -54,7 +54,7 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
     const navigate = useNavigate();
 
     if (item.type === null) {
-        return <div>item.message</div>;
+        return <div>{item.message}</div>;
     }
 
     const handleClick = () => {
@@ -74,7 +74,7 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
     const elapsedTime = endDatetime - new Date(item.activity_try.start_datetime).getTime();
 
     return (
-        <div className="notification__item" onClick={handleClick}>
+        <div className={`notification__item ${item.viewed ? "viewed" : ""}`} onClick={handleClick}>
             <div className="d-flex justify-content-center">
                 <NotificationDateTime datetime={item.creation_datetime} />
                 <NotificationUser userData={item.user} />
