@@ -11,7 +11,7 @@ jobs:
                 working-directory: ./client
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
             - name: Install npm modules
               run: npm install
@@ -20,7 +20,7 @@ jobs:
               run: npm run build
 
             - name: Upload artifacts
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: build-data
                   path: client/build
@@ -34,7 +34,7 @@ jobs:
 
         steps:
             - name: Download build data
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               with:
                   name: build-data
                   path: client/build
@@ -60,7 +60,7 @@ jobs:
                 working-directory: ./server
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
             - name: Deploy server
               uses: appleboy/ssh-action@v0.1.10
