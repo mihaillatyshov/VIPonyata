@@ -48,6 +48,8 @@ export const processingAliases: TAliases = {
     open_question: TeacherAssessmentOpenQuestion,
     img: TeacherAssessmentImg,
     audio: TeacherAssessmentAudio,
+    block_begin: () => <></>,
+    block_end: () => <></>,
 };
 
 type GetProcessingDataReturnType =

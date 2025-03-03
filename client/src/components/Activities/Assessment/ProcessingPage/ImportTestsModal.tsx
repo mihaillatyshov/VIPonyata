@@ -55,6 +55,23 @@ export const ImportTestsModalModal = ({
                     });
                 }
             } else if (trimmedLine.match(/^\d+\.\t/)) {
+                if (result.length === 0) {
+                    if (taskName === TAssessmentTaskName.TEST_SINGLE) {
+                        result.push({
+                            name: taskName,
+                            question: "",
+                            options: [],
+                            meta_answer: null,
+                        });
+                    } else if (taskName === TAssessmentTaskName.TEST_MULTI) {
+                        result.push({
+                            name: taskName,
+                            question: "",
+                            options: [],
+                            meta_answers: [],
+                        });
+                    }
+                }
                 result[result.length - 1].options.push(trimmedLine.replace(/^\d+\.\t/, "").trim());
             }
         });

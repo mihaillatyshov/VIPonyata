@@ -1,18 +1,14 @@
 import React from "react";
 
 interface AddTaskButtonProps {
-    insertId: number;
-    handleClick: (insertId: number) => void;
+    onClick: () => void;
 }
 
-const AddTaskButton = ({ insertId, handleClick }: AddTaskButtonProps) => {
+const AddTaskButton = ({ onClick }: AddTaskButtonProps) => {
     return (
-        <input
-            type="button"
-            className="btn btn-primary mx-auto d-flex"
-            onClick={() => handleClick(insertId)}
-            value={"Добавить задание"}
-        />
+        <button className="btn btn-primary mx-auto d-inline-flex" onClick={onClick}>
+            Добавить задание
+        </button>
     );
 };
 

@@ -1,6 +1,7 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import { AddBlockButton } from "components/Activities/Assessment/ProcessingPage/AddBlockButton";
 import Loading from "components/Common/Loading";
 import PageTitle from "components/Common/PageTitle";
 import ErrorPage from "components/ErrorPages/ErrorPage";
@@ -24,8 +25,17 @@ import { ProcessingButtonBlock } from "ui/Processing/ProcessingButtonBlock";
 
 import AddTaskButton from "./AddTaskButton";
 import { getProcessingData, processingAliases, TAliasProp } from "./AssessmentProcessingUtils";
+import BlockLines from "./BlockLines";
 import SelectTypeModal from "./SelectTypeModal";
 import TeacherAssessmentTypeBase from "./Types/TeacherAssessmentTypeBase";
+
+export function findLastIndex<T>(array: Array<T>, predicate: (value: T, index: number, obj: T[]) => boolean): number {
+    let l = array.length;
+    while (l--) {
+        if (predicate(array[l], l, array)) return l;
+    }
+    return -1;
+}
 
 interface IAssessmentProcessingResponse {
     assessment: {
@@ -41,7 +51,7 @@ interface IAssessmentProcessingPageProps {
 
 export const IAssessmentProcessingPage = ({ title, name, processingType }: IAssessmentProcessingPageProps) => {
     const { id: idStr } = useParams();
-    const id = parseInt(idStr as string);
+    const id = parseInt(idStr || "");
 
     const navigate = useNavigate();
 
@@ -60,6 +70,7 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
     const [lessonId, setLessonId] = useState<number>(0);
 
     useLayoutEffect(() => {
+        console.log("useLayoutEffect");
         setLoadStatus(LoadStatus.LOADING);
 
         getProcessingData(processingType, name, id).then((data) => {
@@ -109,8 +120,29 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
         );
     }
 
+    const checkBlocks = () => {
+        const blocks = tasks.filter(
+            (item, i) => item.name === TAssessmentTaskName.BLOCK_BEGIN || item.name === TAssessmentTaskName.BLOCK_END,
+        );
+
+        if (blocks.length % 2 !== 0) return false;
+
+        for (let i = 1; i < blocks.length; i++) {
+            if (blocks[i].name === blocks[i - 1].name) {
+                return false;
+            }
+        }
+
+        return true;
+    };
+
     const handleProcessing = () => {
         const ajaxMethod = processingType === "edit" ? AjaxPatch : AjaxPost;
+
+        if (!checkBlocks()) {
+            setErrors({ message: "Ошибка: коллизия блоков!!!", errors: {} });
+            return;
+        }
 
         ajaxMethod<IAssessmentProcessingResponse>({
             url: `/api/${name}/${id}`,
@@ -149,7 +181,6 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
         }
 
         const newHashesCount = taskData === undefined ? 1 : taskData.length;
-
         for (let i = 0; i < newHashesCount; i++) {
             while (true) {
                 const id = uuid();
@@ -160,14 +191,33 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
             }
         }
 
-        setTasks((prev) => {
-            if (taskData !== undefined) {
-                prev.splice(taskIdToAdd, 0, ...taskData);
-            } else {
-                prev.splice(taskIdToAdd, 0, getTeacherAssessmentTaskDefaultData(name));
+        if (taskData !== undefined) {
+            tasks.splice(taskIdToAdd, 0, ...taskData);
+        } else {
+            tasks.splice(taskIdToAdd, 0, getTeacherAssessmentTaskDefaultData(name));
+        }
+        setTasks([...tasks]);
+    };
+
+    const addBlock = (taskId: number) => {
+        const newHashesCount = 2;
+        for (let i = 0; i < newHashesCount; i++) {
+            while (true) {
+                const id = uuid();
+                if (tasksHashes.current.includes(id)) continue;
+
+                tasksHashes.current.splice(taskId, 0, id);
+                break;
             }
-            return [...prev];
-        });
+        }
+
+        tasks.splice(
+            taskId,
+            0,
+            getTeacherAssessmentTaskDefaultData(TAssessmentTaskName.BLOCK_BEGIN),
+            getTeacherAssessmentTaskDefaultData(TAssessmentTaskName.BLOCK_END),
+        );
+        setTasks([...tasks]);
     };
 
     const moveTask = (taskId: number, direction: "up" | "down") => {
@@ -188,10 +238,31 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
     };
 
     const removeTask = (taskId: number) => {
-        tasksHashes.current.splice(taskId, 1);
-
+        const taskName = tasks[taskId].name;
         const newTasks = [...tasks];
+
+        if (taskName === TAssessmentTaskName.BLOCK_BEGIN) {
+            const endIndex = tasks.findIndex((item, i) => i > taskId && item.name === TAssessmentTaskName.BLOCK_END);
+            if (endIndex !== -1) {
+                tasksHashes.current.splice(endIndex, 1);
+                newTasks.splice(endIndex, 1);
+            }
+        }
+
+        tasksHashes.current.splice(taskId, 1);
         newTasks.splice(taskId, 1);
+
+        if (taskName === TAssessmentTaskName.BLOCK_END) {
+            const beginIndex = findLastIndex(
+                tasks,
+                (item, i) => i <= taskId && item.name === TAssessmentTaskName.BLOCK_BEGIN,
+            );
+            if (beginIndex !== -1) {
+                tasksHashes.current.splice(beginIndex, 1);
+                newTasks.splice(beginIndex, 1);
+            }
+        }
+
         setTasks(newTasks);
     };
 
@@ -211,8 +282,16 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
         });
     };
 
+    const blocks = tasks
+        .map((item, i) =>
+            item.name === TAssessmentTaskName.BLOCK_BEGIN || item.name === TAssessmentTaskName.BLOCK_END
+                ? tasksHashes.current[i]
+                : undefined,
+        )
+        .filter((item) => item !== undefined) as string[];
+
     return (
-        <div className="container mb-5 pb-5">
+        <div className="container mb-5" style={{ paddingBottom: 320, position: "relative" }}>
             <PageTitle title={title} urlBack={`/lessons/${lessonId}`} />
             {/* <input type="button" className="btn btn-success w-100 mb-5" onClick={submitHandler} value={"Создать"} /> */}
             <div className="processing-page">
@@ -246,7 +325,10 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
                 <div className="processing-page__content">
                     {tasks.map((item, i) => (
                         <React.Fragment key={tasksHashes.current[i]}>
-                            <AddTaskButton insertId={i} handleClick={openModal} />
+                            <div className="text-center" key={i}>
+                                <AddTaskButton onClick={() => openModal(i)} />
+                                <AddBlockButton onClick={() => addBlock(i)} />
+                            </div>
                             <TeacherAssessmentTypeBase
                                 taskName={item.name}
                                 moveUp={() => moveUp(i)}
@@ -254,12 +336,17 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
                                 removeTask={() => removeTask(i)}
                                 error={errors.errors[`${i}`] || ""}
                             >
-                                <div>{drawItem(item, i, tasksHashes.current[i])}</div>
+                                <div id={tasksHashes.current[i]}>{drawItem(item, i, tasksHashes.current[i])}</div>
                             </TeacherAssessmentTypeBase>
                         </React.Fragment>
                     ))}
-                    <AddTaskButton insertId={tasks.length} handleClick={openModal} />
+                    <div className="text-center" key={tasks.length}>
+                        <AddTaskButton onClick={() => openModal(tasks.length)} />
+                        <AddBlockButton onClick={() => addBlock(tasks.length)} />
+                    </div>
                 </div>
+
+                <BlockLines lines={blocks} />
 
                 <SelectTypeModal
                     isShow={isShowSelectTypeModal}

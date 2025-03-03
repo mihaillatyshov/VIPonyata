@@ -31,6 +31,8 @@ const validateSchemas: TValidateSchemas = {
     [TAssessmentTaskName.OPEN_QUESTION]: z.object({ answer: z.string().min(1, "Ответ не может быть пустым") }),
     [TAssessmentTaskName.IMG]: z.object({}),
     [TAssessmentTaskName.AUDIO]: z.object({}),
+    [TAssessmentTaskName.BLOCK_BEGIN]: z.object({}),
+    [TAssessmentTaskName.BLOCK_END]: z.object({}),
 };
 
 const validateTask = (task: TAssessmentItemBase): PyError | undefined => {

@@ -23,6 +23,8 @@ class AssessmentTaskName(str, Enum):
     OPEN_QUESTION = "open_question"
     IMG = "img"
     AUDIO = "audio"
+    BLOCK_BEGIN = "block_begin"
+    BLOCK_END = "block_end"
 
 
 ANSWER_CANT_BE_EMPTY = "Ответ не может быть пустым"
@@ -745,6 +747,68 @@ class AudioTaskCheck(BaseModelCheck):
 
 
 #########################################################################################################################
+################ BlockBegin #############################################################################################
+#########################################################################################################################
+class BlockBeginTaskBase(BaseModelTask):
+    @field_validator("name")
+    @classmethod
+    def name_validation(cls, v: str):
+        return validate_name(v, AssessmentTaskName.BLOCK_BEGIN)
+
+
+class BlockBeginTaskTeacherBase(BlockBeginTaskBase):
+    pass
+
+
+class BlockBeginTaskStudentReq(BlockBeginTaskBase):
+    pass
+
+
+class BlockBeginTaskRes(BlockBeginTaskTeacherBase, BaseModelRes):
+    def custom_validation(self) -> bool:
+        return True
+
+
+class BlockBeginTaskTeacherReq(BlockBeginTaskTeacherBase):
+    pass
+
+
+class BlockBeginTaskCheck(BaseModelCheck):
+    pass
+
+
+#########################################################################################################################
+################ BlockEnd #############################################################################################
+#########################################################################################################################
+class BlockEndTaskBase(BaseModelTask):
+    @field_validator("name")
+    @classmethod
+    def name_validation(cls, v: str):
+        return validate_name(v, AssessmentTaskName.BLOCK_END)
+
+
+class BlockEndTaskTeacherBase(BlockEndTaskBase):
+    pass
+
+
+class BlockEndTaskStudentReq(BlockEndTaskBase):
+    pass
+
+
+class BlockEndTaskRes(BlockEndTaskTeacherBase, BaseModelRes):
+    def custom_validation(self) -> bool:
+        return True
+
+
+class BlockEndTaskTeacherReq(BlockEndTaskTeacherBase):
+    pass
+
+
+class BlockEndTaskCheck(BaseModelCheck):
+    pass
+
+
+#########################################################################################################################
 ################ Alias ##################################################################################################
 #########################################################################################################################
 class AliasType(TypedDict):
@@ -778,6 +842,8 @@ create_alias(AssessmentTaskName.OPEN_QUESTION, OpenQuestionTaskStudentReq, OpenQ
              OpenQuestionTaskTeacherReq)
 create_alias(AssessmentTaskName.IMG, ImgTaskStudentReq, ImgTaskRes, ImgTaskTeacherReq)
 create_alias(AssessmentTaskName.AUDIO, AudioTaskStudentReq, AudioTaskRes, AudioTaskTeacherReq)
+create_alias(AssessmentTaskName.BLOCK_BEGIN, BlockBeginTaskStudentReq, BlockBeginTaskRes, BlockBeginTaskTeacherReq)
+create_alias(AssessmentTaskName.BLOCK_END, BlockEndTaskStudentReq, BlockEndTaskRes, BlockEndTaskTeacherReq)
 
 # Check Aliases
 for name in AssessmentTaskName:

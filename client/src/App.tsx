@@ -129,7 +129,7 @@ const App = () => {
                     <Route path="/hieroglyph/edit/:id" element={getTeacherRoute(<HieroglyphEditPage />)} />
 
                     <Route
-                        path="/assessment/:id/*"
+                        path="/assessment/:assessmentId"
                         element={getRoute(<StudentAssessmentPage />, <StudentAssessmentPage />)}
                     />
                     <Route path="/assessment/create/:id" element={getTeacherRoute(<AssessmentCreatePage />)} />

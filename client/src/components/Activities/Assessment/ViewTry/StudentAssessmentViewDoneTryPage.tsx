@@ -55,6 +55,8 @@ const aliases: TAliases = {
     open_question: StudentAssessmentDoneTryOpenQuestion,
     img: StudentAssessmentDoneTryImg,
     audio: StudentAssessmentDoneTryAudio,
+    block_begin: () => <></>,
+    block_end: () => <></>,
 };
 
 interface DoneTryResponse {
@@ -108,27 +110,34 @@ const StudentAssessmentViewDoneTryPage = () => {
         });
     };
 
+    const isDrawableItem = (task: TAssessmentItemBase) => {
+        return task.name !== TAssessmentTaskName.BLOCK_BEGIN && task.name !== TAssessmentTaskName.BLOCK_END;
+    };
+
     return (
         <div className="container pb-4" style={{ maxWidth: "800px" }}>
             <PageTitle title="タスク" urlBack={lessonId !== undefined ? `/lessons/${lessonId}` : undefined} />
             <hr />
             <div className="student-assessment-tasks">
-                {doneTry.data.done_tasks.map((doneTask, i) => (
-                    <React.Fragment key={i}>
-                        <div className="student-assessment-view-task__wrapper">
-                            {doneTask.name !== TAssessmentTaskName.IMG && (
-                                <div className="student-assessment-task-title">
-                                    {studentAssessmentTaskRusNameAliases[doneTask.name]}
+                {doneTry.data.done_tasks.map(
+                    (doneTask, i) =>
+                        isDrawableItem(doneTask) && (
+                            <React.Fragment key={i}>
+                                <div className="student-assessment-view-task__wrapper">
+                                    {doneTask.name !== TAssessmentTaskName.IMG && (
+                                        <div className="student-assessment-task-title">
+                                            {studentAssessmentTaskRusNameAliases[doneTask.name]}
+                                        </div>
+                                    )}
+                                    {hasMistakesMessage(doneTask.name) ? (
+                                        <TaskMistakes {...doneTry.data.checked_tasks[i]} />
+                                    ) : null}
+                                    {drawItem(doneTask, doneTry.data.checked_tasks[i], i)}
                                 </div>
-                            )}
-                            {hasMistakesMessage(doneTask.name) ? (
-                                <TaskMistakes {...doneTry.data.checked_tasks[i]} />
-                            ) : null}
-                            {drawItem(doneTask, doneTry.data.checked_tasks[i], i)}
-                        </div>
-                        <hr className="my-0 py-0" />
-                    </React.Fragment>
-                ))}
+                                <hr className="my-0 py-0" />
+                            </React.Fragment>
+                        ),
+                )}
             </div>
         </div>
     );

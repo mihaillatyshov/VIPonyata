@@ -11,6 +11,8 @@ export enum TAssessmentTaskName {
     OPEN_QUESTION = "open_question",
     IMG = "img",
     AUDIO = "audio",
+    BLOCK_BEGIN = "block_begin",
+    BLOCK_END = "block_end",
 }
 
 export interface TAssessmentItemBase {
@@ -227,6 +229,28 @@ export interface TAssessmentCheckedAudio extends TAssessmentCheckedItemBase {}
 export type TAssessmentDoneTryAudio = TAssessmentAudio & TTeacherAssessmentAudio;
 
 // * ==================================================================================================================
+// * ========== BlockBegin ============================================================================================
+// * ==================================================================================================================
+interface TAssessmentBlockBeginBase extends TAssessmentItemBase {
+    name: TAssessmentTaskName.BLOCK_BEGIN;
+}
+export interface TAssessmentBlockBegin extends TAssessmentBlockBeginBase {}
+export interface TTeacherAssessmentBlockBegin extends TAssessmentBlockBeginBase {}
+export interface TAssessmentCheckedBlockBegin extends TAssessmentCheckedItemBase {}
+export type TAssessmentDoneTryBlockBegin = TAssessmentBlockBegin & TTeacherAssessmentBlockBegin;
+
+// * ==================================================================================================================
+// * ========== BlockEnd ============================================================================================
+// * ==================================================================================================================
+interface TAssessmentBlockEndBase extends TAssessmentItemBase {
+    name: TAssessmentTaskName.BLOCK_END;
+}
+export interface TAssessmentBlockEnd extends TAssessmentBlockEndBase {}
+export interface TTeacherAssessmentBlockEnd extends TAssessmentBlockEndBase {}
+export interface TAssessmentCheckedBlockEnd extends TAssessmentCheckedItemBase {}
+export type TAssessmentDoneTryBlockEnd = TAssessmentBlockEnd & TTeacherAssessmentBlockEnd;
+
+// * ==================================================================================================================
 // * ========== Combinations ==========================================================================================
 // * ==================================================================================================================
 export interface TGetAssessmentStudentTypeByName {
@@ -242,6 +266,8 @@ export interface TGetAssessmentStudentTypeByName {
     [TAssessmentTaskName.OPEN_QUESTION]: TAssessmentOpenQuestion;
     [TAssessmentTaskName.IMG]: TAssessmentImg;
     [TAssessmentTaskName.AUDIO]: TAssessmentAudio;
+    [TAssessmentTaskName.BLOCK_BEGIN]: TAssessmentBlockBegin;
+    [TAssessmentTaskName.BLOCK_END]: TAssessmentBlockEnd;
 }
 
 export interface TGetAsseessmentTeacherTypeByName {
@@ -257,6 +283,8 @@ export interface TGetAsseessmentTeacherTypeByName {
     [TAssessmentTaskName.OPEN_QUESTION]: TTeacherAssessmentOpenQuestion;
     [TAssessmentTaskName.IMG]: TTeacherAssessmentImg;
     [TAssessmentTaskName.AUDIO]: TTeacherAssessmentAudio;
+    [TAssessmentTaskName.BLOCK_BEGIN]: TTeacherAssessmentBlockBegin;
+    [TAssessmentTaskName.BLOCK_END]: TTeacherAssessmentBlockEnd;
 }
 
 export interface TGetAsseessmentCheckTypeByName {
@@ -272,6 +300,8 @@ export interface TGetAsseessmentCheckTypeByName {
     [TAssessmentTaskName.OPEN_QUESTION]: TAssessmentCheckedOpenQuestion;
     [TAssessmentTaskName.IMG]: TAssessmentCheckedImg;
     [TAssessmentTaskName.AUDIO]: TAssessmentCheckedAudio;
+    [TAssessmentTaskName.BLOCK_BEGIN]: TAssessmentCheckedBlockBegin;
+    [TAssessmentTaskName.BLOCK_END]: TAssessmentCheckedBlockEnd;
 }
 
 export interface TGetAsseessmentDoneTryTypeByName {
@@ -287,6 +317,8 @@ export interface TGetAsseessmentDoneTryTypeByName {
     [TAssessmentTaskName.OPEN_QUESTION]: TAssessmentDoneTryOpenQuestion;
     [TAssessmentTaskName.IMG]: TAssessmentDoneTryImg;
     [TAssessmentTaskName.AUDIO]: TAssessmentDoneTryAudio;
+    [TAssessmentTaskName.BLOCK_BEGIN]: TAssessmentDoneTryBlockBegin;
+    [TAssessmentTaskName.BLOCK_END]: TAssessmentDoneTryBlockEnd;
 }
 
 export type TStudentAssessmentAnyItem = TGetAssessmentStudentTypeByName[keyof TGetAssessmentStudentTypeByName];
@@ -324,6 +356,8 @@ const teacherAssessmentTaskDefaultDataAliases: TTeacherAssessmentTaskDefaultData
     open_question: () => ({ name: TAssessmentTaskName.OPEN_QUESTION, meta_answer: "", question: "" }),
     img: () => ({ name: TAssessmentTaskName.IMG, url: "" }),
     audio: () => ({ name: TAssessmentTaskName.AUDIO, url: "" }),
+    block_begin: () => ({ name: TAssessmentTaskName.BLOCK_BEGIN }),
+    block_end: () => ({ name: TAssessmentTaskName.BLOCK_END }),
 };
 
 export const getTeacherAssessmentTaskDefaultData = (name: TAssessmentTaskName): TTeacherAssessmentAnyItem => {
@@ -344,6 +378,8 @@ export const assessmentTaskRusNameAliases: TAssessmentTaskRusNameAliases = {
     open_question: "Открытый вопрос",
     img: "Картинка",
     audio: "Аудио",
+    block_begin: "Начало блока",
+    block_end: "Конец блока",
 };
 
 export const studentAssessmentTaskRusNameAliases: TAssessmentTaskRusNameAliases = {
@@ -359,4 +395,6 @@ export const studentAssessmentTaskRusNameAliases: TAssessmentTaskRusNameAliases 
     open_question: "Ответь на вопрос",
     img: "Картинка :3",
     audio: "Прослушай аудио",
+    block_begin: "Начало блока",
+    block_end: "Конец блока",
 };

@@ -1,20 +1,12 @@
 from typing import Callable
 
-from server.models.assessment import (AssessmentTaskName, AudioTaskCheck,
-                                      AudioTaskRes, ClassificationTaskCheck,
-                                      ClassificationTaskRes,
-                                      CreateSentenceTaskRes,
-                                      FillSpacesByHandTaskRes,
-                                      FillSpacesExistsTaskRes,
-                                      FindPairTaskCheck, FindPairTaskRes,
-                                      IFillSpacesTaskCheck, ImgTaskCheck,
-                                      ImgTaskRes, IOrderTaskCheck,
-                                      MultiTestTaskCheck, MultiTestTaskRes,
-                                      OpenQuestionTaskCheck,
-                                      OpenQuestionTaskRes,
-                                      SentenceOrderTaskRes,
-                                      SingleTestTaskCheck, SingleTestTaskRes,
-                                      TextTaskCheck, TextTaskRes)
+from server.models.assessment import (AssessmentTaskName, AudioTaskCheck, AudioTaskRes, BlockBeginTaskCheck,
+                                      BlockBeginTaskRes, BlockEndTaskCheck, BlockEndTaskRes, ClassificationTaskCheck,
+                                      ClassificationTaskRes, CreateSentenceTaskRes, FillSpacesByHandTaskRes,
+                                      FillSpacesExistsTaskRes, FindPairTaskCheck, FindPairTaskRes, IFillSpacesTaskCheck,
+                                      ImgTaskCheck, ImgTaskRes, IOrderTaskCheck, MultiTestTaskCheck, MultiTestTaskRes,
+                                      OpenQuestionTaskCheck, OpenQuestionTaskRes, SentenceOrderTaskRes,
+                                      SingleTestTaskCheck, SingleTestTaskRes, TextTaskCheck, TextTaskRes)
 
 
 def text_task_check(_: TextTaskRes) -> TextTaskCheck:
@@ -120,6 +112,14 @@ def audio_task_check(_: AudioTaskRes) -> AudioTaskCheck:
     return AudioTaskCheck()
 
 
+def block_begin_task_check(_: BlockBeginTaskRes) -> BlockBeginTaskCheck:
+    return BlockBeginTaskCheck()
+
+
+def block_end_task_check(_: BlockEndTaskRes) -> BlockEndTaskCheck:
+    return BlockEndTaskCheck()
+
+
 CheckAliases: dict[str, Callable] = {}
 
 CheckAliases[AssessmentTaskName.TEXT] = text_task_check
@@ -134,6 +134,8 @@ CheckAliases[AssessmentTaskName.CLASSIFICATION] = classification_task_check
 CheckAliases[AssessmentTaskName.OPEN_QUESTION] = open_question_task_check
 CheckAliases[AssessmentTaskName.IMG] = img_task_check
 CheckAliases[AssessmentTaskName.AUDIO] = audio_task_check
+CheckAliases[AssessmentTaskName.BLOCK_BEGIN] = block_begin_task_check
+CheckAliases[AssessmentTaskName.BLOCK_END] = block_end_task_check
 
 # Check Aliases
 for name in AssessmentTaskName:
