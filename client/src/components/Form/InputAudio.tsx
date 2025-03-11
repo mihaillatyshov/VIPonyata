@@ -131,11 +131,13 @@ const InputAudio = ({
         return { message: errorMessage };
     };
 
+    const audioId = `${htmlId}_audio`;
+
     return (
         <div className={`${styles.inputFile} ${className}`}>
-            <InputAudioLabel value={value} placeholder={placeholder} htmlId={htmlId} />
+            <InputAudioLabel value={value} placeholder={placeholder} htmlId={audioId} />
             <InputError {...getErrorMessage()} className="justify-content-center" />
-            <input className="" type="file" id={htmlId} accept=".mp3,audio/*" onChange={handler} />
+            <input className="d-none" type="file" id={audioId} accept=".mp3,audio/*" onChange={handler} />
         </div>
     );
 };

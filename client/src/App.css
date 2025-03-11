@@ -46,9 +46,12 @@ body {
     height: 100%;
     margin: 0;
     overflow-y: scroll;
+    /* background: linear-gradient(180deg, #ffffff 5%, rgba(255, 255, 255, 0) 75%),
+        linear-gradient(0deg, #ffffffc7 0%, rgba(255, 255, 255, 0) 35%),
+        linear-gradient(100.24deg, #12d73068 0%, #a084caaf 56%); */
     background: linear-gradient(180deg, #ffffff 5%, rgba(255, 255, 255, 0) 75%),
         linear-gradient(0deg, #ffffffc7 0%, rgba(255, 255, 255, 0) 35%),
-        linear-gradient(100.24deg, #12d73068 0%, #a084caaf 56%);
+        linear-gradient(100.24deg, #fdfdfd68 0%, #f7cbe8e4 56%);
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: cover;

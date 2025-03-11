@@ -117,11 +117,13 @@ const InputImage = ({
         return { message: errorMessage };
     };
 
+    const imgId = `${htmlId}_img`;
+
     return (
         <div className={`${styles.inputFile} ${className}`}>
-            <InputImageLabel value={value} placeholder={placeholder} htmlId={htmlId} />
+            <InputImageLabel value={value} placeholder={placeholder} htmlId={imgId} />
             <InputError {...getErrorMessage()} className="justify-content-center" />
-            <input className="" type="file" id={htmlId} accept="image/*" onChange={handler} />
+            <input className="d-none" type="file" id={imgId} accept="image/*" onChange={handler} />
         </div>
     );
 };
