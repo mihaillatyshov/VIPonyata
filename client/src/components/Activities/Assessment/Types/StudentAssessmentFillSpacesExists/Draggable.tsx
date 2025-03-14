@@ -35,7 +35,11 @@ const Draggable = ({ id, str, longestStr, type }: DraggableProps) => {
 
     return (
         <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="d-flex dnd__sortable-item">
-            <AutosizeDiv value={str} valueToCalcSize={longestStr} inputClassName="prevent-select text-center" />
+            <AutosizeDiv
+                value={str}
+                valueToCalcSize={longestStr}
+                inputClassName="prevent-select text-center text-nowrap"
+            />
         </div>
     );
 };

@@ -30,7 +30,7 @@ const Droppable = ({ id, longestStr, str }: DroppableProps) => {
                         <AutosizeDiv
                             value={TAssessmentFillSpacesExistsEmpty}
                             valueToCalcSize={longestStr}
-                            inputClassName="prevent-select text-center"
+                            inputClassName="prevent-select text-center text-nowrap"
                         />
                     </div>
                 )}
