@@ -25,10 +25,17 @@ class RemoveColorFilter(logging.Filter):
 remove_color_filter = RemoveColorFilter()
 logging.getLogger("werkzeug").addFilter(remove_color_filter)
 
-
 app = create_app()
 CORS(app)
 
+if __name__ != "__main__":
+    try:
+        gunicorn_logger = logging.getLogger("gunicorn.access")
+        if gunicorn_logger:
+            app.logger.handlers = gunicorn_logger.handlers
+            app.logger.setLevel(gunicorn_logger.level)
+    except:
+        logging.warning("Can not set app logger to gunicorn_logger")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0")

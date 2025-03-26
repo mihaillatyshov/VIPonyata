@@ -224,6 +224,7 @@ const StudentAssessmentPage = () => {
     };
 
     const addBlockToChanged = (blockId: number) => {
+        setTimeout(() => window.scrollTo(0, 0), 0);
         if (!changedBlocks.includes(blockId)) {
             setChangedBlocks((prev) => [...prev, blockId]);
         }
