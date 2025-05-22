@@ -90,7 +90,9 @@ const StudentAssessmentFillSpacesExists = ({
                 <div className="student-assessment-fill-spaces">
                     {data.separates.map((element: string, fieldId: number) => (
                         <React.Fragment key={fieldId}>
-                            <div className="prevent-select">{element}</div>
+                            <div className="prevent-select d-inline text-break me-2" style={{ whiteSpace: "normal" }}>
+                                {element}
+                            </div>
                             {fieldId < data.separates.length - 1 && (
                                 <Droppable id={fieldId} longestStr={longestStr} str={data.answers[fieldId]} />
                             )}

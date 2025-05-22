@@ -27,30 +27,38 @@ div {
     border-top: solid 1px #8a15c0;
     border-left: solid 1px #8a15c0;
 }
-.flex-table:first-of-type .flex-row {
+.flex-table:first-of-type .flex-row,
+.flex-row-style {
     background: #a119d2;
     color: white;
     border-color: #9e15c0;
 }
 
-.flex-table.flex-table-row .flex-row {
+.flex-table.flex-table-row .flex-row,
+.flex-row-style {
     background: #f4f2f177;
 }
 
-.flex-table.flex-table-row:nth-child(odd) .flex-row {
+.flex-table.flex-table-row:nth-child(odd) .flex-row,
+.flex-row-style {
     background: #f4f2f1cc;
 }
+
 .flex-table:hover {
     background: #f5f5f5;
     transition: 500ms;
 }
 
-.flex-row {
-    width: 25%;
+.flex-row-style {
     text-align: center;
     padding: 0.5em 0.5em;
     border-right: solid 1px #d9d9d9;
     border-bottom: solid 1px #d9d9d9;
+}
+
+.flex-row {
+    @extend .flex-row-style;
+    width: 25%;
 }
 .flex-row.first {
     width: 25%;

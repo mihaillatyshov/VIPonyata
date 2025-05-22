@@ -1,7 +1,7 @@
 import abc
 import datetime
 import random
-import re
+from collections import Counter
 from enum import Enum
 from typing import TypedDict
 
@@ -252,8 +252,8 @@ class FindPairTaskTeacherBase(FindPairTaskBase):
 
 
 def find_pair_fs_validation_base(first: list[StrExtraSpaceRemove], second: list[StrExtraSpaceRemove]):
-    if (len(first) != len(set(first))) or (len(second) != len(set(second))):
-        raise ValueError("Есть повторения полей")
+    # if (len(first) != len(set(first))) or (len(second) != len(set(second))):
+    #     raise ValueError("Есть повторения полей")
 
     if len(first) != len(second):
         raise ValueError(f"Первый и второй стоблец разной длины (f:{len(first)}, s:{len(second)})")
@@ -291,10 +291,7 @@ class FindPairTaskRes(FindPairTaskTeacherBase, BaseModelRes):
         return self
 
     def custom_validation(self) -> bool:
-        if (len(set(self.meta_first)) != len(self.first)) or (len(set(self.meta_second)) != len(self.second)):
-            return False
-
-        if (set(self.meta_first) != set(self.first)) or (set(self.meta_second) != set(self.second)):
+        if (Counter(self.meta_first) != Counter(self.first)) or (Counter(self.meta_second) != Counter(self.second)):
             return False
 
         return True
