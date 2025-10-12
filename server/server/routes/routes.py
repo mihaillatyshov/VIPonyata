@@ -273,6 +273,12 @@ def add_assessment_new_done_tasks(activity_id):
     return user_selector_function(None, student_funcs.AssessmentHandlers.add_new_done_tasks, activity_id=activity_id)
 
 
+@routes_bp.route("/assessment/<int:activity_id>/checkblock", methods=["POST"])
+@login_required
+def check_assessment_block_tasks(activity_id):
+    return user_selector_function(None, student_funcs.AssessmentHandlers.check_block_tasks, activity_id=activity_id)
+
+
 @routes_bp.route("/assessment/<int:activity_id>", methods=["GET"])
 @login_required
 def get_assessment_by_id(activity_id):

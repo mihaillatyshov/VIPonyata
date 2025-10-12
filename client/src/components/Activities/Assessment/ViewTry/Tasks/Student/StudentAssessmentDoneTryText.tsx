@@ -1,6 +1,6 @@
 import React from "react";
-import ReactMarkdown from "react-markdown";
 
+import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import { TAssessmentCheckedText, TAssessmentText } from "models/Activity/Items/TAssessmentItems";
 
 import { AssessmentDoneTryTaskBaseProps } from "../AssessmentDoneTryTaskBase";
@@ -10,7 +10,7 @@ export const StudentAssessmentDoneTryText = ({
 }: AssessmentDoneTryTaskBaseProps<TAssessmentText, TAssessmentCheckedText>) => {
     return (
         <div className="prevent-select md-last-pad-zero">
-            <ReactMarkdown>{data.text}</ReactMarkdown>
+            <ReactMarkdownWithHtml>{data.text}</ReactMarkdownWithHtml>
         </div>
     );
 };

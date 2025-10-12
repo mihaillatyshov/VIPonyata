@@ -1,6 +1,6 @@
 import React from "react";
-import ReactMarkdown from "react-markdown";
 
+import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import { TAssessmentTaskName, TTeacherAssessmentText } from "models/Activity/Items/TAssessmentItems";
 
@@ -27,7 +27,7 @@ const TeacherAssessmentText = ({
                 noErrorField={true}
             />
             <div className="mt-2 md-last-pad-zero">
-                <ReactMarkdown>{data.text}</ReactMarkdown>
+                <ReactMarkdownWithHtml>{data.text}</ReactMarkdownWithHtml>
             </div>
         </div>
     );

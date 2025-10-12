@@ -1,10 +1,18 @@
 .modal-dialog {
     width: 90vw;
+    border-radius: var(--bs-modal-inner-border-radius);
+    overflow: hidden;
 }
 
 .modal-content {
     min-height: 50vh;
     max-height: 90vh;
+}
+
+.modal-content-auto-height {
+    margin: auto !important;
+    min-height: auto !important;
+    max-height: auto !important;
 }
 
 .modal-content-fullscreen {

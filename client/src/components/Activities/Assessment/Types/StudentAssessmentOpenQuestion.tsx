@@ -1,6 +1,6 @@
 import React from "react";
-import ReactMarkdown from "react-markdown";
 
+import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import { TAssessmentOpenQuestion } from "models/Activity/Items/TAssessmentItems";
 import { useAppDispatch } from "redux/hooks";
@@ -19,7 +19,7 @@ const StudentAssessmentOpenQuestion = ({ data, taskId }: StudentAssessmentTypePr
     return (
         <div className="student-assessment-open-question__wrapper">
             <div className="prevent-select md-last-pad-zero mb-1">
-                <ReactMarkdown>{data.question}</ReactMarkdown>
+                <ReactMarkdownWithHtml>{data.question}</ReactMarkdownWithHtml>
             </div>
             <FloatingLabelTextareaAutosize
                 value={data.answer}

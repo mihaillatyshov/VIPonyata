@@ -6,15 +6,11 @@ from server.exceptions.ApiExceptions import InvalidAPIUsage, InvalidRequestJson
 from server.handlers.common.assessment_auto_checks import CheckAliases
 from server.handlers.student.activity_handlers import ActivityHandlers
 from server.log_lib import LogE, LogW
-from server.models.assessment import Aliases
-from server.models.db_models import (AbstractAssessmentTry, Assessment,
-                                     AssessmentTry, AssessmentTryType,
-                                     AssessmentType, FinalBoss, FinalBossTry,
-                                     time_limit_to_timedelta)
+from server.models.assessment import Aliases, AssessmentTaskName
+from server.models.db_models import (AbstractAssessmentTry, Assessment, AssessmentTry, AssessmentTryType,
+                                     AssessmentType, FinalBoss, FinalBossTry, time_limit_to_timedelta)
 from server.queries import StudentDBqueries as DBQS
-from server.routes.routes_utils import (activity_end_time_handler,
-                                        get_current_user_id,
-                                        start_activity_timer_limit)
+from server.routes.routes_utils import (activity_end_time_handler, get_current_user_id, start_activity_timer_limit)
 
 
 def parse_new_tasks(data_str: str) -> list[dict]:
@@ -96,6 +92,30 @@ def calc_is_checked(activity_try: AbstractAssessmentTry) -> bool:
     return all(check_task.get("cheked", False) for check_task in checked_tasks)
 
 
+def create_blocks(done_tasks_list: list[dict] | None, checked_tasks: list[dict] | None):
+    if checked_tasks is None or done_tasks_list is None:
+        return []
+
+    blocks: list[list[dict]] = []
+    is_item_in_last_block = False
+
+    for i, (done_task_item, check_task_item) in enumerate(zip(done_tasks_list, checked_tasks)):
+        if done_task_item.get("name") == AssessmentTaskName.BLOCK_BEGIN:
+            is_item_in_last_block = True
+            blocks.append([])
+        elif done_task_item.get("name") == AssessmentTaskName.BLOCK_END:
+            is_item_in_last_block = False
+            blocks[-1].append({"item": check_task_item, "itemId": i})
+            continue
+
+        if is_item_in_last_block:
+            blocks[-1].append({"item": check_task_item, "itemId": i})
+        else:
+            blocks.append([{"item": check_task_item, "itemId": i}])
+
+    return blocks
+
+
 class IAssessmentHandlers(ActivityHandlers[AssessmentType, AssessmentTryType]):
     _activity_queries: DBQS.AssessmentQueriesClass[AssessmentType, AssessmentTryType]
 
@@ -129,11 +149,10 @@ class IAssessmentHandlers(ActivityHandlers[AssessmentType, AssessmentTryType]):
         done_tasks_list = parse_student_req(done_tasks_json, db_done_tasks)
         checked_tasks_list = check_task_req(done_tasks_list)
 
-        self._activity_queries.add_done_and_check_tasks(activity_try.id,
-                                                        json.dumps(done_tasks_list),
+        self._activity_queries.add_done_and_check_tasks(activity_try.id, json.dumps(done_tasks_list),
                                                         json.dumps(checked_tasks_list))
 
-        return activity_try
+        return activity_try.id
 
     def add_new_done_tasks(self, activity_id: int):
         if not request.json:
@@ -143,13 +162,37 @@ class IAssessmentHandlers(ActivityHandlers[AssessmentType, AssessmentTryType]):
 
         return {"message": "ok"}
 
+    def check_block_tasks(self, activity_id: int):
+        if not request.json:
+            raise InvalidRequestJson()
+
+        block_id = request.json.get("blockId")
+        if block_id is None:
+            raise InvalidAPIUsage("No blockId in request")
+
+        self._set_done_tasks(request.json, activity_id)
+        activity_try = self._activity_queries.get_unfinished_try_by_activity_id(activity_id, get_current_user_id())
+        done_tasks_list = parse_student_tasks(activity_try.done_tasks)
+        checked_tasks = json.loads(activity_try.checked_tasks or "[]")
+        blocks = create_blocks(done_tasks_list, checked_tasks)
+
+        if block_id < 0 or block_id >= len(blocks):
+            raise InvalidAPIUsage("No tasks with this blockId")
+
+        block_tasks = blocks[block_id]
+        for task in block_tasks:
+            if task["item"].get("mistakes_count", 0) > 0:
+                return {"isOk": False, "message": "Block is invalid"}
+
+        return {"isOk": True, "message": "Block is valid"}
+
     def end_try(self, activity_id: int):
         if not request.json:
             raise InvalidRequestJson()
 
-        activity_try = self._set_done_tasks(request.json, activity_id)
+        activity_try_id = self._set_done_tasks(request.json, activity_id)
 
-        activity_end_time_handler(activity_try.id, self._activity_queries._activity_try_type)
+        activity_end_time_handler(activity_try_id, self._activity_queries._activity_try_type)
         return {"message": "Successfully closed"}
 
     def get_by_id(self, activity_id: int):
@@ -166,10 +209,10 @@ class IAssessmentHandlers(ActivityHandlers[AssessmentType, AssessmentTryType]):
 
         result = []
         for done_try in done_tries:
-            result.append(
-                {**done_try.__json__(),
-                 "mistakes_count": calc_mistakes_count(done_try),
-                 "is_checked": calc_is_checked(done_try)})
+            result.append({
+                **done_try.__json__(), "mistakes_count": calc_mistakes_count(done_try),
+                "is_checked": calc_is_checked(done_try)
+            })
             done_try.done_tasks = parse_student_tasks(done_try.done_tasks)
         return {"done_tries": result}
 

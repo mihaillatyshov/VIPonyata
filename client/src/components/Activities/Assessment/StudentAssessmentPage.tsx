@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
+import { StudentAssessmentCheckBlockModal } from "components/Activities/Assessment/StudentAssessmentCheckBlockModal";
 import PageDescription from "components/Common/PageDescription";
 import PageTitle from "components/Common/PageTitle";
 import InputError from "components/Form/InputError";
@@ -165,6 +166,12 @@ const createBlocks = (assessmentItems: TTeacherAssessmentItems | undefined): TBl
     return blocks;
 };
 
+interface TBlockHasErrors {
+    isModalOpen: boolean;
+    isCheckLoading: boolean;
+    continueCallback?: () => void;
+}
+
 const StudentAssessmentPage = () => {
     const { assessmentId: assessmentIdStr } = useParams();
     const [searchParams, setSearchParams] = useSearchParams({ itemId: "0" });
@@ -175,10 +182,12 @@ const StudentAssessmentPage = () => {
     const [isNeedDrawFullValidaton, setIsNeedDrawFullValidaton] = useState(false);
     const [errors, setErrors] = useState<PyErrorDict>({ errors: {}, message: "" });
     const [changedBlocks, setChangedBlocks] = useState<number[]>([]);
+    const [blockHasErrors, setBlockHasErrors] = useState<TBlockHasErrors>({
+        isModalOpen: false,
+        isCheckLoading: false,
+    });
 
     const blocks = useMemo(() => createBlocks(assessment.items), [assessment.items]);
-    console.log("Assessment", assessment.items);
-    console.log("Blocks", blocks);
     const blockId = fixBlockId(searchParams.get("blockId"), assessment.items !== undefined ? blocks.length : undefined);
 
     useEffect(() => {
@@ -196,18 +205,23 @@ const StudentAssessmentPage = () => {
             });
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+    const saveCurrentState = useCallback(() => {
+        return AjaxPost({
+            url: `/api/assessment/${assessmentId}/newdonetasks`,
+            body: { done_tasks: assessment.items },
+        });
+    }, [assessmentId, assessment]);
+
     useEffect(() => {
-        const timer = setTimeout(() => {
-            AjaxPost({ url: `/api/assessment/${assessmentId}/newdonetasks`, body: { done_tasks: assessment.items } });
-        }, 2000);
+        const timer = setTimeout(saveCurrentState, 2000);
         return () => clearTimeout(timer);
-    }, [assessment, assessmentId]);
+    }, [assessment, assessmentId, saveCurrentState]);
 
     const backToLessonHandle = () => {
         navigate(`/lessons/${assessment.info.lesson_id}`, { replace: true });
     };
 
-    const endAssessmentHandle = () => {
+    const endAssessment = () => {
         setIsNeedDrawFullValidaton(true);
         const validationFieldsFilledResult = validateStudentAssessmentTasksFilled(assessment.items);
         if (validationFieldsFilledResult !== undefined) {
@@ -243,16 +257,59 @@ const StudentAssessmentPage = () => {
         addBlockToChanged(blockId);
     };
 
-    const prevBlockHandle = () => {
-        searchParams.set("blockId", (blockId - 1).toString());
-        setSearchParams(searchParams);
-        addBlockToChanged(blockId);
+    const checkBlockErrors = (cb: () => void) => {
+        setBlockHasErrors(() => ({
+            isCheckLoading: true,
+            isModalOpen: false,
+            continueCallback: cb,
+        }));
+        AjaxPost<{ isOk: boolean }>({
+            url: `/api/assessment/${assessmentId}/checkblock`,
+            body: { done_tasks: assessment.items, blockId },
+        })
+            .then((data) => {
+                console.log(data);
+                console.log(errors.errors, Object.keys(errors.errors).length);
+                let blockHasErrors = false;
+                for (let i = 0; i < blocks[blockId].length; i++) {
+                    if (!!errors.errors[`${blocks[blockId][i].itemId}`]) {
+                        blockHasErrors = true;
+                        break;
+                    }
+                }
+                const hasError = !data.isOk || blockHasErrors;
+                setBlockHasErrors(() => ({
+                    isCheckLoading: false,
+                    isModalOpen: hasError,
+                    continueCallback: cb,
+                }));
+                if (!hasError) {
+                    cb();
+                }
+            })
+            .catch(() => {
+                cb();
+            });
     };
 
-    const nextBlockHandle = () => {
-        searchParams.set("blockId", (blockId + 1).toString());
-        setSearchParams(searchParams);
+    const handleEndAssessment = () => {
         addBlockToChanged(blockId);
+        checkBlockErrors(endAssessment);
+    };
+
+    const handleGoPrevBlock = () => {
+        addBlockToChanged(blockId);
+        checkBlockErrors(() => setBlockId(blockId - 1));
+    };
+
+    const handleGoNextBlock = () => {
+        addBlockToChanged(blockId);
+        checkBlockErrors(() => setBlockId(blockId + 1));
+    };
+
+    const handleGoToBlock = (newBlockId: number) => {
+        addBlockToChanged(blockId);
+        checkBlockErrors(() => setBlockId(newBlockId));
     };
 
     if (isNaN(assessmentId)) {
@@ -310,6 +367,14 @@ const StudentAssessmentPage = () => {
 
     return (
         <div className="container pb-5" style={{ maxWidth: "800px" }}>
+            <StudentAssessmentCheckBlockModal
+                isShow={blockHasErrors.isModalOpen}
+                close={() => setBlockHasErrors({ isModalOpen: false, isCheckLoading: false })}
+                onContinueWithoutFixing={() => {
+                    blockHasErrors.continueCallback !== undefined && blockHasErrors.continueCallback();
+                    setBlockHasErrors({ isModalOpen: false, isCheckLoading: false });
+                }}
+            />
             <PageTitle title="タスク" urlBack={`/lessons/${assessment.info.lesson_id}`} />
             <PageDescription description={assessment.info.description} className="mb-1" />
             <StudentActivityDeadline activityInfo={assessment.info} />
@@ -325,7 +390,7 @@ const StudentAssessmentPage = () => {
                             isBlockHasError(index),
                         )}
                         onClick={() => {
-                            setBlockId(index);
+                            handleGoToBlock(index);
                         }}
                     />
                 ))}
@@ -355,7 +420,7 @@ const StudentAssessmentPage = () => {
             </div>
             <div className="mb-2 d-flex space-between w-100">
                 {blockId !== 0 && (
-                    <button type="button" className="btn btn-secondary mt-3 me-auto" onClick={prevBlockHandle}>
+                    <button type="button" className="btn btn-secondary mt-3 me-auto" onClick={handleGoPrevBlock}>
                         Назад
                     </button>
                 )}
@@ -363,11 +428,11 @@ const StudentAssessmentPage = () => {
                     <input
                         type="button"
                         className="btn btn-success mt-3"
-                        onClick={endAssessmentHandle}
+                        onClick={handleEndAssessment}
                         value="Завершить"
                     />
                 ) : (
-                    <button type="button" className="btn btn-success mt-3 ms-auto" onClick={nextBlockHandle}>
+                    <button type="button" className="btn btn-success mt-3 ms-auto" onClick={handleGoNextBlock}>
                         Далее
                     </button>
                 )}

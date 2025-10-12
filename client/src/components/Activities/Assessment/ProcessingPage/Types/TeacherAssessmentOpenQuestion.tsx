@@ -1,6 +1,6 @@
 import React from "react";
-import ReactMarkdown from "react-markdown";
 
+import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import { TTeacherAssessmentOpenQuestion } from "models/Activity/Items/TAssessmentItems";
 
@@ -24,7 +24,7 @@ const TeacherAssessmentOpenQuestion = ({
             />
 
             <div className="mt-3 mb-2 md-last-pad-zero">
-                <ReactMarkdown>{data.question}</ReactMarkdown>
+                <ReactMarkdownWithHtml>{data.question}</ReactMarkdownWithHtml>
             </div>
             <FloatingLabelTextareaAutosize
                 htmlId={`answer_${taskUUID}`}

@@ -1,6 +1,6 @@
 import React from "react";
-import ReactMarkdown from "react-markdown";
 
+import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import { TAssessmentCheckedOpenQuestion, TAssessmentDoneTryOpenQuestion } from "models/Activity/Items/TAssessmentItems";
 
 import { AssessmentDoneTryTaskBaseProps } from "../AssessmentDoneTryTaskBase";
@@ -22,7 +22,7 @@ export const StudentAssessmentDoneTryOpenQuestion = ({
     return (
         <div className="student-assessment-view-open-question__container">
             <div className="prevent-select md-last-pad-zero">
-                <ReactMarkdown>{data.question}</ReactMarkdown>
+                <ReactMarkdownWithHtml>{data.question}</ReactMarkdownWithHtml>
             </div>
 
             <div className="student-assessment-view-open-question__wrapper">

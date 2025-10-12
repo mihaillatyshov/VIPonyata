@@ -1,6 +1,6 @@
 import React from "react";
-import ReactMarkdown from "react-markdown";
 
+import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import InputCheckSingle from "components/Form/InputCheckSingle";
 import { TAssessmentTestMulti } from "models/Activity/Items/TAssessmentItems";
 import { useAppDispatch } from "redux/hooks";
@@ -23,7 +23,7 @@ const StudentAssessmentTestMulti = ({ data, taskId }: StudentAssessmentTypeProps
     return (
         <div className="student-assessment-test">
             <div className="prevent-select md-last-pad-zero">
-                <ReactMarkdown>{data.question}</ReactMarkdown>
+                <ReactMarkdownWithHtml>{data.question}</ReactMarkdownWithHtml>
             </div>
 
             <div className="student-assessment-test__options">

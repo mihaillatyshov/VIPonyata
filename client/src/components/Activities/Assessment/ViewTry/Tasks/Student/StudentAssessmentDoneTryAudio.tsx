@@ -1,6 +1,6 @@
 import React from "react";
-import ReactMarkdown from "react-markdown";
 
+import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import { TAssessmentAudio, TAssessmentCheckedAudio } from "models/Activity/Items/TAssessmentItems";
 
 import { AssessmentDoneTryTaskBaseProps } from "../AssessmentDoneTryTaskBase";
@@ -12,7 +12,7 @@ export const StudentAssessmentDoneTryAudio = ({
         <div className="d-flex w-100 justify-content-center flex-column text-center gap-2">
             {data.description && (
                 <div className="prevent-select md-last-pad-zero">
-                    <ReactMarkdown>{data.description}</ReactMarkdown>
+                    <ReactMarkdownWithHtml>{data.description}</ReactMarkdownWithHtml>
                 </div>
             )}
 

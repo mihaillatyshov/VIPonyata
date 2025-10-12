@@ -1,6 +1,6 @@
 import React from "react";
-import ReactMarkdown from "react-markdown";
 
+import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import { TAssessmentImg } from "models/Activity/Items/TAssessmentItems";
 
 import { StudentAssessmentTypeProps } from "./StudentAssessmentTypeProps";
@@ -10,7 +10,7 @@ const StudentAssessmentImg = ({ data, taskId }: StudentAssessmentTypeProps<TAsse
         <div className="d-flex w-100 justify-content-center flex-column text-center gap-2">
             {data.description && (
                 <div className="prevent-select md-last-pad-zero">
-                    <ReactMarkdown>{data.description}</ReactMarkdown>
+                    <ReactMarkdownWithHtml>{data.description}</ReactMarkdownWithHtml>
                 </div>
             )}
             <div>

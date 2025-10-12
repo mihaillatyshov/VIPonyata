@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import ReactMarkdown from "react-markdown";
 
+import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import InputAudio from "components/Form/InputAudio";
 import { LoadStatus } from "libs/Status";
@@ -43,7 +43,7 @@ const TeacherAssessmentAudio = ({
             />
             {data.description && (
                 <div className="mt-2 text-center md-last-pad-zero">
-                    <ReactMarkdown>{data.description}</ReactMarkdown>
+                    <ReactMarkdownWithHtml>{data.description}</ReactMarkdownWithHtml>
                 </div>
             )}
             <InputAudio

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import ReactMarkdown from "react-markdown";
 
+import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import InputImage from "components/Form/InputImage";
 import { LoadStatus } from "libs/Status";
@@ -39,7 +39,7 @@ const TeacherAssessmentImg = ({ data, taskUUID, onChangeTask }: TeacherAssessmen
             />
             {data.description && (
                 <div className="mt-2 text-center md-last-pad-zero">
-                    <ReactMarkdown>{data.description}</ReactMarkdown>
+                    <ReactMarkdownWithHtml>{data.description}</ReactMarkdownWithHtml>
                 </div>
             )}
             <InputImage

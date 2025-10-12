@@ -1,6 +1,6 @@
 import React from "react";
-import ReactMarkdown from "react-markdown";
 
+import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import InputRadioSingle from "components/Form/InputRadioSingle";
 import { TAssessmentTestSingle } from "models/Activity/Items/TAssessmentItems";
 import { useAppDispatch } from "redux/hooks";
@@ -19,7 +19,7 @@ const StudentAssessmentTestSingle = ({ data, taskId }: StudentAssessmentTypeProp
     return (
         <div className="student-assessment-test">
             <div className="prevent-select md-last-pad-zero">
-                <ReactMarkdown>{data.question}</ReactMarkdown>
+                <ReactMarkdownWithHtml>{data.question}</ReactMarkdownWithHtml>
             </div>
 
             <div className="student-assessment-test__options">

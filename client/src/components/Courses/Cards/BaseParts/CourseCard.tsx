@@ -1,6 +1,6 @@
 import React from "react";
-import ReactMarkdown from "react-markdown";
 
+import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import { ChatUrlLinkMd, TextWithLinksForMd } from "components/Common/TextWithLinks";
 
 type TitleProps = { title: string };
@@ -17,9 +17,9 @@ type DescriptionProps = { description: string | null };
 export const Description = ({ description }: DescriptionProps) => {
     return (
         <div className="md-last-pad-zero">
-            <ReactMarkdown components={{ a: ChatUrlLinkMd }}>
+            <ReactMarkdownWithHtml components={{ a: ChatUrlLinkMd }}>
                 {TextWithLinksForMd({ text: description ?? "", linkMaxChars: 60 })}
-            </ReactMarkdown>
+            </ReactMarkdownWithHtml>
         </div>
     );
 };
