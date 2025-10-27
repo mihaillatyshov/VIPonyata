@@ -1,5 +1,6 @@
 import React from "react";
 
+import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import { TAssessmentCheckedFindPair, TAssessmentDoneTryFindPair } from "models/Activity/Items/TAssessmentItems";
 
 import { AssessmentDoneTryTaskBaseProps } from "../AssessmentDoneTryTaskBase";
@@ -15,12 +16,16 @@ interface FieldRowItemProps {
 const FieldRowItem = ({ id, field, parsCreated, alignRight, isWrong }: FieldRowItemProps) => {
     const answerClass = isWrong ? "wrong" : "done";
     const getClassName = () => {
-        return `student-assessment-find-pair__item
+        return `student-assessment-find-pair__item prevent-select md-last-pad-zero
         ${alignRight ? "right" : ""}
         ${id < parsCreated ? answerClass : ""} `;
     };
 
-    return <div className={getClassName()}>{field}</div>;
+    return (
+        <div className={getClassName()}>
+            <ReactMarkdownWithHtml>{field}</ReactMarkdownWithHtml>
+        </div>
+    );
 };
 
 interface FieldRowProps {

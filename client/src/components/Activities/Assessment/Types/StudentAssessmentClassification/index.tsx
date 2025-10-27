@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 
-import { FindMaxStr } from "libs/Autisize";
+import { FindMaxStr, fixRubyStr } from "libs/Autisize";
 import { TAssessmentClassification } from "models/Activity/Items/TAssessmentItems";
 import { useAppDispatch } from "redux/hooks";
 import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
@@ -41,10 +41,12 @@ const StudentAssessmentClassification = ({ data, taskId }: StudentAssessmentType
         return [inputs, ...answers];
     });
 
-    const longestStr = useMemo(
-        () => FindMaxStr([data.inputs, ...data.answers].map(FindMaxStr)),
-        [data.inputs, data.answers],
-    );
+    const longestStr = useMemo(() => {
+        return FindMaxStr(
+            [data.inputs, ...data.answers].map((item) => FindMaxStr(item, fixRubyStr)),
+            fixRubyStr,
+        );
+    }, [data.inputs, data.answers]);
 
     useEffect(() => {
         const newData = {

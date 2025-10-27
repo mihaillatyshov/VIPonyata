@@ -1,5 +1,6 @@
 import React from "react";
 
+import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import AutosizeDiv from "libs/AutosizeDiv";
 
 import { useDroppable } from "@dnd-kit/core";
@@ -24,7 +25,11 @@ export default function Container({ id, items, title, type, longestStr }: Contai
     return (
         <SortableContext id={`${id}`} items={items.map(({ strId }) => strId)} strategy={rectSortingStrategy}>
             <div ref={setNodeRef} className={`${className}`}>
-                <div className="student-assessment-classification__column-title">{title}</div>
+                <div className="student-assessment-classification__column-title">
+                    <div className="prevent-select md-last-no-margin">
+                        <ReactMarkdownWithHtml>{title || ""}</ReactMarkdownWithHtml>
+                    </div>
+                </div>
                 {title ? (
                     <div className="student-assessment-classification__hr">
                         <AutosizeDiv

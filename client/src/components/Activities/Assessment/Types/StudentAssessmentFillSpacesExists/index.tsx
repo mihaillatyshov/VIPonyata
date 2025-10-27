@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 
-import { FindMaxStr } from "libs/Autisize";
+import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
+import { FindMaxStr, fixRubyStr } from "libs/Autisize";
 import { TAssessmentFillSpacesExists, TAssessmentFillSpacesExistsEmpty } from "models/Activity/Items/TAssessmentItems";
 import { useAppDispatch } from "redux/hooks";
 import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
@@ -79,6 +80,7 @@ const StudentAssessmentFillSpacesExists = ({
                 [...data.inputs, ...data.answers, TAssessmentFillSpacesExistsEmpty].filter(
                     (item) => item !== null,
                 ) as string[],
+                fixRubyStr,
             ),
         [data.inputs, data.answers],
     );
@@ -91,7 +93,9 @@ const StudentAssessmentFillSpacesExists = ({
                     {data.separates.map((element: string, fieldId: number) => (
                         <React.Fragment key={fieldId}>
                             <div className="prevent-select d-inline text-break me-2" style={{ whiteSpace: "normal" }}>
-                                {element}
+                                <div className="prevent-select md-last-no-margin">
+                                    <ReactMarkdownWithHtml>{element}</ReactMarkdownWithHtml>
+                                </div>
                             </div>
                             {fieldId < data.separates.length - 1 && (
                                 <Droppable id={fieldId} longestStr={longestStr} str={data.answers[fieldId]} />

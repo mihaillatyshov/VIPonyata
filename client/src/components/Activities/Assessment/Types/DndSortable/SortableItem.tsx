@@ -1,5 +1,6 @@
 import React from "react";
 
+import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import CSS from "csstype";
 
 import { useSortable } from "@dnd-kit/sortable";
@@ -32,7 +33,9 @@ const SortableItem = ({ id, str, customData, width }: SortableItemProps) => {
             {...listeners}
             className="student-assessment-view-sortable-order__item"
         >
-            <div className="prevent-select">{str}</div>
+            <div className="prevent-select md-last-no-margin">
+                <ReactMarkdownWithHtml>{str}</ReactMarkdownWithHtml>
+            </div>
         </div>
     );
 };

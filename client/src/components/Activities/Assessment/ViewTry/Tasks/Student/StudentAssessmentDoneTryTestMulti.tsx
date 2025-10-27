@@ -36,7 +36,9 @@ const StudentAssessmentDoneTryTestTaskItem = ({
                 isDisabled={true}
                 onChange={() => {}}
             />
-            <span className={`form-control prevent-select ${validationTextClassName}`}>{option}</span>
+            <div className={`form-control prevent-select md-last-pad-zero ${validationTextClassName}`}>
+                <ReactMarkdownWithHtml>{option}</ReactMarkdownWithHtml>
+            </div>
         </div>
     );
 };

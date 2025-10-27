@@ -152,13 +152,13 @@
 }
 
 .student-assessment-fill-spaces {
-    // display: flex;
-    // flex-wrap: wrap;
-    // align-items: center;
-    // column-gap: 6px;
-    // row-gap: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 6px;
+    row-gap: 4px;
     width: 100%;
-    // line-height: 2;
+    line-height: 2;
 }
 
 .student-assessment-fill-spaces-exists__inputs {
@@ -192,6 +192,7 @@
     @extend .my-card;
 
     display: flex;
+    flex-wrap: wrap;
 
     padding: 10px;
     gap: 8px;

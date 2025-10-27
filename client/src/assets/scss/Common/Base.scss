@@ -53,3 +53,7 @@ rt {
     line-height: 1;
     vertical-align: top;
 }
+
+.md-last-no-margin p:last-child {
+    margin-bottom: 0;
+}

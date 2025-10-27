@@ -1,5 +1,7 @@
 import React from "react";
 
+import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
+
 interface FieldRowItemProps {
     id: number;
     field: string;
@@ -11,7 +13,7 @@ interface FieldRowItemProps {
 
 const FieldRowItem = ({ id, field, selectedId, setSelected, parsCreated, alignRight }: FieldRowItemProps) => {
     const getClassName = () => {
-        return `student-assessment-find-pair__item ${alignRight ? "right" : ""} ${
+        return `student-assessment-find-pair__item prevent-select md-last-no-margin ${alignRight ? "right" : ""} ${
             id === selectedId ? "selected" : ""
         } ${id < parsCreated ? "done" : ""} `;
     };
@@ -22,7 +24,7 @@ const FieldRowItem = ({ id, field, selectedId, setSelected, parsCreated, alignRi
 
     return (
         <div className={getClassName()} onClick={() => onClickHandle(id)}>
-            {field}
+            <ReactMarkdownWithHtml>{field}</ReactMarkdownWithHtml>
         </div>
     );
 };

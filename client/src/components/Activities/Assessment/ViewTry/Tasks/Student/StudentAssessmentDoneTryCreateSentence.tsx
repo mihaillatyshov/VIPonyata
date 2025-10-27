@@ -1,3 +1,4 @@
+import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import {
     TAssessmentCheckedCreateSentence,
     TAssessmentDoneTryCreateSentence,
@@ -10,7 +11,9 @@ export const StudentAssessmentDoneTryCreateSentence = ({
     checks,
 }: AssessmentDoneTryTaskBaseProps<TAssessmentDoneTryCreateSentence, TAssessmentCheckedCreateSentence>) => {
     const getClassName = (id: number) => {
-        return `student-assessment-view-sortable-order__item ${checks.mistake_parts.includes(id) ? "wrong" : "good"}`;
+        return `student-assessment-view-sortable-order__item prevent-select md-last-pad-zero ${
+            checks.mistake_parts.includes(id) ? "wrong" : "good"
+        }`;
     };
 
     return (
@@ -20,7 +23,7 @@ export const StudentAssessmentDoneTryCreateSentence = ({
                 <div className="student-assessment-sortable-order horizontal">
                     {data.parts.map((item, id) => (
                         <div key={id} className={getClassName(id)}>
-                            {item}
+                            <ReactMarkdownWithHtml>{item}</ReactMarkdownWithHtml>
                         </div>
                     ))}
                 </div>
@@ -31,8 +34,11 @@ export const StudentAssessmentDoneTryCreateSentence = ({
 
                     <div className="student-assessment-sortable-order horizontal">
                         {data.meta_parts.map((item, id) => (
-                            <div key={id} className="student-assessment-view-sortable-order__item good">
-                                {item}
+                            <div
+                                key={id}
+                                className="student-assessment-view-sortable-order__item good prevent-select md-last-pad-zero"
+                            >
+                                <ReactMarkdownWithHtml>{item}</ReactMarkdownWithHtml>
                             </div>
                         ))}
                     </div>

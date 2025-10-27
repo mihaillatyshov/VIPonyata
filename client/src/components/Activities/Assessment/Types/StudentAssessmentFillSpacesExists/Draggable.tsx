@@ -1,7 +1,7 @@
 import React from "react";
 
+import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import CSS from "csstype";
-import AutosizeDiv from "libs/AutosizeDiv";
 
 import { useDraggable } from "@dnd-kit/core";
 import { CSS as DNDCSS } from "@dnd-kit/utilities";
@@ -35,11 +35,9 @@ const Draggable = ({ id, str, longestStr, type }: DraggableProps) => {
 
     return (
         <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="d-flex dnd__sortable-item">
-            <AutosizeDiv
-                value={str}
-                valueToCalcSize={longestStr}
-                inputClassName="prevent-select text-center text-nowrap"
-            />
+            <div className="prevent-select md-last-no-margin">
+                <ReactMarkdownWithHtml>{str}</ReactMarkdownWithHtml>
+            </div>
         </div>
     );
 };

@@ -38,7 +38,9 @@ const StudentAssessmentTestMulti = ({ data, taskId }: StudentAssessmentTypeProps
                             selectedIds={data.answers}
                             onChange={onChangeHandler}
                         />
-                        <span className="form-control prevent-select">{answer}</span>
+                        <div className="form-control prevent-select md-last-no-margin">
+                            <ReactMarkdownWithHtml>{answer}</ReactMarkdownWithHtml>
+                        </div>
                     </div>
                 ))}
             </div>

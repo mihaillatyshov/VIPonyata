@@ -1,6 +1,6 @@
 import React from "react";
 
-import AutosizeDiv from "libs/AutosizeDiv";
+import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS as DNDCSS } from "@dnd-kit/utilities";
@@ -18,12 +18,15 @@ interface SortableItemProps {
 
 export function Item({ str, longestStr }: ItemProps) {
     return (
-        <AutosizeDiv
-            value={str}
-            valueToCalcSize={longestStr}
-            inputClassName="student-assessment-classification__item"
-            className="student-assessment-classification__item-autosize"
-        />
+        <div className="prevent-select md-last-no-margin student-assessment-classification__item student-assessment-classification__item-autosize">
+            <ReactMarkdownWithHtml>{str}</ReactMarkdownWithHtml>
+        </div>
+        // <AutosizeDiv
+        //     value={str}
+        //     valueToCalcSize={longestStr}
+        //     inputClassName="student-assessment-classification__item"
+        //     className="student-assessment-classification__item-autosize"
+        // />
     );
 }
 

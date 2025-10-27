@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 
-import { FindMaxStr } from "libs/Autisize";
+import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
+import { FindMaxStr, fixRubyStr } from "libs/Autisize";
 import AutosizeDiv from "libs/AutosizeDiv";
 import { TAssessmentCheckedClassification, TAssessmentClassification } from "models/Activity/Items/TAssessmentItems";
 
@@ -33,13 +34,21 @@ const Container = ({ items, longestStr, title, wrongItems }: ContainerProps) => 
                 </div>
             ) : null}
             {items.map((str, i) => (
-                <AutosizeDiv
+                <div
                     key={i}
-                    value={str}
-                    valueToCalcSize={longestStr}
-                    inputClassName={getItemClassName(i)}
-                    className="student-assessment-classification__item-autosize"
-                />
+                    className={`student-assessment-classification__item-autosize form-control prevent-select md-last-pad-zero ${getItemClassName(
+                        i,
+                    )}`}
+                >
+                    <ReactMarkdownWithHtml>{str}</ReactMarkdownWithHtml>
+                </div>
+                // <AutosizeDiv
+                //     key={i}
+                //     value={str}
+                //     valueToCalcSize={longestStr}
+                //     inputClassName={getItemClassName(i)}
+                //     className=""
+                // />
             ))}
         </div>
     );
@@ -49,7 +58,11 @@ export const StudentAssessmentDoneTryClassification = ({
     checks,
 }: AssessmentDoneTryTaskBaseProps<TAssessmentClassification, TAssessmentCheckedClassification>) => {
     const longestStr = useMemo(
-        () => FindMaxStr([data.inputs, ...data.answers].map(FindMaxStr)),
+        () =>
+            FindMaxStr(
+                [data.inputs, ...data.answers].map((item) => FindMaxStr(item, fixRubyStr)),
+                fixRubyStr,
+            ),
         [data.inputs, data.answers],
     );
 
