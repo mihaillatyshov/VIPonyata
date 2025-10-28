@@ -22,7 +22,7 @@ const SortableItem = ({ id, str, customData, width }: SortableItemProps) => {
     const style: CSS.Properties = {
         transform: DNDCSS.Transform.toString(transform),
         transition,
-        minWidth: `calc(${width}em * 0.75)`,
+        minWidth: `calc(${width + 1}ch)`,
     };
 
     return (

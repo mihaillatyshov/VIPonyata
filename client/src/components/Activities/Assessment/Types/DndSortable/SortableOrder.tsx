@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 
+import { fixRubyStr } from "libs/Autisize";
 import { TAssessmentCreateSentence, TAssessmentSentenceOrder } from "models/Activity/Items/TAssessmentItems";
 
 import {
@@ -43,7 +44,7 @@ const SortableOrder = ({ handleDragEnd, order, data }: SortableOrderProps) => {
         }));
     }, [data.parts]);
 
-    const itemWidth = Math.max(...localParts.map((item) => item.str.length), 3);
+    const itemWidth = Math.max(...localParts.map((item) => fixRubyStr(item.str).length), 3);
 
     return (
         <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors} autoScroll={false}>
