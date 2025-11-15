@@ -268,8 +268,6 @@ const StudentAssessmentPage = () => {
             body: { done_tasks: assessment.items, blockId },
         })
             .then((data) => {
-                console.log(data);
-                console.log(errors.errors, Object.keys(errors.errors).length);
                 let blockHasErrors = false;
                 for (let i = 0; i < blocks[blockId].length; i++) {
                     if (!!errors.errors[`${blocks[blockId][i].itemId}`]) {

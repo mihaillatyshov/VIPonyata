@@ -1,5 +1,6 @@
 import React from "react";
 
+import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import CSS from "csstype";
 import { getTextWidth } from "libs/fontSize";
 import {
@@ -141,11 +142,17 @@ const ITeacherAssessmentFillSpaces = <T extends TTeacherAssessmentFillSpaceType>
                     &nbsp;
                     {data.meta_answers.map((answer, i) => (
                         <React.Fragment key={i}>
-                            <div className="me-2">{data.separates[i]}</div>
-                            <div className={`${styles.fillSpacesResultAnswer} me-2`}>{answer} </div>
+                            <div className="prevent-select me-2 md-last-no-margin">
+                                <ReactMarkdownWithHtml>{data.separates[i]}</ReactMarkdownWithHtml>
+                            </div>
+                            <div className={`prevent-select md-last-no-margin ${styles.fillSpacesResultAnswer} me-2`}>
+                                <ReactMarkdownWithHtml>{answer}</ReactMarkdownWithHtml>
+                            </div>
                         </React.Fragment>
                     ))}
-                    <div className="me-1">{data.separates.at(-1)}</div>
+                    <div className="prevent-select me-2 md-last-no-margin">
+                        <ReactMarkdownWithHtml>{data.separates.at(-1) || ""}</ReactMarkdownWithHtml>
+                    </div>
                 </div>
             </div>
         </div>

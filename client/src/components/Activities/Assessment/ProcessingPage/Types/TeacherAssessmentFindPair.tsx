@@ -33,7 +33,6 @@ const ImportExcelModal = ({ isShow, close, defaultData, updateDataHandler }: Imp
     useLayoutEffect(() => {
         setCols(defaultData);
         setText(colsToText(defaultData));
-        console.log("hi");
     }, [defaultData]);
 
     const parseExcel = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

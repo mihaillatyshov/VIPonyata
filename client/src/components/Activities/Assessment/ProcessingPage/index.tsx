@@ -70,7 +70,6 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
     const [lessonId, setLessonId] = useState<number>(0);
 
     useLayoutEffect(() => {
-        console.log("useLayoutEffect");
         setLoadStatus(LoadStatus.LOADING);
 
         getProcessingData(processingType, name, id).then((data) => {
