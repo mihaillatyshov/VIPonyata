@@ -1,17 +1,17 @@
 .box-shadow-main {
-    box-shadow: 5px 5px 10px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 5px 5px 10px 5px #ffc0c041;
     transition: box-shadow 0.5s;
 }
 
 .box-shadow-main:hover {
-    box-shadow: 8px 8px 14px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 8px 8px 14px 8px #ffc0c08d;
 }
 
 .box-shadow-main-mini {
-    box-shadow: 2px 2px 6px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: 2px 2px 6px 2px #ffc0c041;
     transition: box-shadow 0.4s;
 }
 
 .box-shadow-main-mini:hover {
-    box-shadow: 4px 4px 8px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: 4px 4px 8px 4px #ffc0c08d;
 }
