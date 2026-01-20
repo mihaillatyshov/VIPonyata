@@ -68,7 +68,7 @@ const aliases: TAliases = {
 };
 
 const fixBlockId = (blockIdRaw: string | null, blocksCount?: number): number => {
-    if (blockIdRaw === null) return 0;
+    if (blockIdRaw === null || blockIdRaw === undefined) return 0;
 
     const blockId = parseInt(blockIdRaw);
 
@@ -179,8 +179,9 @@ const StudentAssessmentPage = () => {
     const dispatch = useAppDispatch();
     const assessment = useAppSelector(selectAssessment);
     const navigate = useNavigate();
-    const [isNeedDrawFullValidaton, setIsNeedDrawFullValidaton] = useState(false);
+    const [isNeedDrawFullValidation, setIsNeedDrawFullValidation] = useState(false);
     const [errors, setErrors] = useState<PyErrorDict>({ errors: {}, message: "" });
+    const [serverErrorBlockIds, setServerErrorBlockIds] = useState<number[]>([]);
     const [changedBlocks, setChangedBlocks] = useState<number[]>([]);
     const [blockHasErrors, setBlockHasErrors] = useState<TBlockHasErrors>({
         isModalOpen: false,
@@ -188,7 +189,10 @@ const StudentAssessmentPage = () => {
     });
 
     const blocks = useMemo(() => createBlocks(assessment.items), [assessment.items]);
-    const blockId = fixBlockId(searchParams.get("blockId"), assessment.items !== undefined ? blocks.length : undefined);
+    const blockIdCurrent = fixBlockId(
+        searchParams.get("blockId"),
+        assessment.items !== undefined ? blocks.length : undefined,
+    );
 
     useEffect(() => {
         dispatch(setAssessmentInfo(undefined));
@@ -222,7 +226,7 @@ const StudentAssessmentPage = () => {
     };
 
     const endAssessment = () => {
-        setIsNeedDrawFullValidaton(true);
+        setIsNeedDrawFullValidation(true);
         const validationFieldsFilledResult = validateStudentAssessmentTasksFilled(assessment.items);
         if (validationFieldsFilledResult !== undefined) {
             setErrors(validationFieldsFilledResult);
@@ -252,9 +256,9 @@ const StudentAssessmentPage = () => {
     };
 
     const setBlockId = (newBlockId: number) => {
+        addBlockToChanged(blockIdCurrent);
         searchParams.set("blockId", newBlockId.toString());
         setSearchParams(searchParams);
-        addBlockToChanged(blockId);
     };
 
     const checkBlockErrors = (cb: () => void) => {
@@ -265,17 +269,22 @@ const StudentAssessmentPage = () => {
         }));
         AjaxPost<{ isOk: boolean }>({
             url: `/api/assessment/${assessmentId}/checkblock`,
-            body: { done_tasks: assessment.items, blockId },
+            body: { done_tasks: assessment.items, blockId: blockIdCurrent },
         })
             .then((data) => {
-                let blockHasErrors = false;
-                for (let i = 0; i < blocks[blockId].length; i++) {
-                    if (!!errors.errors[`${blocks[blockId][i].itemId}`]) {
-                        blockHasErrors = true;
-                        break;
-                    }
+                // let blockHasErrors = false;
+                // for (let i = 0; i < blocks[blockIdCurrent].length; i++) {
+                //     if (!!errors.errors[`${blocks[blockIdCurrent][i].itemId}`]) {
+                //         blockHasErrors = true;
+                //         break;
+                //     }
+                // }
+                const hasError = !data.isOk; // || blockHasErrors // This commented validation cause error (only here)
+                if (!data.isOk && !serverErrorBlockIds.includes(blockIdCurrent)) {
+                    setServerErrorBlockIds((prev) => [...prev, blockIdCurrent]);
+                } else if (data.isOk && serverErrorBlockIds.includes(blockIdCurrent)) {
+                    setServerErrorBlockIds((prev) => prev.filter((id) => id !== blockIdCurrent));
                 }
-                const hasError = !data.isOk || blockHasErrors;
                 setBlockHasErrors(() => ({
                     isCheckLoading: false,
                     isModalOpen: hasError,
@@ -291,22 +300,22 @@ const StudentAssessmentPage = () => {
     };
 
     const handleEndAssessment = () => {
-        addBlockToChanged(blockId);
+        addBlockToChanged(blockIdCurrent);
         checkBlockErrors(endAssessment);
     };
 
     const handleGoPrevBlock = () => {
-        addBlockToChanged(blockId);
-        checkBlockErrors(() => setBlockId(blockId - 1));
+        addBlockToChanged(blockIdCurrent);
+        checkBlockErrors(() => setBlockId(blockIdCurrent - 1));
     };
 
     const handleGoNextBlock = () => {
-        addBlockToChanged(blockId);
-        checkBlockErrors(() => setBlockId(blockId + 1));
+        addBlockToChanged(blockIdCurrent);
+        checkBlockErrors(() => setBlockId(blockIdCurrent + 1));
     };
 
     const handleGoToBlock = (newBlockId: number) => {
-        addBlockToChanged(blockId);
+        addBlockToChanged(blockIdCurrent);
         checkBlockErrors(() => setBlockId(newBlockId));
     };
 
@@ -315,8 +324,8 @@ const StudentAssessmentPage = () => {
         return null;
     }
 
-    if (blockId !== parseInt(searchParams.get("blockId") || "")) {
-        searchParams.set("blockId", blockId.toString());
+    if (blockIdCurrent !== parseInt(searchParams.get("blockId") || "")) {
+        searchParams.set("blockId", blockIdCurrent.toString());
         setSearchParams(searchParams);
 
         return <div> Loading... </div>;
@@ -337,7 +346,7 @@ const StudentAssessmentPage = () => {
         return React.createElement(component, { data: item, taskId: itemId });
     };
 
-    const toDrawItems = blocks[blockId];
+    const toDrawItems = blocks[blockIdCurrent];
 
     const getItemBlock = (itemId: number) => {
         for (let i = 0; i < blocks.length; i++) {
@@ -383,9 +392,9 @@ const StudentAssessmentPage = () => {
                         blockId={index}
                         status={getIconStatus(
                             index,
-                            blockId,
-                            isNeedDrawFullValidaton || changedBlocks.includes(index),
-                            isBlockHasError(index),
+                            blockIdCurrent,
+                            isNeedDrawFullValidation || changedBlocks.includes(index),
+                            isBlockHasError(index) || serverErrorBlockIds.includes(index),
                         )}
                         onClick={() => {
                             handleGoToBlock(index);
@@ -407,7 +416,7 @@ const StudentAssessmentPage = () => {
                                     )}
                                     {drawItem(JSON.parse(JSON.stringify(item)), itemId)}
                                 </div>
-                                {(isNeedDrawFullValidaton || changedBlocks.includes(getItemBlock(itemId))) &&
+                                {(isNeedDrawFullValidation || changedBlocks.includes(getItemBlock(itemId))) &&
                                     errors.errors[`${itemId}`] !== undefined && (
                                         <InputError message={errors.errors[`${itemId}`].message} />
                                     )}
@@ -417,25 +426,22 @@ const StudentAssessmentPage = () => {
                 )}
             </div>
             <div className="mb-2 d-flex space-between w-100">
-                {blockId !== 0 && (
+                {blockIdCurrent !== 0 && (
                     <button type="button" className="btn btn-secondary mt-3 me-auto" onClick={handleGoPrevBlock}>
                         Назад
                     </button>
                 )}
-                {blockId === blocks.length - 1 ? (
-                    <input
-                        type="button"
-                        className="btn btn-success mt-3"
-                        onClick={handleEndAssessment}
-                        value="Завершить"
-                    />
+                {blockIdCurrent === blocks.length - 1 ? (
+                    <button type="button" className="btn btn-success mt-3" onClick={handleEndAssessment}>
+                        Завершить
+                    </button>
                 ) : (
                     <button type="button" className="btn btn-success mt-3 ms-auto" onClick={handleGoNextBlock}>
                         Далее
                     </button>
                 )}
             </div>
-            {isNeedDrawFullValidaton && <InputError className="mt-1 mb-5" message={errors.message} />}
+            {isNeedDrawFullValidation && <InputError className="mt-1 mb-5" message={errors.message} />}
         </div>
     );
 };
