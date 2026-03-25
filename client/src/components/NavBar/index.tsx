@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import Notifications from "components/Notifications/Notifications";
@@ -7,7 +7,6 @@ import { TAnyNotifications, TNotificationBase } from "models/TNotification";
 import { useAppSelector } from "redux/hooks";
 import { selectUser } from "redux/slices/userSlice";
 
-import { Dictionary } from "./Dictionary";
 import Profile from "./Profile";
 import styles from "./StyleNavBar.module.css";
 
@@ -71,9 +70,7 @@ const NavBar = () => {
                         <img className="d-block d-lg-none" src="/svg/LogoSmall.svg" alt="Главная" height={60} />
                     </Link>
                 </div>
-                <div className="col-6 col-lg-4 mx-auto d-flex align-items-center">
-                    <Dictionary />
-                </div>
+                <div className="col-6 col-lg-4 mx-auto d-flex align-items-center">{/* <Dictionary /> */}</div>
                 <div className="col-4 align-items-end">
                     <div className="d-flex justify-content-end align-items-center">
                         <div
