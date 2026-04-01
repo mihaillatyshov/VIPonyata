@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import Loading from "components/Common/Loading";
 import PageTitle from "components/Common/PageTitle";
@@ -14,6 +15,14 @@ interface CatalogResponse {
     subgroups: TQuizletSubgroup[];
     subgroup_words: TQuizletSubgroupWord[];
     words: TQuizletWord[];
+}
+
+interface GroupCreateResponse {
+    group: TQuizletGroup;
+}
+
+interface SubgroupCreateResponse {
+    subgroup: TQuizletSubgroup;
 }
 
 interface EditorRow {
@@ -401,17 +410,225 @@ const TopicEditor = ({ subgroup, initialWords, onRename, onDelete }: TopicEditor
     );
 };
 
+interface QuizletBreadcrumbsProps {
+    group?: TQuizletGroup;
+    subgroup?: TQuizletSubgroup;
+}
+
+const QuizletBreadcrumbs = ({ group, subgroup }: QuizletBreadcrumbsProps) => {
+    return (
+        <nav aria-label="breadcrumb" className="mb-3">
+            <ol className="breadcrumb mb-0">
+                <li
+                    className={`breadcrumb-item ${!group ? "active" : ""}`}
+                    {...(!group ? { "aria-current": "page" } : {})}
+                >
+                    {!group ? "Lessons" : <Link to="/quizlet">Lessons</Link>}
+                </li>
+                {group && (
+                    <li
+                        className={`breadcrumb-item ${!subgroup ? "active" : ""}`}
+                        {...(!subgroup ? { "aria-current": "page" } : {})}
+                    >
+                        {!subgroup ? group.title : <Link to={`/quizlet/lessons/${group.id}`}>{group.title}</Link>}
+                    </li>
+                )}
+                {subgroup && (
+                    <li className="breadcrumb-item active" aria-current="page">
+                        {subgroup.title}
+                    </li>
+                )}
+            </ol>
+        </nav>
+    );
+};
+
+interface LessonsPageProps {
+    groups: TQuizletGroup[];
+    onCreateLesson: (title: string) => Promise<void>;
+    onRenameLesson: (group: TQuizletGroup) => Promise<void>;
+    onDeleteLesson: (group: TQuizletGroup) => Promise<void>;
+}
+
+const LessonsPage = ({ groups, onCreateLesson, onRenameLesson, onDeleteLesson }: LessonsPageProps) => {
+    const [newLessonTitle, setNewLessonTitle] = useState("");
+
+    const handleCreate = async () => {
+        const title = newLessonTitle.trim();
+        if (title.length === 0) return;
+        await onCreateLesson(title);
+        setNewLessonTitle("");
+    };
+
+    return (
+        <>
+            <QuizletBreadcrumbs />
+
+            <div className="card py-3 px-2 px-md-3 mb-3">
+                <h5 className="mb-3">Lessons</h5>
+                <div className="d-flex flex-column flex-md-row gap-2 align-items-stretch" style={{ maxWidth: "760px" }}>
+                    <input
+                        className="form-control"
+                        value={newLessonTitle}
+                        onChange={(e) => setNewLessonTitle(e.target.value)}
+                        placeholder="Lesson title"
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                handleCreate();
+                            }
+                        }}
+                    />
+                    <button className="btn btn-primary" onClick={handleCreate}>
+                        Create lesson
+                    </button>
+                </div>
+            </div>
+
+            <div className="card py-3 px-2 px-md-3">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h5 className="mb-0">All lessons</h5>
+                </div>
+
+                {groups.length === 0 && (
+                    <p className="text-muted small mb-0">No lessons yet. Create the first lesson.</p>
+                )}
+
+                {groups.map((group) => (
+                    <div
+                        key={group.id}
+                        className="d-flex justify-content-between align-items-center flex-nowrap border rounded p-2 mb-2 gap-2"
+                    >
+                        <Link
+                            to={`/quizlet/lessons/${group.id}`}
+                            className="text-decoration-none text-truncate"
+                            style={{ flex: 1, minWidth: 0 }}
+                        >
+                            {group.title}
+                        </Link>
+                        <div className="d-flex gap-2 flex-nowrap">
+                            <button className="btn btn-sm btn-outline-secondary" onClick={() => onRenameLesson(group)}>
+                                Rename
+                            </button>
+                            <button className="btn btn-sm btn-outline-danger" onClick={() => onDeleteLesson(group)}>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </>
+    );
+};
+
+interface LessonPageProps {
+    group: TQuizletGroup;
+    topics: TQuizletSubgroup[];
+    onCreateTopic: (groupId: number, title: string) => Promise<void>;
+    onRenameTopic: (subgroup: TQuizletSubgroup) => Promise<void>;
+    onDeleteTopic: (subgroup: TQuizletSubgroup) => Promise<void>;
+}
+
+const LessonPage = ({ group, topics, onCreateTopic, onRenameTopic, onDeleteTopic }: LessonPageProps) => {
+    const [newTopicTitle, setNewTopicTitle] = useState("");
+
+    const handleCreate = async () => {
+        const title = newTopicTitle.trim();
+        if (title.length === 0) return;
+        await onCreateTopic(group.id, title);
+        setNewTopicTitle("");
+    };
+
+    return (
+        <>
+            <QuizletBreadcrumbs group={group} />
+
+            <div className="card py-3 px-2 px-md-3 mb-3">
+                <h5 className="mb-3">Create topic in {group.title}</h5>
+                <div className="d-flex flex-column flex-md-row gap-2 align-items-stretch" style={{ maxWidth: "760px" }}>
+                    <input
+                        className="form-control"
+                        value={newTopicTitle}
+                        onChange={(e) => setNewTopicTitle(e.target.value)}
+                        placeholder="Topic title"
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                handleCreate();
+                            }
+                        }}
+                    />
+                    <button className="btn btn-primary" onClick={handleCreate}>
+                        Create topic
+                    </button>
+                </div>
+            </div>
+
+            <div className="card py-3 px-2 px-md-3">
+                <h5 className="mb-3">Topics</h5>
+                {topics.length === 0 && <p className="text-muted small mb-0">No topics yet. Create a topic above.</p>}
+
+                {topics.map((subgroup) => (
+                    <div
+                        key={subgroup.id}
+                        className="d-flex justify-content-between align-items-center flex-nowrap border rounded p-2 mb-2 gap-2"
+                    >
+                        <Link
+                            to={`/quizlet/topics/${subgroup.id}`}
+                            className="text-decoration-none text-truncate"
+                            style={{ flex: 1, minWidth: 0 }}
+                        >
+                            {subgroup.title}
+                        </Link>
+                        <div className="d-flex gap-2 flex-nowrap">
+                            <button
+                                className="btn btn-sm btn-outline-secondary"
+                                onClick={() => onRenameTopic(subgroup)}
+                            >
+                                Rename
+                            </button>
+                            <button className="btn btn-sm btn-outline-danger" onClick={() => onDeleteTopic(subgroup)}>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </>
+    );
+};
+
+interface TopicPageProps {
+    group: TQuizletGroup;
+    subgroup: TQuizletSubgroup;
+    words: TQuizletWord[];
+    onRenameTopic: (subgroup: TQuizletSubgroup) => Promise<void>;
+    onDeleteTopic: (subgroup: TQuizletSubgroup) => Promise<void>;
+}
+
+const TopicPage = ({ group, subgroup, words, onRenameTopic, onDeleteTopic }: TopicPageProps) => {
+    return (
+        <>
+            <QuizletBreadcrumbs group={group} subgroup={subgroup} />
+            <TopicEditor
+                subgroup={subgroup}
+                initialWords={words}
+                onRename={() => onRenameTopic(subgroup)}
+                onDelete={() => onDeleteTopic(subgroup)}
+            />
+        </>
+    );
+};
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 const TeacherQuizletManager = () => {
+    const { lessonId, topicId } = useParams<{ lessonId?: string; topicId?: string }>();
+    const navigate = useNavigate();
+
     const [loadStatus, setLoadStatus] = useState<LoadStatus.Type>(LoadStatus.NONE);
     const [groups, setGroups] = useState<TQuizletGroup[]>([]);
     const [subgroups, setSubgroups] = useState<TQuizletSubgroup[]>([]);
     const [subgroupWords, setSubgroupWords] = useState<TQuizletSubgroupWord[]>([]);
     const [words, setWords] = useState<TQuizletWord[]>([]);
-
-    const [newGroupTitle, setNewGroupTitle] = useState("");
-    const [newSubgroup, setNewSubgroup] = useState<{ groupId: number; title: string }>({ groupId: 0, title: "" });
 
     const fetchCatalog = () => {
         setLoadStatus(LoadStatus.LOADING);
@@ -430,14 +647,76 @@ const TeacherQuizletManager = () => {
         fetchCatalog();
     }, []);
 
-    const groupedSubgroups = useMemo(
-        () => groups.map((group) => ({ group, subgroups: subgroups.filter((s) => s.group_id === group.id) })),
-        [groups, subgroups],
+    const activeLessonId = lessonId ? Number(lessonId) : undefined;
+    const activeTopicId = topicId ? Number(topicId) : undefined;
+
+    const activeGroup = useMemo(() => groups.find((group) => group.id === activeLessonId), [groups, activeLessonId]);
+
+    const activeSubgroup = useMemo(
+        () => subgroups.find((subgroup) => subgroup.id === activeTopicId),
+        [subgroups, activeTopicId],
     );
+
+    const activeSubgroupGroup = useMemo(() => {
+        if (!activeSubgroup || activeSubgroup.group_id === undefined) return undefined;
+        return groups.find((group) => group.id === activeSubgroup.group_id);
+    }, [groups, activeSubgroup]);
 
     const getSubgroupWords = (subgroupId: number): TQuizletWord[] => {
         const ids = subgroupWords.filter((item) => item.subgroup_id === subgroupId).map((item) => item.word_id);
         return words.filter((word) => ids.includes(word.id));
+    };
+
+    const handleCreateLesson = async (title: string) => {
+        const resp = await AjaxPost<GroupCreateResponse>({
+            url: "/api/quizlet/groups",
+            body: { title },
+        });
+        fetchCatalog();
+        navigate(`/quizlet/lessons/${resp.group.id}`);
+    };
+
+    const handleRenameLesson = async (group: TQuizletGroup) => {
+        const title = window.prompt("New lesson title", group.title);
+        if (!title || title.trim().length === 0) return;
+        await AjaxPatch({ url: `/api/quizlet/groups/${group.id}`, body: { title } });
+        fetchCatalog();
+    };
+
+    const handleDeleteLesson = async (group: TQuizletGroup) => {
+        await AjaxDelete({ url: `/api/quizlet/groups/${group.id}` });
+        fetchCatalog();
+        if (activeLessonId === group.id || (activeSubgroupGroup && activeSubgroupGroup.id === group.id)) {
+            navigate("/quizlet");
+        }
+    };
+
+    const handleCreateTopic = async (groupId: number, title: string) => {
+        const resp = await AjaxPost<SubgroupCreateResponse>({
+            url: `/api/quizlet/groups/${groupId}/subgroups`,
+            body: { title },
+        });
+        fetchCatalog();
+        navigate(`/quizlet/topics/${resp.subgroup.id}`);
+    };
+
+    const handleRenameTopic = async (subgroup: TQuizletSubgroup) => {
+        const title = window.prompt("New topic title", subgroup.title);
+        if (!title || title.trim().length === 0) return;
+        await AjaxPatch({ url: `/api/quizlet/subgroups/${subgroup.id}`, body: { title } });
+        fetchCatalog();
+    };
+
+    const handleDeleteTopic = async (subgroup: TQuizletSubgroup) => {
+        await AjaxDelete({ url: `/api/quizlet/subgroups/${subgroup.id}` });
+        fetchCatalog();
+        if (activeTopicId === subgroup.id) {
+            if (subgroup.group_id) {
+                navigate(`/quizlet/lessons/${subgroup.group_id}`);
+            } else {
+                navigate("/quizlet");
+            }
+        }
     };
 
     if (loadStatus === LoadStatus.ERROR) {
@@ -456,139 +735,62 @@ const TeacherQuizletManager = () => {
 
     return (
         <div className="container">
-            <PageTitle title="Quizlet manager" />
+            <div className="mx-auto" style={{ maxWidth: "880px" }}>
+                <PageTitle title="Quizlet manager" />
 
-            {/* New lesson (group) */}
-            <div className="card p-3 p-md-4 mb-3">
-                <h5 className="mb-3">Новый урок</h5>
-                <div className="d-flex gap-2">
-                    <input
-                        className="form-control"
-                        value={newGroupTitle}
-                        onChange={(e) => setNewGroupTitle(e.target.value)}
-                        placeholder="Название урока"
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter" && newGroupTitle.trim().length > 0) {
-                                AjaxPost({ url: "/api/quizlet/groups", body: { title: newGroupTitle } }).then(() => {
-                                    setNewGroupTitle("");
-                                    fetchCatalog();
-                                });
-                            }
-                        }}
+                {!activeLessonId && !activeTopicId && (
+                    <LessonsPage
+                        groups={groups}
+                        onCreateLesson={handleCreateLesson}
+                        onRenameLesson={handleRenameLesson}
+                        onDeleteLesson={handleDeleteLesson}
                     />
-                    <button
-                        className="btn btn-primary"
-                        onClick={() => {
-                            if (newGroupTitle.trim().length === 0) return;
-                            AjaxPost({ url: "/api/quizlet/groups", body: { title: newGroupTitle } }).then(() => {
-                                setNewGroupTitle("");
-                                fetchCatalog();
-                            });
-                        }}
-                    >
-                        Добавить
-                    </button>
-                </div>
-            </div>
+                )}
 
-            {/* New topic (subgroup) */}
-            <div className="card p-3 p-md-4 mb-3">
-                <h5 className="mb-3">Новая тема</h5>
-                <div className="row g-2">
-                    <div className="col-12 col-md-4">
-                        <select
-                            className="form-select"
-                            value={newSubgroup.groupId}
-                            onChange={(e) => setNewSubgroup({ ...newSubgroup, groupId: Number(e.target.value) })}
-                        >
-                            <option value={0}>Выберите урок</option>
-                            {groups.map((group) => (
-                                <option key={group.id} value={group.id}>
-                                    {group.title}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="col-12 col-md-6">
-                        <input
-                            className="form-control"
-                            value={newSubgroup.title}
-                            onChange={(e) => setNewSubgroup({ ...newSubgroup, title: e.target.value })}
-                            placeholder="Название темы"
-                        />
-                    </div>
-                    <div className="col-12 col-md-2 d-grid">
-                        <button
-                            className="btn btn-primary"
-                            onClick={() => {
-                                if (newSubgroup.groupId <= 0 || newSubgroup.title.trim().length === 0) return;
-                                AjaxPost({
-                                    url: `/api/quizlet/groups/${newSubgroup.groupId}/subgroups`,
-                                    body: { title: newSubgroup.title },
-                                }).then(() => {
-                                    setNewSubgroup({ groupId: 0, title: "" });
-                                    fetchCatalog();
-                                });
-                            }}
-                        >
-                            Добавить
-                        </button>
-                    </div>
-                </div>
-            </div>
+                {activeLessonId && !activeTopicId && activeGroup && (
+                    <LessonPage
+                        group={activeGroup}
+                        topics={subgroups.filter((subgroup) => subgroup.group_id === activeGroup.id)}
+                        onCreateTopic={handleCreateTopic}
+                        onRenameTopic={handleRenameTopic}
+                        onDeleteTopic={handleDeleteTopic}
+                    />
+                )}
 
-            {/* Lessons with topic editors */}
-            {groupedSubgroups.map(({ group, subgroups: groupSubgroups }) => (
-                <div key={group.id} className="card p-3 p-md-4 mb-3">
-                    <div className="d-flex justify-content-between align-items-center mb-3">
-                        <h5 className="mb-0">{group.title}</h5>
-                        <div className="d-flex gap-2">
-                            <button
-                                className="btn btn-sm btn-outline-secondary"
-                                onClick={() => {
-                                    const title = window.prompt("Новое название урока", group.title);
-                                    if (!title || title.trim().length === 0) return;
-                                    AjaxPatch({ url: `/api/quizlet/groups/${group.id}`, body: { title } }).then(() =>
-                                        fetchCatalog(),
-                                    );
-                                }}
-                            >
-                                Переименовать
-                            </button>
-                            <button
-                                className="btn btn-sm btn-outline-danger"
-                                onClick={() =>
-                                    AjaxDelete({ url: `/api/quizlet/groups/${group.id}` }).then(() => fetchCatalog())
-                                }
-                            >
-                                Удалить
+                {activeTopicId && activeSubgroup && activeSubgroupGroup && (
+                    <TopicPage
+                        group={activeSubgroupGroup}
+                        subgroup={activeSubgroup}
+                        words={getSubgroupWords(activeSubgroup.id)}
+                        onRenameTopic={handleRenameTopic}
+                        onDeleteTopic={handleDeleteTopic}
+                    />
+                )}
+
+                {activeLessonId && !activeGroup && (
+                    <div className="card py-3 px-2 px-md-3">
+                        <h5 className="mb-2">Lesson not found</h5>
+                        <p className="text-muted mb-3">The selected lesson does not exist.</p>
+                        <div>
+                            <button className="btn btn-outline-primary" onClick={() => navigate("/quizlet")}>
+                                Back to lessons
                             </button>
                         </div>
                     </div>
+                )}
 
-                    {groupSubgroups.length === 0 && (
-                        <p className="text-muted small mb-0">Нет тем. Добавьте тему через форму выше.</p>
-                    )}
-
-                    {groupSubgroups.map((subgroup) => (
-                        <TopicEditor
-                            key={subgroup.id}
-                            subgroup={subgroup}
-                            initialWords={getSubgroupWords(subgroup.id)}
-                            onRename={() => {
-                                const title = window.prompt("Новое название темы", subgroup.title);
-                                if (!title || title.trim().length === 0) return;
-                                AjaxPatch({ url: `/api/quizlet/subgroups/${subgroup.id}`, body: { title } }).then(() =>
-                                    fetchCatalog(),
-                                );
-                            }}
-                            onDelete={() =>
-                                AjaxDelete({ url: `/api/quizlet/subgroups/${subgroup.id}` }).then(() => fetchCatalog())
-                            }
-                        />
-                    ))}
-                </div>
-            ))}
+                {activeTopicId && (!activeSubgroup || !activeSubgroupGroup) && (
+                    <div className="card py-3 px-2 px-md-3">
+                        <h5 className="mb-2">Topic not found</h5>
+                        <p className="text-muted mb-3">The selected topic does not exist.</p>
+                        <div>
+                            <button className="btn btn-outline-primary" onClick={() => navigate("/quizlet")}>
+                                Back to lessons
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

@@ -144,6 +144,8 @@ const App = () => {
 
                     <Route path="/dictionary" element={getLoggedRoute(<DictionaryPage />)} />
                     <Route path="/quizlet" element={getRoute(<TeacherQuizletManager />, <StudentQuizlet />)} />
+                    <Route path="/quizlet/lessons/:lessonId" element={getTeacherRoute(<TeacherQuizletManager />)} />
+                    <Route path="/quizlet/topics/:topicId" element={getTeacherRoute(<TeacherQuizletManager />)} />
                     <Route
                         path="*"
                         element={
