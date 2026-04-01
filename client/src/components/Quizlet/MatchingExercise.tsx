@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 
 import { TQuizletSessionWord } from "models/TQuizlet";
 
-import { getWordChar } from "./quizletUtils";
+import { getWordChar, hasValidKanaHint } from "./quizletUtils";
 
 interface Props {
     words: TQuizletSessionWord[];
@@ -69,7 +69,9 @@ const MatchingExercise = ({ words, showHints, onAttempt }: Props) => {
                         {pageWords.map((word) => {
                             const selected = selectedLeft === word.id;
                             const isWrong = wrongPair !== null && wrongPair.leftId === word.id;
-                            const title = showHints ? `${getWordChar(word)} (${word.word_jp})` : getWordChar(word);
+                            const char = getWordChar(word);
+                            const kanaHint = word.word_jp.trim();
+                            const title = showHints && hasValidKanaHint(word) ? `${char} (${kanaHint})` : char;
 
                             return (
                                 <button

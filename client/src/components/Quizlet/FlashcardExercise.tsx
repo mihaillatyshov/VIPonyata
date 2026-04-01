@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 
 import { TQuizletSessionWord } from "models/TQuizlet";
 
-import { getWordChar } from "./quizletUtils";
+import { getWordChar, hasValidKanaHint } from "./quizletUtils";
 
 interface Props {
     words: TQuizletSessionWord[];
@@ -36,6 +36,8 @@ const FlashcardExercise = ({ words, queue, showHints, direction, onAnswer }: Pro
     }
 
     const charDisplay = getWordChar(currentWord);
+    const shouldShowKanaHint = showHints && hasValidKanaHint(currentWord);
+    const kanaHint = currentWord.word_jp.trim();
 
     return (
         <div>
@@ -48,7 +50,7 @@ const FlashcardExercise = ({ words, queue, showHints, direction, onAnswer }: Pro
                 {!isFlipped && direction === "jp_to_ru" && (
                     <div>
                         <div className="fs-2 mb-2">{charDisplay}</div>
-                        {showHints && <div className="text-muted">({currentWord.word_jp})</div>}
+                        {shouldShowKanaHint && <div className="text-muted">({kanaHint})</div>}
                     </div>
                 )}
 
