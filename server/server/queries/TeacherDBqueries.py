@@ -10,11 +10,14 @@ from server.models.course import CourseCreateReq
 from server.models.db_models import (ActivityTryType, Assessment, AssessmentTry, AssessmentTryType, AssessmentType,
                                      Course, Dictionary, Drilling, DrillingCard, DrillingTry, FinalBoss, FinalBossTry,
                                      Hieroglyph, HieroglyphCard, HieroglyphTry, Lesson, LexisCardType, LexisTryType,
-                                     LexisType, NotificationStudentToTeacher, NotificationTeacherToStudent, User,
+                                     LexisType, NotificationStudentToTeacher, NotificationTeacherToStudent,
+                                     QuizletDictionary, QuizletGroup, QuizletSubgroup, QuizletSubgroupWord, User,
                                      UserDictionary, a_users_courses, a_users_lessons)
 from server.models.dictionary import (DictionaryCreateReq, DictionaryCreateReqItem)
 from server.models.lesson import LessonCreateReq
 from server.models.lexis import LexisCardCreateReq, LexisCreateReq
+from server.models.quizlet import (QuizletGroupCreateReq, QuizletSubgroupCreateReq, QuizletWordCreateReq,
+                                   QuizletWordUpdateReq)
 
 
 #########################################################################################################################
@@ -461,6 +464,102 @@ def clear_dictionary():
             delete(Dictionary).where(Dictionary.id.not_in(select(DrillingCard.dictionary_id))).where(
                 Dictionary.id.not_in(select(HieroglyphCard.dictionary_id))).where(
                     Dictionary.id.not_in(select(UserDictionary.dictionary_id))))
+
+
+#########################################################################################################################
+################ Quizlet ################################################################################################
+#########################################################################################################################
+def get_quizlet_groups() -> list[QuizletGroup]:
+    with DBsession.begin() as session:
+        return session.scalars(select(QuizletGroup).order_by(QuizletGroup.sort).order_by(QuizletGroup.id)).all()
+
+
+def get_quizlet_subgroups_by_group_ids(group_ids: list[int]) -> list[QuizletSubgroup]:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(QuizletSubgroup).where(QuizletSubgroup.group_id.in_(group_ids)).order_by(
+                QuizletSubgroup.sort).order_by(QuizletSubgroup.id)).all()
+
+
+def get_quizlet_words_by_subgroup_ids(subgroup_ids: list[int]) -> list[tuple[QuizletSubgroupWord, QuizletDictionary]]:
+    if len(subgroup_ids) == 0:
+        return []
+
+    with DBsession.begin() as session:
+        return session.execute(
+            select(QuizletSubgroupWord, QuizletDictionary).join(QuizletSubgroupWord.word).where(
+                QuizletSubgroupWord.subgroup_id.in_(subgroup_ids))).all()
+
+
+def create_quizlet_group(data: QuizletGroupCreateReq) -> QuizletGroup:
+    with DBsession.begin() as session:
+        group = QuizletGroup(**data.model_dump())
+        session.add(group)
+        return group
+
+
+def update_quizlet_group(group_id: int, data: QuizletGroupCreateReq):
+    with DBsession.begin() as session:
+        session.execute(update(QuizletGroup).where(QuizletGroup.id == group_id).values(**data.model_dump()))
+
+
+def delete_quizlet_group(group_id: int):
+    with DBsession.begin() as session:
+        session.execute(delete(QuizletGroup).where(QuizletGroup.id == group_id))
+
+
+def create_quizlet_subgroup(group_id: int, data: QuizletSubgroupCreateReq) -> QuizletSubgroup:
+    with DBsession.begin() as session:
+        subgroup = QuizletSubgroup(group_id=group_id, **data.model_dump())
+        session.add(subgroup)
+        return subgroup
+
+
+def update_quizlet_subgroup(subgroup_id: int, data: QuizletSubgroupCreateReq):
+    with DBsession.begin() as session:
+        session.execute(update(QuizletSubgroup).where(QuizletSubgroup.id == subgroup_id).values(**data.model_dump()))
+
+
+def delete_quizlet_subgroup(subgroup_id: int):
+    with DBsession.begin() as session:
+        session.execute(delete(QuizletSubgroup).where(QuizletSubgroup.id == subgroup_id))
+
+
+def _create_teacher_quizlet_word(data: QuizletWordCreateReq) -> QuizletDictionary:
+    with DBsession.begin() as session:
+        word = QuizletDictionary(char_jp=data.char_jp, word_jp=data.word_jp, ru=data.ru, img=data.img, owner_id=None)
+        session.add(word)
+        return word
+
+
+def add_quizlet_word(data: QuizletWordCreateReq) -> QuizletDictionary:
+    word = _create_teacher_quizlet_word(data)
+
+    with DBsession.begin() as session:
+        exists_link = session.scalars(
+            select(QuizletSubgroupWord).where(QuizletSubgroupWord.subgroup_id == data.subgroup_id).where(
+                QuizletSubgroupWord.word_id == word.id)).one_or_none()
+        if exists_link is None:
+            session.add(QuizletSubgroupWord(subgroup_id=data.subgroup_id, word_id=word.id))
+
+    return word
+
+
+def update_quizlet_word(word_id: int, data: QuizletWordUpdateReq):
+    with DBsession.begin() as session:
+        session.execute(update(QuizletDictionary).where(QuizletDictionary.id == word_id).values(**data.model_dump()))
+
+
+def remove_quizlet_word_from_subgroup(subgroup_id: int, word_id: int):
+    with DBsession.begin() as session:
+        session.execute(
+            delete(QuizletSubgroupWord).where(QuizletSubgroupWord.subgroup_id == subgroup_id).where(
+                QuizletSubgroupWord.word_id == word_id))
+
+
+def delete_quizlet_word(word_id: int):
+    with DBsession.begin() as session:
+        session.execute(delete(QuizletDictionary).where(QuizletDictionary.id == word_id))
 
 
 #########################################################################################################################

@@ -2,7 +2,7 @@ import datetime
 import json
 from typing import Any, Optional, Type, TypeVar, Union
 
-from sqlalchemy import (Boolean, Column, Date, DateTime, ForeignKey, Integer, String, Table, Text, Time,
+from sqlalchemy import (Boolean, Column, Date, DateTime, ForeignKey, Integer, String, Table, Text, Time, text,
                         UniqueConstraint, create_engine)
 from sqlalchemy.engine import URL
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
@@ -55,6 +55,10 @@ class User(Base):
     lessons: Mapped[list["Lesson"]] = relationship("Lesson", secondary=a_users_lessons, overlaps="lessons,user")
 
     users_dictionary: Mapped[list["UserDictionary"]] = relationship("UserDictionary", back_populates="user")
+    quizlet_personal_lesson: Mapped[Optional["UserQuizletLesson"]] = relationship("UserQuizletLesson",
+                                                                                  back_populates="user",
+                                                                                  uselist=False)
+    quizlet_sessions: Mapped[list["QuizletSession"]] = relationship("QuizletSession", back_populates="user")
 
     __mapper_args__ = {'eager_defaults': True}
 
@@ -545,6 +549,297 @@ class NotificationTeacherToStudent(Base):
 #########################################################################################################################
 ################ Quizlet ################################################################################################
 #########################################################################################################################
+class QuizletGroup(Base):
+    __tablename__ = "quizlet_groups"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    title: Mapped[str] = mapped_column(String(128), nullable=False)
+    sort: Mapped[int] = mapped_column(Integer, default=500, nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text("now()"), nullable=False)
+
+    subgroups: Mapped[list["QuizletSubgroup"]] = relationship("QuizletSubgroup",
+                                                              back_populates="group",
+                                                              cascade="all, delete-orphan")
+
+    __mapper_args__ = {'eager_defaults': True}
+
+    def __json__(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "sort": self.sort,
+            "created_at": self.created_at,
+        }
+
+
+class QuizletSubgroup(Base):
+    __tablename__ = "quizlet_subgroups"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    title: Mapped[str] = mapped_column(String(128), nullable=False)
+    sort: Mapped[int] = mapped_column(Integer, default=500, nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text("now()"), nullable=False)
+
+    group_id: Mapped[int] = mapped_column(Integer, ForeignKey("quizlet_groups.id"), nullable=False)
+    group: Mapped["QuizletGroup"] = relationship("QuizletGroup", back_populates="subgroups")
+
+    words_links: Mapped[list["QuizletSubgroupWord"]] = relationship("QuizletSubgroupWord",
+                                                                    back_populates="subgroup",
+                                                                    cascade="all, delete-orphan")
+
+    __mapper_args__ = {'eager_defaults': True}
+
+    def __json__(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "sort": self.sort,
+            "group_id": self.group_id,
+            "created_at": self.created_at,
+        }
+
+
+class QuizletDictionary(Base):
+    __tablename__ = "quizlet_dictionary"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    char_jp: Mapped[Optional[str]] = mapped_column(String(128))
+    word_jp: Mapped[str] = mapped_column(String(128), nullable=False)
+    ru: Mapped[str] = mapped_column(String(128), nullable=False)
+    img: Mapped[Optional[str]] = mapped_column(String(1024))
+
+    owner_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey(USERS_ID))
+    owner: Mapped[Optional["User"]] = relationship("User")
+
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text("now()"), nullable=False)
+
+    subgroup_links: Mapped[list["QuizletSubgroupWord"]] = relationship("QuizletSubgroupWord",
+                                                                       back_populates="word",
+                                                                       cascade="all, delete-orphan")
+
+    __mapper_args__ = {'eager_defaults': True}
+
+    def __json__(self):
+        return {
+            "id": self.id,
+            "char_jp": self.char_jp,
+            "word_jp": self.word_jp,
+            "ru": self.ru,
+            "img": self.img,
+            "owner_id": self.owner_id,
+            "created_at": self.created_at,
+        }
+
+
+class QuizletSubgroupWord(Base):
+    __tablename__ = "quizlet_subgroup_words"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    subgroup_id: Mapped[int] = mapped_column(Integer, ForeignKey("quizlet_subgroups.id"), nullable=False)
+    subgroup: Mapped["QuizletSubgroup"] = relationship("QuizletSubgroup", back_populates="words_links")
+
+    word_id: Mapped[int] = mapped_column(Integer, ForeignKey("quizlet_dictionary.id"), nullable=False)
+    word: Mapped["QuizletDictionary"] = relationship("QuizletDictionary", back_populates="subgroup_links")
+
+    __table_args__ = (UniqueConstraint('subgroup_id', 'word_id', name='idx_quizlet_subgroup_word'), )
+
+
+class UserQuizletLesson(Base):
+    __tablename__ = "user_quizlet_lessons"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    title: Mapped[str] = mapped_column(String(128), nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text("now()"), nullable=False)
+
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey(USERS_ID), nullable=False, unique=True)
+    user: Mapped["User"] = relationship("User", back_populates="quizlet_personal_lesson")
+
+    subgroups: Mapped[list["UserQuizletSubgroup"]] = relationship("UserQuizletSubgroup",
+                                                                  back_populates="lesson",
+                                                                  cascade="all, delete-orphan")
+
+    __mapper_args__ = {'eager_defaults': True}
+
+    def __json__(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "user_id": self.user_id,
+            "created_at": self.created_at,
+        }
+
+
+class UserQuizletSubgroup(Base):
+    __tablename__ = "user_quizlet_subgroups"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    title: Mapped[str] = mapped_column(String(128), nullable=False)
+    sort: Mapped[int] = mapped_column(Integer, default=500, nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text("now()"), nullable=False)
+
+    lesson_id: Mapped[int] = mapped_column(Integer, ForeignKey("user_quizlet_lessons.id"), nullable=False)
+    lesson: Mapped["UserQuizletLesson"] = relationship("UserQuizletLesson", back_populates="subgroups")
+
+    words: Mapped[list["UserQuizletWord"]] = relationship("UserQuizletWord",
+                                                          back_populates="subgroup",
+                                                          cascade="all, delete-orphan")
+
+    __mapper_args__ = {'eager_defaults': True}
+
+    def __json__(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "sort": self.sort,
+            "lesson_id": self.lesson_id,
+            "created_at": self.created_at,
+        }
+
+
+class UserQuizletWord(Base):
+    __tablename__ = "user_quizlet_words"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    char_jp: Mapped[Optional[str]] = mapped_column(String(128))
+    word_jp: Mapped[str] = mapped_column(String(128), nullable=False)
+    ru: Mapped[str] = mapped_column(String(128), nullable=False)
+    img: Mapped[Optional[str]] = mapped_column(String(1024))
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text("now()"), nullable=False)
+
+    subgroup_id: Mapped[int] = mapped_column(Integer, ForeignKey("user_quizlet_subgroups.id"), nullable=False)
+    subgroup: Mapped["UserQuizletSubgroup"] = relationship("UserQuizletSubgroup", back_populates="words")
+
+    __mapper_args__ = {'eager_defaults': True}
+
+    def __json__(self):
+        return {
+            "id": self.id,
+            "char_jp": self.char_jp,
+            "word_jp": self.word_jp,
+            "ru": self.ru,
+            "img": self.img,
+            "subgroup_id": self.subgroup_id,
+            "created_at": self.created_at,
+        }
+
+
+class QuizletSession(Base):
+    __tablename__ = "quizlet_sessions"
+
+    class Type:
+        PAIR = "pair"
+        FLASHCARDS = "flashcards"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    quiz_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    show_hints: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    translation_direction: Mapped[str] = mapped_column(String(32), nullable=False)
+
+    is_finished: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+    started_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text("now()"), nullable=False)
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text("now()"), nullable=False)
+    ended_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
+
+    elapsed_seconds: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+    total_words: Mapped[int] = mapped_column(Integer, nullable=False)
+    correct_answers: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    incorrect_answers: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    skipped_words: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+    queue_state: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
+
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey(USERS_ID), nullable=False)
+    user: Mapped["User"] = relationship("User", back_populates="quizlet_sessions")
+
+    words: Mapped[list["QuizletSessionWord"]] = relationship("QuizletSessionWord",
+                                                             back_populates="session",
+                                                             cascade="all, delete-orphan")
+    incorrect_words: Mapped[list["QuizletSessionIncorrectWord"]] = relationship("QuizletSessionIncorrectWord",
+                                                                                back_populates="session",
+                                                                                cascade="all, delete-orphan")
+
+    __mapper_args__ = {'eager_defaults': True}
+
+    def __json__(self):
+        return {
+            "id": self.id,
+            "quiz_type": self.quiz_type,
+            "show_hints": self.show_hints,
+            "translation_direction": self.translation_direction,
+            "is_finished": self.is_finished,
+            "started_at": self.started_at,
+            "updated_at": self.updated_at,
+            "ended_at": self.ended_at,
+            "elapsed_seconds": self.elapsed_seconds,
+            "total_words": self.total_words,
+            "correct_answers": self.correct_answers,
+            "incorrect_answers": self.incorrect_answers,
+            "skipped_words": self.skipped_words,
+            "queue_state": self.queue_state,
+            "user_id": self.user_id,
+        }
+
+
+class QuizletSessionWord(Base):
+    __tablename__ = "quizlet_session_words"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    source_type: Mapped[str] = mapped_column(String(16), nullable=False)
+    source_word_id: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    char_jp: Mapped[Optional[str]] = mapped_column(String(128))
+    word_jp: Mapped[str] = mapped_column(String(128), nullable=False)
+    ru: Mapped[str] = mapped_column(String(128), nullable=False)
+    img: Mapped[Optional[str]] = mapped_column(String(1024))
+
+    is_correct: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    is_skipped: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    incorrect_attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    correct_attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+    session_id: Mapped[int] = mapped_column(Integer, ForeignKey("quizlet_sessions.id"), nullable=False)
+    session: Mapped["QuizletSession"] = relationship("QuizletSession", back_populates="words")
+
+    def __json__(self):
+        return {
+            "id": self.id,
+            "source_type": self.source_type,
+            "source_word_id": self.source_word_id,
+            "char_jp": self.char_jp,
+            "word_jp": self.word_jp,
+            "ru": self.ru,
+            "img": self.img,
+            "is_correct": self.is_correct,
+            "is_skipped": self.is_skipped,
+            "incorrect_attempts": self.incorrect_attempts,
+            "correct_attempts": self.correct_attempts,
+            "session_id": self.session_id,
+        }
+
+
+class QuizletSessionIncorrectWord(Base):
+    __tablename__ = "quizlet_session_incorrect_words"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    session_id: Mapped[int] = mapped_column(Integer, ForeignKey("quizlet_sessions.id"), nullable=False)
+    session: Mapped["QuizletSession"] = relationship("QuizletSession", back_populates="incorrect_words")
+
+    session_word_id: Mapped[int] = mapped_column(Integer, ForeignKey("quizlet_session_words.id"), nullable=False)
+    session_word: Mapped["QuizletSessionWord"] = relationship("QuizletSessionWord")
+
+    __table_args__ = (UniqueConstraint('session_id', 'session_word_id', name='idx_quizlet_session_incorrect_word'), )
 
 
 #########################################################################################################################

@@ -345,6 +345,180 @@ def add_association_to_dictionary(id):
 
 
 #########################################################################################################################
+################ Quizlet ################################################################################################
+#########################################################################################################################
+@routes_bp.route("/quizlet/groups", methods=["GET"])
+@login_required
+def get_quizlet_groups():
+    return user_selector_function(teacher_funcs.get_quizlet_groups, student_funcs.get_quizlet_catalog)
+
+
+@routes_bp.route("/quizlet/groups", methods=["POST"])
+@login_required
+def create_quizlet_group():
+    return user_selector_function(teacher_funcs.create_quizlet_group, None)
+
+
+@routes_bp.route("/quizlet/groups/<int:group_id>", methods=["PATCH"])
+@login_required
+def update_quizlet_group(group_id):
+    return user_selector_function(teacher_funcs.update_quizlet_group, None, group_id=group_id)
+
+
+@routes_bp.route("/quizlet/groups/<int:group_id>", methods=["DELETE"])
+@login_required
+def delete_quizlet_group(group_id):
+    return user_selector_function(teacher_funcs.delete_quizlet_group, None, group_id=group_id)
+
+
+@routes_bp.route("/quizlet/groups/<int:group_id>/subgroups", methods=["POST"])
+@login_required
+def create_quizlet_subgroup(group_id):
+    return user_selector_function(teacher_funcs.create_quizlet_subgroup, None, group_id=group_id)
+
+
+@routes_bp.route("/quizlet/subgroups/<int:subgroup_id>", methods=["PATCH"])
+@login_required
+def update_quizlet_subgroup(subgroup_id):
+    return user_selector_function(teacher_funcs.update_quizlet_subgroup, None, subgroup_id=subgroup_id)
+
+
+@routes_bp.route("/quizlet/subgroups/<int:subgroup_id>", methods=["DELETE"])
+@login_required
+def delete_quizlet_subgroup(subgroup_id):
+    return user_selector_function(teacher_funcs.delete_quizlet_subgroup, None, subgroup_id=subgroup_id)
+
+
+@routes_bp.route("/quizlet/words", methods=["POST"])
+@login_required
+def add_quizlet_word():
+    return user_selector_function(teacher_funcs.add_quizlet_word, None)
+
+
+@routes_bp.route("/quizlet/words/<int:word_id>", methods=["PATCH"])
+@login_required
+def update_quizlet_word(word_id):
+    return user_selector_function(teacher_funcs.update_quizlet_word, None, word_id=word_id)
+
+
+@routes_bp.route("/quizlet/subgroups/<int:subgroup_id>/words/<int:word_id>", methods=["DELETE"])
+@login_required
+def remove_quizlet_word_from_subgroup(subgroup_id, word_id):
+    return user_selector_function(teacher_funcs.remove_quizlet_word_from_subgroup,
+                                  None,
+                                  subgroup_id=subgroup_id,
+                                  word_id=word_id)
+
+
+@routes_bp.route("/quizlet/words/<int:word_id>", methods=["DELETE"])
+@login_required
+def delete_quizlet_word(word_id):
+    return user_selector_function(teacher_funcs.delete_quizlet_word, None, word_id=word_id)
+
+
+@routes_bp.route("/quizlet/personal", methods=["GET"])
+@login_required
+def get_personal_quizlet():
+    return user_selector_function(None, student_funcs.get_personal_quizlet)
+
+
+@routes_bp.route("/quizlet/personal", methods=["POST"])
+@login_required
+def create_personal_quizlet_lesson():
+    return user_selector_function(None, student_funcs.create_personal_quizlet_lesson)
+
+
+@routes_bp.route("/quizlet/personal", methods=["PATCH"])
+@login_required
+def update_personal_quizlet_lesson():
+    return user_selector_function(None, student_funcs.update_personal_quizlet_lesson)
+
+
+@routes_bp.route("/quizlet/personal/subgroups", methods=["POST"])
+@login_required
+def create_personal_quizlet_subgroup():
+    return user_selector_function(None, student_funcs.create_personal_quizlet_subgroup)
+
+
+@routes_bp.route("/quizlet/personal/subgroups/<int:subgroup_id>", methods=["PATCH"])
+@login_required
+def update_personal_quizlet_subgroup(subgroup_id):
+    return user_selector_function(None, student_funcs.update_personal_quizlet_subgroup, subgroup_id=subgroup_id)
+
+
+@routes_bp.route("/quizlet/personal/subgroups/<int:subgroup_id>", methods=["DELETE"])
+@login_required
+def delete_personal_quizlet_subgroup(subgroup_id):
+    return user_selector_function(None, student_funcs.delete_personal_quizlet_subgroup, subgroup_id=subgroup_id)
+
+
+@routes_bp.route("/quizlet/personal/words", methods=["POST"])
+@login_required
+def add_personal_quizlet_word():
+    return user_selector_function(None, student_funcs.add_personal_quizlet_word)
+
+
+@routes_bp.route("/quizlet/personal/words/<int:word_id>", methods=["PATCH"])
+@login_required
+def update_personal_quizlet_word(word_id):
+    return user_selector_function(None, student_funcs.update_personal_quizlet_word, word_id=word_id)
+
+
+@routes_bp.route("/quizlet/personal/words/<int:word_id>", methods=["DELETE"])
+@login_required
+def delete_personal_quizlet_word(word_id):
+    return user_selector_function(None, student_funcs.delete_personal_quizlet_word, word_id=word_id)
+
+
+@routes_bp.route("/quizlet/sessions/start", methods=["POST"])
+@login_required
+def start_quizlet_session():
+    return user_selector_function(None, student_funcs.start_quizlet_session)
+
+
+@routes_bp.route("/quizlet/sessions/<int:session_id>", methods=["GET"])
+@login_required
+def get_quizlet_session(session_id):
+    return user_selector_function(None, student_funcs.get_quizlet_session, session_id=session_id)
+
+
+@routes_bp.route("/quizlet/sessions/<int:session_id>/pair-attempt", methods=["POST"])
+@login_required
+def mark_quizlet_pair_attempt(session_id):
+    return user_selector_function(None, student_funcs.mark_quizlet_pair_attempt, session_id=session_id)
+
+
+@routes_bp.route("/quizlet/sessions/<int:session_id>/flashcard-answer", methods=["POST"])
+@login_required
+def mark_quizlet_flashcard_answer(session_id):
+    return user_selector_function(None, student_funcs.mark_quizlet_flashcard_answer, session_id=session_id)
+
+
+@routes_bp.route("/quizlet/sessions/<int:session_id>/save-progress", methods=["POST"])
+@login_required
+def save_quizlet_progress(session_id):
+    return user_selector_function(None, student_funcs.save_quizlet_progress, session_id=session_id)
+
+
+@routes_bp.route("/quizlet/sessions/<int:session_id>/end", methods=["POST"])
+@login_required
+def end_quizlet_session(session_id):
+    return user_selector_function(None, student_funcs.end_quizlet_session, session_id=session_id)
+
+
+@routes_bp.route("/quizlet/sessions/retry-incorrect", methods=["POST"])
+@login_required
+def retry_quizlet_incorrect_words():
+    return user_selector_function(None, student_funcs.retry_quizlet_incorrect_words)
+
+
+@routes_bp.route("/quizlet/sessions/stats", methods=["GET"])
+@login_required
+def get_quizlet_sessions_stats():
+    return user_selector_function(None, student_funcs.get_quizlet_sessions_stats)
+
+
+#########################################################################################################################
 ################ Notifications ##########################################################################################
 #########################################################################################################################
 @routes_bp.route("/notifications", methods=["GET"])

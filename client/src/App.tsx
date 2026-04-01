@@ -20,6 +20,7 @@ import DictionaryPage from "components/Dictionary/DictionaryPage";
 import ErrorPage from "components/ErrorPages/ErrorPage";
 import { LessonCreatePage, LessonEditPage } from "components/Lessons/LessonProcessingPage";
 import TeacherLessonPage from "components/Lessons/TeacherLessonPage";
+import { StudentQuizlet, TeacherQuizletManager } from "components/Quizlet";
 import { LoadStatus } from "libs/Status";
 import { isTeacher } from "redux/funcs/user";
 
@@ -37,8 +38,8 @@ import { useAppDispatch, useAppSelector } from "./redux/hooks";
 import { selectUser, setUserData, UserDataType } from "./redux/slices/userSlice";
 import styleThemes from "./themes/StyleThemes.module.css";
 
-import "./RoundBlock.css";
 import "./App.css";
+import "./RoundBlock.css";
 
 const App = () => {
     const user = useAppSelector(selectUser).data;
@@ -142,6 +143,7 @@ const App = () => {
                     <Route path="/profile" element={getRoute(<StudentProfilePage />, <StudentProfilePage />)} />
 
                     <Route path="/dictionary" element={getLoggedRoute(<DictionaryPage />)} />
+                    <Route path="/quizlet" element={getRoute(<TeacherQuizletManager />, <StudentQuizlet />)} />
                     <Route
                         path="*"
                         element={
