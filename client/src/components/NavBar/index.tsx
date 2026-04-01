@@ -70,7 +70,11 @@ const NavBar = () => {
                         <img className="d-block d-lg-none" src="/svg/LogoSmall.svg" alt="Главная" height={60} />
                     </Link>
                 </div>
-                <div className="col-6 col-lg-4 mx-auto d-flex align-items-center">{/* <Dictionary /> */}</div>
+                <div className="col-6 col-lg-4 mx-auto d-flex align-items-center">
+                    <Link className="d-flex mx-auto a-clear navbar-dictionary-title ap-japanesefont" to="/quizlet">
+                        Quizlet
+                    </Link>
+                </div>
                 <div className="col-4 align-items-end">
                     <div className="d-flex justify-content-end align-items-center">
                         <div
