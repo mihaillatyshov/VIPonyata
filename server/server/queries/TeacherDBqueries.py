@@ -17,7 +17,7 @@ from server.models.dictionary import (DictionaryCreateReq, DictionaryCreateReqIt
 from server.models.lesson import LessonCreateReq
 from server.models.lexis import LexisCardCreateReq, LexisCreateReq
 from server.models.quizlet import (QuizletGroupCreateReq, QuizletSubgroupCreateReq, QuizletWordCreateReq,
-                                   QuizletWordUpdateReq)
+                                   QuizletWordsBatchCreateReq, QuizletWordUpdateReq)
 
 
 #########################################################################################################################
@@ -560,6 +560,10 @@ def remove_quizlet_word_from_subgroup(subgroup_id: int, word_id: int):
 def delete_quizlet_word(word_id: int):
     with DBsession.begin() as session:
         session.execute(delete(QuizletDictionary).where(QuizletDictionary.id == word_id))
+
+
+def batch_add_quizlet_words(data: QuizletWordsBatchCreateReq) -> list[QuizletDictionary]:
+    return [add_quizlet_word(word) for word in data.words]
 
 
 #########################################################################################################################

@@ -2,7 +2,7 @@ from flask import request
 
 import server.queries.TeacherDBqueries as DBQT
 from server.models.quizlet import (QuizletGroupCreateReq, QuizletSubgroupCreateReq, QuizletWordCreateReq,
-                                   QuizletWordUpdateReq)
+                                   QuizletWordsBatchCreateReq, QuizletWordUpdateReq)
 from server.models.utils import validate_req
 
 
@@ -27,7 +27,7 @@ def get_quizlet_groups() -> dict:
 def create_quizlet_group() -> dict:
     data = validate_req(QuizletGroupCreateReq, request.json)
     group = DBQT.create_quizlet_group(data)
-    return {"group": group}
+    return {"group": group.__json__()}
 
 
 def update_quizlet_group(group_id: int) -> dict:
@@ -44,7 +44,7 @@ def delete_quizlet_group(group_id: int) -> dict:
 def create_quizlet_subgroup(group_id: int) -> dict:
     data = validate_req(QuizletSubgroupCreateReq, request.json)
     subgroup = DBQT.create_quizlet_subgroup(group_id, data)
-    return {"subgroup": subgroup}
+    return {"subgroup": subgroup.__json__()}
 
 
 def update_quizlet_subgroup(subgroup_id: int) -> dict:
@@ -61,7 +61,13 @@ def delete_quizlet_subgroup(subgroup_id: int) -> dict:
 def add_quizlet_word() -> dict:
     data = validate_req(QuizletWordCreateReq, request.json)
     word = DBQT.add_quizlet_word(data)
-    return {"word": word}
+    return {"word": word.__json__()}
+
+
+def batch_add_quizlet_words() -> dict:
+    data = validate_req(QuizletWordsBatchCreateReq, request.json)
+    words = DBQT.batch_add_quizlet_words(data)
+    return {"words": [w.__json__() for w in words]}
 
 
 def update_quizlet_word(word_id: int) -> dict:

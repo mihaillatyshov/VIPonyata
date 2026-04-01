@@ -34,6 +34,10 @@ class QuizletWordUpdateReq(BaseModel):
     img: StrExtraSpaceRemove | None = None
 
 
+class QuizletWordsBatchCreateReq(BaseModel):
+    words: list[QuizletWordCreateReq]
+
+
 class QuizletPersonalLessonCreateReq(BaseModel):
     title: StrExtraSpaceRemove
 

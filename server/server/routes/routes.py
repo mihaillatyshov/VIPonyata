@@ -395,6 +395,12 @@ def add_quizlet_word():
     return user_selector_function(teacher_funcs.add_quizlet_word, None)
 
 
+@routes_bp.route("/quizlet/words/batch", methods=["POST"])
+@login_required
+def batch_add_quizlet_words():
+    return user_selector_function(teacher_funcs.batch_add_quizlet_words, None)
+
+
 @routes_bp.route("/quizlet/words/<int:word_id>", methods=["PATCH"])
 @login_required
 def update_quizlet_word(word_id):
