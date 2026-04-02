@@ -1,0 +1,103 @@
+.quizlet-progress-history {
+    max-width: 760px;
+    margin: 0 auto;
+    align-items: stretch;
+}
+
+.quizlet-progress-history-title {
+    margin-bottom: 20px;
+}
+
+.quizlet-progress-history-table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.quizlet-progress-history-table thead th {
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-align: center;
+    color: #5b6878;
+    background: #f8fafc;
+    border-top: 1px solid #e4e9f0;
+    border-bottom: 1px solid #e4e9f0;
+}
+
+.quizlet-progress-history-table thead th:first-child {
+    border-left: 1px solid #e4e9f0;
+    border-top-left-radius: 12px;
+}
+
+.quizlet-progress-history-table thead th:last-child {
+    border-right: 1px solid #e4e9f0;
+    border-top-right-radius: 12px;
+}
+
+.quizlet-progress-history-table tbody td {
+    border-bottom: 1px solid #edf1f5;
+    color: #1f2c3d;
+}
+
+.quizlet-progress-history-table thead th:nth-child(1),
+.quizlet-progress-history-table tbody td:nth-child(1) {
+    padding-right: 18px;
+}
+
+.quizlet-progress-history-table thead th:nth-child(2),
+.quizlet-progress-history-table tbody td:nth-child(2) {
+    padding-left: 18px;
+}
+
+.quizlet-progress-history-table tbody td:nth-child(3),
+.quizlet-progress-history-table tbody td:nth-child(4) {
+    text-align: center;
+}
+
+.quizlet-progress-history-row {
+    cursor: pointer;
+    transition: background-color 0.16s ease;
+}
+
+.quizlet-progress-history-row:hover {
+    background: #f2f8ff;
+}
+
+.quizlet-progress-history-row.is-expanded {
+    background: #f8fbff;
+}
+
+.quizlet-progress-history-details-row td {
+    background: #fbfdff;
+    border-bottom: 1px solid #e4ebf3;
+}
+
+.quizlet-progress-history-details-wrap {
+    padding: 10px 6px;
+}
+
+.quizlet-progress-history-details-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #3b4a5d;
+    margin-bottom: 8px;
+}
+
+.quizlet-progress-history-topics-list {
+    margin: 0;
+    padding-left: 18px;
+    color: #31455d;
+}
+
+@media (max-width: 576px) {
+    .quizlet-progress-history-table thead th,
+    .quizlet-progress-history-table tbody td {
+        padding: 10px 8px;
+        font-size: 0.87rem;
+    }
+
+    .quizlet-progress-history-title {
+        margin-bottom: 14px;
+    }
+}

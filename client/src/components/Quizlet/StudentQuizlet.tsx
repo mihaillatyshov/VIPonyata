@@ -20,6 +20,7 @@ import MatchingExercise from "./MatchingExercise";
 
 import "./QuizletShared.css";
 
+import QuizletProgressHistory from "./QuizletProgressHistory";
 import QuizletQuizStart from "./QuizletQuizStart";
 import QuizletSessionResults from "./QuizletSessionResults";
 import { parseQueue } from "./quizletUtils";
@@ -401,7 +402,7 @@ const PersonalTopicEditor = ({ subgroup, initialWords, onSaved }: PersonalTopicE
 
 const StudentQuizlet = () => {
     const [loadStatus, setLoadStatus] = useState<LoadStatus.Type>(LoadStatus.NONE);
-    const [mode, setMode] = useState<"training" | "view" | null>(null);
+    const [mode, setMode] = useState<"training" | "view" | "progress" | null>(null);
 
     const [groups, setGroups] = useState<TQuizletGroup[]>([]);
     const [subgroups, setSubgroups] = useState<TQuizletSubgroup[]>([]);
@@ -433,6 +434,12 @@ const StudentQuizlet = () => {
     const [isEditingPersonalTopicTitle, setIsEditingPersonalTopicTitle] = useState(false);
     const [personalTopicTitleDraft, setPersonalTopicTitleDraft] = useState<string>("");
 
+    const [historySessions, setHistorySessions] = useState<TQuizletSession[]>([]);
+    const [historyLoadStatus, setHistoryLoadStatus] = useState<LoadStatus.Type>(LoadStatus.NONE);
+    const [expandedHistorySessionId, setExpandedHistorySessionId] = useState<number | null>(null);
+    const [historySessionWordsById, setHistorySessionWordsById] = useState<Record<number, TQuizletSessionWord[]>>({});
+    const [historyLoadingDetailsSessionId, setHistoryLoadingDetailsSessionId] = useState<number | null>(null);
+
     const [lastStartPayload, setLastStartPayload] = useState<any>(null);
 
     const fetchCatalog = () => {
@@ -459,6 +466,18 @@ const StudentQuizlet = () => {
             .catch(() => setLoadStatus(LoadStatus.ERROR));
     };
 
+    const loadHistory = () => {
+        setHistoryLoadStatus(LoadStatus.LOADING);
+        AjaxGet<{ sessions: TQuizletSession[] }>({ url: "/api/quizlet/sessions/stats" })
+            .then((json) => {
+                setHistorySessions(json.sessions.filter((item) => item.is_finished));
+                setHistoryLoadStatus(LoadStatus.DONE);
+            })
+            .catch(() => {
+                setHistoryLoadStatus(LoadStatus.ERROR);
+            });
+    };
+
     useEffect(() => {
         loadData();
     }, []);
@@ -471,6 +490,13 @@ const StudentQuizlet = () => {
         setIsEditingLessonTitle(false);
         setIsEditingPersonalTopicTitle(false);
         setPersonalTopicTitleDraft("");
+        setExpandedHistorySessionId(null);
+    }, [mode]);
+
+    useEffect(() => {
+        if (mode === "progress") {
+            loadHistory();
+        }
     }, [mode]);
 
     const loadSession = (sessionId: number) => {
@@ -635,7 +661,87 @@ const StudentQuizlet = () => {
         setSessionWords([]);
     };
 
+    const loadHistorySessionWords = (sessionId: number) => {
+        setHistoryLoadingDetailsSessionId(sessionId);
+        AjaxGet<SessionResponse>({ url: `/api/quizlet/sessions/${sessionId}` })
+            .then((json) => {
+                setHistorySessionWordsById((prev) => ({ ...prev, [sessionId]: json.words }));
+            })
+            .finally(() => {
+                setHistoryLoadingDetailsSessionId((current) => (current === sessionId ? null : current));
+            });
+    };
+
+    const toggleHistorySession = (sessionId: number) => {
+        if (expandedHistorySessionId === sessionId) {
+            setExpandedHistorySessionId(null);
+            return;
+        }
+
+        setExpandedHistorySessionId(sessionId);
+
+        if (historySessionWordsById[sessionId] === undefined) {
+            loadHistorySessionWords(sessionId);
+        }
+    };
+
     const unresolvedCount = sessionWords.filter((word) => !word.is_correct).length;
+
+    const subgroupTitleById = useMemo(() => {
+        return new Map(subgroups.map((subgroup) => [subgroup.id, subgroup.title]));
+    }, [subgroups]);
+
+    const personalSubgroupTitleById = useMemo(() => {
+        return new Map(personalSubgroups.map((subgroup) => [subgroup.id, subgroup.title]));
+    }, [personalSubgroups]);
+
+    const teacherWordTopicsMap = useMemo(() => {
+        const map = new Map<number, string[]>();
+
+        subgroupWords.forEach((link) => {
+            const subgroupTitle = subgroupTitleById.get(link.subgroup_id);
+            if (!subgroupTitle) return;
+
+            const existing = map.get(link.word_id) ?? [];
+            if (!existing.includes(subgroupTitle)) {
+                map.set(link.word_id, [...existing, subgroupTitle]);
+            }
+        });
+
+        return map;
+    }, [subgroupWords, subgroupTitleById]);
+
+    const personalWordTopicsMap = useMemo(() => {
+        const map = new Map<number, string[]>();
+
+        personalWords.forEach((word) => {
+            const subgroupId = word.subgroup_id;
+            if (subgroupId === undefined) return;
+            const subgroupTitle = personalSubgroupTitleById.get(subgroupId);
+            if (!subgroupTitle) return;
+
+            const existing = map.get(word.id) ?? [];
+            if (!existing.includes(subgroupTitle)) {
+                map.set(word.id, [...existing, subgroupTitle]);
+            }
+        });
+
+        return map;
+    }, [personalWords, personalSubgroupTitleById]);
+
+    const getTopicsFromSessionWords = (sessionWordsList: TQuizletSessionWord[]) => {
+        const topics = new Set<string>();
+
+        sessionWordsList.forEach((word) => {
+            const teacherTopics = teacherWordTopicsMap.get(word.source_word_id) ?? [];
+            const personalTopics = personalWordTopicsMap.get(word.source_word_id) ?? [];
+
+            teacherTopics.forEach((topic) => topics.add(topic));
+            personalTopics.forEach((topic) => topics.add(topic));
+        });
+
+        return Array.from(topics);
+    };
 
     useEffect(() => {
         if (personalLesson !== null && personalLessonTitle.trim().length === 0) {
@@ -880,6 +986,14 @@ const StudentQuizlet = () => {
                         >
                             <i className="bi bi-book fs-2 mb-2" />
                             <span className="fw-semibold">Все словари</span>
+                        </button>
+                        <button
+                            className="btn quizlet-mode-button quizlet-mode-button-progress rounded-circle d-flex flex-column justify-content-center align-items-center"
+                            style={{ width: "180px", height: "180px" }}
+                            onClick={() => setMode("progress")}
+                        >
+                            <i className="bi bi-graph-up-arrow fs-2 mb-2" />
+                            <span className="fw-semibold">Мои успехи</span>
                         </button>
                     </div>
                 </div>
@@ -1186,6 +1300,28 @@ const StudentQuizlet = () => {
                             </>
                         )}
                     </div>
+                </div>
+            )}
+
+            {session === null && mode === "progress" && (
+                <div style={{ maxWidth: "760px", margin: "0 auto" }}>
+                    <div className="mb-3">
+                        <button className="btn btn-outline-secondary" onClick={() => setMode(null)}>
+                            Назад к выбору режима
+                        </button>
+                    </div>
+
+                    <QuizletProgressHistory
+                        sessions={historySessions}
+                        isLoading={historyLoadStatus === LoadStatus.LOADING}
+                        hasError={historyLoadStatus === LoadStatus.ERROR}
+                        expandedSessionId={expandedHistorySessionId}
+                        loadingDetailsSessionId={historyLoadingDetailsSessionId}
+                        sessionWordsById={historySessionWordsById}
+                        onRowClick={toggleHistorySession}
+                        onRetryLoad={loadHistory}
+                        getTopicsFromSessionWords={getTopicsFromSessionWords}
+                    />
                 </div>
             )}
 

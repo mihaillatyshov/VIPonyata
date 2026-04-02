@@ -73,3 +73,16 @@
     color: #000000;
     background: linear-gradient(160deg, #fffbed 0%, #ffecc9 100%);
 }
+
+.quizlet-mode-button-progress {
+    border-color: #c4d8b4;
+    background: linear-gradient(160deg, #f6fbf0 0%, #e4f1d8 100%);
+}
+
+.quizlet-mode-button-progress:hover,
+.quizlet-mode-button-progress:focus-visible,
+.quizlet-mode-button-progress:active {
+    border-color: #b3cba0;
+    color: #000000;
+    background: linear-gradient(160deg, #f2f9ea 0%, #dceccb 100%);
+}
