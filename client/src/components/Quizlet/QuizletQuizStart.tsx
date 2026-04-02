@@ -52,6 +52,18 @@ const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups
         setSelectedTeacherSubgroups(Array.from(new Set([...selectedTeacherSubgroups, ...groupSubgroupIds])));
     };
 
+    const togglePersonalGroup = () => {
+        const personalSubgroupIds = personalSubgroups.map((item) => item.id);
+        const allSelected = personalSubgroupIds.every((id) => selectedPersonalSubgroups.includes(id));
+
+        if (allSelected) {
+            setSelectedPersonalSubgroups(selectedPersonalSubgroups.filter((id) => !personalSubgroupIds.includes(id)));
+            return;
+        }
+
+        setSelectedPersonalSubgroups(Array.from(new Set([...selectedPersonalSubgroups, ...personalSubgroupIds])));
+    };
+
     const start = () => {
         onStart({
             quiz_type: quizType,
@@ -64,14 +76,66 @@ const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups
 
     return (
         <div className="card p-3 p-md-4">
-            <h4 className="mb-3">Настройки тренировки</h4>
+            <h4 className="mb-3">Выбери упражнение</h4>
 
             <div className="mb-3">
-                <label className="form-label">Тип упражнения</label>
-                <select className="form-select" value={quizType} onChange={(e) => setQuizType(e.target.value as any)}>
-                    <option value="pair">Pair matching</option>
-                    <option value="flashcards">Flashcards</option>
-                </select>
+                <div className="row g-2">
+                    <div className="col-12 col-md-6">
+                        <button
+                            type="button"
+                            className={`w-100 text-start border rounded p-3 bg-white ${
+                                quizType === "flashcards" ? "border-primary shadow-sm" : "border-light"
+                            }`}
+                            onClick={() => setQuizType("flashcards")}
+                        >
+                            <div className="d-flex align-items-center gap-2 mb-1">
+                                <i className="bi bi-card-text fs-4 text-primary" />
+                                <span className="fw-semibold">Карточки</span>
+                            </div>
+                            <div className="small text-muted">Классический формат карточек для запоминания.</div>
+                        </button>
+                        {quizType === "flashcards" && (
+                            <div className="mt-2 border rounded p-2 bg-light">
+                                <div className="small fw-semibold mb-2">Направление перевода</div>
+                                <div className="d-flex gap-2">
+                                    <button
+                                        type="button"
+                                        className={`btn btn-sm ${
+                                            direction === "jp_to_ru" ? "btn-primary" : "btn-outline-secondary"
+                                        }`}
+                                        onClick={() => setDirection("jp_to_ru")}
+                                    >
+                                        jp → ru
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`btn btn-sm ${
+                                            direction === "ru_to_jp" ? "btn-primary" : "btn-outline-secondary"
+                                        }`}
+                                        onClick={() => setDirection("ru_to_jp")}
+                                    >
+                                        ru → jp
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    <div className="col-12 col-md-6">
+                        <button
+                            type="button"
+                            className={`w-100 text-start border rounded p-3 bg-white ${
+                                quizType === "pair" ? "border-primary shadow-sm" : "border-light"
+                            }`}
+                            onClick={() => setQuizType("pair")}
+                        >
+                            <div className="d-flex align-items-center gap-2 mb-1">
+                                <i className="bi bi-grid-3x3-gap fs-4 text-primary" />
+                                <span className="fw-semibold">Пары</span>
+                            </div>
+                            <div className="small text-muted">Соединяй совпадающие пары как можно быстрее.</div>
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div className="form-check mb-3">
@@ -83,26 +147,61 @@ const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups
                     onChange={(e) => setShowHints(e.target.checked)}
                 />
                 <label className="form-check-label" htmlFor="quizletShowHints">
-                    Показывать чтение в скобках рядом с иероглифом
+                    Показывать чтения для иероглифов
                 </label>
             </div>
 
+            <h4 className="mt-4 mb-3">Выбери словари</h4>
             <div className="mb-4">
-                <label className="form-label">Направление перевода для карточек</label>
-                <select className="form-select" value={direction} onChange={(e) => setDirection(e.target.value as any)}>
-                    <option value="jp_to_ru">jp (char_jp) → ru</option>
-                    <option value="ru_to_jp">ru → jp (char_jp)</option>
-                </select>
-            </div>
+                {personalLesson !== null && (
+                    <div className="border rounded p-2 mb-2">
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                            <strong>Мой словарь</strong>
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-outline-secondary"
+                                onClick={togglePersonalGroup}
+                            >
+                                Выбрать всё
+                            </button>
+                        </div>
+                        {personalSubgroups.length === 0 && (
+                            <div className="text-muted small">Добавьте подгруппы в личный урок</div>
+                        )}
+                        {personalSubgroups.length > 0 && (
+                            <div className="d-flex flex-wrap gap-2">
+                                {personalSubgroups.map((subgroup) => (
+                                    <label key={subgroup.id} className="form-check me-3">
+                                        <input
+                                            className="form-check-input"
+                                            type="checkbox"
+                                            checked={selectedPersonalSubgroups.includes(subgroup.id)}
+                                            onChange={() =>
+                                                toggleSelection(
+                                                    selectedPersonalSubgroups,
+                                                    setSelectedPersonalSubgroups,
+                                                    subgroup.id,
+                                                )
+                                            }
+                                        />
+                                        <span className="form-check-label">{subgroup.title}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
 
-            <h5 className="mb-2">Словари преподавателя</h5>
-            <div className="mb-4">
                 {subgroupsByGroup.map(({ group, subgroups: nestedSubgroups }) => (
                     <div key={group.id} className="border rounded p-2 mb-2">
                         <div className="d-flex justify-content-between align-items-center mb-2">
                             <strong>{group.title}</strong>
-                            <button className="btn btn-sm btn-outline-secondary" onClick={() => toggleGroup(group.id)}>
-                                Выбрать группу целиком
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-outline-secondary"
+                                onClick={() => toggleGroup(group.id)}
+                            >
+                                Выбрать всё
                             </button>
                         </div>
                         <div className="d-flex flex-wrap gap-2">
@@ -126,35 +225,6 @@ const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups
                         </div>
                     </div>
                 ))}
-            </div>
-
-            <h5 className="mb-2">Личный словарь</h5>
-            <div className="mb-4">
-                {personalLesson === null && <div className="text-muted">Личный урок пока не создан</div>}
-                {personalLesson !== null && personalSubgroups.length === 0 && (
-                    <div className="text-muted">Добавьте подгруппы в личный урок</div>
-                )}
-                {personalSubgroups.length > 0 && (
-                    <div className="d-flex flex-wrap gap-2">
-                        {personalSubgroups.map((subgroup) => (
-                            <label key={subgroup.id} className="form-check me-3">
-                                <input
-                                    className="form-check-input"
-                                    type="checkbox"
-                                    checked={selectedPersonalSubgroups.includes(subgroup.id)}
-                                    onChange={() =>
-                                        toggleSelection(
-                                            selectedPersonalSubgroups,
-                                            setSelectedPersonalSubgroups,
-                                            subgroup.id,
-                                        )
-                                    }
-                                />
-                                <span className="form-check-label">{subgroup.title}</span>
-                            </label>
-                        ))}
-                    </div>
-                )}
             </div>
 
             <button
