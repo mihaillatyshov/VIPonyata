@@ -1,4 +1,5 @@
 import "./QuizletSessionResults.css";
+import "./QuizletShared.css";
 
 interface Props {
     correct: number;
@@ -26,7 +27,7 @@ const QuizletSessionResults = ({
     const shouldShowSkipped = skipped > 0 && viewedCards < totalWords;
 
     return (
-        <div className="quizlet-results">
+        <div className="quizlet-main-container quizlet-results">
             <h2 className="quizlet-results-title">
                 Результаты <span aria-hidden>🎉</span>
             </h2>

@@ -3,17 +3,6 @@
     --matching-card-radius: 16px;
 }
 
-.matching-session-wrapper {
-    width: 100%;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    border-radius: 16px;
-    background: #fdfbfb;
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(8px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-    padding: 14px;
-}
-
 .matching-session-header {
     margin-bottom: 12px;
 }
@@ -204,10 +193,6 @@
 }
 
 @media (max-width: 768px) {
-    .matching-session-wrapper {
-        padding: 12px;
-    }
-
     .matching-exercise {
         --matching-card-min-height: 68px;
     }

@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 
 import { TQuizletGroup, TQuizletLesson, TQuizletSubgroup } from "models/TQuizlet";
 
+import "./QuizletShared.css";
+
 interface StartPayload {
     quiz_type: "pair" | "flashcards";
     subgroup_ids: number[];
@@ -79,7 +81,7 @@ const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups
     };
 
     return (
-        <div className="card p-3 p-md-4">
+        <div className="quizlet-main-container">
             <h4 className="mb-3">Выбери упражнение</h4>
 
             <div className="mb-3">

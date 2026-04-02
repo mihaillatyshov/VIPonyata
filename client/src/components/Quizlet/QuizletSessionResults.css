@@ -1,13 +1,9 @@
 .quizlet-results {
     max-width: 640px;
     margin: 0 auto;
-    padding: 40px 32px 44px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: #ffffff;
-    border-radius: 20px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.09);
 }
 
 .quizlet-results-title {
@@ -151,11 +147,6 @@
 }
 
 @media (max-width: 576px) {
-    .quizlet-results {
-        padding: 28px 20px 32px;
-        border-radius: 14px;
-    }
-
     .quizlet-results-title {
         font-size: 1.6rem;
         margin-bottom: 24px;

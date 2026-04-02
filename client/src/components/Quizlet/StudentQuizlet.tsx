@@ -17,6 +17,9 @@ import {
 
 import FlashcardExercise from "./FlashcardExercise";
 import MatchingExercise from "./MatchingExercise";
+
+import "./QuizletShared.css";
+
 import QuizletQuizStart from "./QuizletQuizStart";
 import QuizletSessionResults from "./QuizletSessionResults";
 import { parseQueue } from "./quizletUtils";
@@ -855,11 +858,9 @@ const StudentQuizlet = () => {
 
             {session === null && mode === null && (
                 <div
-                    className="card p-3 p-md-4 mx-auto"
+                    className="quizlet-main-container mx-auto"
                     style={{
                         maxWidth: "760px",
-                        background: "linear-gradient(180deg, #fbfdff 0%, #f6e9f4a5 100%)",
-                        borderColor: "#e9eff5",
                     }}
                 >
                     <h4 className="text-center mb-4">Выберите режим</h4>
@@ -921,7 +922,7 @@ const StudentQuizlet = () => {
                         </button>
                     </div>
 
-                    <div className="card p-3 p-md-4">
+                    <div className="quizlet-main-container">
                         <div className="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
                             <div className="flex-grow-1" style={{ minWidth: 0 }}>
                                 {selectedPersonalTopicId === null &&
@@ -1100,7 +1101,7 @@ const StudentQuizlet = () => {
                         </button>
                     </div>
 
-                    <div className="card p-3 p-md-4">
+                    <div className="quizlet-main-container">
                         <ViewModeBreadcrumb items={teacherBreadcrumbItems} />
 
                         {groups.length === 0 && <div className="text-muted">Пока нет доступных уроков.</div>}
@@ -1207,7 +1208,7 @@ const StudentQuizlet = () => {
                     )}
 
                     {!session.is_finished && session.quiz_type === "pair" && (
-                        <div className="matching-session-wrapper">
+                        <div className="quizlet-main-container matching-session-wrapper">
                             <div className="matching-session-header">
                                 <TrainingSessionHeader
                                     incorrectAnswers={session.incorrect_answers}
