@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 
 import { TQuizletSessionWord } from "models/TQuizlet";
 
-import { getWordChar, hasValidKanaHint } from "./quizletUtils";
+import { formatDuration, getWordChar, hasValidKanaHint } from "./quizletUtils";
 
 import "./FlashcardExercise.css";
 
@@ -99,14 +99,7 @@ const FlashcardExercise = ({
                             </span>
                             <span className="flashcard-time" title="Время">
                                 <i className="bi bi-clock" />
-                                <span>
-                                    {elapsedSeconds > 0
-                                        ? `${Math.floor(elapsedSeconds / 60)}:${`${elapsedSeconds % 60}`.padStart(
-                                              2,
-                                              "0",
-                                          )}`
-                                        : "0:00"}
-                                </span>
+                                <span>{formatDuration(elapsedSeconds)}</span>
                             </span>
                         </div>
                     </div>

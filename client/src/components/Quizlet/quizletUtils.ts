@@ -32,5 +32,5 @@ export const formatDuration = (seconds: number) => {
     const clamped = Math.max(0, Math.floor(seconds));
     const mins = Math.floor(clamped / 60);
     const secs = clamped % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 };

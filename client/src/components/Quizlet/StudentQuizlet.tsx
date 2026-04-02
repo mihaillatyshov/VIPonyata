@@ -411,6 +411,8 @@ const StudentQuizlet = () => {
     const [session, setSession] = useState<(TQuizletSession & { queue_state?: string }) | null>(null);
     const [sessionWords, setSessionWords] = useState<TQuizletSessionWord[]>([]);
     const autoFinishSessionIdRef = useRef<number | null>(null);
+    const timerSessionIdRef = useRef<number | null>(null);
+    const [liveElapsedSeconds, setLiveElapsedSeconds] = useState<number>(0);
 
     const [isEditingPersonal, setIsEditingPersonal] = useState(false);
     const [personalLessonTitle, setPersonalLessonTitle] = useState<string>("");
@@ -672,6 +674,39 @@ const StudentQuizlet = () => {
                 autoFinishSessionIdRef.current = null;
             });
     }, [session, unresolvedCount]);
+
+    useEffect(() => {
+        if (session === null) {
+            timerSessionIdRef.current = null;
+            setLiveElapsedSeconds(0);
+            return;
+        }
+
+        if (timerSessionIdRef.current !== session.id) {
+            timerSessionIdRef.current = session.id;
+            setLiveElapsedSeconds(session.elapsed_seconds);
+            return;
+        }
+
+        if (session.is_finished) {
+            setLiveElapsedSeconds(session.elapsed_seconds);
+            return;
+        }
+
+        setLiveElapsedSeconds((prev) => Math.max(prev, session.elapsed_seconds));
+    }, [session]);
+
+    useEffect(() => {
+        if (session === null || session.is_finished) {
+            return;
+        }
+
+        const intervalId = window.setInterval(() => {
+            setLiveElapsedSeconds((prev) => prev + 1);
+        }, 1000);
+
+        return () => window.clearInterval(intervalId);
+    }, [session?.id, session?.is_finished]);
 
     useEffect(() => {
         if (
@@ -1144,7 +1179,7 @@ const StudentQuizlet = () => {
                             <strong>
                                 Прогресс: {session.correct_answers}/{session.total_words} | Ошибок:{" "}
                                 {session.incorrect_answers} | Осталось: {unresolvedCount} | Время:{" "}
-                                {formatDuration(session.elapsed_seconds)}
+                                {formatDuration(liveElapsedSeconds)}
                             </strong>
                         )}
                     </div>
@@ -1166,7 +1201,7 @@ const StudentQuizlet = () => {
                             totalWords={session.total_words}
                             unresolvedCount={unresolvedCount}
                             incorrectAnswers={session.incorrect_answers}
-                            elapsedSeconds={session.elapsed_seconds}
+                            elapsedSeconds={liveElapsedSeconds}
                             onFinishTraining={endNow}
                             onAnswer={submitFlashcard}
                         />
