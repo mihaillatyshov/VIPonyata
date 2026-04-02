@@ -72,6 +72,28 @@
     hyphens: none;
 }
 
+.matching-card-text-with-reading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.matching-card-main-text {
+    display: block;
+    max-width: 100%;
+}
+
+.matching-card-reading {
+    display: block;
+    max-width: 100%;
+    font-size: 0.68em;
+    line-height: 1.2;
+    color: #6f7885;
+    opacity: 0.82;
+}
+
 .matching-card:hover:not(:disabled),
 .matching-card:focus-visible {
     border-color: #f7c8cd;

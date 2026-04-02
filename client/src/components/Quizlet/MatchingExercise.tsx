@@ -19,6 +19,10 @@ const MOBILE_MAX_FONT_SIZE = 18;
 const MOBILE_MIN_FONT_SIZE = 11;
 const FONT_SIZE_STEP = 1;
 const MAX_TEXT_LINES = 3;
+const LONG_TEXT_CHAR_COUNT = 14;
+const VERY_LONG_TEXT_CHAR_COUNT = 22;
+const LONG_TEXT_FONT_REDUCTION = 2;
+const VERY_LONG_TEXT_FONT_REDUCTION = 4;
 
 const deterministicSortByIdHash = (left: TQuizletSessionWord, right: TQuizletSessionWord) => {
     const leftHash = ((left.id * 1103515245 + 12345) >>> 0) % 2147483647;
@@ -35,7 +39,8 @@ interface MatchingCardButtonProps {
     className: string;
     onClick: () => void;
     disabled: boolean;
-    text: string;
+    mainText: string;
+    secondaryText?: string;
 }
 
 const getFontBounds = () => {
@@ -46,9 +51,24 @@ const getFontBounds = () => {
     return { max: DESKTOP_MAX_FONT_SIZE, min: DESKTOP_MIN_FONT_SIZE };
 };
 
-const MatchingCardButton = ({ className, onClick, disabled, text }: MatchingCardButtonProps) => {
+const getLengthAdjustedMaxFontSize = (text: string, maxFontSize: number, minFontSize: number) => {
+    const normalizedLength = text.replace(/\s+/g, "").length;
+
+    if (normalizedLength >= VERY_LONG_TEXT_CHAR_COUNT) {
+        return Math.max(minFontSize, maxFontSize - VERY_LONG_TEXT_FONT_REDUCTION);
+    }
+
+    if (normalizedLength >= LONG_TEXT_CHAR_COUNT) {
+        return Math.max(minFontSize, maxFontSize - LONG_TEXT_FONT_REDUCTION);
+    }
+
+    return maxFontSize;
+};
+
+const MatchingCardButton = ({ className, onClick, disabled, mainText, secondaryText }: MatchingCardButtonProps) => {
     const cardRef = useRef<HTMLButtonElement | null>(null);
     const [fontSizePx, setFontSizePx] = useState<number>(DESKTOP_MAX_FONT_SIZE);
+    const combinedText = secondaryText ? `${mainText} ${secondaryText}` : mainText;
 
     useLayoutEffect(() => {
         const card = cardRef.current;
@@ -66,7 +86,7 @@ const MatchingCardButton = ({ className, onClick, disabled, text }: MatchingCard
             }
 
             const fontBounds = getFontBounds();
-            let nextFontSize = fontBounds.max;
+            let nextFontSize = getLengthAdjustedMaxFontSize(combinedText, fontBounds.max, fontBounds.min);
             element.style.fontSize = `${nextFontSize}px`;
 
             const getLineHeight = () => {
@@ -115,7 +135,7 @@ const MatchingCardButton = ({ className, onClick, disabled, text }: MatchingCard
                 window.cancelAnimationFrame(frameId);
             }
         };
-    }, [text]);
+    }, [combinedText]);
 
     return (
         <button
@@ -125,7 +145,10 @@ const MatchingCardButton = ({ className, onClick, disabled, text }: MatchingCard
             disabled={disabled}
             style={{ fontSize: `${fontSizePx}px` }}
         >
-            <span className="matching-card-text">{text}</span>
+            <span className={`matching-card-text ${secondaryText ? "matching-card-text-with-reading" : ""}`}>
+                <span className="matching-card-main-text">{mainText}</span>
+                {secondaryText && <span className="matching-card-reading">{secondaryText}</span>}
+            </span>
         </button>
     );
 };
@@ -268,8 +291,8 @@ const MatchingExercise = ({ words, showHints, onAttempt }: Props) => {
                             const isWrong = wrongPair !== null && wrongPair.leftId === word.id;
                             const isCorrect = correctPair !== null && correctPair.leftId === word.id;
                             const char = getWordChar(word);
+                            const shouldShowKanaHint = showHints && hasValidKanaHint(word);
                             const kanaHint = word.word_jp.trim();
-                            const title = showHints && hasValidKanaHint(word) ? `${char} (${kanaHint})` : char;
 
                             if (isHidden) {
                                 return (
@@ -285,7 +308,8 @@ const MatchingExercise = ({ words, showHints, onAttempt }: Props) => {
                                     } ${isCorrect ? "is-correct" : ""}`}
                                     onClick={() => onSelectLeft(word.id)}
                                     disabled={isSending}
-                                    text={title}
+                                    mainText={char}
+                                    secondaryText={shouldShowKanaHint ? kanaHint : undefined}
                                 />
                             );
                         })}
@@ -314,7 +338,7 @@ const MatchingExercise = ({ words, showHints, onAttempt }: Props) => {
                                     } ${isCorrect ? "is-correct" : ""}`}
                                     onClick={() => onSelectRight(word.id)}
                                     disabled={isSending}
-                                    text={word.ru}
+                                    mainText={word.ru}
                                 />
                             );
                         })}
