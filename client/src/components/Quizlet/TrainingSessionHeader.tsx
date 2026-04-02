@@ -7,6 +7,8 @@ interface TrainingSessionHeaderProps {
     elapsedSeconds: number;
     currentPosition: number;
     totalWords: number;
+    currentPage?: number;
+    totalPages?: number;
     onFinishTraining: () => void;
 }
 
@@ -15,8 +17,13 @@ const TrainingSessionHeader = ({
     elapsedSeconds,
     currentPosition,
     totalWords,
+    currentPage,
+    totalPages,
     onFinishTraining,
 }: TrainingSessionHeaderProps) => {
+    const isPageMode = currentPage !== undefined && totalPages !== undefined && totalPages > 0;
+    const tooltipText = isPageMode ? `${currentPage} из ${totalPages} страниц` : undefined;
+
     return (
         <div className="flashcard-card-header">
             <div className="flashcard-header-side flashcard-header-left">
@@ -32,7 +39,15 @@ const TrainingSessionHeader = ({
                 </div>
             </div>
             <div className="flashcard-position">
-                {Math.max(1, currentPosition)} / {totalWords}
+                {isPageMode ? (
+                    <span title={tooltipText}>
+                        {currentPage} / {totalPages}
+                    </span>
+                ) : (
+                    <>
+                        {Math.max(1, currentPosition)} / {totalWords}
+                    </>
+                )}
             </div>
             <div className="flashcard-header-side flashcard-header-right">
                 <button className="btn btn-sm btn-outline-secondary flashcard-finish-btn" onClick={onFinishTraining}>

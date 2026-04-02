@@ -10,6 +10,7 @@ interface Props {
     words: TQuizletSessionWord[];
     showHints: boolean;
     onAttempt: (leftWordId: number, rightWordId: number) => Promise<boolean>;
+    onPageChange?: (currentPage: number, totalPages: number) => void;
 }
 
 const MAX_BATCH_SIZE = 12;
@@ -170,7 +171,7 @@ const MatchingCardButton = ({ className, onClick, disabled, mainText, secondaryT
     );
 };
 
-const MatchingExercise = ({ words, showHints, onAttempt }: Props) => {
+const MatchingExercise = ({ words, showHints, onAttempt, onPageChange }: Props) => {
     const [selectedLeft, setSelectedLeft] = useState<number | null>(null);
     const [selectedRight, setSelectedRight] = useState<number | null>(null);
     const [wrongPair, setWrongPair] = useState<{ leftId: number; rightId: number } | null>(null);
@@ -185,6 +186,25 @@ const MatchingExercise = ({ words, showHints, onAttempt }: Props) => {
     const unresolvedWords = useMemo(() => words.filter((word) => !word.is_correct), [words]);
 
     const rightWords = useMemo(() => [...batchWords].sort(deterministicSortByIdHash), [batchWords]);
+
+    const totalPages = useMemo(() => {
+        return Math.max(1, Math.ceil(unresolvedWords.length / MAX_BATCH_SIZE));
+    }, [unresolvedWords.length]);
+
+    const currentPage = useMemo(() => {
+        if (unresolvedWords.length === 0) {
+            return 1;
+        }
+        const firstBatchWordId = batchWords.length > 0 ? batchWords[0].id : unresolvedWords[0].id;
+        const firstBatchWordIndex = unresolvedWords.findIndex((word) => word.id === firstBatchWordId);
+        return Math.floor(firstBatchWordIndex / MAX_BATCH_SIZE) + 1;
+    }, [unresolvedWords, batchWords]);
+
+    useEffect(() => {
+        if (onPageChange) {
+            onPageChange(currentPage, totalPages);
+        }
+    }, [currentPage, totalPages, onPageChange]);
 
     useEffect(() => {
         if (batchWords.length === 0) {

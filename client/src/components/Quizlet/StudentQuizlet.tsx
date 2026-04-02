@@ -415,6 +415,11 @@ const StudentQuizlet = () => {
     const timerSessionIdRef = useRef<number | null>(null);
     const [liveElapsedSeconds, setLiveElapsedSeconds] = useState<number>(0);
 
+    const [matchingPageInfo, setMatchingPageInfo] = useState<{ currentPage: number; totalPages: number }>({
+        currentPage: 1,
+        totalPages: 1,
+    });
+
     const [isEditingPersonal, setIsEditingPersonal] = useState(false);
     const [personalLessonTitle, setPersonalLessonTitle] = useState<string>("");
     const [newPersonalTopicTitle, setNewPersonalTopicTitle] = useState<string>("");
@@ -1183,6 +1188,8 @@ const StudentQuizlet = () => {
                                     elapsedSeconds={liveElapsedSeconds}
                                     currentPosition={session.correct_answers}
                                     totalWords={session.total_words}
+                                    currentPage={matchingPageInfo.currentPage}
+                                    totalPages={matchingPageInfo.totalPages}
                                     onFinishTraining={endNow}
                                 />
                             </div>
@@ -1197,6 +1204,8 @@ const StudentQuizlet = () => {
                                     elapsedSeconds={liveElapsedSeconds}
                                     currentPosition={session.correct_answers}
                                     totalWords={session.total_words}
+                                    currentPage={matchingPageInfo.currentPage}
+                                    totalPages={matchingPageInfo.totalPages}
                                     onFinishTraining={endNow}
                                 />
                             </div>
@@ -1204,6 +1213,9 @@ const StudentQuizlet = () => {
                                 words={sessionWords}
                                 showHints={session.show_hints}
                                 onAttempt={submitPairAttempt}
+                                onPageChange={(page, total) =>
+                                    setMatchingPageInfo({ currentPage: page, totalPages: total })
+                                }
                             />
                         </div>
                     )}

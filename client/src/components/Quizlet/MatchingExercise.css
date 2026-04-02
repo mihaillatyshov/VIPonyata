@@ -20,8 +20,36 @@
 
 .matching-session-header .flashcard-card-header {
     position: static;
-    min-height: 52px;
+    min-height: 94px;
     padding: 0;
+}
+
+.matching-session-header .flashcard-position {
+    top: 42px;
+    font-size: 2rem;
+    letter-spacing: 0.015em;
+}
+
+.matching-session-header .flashcard-position {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid #d9e1ea;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 6px 18px rgba(20, 34, 56, 0.08);
+}
+
+.matching-session-header .flashcard-position > span {
+    display: inline;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
 }
 
 .matching-columns {
@@ -182,6 +210,15 @@
 
     .matching-exercise {
         --matching-card-min-height: 68px;
+    }
+
+    .matching-session-header .flashcard-card-header {
+        min-height: 84px;
+    }
+
+    .matching-session-header .flashcard-position {
+        top: 36px;
+        font-size: 1.75rem;
     }
 
     .matching-columns {
