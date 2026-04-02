@@ -186,6 +186,11 @@
     color: #55657a;
 }
 
+.flashcard-reading-revealed {
+    margin-top: 6px;
+    font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+}
+
 .flashcard-translation {
     margin-top: 18px;
     min-height: 24px;

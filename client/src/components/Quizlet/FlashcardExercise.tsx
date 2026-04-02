@@ -83,7 +83,16 @@ const FlashcardExercise = ({
             )}
 
             <div className={`flashcard-translation ${showTranslation ? "is-visible" : ""}`}>
-                {showTranslation ? revealedText : ""}
+                {showTranslation ? (
+                    <>
+                        <div>{revealedText}</div>
+                        {direction === "ru_to_jp" && shouldShowKanaHint && (
+                            <div className="flashcard-reading flashcard-reading-revealed">{kanaHint}</div>
+                        )}
+                    </>
+                ) : (
+                    ""
+                )}
             </div>
         </div>
     );
