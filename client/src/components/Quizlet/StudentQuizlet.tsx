@@ -559,7 +559,10 @@ const StudentQuizlet = () => {
             return;
         }
 
-        const shouldFinishAfterAnswer = recognized && queue.length === 1 && queue[0] === wordId;
+        // Finish session when answering the last word in queue
+        // - if correct answer (recognized=true)
+        // - OR if incorrect answer (recognized=false) on the last word ("Не помню")
+        const shouldFinishAfterAnswer = queue.length === 1 && queue[0] === wordId;
 
         await AjaxPost({
             url: `/api/quizlet/sessions/${session.id}/flashcard-answer`,

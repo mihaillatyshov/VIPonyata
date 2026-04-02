@@ -592,11 +592,24 @@ def _mark_incorrect_word(session, session_id: int, session_word_id: int):
 
 
 def _insert_word_later_in_queue(queue: list[int], word_id: int):
+    """
+    Insert word back into the queue at a random position.
+    - Minimum distance of 4 cards ahead (if possible)
+    - If queue has < 4 cards, append at end
+    """
     if len(queue) == 0:
         queue.append(word_id)
         return
 
-    insert_pos = random.randint(1, len(queue))
+    # If queue has fewer than 4 cards, just append at the end
+    if len(queue) < 4:
+        queue.append(word_id)
+        return
+
+    # Insert at a random position starting at index 4
+    min_insert_pos = 4
+    max_insert_pos = len(queue)
+    insert_pos = random.randint(min_insert_pos, max_insert_pos)
     queue.insert(insert_pos, word_id)
 
 
@@ -664,7 +677,10 @@ def mark_quizlet_flashcard_answer(user_id: int, session_id: int, data: QuizletFl
             word.incorrect_attempts = word.incorrect_attempts + 1
             quiz_session.incorrect_answers = quiz_session.incorrect_answers + 1
             _mark_incorrect_word(session, session_id, word.id)
-            _insert_word_later_in_queue(queue, word.id)
+            # Only requeue if there are other words in the queue
+            # (if queue is empty, it's the last word and will be counted as error)
+            if queue:
+                _insert_word_later_in_queue(queue, word.id)
 
         quiz_session.queue_state = _dump_queue(queue)
         quiz_session.updated_at = datetime.now()

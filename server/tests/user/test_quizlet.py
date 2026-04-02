@@ -22,7 +22,7 @@ def test_flashcard_incorrect_answer_requeues_word_at_random_later_position(creat
         quiz_session = QuizletSession(quiz_type=QuizletSession.Type.FLASHCARDS,
                                       show_hints=False,
                                       translation_direction="jp_to_ru",
-                                      total_words=4,
+                                      total_words=8,
                                       user_id=user.id,
                                       queue_state="[]")
         session.add(quiz_session)
@@ -34,8 +34,7 @@ def test_flashcard_incorrect_answer_requeues_word_at_random_later_position(creat
                                char_jp=f"漢字{index + 1}",
                                word_jp=f"かな{index + 1}",
                                ru=f"перевод {index + 1}",
-                               session_id=quiz_session.id)
-            for index in range(4)
+                               session_id=quiz_session.id) for index in range(8)
         ]
         session.add_all(words)
         session.flush()
@@ -43,7 +42,11 @@ def test_flashcard_incorrect_answer_requeues_word_at_random_later_position(creat
         word_ids = [word.id for word in words]
         quiz_session.queue_state = json.dumps(word_ids)
 
-    monkeypatch.setattr(StudentDBqueries.random, "randint", lambda start, end: 2)
+    # Mock randint to return 5, so the word is inserted at position 5
+    # Initial queue: [w0, w1, w2, w3, w4, w5, w6, w7]
+    # After removing w0: [w1, w2, w3, w4, w5, w6, w7]
+    # Insert position 5 (after minimum 4-card distance): [w1, w2, w3, w4, w0, w5, w6, w7]
+    monkeypatch.setattr(StudentDBqueries.random, "randint", lambda start, end: 5)
 
     StudentDBqueries.mark_quizlet_flashcard_answer(
         user.id,
@@ -57,7 +60,107 @@ def test_flashcard_incorrect_answer_requeues_word_at_random_later_position(creat
 
         assert updated_session is not None
         assert updated_word is not None
-        assert json.loads(updated_session.queue_state) == [word_ids[1], word_ids[2], word_ids[0], word_ids[3]]
+        assert json.loads(updated_session.queue_state) == [
+            word_ids[1], word_ids[2], word_ids[3], word_ids[4], word_ids[0], word_ids[5], word_ids[6], word_ids[7]
+        ]
         assert updated_session.incorrect_answers == 1
         assert updated_word.incorrect_attempts == 1
         assert updated_word.is_correct is False
+
+
+def test_flashcard_incorrect_answer_small_queue_appends_at_end(create_db):
+    """Test that with queue < 4 cards, incorrect word is appended at end."""
+    DBsession.init(create_db)
+
+    with DBsession.begin() as session:
+        user = User(name="Quizlet Student",
+                    nickname="quizlet_student",
+                    password="password123",
+                    birthday=datetime.date(2000, 1, 1),
+                    level=User.Level.STUDENT)
+        session.add(user)
+        session.flush()
+
+        quiz_session = QuizletSession(quiz_type=QuizletSession.Type.FLASHCARDS,
+                                      show_hints=False,
+                                      translation_direction="jp_to_ru",
+                                      total_words=3,
+                                      user_id=user.id,
+                                      queue_state="[]")
+        session.add(quiz_session)
+        session.flush()
+
+        words = [
+            QuizletSessionWord(source_type="combined",
+                               source_word_id=index + 1,
+                               char_jp=f"漢字{index + 1}",
+                               word_jp=f"かな{index + 1}",
+                               ru=f"перевод {index + 1}",
+                               session_id=quiz_session.id) for index in range(3)
+        ]
+        session.add_all(words)
+        session.flush()
+
+        word_ids = [word.id for word in words]
+        quiz_session.queue_state = json.dumps(word_ids)
+
+    StudentDBqueries.mark_quizlet_flashcard_answer(
+        user.id,
+        quiz_session.id,
+        QuizletFlashcardAnswerReq(session_word_id=word_ids[0], recognized=False),
+    )
+
+    with DBsession.begin() as session:
+        updated_session = session.get(QuizletSession, quiz_session.id)
+        # With 3 cards, after removing first one, we have 2 cards (< 4)
+        # So the word should be appended at the end
+        assert json.loads(updated_session.queue_state) == [word_ids[1], word_ids[2], word_ids[0]]
+
+
+def test_flashcard_incorrect_answer_boundary_4_cards_appends_at_end(create_db):
+    """Test that with queue = 4 cards, incorrect word is appended at end."""
+    DBsession.init(create_db)
+
+    with DBsession.begin() as session:
+        user = User(name="Quizlet Student",
+                    nickname="quizlet_student",
+                    password="password123",
+                    birthday=datetime.date(2000, 1, 1),
+                    level=User.Level.STUDENT)
+        session.add(user)
+        session.flush()
+
+        quiz_session = QuizletSession(quiz_type=QuizletSession.Type.FLASHCARDS,
+                                      show_hints=False,
+                                      translation_direction="jp_to_ru",
+                                      total_words=4,
+                                      user_id=user.id,
+                                      queue_state="[]")
+        session.add(quiz_session)
+        session.flush()
+
+        words = [
+            QuizletSessionWord(source_type="combined",
+                               source_word_id=index + 1,
+                               char_jp=f"漢字{index + 1}",
+                               word_jp=f"かな{index + 1}",
+                               ru=f"перевод {index + 1}",
+                               session_id=quiz_session.id) for index in range(4)
+        ]
+        session.add_all(words)
+        session.flush()
+
+        word_ids = [word.id for word in words]
+        quiz_session.queue_state = json.dumps(word_ids)
+
+    StudentDBqueries.mark_quizlet_flashcard_answer(
+        user.id,
+        quiz_session.id,
+        QuizletFlashcardAnswerReq(session_word_id=word_ids[0], recognized=False),
+    )
+
+    with DBsession.begin() as session:
+        updated_session = session.get(QuizletSession, quiz_session.id)
+        # With 4 cards, after removing first one, we have 3 cards (< 4)
+        # So the word should be appended at the end
+        assert json.loads(updated_session.queue_state) == [word_ids[1], word_ids[2], word_ids[3], word_ids[0]]
