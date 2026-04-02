@@ -19,7 +19,7 @@ import FlashcardExercise from "./FlashcardExercise";
 import MatchingExercise from "./MatchingExercise";
 import QuizletQuizStart from "./QuizletQuizStart";
 import QuizletSessionResults from "./QuizletSessionResults";
-import { parseQueue } from "./quizletUtils";
+import { parseQueue, shuffleArray } from "./quizletUtils";
 import TrainingSessionHeader from "./TrainingSessionHeader";
 import ViewModeBreadcrumb from "./ViewModeBreadcrumb";
 
@@ -411,6 +411,7 @@ const StudentQuizlet = () => {
 
     const [session, setSession] = useState<(TQuizletSession & { queue_state?: string }) | null>(null);
     const [sessionWords, setSessionWords] = useState<TQuizletSessionWord[]>([]);
+    const [shuffledSessionWords, setShuffledSessionWords] = useState<TQuizletSessionWord[]>([]);
     const autoFinishSessionIdRef = useRef<number | null>(null);
     const timerSessionIdRef = useRef<number | null>(null);
     const [liveElapsedSeconds, setLiveElapsedSeconds] = useState<number>(0);
@@ -483,11 +484,44 @@ const StudentQuizlet = () => {
     };
 
     const queue = useMemo(() => {
-        if (session === null) {
+        if (session === null || shuffledSessionWords.length === 0) {
             return [] as number[];
         }
+
+        // Check if this is a fresh session (all words are unresolved)
+        const allWordsUnresolved = shuffledSessionWords.every((word) => !word.is_correct);
+
+        // For fresh sessions, rebuild queue from shuffled words
+        // For resumed sessions, parse from server state
+        if (allWordsUnresolved && sessionWords.length > 0) {
+            // All words are unresolved in the shuffled list - this is a fresh session
+            // Create queue from shuffled words in order
+            return shuffledSessionWords.map((word) => word.id);
+        }
+
+        // Otherwise parse the server's queue_state
         return parseQueue(session as any);
-    }, [session]);
+    }, [session, shuffledSessionWords, sessionWords]);
+
+    // Shuffle words on fresh session start (all words unresolved)
+    useEffect(() => {
+        if (sessionWords.length === 0) {
+            setShuffledSessionWords([]);
+            return;
+        }
+
+        // Check if this is a fresh session (all words are unresolved)
+        const allWordsUnresolved = sessionWords.every((word) => !word.is_correct);
+
+        if (allWordsUnresolved) {
+            // Shuffle words for this new session
+            const shuffled = shuffleArray(sessionWords);
+            setShuffledSessionWords(shuffled);
+        } else {
+            // Keep original order for partial/resumed sessions
+            setShuffledSessionWords(sessionWords);
+        }
+    }, [sessionWords]);
 
     const startSession = (payload: any) => {
         setLastStartPayload(payload);
@@ -1210,7 +1244,7 @@ const StudentQuizlet = () => {
                                 />
                             </div>
                             <MatchingExercise
-                                words={sessionWords}
+                                words={shuffledSessionWords}
                                 showHints={session.show_hints}
                                 onAttempt={submitPairAttempt}
                                 onPageChange={(page, total) =>
@@ -1222,7 +1256,7 @@ const StudentQuizlet = () => {
 
                     {!session.is_finished && session.quiz_type === "flashcards" && (
                         <FlashcardExercise
-                            words={sessionWords}
+                            words={shuffledSessionWords}
                             queue={queue}
                             showHints={session.show_hints}
                             direction={session.translation_direction}
