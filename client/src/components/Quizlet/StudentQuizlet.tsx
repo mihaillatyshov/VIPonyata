@@ -964,36 +964,35 @@ const StudentQuizlet = () => {
 
             {session === null && mode === null && (
                 <div
-                    className="quizlet-main-container mx-auto"
+                    className="mx-auto"
                     style={{
                         maxWidth: "760px",
                     }}
                 >
-                    <h4 className="text-center mb-4">Выберите режим</h4>
                     <div className="d-flex justify-content-center align-items-center flex-wrap gap-4">
                         <button
-                            className="btn quizlet-mode-button quizlet-mode-button-training rounded-circle d-flex flex-column justify-content-center align-items-center"
-                            style={{ width: "180px", height: "180px" }}
-                            onClick={() => setMode("training")}
-                        >
-                            <i className="bi bi-lightning-charge fs-2 mb-2" />
-                            <span className="fw-semibold">Потренируемся?</span>
-                        </button>
-                        <button
-                            className="btn quizlet-mode-button quizlet-mode-button-view rounded-circle d-flex flex-column justify-content-center align-items-center"
-                            style={{ width: "180px", height: "180px" }}
+                            className="btn quizlet-mode-button quizlet-mode-button-view quizlet-mode-button-rect d-flex flex-column justify-content-center align-items-center"
+                            style={{ width: "220px", height: "140px" }}
                             onClick={() => setMode("view")}
                         >
-                            <i className="bi bi-book fs-2 mb-2" />
-                            <span className="fw-semibold">Все словари</span>
+                            <i className="bi bi-journal-text quizlet-mode-icon" />
+                            <span className="quizlet-mode-label">Все словари</span>
                         </button>
                         <button
-                            className="btn quizlet-mode-button quizlet-mode-button-progress rounded-circle d-flex flex-column justify-content-center align-items-center"
-                            style={{ width: "180px", height: "180px" }}
+                            className="btn quizlet-mode-button quizlet-mode-button-training quizlet-mode-button-rect d-flex flex-column justify-content-center align-items-center"
+                            style={{ width: "220px", height: "140px" }}
+                            onClick={() => setMode("training")}
+                        >
+                            <i className="bi bi-lightning quizlet-mode-icon" />
+                            <span className="quizlet-mode-label">Потренируемся?</span>
+                        </button>
+                        <button
+                            className="btn quizlet-mode-button quizlet-mode-button-progress quizlet-mode-button-rect d-flex flex-column justify-content-center align-items-center"
+                            style={{ width: "220px", height: "140px" }}
                             onClick={() => setMode("progress")}
                         >
-                            <i className="bi bi-graph-up-arrow fs-2 mb-2" />
-                            <span className="fw-semibold">Мои успехи</span>
+                            <i className="bi bi-bar-chart-line quizlet-mode-icon" />
+                            <span className="quizlet-mode-label">Мои успехи</span>
                         </button>
                     </div>
                 </div>
