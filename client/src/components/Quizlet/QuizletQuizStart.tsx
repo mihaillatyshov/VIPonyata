@@ -19,7 +19,7 @@ interface Props {
 }
 
 const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups, onStart }: Props) => {
-    const [quizType, setQuizType] = useState<"pair" | "flashcards">("pair");
+    const [quizType, setQuizType] = useState<"pair" | "flashcards" | null>(null);
     const [showHints, setShowHints] = useState<boolean>(false);
     const [direction, setDirection] = useState<"jp_to_ru" | "ru_to_jp">("jp_to_ru");
     const [selectedTeacherSubgroups, setSelectedTeacherSubgroups] = useState<number[]>([]);
@@ -65,6 +65,10 @@ const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups
     };
 
     const start = () => {
+        if (quizType === null) {
+            return;
+        }
+
         onStart({
             quiz_type: quizType,
             subgroup_ids: selectedTeacherSubgroups,
@@ -230,7 +234,7 @@ const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups
             <button
                 className="btn btn-primary"
                 onClick={start}
-                disabled={selectedTeacherSubgroups.length + selectedPersonalSubgroups.length === 0}
+                disabled={quizType === null || selectedTeacherSubgroups.length + selectedPersonalSubgroups.length === 0}
             >
                 Начать тренировку
             </button>

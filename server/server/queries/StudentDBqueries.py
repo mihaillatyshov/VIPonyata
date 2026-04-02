@@ -591,6 +591,15 @@ def _mark_incorrect_word(session, session_id: int, session_word_id: int):
         session.add(QuizletSessionIncorrectWord(session_id=session_id, session_word_id=session_word_id))
 
 
+def _insert_word_later_in_queue(queue: list[int], word_id: int):
+    if len(queue) == 0:
+        queue.append(word_id)
+        return
+
+    insert_pos = random.randint(1, len(queue))
+    queue.insert(insert_pos, word_id)
+
+
 def mark_quizlet_pair_attempt(user_id: int, session_id: int, left_word_id: int, right_word_id: int) -> bool:
     with DBsession.begin() as session:
         quiz_session = session.scalars(
@@ -655,10 +664,7 @@ def mark_quizlet_flashcard_answer(user_id: int, session_id: int, data: QuizletFl
             word.incorrect_attempts = word.incorrect_attempts + 1
             quiz_session.incorrect_answers = quiz_session.incorrect_answers + 1
             _mark_incorrect_word(session, session_id, word.id)
-
-            random_position = random.randint(5, 15)
-            insert_pos = min(len(queue), max(0, random_position - 1))
-            queue.insert(insert_pos, word.id)
+            _insert_word_later_in_queue(queue, word.id)
 
         quiz_session.queue_state = _dump_queue(queue)
         quiz_session.updated_at = datetime.now()
