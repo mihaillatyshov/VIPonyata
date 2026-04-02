@@ -66,12 +66,10 @@ const isJpEmpty = (row: EditorRow) => row.char_jp.trim() === "" && row.word_jp.t
 interface PersonalTopicEditorProps {
     subgroup: TQuizletSubgroup;
     initialWords: TQuizletWord[];
-    onRename: () => void;
-    onDelete: () => void;
     onSaved: () => void;
 }
 
-const PersonalTopicEditor = ({ subgroup, initialWords, onRename, onDelete, onSaved }: PersonalTopicEditorProps) => {
+const PersonalTopicEditor = ({ subgroup, initialWords, onSaved }: PersonalTopicEditorProps) => {
     const [rows, setRows] = useState<EditorRow[]>(() =>
         initialWords.length > 0 ? wordsToRows(initialWords) : [makeEmptyRow()],
     );
@@ -322,19 +320,7 @@ const PersonalTopicEditor = ({ subgroup, initialWords, onRename, onDelete, onSav
     };
 
     return (
-        <div className="border rounded p-2 mb-2">
-            <div className="d-flex justify-content-between align-items-center mb-2">
-                <strong>{subgroup.title}</strong>
-                <div className="d-flex gap-2">
-                    <button className="btn btn-sm btn-outline-secondary" onClick={onRename}>
-                        Переименовать
-                    </button>
-                    <button className="btn btn-sm btn-outline-danger" onClick={onDelete}>
-                        Удалить
-                    </button>
-                </div>
-            </div>
-
+        <div>
             <div className="table-responsive">
                 <table ref={tableRef} className="table table-sm table-bordered align-middle mb-1" onPaste={handlePaste}>
                     <thead>
@@ -400,7 +386,7 @@ const PersonalTopicEditor = ({ subgroup, initialWords, onRename, onDelete, onSav
                         </span>
                     )}
                     <button className="btn btn-sm btn-primary" onClick={handleSave} disabled={isSaving || !isDirty}>
-                        {isSaving ? "Сохранение..." : "Сохранить тему"}
+                        {isSaving ? "Сохранение..." : "Сохранить"}
                     </button>
                 </div>
             </div>
@@ -427,6 +413,12 @@ const StudentQuizlet = () => {
     const [isEditingPersonal, setIsEditingPersonal] = useState(false);
     const [personalLessonTitle, setPersonalLessonTitle] = useState<string>("");
     const [newPersonalTopicTitle, setNewPersonalTopicTitle] = useState<string>("");
+    const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
+    const [selectedTopicId, setSelectedTopicId] = useState<number | null>(null);
+    const [isEditingLessonTitle, setIsEditingLessonTitle] = useState(false);
+    const [selectedPersonalTopicId, setSelectedPersonalTopicId] = useState<number | null>(null);
+    const [isEditingPersonalTopicTitle, setIsEditingPersonalTopicTitle] = useState(false);
+    const [personalTopicTitleDraft, setPersonalTopicTitleDraft] = useState<string>("");
 
     const [lastStartPayload, setLastStartPayload] = useState<any>(null);
 
@@ -457,6 +449,16 @@ const StudentQuizlet = () => {
     useEffect(() => {
         loadData();
     }, []);
+
+    useEffect(() => {
+        setSelectedLessonId(null);
+        setSelectedTopicId(null);
+        setIsEditingPersonal(false);
+        setSelectedPersonalTopicId(null);
+        setIsEditingLessonTitle(false);
+        setIsEditingPersonalTopicTitle(false);
+        setPersonalTopicTitleDraft("");
+    }, [mode]);
 
     const loadSession = (sessionId: number) => {
         AjaxGet<SessionResponse>({ url: `/api/quizlet/sessions/${sessionId}` })
@@ -557,6 +559,7 @@ const StudentQuizlet = () => {
         const method = personalLesson === null ? AjaxPost : AjaxPatch;
 
         method({ url: endpoint, body: { title: personalLessonTitle } }).then(() => {
+            setIsEditingLessonTitle(false);
             fetchPersonal();
         });
     };
@@ -566,16 +569,22 @@ const StudentQuizlet = () => {
             return;
         }
 
-        AjaxPost({ url: "/api/quizlet/personal/subgroups", body: { title: newPersonalTopicTitle } }).then(() => {
+        AjaxPost<{ subgroup: TQuizletSubgroup }>({
+            url: "/api/quizlet/personal/subgroups",
+            body: { title: newPersonalTopicTitle },
+        }).then((resp) => {
+            const newId = resp.subgroup?.id;
             setNewPersonalTopicTitle("");
-            fetchPersonal();
+            fetchPersonal().then(() => {
+                if (newId !== undefined) setSelectedPersonalTopicId(newId);
+            });
         });
     };
 
-    const renamePersonalTopic = async (subgroup: TQuizletSubgroup) => {
-        const title = window.prompt("Новое название темы", subgroup.title);
+    const renamePersonalTopic = async (subgroup: TQuizletSubgroup, title: string) => {
         if (!title || title.trim().length === 0) return;
-        await AjaxPatch({ url: `/api/quizlet/personal/subgroups/${subgroup.id}`, body: { title } });
+        await AjaxPatch({ url: `/api/quizlet/personal/subgroups/${subgroup.id}`, body: { title: title.trim() } });
+        setIsEditingPersonalTopicTitle(false);
         fetchPersonal();
     };
 
@@ -594,6 +603,20 @@ const StudentQuizlet = () => {
             setPersonalLessonTitle(personalLesson.title);
         }
     }, [personalLesson]);
+
+    useEffect(() => {
+        const subgroup =
+            selectedPersonalTopicId !== null
+                ? personalSubgroups.find((item) => item.id === selectedPersonalTopicId) ?? null
+                : null;
+        if (subgroup !== null) {
+            setIsEditingLessonTitle(false);
+            setPersonalTopicTitleDraft(subgroup.title);
+        } else {
+            setPersonalTopicTitleDraft("");
+            setIsEditingPersonalTopicTitle(false);
+        }
+    }, [selectedPersonalTopicId, personalSubgroups]);
 
     useEffect(() => {
         if (session === null || session.is_finished) {
@@ -635,6 +658,21 @@ const StudentQuizlet = () => {
     const getPersonalSubgroupWords = (subgroupId: number): TQuizletWord[] => {
         return personalWords.filter((word) => word.subgroup_id === subgroupId);
     };
+
+    const selectedLesson =
+        selectedLessonId !== null ? groups.find((group) => group.id === selectedLessonId) ?? null : null;
+    const selectedLessonTopics = selectedLesson
+        ? subgroups.filter((subgroup) => subgroup.group_id === selectedLesson.id)
+        : [];
+    const selectedTopic =
+        selectedTopicId !== null
+            ? selectedLessonTopics.find((subgroup) => subgroup.id === selectedTopicId) ?? null
+            : null;
+    const selectedTopicWords = selectedTopic ? getSubgroupWords(selectedTopic.id) : [];
+    const selectedPersonalSubgroup =
+        selectedPersonalTopicId !== null
+            ? personalSubgroups.find((subgroup) => subgroup.id === selectedPersonalTopicId) ?? null
+            : null;
 
     return (
         <div className="container">
@@ -689,8 +727,189 @@ const StudentQuizlet = () => {
                 </>
             )}
 
-            {session === null && mode === "view" && (
-                <>
+            {session === null && mode === "view" && isEditingPersonal && (
+                <div style={{ maxWidth: "760px", margin: "0 auto" }}>
+                    <div className="mb-3">
+                        <button
+                            className="btn btn-outline-secondary"
+                            onClick={() => {
+                                if (selectedPersonalTopicId !== null) {
+                                    setSelectedPersonalTopicId(null);
+                                } else {
+                                    setIsEditingPersonal(false);
+                                    setIsEditingLessonTitle(false);
+                                }
+                            }}
+                        >
+                            <i className="bi bi-arrow-left me-1" />
+                            {selectedPersonalTopicId !== null ? "Назад к темам" : "Назад к словарям"}
+                        </button>
+                    </div>
+
+                    <div className="card p-3 p-md-4">
+                        <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                            <div className="d-flex align-items-center gap-2 flex-wrap">
+                                {selectedPersonalTopicId === null &&
+                                (isEditingLessonTitle || personalLesson === null) ? (
+                                    <div className="d-flex gap-2 flex-grow-1">
+                                        <input
+                                            className="form-control"
+                                            value={personalLessonTitle}
+                                            onChange={(e) => setPersonalLessonTitle(e.target.value)}
+                                            placeholder="Например: Мой словарь"
+                                            autoFocus
+                                            onBlur={personalLesson !== null ? ensurePersonalLesson : undefined}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter") ensurePersonalLesson();
+                                                if (e.key === "Escape" && personalLesson !== null) {
+                                                    setIsEditingLessonTitle(false);
+                                                    setPersonalLessonTitle(personalLesson.title);
+                                                }
+                                            }}
+                                        />
+                                        {personalLesson === null && (
+                                            <button className="btn btn-outline-primary" onClick={ensurePersonalLesson}>
+                                                Создать
+                                            </button>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <>
+                                        <h4 className="mb-0">
+                                            {personalLesson !== null ? personalLesson.title : personalLessonTitle}
+                                        </h4>
+                                        {selectedPersonalTopicId === null && personalLesson !== null && (
+                                            <button
+                                                className="btn btn-sm btn-link p-0 text-muted"
+                                                title="Переименовать"
+                                                onClick={() => {
+                                                    setIsEditingLessonTitle(true);
+                                                    setPersonalLessonTitle(personalLesson.title);
+                                                }}
+                                            >
+                                                <i className="bi bi-pencil" />
+                                            </button>
+                                        )}
+                                    </>
+                                )}
+
+                                {personalLesson !== null && selectedPersonalSubgroup !== null && (
+                                    <>
+                                        <span className="text-muted">&gt;</span>
+                                        {isEditingPersonalTopicTitle ? (
+                                            <input
+                                                className="form-control form-control-sm"
+                                                style={{ width: "auto", minWidth: "220px" }}
+                                                value={personalTopicTitleDraft}
+                                                onChange={(e) => setPersonalTopicTitleDraft(e.target.value)}
+                                                autoFocus
+                                                onBlur={() =>
+                                                    renamePersonalTopic(
+                                                        selectedPersonalSubgroup,
+                                                        personalTopicTitleDraft,
+                                                    )
+                                                }
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "Enter") {
+                                                        renamePersonalTopic(
+                                                            selectedPersonalSubgroup,
+                                                            personalTopicTitleDraft,
+                                                        );
+                                                    }
+                                                    if (e.key === "Escape") {
+                                                        setIsEditingPersonalTopicTitle(false);
+                                                        setPersonalTopicTitleDraft(selectedPersonalSubgroup.title);
+                                                    }
+                                                }}
+                                            />
+                                        ) : (
+                                            <>
+                                                <h5 className="mb-0">{selectedPersonalSubgroup.title}</h5>
+                                                <button
+                                                    className="btn btn-sm btn-link p-0 text-muted"
+                                                    title="Переименовать тему"
+                                                    onClick={() => {
+                                                        setIsEditingPersonalTopicTitle(true);
+                                                        setPersonalTopicTitleDraft(selectedPersonalSubgroup.title);
+                                                    }}
+                                                >
+                                                    <i className="bi bi-pencil" />
+                                                </button>
+                                            </>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+
+                            {selectedPersonalSubgroup !== null && (
+                                <div className="d-flex gap-2 align-items-center">
+                                    <button
+                                        className="btn btn-sm btn-link p-0 text-danger"
+                                        onClick={async () => {
+                                            await deletePersonalTopic(selectedPersonalSubgroup);
+                                            setSelectedPersonalTopicId(null);
+                                        }}
+                                    >
+                                        Удалить
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Topic list page */}
+                        {personalLesson !== null && selectedPersonalTopicId === null && (
+                            <>
+                                <div className="mb-3 d-flex gap-2">
+                                    <input
+                                        className="form-control"
+                                        value={newPersonalTopicTitle}
+                                        onChange={(e) => setNewPersonalTopicTitle(e.target.value)}
+                                        placeholder="Новая тема..."
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter") addPersonalSubgroup();
+                                        }}
+                                    />
+                                    <button className="btn btn-outline-primary" onClick={addPersonalSubgroup}>
+                                        + Добавить
+                                    </button>
+                                </div>
+
+                                {personalSubgroups.length === 0 && (
+                                    <div className="text-muted">Тем пока нет. Добавьте первую тему.</div>
+                                )}
+
+                                {personalSubgroups.length > 0 && (
+                                    <div className="list-group">
+                                        {personalSubgroups.map((subgroup) => (
+                                            <button
+                                                key={subgroup.id}
+                                                className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                                                style={{ padding: "14px 18px", marginBottom: "4px" }}
+                                                onClick={() => setSelectedPersonalTopicId(subgroup.id)}
+                                            >
+                                                <span>{subgroup.title}</span>
+                                                <i className="bi bi-chevron-right text-muted" />
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </>
+                        )}
+
+                        {personalLesson !== null && selectedPersonalSubgroup !== null && (
+                            <PersonalTopicEditor
+                                key={selectedPersonalSubgroup.id}
+                                subgroup={selectedPersonalSubgroup}
+                                initialWords={getPersonalSubgroupWords(selectedPersonalSubgroup.id)}
+                                onSaved={fetchPersonal}
+                            />
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {session === null && mode === "view" && !isEditingPersonal && (
+                <div style={{ maxWidth: "760px", margin: "0 auto" }}>
                     <div className="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <button className="btn btn-outline-secondary" onClick={() => setMode(null)}>
                             Назад к выбору режима
@@ -699,128 +918,130 @@ const StudentQuizlet = () => {
                         <button
                             className="btn btn-primary"
                             onClick={() => {
-                                setIsEditingPersonal((prev) => !prev);
+                                setIsEditingPersonal(true);
                                 if (personalLesson === null && personalLessonTitle.trim().length === 0) {
                                     setPersonalLessonTitle("Мой словарь");
                                 }
                             }}
                         >
-                            {personalLesson === null ? "Create personal dictionary" : "Edit personal dictionary"}
+                            {personalLesson === null ? "Create personal dictionary" : "Мой словарь"}
                         </button>
                     </div>
 
-                    {isEditingPersonal && (
-                        <div className="card p-3 p-md-4 mb-3">
-                            <h4 className="mb-3">Личный словарь</h4>
+                    <div className="card p-3 p-md-4">
+                        <h4 className="mb-3">
+                            {selectedLesson !== null && selectedTopic !== null
+                                ? `${selectedLesson.title} — ${selectedTopic.title}`
+                                : "Словари преподавателя"}
+                        </h4>
 
-                            <div className="mb-3">
-                                <label className="form-label">Название словаря</label>
-                                <div className="d-flex gap-2">
-                                    <input
-                                        className="form-control"
-                                        value={personalLessonTitle}
-                                        onChange={(e) => setPersonalLessonTitle(e.target.value)}
-                                        placeholder="Например: Мой словарь"
-                                    />
-                                    <button className="btn btn-outline-primary" onClick={ensurePersonalLesson}>
-                                        {personalLesson === null ? "Создать" : "Сохранить"}
-                                    </button>
-                                </div>
-                            </div>
+                        <div className="d-flex flex-wrap gap-2 mb-3">
+                            {selectedLesson !== null && (
+                                <button
+                                    className="btn btn-sm btn-outline-secondary"
+                                    onClick={() => {
+                                        setSelectedLessonId(null);
+                                        setSelectedTopicId(null);
+                                    }}
+                                >
+                                    <i className="bi bi-arrow-left me-1" />К списку уроков
+                                </button>
+                            )}
 
-                            {personalLesson !== null && (
-                                <>
-                                    <div className="mb-3">
-                                        <label className="form-label">Новая тема</label>
-                                        <div className="d-flex gap-2">
-                                            <input
-                                                className="form-control"
-                                                value={newPersonalTopicTitle}
-                                                onChange={(e) => setNewPersonalTopicTitle(e.target.value)}
-                                                placeholder="Название темы"
-                                            />
-                                            <button className="btn btn-outline-primary" onClick={addPersonalSubgroup}>
-                                                Добавить тему
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    {personalSubgroups.length === 0 && (
-                                        <div className="text-muted">Тем пока нет. Добавьте первую тему.</div>
-                                    )}
-
-                                    {personalSubgroups.map((subgroup) => (
-                                        <PersonalTopicEditor
-                                            key={subgroup.id}
-                                            subgroup={subgroup}
-                                            initialWords={getPersonalSubgroupWords(subgroup.id)}
-                                            onRename={() => renamePersonalTopic(subgroup)}
-                                            onDelete={() => deletePersonalTopic(subgroup)}
-                                            onSaved={fetchPersonal}
-                                        />
-                                    ))}
-                                </>
+                            {selectedLesson !== null && selectedTopic !== null && (
+                                <button
+                                    className="btn btn-sm btn-outline-secondary"
+                                    onClick={() => setSelectedTopicId(null)}
+                                >
+                                    <i className="bi bi-arrow-left me-1" />К темам урока
+                                </button>
                             )}
                         </div>
-                    )}
-
-                    <div className="card p-3 p-md-4">
-                        <h4 className="mb-3">Словари преподавателя</h4>
 
                         {groups.length === 0 && <div className="text-muted">Пока нет доступных уроков.</div>}
 
-                        {groups.map((group) => {
-                            const nestedSubgroups = subgroups.filter((subgroup) => subgroup.group_id === group.id);
-
-                            return (
-                                <div key={group.id} className="border rounded p-3 mb-3">
-                                    <h5 className="mb-3">{group.title}</h5>
-
-                                    {nestedSubgroups.length === 0 && (
-                                        <div className="text-muted small">В этом уроке пока нет тем.</div>
-                                    )}
-
-                                    {nestedSubgroups.map((subgroup) => {
-                                        const subgroupWordsList = getSubgroupWords(subgroup.id);
-
-                                        return (
-                                            <div key={subgroup.id} className="mb-3">
-                                                <h6 className="mb-2">{subgroup.title}</h6>
-                                                <div className="table-responsive">
-                                                    <table className="table table-sm table-bordered align-middle mb-0">
-                                                        <thead>
-                                                            <tr className="table-light">
-                                                                <th style={{ width: "28%" }}>char_jp</th>
-                                                                <th style={{ width: "28%" }}>word_jp</th>
-                                                                <th style={{ width: "44%" }}>ru</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {subgroupWordsList.length === 0 && (
-                                                                <tr>
-                                                                    <td colSpan={3} className="text-muted small">
-                                                                        Нет слов в этой теме.
-                                                                    </td>
-                                                                </tr>
-                                                            )}
-                                                            {subgroupWordsList.map((word) => (
-                                                                <tr key={word.id}>
-                                                                    <td>{word.char_jp ?? ""}</td>
-                                                                    <td>{word.word_jp}</td>
-                                                                    <td>{word.ru}</td>
-                                                                </tr>
-                                                            ))}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
+                        {groups.length > 0 && selectedLesson === null && (
+                            <div>
+                                <div className="list-group">
+                                    {groups.map((group) => (
+                                        <button
+                                            key={group.id}
+                                            className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                                            style={{ padding: "14px 18px", marginBottom: "4px" }}
+                                            onClick={() => {
+                                                setSelectedLessonId(group.id);
+                                                setSelectedTopicId(null);
+                                            }}
+                                        >
+                                            <span className="fw-semibold">{group.title}</span>
+                                            <i className="bi bi-chevron-right text-muted" />
+                                        </button>
+                                    ))}
                                 </div>
-                            );
-                        })}
+                            </div>
+                        )}
+
+                        {selectedLesson !== null && selectedTopic === null && (
+                            <>
+                                <h5 className="mb-3">{selectedLesson.title}</h5>
+                                {selectedLessonTopics.length === 0 && (
+                                    <div className="text-muted small">В этом уроке пока нет тем.</div>
+                                )}
+                                {selectedLessonTopics.length > 0 && (
+                                    <div className="list-group">
+                                        {selectedLessonTopics.map((subgroup) => (
+                                            <button
+                                                key={subgroup.id}
+                                                className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                                                style={{ padding: "14px 18px", marginBottom: "4px" }}
+                                                onClick={() => setSelectedTopicId(subgroup.id)}
+                                            >
+                                                <span>{subgroup.title}</span>
+                                                <i className="bi bi-chevron-right text-muted" />
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </>
+                        )}
+
+                        {selectedLesson !== null && selectedTopic !== null && (
+                            <>
+                                <div className="table-responsive" style={{ maxWidth: "800px" }}>
+                                    <table className="table table-bordered table-hover align-middle mb-0">
+                                        <thead>
+                                            <tr className="table-light">
+                                                <th style={{ width: "28%", padding: "12px 18px" }}>char_jp</th>
+                                                <th style={{ width: "28%", padding: "12px 18px" }}>word_jp</th>
+                                                <th style={{ width: "44%", padding: "12px 18px" }}>ru</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {selectedTopicWords.length === 0 && (
+                                                <tr>
+                                                    <td
+                                                        colSpan={3}
+                                                        className="text-muted small"
+                                                        style={{ padding: "12px 18px" }}
+                                                    >
+                                                        Нет слов в этой теме.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                            {selectedTopicWords.map((word) => (
+                                                <tr key={word.id}>
+                                                    <td style={{ padding: "12px 18px" }}>{word.char_jp ?? ""}</td>
+                                                    <td style={{ padding: "12px 18px" }}>{word.word_jp}</td>
+                                                    <td style={{ padding: "12px 18px" }}>{word.ru}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </>
+                        )}
                     </div>
-                </>
+                </div>
             )}
 
             {session !== null && (
