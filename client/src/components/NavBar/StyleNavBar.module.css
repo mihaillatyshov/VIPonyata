@@ -2,6 +2,23 @@
     cursor: pointer;
 }
 
+.quizletButton {
+    font-size: 56px;
+    color: #67ae2d;
+}
+
+@media (max-width: 576px) {
+    .quizletButton {
+        font-size: 36px;
+    }
+}
+
+@media (max-width: 400px) {
+    .quizletButton {
+        font-size: 24px;
+    }
+}
+
 .profileBlock {
     cursor: pointer;
     position: relative;

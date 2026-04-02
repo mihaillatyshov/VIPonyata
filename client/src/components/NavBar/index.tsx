@@ -71,8 +71,11 @@ const NavBar = () => {
                     </Link>
                 </div>
                 <div className="col-6 col-lg-4 mx-auto d-flex align-items-center">
-                    <Link className="d-flex mx-auto a-clear navbar-dictionary-title ap-japanesefont" to="/quizlet">
-                        Quizlet
+                    <Link
+                        className={`d-flex mx-auto a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton}`}
+                        to="/quizlet"
+                    >
+                        ワードラボ
                     </Link>
                 </div>
                 <div className="col-4 align-items-end">
