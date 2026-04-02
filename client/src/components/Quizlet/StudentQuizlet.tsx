@@ -672,6 +672,28 @@ const StudentQuizlet = () => {
             });
     }, [session, unresolvedCount]);
 
+    useEffect(() => {
+        if (
+            session === null ||
+            session.is_finished ||
+            session.quiz_type !== "pair" ||
+            unresolvedCount !== 0 ||
+            autoFinishSessionIdRef.current === session.id
+        ) {
+            return;
+        }
+
+        autoFinishSessionIdRef.current = session.id;
+        AjaxPost<{ session: TQuizletSession }>({
+            url: `/api/quizlet/sessions/${session.id}/end`,
+            body: { force_finish: false },
+        })
+            .then(() => loadSession(session.id))
+            .catch(() => {
+                autoFinishSessionIdRef.current = null;
+            });
+    }, [session, unresolvedCount]);
+
     if (loadStatus === LoadStatus.ERROR) {
         return (
             <ErrorPage
