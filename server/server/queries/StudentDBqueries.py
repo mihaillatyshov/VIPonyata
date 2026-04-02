@@ -695,7 +695,10 @@ def end_quizlet_session(user_id: int, session_id: int, data: QuizletEndSessionRe
             if data.force_finish:
                 for word in remaining_words:
                     word.is_skipped = True
-            quiz_session.skipped_words = len(remaining_words)
+
+            # "Не просмотрено" includes only cards that were never shown to the user.
+            quiz_session.skipped_words = len(
+                [word for word in words if (word.correct_attempts + word.incorrect_attempts) == 0])
 
             quiz_session.is_finished = True
             quiz_session.ended_at = datetime.now()

@@ -542,36 +542,7 @@ const StudentQuizlet = () => {
             return;
         }
 
-        const isLastUnresolvedCard =
-            session.quiz_type === "flashcards" &&
-            !recognized &&
-            unresolvedCount === 1 &&
-            sessionWords.some((word) => word.id === wordId && !word.is_correct);
-
-        if (isLastUnresolvedCard) {
-            await AjaxPost({
-                url: `/api/quizlet/sessions/${session.id}/flashcard-answer`,
-                body: {
-                    session_word_id: wordId,
-                    recognized,
-                },
-            });
-
-            // Keep the final "Не помню" card out of repeat queue and finish immediately.
-            await AjaxPost({
-                url: `/api/quizlet/sessions/${session.id}/save-progress`,
-                body: { queue: [] },
-            }).catch(() => undefined);
-
-            const endResponse = await AjaxPost<{ session: TQuizletSession }>({
-                url: `/api/quizlet/sessions/${session.id}/end`,
-                body: { force_finish: true },
-            });
-
-            setSession({ ...endResponse.session, is_finished: true });
-            loadSession(session.id);
-            return;
-        }
+        const isLastQueueItem = queue.length === 1 && queue[0] === wordId;
 
         await AjaxPost({
             url: `/api/quizlet/sessions/${session.id}/flashcard-answer`,
@@ -580,6 +551,15 @@ const StudentQuizlet = () => {
                 recognized,
             },
         });
+
+        if (isLastQueueItem) {
+            autoFinishSessionIdRef.current = session.id;
+            await AjaxPost({
+                url: `/api/quizlet/sessions/${session.id}/end`,
+                body: { force_finish: false },
+            });
+        }
+
         loadSession(session.id);
     };
 
@@ -1140,6 +1120,7 @@ const StudentQuizlet = () => {
                             correct={session.correct_answers}
                             incorrect={session.incorrect_answers}
                             skipped={session.skipped_words}
+                            totalWords={session.total_words}
                             elapsedSeconds={session.elapsed_seconds}
                             onRetryAll={retryAll}
                             onRetryIncorrect={retryIncorrect}

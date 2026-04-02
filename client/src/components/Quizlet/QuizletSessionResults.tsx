@@ -4,6 +4,7 @@ interface Props {
     correct: number;
     incorrect: number;
     skipped: number;
+    totalWords: number;
     elapsedSeconds: number;
     onRetryAll: () => void;
     onRetryIncorrect: () => void;
@@ -14,19 +15,28 @@ const QuizletSessionResults = ({
     correct,
     incorrect,
     skipped,
+    totalWords,
     elapsedSeconds,
     onRetryAll,
     onRetryIncorrect,
     onFinish,
 }: Props) => {
+    const performanceEmoji = incorrect === 0 ? "😍" : incorrect > correct ? "🙃" : "😊";
+    const viewedCards = correct + incorrect;
+    const shouldShowSkipped = skipped > 0 && viewedCards < totalWords;
+
     return (
         <div className="quizlet-results">
+            <h2 className="quizlet-results-title">
+                Результаты <span aria-hidden>🎉</span>
+            </h2>
+
             <div className="quizlet-results-stats">
                 <div className="quizlet-results-stat quizlet-results-stat-correct">
                     <span className="quizlet-results-icon" aria-hidden>
                         <i className="bi bi-check-circle-fill" />
                     </span>
-                    <span className="quizlet-results-label">Помню</span>
+                    <span className="quizlet-results-label">Повторено</span>
                     <span className="quizlet-results-value">{correct}</span>
                 </div>
 
@@ -34,36 +44,49 @@ const QuizletSessionResults = ({
                     <span className="quizlet-results-icon" aria-hidden>
                         <i className="bi bi-x-circle-fill" />
                     </span>
-                    <span className="quizlet-results-label">Не помню</span>
-                    <span className="quizlet-results-value">{incorrect}</span>
+                    <span className="quizlet-results-label">Ошибки</span>
+                    <span className="quizlet-results-value">
+                        {incorrect}
+                        <span className="quizlet-results-perf-emoji" aria-hidden>
+                            {performanceEmoji}
+                        </span>
+                    </span>
                 </div>
 
-                {skipped > 0 && (
+                {shouldShowSkipped && (
                     <div className="quizlet-results-stat quizlet-results-stat-skipped">
                         <span className="quizlet-results-icon" aria-hidden>
                             <i className="bi bi-dash-circle-fill" />
                         </span>
-                        <span className="quizlet-results-label">Не повторено</span>
+                        <span className="quizlet-results-label">Не просмотрено</span>
                         <span className="quizlet-results-value">{skipped}</span>
                     </div>
                 )}
             </div>
 
-            <div className="quizlet-results-time" title="Время">
-                <i className="bi bi-clock" />
-                <span>
-                    {Math.floor(elapsedSeconds / 60)}:{`${elapsedSeconds % 60}`.padStart(2, "0")}
-                </span>
+            <div className="quizlet-results-time-row">
+                <div className="quizlet-results-time" title="Время">
+                    <span className="quizlet-results-time-value">
+                        {Math.floor(elapsedSeconds / 60)}:{`${elapsedSeconds % 60}`.padStart(2, "0")}
+                    </span>
+                    <i className="bi bi-clock quizlet-results-time-icon" aria-hidden />
+                </div>
             </div>
 
             <div className="quizlet-results-actions">
-                <button className="btn btn-outline-primary" onClick={onRetryAll}>
+                <button className="btn btn-success quizlet-results-action-btn" onClick={onRetryAll}>
+                    <i className="bi bi-arrow-repeat" aria-hidden />
                     Повторить все
                 </button>
-                <button className="btn btn-warning" onClick={onRetryIncorrect}>
+                <button
+                    className="btn btn-warning quizlet-results-action-btn quizlet-btn-orange"
+                    onClick={onRetryIncorrect}
+                >
+                    <i className="bi bi-exclamation-triangle" aria-hidden />
                     Повторить ошибки
                 </button>
-                <button className="btn btn-secondary" onClick={onFinish}>
+                <button className="btn btn-secondary quizlet-results-action-btn" onClick={onFinish}>
+                    <i className="bi bi-box-arrow-right" aria-hidden />
                     Выйти
                 </button>
             </div>
