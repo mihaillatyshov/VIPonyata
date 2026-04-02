@@ -4,17 +4,36 @@ import { TQuizletSessionWord } from "models/TQuizlet";
 
 import { getWordChar, hasValidKanaHint } from "./quizletUtils";
 
+import "./FlashcardExercise.css";
+
 interface Props {
     words: TQuizletSessionWord[];
     queue: number[];
     showHints: boolean;
     direction: "jp_to_ru" | "ru_to_jp";
+    totalWords: number;
+    unresolvedCount: number;
+    incorrectAnswers: number;
+    elapsedSeconds: number;
+    onFinishTraining: () => void;
     onAnswer: (wordId: number, recognized: boolean) => Promise<void>;
 }
 
-const FlashcardExercise = ({ words, queue, showHints, direction, onAnswer }: Props) => {
+const FlashcardExercise = ({
+    words,
+    queue,
+    showHints,
+    direction,
+    totalWords,
+    unresolvedCount,
+    incorrectAnswers,
+    elapsedSeconds,
+    onFinishTraining,
+    onAnswer,
+}: Props) => {
     const [isFlipped, setIsFlipped] = useState<boolean>(false);
     const [isSending, setIsSending] = useState<boolean>(false);
+    const [disableFlipAnimation, setDisableFlipAnimation] = useState<boolean>(false);
 
     const currentWord = useMemo(() => {
         const queueWord = queue.length > 0 ? words.find((word) => word.id === queue[0]) : undefined;
@@ -25,57 +44,110 @@ const FlashcardExercise = ({ words, queue, showHints, direction, onAnswer }: Pro
         if (isSending || currentWord === null) {
             return;
         }
+
+        // Keep transition only for manual card flips.
+        // When answering, reset to the front instantly before moving to next card.
+        setDisableFlipAnimation(true);
+        setIsFlipped(false);
         setIsSending(true);
         await onAnswer(currentWord.id, recognized);
         setIsSending(false);
-        setIsFlipped(false);
+
+        requestAnimationFrame(() => {
+            setDisableFlipAnimation(false);
+        });
     };
 
     if (currentWord === null) {
-        return <div className="alert alert-success">Карточки завершены</div>;
+        return null;
     }
 
     const charDisplay = getWordChar(currentWord);
     const shouldShowKanaHint = showHints && hasValidKanaHint(currentWord);
     const kanaHint = currentWord.word_jp.trim();
+    const currentPosition = unresolvedCount > 0 ? totalWords - unresolvedCount + 1 : totalWords;
+    const revealedText = direction === "jp_to_ru" ? currentWord.ru : charDisplay;
+
+    const renderFaceContent = (showTranslation: boolean) => (
+        <div className="flashcard-content">
+            {direction === "jp_to_ru" && (
+                <>
+                    <div className="flashcard-main-word">{charDisplay}</div>
+                    {shouldShowKanaHint && <div className="flashcard-reading">{kanaHint}</div>}
+                </>
+            )}
+
+            {direction === "ru_to_jp" && (
+                <div className="flashcard-main-word flashcard-main-word-ru">{currentWord.ru}</div>
+            )}
+
+            <div className={`flashcard-translation ${showTranslation ? "is-visible" : ""}`}>
+                {showTranslation ? revealedText : ""}
+            </div>
+        </div>
+    );
 
     return (
-        <div>
-            <h4 className="mb-3">Flashcards</h4>
-            <button
-                className="card w-100 text-start p-4 mb-3"
-                style={{ minHeight: 220 }}
-                onClick={() => setIsFlipped(!isFlipped)}
-            >
-                {!isFlipped && direction === "jp_to_ru" && (
-                    <div>
-                        <div className="fs-2 mb-2">{charDisplay}</div>
-                        {shouldShowKanaHint && <div className="text-muted">({kanaHint})</div>}
+        <div className="flashcard-exercise">
+            <div className="flashcard-card-shell">
+                <div className="flashcard-card-header">
+                    <div className="flashcard-header-side flashcard-header-left">
+                        <div className="flashcard-meta">
+                            <span className="flashcard-error-badge" title="Ошибки">
+                                <i className="bi bi-exclamation-circle" />
+                                <span>{incorrectAnswers}</span>
+                            </span>
+                            <span className="flashcard-time" title="Время">
+                                <i className="bi bi-clock" />
+                                <span>
+                                    {elapsedSeconds > 0
+                                        ? `${Math.floor(elapsedSeconds / 60)}:${`${elapsedSeconds % 60}`.padStart(
+                                              2,
+                                              "0",
+                                          )}`
+                                        : "0:00"}
+                                </span>
+                            </span>
+                        </div>
                     </div>
-                )}
-
-                {!isFlipped && direction === "ru_to_jp" && <div className="fs-3">{currentWord.ru}</div>}
-
-                {isFlipped && (
-                    <div>
-                        <div className="text-muted">char_jp</div>
-                        <div className="fs-2 mb-2">{charDisplay}</div>
-
-                        <div className="text-muted">word_jp</div>
-                        <div className="fs-4 mb-2">{currentWord.word_jp}</div>
-
-                        <div className="text-muted">ru</div>
-                        <div className="fs-4">{currentWord.ru}</div>
+                    <div className="flashcard-position">
+                        {Math.max(1, currentPosition)} / {totalWords}
                     </div>
-                )}
-            </button>
+                    <div className="flashcard-header-side flashcard-header-right">
+                        <button
+                            className="btn btn-sm btn-outline-secondary flashcard-finish-btn"
+                            onClick={onFinishTraining}
+                        >
+                            Завершить
+                        </button>
+                    </div>
+                </div>
 
-            <div className="d-flex gap-2">
-                <button className="btn btn-success" disabled={!isFlipped || isSending} onClick={() => submit(true)}>
-                    Узнал
+                <button
+                    className={`flashcard-card ${isFlipped ? "is-flipped" : ""} ${
+                        disableFlipAnimation ? "is-instant" : ""
+                    }`}
+                    onClick={() => {
+                        if (isSending) {
+                            return;
+                        }
+                        setIsFlipped(!isFlipped);
+                    }}
+                >
+                    <div className="flashcard-flip-inner">
+                        <div className="flashcard-face flashcard-face-front">{renderFaceContent(false)}</div>
+                        <div className="flashcard-face flashcard-face-back">{renderFaceContent(true)}</div>
+                    </div>
                 </button>
-                <button className="btn btn-danger" disabled={!isFlipped || isSending} onClick={() => submit(false)}>
-                    Не узнал
+            </div>
+
+            <div className={`flashcard-actions ${isFlipped ? "is-visible" : ""}`}>
+                <button className="btn btn-success" disabled={isSending || !isFlipped} onClick={() => submit(true)}>
+                    Помню
+                </button>
+                <div className="flashcard-remaining">Еще: {unresolvedCount}</div>
+                <button className="btn btn-danger" disabled={isSending || !isFlipped} onClick={() => submit(false)}>
+                    Не помню
                 </button>
             </div>
         </div>

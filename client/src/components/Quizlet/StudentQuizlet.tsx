@@ -409,6 +409,7 @@ const StudentQuizlet = () => {
 
     const [session, setSession] = useState<(TQuizletSession & { queue_state?: string }) | null>(null);
     const [sessionWords, setSessionWords] = useState<TQuizletSessionWord[]>([]);
+    const autoFinishSessionIdRef = useRef<number | null>(null);
 
     const [isEditingPersonal, setIsEditingPersonal] = useState(false);
     const [personalLessonTitle, setPersonalLessonTitle] = useState<string>("");
@@ -481,6 +482,7 @@ const StudentQuizlet = () => {
 
     const startSession = (payload: any) => {
         setLastStartPayload(payload);
+        autoFinishSessionIdRef.current = null;
         AjaxPost<{ session: TQuizletSession }>({ url: "/api/quizlet/sessions/start", body: payload }).then((json) => {
             loadSession(json.session.id);
         });
@@ -540,6 +542,37 @@ const StudentQuizlet = () => {
             return;
         }
 
+        const isLastUnresolvedCard =
+            session.quiz_type === "flashcards" &&
+            !recognized &&
+            unresolvedCount === 1 &&
+            sessionWords.some((word) => word.id === wordId && !word.is_correct);
+
+        if (isLastUnresolvedCard) {
+            await AjaxPost({
+                url: `/api/quizlet/sessions/${session.id}/flashcard-answer`,
+                body: {
+                    session_word_id: wordId,
+                    recognized,
+                },
+            });
+
+            // Keep the final "Не помню" card out of repeat queue and finish immediately.
+            await AjaxPost({
+                url: `/api/quizlet/sessions/${session.id}/save-progress`,
+                body: { queue: [] },
+            }).catch(() => undefined);
+
+            const endResponse = await AjaxPost<{ session: TQuizletSession }>({
+                url: `/api/quizlet/sessions/${session.id}/end`,
+                body: { force_finish: true },
+            });
+
+            setSession({ ...endResponse.session, is_finished: true });
+            loadSession(session.id);
+            return;
+        }
+
         await AjaxPost({
             url: `/api/quizlet/sessions/${session.id}/flashcard-answer`,
             body: {
@@ -594,9 +627,12 @@ const StudentQuizlet = () => {
     };
 
     const finishAndBackToStart = () => {
+        autoFinishSessionIdRef.current = null;
         setSession(null);
         setSessionWords([]);
     };
+
+    const unresolvedCount = sessionWords.filter((word) => !word.is_correct).length;
 
     useEffect(() => {
         if (personalLesson !== null && personalLessonTitle.trim().length === 0) {
@@ -634,6 +670,28 @@ const StudentQuizlet = () => {
         return () => clearInterval(intervalId);
     }, [session]);
 
+    useEffect(() => {
+        if (
+            session === null ||
+            session.is_finished ||
+            session.quiz_type !== "flashcards" ||
+            unresolvedCount !== 0 ||
+            autoFinishSessionIdRef.current === session.id
+        ) {
+            return;
+        }
+
+        autoFinishSessionIdRef.current = session.id;
+        AjaxPost<{ session: TQuizletSession }>({
+            url: `/api/quizlet/sessions/${session.id}/end`,
+            body: { force_finish: false },
+        })
+            .then(() => loadSession(session.id))
+            .catch(() => {
+                autoFinishSessionIdRef.current = null;
+            });
+    }, [session, unresolvedCount]);
+
     if (loadStatus === LoadStatus.ERROR) {
         return (
             <ErrorPage
@@ -647,8 +705,6 @@ const StudentQuizlet = () => {
     if (loadStatus !== LoadStatus.DONE) {
         return <Loading />;
     }
-
-    const unresolvedCount = sessionWords.filter((word) => !word.is_correct).length;
 
     const getSubgroupWords = (subgroupId: number): TQuizletWord[] => {
         const ids = subgroupWords.filter((item) => item.subgroup_id === subgroupId).map((item) => item.word_id);
@@ -1045,17 +1101,14 @@ const StudentQuizlet = () => {
             )}
 
             {session !== null && (
-                <div className="card p-3 p-md-4">
+                <div className="quizlet-session-shell p-3 p-md-4">
                     <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                        <strong>
-                            Прогресс: {session.correct_answers}/{session.total_words} | Ошибок:{" "}
-                            {session.incorrect_answers} | Осталось: {unresolvedCount} | Время:{" "}
-                            {formatDuration(session.elapsed_seconds)}
-                        </strong>
-                        {!session.is_finished && (
-                            <button className="btn btn-outline-danger" onClick={endNow}>
-                                Закончить тренировку
-                            </button>
+                        {session.quiz_type === "pair" && (
+                            <strong>
+                                Прогресс: {session.correct_answers}/{session.total_words} | Ошибок:{" "}
+                                {session.incorrect_answers} | Осталось: {unresolvedCount} | Время:{" "}
+                                {formatDuration(session.elapsed_seconds)}
+                            </strong>
                         )}
                     </div>
 
@@ -1073,24 +1126,13 @@ const StudentQuizlet = () => {
                             queue={queue}
                             showHints={session.show_hints}
                             direction={session.translation_direction}
+                            totalWords={session.total_words}
+                            unresolvedCount={unresolvedCount}
+                            incorrectAnswers={session.incorrect_answers}
+                            elapsedSeconds={session.elapsed_seconds}
+                            onFinishTraining={endNow}
                             onAnswer={submitFlashcard}
                         />
-                    )}
-
-                    {!session.is_finished && unresolvedCount === 0 && (
-                        <div className="mt-3">
-                            <button
-                                className="btn btn-success"
-                                onClick={() => {
-                                    AjaxPost<{ session: TQuizletSession }>({
-                                        url: `/api/quizlet/sessions/${session.id}/end`,
-                                        body: { force_finish: false },
-                                    }).then(() => loadSession(session.id));
-                                }}
-                            >
-                                Завершить и показать результат
-                            </button>
-                        </div>
                     )}
 
                     {session.is_finished && (
@@ -1103,6 +1145,14 @@ const StudentQuizlet = () => {
                             onRetryIncorrect={retryIncorrect}
                             onFinish={finishAndBackToStart}
                         />
+                    )}
+
+                    {!session.is_finished && session.quiz_type !== "flashcards" && (
+                        <div className="d-flex justify-content-end mt-3">
+                            <button className="btn btn-sm btn-outline-secondary" onClick={endNow}>
+                                Закончить тренировку
+                            </button>
+                        </div>
                     )}
                 </div>
             )}
