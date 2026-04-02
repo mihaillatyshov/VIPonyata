@@ -866,20 +866,20 @@ const StudentQuizlet = () => {
                     <h4 className="text-center mb-4">Выберите режим</h4>
                     <div className="d-flex justify-content-center align-items-center flex-wrap gap-4">
                         <button
-                            className="btn btn-outline-primary rounded-circle d-flex flex-column justify-content-center align-items-center"
+                            className="btn quizlet-mode-button quizlet-mode-button-training rounded-circle d-flex flex-column justify-content-center align-items-center"
                             style={{ width: "180px", height: "180px" }}
                             onClick={() => setMode("training")}
                         >
                             <i className="bi bi-lightning-charge fs-2 mb-2" />
-                            <span className="fw-semibold">Training mode</span>
+                            <span className="fw-semibold">Потренируемся?</span>
                         </button>
                         <button
-                            className="btn btn-outline-secondary rounded-circle d-flex flex-column justify-content-center align-items-center"
+                            className="btn quizlet-mode-button quizlet-mode-button-view rounded-circle d-flex flex-column justify-content-center align-items-center"
                             style={{ width: "180px", height: "180px" }}
                             onClick={() => setMode("view")}
                         >
                             <i className="bi bi-book fs-2 mb-2" />
-                            <span className="fw-semibold">View mode</span>
+                            <span className="fw-semibold">Все словари</span>
                         </button>
                     </div>
                 </div>
