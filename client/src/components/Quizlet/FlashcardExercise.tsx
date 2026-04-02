@@ -78,17 +78,20 @@ const FlashcardExercise = ({
                 </>
             )}
 
-            {direction === "ru_to_jp" && (
-                <div className="flashcard-main-word flashcard-main-word-ru">{currentWord.ru}</div>
-            )}
+            {direction === "ru_to_jp" &&
+                (showTranslation ? (
+                    <>
+                        <div className="flashcard-main-word">{revealedText}</div>
+                        {shouldShowKanaHint && <div className="flashcard-reading">{kanaHint}</div>}
+                    </>
+                ) : (
+                    <div className="flashcard-main-word flashcard-main-word-ru">{currentWord.ru}</div>
+                ))}
 
             <div className={`flashcard-translation ${showTranslation ? "is-visible" : ""}`}>
                 {showTranslation ? (
                     <>
-                        <div>{revealedText}</div>
-                        {direction === "ru_to_jp" && shouldShowKanaHint && (
-                            <div className="flashcard-reading flashcard-reading-revealed">{kanaHint}</div>
-                        )}
+                        <div>{direction === "ru_to_jp" ? currentWord.ru : revealedText}</div>
                     </>
                 ) : (
                     ""
