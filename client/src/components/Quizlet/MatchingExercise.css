@@ -3,6 +3,25 @@
     --matching-card-radius: 16px;
 }
 
+.matching-session-wrapper {
+    width: 100%;
+    border: 1px solid #d9e1ea;
+    border-radius: 16px;
+    background: linear-gradient(165deg, #fefeff 0%, #f7f9fc 100%);
+    box-shadow: 0 10px 30px rgba(20, 34, 56, 0.08);
+    padding: 14px;
+}
+
+.matching-session-header {
+    margin-bottom: 12px;
+}
+
+.matching-session-header .flashcard-card-header {
+    position: static;
+    min-height: 52px;
+    padding: 0;
+}
+
 .matching-columns {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -133,6 +152,10 @@
 }
 
 @media (max-width: 768px) {
+    .matching-session-wrapper {
+        padding: 12px;
+    }
+
     .matching-exercise {
         --matching-card-min-height: 68px;
     }

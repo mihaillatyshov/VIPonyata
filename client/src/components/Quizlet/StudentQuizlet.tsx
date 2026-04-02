@@ -19,7 +19,8 @@ import FlashcardExercise from "./FlashcardExercise";
 import MatchingExercise from "./MatchingExercise";
 import QuizletQuizStart from "./QuizletQuizStart";
 import QuizletSessionResults from "./QuizletSessionResults";
-import { formatDuration, parseQueue } from "./quizletUtils";
+import { parseQueue } from "./quizletUtils";
+import TrainingSessionHeader from "./TrainingSessionHeader";
 import ViewModeBreadcrumb from "./ViewModeBreadcrumb";
 
 interface CatalogResponse {
@@ -1174,22 +1175,37 @@ const StudentQuizlet = () => {
 
             {session !== null && (
                 <div className="quizlet-session-shell p-3 p-md-4">
-                    <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                        {session.quiz_type === "pair" && (
-                            <strong>
-                                Прогресс: {session.correct_answers}/{session.total_words} | Ошибок:{" "}
-                                {session.incorrect_answers} | Осталось: {unresolvedCount} | Время:{" "}
-                                {formatDuration(liveElapsedSeconds)}
-                            </strong>
-                        )}
-                    </div>
+                    {!session.is_finished && session.quiz_type !== "flashcards" && session.quiz_type !== "pair" && (
+                        <div className="mb-3">
+                            <div className="training-session-header-shell">
+                                <TrainingSessionHeader
+                                    incorrectAnswers={session.incorrect_answers}
+                                    elapsedSeconds={liveElapsedSeconds}
+                                    currentPosition={session.correct_answers}
+                                    totalWords={session.total_words}
+                                    onFinishTraining={endNow}
+                                />
+                            </div>
+                        </div>
+                    )}
 
                     {!session.is_finished && session.quiz_type === "pair" && (
-                        <MatchingExercise
-                            words={sessionWords}
-                            showHints={session.show_hints}
-                            onAttempt={submitPairAttempt}
-                        />
+                        <div className="matching-session-wrapper">
+                            <div className="matching-session-header">
+                                <TrainingSessionHeader
+                                    incorrectAnswers={session.incorrect_answers}
+                                    elapsedSeconds={liveElapsedSeconds}
+                                    currentPosition={session.correct_answers}
+                                    totalWords={session.total_words}
+                                    onFinishTraining={endNow}
+                                />
+                            </div>
+                            <MatchingExercise
+                                words={sessionWords}
+                                showHints={session.show_hints}
+                                onAttempt={submitPairAttempt}
+                            />
+                        </div>
                     )}
 
                     {!session.is_finished && session.quiz_type === "flashcards" && (
@@ -1218,14 +1234,6 @@ const StudentQuizlet = () => {
                             onRetryIncorrect={retryIncorrect}
                             onFinish={finishAndBackToStart}
                         />
-                    )}
-
-                    {!session.is_finished && session.quiz_type !== "flashcards" && (
-                        <div className="d-flex justify-content-end mt-3">
-                            <button className="btn btn-sm btn-outline-secondary" onClick={endNow}>
-                                Закончить тренировку
-                            </button>
-                        </div>
                     )}
                 </div>
             )}

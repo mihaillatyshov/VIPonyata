@@ -2,7 +2,8 @@ import { useMemo, useState } from "react";
 
 import { TQuizletSessionWord } from "models/TQuizlet";
 
-import { formatDuration, getWordChar, hasValidKanaHint } from "./quizletUtils";
+import { getWordChar, hasValidKanaHint } from "./quizletUtils";
+import TrainingSessionHeader from "./TrainingSessionHeader";
 
 import "./FlashcardExercise.css";
 
@@ -90,31 +91,13 @@ const FlashcardExercise = ({
     return (
         <div className="flashcard-exercise">
             <div className="flashcard-card-shell">
-                <div className="flashcard-card-header">
-                    <div className="flashcard-header-side flashcard-header-left">
-                        <div className="flashcard-meta">
-                            <span className="flashcard-error-badge" title="Ошибки">
-                                <i className="bi bi-exclamation-circle" />
-                                <span>{incorrectAnswers}</span>
-                            </span>
-                            <span className="flashcard-time" title="Время">
-                                <i className="bi bi-clock" />
-                                <span>{formatDuration(elapsedSeconds)}</span>
-                            </span>
-                        </div>
-                    </div>
-                    <div className="flashcard-position">
-                        {Math.max(1, currentPosition)} / {totalWords}
-                    </div>
-                    <div className="flashcard-header-side flashcard-header-right">
-                        <button
-                            className="btn btn-sm btn-outline-secondary flashcard-finish-btn"
-                            onClick={onFinishTraining}
-                        >
-                            Завершить
-                        </button>
-                    </div>
-                </div>
+                <TrainingSessionHeader
+                    incorrectAnswers={incorrectAnswers}
+                    elapsedSeconds={elapsedSeconds}
+                    currentPosition={currentPosition}
+                    totalWords={totalWords}
+                    onFinishTraining={onFinishTraining}
+                />
 
                 <button
                     className={`flashcard-card ${isFlipped ? "is-flipped" : ""} ${

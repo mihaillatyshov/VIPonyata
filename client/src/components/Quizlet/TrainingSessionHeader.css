@@ -1,0 +1,23 @@
+.training-session-header-shell {
+    position: relative;
+    width: 100%;
+    min-height: 70px;
+    margin: 0;
+    border: 1px solid #d9e1ea;
+    border-radius: 16px;
+    background: linear-gradient(165deg, #fefeff 0%, #f7f9fc 100%);
+    box-shadow: 0 10px 30px rgba(20, 34, 56, 0.08);
+}
+
+.training-session-header-shell .flashcard-card-header {
+    position: absolute;
+    top: 18px;
+    left: 0;
+    right: 0;
+}
+
+@media (max-width: 576px) {
+    .training-session-header-shell .flashcard-card-header {
+        top: 12px;
+    }
+}
