@@ -9,3 +9,20 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
     padding: 14px;
 }
+
+.quizlet-start-training-btn:disabled {
+    background-color: #9aa3ad;
+    border-color: #9aa3ad;
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.quizlet-start-training-btn:disabled:hover,
+.quizlet-start-training-btn:disabled:focus,
+.quizlet-start-training-btn:disabled:active {
+    background-color: #9aa3ad;
+    border-color: #9aa3ad;
+    opacity: 0.65;
+    box-shadow: none;
+    transform: none;
+}

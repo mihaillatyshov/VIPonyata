@@ -27,6 +27,9 @@ const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups
     const [selectedTeacherSubgroups, setSelectedTeacherSubgroups] = useState<number[]>([]);
     const [selectedPersonalSubgroups, setSelectedPersonalSubgroups] = useState<number[]>([]);
 
+    const selectedDictionariesCount = selectedTeacherSubgroups.length + selectedPersonalSubgroups.length;
+    const canStartTraining = quizType !== null && selectedDictionariesCount > 0;
+
     const subgroupsByGroup = useMemo(() => {
         return groups.map((group) => ({
             group,
@@ -67,7 +70,7 @@ const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups
     };
 
     const start = () => {
-        if (quizType === null) {
+        if (!canStartTraining || quizType === null) {
             return;
         }
 
@@ -233,13 +236,16 @@ const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups
                 ))}
             </div>
 
-            <button
-                className="btn btn-primary"
-                onClick={start}
-                disabled={quizType === null || selectedTeacherSubgroups.length + selectedPersonalSubgroups.length === 0}
-            >
-                Начать тренировку
-            </button>
+            <div className="d-flex justify-content-end">
+                <button
+                    type="button"
+                    className="btn btn-primary quizlet-start-training-btn"
+                    onClick={start}
+                    disabled={!canStartTraining}
+                >
+                    Начать тренировку
+                </button>
+            </div>
         </div>
     );
 };
