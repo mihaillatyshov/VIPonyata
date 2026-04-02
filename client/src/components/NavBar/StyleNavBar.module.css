@@ -1,15 +1,115 @@
+.navShell {
+    margin-top: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.78);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(2px);
+}
+
+.navInner {
+    min-height: 92px;
+    padding: 2px 10px;
+}
+
+.logoFull,
+.logoSmall {
+    filter: none;
+    transition: transform 160ms ease;
+}
+
+.logoFull:hover,
+.logoSmall:hover {
+    transform: translateY(-1px) scale(1.01);
+}
+
 .notificationsBlock {
     cursor: pointer;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    border: 1px solid rgba(65, 92, 65, 0.14);
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition:
+        background-color 160ms ease,
+        border-color 160ms ease,
+        box-shadow 160ms ease,
+        color 160ms ease;
+}
+
+.notificationsBlock:hover {
+    border-color: rgba(103, 174, 45, 0.38);
+    background: rgba(238, 248, 229, 0.92);
+    box-shadow: 0 1px 3px rgba(103, 174, 45, 0.12);
+}
+
+.notificationIcon {
+    font-size: 23px;
+    color: #5f7a5f;
+    line-height: 1;
+}
+
+.notificationBadge {
+    min-width: 18px;
+    min-height: 18px;
+    font-size: 11px;
+    background: #5ea52d;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.95);
+}
+
+.notificationBadgeHidden {
+    display: none;
 }
 
 .quizletButton {
-    font-size: 56px;
-    color: #67ae2d;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 16px 6px;
+    border-radius: 999px;
+    border: 1px solid rgba(103, 174, 45, 0.22);
+    font-size: 48px;
+    color: #4f9716;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(237, 250, 227, 0.98) 100%);
+    box-shadow: 0 2px 8px rgba(103, 174, 45, 0.14);
+    transition:
+        transform 180ms ease,
+        box-shadow 180ms ease,
+        color 180ms ease;
+}
+
+.quizletButton:hover {
+    color: #3f8112;
+    transform: none;
+    box-shadow: 0 3px 9px rgba(103, 174, 45, 0.16);
 }
 
 @media (max-width: 576px) {
+    .navShell {
+        border-radius: 14px;
+    }
+
+    .navInner {
+        min-height: 76px;
+        padding: 2px 6px;
+    }
+
     .quizletButton {
         font-size: 36px;
+        padding: 4px 10px 5px;
+    }
+
+    .notificationsBlock {
+        width: 38px;
+        height: 38px;
+        margin-right: 0.5rem;
+    }
+
+    .notificationIcon {
+        font-size: 20px;
     }
 }
 
@@ -22,18 +122,32 @@
 .profileBlock {
     cursor: pointer;
     position: relative;
+    width: 52px;
+    min-height: 52px;
+    border-radius: 14px;
+    padding: 4px;
+    border: 1px solid rgba(65, 92, 65, 0.14);
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition:
+        background-color 160ms ease,
+        border-color 160ms ease,
+        box-shadow 160ms ease;
 }
 
 .profileBlock:hover {
-    opacity: 80%;
+    border-color: rgba(103, 174, 45, 0.38);
+    background: rgba(238, 248, 229, 0.92);
+    box-shadow: 0 1px 3px rgba(103, 174, 45, 0.12);
 }
 
 .profileImgWrapper {
-    width: 40px;
-    height: 40px;
-}
-
-.profileImgWrapper:hover {
+    width: 100%;
+    height: 100%;
+    min-width: 42px;
+    min-height: 42px;
+    display: grid;
+    place-items: center;
 }
 
 .profileImg {
@@ -41,4 +155,29 @@
     aspect-ratio: 1/1;
     border-radius: 50%;
     object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow: none;
+}
+
+.profileFallbackIcon {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    font-size: 40px;
+    line-height: 1;
+    color: #6a826a;
+}
+
+.profileName {
+    width: auto;
+    min-width: 46px;
+    max-width: 116px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border-radius: 10px;
+    padding: 1px 6px;
+    color: #486248;
+    background: transparent;
 }

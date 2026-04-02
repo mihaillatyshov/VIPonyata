@@ -61,13 +61,25 @@ const NavBar = () => {
         return newNotificationsCount.toString();
     };
 
+    const notificationStr = getNotificationStr();
+
     return (
-        <div className="container mainNavBar">
-            <div className="d-flex justify-content-center align-items-center">
+        <div className={`container mainNavBar ${styles.navShell}`}>
+            <div className={`d-flex justify-content-center align-items-center ${styles.navInner}`}>
                 <div className="col-2 col-lg-4 px-0 align-items-center">
                     <Link to="/">
-                        <img className="d-none d-lg-block" src="/svg/LogoFull.svg" alt="Главная" height={100} />
-                        <img className="d-block d-lg-none" src="/svg/LogoSmall.svg" alt="Главная" height={60} />
+                        <img
+                            className={`d-none d-lg-block ${styles.logoFull}`}
+                            src="/svg/LogoFull.svg"
+                            alt="Главная"
+                            height={100}
+                        />
+                        <img
+                            className={`d-block d-lg-none ${styles.logoSmall}`}
+                            src="/svg/LogoSmall.svg"
+                            alt="Главная"
+                            height={60}
+                        />
                     </Link>
                 </div>
                 <div className="col-6 col-lg-4 mx-auto d-flex align-items-center">
@@ -84,9 +96,13 @@ const NavBar = () => {
                             className={`position-relative me-3 ${styles.notificationsBlock}`}
                             onClick={openNotifications}
                         >
-                            <i className="bi bi-bell-fill font-icon-height-0" style={{ fontSize: "32px" }}></i>
-                            <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">
-                                {getNotificationStr()}
+                            <i className={`bi bi-bell font-icon-height-0 ${styles.notificationIcon}`}></i>
+                            <span
+                                className={`position-absolute top-0 start-100 translate-middle badge rounded-pill ${
+                                    styles.notificationBadge
+                                } ${!notificationStr ? styles.notificationBadgeHidden : ""}`}
+                            >
+                                {notificationStr}
                             </span>
                         </div>
                         <Notifications

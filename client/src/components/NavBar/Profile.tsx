@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useGetAuthorizedUserSafe } from "redux/funcs/user";
@@ -19,10 +18,12 @@ const Profile = () => {
                     {user.userData.avatar ? (
                         <img className={styles.profileImg} alt="profile" src={user.userData.avatar} />
                     ) : (
-                        <i className="bi bi-person-circle a-clear navbar-profile" style={{ fontSize: "40px" }} />
+                        <i className={`bi bi-person a-clear navbar-profile ${styles.profileFallbackIcon}`} />
                     )}
                 </div>
-                <div className="ms-1 d-none d-lg-block navbar-profile-name text-center">{user.userData.name}</div>
+                <div className={`ms-1 d-none d-lg-block navbar-profile-name text-center ${styles.profileName}`}>
+                    {user.userData.name}
+                </div>
             </div>
         </div>
     );
