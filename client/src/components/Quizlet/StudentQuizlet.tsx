@@ -20,6 +20,7 @@ import MatchingExercise from "./MatchingExercise";
 import QuizletQuizStart from "./QuizletQuizStart";
 import QuizletSessionResults from "./QuizletSessionResults";
 import { formatDuration, parseQueue } from "./quizletUtils";
+import ViewModeBreadcrumb from "./ViewModeBreadcrumb";
 
 interface CatalogResponse {
     groups: TQuizletGroup[];
@@ -326,7 +327,7 @@ const PersonalTopicEditor = ({ subgroup, initialWords, onSaved }: PersonalTopicE
                     <thead>
                         <tr className="table-light">
                             <th style={{ width: "28%" }}>Кандзи</th>
-                            <th style={{ width: "28%" }}>Кана</th>
+                            <th style={{ width: "28%" }}>Чтение</th>
                             <th style={{ width: "37%" }}>Перевод</th>
                             <th style={{ width: "7%" }}></th>
                         </tr>
@@ -732,6 +733,71 @@ const StudentQuizlet = () => {
             ? personalSubgroups.find((subgroup) => subgroup.id === selectedPersonalTopicId) ?? null
             : null;
 
+    const teacherBreadcrumbItems =
+        selectedLesson === null
+            ? [{ key: "teacher-root", label: "Словари преподавателя" }]
+            : selectedTopic === null
+            ? [
+                  {
+                      key: "teacher-lesson",
+                      label: selectedLesson.title,
+                      onClick: () => {
+                          setSelectedLessonId(null);
+                          setSelectedTopicId(null);
+                      },
+                  },
+                  {
+                      key: "teacher-topics",
+                      label: "Темы",
+                  },
+              ]
+            : [
+                  {
+                      key: "teacher-lesson",
+                      label: selectedLesson.title,
+                      onClick: () => {
+                          setSelectedLessonId(null);
+                          setSelectedTopicId(null);
+                      },
+                  },
+                  {
+                      key: "teacher-topic",
+                      label: selectedTopic.title,
+                  },
+              ];
+
+    const personalRootLabel =
+        personalLesson !== null
+            ? personalLesson.title
+            : personalLessonTitle.trim().length > 0
+            ? personalLessonTitle.trim()
+            : "Мой словарь";
+
+    const personalBreadcrumbItems =
+        selectedPersonalSubgroup === null
+            ? [
+                  {
+                      key: "personal-root",
+                      label: personalRootLabel,
+                      onClick: () => setSelectedPersonalTopicId(null),
+                  },
+                  {
+                      key: "personal-topics",
+                      label: "Темы",
+                  },
+              ]
+            : [
+                  {
+                      key: "personal-root",
+                      label: personalRootLabel,
+                      onClick: () => setSelectedPersonalTopicId(null),
+                  },
+                  {
+                      key: "personal-topic",
+                      label: selectedPersonalSubgroup.title,
+                  },
+              ];
+
     return (
         <div className="container">
             <PageTitle title="Quizlet" />
@@ -805,8 +871,8 @@ const StudentQuizlet = () => {
                     </div>
 
                     <div className="card p-3 p-md-4">
-                        <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                            <div className="d-flex align-items-center gap-2 flex-wrap">
+                        <div className="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                            <div className="flex-grow-1" style={{ minWidth: 0 }}>
                                 {selectedPersonalTopicId === null &&
                                 (isEditingLessonTitle || personalLesson === null) ? (
                                     <div className="d-flex gap-2 flex-grow-1">
@@ -832,10 +898,9 @@ const StudentQuizlet = () => {
                                         )}
                                     </div>
                                 ) : (
-                                    <>
-                                        <h4 className="mb-0">
-                                            {personalLesson !== null ? personalLesson.title : personalLessonTitle}
-                                        </h4>
+                                    <div className="d-flex align-items-center gap-2">
+                                        <ViewModeBreadcrumb items={personalBreadcrumbItems} className="mb-0" />
+
                                         {selectedPersonalTopicId === null && personalLesson !== null && (
                                             <button
                                                 className="btn btn-sm btn-link p-0 text-muted"
@@ -848,13 +913,26 @@ const StudentQuizlet = () => {
                                                 <i className="bi bi-pencil" />
                                             </button>
                                         )}
-                                    </>
+
+                                        {selectedPersonalSubgroup !== null && !isEditingPersonalTopicTitle && (
+                                            <button
+                                                className="btn btn-sm btn-link p-0 text-muted"
+                                                title="Переименовать тему"
+                                                onClick={() => {
+                                                    setIsEditingPersonalTopicTitle(true);
+                                                    setPersonalTopicTitleDraft(selectedPersonalSubgroup.title);
+                                                }}
+                                            >
+                                                <i className="bi bi-pencil" />
+                                            </button>
+                                        )}
+                                    </div>
                                 )}
 
-                                {personalLesson !== null && selectedPersonalSubgroup !== null && (
-                                    <>
-                                        <span className="text-muted">&gt;</span>
-                                        {isEditingPersonalTopicTitle ? (
+                                {personalLesson !== null &&
+                                    selectedPersonalSubgroup !== null &&
+                                    isEditingPersonalTopicTitle && (
+                                        <div className="mt-2">
                                             <input
                                                 className="form-control form-control-sm"
                                                 style={{ width: "auto", minWidth: "220px" }}
@@ -880,27 +958,12 @@ const StudentQuizlet = () => {
                                                     }
                                                 }}
                                             />
-                                        ) : (
-                                            <>
-                                                <h5 className="mb-0">{selectedPersonalSubgroup.title}</h5>
-                                                <button
-                                                    className="btn btn-sm btn-link p-0 text-muted"
-                                                    title="Переименовать тему"
-                                                    onClick={() => {
-                                                        setIsEditingPersonalTopicTitle(true);
-                                                        setPersonalTopicTitleDraft(selectedPersonalSubgroup.title);
-                                                    }}
-                                                >
-                                                    <i className="bi bi-pencil" />
-                                                </button>
-                                            </>
-                                        )}
-                                    </>
-                                )}
+                                        </div>
+                                    )}
                             </div>
 
-                            {selectedPersonalSubgroup !== null && (
-                                <div className="d-flex gap-2 align-items-center">
+                            <div className="d-flex gap-2 align-items-center">
+                                {selectedPersonalSubgroup !== null && (
                                     <button
                                         className="btn btn-sm btn-link p-0 text-danger"
                                         onClick={async () => {
@@ -910,8 +973,8 @@ const StudentQuizlet = () => {
                                     >
                                         Удалить
                                     </button>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
 
                         {/* Topic list page */}
@@ -987,34 +1050,7 @@ const StudentQuizlet = () => {
                     </div>
 
                     <div className="card p-3 p-md-4">
-                        <h4 className="mb-3">
-                            {selectedLesson !== null && selectedTopic !== null
-                                ? `${selectedLesson.title} — ${selectedTopic.title}`
-                                : "Словари преподавателя"}
-                        </h4>
-
-                        <div className="d-flex flex-wrap gap-2 mb-3">
-                            {selectedLesson !== null && (
-                                <button
-                                    className="btn btn-sm btn-outline-secondary"
-                                    onClick={() => {
-                                        setSelectedLessonId(null);
-                                        setSelectedTopicId(null);
-                                    }}
-                                >
-                                    <i className="bi bi-arrow-left me-1" />К списку уроков
-                                </button>
-                            )}
-
-                            {selectedLesson !== null && selectedTopic !== null && (
-                                <button
-                                    className="btn btn-sm btn-outline-secondary"
-                                    onClick={() => setSelectedTopicId(null)}
-                                >
-                                    <i className="bi bi-arrow-left me-1" />К темам урока
-                                </button>
-                            )}
-                        </div>
+                        <ViewModeBreadcrumb items={teacherBreadcrumbItems} />
 
                         {groups.length === 0 && <div className="text-muted">Пока нет доступных уроков.</div>}
 
@@ -1041,7 +1077,6 @@ const StudentQuizlet = () => {
 
                         {selectedLesson !== null && selectedTopic === null && (
                             <>
-                                <h5 className="mb-3">{selectedLesson.title}</h5>
                                 {selectedLessonTopics.length === 0 && (
                                     <div className="text-muted small">В этом уроке пока нет тем.</div>
                                 )}
@@ -1069,9 +1104,9 @@ const StudentQuizlet = () => {
                                     <table className="table table-bordered table-hover align-middle mb-0">
                                         <thead>
                                             <tr className="table-light">
-                                                <th style={{ width: "28%", padding: "12px 18px" }}>char_jp</th>
-                                                <th style={{ width: "28%", padding: "12px 18px" }}>word_jp</th>
-                                                <th style={{ width: "44%", padding: "12px 18px" }}>ru</th>
+                                                <th style={{ width: "28%", padding: "12px 18px" }}>Кандзи</th>
+                                                <th style={{ width: "28%", padding: "12px 18px" }}>Чтение</th>
+                                                <th style={{ width: "44%", padding: "12px 18px" }}>Перевод</th>
                                             </tr>
                                         </thead>
                                         <tbody>
