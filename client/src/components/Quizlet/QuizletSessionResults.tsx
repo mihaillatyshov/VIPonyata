@@ -25,6 +25,7 @@ const QuizletSessionResults = ({
     const performanceEmoji = incorrect === 0 ? "😍" : incorrect > correct ? "🙃" : "😊";
     const viewedCards = correct + incorrect;
     const shouldShowSkipped = skipped > 0 && viewedCards < totalWords;
+    const shouldShowRetryIncorrect = incorrect > 0;
 
     return (
         <div className="quizlet-main-container quizlet-results">
@@ -74,18 +75,22 @@ const QuizletSessionResults = ({
                 </div>
             </div>
 
-            <div className="quizlet-results-actions">
+            <div
+                className={`quizlet-results-actions ${!shouldShowRetryIncorrect ? "quizlet-results-actions-two" : ""}`}
+            >
                 <button className="btn btn-success quizlet-results-action-btn" onClick={onRetryAll}>
                     <i className="bi bi-arrow-repeat" aria-hidden />
                     Повторить все
                 </button>
-                <button
-                    className="btn btn-warning quizlet-results-action-btn quizlet-btn-orange"
-                    onClick={onRetryIncorrect}
-                >
-                    <i className="bi bi-exclamation-triangle" aria-hidden />
-                    Повторить ошибки
-                </button>
+                {shouldShowRetryIncorrect && (
+                    <button
+                        className="btn btn-warning quizlet-results-action-btn quizlet-btn-orange"
+                        onClick={onRetryIncorrect}
+                    >
+                        <i className="bi bi-exclamation-triangle" aria-hidden />
+                        Повторить ошибки
+                    </button>
+                )}
                 <button className="btn btn-secondary quizlet-results-action-btn" onClick={onFinish}>
                     <i className="bi bi-box-arrow-right" aria-hidden />
                     Выйти
