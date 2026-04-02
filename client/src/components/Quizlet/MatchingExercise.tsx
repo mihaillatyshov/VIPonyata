@@ -23,6 +23,7 @@ const LONG_TEXT_CHAR_COUNT = 14;
 const VERY_LONG_TEXT_CHAR_COUNT = 22;
 const LONG_TEXT_FONT_REDUCTION = 2;
 const VERY_LONG_TEXT_FONT_REDUCTION = 4;
+const CYRILLIC_TEXT_RE = /[\u0400-\u04FF]/;
 
 const deterministicSortByIdHash = (left: TQuizletSessionWord, right: TQuizletSessionWord) => {
     const leftHash = ((left.id * 1103515245 + 12345) >>> 0) % 2147483647;
@@ -69,6 +70,7 @@ const MatchingCardButton = ({ className, onClick, disabled, mainText, secondaryT
     const cardRef = useRef<HTMLButtonElement | null>(null);
     const [fontSizePx, setFontSizePx] = useState<number>(DESKTOP_MAX_FONT_SIZE);
     const combinedText = secondaryText ? `${mainText} ${secondaryText}` : mainText;
+    const isRussianText = CYRILLIC_TEXT_RE.test(combinedText);
 
     useLayoutEffect(() => {
         const card = cardRef.current;
@@ -85,26 +87,41 @@ const MatchingCardButton = ({ className, onClick, disabled, mainText, secondaryT
                 return;
             }
 
+            const textElement = element.querySelector<HTMLElement>(".matching-card-text");
+            const measuredTextElement = textElement ?? element;
+
             const fontBounds = getFontBounds();
             let nextFontSize = getLengthAdjustedMaxFontSize(combinedText, fontBounds.max, fontBounds.min);
             element.style.fontSize = `${nextFontSize}px`;
 
             const getLineHeight = () => {
-                const computed = window.getComputedStyle(element);
+                const computed = window.getComputedStyle(measuredTextElement);
                 const parsedLineHeight = Number.parseFloat(computed.lineHeight);
                 return Number.isFinite(parsedLineHeight) ? parsedLineHeight : nextFontSize * 1.3;
             };
 
-            while (nextFontSize > fontBounds.min) {
+            const hasTextOverflow = () => {
                 const lineHeight = getLineHeight();
-                const exceedsMaxLines = element.scrollHeight > lineHeight * MAX_TEXT_LINES + 1;
-                const overflowsWidth = element.scrollWidth > element.clientWidth + 1;
+                const exceedsMaxLines = measuredTextElement.scrollHeight > lineHeight * MAX_TEXT_LINES + 1;
+                const overflowsWidth = measuredTextElement.scrollWidth > measuredTextElement.clientWidth + 1;
                 const overflowsHeight = element.scrollHeight > element.clientHeight + 1;
 
-                if (!exceedsMaxLines && !overflowsWidth && !overflowsHeight) {
+                return exceedsMaxLines || overflowsWidth || overflowsHeight;
+            };
+
+            while (nextFontSize > fontBounds.min) {
+                const overflowDetected = hasTextOverflow();
+
+                if (!overflowDetected) {
                     break;
                 }
 
+                nextFontSize -= FONT_SIZE_STEP;
+                element.style.fontSize = `${nextFontSize}px`;
+            }
+
+            // Russian words can use wider glyphs, so enforce the same overflow fitting pass explicitly.
+            while (isRussianText && nextFontSize > fontBounds.min && hasTextOverflow()) {
                 nextFontSize -= FONT_SIZE_STEP;
                 element.style.fontSize = `${nextFontSize}px`;
             }
@@ -135,7 +152,7 @@ const MatchingCardButton = ({ className, onClick, disabled, mainText, secondaryT
                 window.cancelAnimationFrame(frameId);
             }
         };
-    }, [combinedText]);
+    }, [combinedText, isRussianText]);
 
     return (
         <button
