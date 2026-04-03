@@ -960,11 +960,11 @@ const StudentQuizlet = () => {
 
     return (
         <div className="container">
-            <PageTitle title="Quizlet" />
+            <PageTitle title="ワードラボ" urlBack="/" />
 
             {session === null && mode === null && (
                 <div
-                    className="mx-auto"
+                    className="mx-auto mt-5"
                     style={{
                         maxWidth: "760px",
                     }}
