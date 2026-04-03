@@ -147,6 +147,14 @@ const App = () => {
                     <Route path="/quizlet/lessons/:lessonId" element={getTeacherRoute(<TeacherQuizletManager />)} />
                     <Route path="/quizlet/topics/:topicId" element={getTeacherRoute(<TeacherQuizletManager />)} />
                     <Route
+                        path="/quizlet/view/lessons/:lessonId"
+                        element={getRoute(<NavigateHome />, <StudentQuizlet />)}
+                    />
+                    <Route
+                        path="/quizlet/view/lessons/:lessonId/topics/:topicId"
+                        element={getRoute(<NavigateHome />, <StudentQuizlet />)}
+                    />
+                    <Route
                         path="*"
                         element={
                             <ErrorPage

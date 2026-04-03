@@ -26,7 +26,6 @@ import QuizletQuizStart from "./QuizletQuizStart";
 import QuizletSessionResults from "./QuizletSessionResults";
 import { parseQueue } from "./quizletUtils";
 import TrainingSessionHeader from "./TrainingSessionHeader";
-import ViewModeBreadcrumb from "./ViewModeBreadcrumb";
 
 interface CatalogResponse {
     groups: TQuizletGroup[];
@@ -336,13 +335,13 @@ const PersonalTopicEditor = ({ subgroup, initialWords, onSaved }: PersonalTopicE
                 >
                     <thead>
                         <tr className="table-light">
-                            <th className="text-center" style={{ width: "28%" }}>
+                            <th className="quizlet-dictionary-table-head" style={{ width: "28%" }}>
                                 Кандзи
                             </th>
-                            <th className="text-center" style={{ width: "28%" }}>
+                            <th className="quizlet-dictionary-table-head" style={{ width: "28%" }}>
                                 Чтение
                             </th>
-                            <th className="text-center" style={{ width: "37%" }}>
+                            <th className="quizlet-dictionary-table-head" style={{ width: "37%" }}>
                                 Перевод
                             </th>
                             <th style={{ width: "5%" }}></th>
@@ -428,6 +427,10 @@ const StudentQuizlet = () => {
 
     const getPersonalTopicPath = (topicId: number) => `${routePaths.personalDictionary}/topics/${topicId}`;
 
+    const getViewLessonPath = (lessonId: number) => `${routePaths.view}/lessons/${lessonId}`;
+    const getViewTopicPath = (lessonId: number, topicId: number) =>
+        `${routePaths.view}/lessons/${lessonId}/topics/${topicId}`;
+
     const [loadStatus, setLoadStatus] = useState<LoadStatus.Type>(LoadStatus.NONE);
     const [mode, setMode] = useState<"training" | "view" | "personal" | "progress" | null>(null);
 
@@ -453,8 +456,6 @@ const StudentQuizlet = () => {
 
     const [personalLessonTitle, setPersonalLessonTitle] = useState<string>("");
     const [newPersonalTopicTitle, setNewPersonalTopicTitle] = useState<string>("");
-    const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
-    const [selectedTopicId, setSelectedTopicId] = useState<number | null>(null);
     const [isEditingLessonTitle, setIsEditingLessonTitle] = useState(false);
     const [selectedPersonalTopicId, setSelectedPersonalTopicId] = useState<number | null>(null);
     const [isEditingPersonalTopicTitle, setIsEditingPersonalTopicTitle] = useState(false);
@@ -474,7 +475,13 @@ const StudentQuizlet = () => {
     const isFlashcardsRoute = location.pathname === routePaths.flashcards;
     const isPairsRoute = location.pathname === routePaths.pairs;
     const isResultsRoute = location.pathname === routePaths.results;
-    const isViewRoute = location.pathname === routePaths.view;
+    const viewLessonRouteMatch = location.pathname.match(/^\/quizlet\/view\/lessons\/(\d+)$/);
+    const viewLessonRouteId = viewLessonRouteMatch ? Number(viewLessonRouteMatch[1]) : null;
+    const viewTopicRouteMatch = location.pathname.match(/^\/quizlet\/view\/lessons\/(\d+)\/topics\/(\d+)$/);
+    const viewTopicLessonRouteId = viewTopicRouteMatch ? Number(viewTopicRouteMatch[1]) : null;
+    const viewTopicRouteId = viewTopicRouteMatch ? Number(viewTopicRouteMatch[2]) : null;
+    const isViewRoute =
+        location.pathname === routePaths.view || viewLessonRouteId !== null || viewTopicRouteId !== null;
     const isPersonalDictionaryRoute = location.pathname === routePaths.personalDictionary;
     const personalTopicRouteMatch = location.pathname.match(/^\/quizlet\/my-dictionary\/topics\/(\d+)$/);
     const personalTopicRouteId = personalTopicRouteMatch ? Number(personalTopicRouteMatch[1]) : null;
@@ -576,8 +583,6 @@ const StudentQuizlet = () => {
     ]);
 
     useEffect(() => {
-        setSelectedLessonId(null);
-        setSelectedTopicId(null);
         setSelectedPersonalTopicId(null);
         setIsEditingLessonTitle(false);
         setIsEditingPersonalTopicTitle(false);
@@ -989,52 +994,23 @@ const StudentQuizlet = () => {
     };
 
     const selectedLesson =
-        selectedLessonId !== null ? groups.find((group) => group.id === selectedLessonId) ?? null : null;
+        // Derive from URL for view section
+        (() => {
+            const id = viewLessonRouteId ?? viewTopicLessonRouteId;
+            return id !== null ? groups.find((group) => group.id === id) ?? null : null;
+        })();
     const selectedLessonTopics = selectedLesson
         ? subgroups.filter((subgroup) => subgroup.group_id === selectedLesson.id)
         : [];
     const selectedTopic =
-        selectedTopicId !== null
-            ? selectedLessonTopics.find((subgroup) => subgroup.id === selectedTopicId) ?? null
+        viewTopicRouteId !== null
+            ? selectedLessonTopics.find((subgroup) => subgroup.id === viewTopicRouteId) ?? null
             : null;
     const selectedTopicWords = selectedTopic ? getSubgroupWords(selectedTopic.id) : [];
     const selectedPersonalSubgroup =
         selectedPersonalTopicId !== null
             ? personalSubgroups.find((subgroup) => subgroup.id === selectedPersonalTopicId) ?? null
             : null;
-
-    const teacherBreadcrumbItems =
-        selectedLesson === null
-            ? [{ key: "teacher-root", label: "Словари преподавателя" }]
-            : selectedTopic === null
-            ? [
-                  {
-                      key: "teacher-lesson",
-                      label: selectedLesson.title,
-                      onClick: () => {
-                          setSelectedLessonId(null);
-                          setSelectedTopicId(null);
-                      },
-                  },
-                  {
-                      key: "teacher-topics",
-                      label: "Темы",
-                  },
-              ]
-            : [
-                  {
-                      key: "teacher-lesson",
-                      label: selectedLesson.title,
-                      onClick: () => {
-                          setSelectedLessonId(null);
-                          setSelectedTopicId(null);
-                      },
-                  },
-                  {
-                      key: "teacher-topic",
-                      label: selectedTopic.title,
-                  },
-              ];
 
     const personalRootLabel =
         personalLesson !== null
@@ -1043,27 +1019,13 @@ const StudentQuizlet = () => {
             ? personalLessonTitle.trim()
             : "Мой словарь";
 
-    const personalBreadcrumbItems =
-        selectedPersonalSubgroup === null
-            ? [{ key: "personal-topics", label: "Темы" }]
-            : [
-                  {
-                      key: "personal-topics",
-                      label: "Темы",
-                      onClick: () => navigate(routePaths.personalDictionary),
-                  },
-                  {
-                      key: "personal-topic",
-                      label: selectedPersonalSubgroup.title,
-                  },
-              ];
-
     const isDictionaryViewPage = session === null && isViewRoute;
     const isPersonalDictionaryPage = session === null && (isPersonalDictionaryRoute || isPersonalTopicRoute);
+    const isPersonalTopicPage = session === null && isPersonalTopicRoute;
     const isTrainingSetupPage = session === null && isSetupRoute;
     const isProgressPage = session === null && isProgressRoute;
     const pageTitle = isDictionaryViewPage
-        ? "辞書"
+        ? "先生の辞書"
         : isPersonalDictionaryPage
         ? personalRootLabel
         : isTrainingSetupPage
@@ -1078,17 +1040,40 @@ const StudentQuizlet = () => {
         ? "ペア"
         : "ワードラボ";
     const pageBackUrl =
-        isDictionaryViewPage || isTrainingSetupPage || isProgressPage
+        (session === null && location.pathname === routePaths.view) || isTrainingSetupPage || isProgressPage
             ? routePaths.modeSelection
+            : session === null && viewLessonRouteId !== null && viewTopicRouteId === null
+            ? routePaths.view
+            : session === null && viewTopicRouteId !== null
+            ? getViewLessonPath(viewTopicLessonRouteId!)
+            : isPersonalTopicPage
+            ? routePaths.personalDictionary
             : isPersonalDictionaryPage
             ? routePaths.view
             : isFlashcardsRoute || isResultsRoute || isPairsRoute
             ? undefined
             : "/";
 
+    const pageTitleRightElement =
+        isPersonalDictionaryPage &&
+        selectedPersonalTopicId === null &&
+        personalLesson !== null &&
+        !isEditingLessonTitle ? (
+            <button
+                className="btn btn-sm btn-link p-0 text-muted quizlet-personal-topic-edit-btn"
+                title="Переименовать"
+                onClick={() => {
+                    setIsEditingLessonTitle(true);
+                    setPersonalLessonTitle(personalLesson.title);
+                }}
+            >
+                <i className="bi bi-pencil" />
+            </button>
+        ) : undefined;
+
     return (
         <div className="container">
-            <PageTitle title={pageTitle} urlBack={pageBackUrl} />
+            <PageTitle title={pageTitle} urlBack={pageBackUrl} rightElement={pageTitleRightElement} />
 
             {session === null && isModeSelectionRoute && (
                 <div
@@ -1127,7 +1112,7 @@ const StudentQuizlet = () => {
             )}
 
             {session === null && isSetupRoute && (
-                <>
+                <div className="mx-auto mt-5" style={{ maxWidth: "760px" }}>
                     <QuizletQuizStart
                         groups={groups}
                         subgroups={subgroups}
@@ -1135,7 +1120,7 @@ const StudentQuizlet = () => {
                         personalSubgroups={personalSubgroups}
                         onStart={startSession}
                     />
-                </>
+                </div>
             )}
 
             {session === null && isPersonalDictionaryPage && (
@@ -1169,46 +1154,15 @@ const StudentQuizlet = () => {
                                     </div>
                                 ) : (
                                     <div className="d-flex align-items-center gap-2">
-                                        <ViewModeBreadcrumb
-                                            items={personalBreadcrumbItems}
-                                            className="mb-0 quizlet-personal-breadcrumb"
-                                        />
-
-                                        {selectedPersonalTopicId === null && personalLesson !== null && (
-                                            <button
-                                                className="btn btn-sm btn-link p-0 text-muted quizlet-personal-topic-edit-btn"
-                                                title="Переименовать"
-                                                onClick={() => {
-                                                    setIsEditingLessonTitle(true);
-                                                    setPersonalLessonTitle(personalLesson.title);
-                                                }}
-                                            >
-                                                <i className="bi bi-pencil" />
-                                            </button>
-                                        )}
-
                                         {selectedPersonalSubgroup !== null && !isEditingPersonalTopicTitle && (
-                                            <button
-                                                className="btn btn-sm btn-link p-0 text-muted quizlet-personal-topic-edit-btn"
-                                                title="Переименовать тему"
-                                                onClick={() => {
-                                                    setIsEditingPersonalTopicTitle(true);
-                                                    setPersonalTopicTitleDraft(selectedPersonalSubgroup.title);
-                                                }}
-                                            >
-                                                <i className="bi bi-pencil" />
-                                            </button>
+                                            <h5 className="quizlet-personal-topic-title mb-0">
+                                                {selectedPersonalSubgroup.title}
+                                            </h5>
                                         )}
-                                    </div>
-                                )}
 
-                                {personalLesson !== null &&
-                                    selectedPersonalSubgroup !== null &&
-                                    isEditingPersonalTopicTitle && (
-                                        <div className="mt-2">
+                                        {selectedPersonalSubgroup !== null && isEditingPersonalTopicTitle && (
                                             <input
-                                                className="form-control form-control-sm"
-                                                style={{ width: "auto", minWidth: "220px" }}
+                                                className="quizlet-personal-topic-title-input"
                                                 value={personalTopicTitleDraft}
                                                 onChange={(e) => setPersonalTopicTitleDraft(e.target.value)}
                                                 autoFocus
@@ -1231,8 +1185,22 @@ const StudentQuizlet = () => {
                                                     }
                                                 }}
                                             />
-                                        </div>
-                                    )}
+                                        )}
+
+                                        {selectedPersonalSubgroup !== null && !isEditingPersonalTopicTitle && (
+                                            <button
+                                                className="btn btn-sm btn-link p-0 text-muted quizlet-personal-topic-edit-btn"
+                                                title="Переименовать тему"
+                                                onClick={() => {
+                                                    setIsEditingPersonalTopicTitle(true);
+                                                    setPersonalTopicTitleDraft(selectedPersonalSubgroup.title);
+                                                }}
+                                            >
+                                                <i className="bi bi-pencil" />
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
                             </div>
 
                             <div className="d-flex gap-2 align-items-center quizlet-personal-topic-header-actions">
@@ -1270,9 +1238,9 @@ const StudentQuizlet = () => {
                         {/* Topic list page */}
                         {personalLesson !== null && selectedPersonalTopicId === null && (
                             <>
-                                <div className="mb-3 d-flex gap-2">
+                                <div className="mb-3 d-flex gap-2 align-items-center quizlet-personal-topic-create-row">
                                     <input
-                                        className="form-control"
+                                        className="form-control quizlet-personal-topic-create-input"
                                         value={newPersonalTopicTitle}
                                         onChange={(e) => setNewPersonalTopicTitle(e.target.value)}
                                         placeholder="Новая тема..."
@@ -1280,7 +1248,10 @@ const StudentQuizlet = () => {
                                             if (e.key === "Enter") addPersonalSubgroup();
                                         }}
                                     />
-                                    <button className="btn btn-outline-primary" onClick={addPersonalSubgroup}>
+                                    <button
+                                        className="btn btn-success btn-sm quizlet-personal-topic-create-btn"
+                                        onClick={addPersonalSubgroup}
+                                    >
                                         + Добавить
                                     </button>
                                 </div>
@@ -1290,18 +1261,33 @@ const StudentQuizlet = () => {
                                 )}
 
                                 {personalSubgroups.length > 0 && (
-                                    <div className="list-group">
-                                        {personalSubgroups.map((subgroup) => (
-                                            <button
-                                                key={subgroup.id}
-                                                className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-                                                style={{ padding: "14px 18px", marginBottom: "4px" }}
-                                                onClick={() => navigate(getPersonalTopicPath(subgroup.id))}
-                                            >
-                                                <span>{subgroup.title}</span>
-                                                <i className="bi bi-chevron-right text-muted" />
-                                            </button>
-                                        ))}
+                                    <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-2 pt-1">
+                                        {personalSubgroups.map((subgroup) => {
+                                            const wordCount = personalWords.filter(
+                                                (word) => word.subgroup_id === subgroup.id,
+                                            ).length;
+
+                                            return (
+                                                <div className="col" key={subgroup.id}>
+                                                    <button
+                                                        className="btn w-100 text-start p-0 border-0 quizlet-topic-card-btn"
+                                                        onClick={() => navigate(getPersonalTopicPath(subgroup.id))}
+                                                    >
+                                                        <div className="card quizlet-topic-card h-100">
+                                                            <div className="card-body d-flex flex-column justify-content-between">
+                                                                <span className="quizlet-topic-card__title">
+                                                                    {subgroup.title}
+                                                                </span>
+                                                                <span className="quizlet-topic-card__count text-muted mt-2">
+                                                                    <i className="bi bi-card-text me-1" />
+                                                                    {wordCount} слов
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </>
@@ -1320,44 +1306,59 @@ const StudentQuizlet = () => {
             )}
 
             {session === null && isViewRoute && (
-                <div style={{ maxWidth: "760px", margin: "0 auto" }}>
-                    <div className="mb-3 d-flex justify-content-end align-items-center flex-wrap gap-2">
-                        <button
-                            className="btn btn-primary"
-                            onClick={() => {
-                                if (personalLesson === null && personalLessonTitle.trim().length === 0) {
-                                    setPersonalLessonTitle("Мой словарь");
-                                }
-                                navigate(routePaths.personalDictionary);
-                            }}
-                        >
-                            {personalLesson === null ? "Create personal dictionary" : "Мой словарь"}
-                        </button>
-                    </div>
-
+                <div className="mx-auto mt-5" style={{ maxWidth: "760px" }}>
                     <div className="quizlet-main-container">
-                        <ViewModeBreadcrumb items={teacherBreadcrumbItems} />
+                        <div className="d-flex justify-content-end align-items-center flex-wrap gap-2 px-1 pt-1 pb-2">
+                            <button
+                                className="btn btn-success"
+                                onClick={() => {
+                                    if (personalLesson === null && personalLessonTitle.trim().length === 0) {
+                                        setPersonalLessonTitle("Мой словарь");
+                                    }
+                                    navigate(routePaths.personalDictionary);
+                                }}
+                            >
+                                {personalLesson === null ? "Create personal dictionary" : "Мой словарь"}
+                            </button>
+                        </div>
 
                         {groups.length === 0 && <div className="text-muted">Пока нет доступных уроков.</div>}
 
                         {groups.length > 0 && selectedLesson === null && (
-                            <div>
-                                <div className="list-group">
-                                    {groups.map((group) => (
-                                        <button
-                                            key={group.id}
-                                            className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-                                            style={{ padding: "14px 18px", marginBottom: "4px" }}
-                                            onClick={() => {
-                                                setSelectedLessonId(group.id);
-                                                setSelectedTopicId(null);
-                                            }}
-                                        >
-                                            <span className="fw-semibold">{group.title}</span>
-                                            <i className="bi bi-chevron-right text-muted" />
-                                        </button>
-                                    ))}
-                                </div>
+                            <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-2 pt-1">
+                                {groups.map((group) => {
+                                    const lessonTopics = subgroups.filter((subgroup) => subgroup.group_id === group.id);
+                                    const lessonTopicIds = new Set(lessonTopics.map((subgroup) => subgroup.id));
+                                    const lessonWordCount = subgroupWords.filter((sw) =>
+                                        lessonTopicIds.has(sw.subgroup_id),
+                                    ).length;
+
+                                    return (
+                                        <div className="col" key={group.id}>
+                                            <button
+                                                className="btn w-100 text-start p-0 border-0 quizlet-topic-card-btn"
+                                                onClick={() => {
+                                                    navigate(getViewLessonPath(group.id));
+                                                }}
+                                            >
+                                                <div className="card quizlet-topic-card h-100">
+                                                    <div className="card-body d-flex flex-column justify-content-between">
+                                                        <span className="quizlet-topic-card__title fw-semibold">
+                                                            {group.title}
+                                                        </span>
+                                                        <span className="quizlet-topic-card__count text-muted mt-2">
+                                                            <i className="bi bi-collection me-1" />
+                                                            {lessonTopics.length} тем
+                                                            <span className="mx-2">•</span>
+                                                            <i className="bi bi-card-text me-1" />
+                                                            {lessonWordCount} слов
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         )}
 
@@ -1367,18 +1368,34 @@ const StudentQuizlet = () => {
                                     <div className="text-muted small">В этом уроке пока нет тем.</div>
                                 )}
                                 {selectedLessonTopics.length > 0 && (
-                                    <div className="list-group">
-                                        {selectedLessonTopics.map((subgroup) => (
-                                            <button
-                                                key={subgroup.id}
-                                                className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-                                                style={{ padding: "14px 18px", marginBottom: "4px" }}
-                                                onClick={() => setSelectedTopicId(subgroup.id)}
-                                            >
-                                                <span>{subgroup.title}</span>
-                                                <i className="bi bi-chevron-right text-muted" />
-                                            </button>
-                                        ))}
+                                    <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-2 pt-1">
+                                        {selectedLessonTopics.map((subgroup) => {
+                                            const wordCount = subgroupWords.filter(
+                                                (sw) => sw.subgroup_id === subgroup.id,
+                                            ).length;
+                                            return (
+                                                <div className="col" key={subgroup.id}>
+                                                    <button
+                                                        className="btn w-100 text-start p-0 border-0 quizlet-topic-card-btn"
+                                                        onClick={() =>
+                                                            navigate(getViewTopicPath(selectedLesson.id, subgroup.id))
+                                                        }
+                                                    >
+                                                        <div className="card quizlet-topic-card h-100">
+                                                            <div className="card-body d-flex flex-column justify-content-between">
+                                                                <span className="quizlet-topic-card__title">
+                                                                    {subgroup.title}
+                                                                </span>
+                                                                <span className="quizlet-topic-card__count text-muted mt-2">
+                                                                    <i className="bi bi-card-text me-1" />
+                                                                    {wordCount} слов
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </>
@@ -1390,9 +1407,24 @@ const StudentQuizlet = () => {
                                     <table className="table table-bordered table-hover align-middle mb-0">
                                         <thead>
                                             <tr className="table-light">
-                                                <th style={{ width: "28%", padding: "12px 18px" }}>Кандзи</th>
-                                                <th style={{ width: "28%", padding: "12px 18px" }}>Чтение</th>
-                                                <th style={{ width: "44%", padding: "12px 18px" }}>Перевод</th>
+                                                <th
+                                                    className="quizlet-dictionary-table-head"
+                                                    style={{ width: "28%", padding: "9px 14px" }}
+                                                >
+                                                    Кандзи
+                                                </th>
+                                                <th
+                                                    className="quizlet-dictionary-table-head"
+                                                    style={{ width: "28%", padding: "9px 14px" }}
+                                                >
+                                                    Чтение
+                                                </th>
+                                                <th
+                                                    className="quizlet-dictionary-table-head"
+                                                    style={{ width: "44%", padding: "9px 14px" }}
+                                                >
+                                                    Перевод
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -1401,7 +1433,7 @@ const StudentQuizlet = () => {
                                                     <td
                                                         colSpan={3}
                                                         className="text-muted small"
-                                                        style={{ padding: "12px 18px" }}
+                                                        style={{ padding: "9px 14px" }}
                                                     >
                                                         Нет слов в этой теме.
                                                     </td>
@@ -1409,9 +1441,9 @@ const StudentQuizlet = () => {
                                             )}
                                             {selectedTopicWords.map((word) => (
                                                 <tr key={word.id}>
-                                                    <td style={{ padding: "12px 18px" }}>{word.char_jp ?? ""}</td>
-                                                    <td style={{ padding: "12px 18px" }}>{word.word_jp}</td>
-                                                    <td style={{ padding: "12px 18px" }}>{word.ru}</td>
+                                                    <td style={{ padding: "9px 14px" }}>{word.char_jp ?? ""}</td>
+                                                    <td style={{ padding: "9px 14px" }}>{word.word_jp}</td>
+                                                    <td style={{ padding: "9px 14px" }}>{word.ru}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -1424,7 +1456,7 @@ const StudentQuizlet = () => {
             )}
 
             {session === null && isProgressRoute && (
-                <div style={{ maxWidth: "760px", margin: "0 auto" }}>
+                <div className="mx-auto mt-5" style={{ maxWidth: "760px" }}>
                     <QuizletProgressHistory
                         sessions={historySessions}
                         isLoading={historyLoadStatus === LoadStatus.LOADING}
