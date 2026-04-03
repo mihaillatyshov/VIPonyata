@@ -459,6 +459,7 @@ const StudentQuizlet = () => {
     const [selectedPersonalTopicId, setSelectedPersonalTopicId] = useState<number | null>(null);
     const [isEditingPersonalTopicTitle, setIsEditingPersonalTopicTitle] = useState(false);
     const [personalTopicTitleDraft, setPersonalTopicTitleDraft] = useState<string>("");
+    const [isDeleteTopicConfirming, setIsDeleteTopicConfirming] = useState(false);
 
     const [historySessions, setHistorySessions] = useState<TQuizletSession[]>([]);
     const [historyLoadStatus, setHistoryLoadStatus] = useState<LoadStatus.Type>(LoadStatus.NONE);
@@ -581,17 +582,20 @@ const StudentQuizlet = () => {
         setIsEditingLessonTitle(false);
         setIsEditingPersonalTopicTitle(false);
         setPersonalTopicTitleDraft("");
+        setIsDeleteTopicConfirming(false);
         setExpandedHistorySessionId(null);
     }, [mode]);
 
     useEffect(() => {
         if (isPersonalDictionaryRoute) {
             setSelectedPersonalTopicId(null);
+            setIsDeleteTopicConfirming(false);
             return;
         }
 
         if (personalTopicRouteId !== null) {
             setSelectedPersonalTopicId(personalTopicRouteId);
+            setIsDeleteTopicConfirming(false);
         }
     }, [isPersonalDictionaryRoute, personalTopicRouteId]);
 
@@ -1232,17 +1236,34 @@ const StudentQuizlet = () => {
                             </div>
 
                             <div className="d-flex gap-2 align-items-center quizlet-personal-topic-header-actions">
-                                {selectedPersonalSubgroup !== null && (
-                                    <button
-                                        className="btn quizlet-personal-topic-delete-action-btn"
-                                        onClick={async () => {
-                                            await deletePersonalTopic(selectedPersonalSubgroup);
-                                            navigate(routePaths.personalDictionary);
-                                        }}
-                                    >
-                                        Удалить
-                                    </button>
-                                )}
+                                {selectedPersonalSubgroup !== null &&
+                                    (isDeleteTopicConfirming ? (
+                                        <>
+                                            <button
+                                                className="btn btn-danger btn-sm"
+                                                onClick={async () => {
+                                                    setIsDeleteTopicConfirming(false);
+                                                    await deletePersonalTopic(selectedPersonalSubgroup);
+                                                    navigate(routePaths.personalDictionary);
+                                                }}
+                                            >
+                                                Точно?
+                                            </button>
+                                            <button
+                                                className="btn btn-outline-secondary btn-sm"
+                                                onClick={() => setIsDeleteTopicConfirming(false)}
+                                            >
+                                                Отмена
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <button
+                                            className="btn quizlet-personal-topic-delete-action-btn"
+                                            onClick={() => setIsDeleteTopicConfirming(true)}
+                                        >
+                                            Удалить
+                                        </button>
+                                    ))}
                             </div>
                         </div>
 

@@ -450,6 +450,7 @@ def update_personal_quizlet_subgroup(user_id: int, subgroup_id: int, data: Quizl
 def delete_personal_quizlet_subgroup(user_id: int, subgroup_id: int):
     subgroup = _get_personal_subgroup(subgroup_id, user_id)
     with DBsession.begin() as session:
+        session.execute(delete(UserQuizletWord).where(UserQuizletWord.subgroup_id == subgroup.id))
         session.execute(delete(UserQuizletSubgroup).where(UserQuizletSubgroup.id == subgroup.id))
 
 
