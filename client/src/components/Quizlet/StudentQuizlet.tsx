@@ -1054,26 +1054,46 @@ const StudentQuizlet = () => {
             ? undefined
             : "/";
 
-    const pageTitleRightElement =
-        isPersonalDictionaryPage &&
-        selectedPersonalTopicId === null &&
-        personalLesson !== null &&
-        !isEditingLessonTitle ? (
-            <button
-                className="btn btn-sm btn-link p-0 text-muted quizlet-personal-topic-edit-btn"
-                title="Переименовать"
-                onClick={() => {
-                    setIsEditingLessonTitle(true);
-                    setPersonalLessonTitle(personalLesson.title);
+    const canInlineEditLessonTitle =
+        isPersonalDictionaryPage && selectedPersonalTopicId === null && personalLesson !== null;
+
+    const pageTitleElement = canInlineEditLessonTitle ? (
+        isEditingLessonTitle ? (
+            <input
+                className="form-control form-control-sm quizlet-page-title-inline-edit-input"
+                value={personalLessonTitle}
+                onChange={(e) => setPersonalLessonTitle(e.target.value)}
+                placeholder="Например: Мой словарь"
+                autoFocus
+                onBlur={ensurePersonalLesson}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter") ensurePersonalLesson();
+                    if (e.key === "Escape" && personalLesson !== null) {
+                        setIsEditingLessonTitle(false);
+                        setPersonalLessonTitle(personalLesson.title);
+                    }
                 }}
-            >
-                <i className="bi bi-pencil" />
-            </button>
-        ) : undefined;
+            />
+        ) : (
+            <span className="d-inline-flex align-items-center gap-2">
+                <span>{personalRootLabel}</span>
+                <button
+                    className="btn btn-sm btn-link p-0 text-muted quizlet-personal-topic-edit-btn"
+                    title="Переименовать"
+                    onClick={() => {
+                        setIsEditingLessonTitle(true);
+                        setPersonalLessonTitle(personalLesson!.title);
+                    }}
+                >
+                    <i className="bi bi-pencil" />
+                </button>
+            </span>
+        )
+    ) : undefined;
 
     return (
         <div className="container">
-            <PageTitle title={pageTitle} urlBack={pageBackUrl} rightElement={pageTitleRightElement} />
+            <PageTitle title={pageTitle} titleElement={pageTitleElement} urlBack={pageBackUrl} />
 
             {session === null && isModeSelectionRoute && (
                 <div
@@ -1128,8 +1148,7 @@ const StudentQuizlet = () => {
                     <div className="quizlet-main-container">
                         <div className="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
                             <div className="flex-grow-1" style={{ minWidth: 0 }}>
-                                {selectedPersonalTopicId === null &&
-                                (isEditingLessonTitle || personalLesson === null) ? (
+                                {selectedPersonalTopicId === null && personalLesson === null ? (
                                     <div className="d-flex gap-2 flex-grow-1">
                                         <input
                                             className="form-control"
@@ -1140,10 +1159,7 @@ const StudentQuizlet = () => {
                                             onBlur={personalLesson !== null ? ensurePersonalLesson : undefined}
                                             onKeyDown={(e) => {
                                                 if (e.key === "Enter") ensurePersonalLesson();
-                                                if (e.key === "Escape" && personalLesson !== null) {
-                                                    setIsEditingLessonTitle(false);
-                                                    setPersonalLessonTitle(personalLesson.title);
-                                                }
+                                                if (e.key === "Escape") setPersonalLessonTitle("");
                                             }}
                                         />
                                         {personalLesson === null && (
@@ -1153,7 +1169,7 @@ const StudentQuizlet = () => {
                                         )}
                                     </div>
                                 ) : (
-                                    <div className="d-flex align-items-center gap-2">
+                                    <div className="d-flex align-items-center gap-2 quizlet-student-topic-header-offset">
                                         {selectedPersonalSubgroup !== null && !isEditingPersonalTopicTitle && (
                                             <h5 className="quizlet-personal-topic-title mb-0">
                                                 {selectedPersonalSubgroup.title}

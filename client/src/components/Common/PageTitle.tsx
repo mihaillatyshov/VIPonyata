@@ -23,16 +23,19 @@ const Back = ({ urlBack }: BackProps) => {
 
 interface PageTitleProps extends BackProps {
     title?: string;
+    titleElement?: React.ReactNode;
     className?: string;
     rightElement?: React.ReactNode;
 }
 
-const PageTitle = ({ title, urlBack, className = "", rightElement }: PageTitleProps) => {
+const PageTitle = ({ title, titleElement, urlBack, className = "", rightElement }: PageTitleProps) => {
     return (
         <div>
             <div className={`${className} ${styles.pageTitle}`}>
                 <Back urlBack={urlBack} />
-                {title !== undefined ? (
+                {titleElement !== undefined ? (
+                    <div className="mx-auto pe-2">{titleElement}</div>
+                ) : title !== undefined ? (
                     <div className="mx-auto pe-2">{title}</div>
                 ) : (
                     <div className="placeholder-wave w-100 lh-1" style={{ height: "var(--var-page-title-size)" }}>

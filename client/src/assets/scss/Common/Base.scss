@@ -57,3 +57,11 @@ rt {
 .md-last-no-margin p:last-child {
     margin-bottom: 0;
 }
+
+/* Avoid persistent post-click focus ring on buttons while preserving keyboard focus-visible state. */
+button:focus:not(:focus-visible),
+.btn:focus:not(:focus-visible),
+.btn-check:focus + .btn:not(:focus-visible) {
+    outline: none;
+    box-shadow: none;
+}

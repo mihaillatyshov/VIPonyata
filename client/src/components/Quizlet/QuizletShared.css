@@ -19,6 +19,24 @@
     padding-left: 18px;
 }
 
+.quizlet-teacher-breadcrumb .breadcrumb {
+    font-size: 2.24rem;
+}
+
+.quizlet-teacher-breadcrumb .breadcrumb-item,
+.quizlet-teacher-breadcrumb .breadcrumb-item a,
+.quizlet-teacher-breadcrumb .breadcrumb-item a:hover,
+.quizlet-teacher-breadcrumb .breadcrumb-item a:focus,
+.quizlet-teacher-breadcrumb .breadcrumb-item a:visited {
+    color: #111111;
+    text-decoration: none;
+}
+
+.quizlet-teacher-breadcrumb .breadcrumb-item a:hover,
+.quizlet-teacher-breadcrumb .breadcrumb-item a:focus {
+    text-decoration: underline;
+}
+
 .quizlet-personal-topic-editor {
     margin-top: 32px;
 }
@@ -69,11 +87,36 @@
     margin-top: 10px;
 }
 
+.quizlet-student-topic-header-offset {
+    padding-left: 10px;
+}
+
+.quizlet-page-title-inline-edit-input {
+    min-width: 280px;
+    max-width: 420px;
+    padding: 0 2px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-family: "APJapanesefont", "CenturyGothicPaneuropean", Arial, Helvetica, sans-serif !important;
+    font-size: var(--var-page-title-size) !important;
+    line-height: 1 !important;
+    font-weight: inherit !important;
+    color: inherit !important;
+    height: auto !important;
+}
+
+.quizlet-page-title-inline-edit-input:focus {
+    outline: none;
+    box-shadow: none !important;
+}
+
 .quizlet-personal-topic-title {
     font-size: 2.64rem;
     font-weight: 600;
     line-height: 1.2;
-    color: #3f4b57;
+    color: #000000;
 }
 
 .quizlet-personal-topic-title-input {
@@ -97,12 +140,34 @@
 }
 
 .quizlet-personal-topic-edit-btn {
-    margin-top: 8px;
+    margin-top: 0;
     color: #8e99a6 !important;
     opacity: 0.95;
     transition:
         color 0.15s ease,
         opacity 0.15s ease;
+}
+
+.quizlet-personal-topic-header-actions .quizlet-personal-topic-edit-btn,
+.quizlet-topic-card .quizlet-personal-topic-edit-btn,
+.quizlet-topic-card .quizlet-personal-topic-row-delete-btn {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    margin: 0;
+}
+
+.quizlet-personal-topic-edit-btn:focus:not(:focus-visible),
+.quizlet-personal-topic-row-delete-btn:focus:not(:focus-visible),
+.quizlet-editor-delete-confirm-wrap .btn:focus:not(:focus-visible),
+.quizlet-lesson-delete-confirm-wrap .btn:focus:not(:focus-visible),
+.quizlet-topic-delete-confirm-wrap .btn:focus:not(:focus-visible) {
+    outline: none;
+    box-shadow: none;
 }
 
 .quizlet-personal-topic-edit-btn:hover,
@@ -161,6 +226,33 @@
     font-weight: 600;
     line-height: 1.3;
     word-break: break-word;
+    color: #000000;
+}
+
+.quizlet-topic-card__title:hover,
+.quizlet-topic-card__title:focus,
+.quizlet-topic-card__title:visited {
+    color: #000000;
+}
+
+.quizlet-topic-card__link-area {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 56px;
+    width: 100%;
+    color: #000000;
+}
+
+.quizlet-topic-card__link-area:hover,
+.quizlet-topic-card__link-area:focus,
+.quizlet-topic-card__link-area:visited {
+    color: #000000;
+}
+
+.quizlet-topic-card__title-large {
+    font-size: 1.18rem;
+    line-height: 1.25;
 }
 
 .quizlet-topic-card__count {
@@ -171,6 +263,10 @@
     text-align: center;
     font-weight: 400;
     font-size: 1.03rem;
+}
+
+.quizlet-teacher-dictionary-title {
+    font-size: 3rem;
 }
 
 .quizlet-personal-topic-delete-action-btn {
