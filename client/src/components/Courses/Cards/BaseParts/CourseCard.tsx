@@ -1,5 +1,3 @@
-import React from "react";
-
 import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import { ChatUrlLinkMd, TextWithLinksForMd } from "components/Common/TextWithLinks";
 
@@ -16,7 +14,7 @@ export const Difficulty = ({ difficulty }: DifficultyProps) => {
 type DescriptionProps = { description: string | null };
 export const Description = ({ description }: DescriptionProps) => {
     return (
-        <div className="md-last-pad-zero">
+        <div className="md-last-pad-zero course__card-description">
             <ReactMarkdownWithHtml components={{ a: ChatUrlLinkMd }}>
                 {TextWithLinksForMd({ text: description ?? "", linkMaxChars: 60 })}
             </ReactMarkdownWithHtml>

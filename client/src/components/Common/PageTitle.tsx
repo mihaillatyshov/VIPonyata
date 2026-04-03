@@ -24,9 +24,10 @@ const Back = ({ urlBack }: BackProps) => {
 interface PageTitleProps extends BackProps {
     title?: string;
     className?: string;
+    rightElement?: React.ReactNode;
 }
 
-const PageTitle = ({ title, urlBack, className = "" }: PageTitleProps) => {
+const PageTitle = ({ title, urlBack, className = "", rightElement }: PageTitleProps) => {
     return (
         <div>
             <div className={`${className} ${styles.pageTitle}`}>
@@ -38,6 +39,7 @@ const PageTitle = ({ title, urlBack, className = "" }: PageTitleProps) => {
                         <span className="placeholder w-100 bg-placeholder rounded lh-1 align-baseline"></span>
                     </div>
                 )}
+                {rightElement}
             </div>
         </div>
     );

@@ -2,7 +2,10 @@
 
 .course__card {
     @extend .box-shadow-main;
-    --var-card-img-width: 110px;
+    --var-card-img-width: 165px;
+    --var-card-img-height: 145px;
+    --var-card-img-right-offset: 0.5rem;
+    --var-card-desc-gap-before-img: 0.25rem;
 
     width: 24rem;
     min-width: 250px;
@@ -14,8 +17,11 @@
 }
 
 .course__card-title {
-    font-size: 24px;
-    font-weight: bold;
+    font-size: clamp(2rem, 1.4rem + 1.6vw, 2.6rem);
+    line-height: 1.1;
+    font-weight: 700;
+    padding-left: 1.25rem;
+    margin-top: 0.4rem;
 }
 
 .course__card-sort {
@@ -27,23 +33,43 @@
 
 .course__card-text-block {
     width: 100%;
-    height: 210px;
+    height: 250px;
     overflow: hidden;
+}
+
+.course__card-content-row {
+    position: relative;
+    margin-top: 2.2rem;
+    min-height: var(--var-card-img-height);
 }
 
 .course__card-extra-text-block {
     overflow: hidden;
 
     &.with-img {
-        max-width: calc(100% - var(--var-card-img-width) - 10px);
+        box-sizing: border-box;
+        width: calc(
+            100% - var(--var-card-img-width) - var(--var-card-img-right-offset) - var(--var-card-desc-gap-before-img)
+        );
+        max-width: calc(
+            100% - var(--var-card-img-width) - var(--var-card-img-right-offset) - var(--var-card-desc-gap-before-img)
+        );
     }
 }
 
+.course__card-description {
+    font-size: 14px;
+    line-height: 1.35;
+    padding-left: 0.5rem;
+}
+
 .course__card-img {
-    max-height: 100%;
-    max-width: var(--var-card-img-width);
     position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translate(0, -50%);
+    top: 0;
+    right: var(--var-card-img-right-offset);
+    height: var(--var-card-img-height);
+    max-height: var(--var-card-img-height);
+    max-width: var(--var-card-img-width);
+    width: var(--var-card-img-width);
+    object-fit: contain;
 }
