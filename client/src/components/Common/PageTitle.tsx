@@ -15,9 +15,9 @@ const Back = ({ urlBack }: BackProps) => {
     }
 
     return (
-        <div onClick={() => navigate(urlBack)} className={styles.pageTitleBack}>
+        <button type="button" onClick={() => navigate(urlBack)} className={styles.pageTitleBack} aria-label="Назад">
             <i className="bi bi-arrow-left" />
-        </div>
+        </button>
     );
 };
 

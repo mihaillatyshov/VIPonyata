@@ -17,22 +17,46 @@
 }
 
 .pageTitleBack {
-    height: var(--var-page-title-size);
-    font-size: 32px;
+    height: calc(var(--var-page-title-size) - 2px);
+    min-width: calc(var(--var-page-title-size) - 2px);
+    font-size: 28px;
     line-height: 1;
-    border-radius: 4px;
+    border-radius: 10px;
+    border: 2px solid #ffbccd;
+    background: rgba(255, 188, 205, 0.12);
 
     cursor: pointer;
     margin-right: 10px;
     margin-left: -5px;
     display: flex;
     align-items: center;
+    justify-content: center;
     color: #ffc3d2;
-    transition: color 0.15s;
+    box-shadow: 0 2px 8px rgba(255, 129, 167, 0.2);
+    transition:
+        color 0.15s,
+        border-color 0.15s,
+        background-color 0.15s,
+        transform 0.1s,
+        box-shadow 0.15s;
 }
 
 .pageTitleBack:hover {
-    color: #e89eb0;
+    color: #ff4f8b;
+    border-color: #ff4f8b;
+    background: rgba(255, 79, 139, 0.1);
+}
+
+.pageTitleBack:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 4px rgba(255, 129, 167, 0.2);
+}
+
+.pageTitleBack:focus-visible {
+    outline: none;
+    box-shadow:
+        0 0 0 3px rgba(255, 188, 205, 0.4),
+        0 2px 8px rgba(255, 129, 167, 0.2);
 }
 
 .pageTitleAdd {
