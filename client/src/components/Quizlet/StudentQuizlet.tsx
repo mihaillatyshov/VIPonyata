@@ -327,15 +327,25 @@ const PersonalTopicEditor = ({ subgroup, initialWords, onSaved }: PersonalTopicE
     };
 
     return (
-        <div>
-            <div className="table-responsive">
-                <table ref={tableRef} className="table table-sm table-bordered align-middle mb-1" onPaste={handlePaste}>
+        <div className="quizlet-personal-topic-editor">
+            <div className="table-responsive quizlet-personal-topic-editor-table-wrap">
+                <table
+                    ref={tableRef}
+                    className="table table-sm table-bordered align-middle mb-1 quizlet-personal-topic-editor-table"
+                    onPaste={handlePaste}
+                >
                     <thead>
                         <tr className="table-light">
-                            <th style={{ width: "28%" }}>Кандзи</th>
-                            <th style={{ width: "28%" }}>Чтение</th>
-                            <th style={{ width: "37%" }}>Перевод</th>
-                            <th style={{ width: "7%" }}></th>
+                            <th className="text-center" style={{ width: "28%" }}>
+                                Кандзи
+                            </th>
+                            <th className="text-center" style={{ width: "28%" }}>
+                                Чтение
+                            </th>
+                            <th className="text-center" style={{ width: "37%" }}>
+                                Перевод
+                            </th>
+                            <th style={{ width: "5%" }}></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -349,7 +359,7 @@ const PersonalTopicEditor = ({ subgroup, initialWords, onSaved }: PersonalTopicE
                                         <td key={field} className="p-0">
                                             <input
                                                 type="text"
-                                                className="form-control form-control-sm border-0 rounded-0 shadow-none"
+                                                className="form-control form-control-sm border-0 rounded-0 shadow-none quizlet-personal-topic-editor-input"
                                                 style={{ background: "transparent" }}
                                                 value={row[field]}
                                                 onChange={(e) => updateCell(row.key, field, e.target.value)}
@@ -366,7 +376,7 @@ const PersonalTopicEditor = ({ subgroup, initialWords, onSaved }: PersonalTopicE
                                     ))}
                                     <td className="text-center p-0">
                                         <button
-                                            className="btn btn-sm btn-link text-danger p-1 lh-1"
+                                            className="btn btn-sm btn-link text-danger p-1 lh-1 quizlet-personal-topic-row-delete-btn"
                                             onClick={() => removeRow(rowIndex)}
                                             title="Удалить строку"
                                         >
@@ -392,7 +402,7 @@ const PersonalTopicEditor = ({ subgroup, initialWords, onSaved }: PersonalTopicE
                             Есть проблемы
                         </span>
                     )}
-                    <button className="btn btn-sm btn-primary" onClick={handleSave} disabled={isSaving || !isDirty}>
+                    <button className="btn btn-success" onClick={handleSave} disabled={isSaving || !isDirty}>
                         {isSaving ? "Сохранение..." : "Сохранить"}
                     </button>
                 </div>
@@ -412,11 +422,14 @@ const StudentQuizlet = () => {
         pairs: "/quizlet/pairs",
         results: "/quizlet/results",
         view: "/quizlet/view",
+        personalDictionary: "/quizlet/my-dictionary",
         progress: "/quizlet/progress",
     } as const;
 
+    const getPersonalTopicPath = (topicId: number) => `${routePaths.personalDictionary}/topics/${topicId}`;
+
     const [loadStatus, setLoadStatus] = useState<LoadStatus.Type>(LoadStatus.NONE);
-    const [mode, setMode] = useState<"training" | "view" | "progress" | null>(null);
+    const [mode, setMode] = useState<"training" | "view" | "personal" | "progress" | null>(null);
 
     const [groups, setGroups] = useState<TQuizletGroup[]>([]);
     const [subgroups, setSubgroups] = useState<TQuizletSubgroup[]>([]);
@@ -438,7 +451,6 @@ const StudentQuizlet = () => {
         totalPages: 1,
     });
 
-    const [isEditingPersonal, setIsEditingPersonal] = useState(false);
     const [personalLessonTitle, setPersonalLessonTitle] = useState<string>("");
     const [newPersonalTopicTitle, setNewPersonalTopicTitle] = useState<string>("");
     const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
@@ -462,6 +474,10 @@ const StudentQuizlet = () => {
     const isPairsRoute = location.pathname === routePaths.pairs;
     const isResultsRoute = location.pathname === routePaths.results;
     const isViewRoute = location.pathname === routePaths.view;
+    const isPersonalDictionaryRoute = location.pathname === routePaths.personalDictionary;
+    const personalTopicRouteMatch = location.pathname.match(/^\/quizlet\/my-dictionary\/topics\/(\d+)$/);
+    const personalTopicRouteId = personalTopicRouteMatch ? Number(personalTopicRouteMatch[1]) : null;
+    const isPersonalTopicRoute = personalTopicRouteId !== null;
     const isProgressRoute = location.pathname === routePaths.progress;
 
     const fetchCatalog = () => {
@@ -515,13 +531,18 @@ const StudentQuizlet = () => {
             return;
         }
 
+        if (isPersonalDictionaryRoute || isPersonalTopicRoute) {
+            setMode("personal");
+            return;
+        }
+
         if (isProgressRoute) {
             setMode("progress");
             return;
         }
 
         setMode(null);
-    }, [isSetupRoute, isViewRoute, isProgressRoute]);
+    }, [isSetupRoute, isViewRoute, isPersonalDictionaryRoute, isPersonalTopicRoute, isProgressRoute]);
 
     useEffect(() => {
         if (session !== null) {
@@ -556,13 +577,23 @@ const StudentQuizlet = () => {
     useEffect(() => {
         setSelectedLessonId(null);
         setSelectedTopicId(null);
-        setIsEditingPersonal(false);
         setSelectedPersonalTopicId(null);
         setIsEditingLessonTitle(false);
         setIsEditingPersonalTopicTitle(false);
         setPersonalTopicTitleDraft("");
         setExpandedHistorySessionId(null);
     }, [mode]);
+
+    useEffect(() => {
+        if (isPersonalDictionaryRoute) {
+            setSelectedPersonalTopicId(null);
+            return;
+        }
+
+        if (personalTopicRouteId !== null) {
+            setSelectedPersonalTopicId(personalTopicRouteId);
+        }
+    }, [isPersonalDictionaryRoute, personalTopicRouteId]);
 
     useEffect(() => {
         if (mode === "progress") {
@@ -710,7 +741,9 @@ const StudentQuizlet = () => {
             const newId = resp.subgroup?.id;
             setNewPersonalTopicTitle("");
             fetchPersonal().then(() => {
-                if (newId !== undefined) setSelectedPersonalTopicId(newId);
+                if (newId !== undefined) {
+                    navigate(getPersonalTopicPath(newId));
+                }
             });
         });
     };
@@ -1008,22 +1041,12 @@ const StudentQuizlet = () => {
 
     const personalBreadcrumbItems =
         selectedPersonalSubgroup === null
-            ? [
-                  {
-                      key: "personal-root",
-                      label: personalRootLabel,
-                      onClick: () => setSelectedPersonalTopicId(null),
-                  },
+            ? [{ key: "personal-topics", label: "Темы" }]
+            : [
                   {
                       key: "personal-topics",
                       label: "Темы",
-                  },
-              ]
-            : [
-                  {
-                      key: "personal-root",
-                      label: personalRootLabel,
-                      onClick: () => setSelectedPersonalTopicId(null),
+                      onClick: () => navigate(routePaths.personalDictionary),
                   },
                   {
                       key: "personal-topic",
@@ -1032,10 +1055,13 @@ const StudentQuizlet = () => {
               ];
 
     const isDictionaryViewPage = session === null && isViewRoute;
+    const isPersonalDictionaryPage = session === null && (isPersonalDictionaryRoute || isPersonalTopicRoute);
     const isTrainingSetupPage = session === null && isSetupRoute;
     const isProgressPage = session === null && isProgressRoute;
     const pageTitle = isDictionaryViewPage
         ? "辞書"
+        : isPersonalDictionaryPage
+        ? personalRootLabel
         : isTrainingSetupPage
         ? "トレーニング"
         : isProgressPage
@@ -1050,6 +1076,8 @@ const StudentQuizlet = () => {
     const pageBackUrl =
         isDictionaryViewPage || isTrainingSetupPage || isProgressPage
             ? routePaths.modeSelection
+            : isPersonalDictionaryPage
+            ? routePaths.view
             : isFlashcardsRoute || isResultsRoute || isPairsRoute
             ? undefined
             : "/";
@@ -1106,25 +1134,8 @@ const StudentQuizlet = () => {
                 </>
             )}
 
-            {session === null && isViewRoute && isEditingPersonal && (
-                <div style={{ maxWidth: "760px", margin: "0 auto" }}>
-                    <div className="mb-3">
-                        <button
-                            className="btn btn-outline-secondary"
-                            onClick={() => {
-                                if (selectedPersonalTopicId !== null) {
-                                    setSelectedPersonalTopicId(null);
-                                } else {
-                                    setIsEditingPersonal(false);
-                                    setIsEditingLessonTitle(false);
-                                }
-                            }}
-                        >
-                            <i className="bi bi-arrow-left me-1" />
-                            {selectedPersonalTopicId !== null ? "Назад к темам" : "Назад к словарям"}
-                        </button>
-                    </div>
-
+            {session === null && isPersonalDictionaryPage && (
+                <div className="quizlet-personal-dictionary-page" style={{ maxWidth: "760px", margin: "0 auto" }}>
                     <div className="quizlet-main-container">
                         <div className="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
                             <div className="flex-grow-1" style={{ minWidth: 0 }}>
@@ -1154,11 +1165,14 @@ const StudentQuizlet = () => {
                                     </div>
                                 ) : (
                                     <div className="d-flex align-items-center gap-2">
-                                        <ViewModeBreadcrumb items={personalBreadcrumbItems} className="mb-0" />
+                                        <ViewModeBreadcrumb
+                                            items={personalBreadcrumbItems}
+                                            className="mb-0 quizlet-personal-breadcrumb"
+                                        />
 
                                         {selectedPersonalTopicId === null && personalLesson !== null && (
                                             <button
-                                                className="btn btn-sm btn-link p-0 text-muted"
+                                                className="btn btn-sm btn-link p-0 text-muted quizlet-personal-topic-edit-btn"
                                                 title="Переименовать"
                                                 onClick={() => {
                                                     setIsEditingLessonTitle(true);
@@ -1171,7 +1185,7 @@ const StudentQuizlet = () => {
 
                                         {selectedPersonalSubgroup !== null && !isEditingPersonalTopicTitle && (
                                             <button
-                                                className="btn btn-sm btn-link p-0 text-muted"
+                                                className="btn btn-sm btn-link p-0 text-muted quizlet-personal-topic-edit-btn"
                                                 title="Переименовать тему"
                                                 onClick={() => {
                                                     setIsEditingPersonalTopicTitle(true);
@@ -1217,13 +1231,13 @@ const StudentQuizlet = () => {
                                     )}
                             </div>
 
-                            <div className="d-flex gap-2 align-items-center">
+                            <div className="d-flex gap-2 align-items-center quizlet-personal-topic-header-actions">
                                 {selectedPersonalSubgroup !== null && (
                                     <button
-                                        className="btn btn-sm btn-link p-0 text-danger"
+                                        className="btn quizlet-personal-topic-delete-action-btn"
                                         onClick={async () => {
                                             await deletePersonalTopic(selectedPersonalSubgroup);
-                                            setSelectedPersonalTopicId(null);
+                                            navigate(routePaths.personalDictionary);
                                         }}
                                     >
                                         Удалить
@@ -1261,7 +1275,7 @@ const StudentQuizlet = () => {
                                                 key={subgroup.id}
                                                 className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
                                                 style={{ padding: "14px 18px", marginBottom: "4px" }}
-                                                onClick={() => setSelectedPersonalTopicId(subgroup.id)}
+                                                onClick={() => navigate(getPersonalTopicPath(subgroup.id))}
                                             >
                                                 <span>{subgroup.title}</span>
                                                 <i className="bi bi-chevron-right text-muted" />
@@ -1284,16 +1298,16 @@ const StudentQuizlet = () => {
                 </div>
             )}
 
-            {session === null && isViewRoute && !isEditingPersonal && (
+            {session === null && isViewRoute && (
                 <div style={{ maxWidth: "760px", margin: "0 auto" }}>
                     <div className="mb-3 d-flex justify-content-end align-items-center flex-wrap gap-2">
                         <button
                             className="btn btn-primary"
                             onClick={() => {
-                                setIsEditingPersonal(true);
                                 if (personalLesson === null && personalLessonTitle.trim().length === 0) {
                                     setPersonalLessonTitle("Мой словарь");
                                 }
+                                navigate(routePaths.personalDictionary);
                             }}
                         >
                             {personalLesson === null ? "Create personal dictionary" : "Мой словарь"}

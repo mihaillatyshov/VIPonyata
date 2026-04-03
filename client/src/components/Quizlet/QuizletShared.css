@@ -10,6 +10,112 @@
     padding: 14px;
 }
 
+.quizlet-personal-dictionary-page {
+    margin-top: 56px !important;
+}
+
+.quizlet-personal-breadcrumb {
+    padding-top: 14px;
+    padding-left: 18px;
+}
+
+.quizlet-personal-topic-editor {
+    margin-top: 32px;
+}
+
+.quizlet-personal-topic-editor-table-wrap {
+    margin-bottom: 10px;
+}
+
+.quizlet-personal-topic-editor-table {
+    --bs-table-bg: transparent;
+}
+
+.quizlet-personal-topic-editor-table thead th {
+    padding: 16px 20px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.quizlet-personal-topic-editor-table tbody td {
+    vertical-align: middle;
+}
+
+.quizlet-personal-topic-editor-input {
+    min-height: 54px;
+    padding: 14px 16px;
+    font-size: 0.98rem;
+    line-height: 1.45;
+}
+
+.quizlet-personal-topic-editor-input::placeholder {
+    color: #b3bac3;
+    opacity: 1;
+}
+
+.quizlet-personal-topic-row-delete-btn,
+.quizlet-personal-topic-row-delete-btn:hover,
+.quizlet-personal-topic-row-delete-btn:focus,
+.quizlet-personal-topic-row-delete-btn:active {
+    text-decoration: none;
+}
+
+.quizlet-personal-topic-row-delete-btn {
+    min-width: 28px;
+    font-size: 1.2rem;
+}
+
+.quizlet-personal-topic-header-actions {
+    margin-top: 10px;
+}
+
+.quizlet-personal-topic-edit-btn {
+    margin-top: 8px;
+}
+
+.quizlet-personal-topic-delete-action-btn {
+    pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 32px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: 2px solid #ffbccd;
+    background: rgba(255, 188, 205, 0.12);
+    color: #ffc3d2;
+    font-size: 0.85rem;
+    font-weight: 400;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(255, 129, 167, 0.2);
+    text-decoration: none;
+    transition:
+        color 0.15s,
+        border-color 0.15s,
+        background-color 0.15s,
+        transform 0.1s,
+        box-shadow 0.15s;
+}
+
+.quizlet-personal-topic-delete-action-btn:hover {
+    color: #ff4f8b;
+    border-color: #ff4f8b;
+    background: rgba(255, 79, 139, 0.1);
+}
+
+.quizlet-personal-topic-delete-action-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 4px rgba(255, 129, 167, 0.2);
+}
+
+.quizlet-personal-topic-delete-action-btn:focus-visible {
+    outline: none;
+    box-shadow:
+        0 0 0 3px rgba(255, 188, 205, 0.4),
+        0 2px 8px rgba(255, 129, 167, 0.2);
+}
+
 .quizlet-start-training-btn:disabled {
     background-color: #9aa3ad;
     border-color: #9aa3ad;
