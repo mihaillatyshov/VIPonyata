@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import Loading from "components/Common/Loading";
 import PageTitle from "components/Common/PageTitle";
@@ -401,6 +402,19 @@ const PersonalTopicEditor = ({ subgroup, initialWords, onSaved }: PersonalTopicE
 };
 
 const StudentQuizlet = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const routePaths = {
+        modeSelection: "/quizlet",
+        setup: "/quizlet/setup",
+        flashcards: "/quizlet/flashcards",
+        pairs: "/quizlet/pairs",
+        results: "/quizlet/results",
+        view: "/quizlet/view",
+        progress: "/quizlet/progress",
+    } as const;
+
     const [loadStatus, setLoadStatus] = useState<LoadStatus.Type>(LoadStatus.NONE);
     const [mode, setMode] = useState<"training" | "view" | "progress" | null>(null);
 
@@ -442,6 +456,14 @@ const StudentQuizlet = () => {
 
     const [lastStartPayload, setLastStartPayload] = useState<any>(null);
 
+    const isModeSelectionRoute = location.pathname === routePaths.modeSelection;
+    const isSetupRoute = location.pathname === routePaths.setup;
+    const isFlashcardsRoute = location.pathname === routePaths.flashcards;
+    const isPairsRoute = location.pathname === routePaths.pairs;
+    const isResultsRoute = location.pathname === routePaths.results;
+    const isViewRoute = location.pathname === routePaths.view;
+    const isProgressRoute = location.pathname === routePaths.progress;
+
     const fetchCatalog = () => {
         return AjaxGet<CatalogResponse>({ url: "/api/quizlet/groups" }).then((json) => {
             setGroups(json.groups);
@@ -481,6 +503,55 @@ const StudentQuizlet = () => {
     useEffect(() => {
         loadData();
     }, []);
+
+    useEffect(() => {
+        if (isSetupRoute) {
+            setMode("training");
+            return;
+        }
+
+        if (isViewRoute) {
+            setMode("view");
+            return;
+        }
+
+        if (isProgressRoute) {
+            setMode("progress");
+            return;
+        }
+
+        setMode(null);
+    }, [isSetupRoute, isViewRoute, isProgressRoute]);
+
+    useEffect(() => {
+        if (session !== null) {
+            const targetPath = session.is_finished
+                ? routePaths.results
+                : session.quiz_type === "flashcards"
+                ? routePaths.flashcards
+                : routePaths.pairs;
+
+            if (location.pathname !== targetPath) {
+                navigate(targetPath, { replace: true });
+            }
+            return;
+        }
+
+        if (isFlashcardsRoute || isPairsRoute || isResultsRoute) {
+            navigate(routePaths.setup, { replace: true });
+        }
+    }, [
+        session,
+        location.pathname,
+        isFlashcardsRoute,
+        isPairsRoute,
+        isResultsRoute,
+        navigate,
+        routePaths.flashcards,
+        routePaths.pairs,
+        routePaths.results,
+        routePaths.setup,
+    ]);
 
     useEffect(() => {
         setSelectedLessonId(null);
@@ -530,6 +601,7 @@ const StudentQuizlet = () => {
         setLastStartPayload(payload);
         autoFinishSessionIdRef.current = null;
         AjaxPost<{ session: TQuizletSession }>({ url: "/api/quizlet/sessions/start", body: payload }).then((json) => {
+            navigate(payload.quiz_type === "flashcards" ? routePaths.flashcards : routePaths.pairs);
             loadSession(json.session.id);
         });
     };
@@ -659,6 +731,7 @@ const StudentQuizlet = () => {
         autoFinishSessionIdRef.current = null;
         setSession(null);
         setSessionWords([]);
+        navigate(routePaths.modeSelection);
     };
 
     const loadHistorySessionWords = (sessionId: number) => {
@@ -962,7 +1035,7 @@ const StudentQuizlet = () => {
         <div className="container">
             <PageTitle title="ワードラボ" urlBack="/" />
 
-            {session === null && mode === null && (
+            {session === null && isModeSelectionRoute && (
                 <div
                     className="mx-auto mt-5"
                     style={{
@@ -973,7 +1046,7 @@ const StudentQuizlet = () => {
                         <button
                             className="btn quizlet-mode-button quizlet-mode-button-view quizlet-mode-button-rect d-flex flex-column justify-content-center align-items-center"
                             style={{ width: "220px", height: "140px" }}
-                            onClick={() => setMode("view")}
+                            onClick={() => navigate(routePaths.view)}
                         >
                             <i className="bi bi-journal-text quizlet-mode-icon" />
                             <span className="quizlet-mode-label">Все словари</span>
@@ -981,7 +1054,7 @@ const StudentQuizlet = () => {
                         <button
                             className="btn quizlet-mode-button quizlet-mode-button-training quizlet-mode-button-rect d-flex flex-column justify-content-center align-items-center"
                             style={{ width: "220px", height: "140px" }}
-                            onClick={() => setMode("training")}
+                            onClick={() => navigate(routePaths.setup)}
                         >
                             <i className="bi bi-lightning quizlet-mode-icon" />
                             <span className="quizlet-mode-label">Потренируемся?</span>
@@ -989,7 +1062,7 @@ const StudentQuizlet = () => {
                         <button
                             className="btn quizlet-mode-button quizlet-mode-button-progress quizlet-mode-button-rect d-flex flex-column justify-content-center align-items-center"
                             style={{ width: "220px", height: "140px" }}
-                            onClick={() => setMode("progress")}
+                            onClick={() => navigate(routePaths.progress)}
                         >
                             <i className="bi bi-bar-chart-line quizlet-mode-icon" />
                             <span className="quizlet-mode-label">Мои успехи</span>
@@ -998,10 +1071,13 @@ const StudentQuizlet = () => {
                 </div>
             )}
 
-            {session === null && mode === "training" && (
+            {session === null && isSetupRoute && (
                 <>
                     <div className="mb-3">
-                        <button className="btn btn-outline-secondary" onClick={() => setMode(null)}>
+                        <button
+                            className="btn btn-outline-secondary"
+                            onClick={() => navigate(routePaths.modeSelection)}
+                        >
                             Назад к выбору режима
                         </button>
                     </div>
@@ -1016,7 +1092,7 @@ const StudentQuizlet = () => {
                 </>
             )}
 
-            {session === null && mode === "view" && isEditingPersonal && (
+            {session === null && isViewRoute && isEditingPersonal && (
                 <div style={{ maxWidth: "760px", margin: "0 auto" }}>
                     <div className="mb-3">
                         <button
@@ -1194,10 +1270,13 @@ const StudentQuizlet = () => {
                 </div>
             )}
 
-            {session === null && mode === "view" && !isEditingPersonal && (
+            {session === null && isViewRoute && !isEditingPersonal && (
                 <div style={{ maxWidth: "760px", margin: "0 auto" }}>
                     <div className="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                        <button className="btn btn-outline-secondary" onClick={() => setMode(null)}>
+                        <button
+                            className="btn btn-outline-secondary"
+                            onClick={() => navigate(routePaths.modeSelection)}
+                        >
                             Назад к выбору режима
                         </button>
 
@@ -1302,10 +1381,13 @@ const StudentQuizlet = () => {
                 </div>
             )}
 
-            {session === null && mode === "progress" && (
+            {session === null && isProgressRoute && (
                 <div style={{ maxWidth: "760px", margin: "0 auto" }}>
                     <div className="mb-3">
-                        <button className="btn btn-outline-secondary" onClick={() => setMode(null)}>
+                        <button
+                            className="btn btn-outline-secondary"
+                            onClick={() => navigate(routePaths.modeSelection)}
+                        >
                             Назад к выбору режима
                         </button>
                     </div>
