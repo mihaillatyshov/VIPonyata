@@ -1031,9 +1031,32 @@ const StudentQuizlet = () => {
                   },
               ];
 
+    const isDictionaryViewPage = session === null && isViewRoute;
+    const isTrainingSetupPage = session === null && isSetupRoute;
+    const isProgressPage = session === null && isProgressRoute;
+    const pageTitle = isDictionaryViewPage
+        ? "辞書"
+        : isTrainingSetupPage
+        ? "トレーニング"
+        : isProgressPage
+        ? "私の結果"
+        : isFlashcardsRoute
+        ? "フラッシュカード"
+        : isResultsRoute
+        ? "スコア"
+        : isPairsRoute
+        ? "ペア"
+        : "ワードラボ";
+    const pageBackUrl =
+        isDictionaryViewPage || isTrainingSetupPage || isProgressPage
+            ? routePaths.modeSelection
+            : isFlashcardsRoute || isResultsRoute || isPairsRoute
+            ? undefined
+            : "/";
+
     return (
         <div className="container">
-            <PageTitle title="ワードラボ" urlBack="/" />
+            <PageTitle title={pageTitle} urlBack={pageBackUrl} />
 
             {session === null && isModeSelectionRoute && (
                 <div
@@ -1073,15 +1096,6 @@ const StudentQuizlet = () => {
 
             {session === null && isSetupRoute && (
                 <>
-                    <div className="mb-3">
-                        <button
-                            className="btn btn-outline-secondary"
-                            onClick={() => navigate(routePaths.modeSelection)}
-                        >
-                            Назад к выбору режима
-                        </button>
-                    </div>
-
                     <QuizletQuizStart
                         groups={groups}
                         subgroups={subgroups}
@@ -1272,14 +1286,7 @@ const StudentQuizlet = () => {
 
             {session === null && isViewRoute && !isEditingPersonal && (
                 <div style={{ maxWidth: "760px", margin: "0 auto" }}>
-                    <div className="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                        <button
-                            className="btn btn-outline-secondary"
-                            onClick={() => navigate(routePaths.modeSelection)}
-                        >
-                            Назад к выбору режима
-                        </button>
-
+                    <div className="mb-3 d-flex justify-content-end align-items-center flex-wrap gap-2">
                         <button
                             className="btn btn-primary"
                             onClick={() => {
@@ -1383,15 +1390,6 @@ const StudentQuizlet = () => {
 
             {session === null && isProgressRoute && (
                 <div style={{ maxWidth: "760px", margin: "0 auto" }}>
-                    <div className="mb-3">
-                        <button
-                            className="btn btn-outline-secondary"
-                            onClick={() => navigate(routePaths.modeSelection)}
-                        >
-                            Назад к выбору режима
-                        </button>
-                    </div>
-
                     <QuizletProgressHistory
                         sessions={historySessions}
                         isLoading={historyLoadStatus === LoadStatus.LOADING}

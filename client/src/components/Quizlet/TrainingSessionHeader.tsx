@@ -50,7 +50,7 @@ const TrainingSessionHeader = ({
                 )}
             </div>
             <div className="flashcard-header-side flashcard-header-right">
-                <button className="btn btn-sm btn-outline-secondary flashcard-finish-btn" onClick={onFinishTraining}>
+                <button type="button" className="training-finish-btn" onClick={onFinishTraining}>
                     Завершить
                 </button>
             </div>
