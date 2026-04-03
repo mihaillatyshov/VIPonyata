@@ -16,7 +16,7 @@ const Back = ({ urlBack }: BackProps) => {
 
     return (
         <div onClick={() => navigate(urlBack)} className={styles.pageTitleBack}>
-            <i className="bi bi-arrow-bar-left text-white" />
+            <i className="bi bi-arrow-left" />
         </div>
     );
 };

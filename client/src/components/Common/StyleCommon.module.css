@@ -20,7 +20,6 @@
     height: var(--var-page-title-size);
     font-size: 32px;
     line-height: 1;
-    background-color: #198754;
     border-radius: 4px;
 
     cursor: pointer;
@@ -28,6 +27,12 @@
     margin-left: -5px;
     display: flex;
     align-items: center;
+    color: #ffc3d2;
+    transition: color 0.15s;
+}
+
+.pageTitleBack:hover {
+    color: #e89eb0;
 }
 
 .pageTitleAdd {
