@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import ShareModal from "components/Share/ShareModal";
 import { useUserIsTeacher } from "redux/funcs/user";
 
-const FONT_SIZE = "24px";
+const FONT_SIZE = "20px";
 
 interface LessonCardFooterProps {
     id: number;

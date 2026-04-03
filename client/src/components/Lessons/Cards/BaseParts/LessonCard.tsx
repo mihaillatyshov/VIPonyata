@@ -9,7 +9,7 @@ export const Title = ({ title }: TitleProps) => {
 type DescriptionProps = { description: string | null };
 export const Description = ({ description }: DescriptionProps) => {
     return (
-        <div className="md-last-pad-zero">
+        <div className="md-last-pad-zero lesson__card-description">
             <ReactMarkdownWithHtml components={{ a: ChatUrlLinkMd }}>
                 {TextWithLinksForMd({ text: description ?? "", linkMaxChars: 40 })}
             </ReactMarkdownWithHtml>

@@ -1,12 +1,9 @@
-import React from "react";
-
 import ErrorPage from "components/ErrorPages/ErrorPage";
 import { useUserIsTeacher } from "redux/funcs/user";
 import { useAppSelector } from "redux/hooks";
 import { selectCourses } from "redux/slices/coursesSlice";
 import { selectLessons } from "redux/slices/lessonsSlice";
 
-import LessonCardCreate from "./Cards/LessonCardCreate";
 import LessonCardLoading from "./Cards/LessonCardLoading";
 import LessonCardWithContent from "./Cards/LessonCardWithContent";
 
@@ -39,7 +36,6 @@ const LessonsList = () => {
 
     return (
         <div className="">
-            <LessonCardCreate courseId={course.id} />
             {lessons.items.map((lesson) => {
                 return <LessonCardWithContent key={lesson.id} lesson={lesson} />;
             })}

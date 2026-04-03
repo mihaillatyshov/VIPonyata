@@ -42,10 +42,15 @@
     border: 2px solid #ffbccd;
     border-radius: 8px;
     opacity: 0.9;
-    transition: opacity 0.15s;
+    transition:
+        opacity 0.15s,
+        color 0.15s,
+        border-color 0.15s;
     text-decoration: none;
 }
 
 .pageTitleAdd:hover {
     opacity: 1;
+    color: #ff4f8b;
+    border-color: #ff4f8b;
 }
