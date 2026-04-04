@@ -388,7 +388,7 @@ export const studentAssessmentTaskRusNameAliases: TAssessmentTaskRusNameAliases 
     test_multi: "Выбери ВСЕ верные ответы",
     find_pair: "Соедини",
     create_sentence: "Создай предложение",
-    fill_spaces_exists: "Заполни пропуски",
+    fill_spaces_exists: "Заполни пропуски этим",
     fill_spaces_by_hand: "Заполни пропуски",
     classification: "Распредели по колонкам",
     sentence_order: "Расставь в верном порядке",

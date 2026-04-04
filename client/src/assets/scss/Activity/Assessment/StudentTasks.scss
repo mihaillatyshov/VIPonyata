@@ -68,8 +68,18 @@
     background-color: rgba(255, 255, 255, 0.8);
     border: 1px solid rgba(178, 192, 212, 0.45);
     border-radius: 10px;
-    padding: 12px;
+    padding: 12px 12px 18px;
     box-shadow: 0 4px 12px rgba(85, 102, 130, 0.1);
+
+    .prevent-select,
+    .form-control,
+    .student-assessment-classification__item,
+    .student-assessment-view-sortable-order__item,
+    .dnd__sortable-item,
+    .dnd__droppable {
+        font-size: 1.05rem;
+        line-height: 1.45;
+    }
 }
 
 @media screen and (max-width: 768px) {
@@ -90,7 +100,7 @@
     }
 
     .student-assessment-task__wrapper {
-        padding: 10px;
+        padding: 10px 10px 14px;
     }
 
     .student-assessment-tasks {
@@ -157,10 +167,10 @@
     cursor: pointer;
 
     &.selected {
-        background-color: #ffb584d0;
+        background-color: #b9dbf4;
     }
     &.done {
-        background-color: #ffd6baa7;
+        background-color: #e1f2fa;
     }
     &.right {
         text-align: end;
@@ -303,7 +313,8 @@
 }
 
 .student-assessment-classification__column-title {
-    font-size: 1.1em;
+    font-size: 1.2em;
+    font-weight: 700;
 }
 
 .student-assessment-classification__answers-wrapper {
@@ -341,6 +352,12 @@
 .student-assessment-classification__hr {
     display: flex;
     flex-direction: column;
+    margin-bottom: 6px;
+
+    hr {
+        border: 0;
+        border-top: 1px solid rgba(142, 153, 168, 0.55);
+    }
 }
 
 $item-border-size: 0px;
@@ -407,6 +424,8 @@ $item-padding: 6px;
     }
 
     .form-control {
+        font-size: 1.05rem;
+        line-height: 1.45;
         border-color: rgba(172, 189, 214, 0.55);
         box-shadow: none;
     }
@@ -427,6 +446,36 @@ $item-padding: 6px;
     display: flex;
     flex-direction: column;
     gap: 4px;
+}
+
+.student-assessment-audio__wrapper {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+}
+
+.student-assessment-audio__player-wrap {
+    width: min(100%, 540px);
+}
+
+.student-assessment-audio__player {
+    display: block;
+    width: 100%;
+    border-radius: 10px;
+    accent-color: #70d7ff;
+}
+
+.student-assessment-audio__player::-webkit-media-controls-panel {
+    background-color: rgba(236, 244, 255, 0.92);
+}
+
+@media screen and (max-width: 768px) {
+    .student-assessment-audio__player-wrap {
+        width: 100%;
+    }
 }
 
 .student-assessment-task__title-not-checked {
@@ -462,4 +511,54 @@ $item-padding: 6px;
     border-color: #8e98a3;
     opacity: 0.78;
     transform: translateY(-1px);
+}
+
+.student-assessment-check-modal__content {
+    border: 1px solid rgba(255, 255, 255, 0.62);
+    border-radius: 14px;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0.68) 100%);
+    box-shadow: 0 10px 24px rgba(120, 138, 160, 0.14);
+    backdrop-filter: blur(10px);
+}
+
+.student-assessment-check-modal__section {
+    background-color: transparent;
+    backdrop-filter: blur(4px);
+
+    &.modal-header,
+    &.modal-footer {
+        border: 0;
+    }
+
+    &.modal-header {
+        position: relative;
+        justify-content: center;
+        border-bottom: 0 !important;
+
+        .btn-close {
+            position: absolute;
+            right: 14px;
+        }
+    }
+
+    &.modal-body {
+        border-top: 0 !important;
+        text-align: center;
+    }
+
+    &.modal-footer {
+        justify-content: center;
+        gap: 10px;
+    }
+}
+
+.student-assessment-check-modal__title {
+    width: 100%;
+    text-align: center;
+    font-family: "APJapanesefont", "CenturyGothicPaneuropean", Arial, Helvetica, sans-serif;
+    font-size: 2.8rem;
+    line-height: 1;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    color: #000000;
 }
