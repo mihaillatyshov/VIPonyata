@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 from typing import Generic, Type, TypedDict
 
 from sqlalchemy import Delete, Select, delete, select, update
@@ -163,6 +164,7 @@ class ActivityTryForNotificationType(TypedDict):
     base_id: int
     start_datetime: datetime
     end_datetime: datetime
+    mistakes_count: int | None
 
 
 #########################################################################################################################
@@ -222,7 +224,13 @@ class LexisQueries(Generic[LexisType, LexisTryType, LexisCardType]):
             if result is None:
                 return None
 
-            return {"id": result[0], "base_id": result[1], "start_datetime": result[2], "end_datetime": result[3]}
+            return {
+                "id": result[0],
+                "base_id": result[1],
+                "start_datetime": result[2],
+                "end_datetime": result[3],
+                "mistakes_count": None
+            }
 
     def get_cards_by_activity_id(self, lexis_id: int) -> list[LexisCardType]:
         with DBsession.begin() as session:
@@ -337,14 +345,23 @@ class IAssessmentQueries(Generic[AssessmentType, AssessmentTryType]):
         with DBsession.begin() as session:
             result = session.execute(                                                                                   #
                 select(self.assessment_try_type.id, self.assessment_try_type.base_id,
-                       self.assessment_try_type.start_datetime, self.assessment_try_type.end_datetime)                  #
+                       self.assessment_try_type.start_datetime, self.assessment_try_type.end_datetime,
+                       self.assessment_try_type.checked_tasks)                                                          #
                 .where(self.assessment_try_type.id == assessment_try_id)                                                #
             ).one_or_none()
 
             if result is None:
                 return None
 
-            return {"id": result[0], "base_id": result[1], "start_datetime": result[2], "end_datetime": result[3]}
+            checked_tasks = json.loads(result[4] or "[]")
+            mistakes_count = sum(task.get("mistakes_count", 0) for task in checked_tasks)
+            return {
+                "id": result[0],
+                "base_id": result[1],
+                "start_datetime": result[2],
+                "end_datetime": result[3],
+                "mistakes_count": mistakes_count
+            }
 
     def get_done_try_by_id(self, assessment_id: int) -> AssessmentTryType | None:
         with DBsession.begin() as session:

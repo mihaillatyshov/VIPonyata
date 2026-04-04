@@ -130,7 +130,7 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
             </div>
             <div className="notification__item-chip" title="Количество ошибок">
                 <i className="bi bi-exclamation-circle" aria-hidden="true"></i>
-                <span>{mistakesCount ?? "-"}</span>
+                <span>Ошибки: {mistakesCount ?? "-"}</span>
             </div>
             <div className="notification__item-inline-content">{content}</div>
         </div>

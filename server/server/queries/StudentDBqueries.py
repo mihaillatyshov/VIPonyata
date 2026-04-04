@@ -96,6 +96,7 @@ class ActivityTryForNotificationType(TypedDict):
     base_id: int
     start_datetime: datetime
     end_datetime: datetime
+    mistakes_count: int | None
 
 
 class ActivityQueries(Generic[ActivityType, ActivityTryType]):
@@ -271,7 +272,8 @@ class AssessmentQueriesClass(ActivityQueries[AssessmentType, AssessmentTryType])
         with DBsession.begin() as session:
             result = session.execute(                                                                                   #
                 select(self._activity_try_type.id, self._activity_try_type.base_id,
-                       self._activity_try_type.start_datetime, self._activity_try_type.end_datetime)                    #
+                       self._activity_try_type.start_datetime, self._activity_try_type.end_datetime,
+                       self._activity_try_type.checked_tasks)                                                           #
                 .where(self._activity_try_type.id == activity_try_id)                                                   #
                 .where(self._activity_try_type.end_datetime != None)                                                    #
                 .where(self._activity_try_type.user_id == user_id)                                                      #
@@ -280,7 +282,15 @@ class AssessmentQueriesClass(ActivityQueries[AssessmentType, AssessmentTryType])
             if result is None:
                 return None
 
-            return {"id": result[0], "base_id": result[1], "start_datetime": result[2], "end_datetime": result[3]}
+            checked_tasks = json.loads(result[4] or "[]")
+            mistakes_count = sum(task.get("mistakes_count", 0) for task in checked_tasks)
+            return {
+                "id": result[0],
+                "base_id": result[1],
+                "start_datetime": result[2],
+                "end_datetime": result[3],
+                "mistakes_count": mistakes_count
+            }
 
 
 AssessmentQueries = AssessmentQueriesClass[Assessment, AssessmentTry](Assessment, AssessmentTry)
