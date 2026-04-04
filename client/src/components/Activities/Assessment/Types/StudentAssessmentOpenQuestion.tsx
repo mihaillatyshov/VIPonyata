@@ -1,5 +1,3 @@
-import React from "react";
-
 import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import { TAssessmentOpenQuestion } from "models/Activity/Items/TAssessmentItems";
@@ -26,6 +24,7 @@ const StudentAssessmentOpenQuestion = ({ data, taskId }: StudentAssessmentTypePr
                 onChangeHandler={onChangeHandler}
                 htmlId={`open_question_${taskId}`}
                 placeholder="Ответ"
+                className="student-assessment-open-question__answer"
                 rows={5}
                 noErrorField
             />

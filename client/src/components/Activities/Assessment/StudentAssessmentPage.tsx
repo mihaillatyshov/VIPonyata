@@ -224,6 +224,24 @@ const StudentAssessmentPage = () => {
         return () => clearTimeout(timer);
     }, [assessment, assessmentId, saveCurrentState]);
 
+    useEffect(() => {
+        // Keep inline validation messages in sync with current answers.
+        if (assessment.items === undefined) {
+            return;
+        }
+
+        if (!isNeedDrawFullValidation && !changedBlocks.includes(blockIdCurrent)) {
+            return;
+        }
+
+        const validationFieldsFilledResult = validateStudentAssessmentTasksFilled(assessment.items);
+        if (validationFieldsFilledResult !== undefined) {
+            setErrors(validationFieldsFilledResult);
+        } else {
+            setErrors({ errors: {}, message: "" });
+        }
+    }, [assessment.items, blockIdCurrent, changedBlocks, isNeedDrawFullValidation]);
+
     const backToLessonHandle = () => {
         navigate(`/lessons/${assessment.info.lesson_id}`, { replace: true });
     };
@@ -409,7 +427,7 @@ const StudentAssessmentPage = () => {
                         <StudentActivityDeadline activityInfo={assessment.info} />
                     </div>
                 </div>
-                <hr />
+                <hr className="student-assessment-divider" />
                 <div className="student-assessment-tasks">
                     {toDrawItems.map(
                         ({ item, itemId }) =>
@@ -433,7 +451,11 @@ const StudentAssessmentPage = () => {
                 </div>
                 <div className="mb-2 d-flex space-between w-100">
                     {blockIdCurrent !== 0 && (
-                        <button type="button" className="btn btn-secondary mt-3 me-auto" onClick={handleGoPrevBlock}>
+                        <button
+                            type="button"
+                            className="btn btn-secondary mt-3 me-auto student-assessment-back-btn"
+                            onClick={handleGoPrevBlock}
+                        >
                             Назад
                         </button>
                     )}

@@ -42,15 +42,23 @@
 
 .student-assessment-task-title {
     line-height: 1;
-    color: #868686;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #9ea7b3;
+}
+
+.student-assessment-divider {
+    margin: 10px 0 14px;
+    border: 0;
+    border-top: 1px solid rgba(175, 189, 209, 0.3);
 }
 
 .student-assessment-tasks {
     display: flex;
     flex-direction: column;
-    gap: 24px;
-    margin-top: 6px;
-    padding: 4px 18px 8px;
+    gap: 32px;
+    margin-top: 10px;
+    padding: 12px 18px 18px;
 }
 
 .student-assessment-task__wrapper {
@@ -86,7 +94,9 @@
     }
 
     .student-assessment-tasks {
-        padding: 2px 10px 6px;
+        margin-top: 8px;
+        padding: 8px 10px 12px;
+        gap: 24px;
     }
 }
 
@@ -106,12 +116,42 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+
+    .input-group {
+        align-items: stretch;
+    }
+
+    .big-check {
+        margin-left: 0;
+        padding: 0 10px;
+        min-width: 44px;
+        border-color: rgba(168, 183, 204, 0.45);
+        background-color: rgba(255, 255, 255, 0.58);
+    }
+
+    .big-check > input {
+        width: 1em;
+        height: 1em;
+        border-color: rgba(128, 147, 173, 0.65);
+        box-shadow: none;
+    }
+
+    .big-check > input:checked {
+        background-color: #70d7ff;
+        border-color: #70d7ff;
+    }
+
+    .big-check + .form-control {
+        background-color: rgba(255, 255, 255, 0.72);
+        border-color: rgba(176, 191, 213, 0.48);
+    }
 }
 
 .student-assessment-find-pair__item {
     @extend .prevent-select;
 
     padding: 4px 6px;
+    border: 1px solid rgba(176, 192, 214, 0.4);
     border-radius: 6px;
     background-color: #ffffffaa;
     cursor: pointer;
@@ -169,6 +209,14 @@
     &.vertical {
         flex-direction: column;
     }
+}
+
+.student-assessment-sortable-order.vertical .student-assessment-view-sortable-order__item {
+    border: 1px solid rgba(176, 192, 214, 0.4);
+}
+
+.student-assessment-sortable-order.horizontal .student-assessment-view-sortable-order__item {
+    border: 1px solid rgba(176, 192, 214, 0.4);
 }
 
 .student-assessment-view-sortable-order__container {
@@ -240,6 +288,11 @@
     width: 100%;
     min-height: 80px;
     background-color: #ffffff66;
+}
+
+.student-assessment-fill-spaces-exists__inputs .dnd__sortable-item,
+.student-assessment-fill-spaces .dnd__sortable-item {
+    border: 1px solid rgba(176, 192, 214, 0.4);
 }
 
 .student-assessment-classification__container {
@@ -322,6 +375,10 @@ $item-padding: 6px;
     }
 }
 
+.student-assessment-classification__container .student-assessment-classification__item {
+    border: 1px solid rgba(176, 192, 214, 0.4);
+}
+
 .student-assessment-classification__item-autosize {
     margin: 0 calc($item-border-size + 2px);
     padding: 0 $item-padding;
@@ -331,6 +388,39 @@ $item-padding: 6px;
     display: flex;
     flex-direction: column;
     gap: 2px;
+}
+
+.student-assessment-open-question__answer {
+    width: min(100%, 620px);
+    align-self: center;
+    margin-top: 8px;
+    margin-bottom: 10px;
+
+    > label {
+        color: rgba(124, 136, 154, 0.62);
+        opacity: 0.68;
+    }
+
+    .form-control:focus ~ label {
+        color: rgba(110, 123, 142, 0.72);
+        opacity: 0.75;
+    }
+
+    .form-control {
+        border-color: rgba(172, 189, 214, 0.55);
+        box-shadow: none;
+    }
+
+    .form-control:focus {
+        border-color: rgba(130, 189, 214, 0.72);
+        box-shadow: 0 0 0 0.12rem rgba(112, 215, 255, 0.18);
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .student-assessment-open-question__answer {
+        width: 100%;
+    }
 }
 
 .student-assessment-view-open-question__container {
@@ -346,4 +436,30 @@ $item-padding: 6px;
     text-align: center;
     font-size: 20px;
     padding: 4px 6px;
+}
+
+.student-assessment-back-btn,
+.student-assessment-back-btn:focus,
+.student-assessment-back-btn:active {
+    background-color: #9aa3ad;
+    border-color: #9aa3ad;
+    opacity: 0.65;
+    box-shadow: none;
+    transform: none;
+}
+
+.student-assessment-back-btn {
+    transition:
+        opacity 0.15s ease,
+        background-color 0.15s ease,
+        border-color 0.15s ease,
+        transform 0.12s ease;
+}
+
+.student-assessment-back-btn:hover,
+.student-assessment-back-btn:focus-visible {
+    background-color: #8e98a3;
+    border-color: #8e98a3;
+    opacity: 0.78;
+    transform: translateY(-1px);
 }
