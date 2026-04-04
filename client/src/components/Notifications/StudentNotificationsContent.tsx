@@ -64,8 +64,12 @@ const getMistakesCount = (item: TStudentNotification): number | null => {
 };
 
 const getLessonTitle = (item: TStudentNotification) => {
-    if (item.type === "lesson" || item.type === "assessment_try" || item.type === "final_boss_try") {
+    if (item.type === "lesson") {
         return item.lesson.name;
+    }
+
+    if (item.type === "assessment_try" || item.type === "final_boss_try") {
+        return `${item.lesson.name} (Выполнено)`;
     }
 
     if (item.type === "course") {
