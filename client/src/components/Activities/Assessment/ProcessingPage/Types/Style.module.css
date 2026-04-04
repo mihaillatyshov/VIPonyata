@@ -107,6 +107,33 @@
     background: #ffffff;
 }
 
+.sentenceOrderNumHead {
+    background-color: var(--css-var-table-header);
+    width: 48px;
+}
+
+.sentenceOrderNumCell {
+    width: 48px;
+    text-align: center;
+    vertical-align: middle;
+    padding: 0;
+}
+
+.sentenceOrderNum {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 2px solid #adb5bd;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #495057;
+    background: transparent;
+    user-select: none;
+}
+
 .duplicateCellWrap {
     position: relative;
 }
