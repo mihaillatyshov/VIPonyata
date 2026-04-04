@@ -743,7 +743,9 @@ const StudentQuizlet = () => {
         AjaxPost<{ session: TQuizletSession }>({
             url: "/api/quizlet/sessions/retry-incorrect",
             body: { source_session_id: session.id },
-        }).then((json) => loadSession(json.session.id));
+        })
+            .then((json) => loadSession(json.session.id))
+            .catch(() => undefined);
     };
 
     const retryAll = () => {

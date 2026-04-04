@@ -757,31 +757,33 @@ def retry_quizlet_incorrect_words(user_id: int, data: QuizletRetryIncorrectReq) 
         if source_session is None:
             raise InvalidAPIUsage("Source session not found", 404)
 
-        incorrect_words = session.execute(
-            select(QuizletSessionIncorrectWord,
-                   QuizletSessionWord).join(QuizletSessionIncorrectWord.session_word).where(
-                       QuizletSessionIncorrectWord.session_id == source_session.id)).all()
+        retry_words = session.scalars(
+            select(QuizletSessionWord).where(QuizletSessionWord.session_id == source_session.id)).all()
+        retry_words = [
+            word for word in retry_words
+            if word.incorrect_attempts > 0 or (word.correct_attempts + word.incorrect_attempts) == 0
+        ]
 
-        if len(incorrect_words) == 0:
-            raise InvalidAPIUsage("No incorrect words to retry", 400)
+        if len(retry_words) == 0:
+            raise InvalidAPIUsage("No incorrect or unviewed words to retry", 400)
 
         retry_session = QuizletSession(quiz_type=source_session.quiz_type,
                                        show_hints=source_session.show_hints,
                                        translation_direction=source_session.translation_direction,
-                                       total_words=len(incorrect_words),
+                                       total_words=len(retry_words),
                                        user_id=user_id,
                                        queue_state="[]")
         session.add(retry_session)
         session.flush()
 
         created_words: list[QuizletSessionWord] = []
-        for _, incorrect_word in incorrect_words:
-            session_word = QuizletSessionWord(source_type=incorrect_word.source_type,
-                                              source_word_id=incorrect_word.source_word_id,
-                                              char_jp=incorrect_word.char_jp,
-                                              word_jp=incorrect_word.word_jp,
-                                              ru=incorrect_word.ru,
-                                              img=incorrect_word.img,
+        for retry_word in retry_words:
+            session_word = QuizletSessionWord(source_type=retry_word.source_type,
+                                              source_word_id=retry_word.source_word_id,
+                                              char_jp=retry_word.char_jp,
+                                              word_jp=retry_word.word_jp,
+                                              ru=retry_word.ru,
+                                              img=retry_word.img,
                                               session_id=retry_session.id)
             session.add(session_word)
             created_words.append(session_word)

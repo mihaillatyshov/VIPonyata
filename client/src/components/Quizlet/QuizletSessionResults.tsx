@@ -25,7 +25,7 @@ const QuizletSessionResults = ({
     const performanceEmoji = incorrect === 0 ? "😍" : incorrect > correct ? "🙃" : "😊";
     const viewedCards = correct + incorrect;
     const shouldShowSkipped = skipped > 0 && viewedCards < totalWords;
-    const shouldShowRetryIncorrect = incorrect > 0;
+    const shouldShowRetryIncorrect = incorrect > 0 || skipped > 0;
 
     return (
         <div className="quizlet-main-container quizlet-results">
@@ -60,7 +60,7 @@ const QuizletSessionResults = ({
                         <span className="quizlet-results-icon" aria-hidden>
                             <i className="bi bi-dash-circle-fill" />
                         </span>
-                        <span className="quizlet-results-label">Не просмотрено</span>
+                        <span className="quizlet-results-label">Не выполнено</span>
                         <span className="quizlet-results-value">{skipped}</span>
                     </div>
                 )}
