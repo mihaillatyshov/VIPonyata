@@ -217,7 +217,27 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
         setTasks([...tasks]);
     };
 
+    const isInsertionInsideBlock = (insertionIndex: number) => {
+        let depth = 0;
+        for (let i = 0; i < insertionIndex; i++) {
+            if (tasks[i].name === TAssessmentTaskName.BLOCK_BEGIN) {
+                depth++;
+                continue;
+            }
+
+            if (tasks[i].name === TAssessmentTaskName.BLOCK_END) {
+                depth = Math.max(0, depth - 1);
+            }
+        }
+
+        return depth > 0;
+    };
+
     const addBlock = (taskId: number) => {
+        if (isInsertionInsideBlock(taskId)) {
+            return;
+        }
+
         const newHashesCount = 2;
         for (let i = 0; i < newHashesCount; i++) {
             while (true) {
@@ -345,7 +365,7 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
                         <React.Fragment key={tasksHashes.current[i]}>
                             <div className="text-center" key={i}>
                                 <AddTaskButton onClick={() => openModal(i)} />
-                                <AddBlockButton onClick={() => addBlock(i)} />
+                                {!isInsertionInsideBlock(i) && <AddBlockButton onClick={() => addBlock(i)} />}
                             </div>
                             <div className="teacher-assessment-task__wrapper">
                                 <TeacherAssessmentTypeBase
@@ -362,7 +382,9 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
                     ))}
                     <div className="text-center" key={tasks.length}>
                         <AddTaskButton onClick={() => openModal(tasks.length)} />
-                        <AddBlockButton onClick={() => addBlock(tasks.length)} />
+                        {!isInsertionInsideBlock(tasks.length) && (
+                            <AddBlockButton onClick={() => addBlock(tasks.length)} />
+                        )}
                     </div>
                 </div>
 
