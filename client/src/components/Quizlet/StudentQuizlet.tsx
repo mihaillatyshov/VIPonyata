@@ -1292,8 +1292,11 @@ const StudentQuizlet = () => {
                     <QuizletQuizStart
                         groups={groups}
                         subgroups={subgroups}
+                        subgroupWords={subgroupWords}
+                        words={words}
                         personalLesson={personalLesson}
                         personalSubgroups={personalSubgroups}
+                        personalWords={personalWords}
                         onStart={startSession}
                     />
                 </div>

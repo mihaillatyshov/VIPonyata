@@ -56,6 +56,8 @@ class QuizletStartSessionReq(BaseModel):
             raise ValueError("Unsupported quiz_type")
         if len(self.subgroup_ids) == 0 and len(self.user_subgroup_ids) == 0:
             raise ValueError("At least one subgroup must be selected")
+        if self.max_words is not None and self.max_words > 100:
+            raise ValueError("max_words must be less than or equal to 100")
         return self
 
 

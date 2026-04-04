@@ -21,6 +21,8 @@ from server.models.quizlet import (QuizletEndSessionReq, QuizletFlashcardAnswerR
                                    QuizletRetryIncorrectReq, QuizletSaveProgressReq, QuizletStartSessionReq,
                                    QuizletSubgroupCreateReq, QuizletWordCreateReq, QuizletWordUpdateReq)
 
+QUIZLET_SESSION_MAX_WORDS = 100
+
 
 #########################################################################################################################
 ################ Course and Lesson ######################################################################################
@@ -566,8 +568,11 @@ def start_quizlet_session(user_id: int, data: QuizletStartSessionReq) -> Quizlet
         if len(words_data) < 2:
             raise InvalidAPIUsage("At least 2 words are required", 400)
 
-        if data.max_words is not None and len(words_data) > data.max_words:
-            raise InvalidAPIUsage(f"Selected words exceed the allowed limit ({data.max_words})", 400)
+        requested_limit = data.max_words if data.max_words is not None else QUIZLET_SESSION_MAX_WORDS
+        effective_limit = min(requested_limit, QUIZLET_SESSION_MAX_WORDS)
+
+        if len(words_data) > effective_limit:
+            raise InvalidAPIUsage(f"Selected words exceed the allowed limit ({QUIZLET_SESSION_MAX_WORDS})", 400)
 
         quiz_session = QuizletSession(quiz_type=data.quiz_type,
                                       show_hints=data.show_hints,

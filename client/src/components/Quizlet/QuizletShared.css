@@ -440,3 +440,21 @@
     font-size: 1.12rem;
     line-height: 1.25;
 }
+
+.quizlet-dictionary-word-count {
+    font-size: 0.82em;
+    color: #8f98a3;
+    font-weight: 400;
+}
+
+.quizlet-selected-words-counter {
+    color: #8f98a3;
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+.quizlet-selected-words-counter-overlimit {
+    color: #c46b7f;
+    font-size: 1.12rem;
+    font-weight: 700;
+}

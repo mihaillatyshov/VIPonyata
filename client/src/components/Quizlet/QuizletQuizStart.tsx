@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-import { TQuizletGroup, TQuizletLesson, TQuizletSubgroup } from "models/TQuizlet";
+import { TQuizletGroup, TQuizletLesson, TQuizletSubgroup, TQuizletSubgroupWord, TQuizletWord } from "models/TQuizlet";
 
 import "./QuizletShared.css";
 
@@ -10,17 +10,32 @@ interface StartPayload {
     user_subgroup_ids: number[];
     show_hints: boolean;
     translation_direction: "jp_to_ru" | "ru_to_jp";
+    max_words: number;
 }
 
 interface Props {
     groups: TQuizletGroup[];
     subgroups: TQuizletSubgroup[];
+    subgroupWords: TQuizletSubgroupWord[];
+    words: TQuizletWord[];
     personalLesson: TQuizletLesson | null;
     personalSubgroups: TQuizletSubgroup[];
+    personalWords: TQuizletWord[];
     onStart: (payload: StartPayload) => void;
 }
 
-const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups, onStart }: Props) => {
+const MAX_WORDS_PER_SESSION = 100;
+
+const QuizletQuizStart = ({
+    groups,
+    subgroups,
+    subgroupWords,
+    words,
+    personalLesson,
+    personalSubgroups,
+    personalWords,
+    onStart,
+}: Props) => {
     const [quizType, setQuizType] = useState<"pair" | "flashcards" | null>(null);
     const [showHints, setShowHints] = useState<boolean>(false);
     const [direction, setDirection] = useState<"jp_to_ru" | "ru_to_jp">("jp_to_ru");
@@ -28,7 +43,75 @@ const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups
     const [selectedPersonalSubgroups, setSelectedPersonalSubgroups] = useState<number[]>([]);
 
     const selectedDictionariesCount = selectedTeacherSubgroups.length + selectedPersonalSubgroups.length;
-    const canStartTraining = quizType !== null && selectedDictionariesCount > 0;
+
+    const wordsCountByGroup = useMemo(() => {
+        const counts = new Map<number, number>();
+
+        groups.forEach((group) => {
+            const groupSubgroupIds = subgroups.filter((item) => item.group_id === group.id).map((item) => item.id);
+            const groupWordIds = new Set(
+                subgroupWords.filter((item) => groupSubgroupIds.includes(item.subgroup_id)).map((item) => item.word_id),
+            );
+
+            counts.set(group.id, groupWordIds.size);
+        });
+
+        return counts;
+    }, [groups, subgroups, subgroupWords]);
+
+    const personalLessonWordsCount = useMemo(() => {
+        return new Set(personalWords.map((word) => word.id)).size;
+    }, [personalWords]);
+
+    const wordsCountBySubgroup = useMemo(() => {
+        const counts = new Map<number, number>();
+
+        subgroups.forEach((subgroup) => {
+            const subgroupWordIds = new Set(
+                subgroupWords.filter((item) => item.subgroup_id === subgroup.id).map((item) => item.word_id),
+            );
+            counts.set(subgroup.id, subgroupWordIds.size);
+        });
+
+        return counts;
+    }, [subgroups, subgroupWords]);
+
+    const personalWordsCountBySubgroup = useMemo(() => {
+        const counts = new Map<number, number>();
+
+        personalSubgroups.forEach((subgroup) => {
+            const subgroupWordsCount = personalWords.filter((word) => word.subgroup_id === subgroup.id).length;
+            counts.set(subgroup.id, subgroupWordsCount);
+        });
+
+        return counts;
+    }, [personalSubgroups, personalWords]);
+
+    const selectedWordsCount = useMemo(() => {
+        const teacherWordIds = new Set(
+            subgroupWords
+                .filter((item) => selectedTeacherSubgroups.includes(item.subgroup_id))
+                .map((item) => item.word_id),
+        );
+        const teacherWords = words.filter((word) => teacherWordIds.has(word.id));
+        const selectedPersonalWords = personalWords.filter(
+            (word) => word.subgroup_id !== undefined && selectedPersonalSubgroups.includes(word.subgroup_id),
+        );
+
+        const uniqueWords = new Set<string>();
+        [...teacherWords, ...selectedPersonalWords].forEach((word) => {
+            const ensuredChar = word.char_jp !== null && word.char_jp !== "" ? word.char_jp : word.word_jp;
+            uniqueWords.add(`${ensuredChar}|${word.word_jp}|${word.ru}`);
+        });
+
+        return uniqueWords.size;
+    }, [subgroupWords, selectedTeacherSubgroups, words, personalWords, selectedPersonalSubgroups]);
+
+    const canStartTraining =
+        quizType !== null &&
+        selectedDictionariesCount > 0 &&
+        selectedWordsCount >= 2 &&
+        selectedWordsCount <= MAX_WORDS_PER_SESSION;
 
     const subgroupsByGroup = useMemo(() => {
         return groups.map((group) => ({
@@ -80,6 +163,7 @@ const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups
             user_subgroup_ids: selectedPersonalSubgroups,
             show_hints: showHints,
             translation_direction: direction,
+            max_words: MAX_WORDS_PER_SESSION,
         });
     };
 
@@ -192,7 +276,10 @@ const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups
                                         e.target.blur();
                                     }}
                                 />
-                                <span className="fw-bold text-dark quizlet-group-checkbox-title">Мой словарь</span>
+                                <span className="fw-bold text-dark quizlet-group-checkbox-title">
+                                    Мой словарь
+                                    <span className="quizlet-dictionary-word-count"> ({personalLessonWordsCount})</span>
+                                </span>
                             </label>
                         </div>
                         {personalSubgroups.length === 0 && (
@@ -215,7 +302,13 @@ const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups
                                                 e.target.blur();
                                             }}
                                         />
-                                        <span className="form-check-label">{subgroup.title}</span>
+                                        <span className="form-check-label">
+                                            {subgroup.title}
+                                            <span className="quizlet-dictionary-word-count">
+                                                {" "}
+                                                ({personalWordsCountBySubgroup.get(subgroup.id) ?? 0})
+                                            </span>
+                                        </span>
                                     </label>
                                 ))}
                             </div>
@@ -253,7 +346,13 @@ const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups
                                         e.target.blur();
                                     }}
                                 />
-                                <span className="fw-bold text-dark quizlet-group-checkbox-title">{group.title}</span>
+                                <span className="fw-bold text-dark quizlet-group-checkbox-title">
+                                    {group.title}
+                                    <span className="quizlet-dictionary-word-count">
+                                        {" "}
+                                        ({wordsCountByGroup.get(group.id) ?? 0})
+                                    </span>
+                                </span>
                             </label>
                         </div>
                         <div className="d-flex flex-wrap gap-2">
@@ -272,7 +371,13 @@ const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups
                                             e.target.blur();
                                         }}
                                     />
-                                    <span className="form-check-label">{subgroup.title}</span>
+                                    <span className="form-check-label">
+                                        {subgroup.title}
+                                        <span className="quizlet-dictionary-word-count">
+                                            {" "}
+                                            ({wordsCountBySubgroup.get(subgroup.id) ?? 0})
+                                        </span>
+                                    </span>
                                 </label>
                             ))}
                         </div>
@@ -280,7 +385,14 @@ const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups
                 ))}
             </div>
 
-            <div className="d-flex justify-content-end">
+            <div className="d-flex justify-content-end align-items-center flex-wrap gap-2">
+                <span
+                    className={`quizlet-selected-words-counter ${
+                        selectedWordsCount > MAX_WORDS_PER_SESSION ? "quizlet-selected-words-counter-overlimit" : ""
+                    }`}
+                >
+                    {selectedWordsCount} / {MAX_WORDS_PER_SESSION}
+                </span>
                 <button
                     type="button"
                     className="btn btn-primary quizlet-start-training-btn"
