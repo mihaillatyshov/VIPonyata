@@ -35,7 +35,7 @@ const StudentAssessmentCreateSentence = ({ data, taskId }: StudentAssessmentType
     const syncTaskData = (nextAnswers: (string | null)[], nextInputs: string[]) => {
         const orderedFilledParts = nextAnswers.filter((item): item is string => item !== null);
         const nextParts = [...orderedFilledParts, ...nextInputs];
-        dispatch(setAssessmentTaskData({ id: taskId, data: { ...data, parts: nextParts } }));
+        dispatch(setAssessmentTaskData({ id: taskId, data: { ...data, parts: nextParts, inputs: nextInputs } }));
     };
 
     const handleAnsInp = (answerId: number) => {

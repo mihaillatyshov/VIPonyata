@@ -17,7 +17,9 @@ const validateSchemas: TValidateSchemas = {
     [TAssessmentTaskName.FIND_PAIR]: z
         .object({ first: z.string().array(), pars_created: z.number() })
         .refine(({ first, pars_created }) => first.length === pars_created, "Не все пары собраны"),
-    [TAssessmentTaskName.CREATE_SENTENCE]: z.object({}),
+    [TAssessmentTaskName.CREATE_SENTENCE]: z
+        .object({ inputs: z.array(z.string()).optional() })
+        .refine(({ inputs }) => inputs !== undefined && inputs.length === 0, "Не все части расставлены"),
     [TAssessmentTaskName.FILL_SPACES_EXISTS]: z.object({
         answers: z.string({ invalid_type_error: "Не все ответы заполнены" }).array(),
     }),
