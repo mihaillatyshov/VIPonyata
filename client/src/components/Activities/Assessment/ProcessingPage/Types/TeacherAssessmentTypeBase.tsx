@@ -30,10 +30,19 @@ const TeacherAssessmentTypeBase = ({
     children,
     error,
 }: TeacherAssessmentTypeBaseProps) => {
+    const isBlockBoundaryTask =
+        taskName === TAssessmentTaskName.BLOCK_BEGIN || taskName === TAssessmentTaskName.BLOCK_END;
+
     return (
         <div className="my-card teacher-assessment-card">
-            <div className="my-card-header">
-                <div className="my-card-header-title">{assessmentTaskRusNameAliases[taskName]}</div>
+            <div className={`my-card-header ${isBlockBoundaryTask ? "teacher-assessment-card__block-header" : ""}`}>
+                <div
+                    className={`my-card-header-title ${
+                        isBlockBoundaryTask ? "teacher-assessment-card__block-title" : ""
+                    }`}
+                >
+                    {assessmentTaskRusNameAliases[taskName]}
+                </div>
                 <div className="ms-auto d-flex gap-3 justify-content-center align-items-center">
                     <div className="d-flex gap-2">
                         <i

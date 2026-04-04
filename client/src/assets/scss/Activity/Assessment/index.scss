@@ -49,6 +49,23 @@
     margin-bottom: 8px;
 }
 
+.teacher-assessment-card .teacher-assessment-card__block-header {
+    position: relative;
+    border-bottom: none;
+    justify-content: flex-end;
+}
+
+.teacher-assessment-card .teacher-assessment-card__block-title {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #80bf63;
+    pointer-events: none;
+}
+
 .teacher-assessment-card .my-card-body {
     padding-top: 8px;
 }
