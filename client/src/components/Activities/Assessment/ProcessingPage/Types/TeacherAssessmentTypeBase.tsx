@@ -46,19 +46,16 @@ const TeacherAssessmentTypeBase = ({
                 <div className="ms-auto d-flex gap-3 justify-content-center align-items-center">
                     <div className="d-flex gap-2">
                         <i
-                            className="bi bi-arrow-down-circle font-icon-height-0 font-icon-button"
-                            style={{ fontSize: "1.8em" }}
+                            className="bi bi-arrow-down font-icon-height-0 font-icon-button teacher-assessment-card__control-icon"
                             onClick={() => moveDown()}
                         />
                         <i
-                            className="bi bi-arrow-up-circle font-icon-height-0 font-icon-button"
-                            style={{ fontSize: "1.8em" }}
+                            className="bi bi-arrow-up font-icon-height-0 font-icon-button teacher-assessment-card__control-icon"
                             onClick={() => moveUp()}
                         />
                     </div>
                     <i
-                        className="bi bi-x font-icon-height-0 font-icon-button-danger"
-                        style={{ fontSize: "2em" }}
+                        className="bi bi-x font-icon-height-0 font-icon-button-danger teacher-assessment-card__control-icon teacher-assessment-card__control-icon--danger"
                         onClick={() => removeTask()}
                     />
                 </div>

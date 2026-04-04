@@ -70,6 +70,20 @@
     padding-top: 8px;
 }
 
+.teacher-assessment-card .teacher-assessment-card__control-icon {
+    font-size: 1.35rem;
+    opacity: 0.62;
+    transition: opacity 120ms ease;
+}
+
+.teacher-assessment-card .teacher-assessment-card__control-icon:hover {
+    opacity: 1;
+}
+
+.teacher-assessment-card .teacher-assessment-card__control-icon--danger {
+    font-size: 1.5rem;
+}
+
 .assessment-select-type-modal {
     .modal-dialog {
         width: 40vw;
