@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Modal from "react-bootstrap/Modal";
 
 import {
@@ -10,6 +10,23 @@ import {
 import { ImportTestsModalModal } from "./ImportTestsModal";
 
 type TAddTasks = (name: TAssessmentTaskName, taskData?: TTeacherAssessmentAnyItem[]) => void;
+
+const assessmentTaskIconAliases: Record<TAssessmentTaskName, string> = {
+    [TAssessmentTaskName.TEXT]: "bi-card-text",
+    [TAssessmentTaskName.TEST_SINGLE]: "bi-ui-radios",
+    [TAssessmentTaskName.TEST_MULTI]: "bi-ui-checks-grid",
+    [TAssessmentTaskName.FIND_PAIR]: "bi-diagram-3",
+    [TAssessmentTaskName.CREATE_SENTENCE]: "bi-blockquote-left",
+    [TAssessmentTaskName.FILL_SPACES_EXISTS]: "bi-input-cursor-text",
+    [TAssessmentTaskName.FILL_SPACES_BY_HAND]: "bi-pencil-square",
+    [TAssessmentTaskName.CLASSIFICATION]: "bi-collection",
+    [TAssessmentTaskName.SENTENCE_ORDER]: "bi-sort-down",
+    [TAssessmentTaskName.OPEN_QUESTION]: "bi-chat-left-dots",
+    [TAssessmentTaskName.IMG]: "bi-image",
+    [TAssessmentTaskName.AUDIO]: "bi-mic",
+    [TAssessmentTaskName.BLOCK_BEGIN]: "bi-brackets",
+    [TAssessmentTaskName.BLOCK_END]: "bi-brackets",
+};
 
 interface SelectTypeModalItemProps {
     name: TAssessmentTaskName;
@@ -32,39 +49,49 @@ const SelectTypeModalItem = ({
 
     if (name === TAssessmentTaskName.TEST_SINGLE || name === TAssessmentTaskName.TEST_MULTI) {
         return (
-            <div className="btn-group w-50 mx-auto">
-                <input
+            <div className="assessment-select-type-modal__row">
+                <button
                     type="button"
-                    className="btn btn-outline-secondary btn-lg w-75 mx-auto text-wrap text-break"
-                    value={assessmentTaskRusNameAliases[name]}
+                    className="notification__item clickable assessment-select-type-modal__button"
                     onClick={() => {
                         addTasks(name);
                         close();
                     }}
-                />
-                <input
-                    className="btn btn-outline-secondary btn-lg w-25 mx-auto text-wrap text-break"
+                >
+                    <span className="notification__item-chip">
+                        <i className={`bi ${assessmentTaskIconAliases[name]}`} aria-hidden="true"></i>
+                    </span>
+                    <span className="notification__item-inline-content">{assessmentTaskRusNameAliases[name]}</span>
+                </button>
+                <button
                     type="button"
-                    value="Импорт"
+                    className="notification__item clickable assessment-select-type-modal__import"
                     onClick={() => {
                         setImportTestsModalTaskName(name);
                         setIsImportTestsModalShow(true);
                     }}
-                />
+                >
+                    <i className="bi bi-box-arrow-in-down" aria-hidden="true"></i>
+                    <span>Импорт</span>
+                </button>
             </div>
         );
     }
 
     return (
-        <input
+        <button
             type="button"
-            className="btn btn-outline-secondary btn-lg w-50 mx-auto text-wrap text-break"
-            value={assessmentTaskRusNameAliases[name]}
+            className="notification__item clickable assessment-select-type-modal__button"
             onClick={() => {
                 addTasks(name);
                 close();
             }}
-        />
+        >
+            <span className="notification__item-chip">
+                <i className={`bi ${assessmentTaskIconAliases[name]}`} aria-hidden="true"></i>
+            </span>
+            <span className="notification__item-inline-content">{assessmentTaskRusNameAliases[name]}</span>
+        </button>
     );
 };
 
@@ -82,12 +109,12 @@ const SelectTypeModal = ({ isShow, close, addTasks }: SelectTypeModalProps) => {
 
     return (
         <>
-            <Modal size="xl" show={isShow} onHide={close} dialogClassName="modal-dialog">
+            <Modal size="xl" show={isShow} onHide={close} className="notifications-modal assessment-select-type-modal">
                 <Modal.Header closeButton className="modal-bg">
                     <Modal.Title>Выбор задания</Modal.Title>
                 </Modal.Header>
                 <Modal.Body className="modal-bg">
-                    <div className="btn-group-vertical mb-4 w-100">
+                    <div className="assessment-select-type-modal__list">
                         {Object.values(TAssessmentTaskName).map((name) => (
                             <SelectTypeModalItem
                                 key={name}
@@ -100,7 +127,6 @@ const SelectTypeModal = ({ isShow, close, addTasks }: SelectTypeModalProps) => {
                         ))}
                     </div>
                 </Modal.Body>
-                <Modal.Footer className="modal-bg"></Modal.Footer>
             </Modal>
             <ImportTestsModalModal
                 taskName={importTestsModalTaskName}
