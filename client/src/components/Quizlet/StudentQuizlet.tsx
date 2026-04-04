@@ -1323,11 +1323,6 @@ const StudentQuizlet = () => {
                                             <Link to={routePaths.personalDictionary}>{personalRootLabel}</Link>
                                         )}
                                     </li>
-                                    {selectedPersonalSubgroup !== null && (
-                                        <li className="breadcrumb-item active" aria-current="page">
-                                            {selectedPersonalSubgroup.title}
-                                        </li>
-                                    )}
                                 </ol>
                             </nav>
                         )}
