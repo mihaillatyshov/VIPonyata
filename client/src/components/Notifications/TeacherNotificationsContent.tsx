@@ -1,11 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-import { getStrHHMMSS } from "libs/useTimer";
 import { TTeacherNotification, TTeacherNotificationWithActivity } from "models/TNotification";
-
-import { NotificationDateTime } from "./Items/NotificationDateTime";
-import { NotificationUser } from "./Items/NotificationUser";
 
 const getTypeName = (item: TTeacherNotificationWithActivity) => {
     switch (item.type) {
@@ -18,6 +14,16 @@ const getTypeName = (item: TTeacherNotificationWithActivity) => {
         case "final_boss_try":
             return "Финальный босс";
     }
+};
+
+const splitDateTime = (datetime?: string | null) => {
+    if (!datetime) {
+        return { date: "-", time: "-" };
+    }
+
+    const [date = "-", time = "-"] = datetime.split(" ");
+
+    return { date, time };
 };
 
 const hasLink = (item: TTeacherNotificationWithActivity): boolean => {
@@ -45,6 +51,20 @@ const getLinkByName = (item: TTeacherNotificationWithActivity) => {
     }
 };
 
+const getMistakesCount = (item: TTeacherNotificationWithActivity): number | null => {
+    const tryData = item.activity_try as Record<string, unknown>;
+
+    if (typeof tryData.mistakes_count === "number") {
+        return tryData.mistakes_count;
+    }
+
+    if (typeof tryData.mistakeCount === "number") {
+        return tryData.mistakeCount;
+    }
+
+    return null;
+};
+
 interface ItemContentProps {
     item: TTeacherNotification;
     closeModal: () => void;
@@ -64,29 +84,55 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
         }
     };
 
+    const isClickable = hasLink(item);
+    const { date, time } = splitDateTime(item.creation_datetime);
+    const mistakesCount = getMistakesCount(item);
+
+    const handleKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (event) => {
+        if (!isClickable) {
+            return;
+        }
+
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            handleClick();
+        }
+    };
+
     const isMessageItem = (item: TTeacherNotification): boolean => {
         return item.type === null || item.type === undefined;
     };
 
-    const endDatetime = item.activity_try.end_datetime
-        ? new Date(item.activity_try.end_datetime).getTime()
-        : Date.now();
-    const elapsedTime = endDatetime - new Date(item.activity_try.start_datetime).getTime();
+    const content = isMessageItem(item) ? item.message || "Уведомление" : item.lesson.name;
+    const studentLabel = `${item.user.nickname} (${item.user.name})`;
 
     return (
-        <div className={`notification__item ${item.viewed ? "viewed" : ""}`} onClick={handleClick}>
-            <div className="d-flex justify-content-center">
-                <NotificationDateTime datetime={item.creation_datetime} />
-                <NotificationUser userData={item.user} />
+        <div
+            className={`notification__item notification__item--compact ${item.viewed ? "viewed" : ""} ${
+                isClickable ? "clickable" : ""
+            }`}
+            onClick={handleClick}
+            onKeyDown={handleKeyDown}
+            role={isClickable ? "button" : undefined}
+            tabIndex={isClickable ? 0 : undefined}
+        >
+            <div className="notification__item-chip notification__item-chip--user" title={studentLabel}>
+                <i className="bi bi-person" aria-hidden="true"></i>
+                <span>{studentLabel}</span>
             </div>
-            <div>
-                Выполнил {getTypeName(item)} из урока "{item.lesson.name}" за {getStrHHMMSS(elapsedTime)}
+            <div className="notification__item-chip">
+                <i className="bi bi-calendar3" aria-hidden="true"></i>
+                <span>{date}</span>
             </div>
-            {!isMessageItem(item) && hasLink(item) ? (
-                <div className="notification__item-button-block">
-                    <input type="button" className="btn btn-violet" value={"Перейти"} onClick={handleClick} />
-                </div>
-            ) : null}
+            <div className="notification__item-chip">
+                <i className="bi bi-clock" aria-hidden="true"></i>
+                <span>{time}</span>
+            </div>
+            <div className="notification__item-chip" title="Количество ошибок">
+                <i className="bi bi-exclamation-circle" aria-hidden="true"></i>
+                <span>{mistakesCount ?? "-"}</span>
+            </div>
+            <div className="notification__item-inline-content">{content}</div>
         </div>
     );
 };
@@ -98,7 +144,7 @@ interface TeacherNotificationsProps {
 
 const TeacherNotifications = ({ notifications, closeModal }: TeacherNotificationsProps) => {
     return (
-        <div className="d-flex flex-column gap-3">
+        <div className="d-flex flex-column gap-2">
             {notifications.map((item, i) => (
                 <ItemContent key={`${item.id}_${i}`} item={item} closeModal={closeModal} />
             ))}

@@ -1,4 +1,3 @@
-import React from "react";
 import { Modal } from "react-bootstrap";
 
 import { TAnyNotifications, TStudentNotification, TTeacherNotification } from "models/TNotification";
@@ -30,7 +29,7 @@ interface NotificationsProps {
 
 const Notifications = ({ isShow, close, notifications }: NotificationsProps) => {
     return (
-        <Modal size="xl" show={isShow} onHide={close}>
+        <Modal size="xl" show={isShow} onHide={close} className="notifications-modal">
             <Modal.Header closeButton className="modal-bg">
                 <Modal.Title>Уведомления</Modal.Title>
             </Modal.Header>
