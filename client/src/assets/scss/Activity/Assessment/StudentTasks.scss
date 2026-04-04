@@ -149,6 +149,20 @@
     color: #80bf63;
 }
 
+.student-assessment-results-mode {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 2px 0 6px;
+}
+
+.student-assessment-results-empty {
+    text-align: center;
+    color: #7f8ea3;
+    font-size: 1.05rem;
+    padding: 14px 6px;
+}
+
 .student-assessment-block-divider {
     width: fit-content;
     text-align: center;

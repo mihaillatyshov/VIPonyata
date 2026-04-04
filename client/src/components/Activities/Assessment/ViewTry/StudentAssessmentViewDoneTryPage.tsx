@@ -73,12 +73,15 @@ interface TaskBlock {
     tasks: TaskInBlock[];
 }
 
+type TResultViewMode = "errors" | "all";
+
 const StudentAssessmentViewDoneTryPage = () => {
     const { id } = useParams();
     const [doneTry, setDoneTry] = useState<LoadStatus.DataDoneOrNotDone<{ data: TAssessmentDoneTry }>>({
         loadStatus: LoadStatus.NONE,
     });
     const [lessonId, setLessonId] = useState<number>();
+    const [viewMode, setViewMode] = useState<TResultViewMode>("errors");
 
     useLayoutEffect(() => {
         setDoneTry({ loadStatus: LoadStatus.LOADING });
@@ -164,6 +167,20 @@ const StudentAssessmentViewDoneTryPage = () => {
 
     const blocks = createBlocks();
 
+    const isTaskWithErrors = (task: TaskInBlock): boolean => {
+        return task.checkedTask.mistakes_count > 0;
+    };
+
+    const visibleBlocks =
+        viewMode === "all"
+            ? blocks
+            : blocks
+                  .map((block) => ({
+                      ...block,
+                      tasks: block.tasks.filter(isTaskWithErrors),
+                  }))
+                  .filter((block) => block.tasks.length > 0);
+
     const getTaskCorrectAnswersTotal = (task: TAssessmentItemBase): number => {
         switch (task.name) {
             case TAssessmentTaskName.TEST_SINGLE:
@@ -201,8 +218,24 @@ const StudentAssessmentViewDoneTryPage = () => {
         <div className="container pb-5" style={{ maxWidth: "800px" }}>
             <PageTitle title="タスク" urlBack={lessonId !== undefined ? `/lessons/${lessonId}` : undefined} />
             <div className="student-assessment-page mt-3">
+                <div className="student-assessment-results-mode">
+                    <button
+                        type="button"
+                        className={`btn btn-sm ${viewMode === "errors" ? "btn-secondary" : "btn-outline-secondary"}`}
+                        onClick={() => setViewMode("errors")}
+                    >
+                        Показать только ошибки
+                    </button>
+                    <button
+                        type="button"
+                        className={`btn btn-sm ${viewMode === "all" ? "btn-secondary" : "btn-outline-secondary"}`}
+                        onClick={() => setViewMode("all")}
+                    >
+                        Показать всё
+                    </button>
+                </div>
                 <div className="student-assessment-tasks">
-                    {blocks.map((block) => (
+                    {visibleBlocks.map((block) => (
                         <React.Fragment key={block.id}>
                             <div className="student-assessment-block-divider">Блок {block.id}</div>
                             {block.tasks.map(({ doneTask, checkedTask, originalIndex }) =>
@@ -234,6 +267,8 @@ const StudentAssessmentViewDoneTryPage = () => {
                             )}
                         </React.Fragment>
                     ))}
+
+                    {visibleBlocks.length === 0 && <div className="student-assessment-results-empty">Ошибок нет</div>}
                 </div>
             </div>
         </div>
