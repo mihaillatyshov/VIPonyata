@@ -142,8 +142,8 @@
 
 .assessment-select-type-modal {
     .modal-dialog {
-        width: 40vw;
-        max-width: 40vw;
+        width: 56vw;
+        max-width: 56vw;
 
         @media (max-width: 991px) {
             width: 92vw;
@@ -153,35 +153,27 @@
 }
 
 .assessment-select-type-modal__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+
+    @media (max-width: 991px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.assessment-select-type-modal__column {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
-.assessment-select-type-modal__row {
-    display: flex;
-    gap: 10px;
-}
-
-.assessment-select-type-modal__button,
-.assessment-select-type-modal__import {
+.assessment-select-type-modal__button {
     width: 100%;
-    min-height: 54px;
+    min-height: 48px;
+    padding: 10px 14px;
 }
 
 .assessment-select-type-modal__button {
     text-align: left;
-}
-
-.assessment-select-type-modal__import {
-    flex: 0 0 130px;
-    justify-content: center;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #536173;
-
-    i {
-        font-size: 0.95rem;
-        color: #667688;
-    }
 }
