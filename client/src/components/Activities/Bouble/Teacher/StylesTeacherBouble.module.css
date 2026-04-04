@@ -1,13 +1,17 @@
-.teacherBoubleFooter {
-    position: absolute;
-    bottom: 16px;
+.teacherBoubleTaskIcon {
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #6c757d;
+    background-color: #ffffffb3;
+    border-radius: 6px;
 }
 
-.teacherBoubleTaskIcon {
-    width: 40px;
-    background-color: #ffffffaa;
-    border-radius: 5px;
-    padding: 4px;
+.teacherBoubleIcon {
+    color: #6c757d;
 }
 
 .teacherBoublePlusWrapper {
@@ -19,4 +23,48 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+}
+
+.teacherBoubleClickable {
+    cursor: pointer;
+}
+
+.teacherBoubleClickable:focus-visible {
+    outline: 2px solid #adb5bd;
+    outline-offset: 2px;
+    border-radius: 12px;
+}
+
+.teacherBoubleWithContent :global(.textActivity > .box-shadow-main) {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 24px 26px;
+    overflow: hidden;
+    text-align: center;
+}
+
+.teacherBoubleWithContent :global(.bouble__title) {
+    position: static;
+    transform: none;
+    width: auto;
+    text-align: center;
+}
+
+.teacherBoubleContent {
+    margin-top: 0;
+    width: 100%;
+    max-width: 210px;
+}
+
+.teacherBoubleLimit {
+    font-size: 14px;
+}
+
+.teacherBoubleWithContent :global(.textActivity::before),
+.teacherBoubleWithContent :global(.textActivity > .box-shadow-main::before) {
+    content: none;
 }

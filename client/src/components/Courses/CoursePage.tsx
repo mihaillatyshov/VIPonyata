@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
-import PageDescription from "components/Common/PageDescription";
 import PageTitle from "components/Common/PageTitle";
 import LessonsList from "components/Lessons/LessonsList";
 import { AjaxGet } from "libs/ServerAPI";
@@ -54,7 +53,6 @@ const CoursePage = () => {
                     ) : undefined
                 }
             />
-            <PageDescription className="mb-5" description={course?.description} isCentered={true} />
             <LessonsList />
         </div>
     );

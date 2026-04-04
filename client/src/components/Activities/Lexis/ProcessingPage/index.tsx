@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import Loading from "components/Common/Loading";
@@ -60,6 +60,7 @@ export const LexisProcessingPage = ({ title, name, processingType }: LexisProces
     }, [tasks]);
 
     useLayoutEffect(() => {
+        window.scrollTo(0, 0);
         setLoadStatus(LoadStatus.LOADING);
 
         getProcessingData(processingType, name, id).then((data) => {

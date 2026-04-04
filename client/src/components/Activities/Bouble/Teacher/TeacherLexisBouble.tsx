@@ -1,9 +1,9 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 import ActivityBouble from "components/Activities/Bouble/ActivityBouble";
 import LoadingBouble from "components/Activities/Bouble/LoadingBouble";
 import { LexisName } from "models/Activity/IActivity";
-import { LexisImages } from "models/Activity/ILexis";
 import { TDrilling } from "models/Activity/TDrilling";
 import { THieroglyph } from "models/Activity/THieroglyph";
 
@@ -29,13 +29,21 @@ const array_chunks = <T extends any>(arr: T[], size: number): T[][] =>
 const TeacherLexisBoubleChild = ({ name, lessonId, info }: TeacherLexisBoubleChildProps) => {
     const getTasksArray = () => (info ? ["card", ...info.tasks.split(",").map((item) => item.trim())] : []);
 
-    const getImgSrc = (taskName: string) => {
-        for (let [name, src] of Object.entries(LexisImages)) {
-            if (taskName === name) {
-                return src;
-            }
+    const getTaskIconClass = (taskName: string) => {
+        switch (taskName) {
+            case "card":
+                return "bi-file-text";
+            case "findpair":
+                return "bi-link-45deg";
+            case "scramble":
+                return "bi-arrow-repeat";
+            case "space":
+                return "bi-pencil";
+            case "translate":
+                return "bi-card-text";
+            default:
+                return "bi-circle";
         }
-        return undefined;
     };
 
     return (
@@ -45,10 +53,9 @@ const TeacherLexisBoubleChild = ({ name, lessonId, info }: TeacherLexisBoubleChi
                     <div className="d-flex gap-2" key={rowId}>
                         {row.map((taskName) => (
                             <div className="d-flex" key={taskName}>
-                                <img
-                                    className={`${styles.teacherBoubleTaskIcon}`}
-                                    src={getImgSrc(taskName)}
-                                    alt={taskName}
+                                <i
+                                    className={`bi ${getTaskIconClass(taskName)} ${styles.teacherBoubleTaskIcon}`}
+                                    aria-label={taskName}
                                 />
                             </div>
                         ))}
@@ -60,16 +67,41 @@ const TeacherLexisBoubleChild = ({ name, lessonId, info }: TeacherLexisBoubleChi
 };
 
 const TeacherLexisBouble = ({ title, name, lessonId, info }: TeacherLexisBoubleProps) => {
+    const navigate = useNavigate();
+
     if (info === undefined) {
         return <LoadingBouble title={title} />;
     }
 
+    const url = info === null ? `/${name}/create/${lessonId}` : `/${name}/edit/${info.id}`;
+
+    const onBubbleClick = () => {
+        navigate(url);
+    };
+
+    const onBubbleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            navigate(url);
+        }
+    };
+
     return (
-        <ActivityBouble title={title}>
-            <div className="d-flex flex-column justify-content-center align-items-center mt-1">
-                <TeacherLexisBoubleChild name={name} lessonId={lessonId} info={info} />
-            </div>
-        </ActivityBouble>
+        <div
+            className={`${styles.teacherBoubleClickable} ${info !== null ? styles.teacherBoubleWithContent : ""}`}
+            onClick={onBubbleClick}
+            onKeyDown={onBubbleKeyDown}
+            role="button"
+            tabIndex={0}
+        >
+            <ActivityBouble title={title}>
+                <div
+                    className={`d-flex flex-column justify-content-center align-items-center ${styles.teacherBoubleContent}`}
+                >
+                    <TeacherLexisBoubleChild name={name} lessonId={lessonId} info={info} />
+                </div>
+            </ActivityBouble>
+        </div>
     );
 };
 

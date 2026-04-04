@@ -1,5 +1,5 @@
 import React, { useLayoutEffect } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 
 import {
     AssessmentCreatePage,
@@ -40,6 +40,24 @@ import styleThemes from "./themes/StyleThemes.module.css";
 
 import "./App.css";
 import "./RoundBlock.css";
+
+const ScrollToTopOnRouteChange = () => {
+    const { pathname } = useLocation();
+
+    useLayoutEffect(() => {
+        const scrollToTop = () => {
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+        };
+
+        scrollToTop();
+        const timer = window.setTimeout(scrollToTop, 0);
+        return () => window.clearTimeout(timer);
+    }, [pathname]);
+
+    return null;
+};
 
 const App = () => {
     const user = useAppSelector(selectUser).data;
@@ -102,6 +120,7 @@ const App = () => {
     return (
         <div className={`${styleThemes.Violet} App`}>
             <BrowserRouter>
+                <ScrollToTopOnRouteChange />
                 {user.isAuth && <NavBar />}
                 <Routes>
                     <Route path="/" element={getRoute(<MainPage />, <MainPage />, <LoginPage />)} />

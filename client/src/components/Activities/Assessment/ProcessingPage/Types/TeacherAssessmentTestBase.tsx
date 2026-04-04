@@ -53,7 +53,7 @@ const TeacherAssessmentTestBase = <T extends TTeacherAssessmentTestType>({
                             className="form-control"
                             value={option}
                             onChange={(e) => changeOptionHandler(e.target.value, i)}
-                            autoFocus={true}
+                            autoFocus={false}
                         />
                         <span className="input-group-text w-auto p-0">
                             <i

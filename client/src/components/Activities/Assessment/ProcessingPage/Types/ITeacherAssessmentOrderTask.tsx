@@ -36,7 +36,7 @@ const Input = ({ value, id, onChange, isCompact }: InputProps) => {
     return (
         <input
             type="text"
-            autoFocus={true}
+            autoFocus={false}
             className="form-control"
             style={style}
             value={value}

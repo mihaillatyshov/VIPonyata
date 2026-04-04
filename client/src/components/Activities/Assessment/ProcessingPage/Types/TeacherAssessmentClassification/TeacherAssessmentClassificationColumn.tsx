@@ -20,7 +20,7 @@ const Title = ({ value, colId, onChange }: TitleProps) => {
                 id={htmlId}
                 placeholder={placeholder}
                 onChange={(e) => onChange(e.target.value, colId)}
-                autoFocus={true}
+                autoFocus={false}
             />
             <label htmlFor={htmlId}>{placeholder}</label>
         </div>
@@ -43,7 +43,7 @@ const Cell = ({ field, colId, rowId, onAnswerChange, removeRow }: CellProps) => 
                 className="form-control"
                 value={field}
                 onChange={(e) => onAnswerChange(e.target.value, colId, rowId)}
-                autoFocus={true}
+                autoFocus={false}
             />
             <span className="input-group-text w-auto p-0">
                 <i

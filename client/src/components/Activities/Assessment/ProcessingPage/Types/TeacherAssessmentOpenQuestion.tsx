@@ -1,5 +1,3 @@
-import React from "react";
-
 import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import { TTeacherAssessmentOpenQuestion } from "models/Activity/Items/TAssessmentItems";
@@ -20,7 +18,7 @@ const TeacherAssessmentOpenQuestion = ({
                 onChangeHandler={(newValue: string) => onChangeTask({ ...data, question: newValue })}
                 rows={6}
                 noErrorField={true}
-                autoFocus={true}
+                autoFocus={false}
             />
 
             <div className="mt-3 mb-2 md-last-pad-zero">

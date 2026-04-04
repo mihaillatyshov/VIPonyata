@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { AddBlockButton } from "components/Activities/Assessment/ProcessingPage/AddBlockButton";
@@ -62,6 +62,7 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
     const [error, setError] = useState<string>("");
 
     const tasksHashes = useRef<string[]>([]);
+    const isInitialScrollFixed = useRef<boolean>(false);
     const [tasks, setTasks] = useState<TTeacherAssessmentItems>([]);
     const [timelimit, setTimelimit] = useState<string>("00:00:00");
     const [description, setDescription] = useState<string>("");
@@ -70,6 +71,7 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
     const [lessonId, setLessonId] = useState<number>(0);
 
     useLayoutEffect(() => {
+        window.scrollTo(0, 0);
         setLoadStatus(LoadStatus.LOADING);
 
         getProcessingData(processingType, name, id).then((data) => {
@@ -99,6 +101,23 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
             }
         });
     }, [id, name, processingType, navigate]);
+
+    useEffect(() => {
+        if (loadStatus !== LoadStatus.DONE || isInitialScrollFixed.current) {
+            return;
+        }
+
+        isInitialScrollFixed.current = true;
+        const timer = window.setTimeout(() => {
+            const active = document.activeElement as HTMLElement | null;
+            active?.blur();
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+        }, 0);
+
+        return () => window.clearTimeout(timer);
+    }, [loadStatus]);
 
     if (loadStatus === LoadStatus.ERROR) {
         return (

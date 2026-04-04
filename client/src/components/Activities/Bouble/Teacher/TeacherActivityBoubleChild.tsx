@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import { ActivityName } from "models/Activity/IActivity";
 import { TAssessment } from "models/Activity/TAssessment";
@@ -15,36 +15,23 @@ interface TeacherActivityBoubleChildProps {
 }
 
 const TeacherActivityBoubleChild = ({ name, lessonId, info, children }: TeacherActivityBoubleChildProps) => {
-    const navigate = useNavigate();
-
-    const footerItemSize = "32px";
-
     if (info === null) {
         return (
             <Link to={`/${name}/create/${lessonId}`} className={"a-link"}>
-                <i className={`bi bi-plus-lg ${styles.teacherBoublePlus}`} style={{ fontSize: "140px" }} />
+                <i
+                    className={`bi bi-plus-lg ${styles.teacherBoublePlus} ${styles.teacherBoubleIcon}`}
+                    style={{ fontSize: "140px" }}
+                />
             </Link>
         );
     }
 
-    const onEditClick = (e: React.MouseEvent<HTMLElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        navigate(`/${name}/edit/${info.id}`);
-    };
-
     return (
         <>
-            <div className="text-nowrap">Лимит: {info.time_limit ?? "Нет"}</div>
-            {children}
-            <div className={`d-flex justify-content-center w-100 ${styles.teacherBoubleFooter}`}>
-                <i
-                    className="mx-3 bi bi-pencil-square font-icon-button"
-                    style={{ fontSize: footerItemSize }}
-                    onClick={onEditClick}
-                />
-                <i className="mx-3 bi bi-graph-up" style={{ fontSize: footerItemSize }} />
+            <div className={`text-nowrap text-center w-100 ${styles.teacherBoubleLimit}`}>
+                Лимит: {info.time_limit ?? "Нет"}
             </div>
+            {children}
         </>
     );
 };

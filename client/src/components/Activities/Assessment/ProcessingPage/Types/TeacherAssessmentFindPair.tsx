@@ -118,7 +118,7 @@ const Cell = ({ value, colName, rowId, onChange }: CellProps) => {
                     className="form-control"
                     value={value}
                     onChange={(e) => onChange(e.target.value, colName, rowId)}
-                    autoFocus={colName === "meta_first"}
+                    autoFocus={false}
                 />
             </div>
         </div>

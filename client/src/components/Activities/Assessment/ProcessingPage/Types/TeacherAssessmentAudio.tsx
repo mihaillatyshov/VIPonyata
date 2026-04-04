@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
@@ -39,7 +39,7 @@ const TeacherAssessmentAudio = ({
                 onChangeHandler={(newValue: string) => onChangeTask({ ...data, description: newValue })}
                 rows={5}
                 noErrorField={true}
-                autoFocus={true}
+                autoFocus={false}
             />
             {data.description && (
                 <div className="mt-2 text-center md-last-pad-zero">

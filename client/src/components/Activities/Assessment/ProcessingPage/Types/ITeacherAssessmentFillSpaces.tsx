@@ -46,7 +46,7 @@ const Input = ({ value, colName, id, isSingle, onChange }: InputProps) => {
                 id={htmlId}
                 placeholder={placeholder}
                 onChange={(e) => onChange(e.target.value, colName, id)}
-                autoFocus={colName === "separates"}
+                autoFocus={false}
             />
             <label htmlFor={htmlId}>{placeholder}</label>
         </div>
