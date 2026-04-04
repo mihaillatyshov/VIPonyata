@@ -23,6 +23,11 @@
     font-size: 2.24rem;
 }
 
+.quizlet-student-view-breadcrumb .breadcrumb {
+    font-size: 1.6rem;
+    --bs-breadcrumb-divider: "•";
+}
+
 .quizlet-teacher-breadcrumb .breadcrumb-item,
 .quizlet-teacher-breadcrumb .breadcrumb-item a,
 .quizlet-teacher-breadcrumb .breadcrumb-item a:hover,

@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import Loading from "components/Common/Loading";
 import PageTitle from "components/Common/PageTitle";
@@ -1302,110 +1302,142 @@ const StudentQuizlet = () => {
             {session === null && isPersonalDictionaryPage && (
                 <div className="quizlet-personal-dictionary-page" style={{ maxWidth: "760px", margin: "0 auto" }}>
                     <div className="quizlet-main-container">
-                        <div className="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
-                            <div className="flex-grow-1" style={{ minWidth: 0 }}>
-                                {selectedPersonalTopicId === null && personalLesson === null ? (
-                                    <div className="d-flex gap-2 flex-grow-1">
-                                        <input
-                                            className="form-control"
-                                            value={personalLessonTitle}
-                                            onChange={(e) => setPersonalLessonTitle(e.target.value)}
-                                            placeholder="Например: Мой словарь"
-                                            autoFocus
-                                            onBlur={personalLesson !== null ? ensurePersonalLesson : undefined}
-                                            onKeyDown={(e) => {
-                                                if (e.key === "Enter") ensurePersonalLesson();
-                                                if (e.key === "Escape") setPersonalLessonTitle("");
-                                            }}
-                                        />
-                                        {personalLesson === null && (
-                                            <button className="btn btn-outline-primary" onClick={ensurePersonalLesson}>
-                                                Создать
-                                            </button>
+                        {personalLesson !== null && (
+                            <nav
+                                aria-label="breadcrumb"
+                                className="mb-3 quizlet-teacher-breadcrumb quizlet-student-view-breadcrumb"
+                            >
+                                <ol className="breadcrumb mb-0">
+                                    <li
+                                        className={`breadcrumb-item ${
+                                            selectedPersonalSubgroup === null ? "active" : ""
+                                        }`}
+                                        {...(selectedPersonalSubgroup === null ? { "aria-current": "page" } : {})}
+                                    >
+                                        {selectedPersonalSubgroup === null ? (
+                                            personalRootLabel
+                                        ) : (
+                                            <Link to={routePaths.personalDictionary}>{personalRootLabel}</Link>
                                         )}
-                                    </div>
-                                ) : (
-                                    <div className="d-flex align-items-center gap-2 quizlet-student-topic-header-offset">
-                                        {selectedPersonalSubgroup !== null && !isEditingPersonalTopicTitle && (
-                                            <h5 className="quizlet-personal-topic-title mb-0">
-                                                {selectedPersonalSubgroup.title}
-                                            </h5>
-                                        )}
+                                    </li>
+                                    {selectedPersonalSubgroup !== null && (
+                                        <li className="breadcrumb-item active" aria-current="page">
+                                            {selectedPersonalSubgroup.title}
+                                        </li>
+                                    )}
+                                </ol>
+                            </nav>
+                        )}
 
-                                        {selectedPersonalSubgroup !== null && isEditingPersonalTopicTitle && (
+                        {(personalLesson === null || selectedPersonalSubgroup !== null) && (
+                            <div className="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                                <div className="flex-grow-1" style={{ minWidth: 0 }}>
+                                    {selectedPersonalTopicId === null && personalLesson === null ? (
+                                        <div className="d-flex gap-2 flex-grow-1">
                                             <input
-                                                className="quizlet-personal-topic-title-input"
-                                                value={personalTopicTitleDraft}
-                                                onChange={(e) => setPersonalTopicTitleDraft(e.target.value)}
+                                                className="form-control"
+                                                value={personalLessonTitle}
+                                                onChange={(e) => setPersonalLessonTitle(e.target.value)}
+                                                placeholder="Например: Мой словарь"
                                                 autoFocus
-                                                onBlur={() =>
-                                                    renamePersonalTopic(
-                                                        selectedPersonalSubgroup,
-                                                        personalTopicTitleDraft,
-                                                    )
-                                                }
+                                                onBlur={personalLesson !== null ? ensurePersonalLesson : undefined}
                                                 onKeyDown={(e) => {
-                                                    if (e.key === "Enter") {
+                                                    if (e.key === "Enter") ensurePersonalLesson();
+                                                    if (e.key === "Escape") setPersonalLessonTitle("");
+                                                }}
+                                            />
+                                            {personalLesson === null && (
+                                                <button
+                                                    className="btn btn-outline-primary"
+                                                    onClick={ensurePersonalLesson}
+                                                >
+                                                    Создать
+                                                </button>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="d-flex align-items-center gap-2 quizlet-student-topic-header-offset">
+                                            {selectedPersonalSubgroup !== null && !isEditingPersonalTopicTitle && (
+                                                <h5 className="quizlet-personal-topic-title mb-0">
+                                                    {selectedPersonalSubgroup.title}
+                                                </h5>
+                                            )}
+
+                                            {selectedPersonalSubgroup !== null && isEditingPersonalTopicTitle && (
+                                                <input
+                                                    className="quizlet-personal-topic-title-input"
+                                                    value={personalTopicTitleDraft}
+                                                    onChange={(e) => setPersonalTopicTitleDraft(e.target.value)}
+                                                    autoFocus
+                                                    onBlur={() =>
                                                         renamePersonalTopic(
                                                             selectedPersonalSubgroup,
                                                             personalTopicTitleDraft,
-                                                        );
+                                                        )
                                                     }
-                                                    if (e.key === "Escape") {
-                                                        setIsEditingPersonalTopicTitle(false);
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "Enter") {
+                                                            renamePersonalTopic(
+                                                                selectedPersonalSubgroup,
+                                                                personalTopicTitleDraft,
+                                                            );
+                                                        }
+                                                        if (e.key === "Escape") {
+                                                            setIsEditingPersonalTopicTitle(false);
+                                                            setPersonalTopicTitleDraft(selectedPersonalSubgroup.title);
+                                                        }
+                                                    }}
+                                                />
+                                            )}
+
+                                            {selectedPersonalSubgroup !== null && !isEditingPersonalTopicTitle && (
+                                                <button
+                                                    className="btn btn-sm btn-link p-0 text-muted quizlet-personal-topic-edit-btn"
+                                                    title="Переименовать тему"
+                                                    onClick={() => {
+                                                        setIsEditingPersonalTopicTitle(true);
                                                         setPersonalTopicTitleDraft(selectedPersonalSubgroup.title);
-                                                    }
-                                                }}
-                                            />
-                                        )}
+                                                    }}
+                                                >
+                                                    <i className="bi bi-pencil" />
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
 
-                                        {selectedPersonalSubgroup !== null && !isEditingPersonalTopicTitle && (
+                                <div className="d-flex gap-2 align-items-center quizlet-personal-topic-header-actions">
+                                    {selectedPersonalSubgroup !== null &&
+                                        (isDeleteTopicConfirming ? (
+                                            <>
+                                                <button
+                                                    className="btn btn-danger btn-sm"
+                                                    onClick={async () => {
+                                                        setIsDeleteTopicConfirming(false);
+                                                        await deletePersonalTopic(selectedPersonalSubgroup);
+                                                        navigate(routePaths.personalDictionary);
+                                                    }}
+                                                >
+                                                    Точно?
+                                                </button>
+                                                <button
+                                                    className="btn btn-outline-secondary btn-sm"
+                                                    onClick={() => setIsDeleteTopicConfirming(false)}
+                                                >
+                                                    Отмена
+                                                </button>
+                                            </>
+                                        ) : (
                                             <button
-                                                className="btn btn-sm btn-link p-0 text-muted quizlet-personal-topic-edit-btn"
-                                                title="Переименовать тему"
-                                                onClick={() => {
-                                                    setIsEditingPersonalTopicTitle(true);
-                                                    setPersonalTopicTitleDraft(selectedPersonalSubgroup.title);
-                                                }}
+                                                className="btn quizlet-personal-topic-delete-action-btn"
+                                                onClick={() => setIsDeleteTopicConfirming(true)}
                                             >
-                                                <i className="bi bi-pencil" />
+                                                Удалить
                                             </button>
-                                        )}
-                                    </div>
-                                )}
+                                        ))}
+                                </div>
                             </div>
-
-                            <div className="d-flex gap-2 align-items-center quizlet-personal-topic-header-actions">
-                                {selectedPersonalSubgroup !== null &&
-                                    (isDeleteTopicConfirming ? (
-                                        <>
-                                            <button
-                                                className="btn btn-danger btn-sm"
-                                                onClick={async () => {
-                                                    setIsDeleteTopicConfirming(false);
-                                                    await deletePersonalTopic(selectedPersonalSubgroup);
-                                                    navigate(routePaths.personalDictionary);
-                                                }}
-                                            >
-                                                Точно?
-                                            </button>
-                                            <button
-                                                className="btn btn-outline-secondary btn-sm"
-                                                onClick={() => setIsDeleteTopicConfirming(false)}
-                                            >
-                                                Отмена
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <button
-                                            className="btn quizlet-personal-topic-delete-action-btn"
-                                            onClick={() => setIsDeleteTopicConfirming(true)}
-                                        >
-                                            Удалить
-                                        </button>
-                                    ))}
-                            </div>
-                        </div>
+                        )}
 
                         {/* Topic list page */}
                         {personalLesson !== null && selectedPersonalTopicId === null && (
@@ -1480,7 +1512,40 @@ const StudentQuizlet = () => {
             {session === null && isViewRoute && (
                 <div className="mx-auto mt-5" style={{ maxWidth: "760px" }}>
                     <div className="quizlet-main-container">
-                        <div className="d-flex justify-content-end align-items-center flex-wrap gap-2 px-1 pt-1 pb-2">
+                        <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 px-1 pt-1 pb-2">
+                            <nav
+                                aria-label="breadcrumb"
+                                className="mb-0 quizlet-teacher-breadcrumb quizlet-student-view-breadcrumb"
+                            >
+                                <ol className="breadcrumb mb-0">
+                                    <li
+                                        className={`breadcrumb-item ${selectedLesson === null ? "active" : ""}`}
+                                        {...(selectedLesson === null ? { "aria-current": "page" } : {})}
+                                    >
+                                        {selectedLesson === null ? "Уроки" : <Link to={routePaths.view}>Уроки</Link>}
+                                    </li>
+                                    {selectedLesson !== null && (
+                                        <li
+                                            className={`breadcrumb-item ${selectedTopic === null ? "active" : ""}`}
+                                            {...(selectedTopic === null ? { "aria-current": "page" } : {})}
+                                        >
+                                            {selectedTopic === null ? (
+                                                selectedLesson.title
+                                            ) : (
+                                                <Link to={getViewLessonPath(selectedLesson.id)}>
+                                                    {selectedLesson.title}
+                                                </Link>
+                                            )}
+                                        </li>
+                                    )}
+                                    {selectedTopic !== null && (
+                                        <li className="breadcrumb-item active" aria-current="page">
+                                            {selectedTopic.title}
+                                        </li>
+                                    )}
+                                </ol>
+                            </nav>
+
                             <button
                                 className="btn btn-success"
                                 onClick={() => {
