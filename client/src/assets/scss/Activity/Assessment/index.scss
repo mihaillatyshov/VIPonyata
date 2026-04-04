@@ -1,5 +1,54 @@
 @use "StudentTasks";
 
+// Teacher Assessment Processing Page styling (matches student side)
+.teacher-assessment-page {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 251, 255, 0.9) 100%);
+    border: 1px solid rgba(160, 178, 200, 0.28);
+    border-radius: 14px;
+    box-shadow: 0 8px 22px rgba(84, 106, 141, 0.1);
+    padding: 14px 16px 20px;
+}
+
+.teacher-assessment-header-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.teacher-assessment-tasks {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.teacher-assessment-task__wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.teacher-assessment-task__title {
+    line-height: 1;
+    color: #868686;
+    font-size: 0.95rem;
+}
+
+// Simplified task card for teacher side (no heavy styling like before)
 .teacher-assessment-card {
-    background-color: #ffffff66;
+    background-color: transparent;
+    box-shadow: none;
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    min-height: auto;
+}
+
+.teacher-assessment-card .my-card-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+}
+
+.teacher-assessment-card .my-card-body {
+    padding-top: 8px;
 }

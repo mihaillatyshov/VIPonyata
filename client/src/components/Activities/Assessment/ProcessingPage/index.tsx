@@ -309,28 +309,27 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
         .filter((item) => item !== undefined) as string[];
 
     return (
-        <div className="container mb-5" style={{ paddingBottom: 320, position: "relative" }}>
+        <div className="container mb-5" style={{ maxWidth: "1100px", paddingBottom: 320, position: "relative" }}>
             <PageTitle title={title} urlBack={`/lessons/${lessonId}`} />
-            {/* <input type="button" className="btn btn-success w-100 mb-5" onClick={submitHandler} value={"Создать"} /> */}
-            <div className="processing-page">
-                <div className="processing-page__header">
-                    <div>
-                        <ProcessingButtonBlock
-                            onSubmit={handleProcessing}
-                            onDelete={handleDelete}
-                            processingType={processingType}
-                        />
-                        <InputError message={errors.message} />
-                    </div>
+            <div className="teacher-assessment-page mt-3">
+                <div>
+                    <ProcessingButtonBlock
+                        onSubmit={handleProcessing}
+                        onDelete={handleDelete}
+                        processingType={processingType}
+                    />
+                    <InputError message={errors.message} />
+                </div>
 
-                    <div>
-                        <InputTime
-                            placeholder="Лимит времени"
-                            value={timelimit}
-                            onChangeHandler={setTimelimit}
-                            htmlId="timelimit"
-                        />
-                    </div>
+                <div className="mt-3">
+                    <InputTime
+                        placeholder="Лимит времени"
+                        value={timelimit}
+                        onChangeHandler={setTimelimit}
+                        htmlId="timelimit"
+                    />
+                </div>
+                <div className="mt-3">
                     <FloatingLabelTextareaAutosize
                         htmlId="description"
                         placeholder="Описание"
@@ -339,23 +338,26 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
                         value={description}
                     />
                 </div>
+                <hr className="student-assessment-divider" />
 
-                <div className="processing-page__content">
+                <div className="teacher-assessment-tasks">
                     {tasks.map((item, i) => (
                         <React.Fragment key={tasksHashes.current[i]}>
                             <div className="text-center" key={i}>
                                 <AddTaskButton onClick={() => openModal(i)} />
                                 <AddBlockButton onClick={() => addBlock(i)} />
                             </div>
-                            <TeacherAssessmentTypeBase
-                                taskName={item.name}
-                                moveUp={() => moveUp(i)}
-                                moveDown={() => moveDown(i)}
-                                removeTask={() => removeTask(i)}
-                                error={errors.errors[`${i}`] || ""}
-                            >
-                                <div id={tasksHashes.current[i]}>{drawItem(item, i, tasksHashes.current[i])}</div>
-                            </TeacherAssessmentTypeBase>
+                            <div className="teacher-assessment-task__wrapper">
+                                <TeacherAssessmentTypeBase
+                                    taskName={item.name}
+                                    moveUp={() => moveUp(i)}
+                                    moveDown={() => moveDown(i)}
+                                    removeTask={() => removeTask(i)}
+                                    error={errors.errors[`${i}`] || ""}
+                                >
+                                    <div id={tasksHashes.current[i]}>{drawItem(item, i, tasksHashes.current[i])}</div>
+                                </TeacherAssessmentTypeBase>
+                            </div>
                         </React.Fragment>
                     ))}
                     <div className="text-center" key={tasks.length}>
@@ -365,13 +367,13 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
                 </div>
 
                 <BlockLines lines={blocks} />
-
-                <SelectTypeModal
-                    isShow={isShowSelectTypeModal}
-                    close={() => setIsShowSelectTypeModal(false)}
-                    addTasks={addTasks}
-                />
             </div>
+
+            <SelectTypeModal
+                isShow={isShowSelectTypeModal}
+                close={() => setIsShowSelectTypeModal(false)}
+                addTasks={addTasks}
+            />
         </div>
     );
 };
