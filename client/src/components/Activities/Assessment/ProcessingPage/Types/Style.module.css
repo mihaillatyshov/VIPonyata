@@ -149,6 +149,32 @@
     padding: 0;
 }
 
+.fillSpacesKindCell {
+    width: 108px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.fillSpacesTextRow > td {
+    background-color: #fafbfc;
+}
+
+.fillSpacesGapRow > td {
+    background-color: #fff8f2;
+}
+
+.fillSpacesKindBadgeText {
+    background-color: #eef2f6;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.fillSpacesKindBadgeGap {
+    background-color: #fff2e6;
+    color: #b5692f;
+    font-weight: 500;
+}
+
 .duplicateCellWrap {
     position: relative;
 }
