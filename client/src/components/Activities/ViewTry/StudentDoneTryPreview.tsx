@@ -46,7 +46,9 @@ const StudentDoneTryPreview = ({ doneTry, openTryPage, isAssessmentStyle = false
                     <i className="bi bi-exclamation-circle" aria-hidden="true"></i>
                     <span>Ошибки: {doneTry.mistakes_count}</span>
                 </div>
-                <div className="notification__item-inline-content">{doneTry.is_checked ? "Проверено" : ""}</div>
+                <div className="notification__item-inline-content">
+                    {doneTry.is_checked ? "проверено" : "не проверено"}
+                </div>
             </div>
         );
     }
@@ -59,8 +61,8 @@ const StudentDoneTryPreview = ({ doneTry, openTryPage, isAssessmentStyle = false
                     <span className="text-nowrap">{doneTry.end_datetime}</span>
                 </div>
                 <div>
-                    {doneTry.is_checked ? "Проверено" : ""}
-                    {doneTry.is_checked ? <>&nbsp;&nbsp;&nbsp;&nbsp;</> : null}
+                    {doneTry.is_checked ? "проверено" : "не проверено"}
+                    <>&nbsp;&nbsp;&nbsp;&nbsp;</>
                     Ошибки: {doneTry.mistakes_count}
                 </div>
             </div>

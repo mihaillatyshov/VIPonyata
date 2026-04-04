@@ -18,6 +18,7 @@ interface StudentViewDoneTryModalProps {
 const StudentViewDoneTryModal = ({ isShow, close, id, name }: StudentViewDoneTryModalProps) => {
     const navigate = useNavigate();
     const isAssessmentModal = name === "assessment";
+    const modalClassName = isAssessmentModal ? "notifications-modal results-modal" : "results-modal";
 
     const [doneTries, setDoneTries] = useState<GetActivityDoneTriesDataType>({
         loadStatus: LoadStatus.NONE,
@@ -36,13 +37,7 @@ const StudentViewDoneTryModal = ({ isShow, close, id, name }: StudentViewDoneTry
     };
 
     return (
-        <Modal
-            size="lg"
-            show={isShow}
-            onHide={close}
-            dialogClassName="modal-dialog"
-            className={isAssessmentModal ? "notifications-modal" : undefined}
-        >
+        <Modal size="lg" show={isShow} onHide={close} dialogClassName="modal-dialog" className={modalClassName}>
             <Modal.Header closeButton className="modal-bg">
                 <Modal.Title>Результаты</Modal.Title>
             </Modal.Header>

@@ -87,11 +87,6 @@ def calc_mistakes_count(activity_try: AbstractAssessmentTry) -> int:
     return sum(check_task.get("mistakes_count", 0) for check_task in checked_tasks)
 
 
-def calc_is_checked(activity_try: AbstractAssessmentTry) -> bool:
-    checked_tasks = json.loads(activity_try.checked_tasks or "[]")
-    return all(check_task.get("cheked", False) for check_task in checked_tasks)
-
-
 def create_blocks(done_tasks_list: list[dict] | None, checked_tasks: list[dict] | None):
     if checked_tasks is None or done_tasks_list is None:
         return []
@@ -206,12 +201,14 @@ class IAssessmentHandlers(ActivityHandlers[AssessmentType, AssessmentTryType]):
         self._activity_queries.get_by_id(activity_id, get_current_user_id())
 
         done_tries = self._activity_queries.get_done_tries_by_activity_id(activity_id, get_current_user_id())
+        done_try_ids = [done_try.id for done_try in done_tries]
+        viewed_notifications_try_ids = self._activity_queries.get_viewed_notifications_by_try_ids(done_try_ids)
 
         result = []
         for done_try in done_tries:
             result.append({
                 **done_try.__json__(), "mistakes_count": calc_mistakes_count(done_try),
-                "is_checked": calc_is_checked(done_try)
+                "is_checked": done_try.id in viewed_notifications_try_ids
             })
             done_try.done_tasks = parse_student_tasks(done_try.done_tasks)
         return {"done_tries": result}

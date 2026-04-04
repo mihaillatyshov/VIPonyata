@@ -292,6 +292,26 @@ class AssessmentQueriesClass(ActivityQueries[AssessmentType, AssessmentTryType])
                 "mistakes_count": mistakes_count
             }
 
+    def get_viewed_notifications_by_try_ids(self, activity_try_ids: list[int]) -> set[int]:
+        if len(activity_try_ids) == 0:
+            return set()
+
+        with DBsession.begin() as session:
+            if self._activity_try_type == AssessmentTry:
+                result = session.scalars(
+                    select(NotificationStudentToTeacher.assessment_try_id).where(
+                        NotificationStudentToTeacher.assessment_try_id.in_(activity_try_ids)).where(
+                            NotificationStudentToTeacher.viewed == True)).all()
+            elif self._activity_try_type == FinalBossTry:
+                result = session.scalars(
+                    select(NotificationStudentToTeacher.final_boss_try_id).where(
+                        NotificationStudentToTeacher.final_boss_try_id.in_(activity_try_ids)).where(
+                            NotificationStudentToTeacher.viewed == True)).all()
+            else:
+                result = []
+
+            return set(try_id for try_id in result if try_id is not None)
+
 
 AssessmentQueries = AssessmentQueriesClass[Assessment, AssessmentTry](Assessment, AssessmentTry)
 FinalBossQueries = AssessmentQueriesClass[FinalBoss, FinalBossTry](FinalBoss, FinalBossTry)

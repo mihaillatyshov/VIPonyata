@@ -6,6 +6,18 @@
     gap: 16px;
 }
 
+.results-modal {
+    .modal-dialog {
+        width: min(88vw, 1140px);
+        max-width: min(88vw, 1140px);
+
+        @media (max-width: 991px) {
+            width: 92vw;
+            max-width: 92vw;
+        }
+    }
+}
+
 .done-try-preview {
     @extend .box-shadow-main;
 
