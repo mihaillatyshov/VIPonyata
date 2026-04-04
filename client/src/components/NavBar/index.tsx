@@ -1,5 +1,5 @@
 import { useLayoutEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import Notifications from "components/Notifications/Notifications";
 import { AjaxGet, AjaxPost } from "libs/ServerAPI";
@@ -14,6 +14,8 @@ const NavBar = () => {
     const [showNotifications, setShowNotifications] = useState<boolean>(false);
     const [notifications, setNotifications] = useState<TAnyNotifications>([]);
     const user = useAppSelector(selectUser);
+    const location = useLocation();
+    const isFlashcardExerciseRoute = location.pathname === "/quizlet/flashcards";
 
     const openNotifications = () => setShowNotifications(true);
     const closeNotifications = () => setShowNotifications(false);
@@ -83,12 +85,21 @@ const NavBar = () => {
                     </Link>
                 </div>
                 <div className="col-6 col-lg-4 mx-auto d-flex align-items-center">
-                    <Link
-                        className={`d-flex mx-auto a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton}`}
-                        to="/quizlet"
-                    >
-                        ワードラボ
-                    </Link>
+                    {isFlashcardExerciseRoute ? (
+                        <span
+                            className={`d-flex mx-auto a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton} ${styles.quizletButtonDisabled}`}
+                            aria-disabled="true"
+                        >
+                            ワードラボ
+                        </span>
+                    ) : (
+                        <Link
+                            className={`d-flex mx-auto a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton}`}
+                            to="/quizlet"
+                        >
+                            ワードラボ
+                        </Link>
+                    )}
                 </div>
                 <div className="col-4 align-items-end">
                     <div className="d-flex justify-content-end align-items-center">

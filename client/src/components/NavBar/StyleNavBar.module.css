@@ -87,6 +87,12 @@
     box-shadow: 0 3px 9px rgba(103, 174, 45, 0.16);
 }
 
+.quizletButtonDisabled {
+    pointer-events: none;
+    cursor: default;
+    opacity: 0.82;
+}
+
 @media (max-width: 576px) {
     .navShell {
         border-radius: 14px;
