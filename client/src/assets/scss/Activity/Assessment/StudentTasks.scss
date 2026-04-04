@@ -594,6 +594,10 @@ $item-padding: 6px;
     border: 1px solid rgba(176, 192, 214, 0.4);
 }
 
+.student-assessment-classification__card--correct .student-assessment-classification__item {
+    border: 1px solid rgba(150, 167, 190, 0.9) !important;
+}
+
 .student-assessment-classification__item-autosize {
     margin: 0 calc($item-border-size + 2px);
     padding: 0 $item-padding;

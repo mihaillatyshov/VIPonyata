@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 
 import { fixRubyStr } from "libs/Autisize";
 import { TAssessmentCreateSentence, TAssessmentSentenceOrder } from "models/Activity/Items/TAssessmentItems";
@@ -50,15 +50,28 @@ const SortableOrder = ({ handleDragEnd, order, data }: SortableOrderProps) => {
         <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors} autoScroll={false}>
             <SortableContext items={localParts.map((item) => item.strId)} strategy={rectSortingStrategy}>
                 <div className={sortContextClassName}>
-                    {localParts.map((item) => (
-                        <SortableItem
-                            key={item.strId}
-                            id={item.strId}
-                            str={item.str}
-                            customData={{ arrayId: item.arrayId }}
-                            width={itemWidth}
-                        />
-                    ))}
+                    {localParts.map((item) =>
+                        order === "vertical" ? (
+                            <div key={item.strId} className="student-assessment-sentence-order__row">
+                                <span className="student-assessment-sentence-order__index">{item.arrayId + 1}</span>
+                                <SortableItem
+                                    id={item.strId}
+                                    str={item.str}
+                                    customData={{ arrayId: item.arrayId }}
+                                    width={itemWidth}
+                                    className="student-assessment-sentence-order__text"
+                                />
+                            </div>
+                        ) : (
+                            <SortableItem
+                                key={item.strId}
+                                id={item.strId}
+                                str={item.str}
+                                customData={{ arrayId: item.arrayId }}
+                                width={itemWidth}
+                            />
+                        ),
+                    )}
                 </div>
             </SortableContext>
         </DndContext>

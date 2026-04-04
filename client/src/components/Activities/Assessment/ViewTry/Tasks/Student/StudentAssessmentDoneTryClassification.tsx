@@ -45,7 +45,11 @@ const Container = ({
     };
 
     return (
-        <div className="student-assessment-classification__card answers">
+        <div
+            className={`student-assessment-classification__card answers ${
+                isCorrectAnswers ? "student-assessment-classification__card--correct" : ""
+            }`.trim()}
+        >
             <div className="student-assessment-classification__column-title">{title}</div>
             {title ? (
                 <div className="student-assessment-classification__hr">

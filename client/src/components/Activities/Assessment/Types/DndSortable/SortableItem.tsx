@@ -1,5 +1,3 @@
-import React from "react";
-
 import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import CSS from "csstype";
 
@@ -11,9 +9,10 @@ interface SortableItemProps {
     str: string;
     customData: any;
     width: number;
+    className?: string;
 }
 
-const SortableItem = ({ id, str, customData, width }: SortableItemProps) => {
+const SortableItem = ({ id, str, customData, width, className = "" }: SortableItemProps) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
         id: id,
         data: customData,
@@ -31,7 +30,7 @@ const SortableItem = ({ id, str, customData, width }: SortableItemProps) => {
             style={style}
             {...attributes}
             {...listeners}
-            className="student-assessment-view-sortable-order__item"
+            className={`student-assessment-view-sortable-order__item ${className}`.trim()}
         >
             <div className="prevent-select md-last-no-margin">
                 <ReactMarkdownWithHtml>{str}</ReactMarkdownWithHtml>
