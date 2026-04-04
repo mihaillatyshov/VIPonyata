@@ -1,5 +1,3 @@
-import React from "react";
-
 import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import CSS from "csstype";
 
@@ -22,6 +20,14 @@ interface DraggableProps {
     type: DraggableType;
 }
 
+const DraggableContent = ({ str }: { str: string }) => {
+    return (
+        <div className="prevent-select md-last-no-margin student-assessment-fill-spaces-exists__draggable-content">
+            <ReactMarkdownWithHtml>{str}</ReactMarkdownWithHtml>
+        </div>
+    );
+};
+
 const Draggable = ({ id, str, longestStr, type }: DraggableProps) => {
     const data: FieldData = { fieldId: id, type };
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
@@ -34,10 +40,17 @@ const Draggable = ({ id, str, longestStr, type }: DraggableProps) => {
     };
 
     return (
-        <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="d-flex dnd__sortable-item">
-            <div className="prevent-select md-last-no-margin">
-                <ReactMarkdownWithHtml>{str}</ReactMarkdownWithHtml>
+        <div
+            ref={setNodeRef}
+            style={style}
+            {...attributes}
+            {...listeners}
+            className="d-flex dnd__sortable-item student-assessment-fill-spaces-exists__draggable"
+        >
+            <div className="student-assessment-fill-spaces-exists__draggable-sizer" aria-hidden="true">
+                <DraggableContent str={longestStr} />
             </div>
+            <DraggableContent str={str} />
         </div>
     );
 };

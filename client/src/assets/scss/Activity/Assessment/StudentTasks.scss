@@ -325,6 +325,24 @@
     border: 1px solid rgba(176, 192, 214, 0.4);
 }
 
+.student-assessment-fill-spaces-exists__draggable {
+    display: grid !important;
+}
+
+.student-assessment-fill-spaces-exists__draggable-sizer,
+.student-assessment-fill-spaces-exists__draggable-content {
+    grid-area: 1 / 1;
+}
+
+.student-assessment-fill-spaces-exists__draggable-sizer {
+    visibility: hidden;
+}
+
+.student-assessment-fill-spaces-exists__draggable-content {
+    min-width: 0;
+    text-align: center;
+}
+
 .student-assessment-classification__container {
     display: flex;
     flex-direction: column;
