@@ -15,6 +15,12 @@
             width: 90vw;
             max-width: 90vw;
         }
+
+        @media (max-width: 575px) {
+            width: calc(100vw - 1rem);
+            max-width: calc(100vw - 1rem);
+            margin: 0.5rem auto;
+        }
     }
 
     .modal-content {
@@ -90,18 +96,11 @@
         opacity: 0.6;
     }
 
+    flex-wrap: wrap;
     overflow-wrap: break-word;
-
-    @media (max-width: 767px) {
-        & {
-            align-items: stretch;
-            flex-wrap: wrap;
-        }
-    }
 }
 
 .notification__item--compact {
-    display: flex;
     align-items: center;
 }
 
@@ -127,7 +126,7 @@
 }
 
 .notification__item-chip--user {
-    max-width: 190px;
+    max-width: min(190px, 100%);
 
     span {
         overflow: hidden;
@@ -138,7 +137,7 @@
 
 .notification__item-inline-content {
     flex: 1 1 auto;
-    min-width: 0;
+    min-width: min(160px, 100%);
     color: #1f2c3d;
     font-size: 0.93rem;
     font-weight: 500;
