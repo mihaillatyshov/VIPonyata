@@ -481,6 +481,10 @@
     border: 1px solid rgba(176, 192, 214, 0.4);
 }
 
+.student-assessment-fill-spaces__empty {
+    background-color: #eef1f4;
+}
+
 .student-assessment-fill-spaces-exists__draggable {
     display: grid !important;
 }

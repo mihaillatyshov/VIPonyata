@@ -1,5 +1,3 @@
-import React from "react";
-
 import AutosizeDiv from "libs/AutosizeDiv";
 import { TAssessmentFillSpacesExistsEmpty } from "models/Activity/Items/TAssessmentItems";
 
@@ -26,7 +24,7 @@ const Droppable = ({ id, longestStr, str }: DroppableProps) => {
                 {str ? (
                     <Draggable id={id} str={str} type="answer" longestStr={longestStr} />
                 ) : (
-                    <div className="d-flex dnd__droppable">
+                    <div className="d-flex dnd__droppable student-assessment-fill-spaces__empty">
                         <AutosizeDiv
                             value={TAssessmentFillSpacesExistsEmpty}
                             valueToCalcSize={longestStr}
