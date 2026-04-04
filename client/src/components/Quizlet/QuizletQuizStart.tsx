@@ -164,14 +164,36 @@ const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups
             <div className="mb-4">
                 {personalLesson !== null && (
                     <div className="border rounded p-2 mb-2">
-                        <div className="d-flex justify-content-between align-items-center mb-2">
-                            <button
-                                type="button"
-                                className="btn btn-link p-0 text-decoration-none fw-bold text-dark"
-                                onClick={togglePersonalGroup}
-                            >
-                                Мой словарь
-                            </button>
+                        <div className="d-flex align-items-center mb-2">
+                            <label className="form-check d-inline-flex align-items-center gap-2 mb-0 quizlet-group-checkbox-label">
+                                <input
+                                    className="form-check-input mt-0"
+                                    type="checkbox"
+                                    checked={
+                                        personalSubgroups.length > 0 &&
+                                        personalSubgroups.every((subgroup) =>
+                                            selectedPersonalSubgroups.includes(subgroup.id),
+                                        )
+                                    }
+                                    disabled={personalSubgroups.length === 0}
+                                    ref={(input) => {
+                                        if (input === null) {
+                                            return;
+                                        }
+
+                                        const selectedCount = personalSubgroups.filter((subgroup) =>
+                                            selectedPersonalSubgroups.includes(subgroup.id),
+                                        ).length;
+                                        input.indeterminate =
+                                            selectedCount > 0 && selectedCount < personalSubgroups.length;
+                                    }}
+                                    onChange={(e) => {
+                                        togglePersonalGroup();
+                                        e.target.blur();
+                                    }}
+                                />
+                                <span className="fw-bold text-dark quizlet-group-checkbox-title">Мой словарь</span>
+                            </label>
                         </div>
                         {personalSubgroups.length === 0 && (
                             <div className="text-muted small">Добавьте подгруппы в личный урок</div>
@@ -203,14 +225,36 @@ const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups
 
                 {subgroupsByGroup.map(({ group, subgroups: nestedSubgroups }) => (
                     <div key={group.id} className="border rounded p-2 mb-2">
-                        <div className="d-flex justify-content-between align-items-center mb-2">
-                            <button
-                                type="button"
-                                className="btn btn-link p-0 text-decoration-none fw-bold text-dark"
-                                onClick={() => toggleGroup(group.id)}
-                            >
-                                {group.title}
-                            </button>
+                        <div className="d-flex align-items-center mb-2">
+                            <label className="form-check d-inline-flex align-items-center gap-2 mb-0 quizlet-group-checkbox-label">
+                                <input
+                                    className="form-check-input mt-0"
+                                    type="checkbox"
+                                    checked={
+                                        nestedSubgroups.length > 0 &&
+                                        nestedSubgroups.every((subgroup) =>
+                                            selectedTeacherSubgroups.includes(subgroup.id),
+                                        )
+                                    }
+                                    disabled={nestedSubgroups.length === 0}
+                                    ref={(input) => {
+                                        if (input === null) {
+                                            return;
+                                        }
+
+                                        const selectedCount = nestedSubgroups.filter((subgroup) =>
+                                            selectedTeacherSubgroups.includes(subgroup.id),
+                                        ).length;
+                                        input.indeterminate =
+                                            selectedCount > 0 && selectedCount < nestedSubgroups.length;
+                                    }}
+                                    onChange={(e) => {
+                                        toggleGroup(group.id);
+                                        e.target.blur();
+                                    }}
+                                />
+                                <span className="fw-bold text-dark quizlet-group-checkbox-title">{group.title}</span>
+                            </label>
                         </div>
                         <div className="d-flex flex-wrap gap-2">
                             {nestedSubgroups.map((subgroup) => (
