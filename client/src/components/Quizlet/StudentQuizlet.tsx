@@ -585,6 +585,12 @@ const StudentQuizlet = () => {
 
     useEffect(() => {
         if (session !== null) {
+            if (session.is_finished && isModeSelectionRoute) {
+                setSession(null);
+                setSessionWords([]);
+                return;
+            }
+
             const targetPath = session.is_finished
                 ? routePaths.results
                 : session.quiz_type === "flashcards"
@@ -603,6 +609,7 @@ const StudentQuizlet = () => {
     }, [
         session,
         location.pathname,
+        isModeSelectionRoute,
         isFlashcardsRoute,
         isPairsRoute,
         isResultsRoute,
