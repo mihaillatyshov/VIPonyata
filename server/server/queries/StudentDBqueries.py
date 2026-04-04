@@ -579,6 +579,14 @@ def get_quizlet_session(session_id: int, user_id: int) -> QuizletSession:
         return result
 
 
+def get_active_quizlet_session(user_id: int) -> QuizletSession | None:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(QuizletSession).where(QuizletSession.user_id == user_id).where(
+                QuizletSession.is_finished == False).order_by(QuizletSession.updated_at.desc()).order_by(
+                    QuizletSession.id.desc())).first()
+
+
 def get_quizlet_session_words(session_id: int) -> list[QuizletSessionWord]:
     with DBsession.begin() as session:
         return session.scalars(select(QuizletSessionWord).where(QuizletSessionWord.session_id == session_id)).all()

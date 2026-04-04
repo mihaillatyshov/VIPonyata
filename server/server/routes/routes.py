@@ -488,6 +488,12 @@ def get_quizlet_session(session_id):
     return user_selector_function(None, student_funcs.get_quizlet_session, session_id=session_id)
 
 
+@routes_bp.route("/quizlet/sessions/active", methods=["GET"])
+@login_required
+def get_active_quizlet_session():
+    return user_selector_function(None, student_funcs.get_active_quizlet_session)
+
+
 @routes_bp.route("/quizlet/sessions/<int:session_id>/pair-attempt", methods=["POST"])
 @login_required
 def mark_quizlet_pair_attempt(session_id):

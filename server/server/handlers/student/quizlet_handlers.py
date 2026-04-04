@@ -111,6 +111,14 @@ def get_quizlet_session(session_id: int) -> dict:
     }
 
 
+def get_active_quizlet_session() -> dict:
+    user_id = get_current_user_id()
+    session = DBQS.get_active_quizlet_session(user_id)
+    if session is None:
+        return {"session": None}
+    return {"session": session}
+
+
 def mark_quizlet_pair_attempt(session_id: int) -> dict:
     user_id = get_current_user_id()
     data = validate_req(QuizletPairAttemptReq, request.json)

@@ -45,6 +45,10 @@ interface SessionResponse {
     words: TQuizletSessionWord[];
 }
 
+interface ActiveSessionResponse {
+    session: (TQuizletSession & { queue_state?: string }) | null;
+}
+
 interface EditorRow {
     key: string;
     id?: number;
@@ -445,8 +449,12 @@ const StudentQuizlet = () => {
 
     const [session, setSession] = useState<(TQuizletSession & { queue_state?: string }) | null>(null);
     const [sessionWords, setSessionWords] = useState<TQuizletSessionWord[]>([]);
+    const [activeSession, setActiveSession] = useState<(TQuizletSession & { queue_state?: string }) | null>(null);
+    const [activeSessionLoadStatus, setActiveSessionLoadStatus] = useState<LoadStatus.Type>(LoadStatus.NONE);
+    const [isFinishingActiveSession, setIsFinishingActiveSession] = useState<boolean>(false);
     const autoFinishSessionIdRef = useRef<number | null>(null);
     const timerSessionIdRef = useRef<number | null>(null);
+    const queueRef = useRef<number[]>([]);
     const [liveElapsedSeconds, setLiveElapsedSeconds] = useState<number>(0);
 
     const [matchingPageInfo, setMatchingPageInfo] = useState<{ currentPage: number; totalPages: number }>({
@@ -516,11 +524,34 @@ const StudentQuizlet = () => {
         setHistoryLoadStatus(LoadStatus.LOADING);
         AjaxGet<{ sessions: TQuizletSession[] }>({ url: "/api/quizlet/sessions/stats" })
             .then((json) => {
-                setHistorySessions(json.sessions.filter((item) => item.is_finished));
+                setHistorySessions(json.sessions.filter((item) => item.is_finished && item.skipped_words === 0));
                 setHistoryLoadStatus(LoadStatus.DONE);
             })
             .catch(() => {
                 setHistoryLoadStatus(LoadStatus.ERROR);
+            });
+    };
+
+    const fetchActiveSession = () => {
+        setActiveSessionLoadStatus(LoadStatus.LOADING);
+        AjaxGet<ActiveSessionResponse>({ url: "/api/quizlet/sessions/active" })
+            .then((json) => {
+                setActiveSession(json.session);
+                setActiveSessionLoadStatus(LoadStatus.DONE);
+            })
+            .catch(() => {
+                // Fallback for environments where the new endpoint is not yet available
+                // (e.g. backend dev server did not reload routes).
+                AjaxGet<{ sessions: TQuizletSession[] }>({ url: "/api/quizlet/sessions/stats" })
+                    .then((json) => {
+                        const unfinished = json.sessions.find((item) => !item.is_finished) ?? null;
+                        setActiveSession(unfinished);
+                        setActiveSessionLoadStatus(LoadStatus.DONE);
+                    })
+                    .catch(() => {
+                        setActiveSession(null);
+                        setActiveSessionLoadStatus(LoadStatus.ERROR);
+                    });
             });
     };
 
@@ -610,6 +641,14 @@ const StudentQuizlet = () => {
         }
     }, [mode]);
 
+    useEffect(() => {
+        if (!isSetupRoute || session !== null) {
+            return;
+        }
+
+        fetchActiveSession();
+    }, [isSetupRoute, session]);
+
     const loadSession = (sessionId: number) => {
         AjaxGet<SessionResponse>({ url: `/api/quizlet/sessions/${sessionId}` })
             .then((json) => {
@@ -637,13 +676,44 @@ const StudentQuizlet = () => {
         return sessionWords.filter((word) => !word.is_correct).map((word) => word.id);
     }, [session, sessionWords]);
 
+    useEffect(() => {
+        queueRef.current = queue;
+    }, [queue]);
+
     const startSession = (payload: any) => {
         setLastStartPayload(payload);
+        setActiveSession(null);
         autoFinishSessionIdRef.current = null;
         AjaxPost<{ session: TQuizletSession }>({ url: "/api/quizlet/sessions/start", body: payload }).then((json) => {
             navigate(payload.quiz_type === "flashcards" ? routePaths.flashcards : routePaths.pairs);
             loadSession(json.session.id);
         });
+    };
+
+    const continueSession = () => {
+        if (activeSession === null || activeSession.is_finished) {
+            return;
+        }
+
+        autoFinishSessionIdRef.current = null;
+        loadSession(activeSession.id);
+    };
+
+    const finishActiveSession = async () => {
+        if (activeSession === null || activeSession.is_finished || isFinishingActiveSession) {
+            return;
+        }
+
+        setIsFinishingActiveSession(true);
+        try {
+            await AjaxPost({
+                url: `/api/quizlet/sessions/${activeSession.id}/end`,
+                body: { force_finish: true },
+            });
+            fetchActiveSession();
+        } finally {
+            setIsFinishingActiveSession(false);
+        }
     };
 
     const endNow = () => {
@@ -894,6 +964,35 @@ const StudentQuizlet = () => {
     }, [session, queue]);
 
     useEffect(() => {
+        if (session === null || session.is_finished) {
+            return;
+        }
+
+        const sessionId = session.id;
+        const persistProgress = () => {
+            AjaxPost({
+                url: `/api/quizlet/sessions/${sessionId}/save-progress`,
+                body: { queue: queueRef.current },
+            }).catch(() => undefined);
+        };
+
+        const onVisibilityChange = () => {
+            if (document.visibilityState === "hidden") {
+                persistProgress();
+            }
+        };
+
+        window.addEventListener("pagehide", persistProgress);
+        document.addEventListener("visibilitychange", onVisibilityChange);
+
+        return () => {
+            persistProgress();
+            window.removeEventListener("pagehide", persistProgress);
+            document.removeEventListener("visibilitychange", onVisibilityChange);
+        };
+    }, [session?.id, session?.is_finished]);
+
+    useEffect(() => {
         if (
             session === null ||
             session.is_finished ||
@@ -1133,6 +1232,32 @@ const StudentQuizlet = () => {
 
             {session === null && isSetupRoute && (
                 <div className="mx-auto mt-5" style={{ maxWidth: "760px" }}>
+                    {activeSessionLoadStatus === LoadStatus.DONE &&
+                        activeSession !== null &&
+                        !activeSession.is_finished && (
+                            <div className="alert alert-warning d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2">
+                                <div>
+                                    <div className="fw-semibold mb-1">Есть незавершенная тренировка</div>
+                                    <div className="small">
+                                        Тип: {activeSession.quiz_type === "flashcards" ? "Карточки" : "Пары"} •
+                                        Прогресс: {activeSession.correct_answers}/{activeSession.total_words}
+                                    </div>
+                                </div>
+                                <div className="d-flex gap-2">
+                                    <button type="button" className="btn btn-warning" onClick={continueSession}>
+                                        Продолжить
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-outline-danger"
+                                        onClick={finishActiveSession}
+                                        disabled={isFinishingActiveSession}
+                                    >
+                                        {isFinishingActiveSession ? "Завершение..." : "Завершить"}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     <QuizletQuizStart
                         groups={groups}
                         subgroups={subgroups}

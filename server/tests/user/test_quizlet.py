@@ -164,3 +164,78 @@ def test_flashcard_incorrect_answer_boundary_4_cards_appends_at_end(create_db):
         # With 4 cards, after removing first one, we have 3 cards (< 4)
         # So the word should be appended at the end
         assert json.loads(updated_session.queue_state) == [word_ids[1], word_ids[2], word_ids[3], word_ids[0]]
+
+
+def test_get_active_quizlet_session_returns_latest_unfinished(create_db):
+    DBsession.init(create_db)
+
+    with DBsession.begin() as session:
+        user = User(name="Quizlet Student",
+                    nickname="quizlet_student",
+                    password="password123",
+                    birthday=datetime.date(2000, 1, 1),
+                    level=User.Level.STUDENT)
+        session.add(user)
+        session.flush()
+
+        session.add(
+            QuizletSession(quiz_type=QuizletSession.Type.FLASHCARDS,
+                           show_hints=False,
+                           translation_direction="jp_to_ru",
+                           total_words=10,
+                           user_id=user.id,
+                           is_finished=False,
+                           updated_at=datetime.datetime(2026, 4, 4, 9, 0, 0),
+                           queue_state="[]"))
+
+        finished_newer = QuizletSession(quiz_type=QuizletSession.Type.PAIR,
+                                        show_hints=False,
+                                        translation_direction="jp_to_ru",
+                                        total_words=10,
+                                        user_id=user.id,
+                                        is_finished=True,
+                                        updated_at=datetime.datetime(2026, 4, 4, 10, 0, 0),
+                                        queue_state="[]")
+        session.add(finished_newer)
+
+        active_latest = QuizletSession(quiz_type=QuizletSession.Type.PAIR,
+                                       show_hints=False,
+                                       translation_direction="jp_to_ru",
+                                       total_words=10,
+                                       user_id=user.id,
+                                       is_finished=False,
+                                       updated_at=datetime.datetime(2026, 4, 4, 11, 0, 0),
+                                       queue_state="[]")
+        session.add(active_latest)
+
+    result = StudentDBqueries.get_active_quizlet_session(user.id)
+
+    assert result is not None
+    assert result.id == active_latest.id
+    assert result.is_finished is False
+
+
+def test_get_active_quizlet_session_returns_none_when_no_unfinished(create_db):
+    DBsession.init(create_db)
+
+    with DBsession.begin() as session:
+        user = User(name="Quizlet Student",
+                    nickname="quizlet_student",
+                    password="password123",
+                    birthday=datetime.date(2000, 1, 1),
+                    level=User.Level.STUDENT)
+        session.add(user)
+        session.flush()
+
+        session.add(
+            QuizletSession(quiz_type=QuizletSession.Type.FLASHCARDS,
+                           show_hints=False,
+                           translation_direction="jp_to_ru",
+                           total_words=10,
+                           user_id=user.id,
+                           is_finished=True,
+                           queue_state="[]"))
+
+    result = StudentDBqueries.get_active_quizlet_session(user.id)
+
+    assert result is None
