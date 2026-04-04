@@ -8,8 +8,8 @@
         linear-gradient(180deg, #ffffff 0%, #fafcff 52%, #f7faff 100%);
 
     .modal-dialog {
-        width: 22.5vw;
-        max-width: 22.5vw;
+        width: 33.75vw;
+        max-width: 33.75vw;
 
         @media (max-width: 991px) {
             width: 90vw;
@@ -37,11 +37,11 @@
 
     .modal-header {
         border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-        padding: 12px 14px 10px;
+        padding: 12px 14px 12px;
     }
 
     .modal-body {
-        padding: 10px;
+        padding: 18px 12px 12px 20px;
     }
 
     .modal-title {
@@ -144,6 +144,11 @@
     font-weight: 500;
     line-height: 1.3;
     overflow-wrap: anywhere;
+}
+
+.notification__item-entity-name {
+    font-weight: 700;
+    color: #80bf63;
 }
 
 .notification__item-content {

@@ -75,6 +75,10 @@ const getLessonTitle = (item: TStudentNotification) => {
     return "Уведомление";
 };
 
+const isAccessNotification = (item: TStudentNotification): boolean => {
+    return item.type === "course" || item.type === "lesson";
+};
+
 interface ItemContentProps {
     item: TStudentNotification;
     closeModal: () => void;
@@ -86,6 +90,7 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
     const { date, time } = getDisplayDateTime(item);
     const mistakesCount = getMistakesCount(item);
     const lessonTitle = getLessonTitle(item);
+    const isAccessItem = isAccessNotification(item);
 
     const handleClick = () => {
         if (isClickable) {
@@ -109,7 +114,15 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
         return item.type === null || item.type === undefined;
     };
 
-    const content = isMessageItem(item) ? item.message || "Уведомление" : getLessonTitle(item);
+    const content = isAccessItem ? (
+        <>
+            Открыт доступ к <span className="notification__item-entity-name">{lessonTitle}</span>
+        </>
+    ) : isMessageItem(item) ? (
+        item.message || "Уведомление"
+    ) : (
+        getLessonTitle(item)
+    );
 
     return (
         <div
@@ -125,14 +138,18 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
                 <i className="bi bi-calendar3" aria-hidden="true"></i>
                 <span>{date}</span>
             </div>
-            <div className="notification__item-chip">
-                <i className="bi bi-clock" aria-hidden="true"></i>
-                <span>{time}</span>
-            </div>
-            <div className="notification__item-chip" title="Количество ошибок">
-                <i className="bi bi-exclamation-circle" aria-hidden="true"></i>
-                <span>{mistakesCount ?? "-"}</span>
-            </div>
+            {!isAccessItem ? (
+                <div className="notification__item-chip">
+                    <i className="bi bi-clock" aria-hidden="true"></i>
+                    <span>{time}</span>
+                </div>
+            ) : null}
+            {!isAccessItem ? (
+                <div className="notification__item-chip" title="Количество ошибок">
+                    <i className="bi bi-exclamation-circle" aria-hidden="true"></i>
+                    <span>{mistakesCount ?? "-"}</span>
+                </div>
+            ) : null}
             <div className="notification__item-inline-content">{content}</div>
         </div>
     );
