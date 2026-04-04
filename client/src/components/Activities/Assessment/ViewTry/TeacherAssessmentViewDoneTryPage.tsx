@@ -17,7 +17,6 @@ import {
 } from "models/Activity/Items/TAssessmentItems";
 import { TAssessmentDoneTry } from "models/Activity/Try/TAssessmentTry";
 
-import { hasMistakesMessage, TaskMistakes } from "./AssessmentViewDoneTryComponents";
 import { TeacherAssessmentDoneTryTaskProps } from "./Tasks/AssessmentDoneTryTaskBase";
 import { StudentAssessmentDoneTryAudio } from "./Tasks/Student/StudentAssessmentDoneTryAudio";
 import { StudentAssessmentDoneTryClassification } from "./Tasks/Student/StudentAssessmentDoneTryClassification";
@@ -63,6 +62,17 @@ const aliases: TAliases = {
 interface DoneTryResponse {
     done_try: TAssessmentDoneTry;
     lesson_id: number;
+}
+
+interface TaskInBlock {
+    doneTask: TAssessmentItemBase;
+    checkedTask: TAssessmentCheckedItemBase;
+    originalIndex: number;
+}
+
+interface TaskBlock {
+    id: number;
+    tasks: TaskInBlock[];
 }
 
 const TeacherAssessmentViewDoneTryPage = () => {
@@ -139,48 +149,137 @@ const TeacherAssessmentViewDoneTryPage = () => {
         return task.name !== TAssessmentTaskName.BLOCK_BEGIN && task.name !== TAssessmentTaskName.BLOCK_END;
     };
 
-    return (
-        <div className="container mb-5 pb-5" style={{ maxWidth: "800px" }}>
-            <PageTitle title="タスク" urlBack={lessonId !== undefined ? `/lessons/${lessonId}` : undefined} />
-            <hr />
-            <div className="student-assessment-tasks">
-                {doneTry.data.done_tasks.map(
-                    (doneTask, i) =>
-                        // <div key={i}>
-                        //     <TaskMistakes {...doneTry.data.checked_tasks[i]} />
-                        //     {drawItem(doneTask, doneTry.data.checked_tasks[i], i)}
-                        //     <hr />
-                        // </div>
+    const getTaskCorrectAnswersTotal = (task: TAssessmentItemBase): number => {
+        switch (task.name) {
+            case TAssessmentTaskName.TEST_SINGLE:
+                return 1;
+            case TAssessmentTaskName.TEST_MULTI:
+                return (task as TGetAsseessmentDoneTryTypeByName[TAssessmentTaskName.TEST_MULTI]).meta_answers.length;
+            case TAssessmentTaskName.FIND_PAIR:
+                return (task as TGetAsseessmentDoneTryTypeByName[TAssessmentTaskName.FIND_PAIR]).meta_first.length;
+            case TAssessmentTaskName.CREATE_SENTENCE:
+                return (task as TGetAsseessmentDoneTryTypeByName[TAssessmentTaskName.CREATE_SENTENCE]).meta_parts
+                    .length;
+            case TAssessmentTaskName.FILL_SPACES_EXISTS:
+                return (task as TGetAsseessmentDoneTryTypeByName[TAssessmentTaskName.FILL_SPACES_EXISTS]).meta_answers
+                    .length;
+            case TAssessmentTaskName.FILL_SPACES_BY_HAND:
+                return (task as TGetAsseessmentDoneTryTypeByName[TAssessmentTaskName.FILL_SPACES_BY_HAND]).meta_answers
+                    .length;
+            case TAssessmentTaskName.CLASSIFICATION:
+                return (
+                    task as TGetAsseessmentDoneTryTypeByName[TAssessmentTaskName.CLASSIFICATION]
+                ).meta_answers.reduce((acc, col) => acc + col.length, 0);
+            case TAssessmentTaskName.SENTENCE_ORDER:
+                return (task as TGetAsseessmentDoneTryTypeByName[TAssessmentTaskName.SENTENCE_ORDER]).meta_parts.length;
+            case TAssessmentTaskName.OPEN_QUESTION:
+                return 1;
+            case TAssessmentTaskName.TEXT:
+            case TAssessmentTaskName.IMG:
+            case TAssessmentTaskName.AUDIO:
+            default:
+                return 1;
+        }
+    };
 
-                        isDrawableItem(doneTask) && (
-                            <React.Fragment key={i}>
-                                <div className="student-assessment-view-task__wrapper">
-                                    {doneTask.name !== TAssessmentTaskName.IMG && (
-                                        <div className="student-assessment-task-title">
-                                            {studentAssessmentTaskRusNameAliases[doneTask.name]}
+    const createBlocks = (): TaskBlock[] => {
+        const blocks: TaskBlock[] = [];
+        let currentBlock: TaskBlock = { id: 1, tasks: [] };
+
+        doneTry.data.done_tasks.forEach((doneTask, index) => {
+            const checkedTask = doneTry.data.checked_tasks[index] as TAssessmentCheckedItemBase;
+
+            if (doneTask.name === TAssessmentTaskName.BLOCK_BEGIN) {
+                if (currentBlock.tasks.length > 0) {
+                    blocks.push(currentBlock);
+                }
+
+                currentBlock = { id: blocks.length + 1, tasks: [] };
+                return;
+            }
+
+            if (doneTask.name === TAssessmentTaskName.BLOCK_END) {
+                if (currentBlock.tasks.length > 0) {
+                    blocks.push(currentBlock);
+                }
+
+                currentBlock = { id: blocks.length + 1, tasks: [] };
+                return;
+            }
+
+            currentBlock.tasks.push({
+                doneTask,
+                checkedTask,
+                originalIndex: index,
+            });
+        });
+
+        if (currentBlock.tasks.length > 0) {
+            blocks.push(currentBlock);
+        }
+
+        return blocks;
+    };
+
+    const blocks = createBlocks();
+
+    return (
+        <div className="container pb-5" style={{ maxWidth: "800px" }}>
+            <PageTitle title="タスク" urlBack={lessonId !== undefined ? `/lessons/${lessonId}` : undefined} />
+            <div className="student-assessment-page mt-3">
+                <div className="student-assessment-tasks">
+                    {blocks.map((block) => (
+                        <React.Fragment key={block.id}>
+                            <div className="student-assessment-block-divider">Блок {block.id}</div>
+                            {block.tasks.map(({ doneTask, checkedTask, originalIndex }) =>
+                                isDrawableItem(doneTask) ? (
+                                    <React.Fragment key={originalIndex}>
+                                        <div className="student-assessment-task__wrapper student-assessment-view-task__wrapper">
+                                            {doneTask.name !== TAssessmentTaskName.IMG && (
+                                                <div className="student-assessment-task-title">
+                                                    {studentAssessmentTaskRusNameAliases[doneTask.name]}
+                                                </div>
+                                            )}
+                                            {doneTask.name !== TAssessmentTaskName.TEXT &&
+                                                doneTask.name !== TAssessmentTaskName.IMG &&
+                                                doneTask.name !== TAssessmentTaskName.AUDIO &&
+                                                (() => {
+                                                    const total = getTaskCorrectAnswersTotal(doneTask);
+                                                    const mistakes = checkedTask.mistakes_count;
+                                                    const correct = Math.max(0, Math.min(total, total - mistakes));
+                                                    const resultClassName =
+                                                        mistakes > 0
+                                                            ? "student-assessment-task-result student-assessment-task-result--error"
+                                                            : "student-assessment-task-result student-assessment-task-result--success";
+
+                                                    return (
+                                                        <div className={resultClassName}>
+                                                            Верно: {correct} из {total}
+                                                        </div>
+                                                    );
+                                                })()}
+                                            {drawItem(doneTask, checkedTask, originalIndex)}
                                         </div>
-                                    )}
-                                    {hasMistakesMessage(doneTask.name) ? (
-                                        <TaskMistakes {...doneTry.data.checked_tasks[i]} />
-                                    ) : null}
-                                    {drawItem(doneTask, doneTry.data.checked_tasks[i], i)}
-                                </div>
-                                <hr className="my-0 py-0" />
-                            </React.Fragment>
-                        ),
+                                    </React.Fragment>
+                                ) : null,
+                            )}
+                        </React.Fragment>
+                    ))}
+                </div>
+                {saveStatus !== LoadStatus.LOADING ? (
+                    <input
+                        type="button"
+                        value="Сохранить и закрыть"
+                        className="btn btn-success mt-3"
+                        onClick={saveChangesAndClose}
+                    />
+                ) : (
+                    <Loading size={32} />
+                )}
+                {saveStatus === LoadStatus.ERROR && (
+                    <InputError className="mt-2" message="Не удалось сохранить данные" />
                 )}
             </div>
-            {saveStatus !== LoadStatus.LOADING ? (
-                <input
-                    type="button"
-                    value="Сохранить и закрыть"
-                    className="btn btn-success"
-                    onClick={saveChangesAndClose}
-                />
-            ) : (
-                <Loading size={32} />
-            )}
-            {saveStatus === LoadStatus.ERROR && <InputError message="Не удалось сохранить данные" />}
         </div>
     );
 };

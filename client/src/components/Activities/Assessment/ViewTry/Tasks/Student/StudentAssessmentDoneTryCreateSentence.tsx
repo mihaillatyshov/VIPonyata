@@ -36,7 +36,7 @@ export const StudentAssessmentDoneTryCreateSentence = ({
                         {data.meta_parts.map((item, id) => (
                             <div
                                 key={id}
-                                className="student-assessment-view-sortable-order__item good prevent-select md-last-pad-zero"
+                                className="student-assessment-view-sortable-order__item student-assessment-correct-answer prevent-select md-last-pad-zero"
                             >
                                 <ReactMarkdownWithHtml>{item}</ReactMarkdownWithHtml>
                             </div>

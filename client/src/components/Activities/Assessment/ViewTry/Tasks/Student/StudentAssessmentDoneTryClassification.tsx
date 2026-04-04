@@ -1,9 +1,12 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 
 import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import { FindMaxStr, fixRubyStr } from "libs/Autisize";
 import AutosizeDiv from "libs/AutosizeDiv";
-import { TAssessmentCheckedClassification, TAssessmentClassification } from "models/Activity/Items/TAssessmentItems";
+import {
+    TAssessmentCheckedClassification,
+    TAssessmentDoneTryClassification,
+} from "models/Activity/Items/TAssessmentItems";
 
 import { AssessmentDoneTryTaskBaseProps } from "../AssessmentDoneTryTaskBase";
 
@@ -11,11 +14,33 @@ interface ContainerProps {
     items: string[];
     longestStr: string;
     title: string;
-    wrongItems: number[];
+    wrongItems?: number[];
+    isCorrectAnswers?: boolean;
+    studentItems?: string[];
 }
 
-const Container = ({ items, longestStr, title, wrongItems }: ContainerProps) => {
+const Container = ({
+    items,
+    longestStr,
+    title,
+    wrongItems = [],
+    isCorrectAnswers = false,
+    studentItems = [],
+}: ContainerProps) => {
     const getItemClassName = (i: number) => {
+        if (isCorrectAnswers) {
+            const isMissed = !studentItems.includes(items[i]);
+            const isAlreadyGiven = studentItems.includes(items[i]);
+
+            if (isAlreadyGiven) {
+                return "student-assessment-classification__item student-assessment-correct-answer-muted";
+            }
+
+            return wrongItems.includes(i) || isMissed
+                ? "student-assessment-classification__item student-assessment-correct-answer"
+                : "student-assessment-classification__item";
+        }
+
         return `student-assessment-classification__item ${wrongItems.includes(i) ? "wrong" : "good"}`;
     };
 
@@ -56,7 +81,7 @@ const Container = ({ items, longestStr, title, wrongItems }: ContainerProps) => 
 export const StudentAssessmentDoneTryClassification = ({
     data,
     checks,
-}: AssessmentDoneTryTaskBaseProps<TAssessmentClassification, TAssessmentCheckedClassification>) => {
+}: AssessmentDoneTryTaskBaseProps<TAssessmentDoneTryClassification, TAssessmentCheckedClassification>) => {
     const longestStr = useMemo(
         () =>
             FindMaxStr(
@@ -67,16 +92,40 @@ export const StudentAssessmentDoneTryClassification = ({
     );
 
     return (
-        <div className="student-assessment-classification__answers-wrapper">
-            {data.answers.map((col, i) => (
-                <Container
-                    key={i + 1}
-                    items={col}
-                    longestStr={longestStr}
-                    title={data.titles[i]}
-                    wrongItems={checks.mistake_answers[i]}
-                />
-            ))}
+        <div className="student-assessment-view-sortable-order__container">
+            <div className="student-assessment-view-sortable-order__wrapper">
+                <div>Твои ответы: </div>
+                <div className="student-assessment-classification__answers-wrapper">
+                    {data.answers.map((col, i) => (
+                        <Container
+                            key={i + 1}
+                            items={col}
+                            longestStr={longestStr}
+                            title={data.titles[i]}
+                            wrongItems={checks.mistake_answers[i]}
+                        />
+                    ))}
+                </div>
+            </div>
+
+            {checks.mistakes_count > 0 && (
+                <div className="student-assessment-view-sortable-order__wrapper">
+                    <div>Правильные ответы: </div>
+                    <div className="student-assessment-classification__answers-wrapper">
+                        {data.meta_answers.map((col, i) => (
+                            <Container
+                                key={`meta_${i + 1}`}
+                                items={col}
+                                longestStr={longestStr}
+                                title={data.titles[i]}
+                                wrongItems={checks.mistake_answers[i]}
+                                isCorrectAnswers={true}
+                                studentItems={data.answers[i]}
+                            />
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

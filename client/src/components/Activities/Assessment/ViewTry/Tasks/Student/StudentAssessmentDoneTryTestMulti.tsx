@@ -1,5 +1,3 @@
-import React from "react";
-
 import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import InputCheckSingle from "components/Form/InputCheckSingle";
 import { TAssessmentCheckedTestMulti, TAssessmentDoneTryTestMulti } from "models/Activity/Items/TAssessmentItems";
@@ -45,15 +43,18 @@ const StudentAssessmentDoneTryTestTaskItem = ({
 
 export const StudentAssessmentDoneTryTestMulti = ({
     data,
-    checks,
     taskId,
 }: AssessmentDoneTryTaskBaseProps<TAssessmentDoneTryTestMulti, TAssessmentCheckedTestMulti>) => {
     const getValidationStr = (fieldId: number): TValidationStr => {
-        if (checks.mistake_answers.includes(fieldId)) {
-            return "wrong";
-        }
-        if (data.meta_answers.includes(fieldId)) {
+        const isSelected = data.answers.includes(fieldId);
+        const isCorrect = data.meta_answers.includes(fieldId);
+
+        if (isSelected && isCorrect) {
             return "good";
+        }
+
+        if ((isCorrect && !isSelected) || (!isCorrect && isSelected)) {
+            return "wrong";
         }
     };
 

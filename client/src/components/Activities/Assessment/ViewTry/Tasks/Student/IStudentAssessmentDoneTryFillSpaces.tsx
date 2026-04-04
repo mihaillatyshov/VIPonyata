@@ -35,7 +35,7 @@ export const IStudentAssessmentDoneTryFillSpaces = ({
                                 <ReactMarkdownWithHtml>{data.answers[i] || "&nbsp;"}</ReactMarkdownWithHtml>
                             </div>
                             {checks.mistake_answers.includes(i) && (
-                                <div className="form-control student-assessment-fill-spaces-by-hand__input wrong-good md-last-pad-zero">
+                                <div className="form-control student-assessment-fill-spaces-by-hand__input student-assessment-correct-answer md-last-pad-zero">
                                     <ReactMarkdownWithHtml>{data.meta_answers[i]}</ReactMarkdownWithHtml>
                                 </div>
                             )}

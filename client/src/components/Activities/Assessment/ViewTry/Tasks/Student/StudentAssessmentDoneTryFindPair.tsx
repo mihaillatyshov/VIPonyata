@@ -1,5 +1,3 @@
-import React from "react";
-
 import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import { TAssessmentCheckedFindPair, TAssessmentDoneTryFindPair } from "models/Activity/Items/TAssessmentItems";
 
@@ -10,15 +8,16 @@ interface FieldRowItemProps {
     field: string;
     parsCreated: number;
     alignRight?: boolean;
-    isWrong: boolean;
+    answerState: "wrong" | "good" | "missed" | "correct-answer" | "plain";
 }
 
-const FieldRowItem = ({ id, field, parsCreated, alignRight, isWrong }: FieldRowItemProps) => {
-    const answerClass = isWrong ? "wrong" : "done";
+const FieldRowItem = ({ id, field, parsCreated, alignRight, answerState }: FieldRowItemProps) => {
+    const answerClass = answerState === "plain" ? "" : answerState;
+    const isAnsweredRow = id < parsCreated || answerState === "wrong";
     const getClassName = () => {
         return `student-assessment-find-pair__item prevent-select md-last-pad-zero
         ${alignRight ? "right" : ""}
-        ${id < parsCreated ? answerClass : ""} `;
+        ${isAnsweredRow ? answerClass : ""} `;
     };
 
     return (
@@ -33,14 +32,14 @@ interface FieldRowProps {
     parsCreated: number;
     first: string;
     second: string;
-    isWrong: boolean;
+    answerState: "wrong" | "good" | "missed" | "correct-answer" | "plain";
 }
 
-const FieldRow = ({ id, parsCreated, first, second, isWrong }: FieldRowProps) => {
+const FieldRow = ({ id, parsCreated, first, second, answerState }: FieldRowProps) => {
     return (
         <div className="row student-assessment-find-pair__row">
-            <FieldRowItem field={first} id={id} parsCreated={parsCreated} alignRight={true} isWrong={isWrong} />
-            <FieldRowItem field={second} id={id} parsCreated={parsCreated} isWrong={isWrong} />
+            <FieldRowItem field={first} id={id} parsCreated={parsCreated} alignRight={true} answerState={answerState} />
+            <FieldRowItem field={second} id={id} parsCreated={parsCreated} answerState={answerState} />
         </div>
     );
 };
@@ -54,6 +53,7 @@ export const StudentAssessmentDoneTryFindPair = ({
     return (
         <div className={rowClassName}>
             <div className="col student-assessment-find-pair__col">
+                <div className="student-assessment-find-pair__label">Твои ответы:</div>
                 {data.first.map((first, i) => (
                     <FieldRow
                         key={i}
@@ -61,13 +61,14 @@ export const StudentAssessmentDoneTryFindPair = ({
                         parsCreated={data.pars_created}
                         first={first}
                         second={data.second[i]}
-                        isWrong={checks.mistake_lines.includes(i)}
+                        answerState={checks.mistake_lines.includes(i) ? "wrong" : "good"}
                     />
                 ))}
             </div>
 
             {checks.mistakes_count > 0 && (
                 <div className="col student-assessment-find-pair__col">
+                    <div className="student-assessment-find-pair__label">Правильные ответы:</div>
                     {data.meta_first.map((first, i) => (
                         <FieldRow
                             key={i}
@@ -75,7 +76,9 @@ export const StudentAssessmentDoneTryFindPair = ({
                             parsCreated={data.meta_first.length}
                             first={first}
                             second={data.meta_second[i]}
-                            isWrong={false}
+                            answerState={
+                                checks.mistake_lines.includes(i) || i >= data.pars_created ? "correct-answer" : "plain"
+                            }
                         />
                     ))}
                 </div>

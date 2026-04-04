@@ -1,5 +1,3 @@
-import React from "react";
-
 import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import { TAssessmentCheckedOpenQuestion, TAssessmentDoneTryOpenQuestion } from "models/Activity/Items/TAssessmentItems";
 
@@ -12,6 +10,7 @@ export const StudentAssessmentDoneTryOpenQuestion = ({
     checks,
 }: AssessmentDoneTryTaskBaseProps<TAssessmentDoneTryOpenQuestion, TAssessmentCheckedOpenQuestion>) => {
     const diffChars: any[] = Diff.diffChars(data.meta_answer || "", data.answer);
+    const studentAnswerClassName = checks.mistakes_count > 0 ? "input-wrong" : "input-good";
 
     const getDiffItemColor = (diffItem: any) => {
         if (diffItem.added === true) return "#4e0707";
@@ -27,13 +26,15 @@ export const StudentAssessmentDoneTryOpenQuestion = ({
 
             <div className="student-assessment-view-open-question__wrapper">
                 <div>Твой ответ:</div>
-                <span className="form-control">{data.answer} &nbsp;</span>
+                <span className={`form-control ${studentAnswerClassName}`}>{data.answer} &nbsp;</span>
             </div>
             {data.meta_answer ? (
                 <>
                     <div className="student-assessment-open-question__wrapper">
                         <div>Правильный ответ:</div>
-                        <span className="form-control input-good">{data.meta_answer} &nbsp;</span>
+                        <span className="form-control student-assessment-correct-answer">
+                            {data.meta_answer} &nbsp;
+                        </span>
                     </div>
 
                     <div className="student-assessment-open-question__wrapper">

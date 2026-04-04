@@ -1,5 +1,3 @@
-import React from "react";
-
 import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import {
     TAssessmentCheckedSentenceOrder,
@@ -20,23 +18,33 @@ export const StudentAssessmentDoneTrySentenceOrder = ({
 
     return (
         <div className={rowClassName}>
-            <div className="student-assessment-sortable-order vertical">
-                {data.parts.map((item, id) => (
-                    <div key={id} className={`prevent-select md-last-pad-zero ${getClassName(id)}`}>
-                        <ReactMarkdownWithHtml>{item}</ReactMarkdownWithHtml>
-                    </div>
-                ))}
-            </div>
-            {checks.mistakes_count > 0 && (
+            <div className="col student-assessment-sentence-order__col">
+                <div className="student-assessment-sentence-order__label">Твои ответы:</div>
                 <div className="student-assessment-sortable-order vertical">
-                    {data.meta_parts.map((item, id) => (
-                        <div
-                            key={id}
-                            className="student-assessment-view-sortable-order__item good prevent-select md-last-pad-zero"
-                        >
-                            <ReactMarkdownWithHtml>{item}</ReactMarkdownWithHtml>
+                    {data.parts.map((item, id) => (
+                        <div key={id} className="student-assessment-sentence-order__row">
+                            <span className="student-assessment-sentence-order__index">{id + 1}</span>
+                            <div className={`prevent-select md-last-pad-zero ${getClassName(id)}`}>
+                                <ReactMarkdownWithHtml>{item}</ReactMarkdownWithHtml>
+                            </div>
                         </div>
                     ))}
+                </div>
+            </div>
+
+            {checks.mistakes_count > 0 && (
+                <div className="col student-assessment-sentence-order__col">
+                    <div className="student-assessment-sentence-order__label">Правильные ответы:</div>
+                    <div className="student-assessment-sortable-order vertical">
+                        {data.meta_parts.map((item, id) => (
+                            <div key={id} className="student-assessment-sentence-order__row">
+                                <span className="student-assessment-sentence-order__index">{id + 1}</span>
+                                <div className="student-assessment-view-sortable-order__item student-assessment-correct-answer prevent-select md-last-pad-zero">
+                                    <ReactMarkdownWithHtml>{item}</ReactMarkdownWithHtml>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
         </div>

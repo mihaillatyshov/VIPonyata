@@ -1,5 +1,3 @@
-import React from "react";
-
 import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import InputRadioSingle from "components/Form/InputRadioSingle";
 import { TAssessmentCheckedTestSingle, TAssessmentDoneTryTestSingle } from "models/Activity/Items/TAssessmentItems";
