@@ -165,13 +165,12 @@ const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups
                 {personalLesson !== null && (
                     <div className="border rounded p-2 mb-2">
                         <div className="d-flex justify-content-between align-items-center mb-2">
-                            <strong>Мой словарь</strong>
                             <button
                                 type="button"
-                                className="btn btn-sm btn-outline-secondary"
+                                className="btn btn-link p-0 text-decoration-none fw-bold text-dark"
                                 onClick={togglePersonalGroup}
                             >
-                                Выбрать всё
+                                Мой словарь
                             </button>
                         </div>
                         {personalSubgroups.length === 0 && (
@@ -185,13 +184,14 @@ const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups
                                             className="form-check-input"
                                             type="checkbox"
                                             checked={selectedPersonalSubgroups.includes(subgroup.id)}
-                                            onChange={() =>
+                                            onChange={(e) => {
                                                 toggleSelection(
                                                     selectedPersonalSubgroups,
                                                     setSelectedPersonalSubgroups,
                                                     subgroup.id,
-                                                )
-                                            }
+                                                );
+                                                e.target.blur();
+                                            }}
                                         />
                                         <span className="form-check-label">{subgroup.title}</span>
                                     </label>
@@ -204,13 +204,12 @@ const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups
                 {subgroupsByGroup.map(({ group, subgroups: nestedSubgroups }) => (
                     <div key={group.id} className="border rounded p-2 mb-2">
                         <div className="d-flex justify-content-between align-items-center mb-2">
-                            <strong>{group.title}</strong>
                             <button
                                 type="button"
-                                className="btn btn-sm btn-outline-secondary"
+                                className="btn btn-link p-0 text-decoration-none fw-bold text-dark"
                                 onClick={() => toggleGroup(group.id)}
                             >
-                                Выбрать всё
+                                {group.title}
                             </button>
                         </div>
                         <div className="d-flex flex-wrap gap-2">
@@ -220,13 +219,14 @@ const QuizletQuizStart = ({ groups, subgroups, personalLesson, personalSubgroups
                                         className="form-check-input"
                                         type="checkbox"
                                         checked={selectedTeacherSubgroups.includes(subgroup.id)}
-                                        onChange={() =>
+                                        onChange={(e) => {
                                             toggleSelection(
                                                 selectedTeacherSubgroups,
                                                 setSelectedTeacherSubgroups,
                                                 subgroup.id,
-                                            )
-                                        }
+                                            );
+                                            e.target.blur();
+                                        }}
                                     />
                                     <span className="form-check-label">{subgroup.title}</span>
                                 </label>
