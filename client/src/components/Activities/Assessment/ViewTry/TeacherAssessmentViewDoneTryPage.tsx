@@ -240,11 +240,19 @@ const TeacherAssessmentViewDoneTryPage = () => {
                   }))
                   .filter((block) => block.tasks.length > 0);
 
+    const totalMistakesCount =
+        typeof doneTry.data.mistakes_count === "number"
+            ? doneTry.data.mistakes_count
+            : doneTry.data.checked_tasks.reduce((acc, task) => acc + (Number(task?.mistakes_count) || 0), 0);
+
     return (
         <div className="container pb-5" style={{ maxWidth: "800px" }}>
             <PageTitle title="タスク" urlBack={lessonId !== undefined ? `/lessons/${lessonId}` : undefined} />
-            <div className="student-assessment-page mt-3">
-                <div className="student-assessment-results-mode">
+            <div className="mt-3 mb-5 box-shadow-main rounded py-4 px-3 w-75 mx-auto d-flex flex-column align-items-center student-assessment-task-result student-assessment-task-result--error">
+                <div className="mb-2 fs-4">
+                    Ошибки в тесте: <strong>{totalMistakesCount}</strong>
+                </div>
+                <div className="student-assessment-results-mode justify-content-center">
                     <button
                         type="button"
                         className={`btn btn-sm ${viewMode === "errors" ? "btn-secondary" : "btn-outline-secondary"}`}
@@ -260,6 +268,8 @@ const TeacherAssessmentViewDoneTryPage = () => {
                         Показать всё
                     </button>
                 </div>
+            </div>
+            <div className="student-assessment-page">
                 <div className="student-assessment-tasks">
                     {visibleBlocks.map((block) => (
                         <React.Fragment key={block.id}>

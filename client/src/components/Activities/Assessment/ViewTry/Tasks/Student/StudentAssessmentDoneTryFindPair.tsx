@@ -69,18 +69,22 @@ export const StudentAssessmentDoneTryFindPair = ({
             {checks.mistakes_count > 0 && (
                 <div className="col student-assessment-find-pair__col">
                     <div className="student-assessment-find-pair__label">Правильные ответы:</div>
-                    {data.meta_first.map((first, i) => (
-                        <FieldRow
-                            key={i}
-                            id={i}
-                            parsCreated={data.meta_first.length}
-                            first={first}
-                            second={data.meta_second[i]}
-                            answerState={
-                                checks.mistake_lines.includes(i) || i >= data.pars_created ? "correct-answer" : "plain"
-                            }
-                        />
-                    ))}
+                    {data.meta_first.map((first, i) => {
+                        const metaSecond = data.meta_second[i];
+                        const isAlreadyCorrect = data.first.some(
+                            (f, j) => !checks.mistake_lines.includes(j) && f === first && data.second[j] === metaSecond,
+                        );
+                        return (
+                            <FieldRow
+                                key={i}
+                                id={i}
+                                parsCreated={data.meta_first.length}
+                                first={first}
+                                second={metaSecond}
+                                answerState={isAlreadyCorrect ? "plain" : "correct-answer"}
+                            />
+                        );
+                    })}
                 </div>
             )}
         </div>

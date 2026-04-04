@@ -81,7 +81,7 @@ const StudentAssessmentViewDoneTryPage = () => {
         loadStatus: LoadStatus.NONE,
     });
     const [lessonId, setLessonId] = useState<number>();
-    const [viewMode, setViewMode] = useState<TResultViewMode>("errors");
+    const [viewMode, setViewMode] = useState<TResultViewMode | null>(null);
 
     useLayoutEffect(() => {
         setDoneTry({ loadStatus: LoadStatus.LOADING });
@@ -181,6 +181,11 @@ const StudentAssessmentViewDoneTryPage = () => {
                   }))
                   .filter((block) => block.tasks.length > 0);
 
+    const totalMistakesCount =
+        typeof doneTry.data.mistakes_count === "number"
+            ? doneTry.data.mistakes_count
+            : doneTry.data.checked_tasks.reduce((acc, task) => acc + (Number(task?.mistakes_count) || 0), 0);
+
     const getTaskCorrectAnswersTotal = (task: TAssessmentItemBase): number => {
         switch (task.name) {
             case TAssessmentTaskName.TEST_SINGLE:
@@ -217,8 +222,11 @@ const StudentAssessmentViewDoneTryPage = () => {
     return (
         <div className="container pb-5" style={{ maxWidth: "800px" }}>
             <PageTitle title="タスク" urlBack={lessonId !== undefined ? `/lessons/${lessonId}` : undefined} />
-            <div className="student-assessment-page mt-3">
-                <div className="student-assessment-results-mode">
+            <div className="mt-3 mb-5 box-shadow-main rounded py-4 px-3 w-75 mx-auto d-flex flex-column align-items-center student-assessment-task-result student-assessment-task-result--error">
+                <div className="mb-2 fs-4">
+                    Ошибки в тесте: <strong>{totalMistakesCount}</strong>
+                </div>
+                <div className="student-assessment-results-mode justify-content-center">
                     <button
                         type="button"
                         className={`btn btn-sm ${viewMode === "errors" ? "btn-secondary" : "btn-outline-secondary"}`}
@@ -234,43 +242,49 @@ const StudentAssessmentViewDoneTryPage = () => {
                         Показать всё
                     </button>
                 </div>
-                <div className="student-assessment-tasks">
-                    {visibleBlocks.map((block) => (
-                        <React.Fragment key={block.id}>
-                            <div className="student-assessment-block-divider">Блок {block.id}</div>
-                            {block.tasks.map(({ doneTask, checkedTask, originalIndex }) =>
-                                isDrawableItem(doneTask) ? (
-                                    <React.Fragment key={originalIndex}>
-                                        <div className="student-assessment-task__wrapper student-assessment-view-task__wrapper">
-                                            {doneTask.name !== TAssessmentTaskName.TEXT &&
-                                                doneTask.name !== TAssessmentTaskName.IMG &&
-                                                doneTask.name !== TAssessmentTaskName.AUDIO &&
-                                                (() => {
-                                                    const total = getTaskCorrectAnswersTotal(doneTask);
-                                                    const mistakes = checkedTask.mistakes_count;
-                                                    const correct = Math.max(0, Math.min(total, total - mistakes));
-                                                    const resultClassName =
-                                                        mistakes > 0
-                                                            ? "student-assessment-task-result student-assessment-task-result--error"
-                                                            : "student-assessment-task-result student-assessment-task-result--success";
-
-                                                    return (
-                                                        <div className={resultClassName}>
-                                                            Верно: {correct} из {total}
-                                                        </div>
-                                                    );
-                                                })()}
-                                            {drawItem(doneTask, checkedTask, originalIndex)}
-                                        </div>
-                                    </React.Fragment>
-                                ) : null,
-                            )}
-                        </React.Fragment>
-                    ))}
-
-                    {visibleBlocks.length === 0 && <div className="student-assessment-results-empty">Ошибок нет</div>}
-                </div>
             </div>
+            {viewMode !== null && (
+                <div className="student-assessment-page">
+                    <div className="student-assessment-tasks">
+                        {visibleBlocks.map((block) => (
+                            <React.Fragment key={block.id}>
+                                <div className="student-assessment-block-divider">Блок {block.id}</div>
+                                {block.tasks.map(({ doneTask, checkedTask, originalIndex }) =>
+                                    isDrawableItem(doneTask) ? (
+                                        <React.Fragment key={originalIndex}>
+                                            <div className="student-assessment-task__wrapper student-assessment-view-task__wrapper">
+                                                {doneTask.name !== TAssessmentTaskName.TEXT &&
+                                                    doneTask.name !== TAssessmentTaskName.IMG &&
+                                                    doneTask.name !== TAssessmentTaskName.AUDIO &&
+                                                    (() => {
+                                                        const total = getTaskCorrectAnswersTotal(doneTask);
+                                                        const mistakes = checkedTask.mistakes_count;
+                                                        const correct = Math.max(0, Math.min(total, total - mistakes));
+                                                        const resultClassName =
+                                                            mistakes > 0
+                                                                ? "student-assessment-task-result student-assessment-task-result--error"
+                                                                : "student-assessment-task-result student-assessment-task-result--success";
+
+                                                        return (
+                                                            <div className={resultClassName}>
+                                                                Верно: {correct} из {total}
+                                                            </div>
+                                                        );
+                                                    })()}
+                                                {drawItem(doneTask, checkedTask, originalIndex)}
+                                            </div>
+                                        </React.Fragment>
+                                    ) : null,
+                                )}
+                            </React.Fragment>
+                        ))}
+
+                        {visibleBlocks.length === 0 && (
+                            <div className="student-assessment-results-empty">Ошибок нет</div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

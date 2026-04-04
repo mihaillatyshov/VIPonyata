@@ -258,7 +258,7 @@ const StudentAssessmentPage = () => {
             url: `/api/assessment/${assessmentId}/endtry`,
             body: { done_tasks: assessment.items },
         }).then(() => {
-            backToLessonHandle();
+            navigate(`/assessment/try/${assessment.info.try.id}`, { replace: true });
         });
     };
 
