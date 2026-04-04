@@ -393,6 +393,13 @@ const StudentAssessmentPage = () => {
         return task.name !== TAssessmentTaskName.BLOCK_BEGIN && task.name !== TAssessmentTaskName.BLOCK_END;
     };
 
+    const shouldDrawTaskValidation = (itemId: number) => {
+        return (
+            (isNeedDrawFullValidation || changedBlocks.includes(getItemBlock(itemId))) &&
+            errors.errors[`${itemId}`] !== undefined
+        );
+    };
+
     return (
         <div className="container pb-5" style={{ maxWidth: "800px" }}>
             <StudentAssessmentCheckBlockModal
@@ -429,25 +436,36 @@ const StudentAssessmentPage = () => {
                 </div>
                 <hr className="student-assessment-divider" />
                 <div className="student-assessment-tasks">
-                    {toDrawItems.map(
-                        ({ item, itemId }) =>
-                            isDrawableItem(item) && (
-                                <React.Fragment key={itemId}>
-                                    <div className="student-assessment-task__wrapper">
-                                        {item.name !== TAssessmentTaskName.IMG && (
-                                            <div className="student-assessment-task-title">
-                                                {studentAssessmentTaskRusNameAliases[item.name]}
-                                            </div>
-                                        )}
-                                        {drawItem(JSON.parse(JSON.stringify(item)), itemId)}
-                                    </div>
-                                    {(isNeedDrawFullValidation || changedBlocks.includes(getItemBlock(itemId))) &&
-                                        errors.errors[`${itemId}`] !== undefined && (
-                                            <InputError message={errors.errors[`${itemId}`].message} />
-                                        )}
-                                </React.Fragment>
-                            ),
-                    )}
+                    {toDrawItems.map(({ item, itemId }) => {
+                        if (!isDrawableItem(item)) {
+                            return null;
+                        }
+
+                        const hasTaskValidationError = shouldDrawTaskValidation(itemId);
+
+                        return (
+                            <React.Fragment key={itemId}>
+                                <div
+                                    className={`student-assessment-task__wrapper ${
+                                        hasTaskValidationError ? "student-assessment-task__wrapper--unanswered" : ""
+                                    }`}
+                                >
+                                    {hasTaskValidationError && (
+                                        <i
+                                            className="bi bi-exclamation-circle-fill student-assessment-task__warning"
+                                            aria-label="Ответ не выбран"
+                                        />
+                                    )}
+                                    {item.name !== TAssessmentTaskName.IMG && (
+                                        <div className="student-assessment-task-title">
+                                            {studentAssessmentTaskRusNameAliases[item.name]}
+                                        </div>
+                                    )}
+                                    {drawItem(JSON.parse(JSON.stringify(item)), itemId)}
+                                </div>
+                            </React.Fragment>
+                        );
+                    })}
                 </div>
                 <div className="mb-2 d-flex space-between w-100">
                     {blockIdCurrent !== 0 && (

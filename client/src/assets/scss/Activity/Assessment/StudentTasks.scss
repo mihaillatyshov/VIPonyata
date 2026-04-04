@@ -62,6 +62,7 @@
 }
 
 .student-assessment-task__wrapper {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -80,6 +81,20 @@
         font-size: 1.05rem;
         line-height: 1.45;
     }
+}
+
+.student-assessment-task__wrapper--unanswered {
+    background-color: #f0ced5;
+    border-color: #c46b7f66;
+}
+
+.student-assessment-task__warning {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #c46b7f;
+    font-size: 28px;
+    line-height: 1;
 }
 
 @media screen and (max-width: 768px) {
@@ -101,6 +116,11 @@
 
     .student-assessment-task__wrapper {
         padding: 10px 10px 14px;
+    }
+
+    .student-assessment-task__warning {
+        top: 8px;
+        right: 8px;
     }
 
     .student-assessment-tasks {
