@@ -1,200 +1,211 @@
-import React, { useLayoutEffect, useState } from "react";
-import { Modal } from "react-bootstrap";
+import React, { useLayoutEffect, useRef, useState } from "react";
 
-import { TextareaAutosize } from "libs/TextareaAutosize";
 import { TTeacherAssessmentFindPair } from "models/Activity/Items/TAssessmentItems";
 
 import styles from "./Style.module.css";
 import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
 
-type TColNames = "meta_first" | "meta_second";
+const COLS = ["meta_first", "meta_second"] as const;
+type TColNames = (typeof COLS)[number];
 
-const zip = (meta_first: string[], meta_second: string[]): string[][] => {
-    return meta_first.map((el, i) => [el, meta_second[i]]);
-};
-
-interface ImportExcelModalProps {
-    isShow: boolean;
-    close: () => void;
-    defaultData: [string[], string[]];
-    updateDataHandler: (cols: [string[], string[]]) => void;
+interface PairRow {
+    meta_first: string;
+    meta_second: string;
 }
 
-const colsToText = (cols: [string[], string[]]) => {
-    return zip(cols[0], cols[1])
-        .map((row) => `${row[0]}\t${row[1]}`)
-        .join("\n");
+const makeEmptyRow = (): PairRow => ({ meta_first: "", meta_second: "" });
+
+const toRows = (meta_first: string[], meta_second: string[]): PairRow[] => {
+    const maxLength = Math.max(meta_first.length, meta_second.length);
+
+    if (maxLength === 0) {
+        return [makeEmptyRow()];
+    }
+
+    return Array.from({ length: maxLength }, (_, index) => ({
+        meta_first: meta_first[index] ?? "",
+        meta_second: meta_second[index] ?? "",
+    }));
 };
 
-const ImportExcelModal = ({ isShow, close, defaultData, updateDataHandler }: ImportExcelModalProps) => {
-    const [text, setText] = useState<string>(colsToText(defaultData));
-    const [cols, setCols] = useState<[string[], string[]]>(defaultData);
+const toTaskData = (rows: PairRow[]): Pick<TTeacherAssessmentFindPair, TColNames> => ({
+    meta_first: rows.map((row) => row.meta_first),
+    meta_second: rows.map((row) => row.meta_second),
+});
 
-    useLayoutEffect(() => {
-        setCols(defaultData);
-        setText(colsToText(defaultData));
-    }, [defaultData]);
+const isRowEmpty = (row: PairRow) => row.meta_first.trim() === "" && row.meta_second.trim() === "";
 
-    const parseExcel = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const lines = e.target.value.split("\n").filter((line) => line.trim() !== "");
-        const col1: string[] = [];
-        const col2: string[] = [];
-        lines.forEach((line) => {
-            const [first = "", second = ""] = line.split("\t");
-            col1.push(first);
-            col2.push(second);
+const parseClipboardPairs = (text: string): PairRow[] =>
+    text
+        .split(/\r?\n/)
+        .filter((line) => line.trim() !== "")
+        .map((line) => {
+            const cells = line.split("\t");
+            return {
+                meta_first: (cells[0] ?? "").trim(),
+                meta_second: (cells[1] ?? "").trim(),
+            };
         });
-        setCols([col1, col2]);
-        setText(e.target.value);
-    };
-
-    return (
-        <>
-            <Modal size="xl" show={isShow} onHide={close} dialogClassName="modal-dialog">
-                <Modal.Header closeButton className="modal-bg">
-                    <Modal.Title>Импорт "Создай пару" из Excel</Modal.Title>
-                </Modal.Header>
-                <Modal.Body className="modal-bg" style={{ "--css-var-table-header": "#1976d2" } as React.CSSProperties}>
-                    <TextareaAutosize
-                        rows={10}
-                        onChange={parseExcel}
-                        className="form-control"
-                        placeholder={"1_1\t2_1\n1_2\t2_2\n1_3\t2_3\n1_4\t2_4\n"}
-                        value={text}
-                    />
-
-                    <div className="table-container">
-                        <div className={`row ${styles.tableHeader}`}>
-                            <div className="col-6">
-                                <div className="d-flex justify-content-center">Первый столбец</div>
-                            </div>
-                            <div className="col-6">
-                                <div className="d-flex justify-content-center">Второй столбец</div>
-                            </div>
-                        </div>
-                        {zip(cols[0], cols[1]).map(([meta_first, meta_second], i) => (
-                            <>
-                                <div key={i} className="d-flex">
-                                    <div className="col-6 d-flex align-items-center justify-content-center fs-5 h-100 p-2">
-                                        {meta_first}
-                                    </div>
-                                    <div className="col-6 d-flex align-items-center justify-content-center fs-5 h-100 p-2">
-                                        {meta_second}
-                                    </div>
-                                </div>
-                                <hr className="m-0 p-0" />
-                            </>
-                        ))}
-                    </div>
-                    <input
-                        className="btn btn-success"
-                        type="button"
-                        value="Добавить"
-                        onClick={() => {
-                            updateDataHandler(cols);
-                            close();
-                        }}
-                    />
-                </Modal.Body>
-                <Modal.Footer className="modal-bg"></Modal.Footer>
-            </Modal>
-        </>
-    );
-};
-
-interface CellProps {
-    value: string;
-    colName: TColNames;
-    rowId: number;
-    onChange: (newValue: string, colName: TColNames, rowId: number) => void;
-}
-
-const Cell = ({ value, colName, rowId, onChange }: CellProps) => {
-    return (
-        <div className="col-5">
-            <div className="d-flex justify-content-center">
-                <input
-                    type="text"
-                    className="form-control"
-                    value={value}
-                    onChange={(e) => onChange(e.target.value, colName, rowId)}
-                    autoFocus={false}
-                />
-            </div>
-        </div>
-    );
-};
 
 const TeacherAssessmentFindPair = ({
     data,
     taskUUID,
     onChangeTask,
 }: TeacherAssessmentTypeProps<TTeacherAssessmentFindPair>) => {
-    const [isShowImportExcelModal, setIsShowImportExcelModal] = useState<boolean>(false);
+    const tableRef = useRef<HTMLTableElement>(null);
+    const focusPending = useRef<{ rowIndex: number; colIndex: number } | null>(null);
+    const [focusVersion, setFocusVersion] = useState(0);
 
-    const onTextChangeHandler = (newValue: string, colName: TColNames, rowId: number) => {
-        const newCol = data[colName];
-        newCol[rowId] = newValue;
-        onChangeTask({ ...data, [colName]: newCol });
+    const rows = toRows(data.meta_first, data.meta_second);
+
+    useLayoutEffect(() => {
+        if (!focusPending.current) return;
+
+        const { rowIndex, colIndex } = focusPending.current;
+        focusPending.current = null;
+
+        const tbody = tableRef.current?.querySelector("tbody");
+        if (!tbody) return;
+
+        const input = tbody.rows[rowIndex]?.cells[colIndex]?.querySelector<HTMLInputElement>("input");
+        input?.focus();
+        input?.select();
+    }, [rows.length, focusVersion]);
+
+    const requestFocus = (rowIndex: number, colIndex: number, forceRender = false) => {
+        focusPending.current = { rowIndex, colIndex };
+        if (forceRender) {
+            setFocusVersion((value) => value + 1);
+        }
     };
 
-    const addLine = () => {
-        onChangeTask({ ...data, meta_first: [...data.meta_first, ""], meta_second: [...data.meta_second, ""] });
+    const updateRows = (nextRows: PairRow[]) => {
+        onChangeTask({ ...data, ...toTaskData(nextRows) });
     };
 
-    const removeLine = (rowId: number) => {
-        const newFirst = [...data.meta_first];
-        const newSecond = [...data.meta_second];
-        newFirst.splice(rowId, 1);
-        newSecond.splice(rowId, 1);
-        onChangeTask({ ...data, meta_first: newFirst, meta_second: newSecond });
+    const updateCell = (rowIndex: number, colName: TColNames, value: string) => {
+        const nextRows = rows.map((row, index) => (index === rowIndex ? { ...row, [colName]: value } : row));
+        updateRows(nextRows);
     };
 
-    const setNewCols = (cols: [string[], string[]]) => {
-        onChangeTask({ ...data, meta_first: [...cols[0]], meta_second: [...cols[1]] });
+    const addRowAfter = (rowIndex: number) => {
+        const nextRows = [...rows];
+        nextRows.splice(rowIndex + 1, 0, makeEmptyRow());
+        requestFocus(rowIndex + 1, 0);
+        updateRows(nextRows);
+    };
+
+    const removeRow = (rowIndex: number) => {
+        const nextRows = rows.filter((_, index) => index !== rowIndex);
+        updateRows(nextRows.length > 0 ? nextRows : []);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, rowIndex: number, colIndex: number) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+
+            if (rowIndex === rows.length - 1) {
+                addRowAfter(rowIndex);
+            } else {
+                requestFocus(rowIndex + 1, 0, true);
+            }
+            return;
+        }
+
+        if (e.key !== "Tab") {
+            return;
+        }
+
+        const nextCol = colIndex + (e.shiftKey ? -1 : 1);
+
+        if (nextCol >= 0 && nextCol < COLS.length) {
+            e.preventDefault();
+            requestFocus(rowIndex, nextCol, true);
+            return;
+        }
+
+        if (!e.shiftKey && nextCol >= COLS.length) {
+            e.preventDefault();
+            if (rowIndex < rows.length - 1) {
+                requestFocus(rowIndex + 1, 0, true);
+            } else {
+                addRowAfter(rowIndex);
+            }
+            return;
+        }
+
+        if (e.shiftKey && nextCol < 0 && rowIndex > 0) {
+            e.preventDefault();
+            requestFocus(rowIndex - 1, COLS.length - 1, true);
+        }
+    };
+
+    const handlePaste = (e: React.ClipboardEvent<HTMLTableElement>) => {
+        const text = e.clipboardData.getData("text");
+        if (!text.includes("\t") && !text.includes("\n")) return;
+
+        e.preventDefault();
+        const pastedRows = parseClipboardPairs(text);
+        if (pastedRows.length === 0) return;
+
+        const nonEmptyRows = rows.filter((row) => !isRowEmpty(row));
+        updateRows([...nonEmptyRows, ...pastedRows]);
     };
 
     return (
         <div className={styles.findPair}>
-            <button className="btn btn-success w-100 mb-3" onClick={() => setIsShowImportExcelModal(true)}>
-                Импортировать из Excel
-            </button>
-            <div className={`row ${styles.tableHeader}`}>
-                <div className="col-5">
-                    <div className="d-flex justify-content-center">Первый столбец</div>
-                </div>
-                <div className="col-2"></div>
-                <div className="col-5">
-                    <div className="d-flex justify-content-center">Второй столбец</div>
-                </div>
+            <div className={styles.findPairActions}>
+                <div className={styles.findPairHint}>Скопируйте 2 столбца из Excel и вставьте их прямо в таблицу.</div>
             </div>
-            {zip(data.meta_first, data.meta_second).map(([meta_first, meta_second], i) => (
-                <div key={i} className={`row ${styles.tableRow}`}>
-                    <Cell colName="meta_first" value={meta_first} rowId={i} onChange={onTextChangeHandler} />
-                    <div className="col-2">
-                        <div className="d-flex justify-content-center">
-                            <i
-                                className="bi bi-x font-icon-height-0 font-icon-button-danger"
-                                style={{ fontSize: "2.3em" }}
-                                onClick={() => removeLine(i)}
-                            />
-                        </div>
-                    </div>
-                    <Cell colName="meta_second" value={meta_second} rowId={i} onChange={onTextChangeHandler} />
-                </div>
-            ))}
-            <div className="d-flex justify-content-center mt-3">
-                <button className="btn btn-outline-dark btn-sm d-flex" onClick={addLine}>
-                    <i className="bi bi-plus-lg" />
-                    Добавить строку
-                </button>
+            <div className={`table-responsive ${styles.findPairTableWrap}`}>
+                <table
+                    ref={tableRef}
+                    className={`table table-sm table-bordered align-middle mb-0 ${styles.findPairTable}`}
+                    onPaste={handlePaste}
+                >
+                    <thead>
+                        <tr>
+                            <th className={styles.findPairTableHead}>1 столбец</th>
+                            <th className={styles.findPairTableHead}>2 столбец</th>
+                            <th className={styles.findPairDeleteHead}></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {rows.map((row, rowIndex) => (
+                            <tr key={`${taskUUID}_${rowIndex}`}>
+                                {COLS.map((colName, colIndex) => (
+                                    <td key={colName} className="p-0">
+                                        <input
+                                            type="text"
+                                            className={`form-control form-control-sm border-0 rounded-0 shadow-none ${styles.findPairInput}`}
+                                            style={{ background: "transparent" }}
+                                            value={row[colName]}
+                                            onChange={(e) => updateCell(rowIndex, colName, e.target.value)}
+                                            onKeyDown={(e) => handleKeyDown(e, rowIndex, colIndex)}
+                                            placeholder={colIndex === 0 ? "левая часть пары" : "правая часть пары"}
+                                        />
+                                    </td>
+                                ))}
+                                <td className={styles.findPairDeleteCell}>
+                                    <div className="d-flex justify-content-center align-items-center h-100">
+                                        <button
+                                            className="btn btn-link p-0 text-danger"
+                                            type="button"
+                                            title="Удалить строку"
+                                            onClick={() => removeRow(rowIndex)}
+                                        >
+                                            <i className="bi bi-x-lg" />
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
-            <ImportExcelModal
-                isShow={isShowImportExcelModal}
-                close={() => setIsShowImportExcelModal(false)}
-                defaultData={[data.meta_first, data.meta_second]}
-                updateDataHandler={setNewCols}
-            />
+            <div className={styles.findPairFooterHint}>
+                Enter: следующая строка. Tab: переход между ячейками. Вставка из Excel добавляет пары в конец таблицы.
+            </div>
         </div>
     );
 };

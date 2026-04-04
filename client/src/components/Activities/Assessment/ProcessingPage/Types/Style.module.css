@@ -24,6 +24,68 @@
     margin: 0 12px;
 }
 
+.findPairActions {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.findPairHint {
+    color: #6c757d;
+    font-size: 0.96rem;
+}
+
+.findPairTableWrap {
+    margin-bottom: 10px;
+}
+
+.findPairTable {
+    --bs-table-bg: transparent;
+    table-layout: fixed;
+}
+
+.findPairTableHead {
+    background-color: var(--css-var-table-header);
+    font-size: 1.08em;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #ffffff;
+    padding: 12px 14px;
+    text-align: center;
+    vertical-align: middle;
+    box-shadow: inset 0 -2px 0 rgb(255 255 255 / 18%);
+}
+
+.findPairDeleteHead {
+    background-color: var(--css-var-table-header);
+    width: 58px;
+}
+
+.findPairInput {
+    min-height: 44px;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    line-height: 1.3;
+}
+
+.findPairInput::placeholder {
+    color: #b3bac3;
+    opacity: 1;
+}
+
+.findPairDeleteCell {
+    width: 58px;
+    vertical-align: middle;
+}
+
+.findPairFooterHint {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
 .fillSpacesResultAnswer {
     color: #888888;
     text-decoration: underline;
