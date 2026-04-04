@@ -1,5 +1,3 @@
-import React from "react";
-
 import Loading from "components/Common/Loading";
 import { LoadStatus } from "libs/Status";
 import { GetActivityDoneTriesDataType } from "requests/Activity/Activity";
@@ -10,12 +8,14 @@ interface StudentViewDoneTryModalContentProps {
     doneTries: GetActivityDoneTriesDataType;
     openTryPage: (id: number) => void;
     errorMessage: string;
+    isAssessmentStyle?: boolean;
 }
 
 const StudentViewDoneTryModalContent = ({
     doneTries,
     openTryPage,
     errorMessage,
+    isAssessmentStyle = false,
 }: StudentViewDoneTryModalContentProps) => {
     if (doneTries.loadStatus === LoadStatus.ERROR) {
         return (
@@ -38,9 +38,14 @@ const StudentViewDoneTryModalContent = ({
     }
 
     return (
-        <div className="view-done-try">
+        <div className={isAssessmentStyle ? "d-flex flex-column gap-2" : "view-done-try"}>
             {doneTries.data.map((doneTry) => (
-                <StudentDoneTryPreview key={doneTry.id} doneTry={doneTry} openTryPage={openTryPage} />
+                <StudentDoneTryPreview
+                    key={doneTry.id}
+                    doneTry={doneTry}
+                    openTryPage={openTryPage}
+                    isAssessmentStyle={isAssessmentStyle}
+                />
             ))}
         </div>
     );

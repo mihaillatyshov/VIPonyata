@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AjaxPost } from "libs/ServerAPI";
@@ -15,9 +14,16 @@ type StudentActivityBubbleProps = {
     name: ActivityName;
     info: TDrilling | THieroglyph | TAssessment;
     onDeadline: () => void;
+    showResultsButton?: boolean;
 };
 
-const StudentActivityBubble = ({ info, title, name, onDeadline }: StudentActivityBubbleProps) => {
+const StudentActivityBubble = ({
+    info,
+    title,
+    name,
+    onDeadline,
+    showResultsButton = true,
+}: StudentActivityBubbleProps) => {
     const navigate = useNavigate();
 
     const isInProgress = () => {
@@ -50,14 +56,16 @@ const StudentActivityBubble = ({ info, title, name, onDeadline }: StudentActivit
     };
 
     return (
-        <ActivityBouble title={title}>
-            <div className="d-flex flex-column justify-content-center align-items-center">
+        <ActivityBouble title={title} bubbleClassName="student-activity-bubble">
+            <div className="d-flex flex-column justify-content-center align-items-center student-activity-bubble__content">
                 <div className="mt-4">
                     <input type="button" className="btn btn-success" onClick={onButtonClick} value={getButtonText()} />
                 </div>
-                <div className="mt-2">
-                    <StudentViewDoneTryButton name={name} id={info.id} />
-                </div>
+                {showResultsButton && (
+                    <div className="mt-2">
+                        <StudentViewDoneTryButton name={name} id={info.id} />
+                    </div>
+                )}
             </div>
         </ActivityBouble>
     );

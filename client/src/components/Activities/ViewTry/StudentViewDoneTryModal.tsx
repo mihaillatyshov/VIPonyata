@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Modal from "react-bootstrap/Modal";
 import { useNavigate } from "react-router-dom";
 
@@ -17,6 +17,7 @@ interface StudentViewDoneTryModalProps {
 
 const StudentViewDoneTryModal = ({ isShow, close, id, name }: StudentViewDoneTryModalProps) => {
     const navigate = useNavigate();
+    const isAssessmentModal = name === "assessment";
 
     const [doneTries, setDoneTries] = useState<GetActivityDoneTriesDataType>({
         loadStatus: LoadStatus.NONE,
@@ -35,12 +36,23 @@ const StudentViewDoneTryModal = ({ isShow, close, id, name }: StudentViewDoneTry
     };
 
     return (
-        <Modal size="lg" show={isShow} onHide={close} dialogClassName="modal-dialog">
+        <Modal
+            size="lg"
+            show={isShow}
+            onHide={close}
+            dialogClassName="modal-dialog"
+            className={isAssessmentModal ? "notifications-modal" : undefined}
+        >
             <Modal.Header closeButton className="modal-bg">
                 <Modal.Title>Результаты</Modal.Title>
             </Modal.Header>
             <Modal.Body className="modal-bg">
-                <StudentViewDoneTryModalContent openTryPage={openTryPage} doneTries={doneTries} errorMessage={error} />
+                <StudentViewDoneTryModalContent
+                    openTryPage={openTryPage}
+                    doneTries={doneTries}
+                    errorMessage={error}
+                    isAssessmentStyle={isAssessmentModal}
+                />
             </Modal.Body>
         </Modal>
     );

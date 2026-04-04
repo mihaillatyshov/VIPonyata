@@ -31,9 +31,32 @@
     justify-content: center;
 }
 
+.done-try-preview--centered {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.done-try-preview--centered .done-try-preview__description {
+    align-items: center;
+}
+
+.done-try-preview--centered .notification__item-inline-content {
+    flex: 0 0 auto;
+    text-align: center;
+}
+
 .bouble__title {
-    font-size: 50px;
+    font-size: 58px;
     font-weight: bold;
     word-break: keep-all;
     font-family: "APJapanesefontImportant";
+}
+
+.student-activity-bubble .bouble__title {
+    padding-top: 14px;
+}
+
+.student-activity-bubble__content {
+    margin-top: 14px;
 }

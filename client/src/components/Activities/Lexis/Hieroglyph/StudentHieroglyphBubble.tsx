@@ -1,4 +1,3 @@
-import React from "react";
 import { useDispatch } from "react-redux";
 
 import StudentActivityBubble from "components/Activities/Bouble/StudentActivityBouble";
@@ -17,6 +16,7 @@ const StudentHieroglyphBubble = ({ hieroglyph }: StudentHieroglyphBubbleProps) =
             info={hieroglyph.info}
             name="hieroglyph"
             onDeadline={() => dispatch(setLexisEndByTime())}
+            showResultsButton={false}
         />
     );
 };

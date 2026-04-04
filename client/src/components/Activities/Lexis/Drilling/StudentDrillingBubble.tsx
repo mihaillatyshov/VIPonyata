@@ -1,4 +1,3 @@
-import React from "react";
 import { useDispatch } from "react-redux";
 
 import StudentActivityBubble from "components/Activities/Bouble/StudentActivityBouble";
@@ -17,6 +16,7 @@ const StudentDrillingBubble = ({ drilling }: StudentDrillingBubbleProps) => {
             info={drilling.info}
             name="drilling"
             onDeadline={() => dispatch(setLexisEndByTime())}
+            showResultsButton={false}
         />
     );
 };
