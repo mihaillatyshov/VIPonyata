@@ -21,7 +21,33 @@
     gap: 24px;
 }
 
+.teacher-assessment-block-container {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 18px 16px 20px;
+    border: 1px solid rgba(145, 172, 207, 0.45);
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(246, 250, 255, 0.72) 0%, rgba(252, 254, 255, 0.94) 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.teacher-assessment-block-container + .teacher-assessment-block-container {
+    margin-top: 10px;
+}
+
+.teacher-assessment-block-container .text-center {
+    margin-bottom: 2px;
+}
+
+.teacher-assessment-block-container .teacher-assessment-task__wrapper {
+    gap: 10px;
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
 .teacher-assessment-task__wrapper {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -43,6 +69,17 @@
     min-height: auto;
 }
 
+.teacher-assessment-block-container .teacher-assessment-card {
+    background-color: rgba(255, 255, 255, 0.92);
+    border-color: rgba(170, 186, 209, 0.52);
+    box-shadow: 0 2px 8px rgba(92, 112, 143, 0.08);
+}
+
+.teacher-assessment-card--validation-error {
+    background-color: #f0ced5 !important;
+    border-color: #c46b7f66 !important;
+}
+
 .teacher-assessment-card .my-card-header {
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     padding-bottom: 8px;
@@ -62,8 +99,27 @@
     text-align: center;
     font-size: 1.6rem;
     font-weight: 700;
-    color: #80bf63;
+    color: #eef6e4;
     pointer-events: none;
+}
+
+.teacher-assessment-card .teacher-assessment-card__title-warning {
+    color: #c46b7f;
+    font-size: 1.1rem;
+    margin-right: 8px;
+    vertical-align: -1px;
+}
+
+.teacher-assessment-card--block-begin {
+    background-color: #ddedc9 !important;
+}
+
+.teacher-assessment-card--block-begin .teacher-assessment-card__block-title {
+    color: #6b9e3f;
+}
+
+.teacher-assessment-card--block-end {
+    background-color: #6b9e3f !important;
 }
 
 .teacher-assessment-card .my-card-body {

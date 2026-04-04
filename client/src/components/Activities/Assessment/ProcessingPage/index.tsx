@@ -25,7 +25,6 @@ import { ProcessingButtonBlock } from "ui/Processing/ProcessingButtonBlock";
 
 import AddTaskButton from "./AddTaskButton";
 import { getProcessingData, processingAliases, TAliasProp } from "./AssessmentProcessingUtils";
-import BlockLines from "./BlockLines";
 import SelectTypeModal from "./SelectTypeModal";
 import TeacherAssessmentTypeBase from "./Types/TeacherAssessmentTypeBase";
 
@@ -36,6 +35,11 @@ export function findLastIndex<T>(array: Array<T>, predicate: (value: T, index: n
     }
     return -1;
 }
+
+const isTaskErrorKey = (key: string, taskId: number): boolean => {
+    const prefix = `${taskId}`;
+    return key === prefix || key.startsWith(`${prefix}.`) || key.startsWith(`${prefix}[`);
+};
 
 interface IAssessmentProcessingResponse {
     assessment: {
@@ -309,6 +313,22 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
             prev[taskId] = data;
             return [...prev];
         });
+
+        setErrors((prev) => {
+            const nextErrors = Object.fromEntries(
+                Object.entries(prev.errors).filter(([key]) => !isTaskErrorKey(key, taskId)),
+            );
+
+            if (Object.keys(nextErrors).length === Object.keys(prev.errors).length) {
+                return prev;
+            }
+
+            return {
+                ...prev,
+                errors: nextErrors,
+                message: Object.keys(nextErrors).length > 0 ? prev.message : "",
+            };
+        });
     };
 
     const drawItem = <T extends TTeacherAssessmentAnyItem>(item: T, id: number, taskUUID: string) => {
@@ -320,13 +340,52 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
         });
     };
 
-    const blocks = tasks
-        .map((item, i) =>
-            item.name === TAssessmentTaskName.BLOCK_BEGIN || item.name === TAssessmentTaskName.BLOCK_END
-                ? tasksHashes.current[i]
-                : undefined,
-        )
-        .filter((item) => item !== undefined) as string[];
+    const renderTaskByIndex = (index: number) => {
+        const item = tasks[index];
+        const taskHash = tasksHashes.current[index];
+        const hasTaskValidationError = Object.keys(errors.errors).some((key) => isTaskErrorKey(key, index));
+
+        return (
+            <React.Fragment key={taskHash}>
+                <div className="text-center">
+                    <AddTaskButton onClick={() => openModal(index)} />
+                    {!isInsertionInsideBlock(index) && <AddBlockButton onClick={() => addBlock(index)} />}
+                </div>
+                <div className="teacher-assessment-task__wrapper">
+                    <TeacherAssessmentTypeBase
+                        taskName={item.name}
+                        moveUp={() => moveUp(index)}
+                        moveDown={() => moveDown(index)}
+                        removeTask={() => removeTask(index)}
+                        hasValidationError={hasTaskValidationError}
+                    >
+                        <div id={taskHash}>{drawItem(item, index, taskHash)}</div>
+                    </TeacherAssessmentTypeBase>
+                </div>
+            </React.Fragment>
+        );
+    };
+
+    const renderedTasks: React.ReactNode[] = [];
+    for (let i = 0; i < tasks.length; i++) {
+        if (tasks[i].name === TAssessmentTaskName.BLOCK_BEGIN) {
+            const blockEndIndex = tasks.findIndex(
+                (item, index) => index > i && item.name === TAssessmentTaskName.BLOCK_END,
+            );
+
+            if (blockEndIndex !== -1) {
+                renderedTasks.push(
+                    <div className="teacher-assessment-block-container" key={`${tasksHashes.current[i]}-container`}>
+                        {Array.from({ length: blockEndIndex - i + 1 }, (_, offset) => renderTaskByIndex(i + offset))}
+                    </div>,
+                );
+                i = blockEndIndex;
+                continue;
+            }
+        }
+
+        renderedTasks.push(renderTaskByIndex(i));
+    }
 
     return (
         <div className="container mb-5" style={{ maxWidth: "1100px", paddingBottom: 320, position: "relative" }}>
@@ -361,25 +420,7 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
                 <hr className="student-assessment-divider" />
 
                 <div className="teacher-assessment-tasks">
-                    {tasks.map((item, i) => (
-                        <React.Fragment key={tasksHashes.current[i]}>
-                            <div className="text-center" key={i}>
-                                <AddTaskButton onClick={() => openModal(i)} />
-                                {!isInsertionInsideBlock(i) && <AddBlockButton onClick={() => addBlock(i)} />}
-                            </div>
-                            <div className="teacher-assessment-task__wrapper">
-                                <TeacherAssessmentTypeBase
-                                    taskName={item.name}
-                                    moveUp={() => moveUp(i)}
-                                    moveDown={() => moveDown(i)}
-                                    removeTask={() => removeTask(i)}
-                                    error={errors.errors[`${i}`] || ""}
-                                >
-                                    <div id={tasksHashes.current[i]}>{drawItem(item, i, tasksHashes.current[i])}</div>
-                                </TeacherAssessmentTypeBase>
-                            </div>
-                        </React.Fragment>
-                    ))}
+                    {renderedTasks}
                     <div className="text-center" key={tasks.length}>
                         <AddTaskButton onClick={() => openModal(tasks.length)} />
                         {!isInsertionInsideBlock(tasks.length) && (
@@ -387,8 +428,6 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
                         )}
                     </div>
                 </div>
-
-                <BlockLines lines={blocks} />
             </div>
 
             <SelectTypeModal

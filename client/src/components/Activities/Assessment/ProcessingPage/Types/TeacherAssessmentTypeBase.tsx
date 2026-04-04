@@ -1,6 +1,5 @@
 import React from "react";
 
-import { fixPyErrorMessage, PyError } from "libs/PyError";
 import {
     assessmentTaskRusNameAliases,
     TAssessmentItemBase,
@@ -19,7 +18,7 @@ interface TeacherAssessmentTypeBaseProps {
     moveUp: () => void;
     removeTask: () => void;
     children: React.ReactNode;
-    error?: PyError;
+    hasValidationError?: boolean;
 }
 
 const TeacherAssessmentTypeBase = ({
@@ -28,19 +27,34 @@ const TeacherAssessmentTypeBase = ({
     moveUp,
     removeTask,
     children,
-    error,
+    hasValidationError = false,
 }: TeacherAssessmentTypeBaseProps) => {
     const isBlockBoundaryTask =
         taskName === TAssessmentTaskName.BLOCK_BEGIN || taskName === TAssessmentTaskName.BLOCK_END;
+    const cardClassName = [
+        "my-card",
+        "teacher-assessment-card",
+        hasValidationError ? "teacher-assessment-card--validation-error" : "",
+        taskName === TAssessmentTaskName.BLOCK_BEGIN ? "teacher-assessment-card--block-begin" : "",
+        taskName === TAssessmentTaskName.BLOCK_END ? "teacher-assessment-card--block-end" : "",
+    ]
+        .filter(Boolean)
+        .join(" ");
 
     return (
-        <div className="my-card teacher-assessment-card">
+        <div className={cardClassName}>
             <div className={`my-card-header ${isBlockBoundaryTask ? "teacher-assessment-card__block-header" : ""}`}>
                 <div
                     className={`my-card-header-title ${
                         isBlockBoundaryTask ? "teacher-assessment-card__block-title" : ""
                     }`}
                 >
+                    {hasValidationError && (
+                        <i
+                            className="bi bi-exclamation-circle-fill teacher-assessment-card__title-warning"
+                            aria-label="Задание заполнено не полностью"
+                        />
+                    )}
                     {assessmentTaskRusNameAliases[taskName]}
                 </div>
                 <div className="ms-auto d-flex gap-3 justify-content-center align-items-center">
@@ -60,14 +74,7 @@ const TeacherAssessmentTypeBase = ({
                     />
                 </div>
             </div>
-            <div className="my-card-body">
-                {children}
-                <div className={error !== undefined ? "mt-3" : ""}>
-                    <div className="text-danger">
-                        {fixPyErrorMessage(error !== undefined ? error.message || "" : "")}
-                    </div>
-                </div>
-            </div>
+            <div className="my-card-body">{children}</div>
         </div>
     );
 };
