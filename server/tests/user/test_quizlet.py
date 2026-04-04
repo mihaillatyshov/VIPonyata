@@ -5,7 +5,7 @@ from sqlalchemy import select
 
 from server.common import DBsession
 from server.models.db_models import QuizletSession, QuizletSessionIncorrectWord, QuizletSessionWord, User
-from server.models.quizlet import QuizletFlashcardAnswerReq, QuizletRetryIncorrectReq
+from server.models.quizlet import QuizletEndSessionReq, QuizletFlashcardAnswerReq, QuizletRetryIncorrectReq
 from server.queries import StudentDBqueries
 
 
@@ -357,3 +357,88 @@ def test_retry_quizlet_incorrect_words_includes_unviewed_words_when_no_errors(cr
         assert saved_retry_session.quiz_type == QuizletSession.Type.PAIR
         assert saved_retry_session.translation_direction == "ru_to_jp"
         assert [word.source_word_id for word in retry_words] == [2, 3]
+
+
+def test_end_quizlet_session_counts_only_never_shown_words_as_skipped(create_db):
+    DBsession.init(create_db)
+
+    with DBsession.begin() as session:
+        user = User(name="Quizlet Student",
+                    nickname="quizlet_student",
+                    password="password123",
+                    birthday=datetime.date(2000, 1, 1),
+                    level=User.Level.STUDENT)
+        session.add(user)
+        session.flush()
+
+        quiz_session = QuizletSession(quiz_type=QuizletSession.Type.FLASHCARDS,
+                                      show_hints=False,
+                                      translation_direction="jp_to_ru",
+                                      total_words=3,
+                                      user_id=user.id,
+                                      queue_state="[]")
+        session.add(quiz_session)
+        session.flush()
+
+        words = [
+            QuizletSessionWord(source_type="combined",
+                               source_word_id=index + 1,
+                               char_jp=f"漢字{index + 1}",
+                               word_jp=f"かな{index + 1}",
+                               ru=f"перевод {index + 1}",
+                               session_id=quiz_session.id) for index in range(3)
+        ]
+        session.add_all(words)
+        session.flush()
+
+        words[0].correct_attempts = 1
+        words[0].is_correct = True
+        words[1].is_skipped = True
+
+    ended_session = StudentDBqueries.end_quizlet_session(user.id, quiz_session.id,
+                                                         QuizletEndSessionReq(force_finish=True))
+
+    assert ended_session.skipped_words == 1
+
+
+def test_get_quizlet_sessions_stats_excludes_empty_finished_sessions(create_db):
+    DBsession.init(create_db)
+
+    with DBsession.begin() as session:
+        user = User(name="Quizlet Student",
+                    nickname="quizlet_student",
+                    password="password123",
+                    birthday=datetime.date(2000, 1, 1),
+                    level=User.Level.STUDENT)
+        session.add(user)
+        session.flush()
+
+        empty_finished = QuizletSession(quiz_type=QuizletSession.Type.FLASHCARDS,
+                                        show_hints=False,
+                                        translation_direction="jp_to_ru",
+                                        total_words=3,
+                                        user_id=user.id,
+                                        is_finished=True,
+                                        queue_state="[]")
+        completed = QuizletSession(quiz_type=QuizletSession.Type.FLASHCARDS,
+                                   show_hints=False,
+                                   translation_direction="jp_to_ru",
+                                   total_words=3,
+                                   user_id=user.id,
+                                   is_finished=True,
+                                   correct_answers=1,
+                                   skipped_words=2,
+                                   queue_state="[]")
+        unfinished = QuizletSession(quiz_type=QuizletSession.Type.FLASHCARDS,
+                                    show_hints=False,
+                                    translation_direction="jp_to_ru",
+                                    total_words=3,
+                                    user_id=user.id,
+                                    is_finished=False,
+                                    correct_answers=2,
+                                    queue_state="[]")
+        session.add_all([empty_finished, completed, unfinished])
+
+    sessions = StudentDBqueries.get_quizlet_sessions_stats(user.id)
+
+    assert [item.id for item in sessions] == [completed.id]

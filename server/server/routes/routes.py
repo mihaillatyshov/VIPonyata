@@ -506,6 +506,12 @@ def mark_quizlet_flashcard_answer(session_id):
     return user_selector_function(None, student_funcs.mark_quizlet_flashcard_answer, session_id=session_id)
 
 
+@routes_bp.route("/quizlet/sessions/<int:session_id>/flashcard-viewed", methods=["POST"])
+@login_required
+def mark_quizlet_flashcard_viewed(session_id):
+    return user_selector_function(None, student_funcs.mark_quizlet_flashcard_viewed, session_id=session_id)
+
+
 @routes_bp.route("/quizlet/sessions/<int:session_id>/save-progress", methods=["POST"])
 @login_required
 def save_quizlet_progress(session_id):

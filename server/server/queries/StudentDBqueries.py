@@ -705,6 +705,24 @@ def mark_quizlet_flashcard_answer(user_id: int, session_id: int, data: QuizletFl
         quiz_session.updated_at = datetime.now()
 
 
+def mark_quizlet_flashcard_viewed(user_id: int, session_id: int, session_word_id: int):
+    with DBsession.begin() as session:
+        quiz_session = session.scalars(
+            select(QuizletSession).where(QuizletSession.id == session_id).where(
+                QuizletSession.user_id == user_id)).one_or_none()
+        if quiz_session is None:
+            raise InvalidAPIUsage("Quizlet session not found", 404)
+
+        word = session.scalars(
+            select(QuizletSessionWord).where(QuizletSessionWord.id == session_word_id).where(
+                QuizletSessionWord.session_id == session_id)).one_or_none()
+        if word is None:
+            raise InvalidAPIUsage("Session word not found", 404)
+
+        word.is_skipped = True
+        quiz_session.updated_at = datetime.now()
+
+
 def save_quizlet_progress(user_id: int, session_id: int, data: QuizletSaveProgressReq):
     with DBsession.begin() as session:
         quiz_session = session.scalars(
@@ -721,7 +739,7 @@ def save_quizlet_progress(user_id: int, session_id: int, data: QuizletSaveProgre
         quiz_session.updated_at = datetime.now()
 
 
-def end_quizlet_session(user_id: int, session_id: int, data: QuizletEndSessionReq) -> QuizletSession:
+def end_quizlet_session(user_id: int, session_id: int, _data: QuizletEndSessionReq) -> QuizletSession:
     with DBsession.begin() as session:
         quiz_session = session.scalars(
             select(QuizletSession).where(QuizletSession.id == session_id).where(
@@ -731,15 +749,9 @@ def end_quizlet_session(user_id: int, session_id: int, data: QuizletEndSessionRe
 
         if not quiz_session.is_finished:
             words = session.scalars(select(QuizletSessionWord).where(QuizletSessionWord.session_id == session_id)).all()
-            remaining_words = [word for word in words if not word.is_correct]
-
-            if data.force_finish:
-                for word in remaining_words:
-                    word.is_skipped = True
-
-            # "Не просмотрено" includes only cards that were never shown to the user.
-            quiz_session.skipped_words = len(
-                [word for word in words if (word.correct_attempts + word.incorrect_attempts) == 0])
+            quiz_session.skipped_words = len([
+                word for word in words if (word.correct_attempts + word.incorrect_attempts) == 0 and not word.is_skipped
+            ])
 
             quiz_session.is_finished = True
             quiz_session.ended_at = datetime.now()
@@ -799,7 +811,10 @@ def retry_quizlet_incorrect_words(user_id: int, data: QuizletRetryIncorrectReq) 
 def get_quizlet_sessions_stats(user_id: int) -> list[QuizletSession]:
     with DBsession.begin() as session:
         return session.scalars(
-            select(QuizletSession).where(QuizletSession.user_id == user_id).order_by(QuizletSession.id.desc())).all()
+            select(QuizletSession).where(QuizletSession.user_id == user_id).where(
+                QuizletSession.is_finished == True).where((QuizletSession.correct_answers > 0)
+                                                          | (QuizletSession.incorrect_answers > 0)).order_by(
+                                                              QuizletSession.id.desc())).all()
 
 
 #########################################################################################################################

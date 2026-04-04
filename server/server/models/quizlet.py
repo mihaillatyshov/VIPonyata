@@ -69,6 +69,10 @@ class QuizletFlashcardAnswerReq(BaseModel):
     recognized: bool
 
 
+class QuizletFlashcardViewedReq(BaseModel):
+    session_word_id: int
+
+
 class QuizletSaveProgressReq(BaseModel):
     queue: list[int]
 

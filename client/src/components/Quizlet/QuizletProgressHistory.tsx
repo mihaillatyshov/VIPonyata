@@ -70,6 +70,7 @@ const QuizletProgressHistory = ({
                                 <th>Дата</th>
                                 <th>Время</th>
                                 <th>Повторено</th>
+                                <th>Не выполнено</th>
                                 <th>Ошибки</th>
                             </tr>
                         </thead>
@@ -95,12 +96,13 @@ const QuizletProgressHistory = ({
                                             </td>
                                             <td>{toDurationText(session.elapsed_seconds)}</td>
                                             <td>{session.correct_answers}</td>
+                                            <td>{session.skipped_words}</td>
                                             <td>{session.incorrect_answers}</td>
                                         </tr>
 
                                         {isExpanded && (
                                             <tr className="quizlet-progress-history-details-row">
-                                                <td colSpan={4}>
+                                                <td colSpan={5}>
                                                     <div className="quizlet-progress-history-details-wrap">
                                                         <div className="quizlet-progress-history-details-title">
                                                             Повторенные темы

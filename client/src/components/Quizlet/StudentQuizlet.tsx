@@ -475,6 +475,7 @@ const StudentQuizlet = () => {
     const [expandedHistorySessionId, setExpandedHistorySessionId] = useState<number | null>(null);
     const [historySessionWordsById, setHistorySessionWordsById] = useState<Record<number, TQuizletSessionWord[]>>({});
     const [historyLoadingDetailsSessionId, setHistoryLoadingDetailsSessionId] = useState<number | null>(null);
+    const viewedFlashcardIdsRef = useRef<Set<number>>(new Set());
 
     const [lastStartPayload, setLastStartPayload] = useState<any>(null);
 
@@ -524,7 +525,7 @@ const StudentQuizlet = () => {
         setHistoryLoadStatus(LoadStatus.LOADING);
         AjaxGet<{ sessions: TQuizletSession[] }>({ url: "/api/quizlet/sessions/stats" })
             .then((json) => {
-                setHistorySessions(json.sessions.filter((item) => item.is_finished && item.skipped_words === 0));
+                setHistorySessions(json.sessions.filter((item) => item.is_finished));
                 setHistoryLoadStatus(LoadStatus.DONE);
             })
             .catch(() => {
@@ -641,6 +642,10 @@ const StudentQuizlet = () => {
             setIsDeleteTopicConfirming(false);
         }
     }, [isPersonalDictionaryRoute, personalTopicRouteId]);
+
+    useEffect(() => {
+        viewedFlashcardIdsRef.current.clear();
+    }, [session?.id]);
 
     useEffect(() => {
         if (mode === "progress") {
@@ -801,6 +806,23 @@ const StudentQuizlet = () => {
         }
 
         loadSession(session.id);
+    };
+
+    const markFlashcardVisible = (wordId: number) => {
+        if (session === null || viewedFlashcardIdsRef.current.has(wordId)) {
+            return;
+        }
+
+        viewedFlashcardIdsRef.current.add(wordId);
+
+        AjaxPost({
+            url: `/api/quizlet/sessions/${session.id}/flashcard-viewed`,
+            body: {
+                session_word_id: wordId,
+            },
+        }).catch(() => {
+            viewedFlashcardIdsRef.current.delete(wordId);
+        });
     };
 
     const ensurePersonalLesson = () => {
@@ -1674,6 +1696,7 @@ const StudentQuizlet = () => {
                             incorrectAnswers={session.incorrect_answers}
                             elapsedSeconds={liveElapsedSeconds}
                             onFinishTraining={endNow}
+                            onWordVisible={markFlashcardVisible}
                             onAnswer={submitFlashcard}
                         />
                     )}

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { TQuizletSessionWord } from "models/TQuizlet";
 
@@ -17,6 +17,7 @@ interface Props {
     incorrectAnswers: number;
     elapsedSeconds: number;
     onFinishTraining: () => void;
+    onWordVisible: (wordId: number) => void;
     onAnswer: (wordId: number, recognized: boolean) => Promise<void>;
 }
 
@@ -30,6 +31,7 @@ const FlashcardExercise = ({
     incorrectAnswers,
     elapsedSeconds,
     onFinishTraining,
+    onWordVisible,
     onAnswer,
 }: Props) => {
     const [isFlipped, setIsFlipped] = useState<boolean>(false);
@@ -40,6 +42,14 @@ const FlashcardExercise = ({
         const queueWord = queue.length > 0 ? words.find((word) => word.id === queue[0]) : undefined;
         return queueWord ?? words.find((word) => !word.is_correct) ?? null;
     }, [words, queue]);
+
+    useEffect(() => {
+        if (currentWord === null) {
+            return;
+        }
+
+        onWordVisible(currentWord.id);
+    }, [currentWord, onWordVisible]);
 
     const submit = async (recognized: boolean) => {
         if (isSending || currentWord === null) {

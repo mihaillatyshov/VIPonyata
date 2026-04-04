@@ -1,10 +1,10 @@
 from flask import request
 
 import server.queries.StudentDBqueries as DBQS
-from server.models.quizlet import (QuizletEndSessionReq, QuizletFlashcardAnswerReq, QuizletPairAttemptReq,
-                                   QuizletPersonalLessonCreateReq, QuizletRetryIncorrectReq, QuizletSaveProgressReq,
-                                   QuizletStartSessionReq, QuizletSubgroupCreateReq, QuizletWordCreateReq,
-                                   QuizletWordUpdateReq)
+from server.models.quizlet import (QuizletEndSessionReq, QuizletFlashcardAnswerReq, QuizletFlashcardViewedReq,
+                                   QuizletPairAttemptReq, QuizletPersonalLessonCreateReq, QuizletRetryIncorrectReq,
+                                   QuizletSaveProgressReq, QuizletStartSessionReq, QuizletSubgroupCreateReq,
+                                   QuizletWordCreateReq, QuizletWordUpdateReq)
 from server.models.utils import validate_req
 from server.routes.routes_utils import get_current_user_id
 
@@ -130,6 +130,13 @@ def mark_quizlet_flashcard_answer(session_id: int) -> dict:
     user_id = get_current_user_id()
     data = validate_req(QuizletFlashcardAnswerReq, request.json)
     DBQS.mark_quizlet_flashcard_answer(user_id, session_id, data)
+    return {"message": "ok"}
+
+
+def mark_quizlet_flashcard_viewed(session_id: int) -> dict:
+    user_id = get_current_user_id()
+    data = validate_req(QuizletFlashcardViewedReq, request.json)
+    DBQS.mark_quizlet_flashcard_viewed(user_id, session_id, data.session_word_id)
     return {"message": "ok"}
 
 
