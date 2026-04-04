@@ -34,7 +34,7 @@ const TeacherAssessmentSentenceOrder = ({
         focusPending.current = null;
 
         const tbody = tableRef.current?.querySelector("tbody");
-        const input = tbody?.rows[rowIndex]?.cells[0]?.querySelector<HTMLInputElement>("input");
+        const input = tbody?.rows[rowIndex]?.cells[1]?.querySelector<HTMLInputElement>("input");
         input?.focus();
         input?.select();
     }, [parts.length, focusVersion]);
@@ -63,12 +63,31 @@ const TeacherAssessmentSentenceOrder = ({
         updateParts(next);
     };
 
+    const splitRowByCaret = (rowIndex: number, start: number, end: number) => {
+        const currentValue = parts[rowIndex] ?? "";
+        const head = currentValue.slice(0, start);
+        const tail = currentValue.slice(end);
+        const next = [...parts];
+        next[rowIndex] = head;
+        next.splice(rowIndex + 1, 0, tail);
+        requestFocus(rowIndex + 1);
+        updateParts(next);
+    };
+
     const removeRow = (rowIndex: number) => {
         const next = parts.filter((_, i) => i !== rowIndex);
         updateParts(next.length > 0 ? next : [""]);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, rowIndex: number) => {
+        if (e.key === "Enter" && e.shiftKey) {
+            e.preventDefault();
+            const start = e.currentTarget.selectionStart ?? e.currentTarget.value.length;
+            const end = e.currentTarget.selectionEnd ?? start;
+            splitRowByCaret(rowIndex, start, end);
+            return;
+        }
+
         if (e.key === "Enter") {
             e.preventDefault();
             if (rowIndex === parts.length - 1) {
