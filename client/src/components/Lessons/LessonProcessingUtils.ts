@@ -10,8 +10,16 @@ export interface LessonProcessingForm {
     img: ImageState;
 }
 
+interface LessonApiModel {
+    name: string;
+    number: number;
+    description: string | null;
+    img: string | null;
+    course_id: number;
+}
+
 interface GetLessonResponse {
-    lesson: LessonProcessingForm & { course_id: number };
+    lesson: LessonApiModel;
 }
 
 type GetProcessingDataReturnType =
@@ -42,7 +50,12 @@ const getEditData = async (id: number): Promise<GetProcessingDataReturnType> => 
         const { lesson } = await AjaxGet<GetLessonResponse>({ url: `/api/lessons/${id}` });
         return {
             loadStatus: LoadStatus.DONE,
-            lesson: lesson,
+            lesson: {
+                name: lesson.name,
+                number: lesson.number,
+                description: lesson.description ?? "",
+                img: lesson.img ? { loadStatus: LoadStatus.DONE, url: lesson.img } : { loadStatus: LoadStatus.NONE },
+            },
             courseId: lesson.course_id,
         };
     } catch (error) {

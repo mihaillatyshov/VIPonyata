@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import Loading from "components/Common/Loading";
@@ -46,6 +46,8 @@ const CourseProcessingPage = ({ processingType }: CourseProcessingPageProps) => 
 
     const [loadStatus, setLoadStatus] = useState<LoadStatus.Type>(LoadStatus.NONE);
     const [error, setError] = useState<string>("");
+    // Сохраняем исходный url картинки
+    const [originalImgUrl, setOriginalImgUrl] = useState<string | null>(null);
 
     const { inputs, validateForm, inputProps } = useFormState<CourseProcessingForm>(
         {
@@ -76,6 +78,7 @@ const CourseProcessingPage = ({ processingType }: CourseProcessingPageProps) => 
                 inputProps.sort.onChangeHandler(data.course.sort);
                 inputProps.description.onChangeHandler(data.course.description ?? "");
                 inputProps.img.onChangeHandler(data.course.img ?? { loadStatus: LoadStatus.NONE });
+                setOriginalImgUrl(GetImg(data.course.img));
             } else {
                 setError(data.message);
                 if (data.needExitPage) {
@@ -113,13 +116,19 @@ const CourseProcessingPage = ({ processingType }: CourseProcessingPageProps) => 
             return;
         }
 
+        // Если редактируем и не выбрана новая картинка, используем старую
+        let imgValue = GetImg(inputs.img);
+        if (processingType === "edit" && (!imgValue || imgValue === null)) {
+            imgValue = originalImgUrl;
+        }
+
         const course: TCourseCreate = {
             name: inputs.name.trim(),
             difficulty: inputs.difficulty.trim(),
             difficulty_color: GetStringOrNull(inputs.difficultyColor),
             sort: inputs.sort,
             description: GetStringOrNull(inputs.description),
-            img: GetImg(inputs.img),
+            img: imgValue,
         };
 
         ajaxMethod<CourseProcessingResponse>({

@@ -12,8 +12,17 @@ export interface CourseProcessingForm {
     img: ImageState;
 }
 
+interface CourseApiModel {
+    name: string;
+    difficulty: string;
+    difficulty_color: string | null;
+    sort: number;
+    description: string | null;
+    img: string | null;
+}
+
 interface GetCourseResponse {
-    course: CourseProcessingForm;
+    course: CourseApiModel;
 }
 
 type GetProcessingDataReturnType =
@@ -43,7 +52,14 @@ const getEditData = async (id: number): Promise<GetProcessingDataReturnType> => 
         const { course } = await AjaxGet<GetCourseResponse>({ url: `/api/courses/${id}` });
         return {
             loadStatus: LoadStatus.DONE,
-            course: course,
+            course: {
+                name: course.name,
+                difficulty: course.difficulty,
+                difficultyColor: course.difficulty_color ?? "",
+                sort: course.sort,
+                description: course.description ?? "",
+                img: course.img ? { loadStatus: LoadStatus.DONE, url: course.img } : { loadStatus: LoadStatus.NONE },
+            },
         };
     } catch (error) {
         if (isProcessableError(error)) {

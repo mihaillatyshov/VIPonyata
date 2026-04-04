@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import Loading from "components/Common/Loading";
@@ -40,6 +40,8 @@ const LessonProcessingPage = ({ processingType }: LessonProcessingPageProps) => 
     const [error, setError] = useState<string>("");
 
     const [courseId, setCourseId] = useState<number>(0);
+    // Сохраняем исходный url картинки
+    const [originalImgUrl, setOriginalImgUrl] = useState<string | null>(null);
 
     const { inputs, validateForm, inputProps } = useFormState<LessonProcessingForm>(
         {
@@ -66,6 +68,7 @@ const LessonProcessingPage = ({ processingType }: LessonProcessingPageProps) => 
                 inputProps.number.onChangeHandler(data.lesson.number);
                 inputProps.description.onChangeHandler(data.lesson.description ?? "");
                 inputProps.img.onChangeHandler(data.lesson.img ?? { loadStatus: LoadStatus.NONE });
+                setOriginalImgUrl(GetImg(data.lesson.img));
             } else {
                 setError(data.message);
                 if (data.needExitPage) {
@@ -103,11 +106,17 @@ const LessonProcessingPage = ({ processingType }: LessonProcessingPageProps) => 
             return;
         }
 
+        // Если редактируем и не выбрана новая картинка, используем старую
+        let imgValue = GetImg(inputs.img);
+        if (processingType === "edit" && (!imgValue || imgValue === null)) {
+            imgValue = originalImgUrl;
+        }
+
         const lesson: TLessonCreate = {
             name: inputs.name,
             description: GetStringOrNull(inputs.description),
             number: inputs.number,
-            img: GetImg(inputs.img),
+            img: imgValue,
         };
 
         ajaxMethod<LessonProcessingResponse>({
