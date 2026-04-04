@@ -97,3 +97,30 @@
     border: 1px solid #00000044;
     border-radius: 8px;
 }
+
+.classificationTableEditor {
+    margin: 0 12px;
+}
+
+.classificationTitleInput {
+    min-width: 140px;
+    background: #ffffff;
+}
+
+.duplicateCellWrap {
+    position: relative;
+}
+
+.duplicateCellInput {
+    padding-right: 32px;
+}
+
+.duplicateCellIcon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #dc3545;
+    pointer-events: none;
+    font-size: 0.95rem;
+}
