@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { StudentAssessmentCheckBlockModal } from "components/Activities/Assessment/StudentAssessmentCheckBlockModal";
-import PageDescription from "components/Common/PageDescription";
 import PageTitle from "components/Common/PageTitle";
 import InputError from "components/Form/InputError";
 import { PyErrorDict } from "libs/PyError";
@@ -106,7 +105,7 @@ interface BlockIconProps {
 }
 
 const BlockIcon = ({ blockId, onClick, status }: BlockIconProps) => {
-    const getColorByStatus = () => {
+    const getClassByStatus = () => {
         switch (status) {
             case "valid":
                 return "btn-success";
@@ -116,14 +115,18 @@ const BlockIcon = ({ blockId, onClick, status }: BlockIconProps) => {
                 return "btn-primary";
             case "default":
             default:
-                return "btn-light";
+                return "student-assessment-block-icon-default";
         }
     };
     return (
         <button
-            className={`btn border border-dark rounded d-flex justify-content-center align-items-center ${getColorByStatus()}`}
+            type="button"
+            className={`btn border rounded d-flex justify-content-center align-items-center ${getClassByStatus()}`}
             style={{ width: 28, height: 36 }}
-            onClick={onClick}
+            onClick={(event) => {
+                onClick();
+                event.currentTarget.blur();
+            }}
         >
             {blockId + 1}
         </button>
@@ -383,63 +386,74 @@ const StudentAssessmentPage = () => {
                 }}
             />
             <PageTitle title="タスク" urlBack={`/lessons/${assessment.info.lesson_id}`} />
-            <PageDescription description={assessment.info.description} className="mb-1" />
-            <StudentActivityDeadline activityInfo={assessment.info} />
-            <div className="d-flex gap-2 flex-wrap mt-2">
-                {blocks.map((_, index) => (
-                    <BlockIcon
-                        key={index}
-                        blockId={index}
-                        status={getIconStatus(
-                            index,
-                            blockIdCurrent,
-                            isNeedDrawFullValidation || changedBlocks.includes(index),
-                            isBlockHasError(index) || serverErrorBlockIds.includes(index),
-                        )}
-                        onClick={() => {
-                            handleGoToBlock(index);
-                        }}
-                    />
-                ))}
-            </div>
-            <hr />
-            <div className="student-assessment-tasks">
-                {toDrawItems.map(
-                    ({ item, itemId }) =>
-                        isDrawableItem(item) && (
-                            <React.Fragment key={itemId}>
-                                <div className="student-assessment-task__wrapper">
-                                    {item.name !== TAssessmentTaskName.IMG && (
-                                        <div className="student-assessment-task-title">
-                                            {studentAssessmentTaskRusNameAliases[item.name]}
-                                        </div>
-                                    )}
-                                    {drawItem(JSON.parse(JSON.stringify(item)), itemId)}
-                                </div>
-                                {(isNeedDrawFullValidation || changedBlocks.includes(getItemBlock(itemId))) &&
-                                    errors.errors[`${itemId}`] !== undefined && (
-                                        <InputError message={errors.errors[`${itemId}`].message} />
-                                    )}
-                                <hr className="my-0 py-0" />
-                            </React.Fragment>
-                        ),
-                )}
-            </div>
-            <div className="mb-2 d-flex space-between w-100">
-                {blockIdCurrent !== 0 && (
-                    <button type="button" className="btn btn-secondary mt-3 me-auto" onClick={handleGoPrevBlock}>
-                        Назад
-                    </button>
-                )}
-                {blockIdCurrent === blocks.length - 1 ? (
-                    <button type="button" className="btn btn-success mt-3" onClick={handleEndAssessment}>
-                        Завершить
-                    </button>
-                ) : (
-                    <button type="button" className="btn btn-success mt-3 ms-auto" onClick={handleGoNextBlock}>
-                        Далее
-                    </button>
-                )}
+            <div className="student-assessment-page mt-3">
+                <div className="student-assessment-header-row mt-2">
+                    <div className="d-flex gap-2 flex-wrap student-assessment-block-icons">
+                        {blocks.map((_, index) => (
+                            <BlockIcon
+                                key={index}
+                                blockId={index}
+                                status={getIconStatus(
+                                    index,
+                                    blockIdCurrent,
+                                    isNeedDrawFullValidation || changedBlocks.includes(index),
+                                    isBlockHasError(index) || serverErrorBlockIds.includes(index),
+                                )}
+                                onClick={() => {
+                                    handleGoToBlock(index);
+                                }}
+                            />
+                        ))}
+                    </div>
+                    <div className="student-assessment-deadline">
+                        <StudentActivityDeadline activityInfo={assessment.info} />
+                    </div>
+                </div>
+                <hr />
+                <div className="student-assessment-tasks">
+                    {toDrawItems.map(
+                        ({ item, itemId }) =>
+                            isDrawableItem(item) && (
+                                <React.Fragment key={itemId}>
+                                    <div className="student-assessment-task__wrapper">
+                                        {item.name !== TAssessmentTaskName.IMG && (
+                                            <div className="student-assessment-task-title">
+                                                {studentAssessmentTaskRusNameAliases[item.name]}
+                                            </div>
+                                        )}
+                                        {drawItem(JSON.parse(JSON.stringify(item)), itemId)}
+                                    </div>
+                                    {(isNeedDrawFullValidation || changedBlocks.includes(getItemBlock(itemId))) &&
+                                        errors.errors[`${itemId}`] !== undefined && (
+                                            <InputError message={errors.errors[`${itemId}`].message} />
+                                        )}
+                                </React.Fragment>
+                            ),
+                    )}
+                </div>
+                <div className="mb-2 d-flex space-between w-100">
+                    {blockIdCurrent !== 0 && (
+                        <button type="button" className="btn btn-secondary mt-3 me-auto" onClick={handleGoPrevBlock}>
+                            Назад
+                        </button>
+                    )}
+                    {blockIdCurrent === blocks.length - 1 ? (
+                        <button type="button" className="btn btn-success mt-3" onClick={handleEndAssessment}>
+                            Завершить
+                        </button>
+                    ) : (
+                        <button
+                            type="button"
+                            className="btn btn-success mt-3 ms-auto"
+                            onClick={(event) => {
+                                handleGoNextBlock();
+                                event.currentTarget.blur();
+                            }}
+                        >
+                            Далее
+                        </button>
+                    )}
+                </div>
             </div>
             {isNeedDrawFullValidation && <InputError className="mt-1 mb-5" message={errors.message} />}
         </div>
