@@ -24,7 +24,7 @@ import "./QuizletShared.css";
 import QuizletProgressHistory from "./QuizletProgressHistory";
 import QuizletQuizStart from "./QuizletQuizStart";
 import QuizletSessionResults from "./QuizletSessionResults";
-import { parseQueue } from "./quizletUtils";
+import { parseQueue, shuffleArray } from "./quizletUtils";
 import TrainingSessionHeader from "./TrainingSessionHeader";
 
 interface CatalogResponse {
@@ -470,6 +470,7 @@ const StudentQuizlet = () => {
     const [isFinishingActiveSession, setIsFinishingActiveSession] = useState<boolean>(false);
     const autoFinishSessionIdRef = useRef<number | null>(null);
     const timerSessionIdRef = useRef<number | null>(null);
+    const shouldShuffleOnSessionLoadRef = useRef<boolean>(false);
     const queueRef = useRef<number[]>([]);
     const [liveElapsedSeconds, setLiveElapsedSeconds] = useState<number>(0);
 
@@ -680,10 +681,27 @@ const StudentQuizlet = () => {
     const loadSession = (sessionId: number) => {
         AjaxGet<SessionResponse>({ url: `/api/quizlet/sessions/${sessionId}` })
             .then((json) => {
-                setSession(json.session);
-                setSessionWords(json.words);
+                const nextWords = json.words;
+                let nextSession = json.session;
+
+                if (shouldShuffleOnSessionLoadRef.current && !nextSession.is_finished) {
+                    const validWordIds = new Set(nextWords.map((word) => word.id));
+                    const persistedQueue = parseQueue(nextSession as any).filter((wordId) => validWordIds.has(wordId));
+                    const initialQueue = persistedQueue.length > 0 ? persistedQueue : nextWords.map((word) => word.id);
+                    const shuffledQueue = shuffleArray(initialQueue);
+
+                    nextSession = {
+                        ...nextSession,
+                        queue_state: JSON.stringify(shuffledQueue),
+                    };
+                }
+
+                shouldShuffleOnSessionLoadRef.current = false;
+                setSession(nextSession);
+                setSessionWords(nextWords);
             })
             .catch(() => {
+                shouldShuffleOnSessionLoadRef.current = false;
                 setSession(null);
                 setSessionWords([]);
             });
@@ -761,16 +779,21 @@ const StudentQuizlet = () => {
         if (session === null) {
             return;
         }
+        shouldShuffleOnSessionLoadRef.current = true;
         AjaxPost<{ session: TQuizletSession }>({
             url: "/api/quizlet/sessions/retry-incorrect",
             body: { source_session_id: session.id },
         })
             .then((json) => loadSession(json.session.id))
-            .catch(() => undefined);
+            .catch(() => {
+                shouldShuffleOnSessionLoadRef.current = false;
+                return undefined;
+            });
     };
 
     const retryAll = () => {
         if (lastStartPayload !== null) {
+            shouldShuffleOnSessionLoadRef.current = true;
             startSession(lastStartPayload);
         }
     };
@@ -918,6 +941,33 @@ const StudentQuizlet = () => {
     };
 
     const unresolvedCount = sessionWords.filter((word) => !word.is_correct).length;
+
+    const orderedSessionWords = useMemo(() => {
+        if (sessionWords.length === 0) {
+            return [] as TQuizletSessionWord[];
+        }
+
+        const queuePositionByWordId = new Map<number, number>(queue.map((wordId, index) => [wordId, index]));
+
+        return [...sessionWords].sort((left, right) => {
+            const leftQueuePosition = queuePositionByWordId.get(left.id);
+            const rightQueuePosition = queuePositionByWordId.get(right.id);
+
+            if (leftQueuePosition !== undefined && rightQueuePosition !== undefined) {
+                return leftQueuePosition - rightQueuePosition;
+            }
+
+            if (leftQueuePosition !== undefined) {
+                return -1;
+            }
+
+            if (rightQueuePosition !== undefined) {
+                return 1;
+            }
+
+            return left.id - right.id;
+        });
+    }, [sessionWords, queue]);
 
     const subgroupTitleById = useMemo(() => {
         return new Map(subgroups.map((subgroup) => [subgroup.id, subgroup.title]));
@@ -1763,7 +1813,7 @@ const StudentQuizlet = () => {
                                 />
                             </div>
                             <MatchingExercise
-                                words={sessionWords}
+                                words={orderedSessionWords}
                                 showHints={session.show_hints}
                                 onAttempt={submitPairAttempt}
                                 onPageChange={(page, total) =>
@@ -1775,7 +1825,7 @@ const StudentQuizlet = () => {
 
                     {!session.is_finished && session.quiz_type === "flashcards" && (
                         <FlashcardExercise
-                            words={sessionWords}
+                            words={orderedSessionWords}
                             queue={queue}
                             showHints={session.show_hints}
                             direction={session.translation_direction}
