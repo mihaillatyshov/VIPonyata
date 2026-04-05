@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import { isFieldData } from "components/Activities/Assessment/Types/StudentAssessmentFillSpacesExists/FieldData";
 import { FindMaxStr, fixRubyStr } from "libs/Autisize";
@@ -24,22 +24,18 @@ const StudentAssessmentCreateSentence = ({ data, taskId }: StudentAssessmentType
     const dispatch = useAppDispatch();
     const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor), useSensor(KeyboardSensor));
 
-    const [answers, setAnswers] = useState<(string | null)[]>(() => Array(data.parts.length).fill(null));
-    const [inputs, setInputs] = useState<string[]>(() => [...data.parts]);
-
-    const firstSetAnswersAndData = useEffectEvent(() => {
-        setAnswers(Array(data.parts.length).fill(null));
-        setInputs([...data.parts]);
-    });
-
-    useEffect(() => {
-        firstSetAnswersAndData();
-    }, [taskId]);
+    const answers = data.answers ?? Array(data.parts.length).fill(null);
+    const inputs = data.inputs ?? [...data.parts];
 
     const syncTaskData = (nextAnswers: (string | null)[], nextInputs: string[]) => {
         const orderedFilledParts = nextAnswers.filter((item): item is string => item !== null);
         const nextParts = [...orderedFilledParts, ...nextInputs];
-        dispatch(setAssessmentTaskData({ id: taskId, data: { ...data, parts: nextParts, inputs: nextInputs } }));
+        dispatch(
+            setAssessmentTaskData({
+                id: taskId,
+                data: { ...data, parts: nextParts, answers: nextAnswers, inputs: nextInputs },
+            }),
+        );
     };
 
     const handleAnsInp = (answerId: number) => {
@@ -52,8 +48,6 @@ const StudentAssessmentCreateSentence = ({ data, taskId }: StudentAssessmentType
         const nextInputs = [...inputs, currentAnswer];
         nextAnswers[answerId] = null;
 
-        setAnswers(nextAnswers);
-        setInputs(nextInputs);
         syncTaskData(nextAnswers, nextInputs);
     };
 
@@ -69,8 +63,6 @@ const StudentAssessmentCreateSentence = ({ data, taskId }: StudentAssessmentType
         }
         nextAnswers[answerId] = selectedInput;
 
-        setAnswers(nextAnswers);
-        setInputs(nextInputs);
         syncTaskData(nextAnswers, nextInputs);
     };
 
@@ -78,7 +70,6 @@ const StudentAssessmentCreateSentence = ({ data, taskId }: StudentAssessmentType
         const nextAnswers = [...answers];
         [nextAnswers[fromId], nextAnswers[toId]] = [nextAnswers[toId], nextAnswers[fromId]];
 
-        setAnswers(nextAnswers);
         syncTaskData(nextAnswers, inputs);
     };
 

@@ -382,11 +382,58 @@ class CreateSentenceTaskBase(BaseModelTask):
 
 
 class CreateSentenceTaskStudentReq(CreateSentenceTaskBase, IOrderTaskStudentReq):
-    pass
+    answers: list[StrExtraSpaceRemove | None] | None = None
+    inputs: list[StrExtraSpaceRemove] | None = None
+
+    @model_validator(mode="after")
+    def answers_inputs_validation(self) -> "CreateSentenceTaskStudentReq":
+        if self.answers is None and self.inputs is None:
+            return self
+
+        if self.answers is None or self.inputs is None:
+            raise ValueError("Для create_sentence поля answers и inputs должны передаваться вместе")
+
+        if len(self.answers) != len(self.parts):
+            raise ValueError("Количество ячеек ответа не соответствует количеству частей")
+
+        combo_answers = [*list(filter(lambda item: item is not None, self.answers)), *self.inputs]
+        combo_answers.sort()
+
+        parts = self.parts.copy()
+        parts.sort()
+
+        if combo_answers != parts:
+            raise ValueError("Список частей не соответствует состоянию ячеек ответа")
+
+        return self
 
 
 class CreateSentenceTaskRes(CreateSentenceTaskBase, IOrderTaskRes):
-    pass
+    answers: list[StrExtraSpaceRemove | None] = []
+    inputs: list[StrExtraSpaceRemove] = []
+
+    @model_validator(mode="after")
+    def new_answers_inputs_validation(self) -> "CreateSentenceTaskRes":
+        if len(self.answers) == 0:
+            self.inputs = self.parts.copy()
+            self.answers = [None for _ in range(len(self.parts))]
+
+        return self
+
+    def custom_validation(self) -> bool:
+        if len(self.meta_parts) != len(self.parts):
+            return False
+
+        if len(self.answers) != len(self.meta_parts):
+            return False
+
+        combo_answers = [*list(filter(lambda item: item is not None, self.answers)), *self.inputs]
+        combo_answers.sort()
+
+        meta_parts = self.meta_parts.copy()
+        meta_parts.sort()
+
+        return combo_answers == meta_parts
 
 
 class CreateSentenceTaskTeacherReq(CreateSentenceTaskBase, IOrderTaskTeacherReq):

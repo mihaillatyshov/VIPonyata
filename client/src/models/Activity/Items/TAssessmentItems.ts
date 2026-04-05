@@ -102,6 +102,7 @@ interface TAssessmentCreateSentenceBase extends TAssessmentItemBase {
 }
 export interface TAssessmentCreateSentence extends TAssessmentCreateSentenceBase {
     parts: string[];
+    answers?: (string | null)[];
     inputs?: string[];
 }
 export interface TTeacherAssessmentCreateSentence extends TAssessmentCreateSentenceBase {
