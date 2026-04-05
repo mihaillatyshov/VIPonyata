@@ -153,40 +153,50 @@ const CourseProcessingPage = ({ processingType }: CourseProcessingPageProps) => 
         <div className="container mb-5 pb-5">
             <PageTitle title="コース" urlBack="/" />
             <div className="container mt-5 d-flex flex-column">
-                <InputText placeholder="Название" htmlId="course-name" className="mt-2" {...inputProps.name} />
-                <div className="row gx-4 mt-2">
-                    <div className="col-md">
-                        <InputText placeholder="Сложность" htmlId="course-difficulty" {...inputProps.difficulty} />
-                    </div>
-                    <div className="col-md">
-                        <InputSelect
-                            placeholder="Цвет"
-                            htmlId="course-difficulty-color"
-                            options={colors}
-                            {...inputProps.difficultyColor}
+                <div className="row gx-4 align-items-start mt-2">
+                    <div className="col-lg-7 d-flex flex-column">
+                        <InputText placeholder="Название" htmlId="course-name" {...inputProps.name} />
+                        {processingType === "create" && (
+                            <div className="row gx-4 mt-2">
+                                <div className="col-md">
+                                    <InputText
+                                        placeholder="Сложность"
+                                        htmlId="course-difficulty"
+                                        {...inputProps.difficulty}
+                                    />
+                                </div>
+                                <div className="col-md">
+                                    <InputSelect
+                                        placeholder="Цвет"
+                                        htmlId="course-difficulty-color"
+                                        options={colors}
+                                        {...inputProps.difficultyColor}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                        <FloatingLabelTextareaAutosize
+                            htmlId="course-description"
+                            {...inputProps.description}
+                            placeholder="Описание"
+                            className="mt-2"
+                            rows={6}
                         />
+                        <div className="mt-2 col-md-4 col-lg-3 px-0">
+                            <InputNumber htmlId="course-sort" placeholder="Сортировка" {...inputProps.sort} />
+                        </div>
+                    </div>
+                    <div className="col-lg-5 mt-3 mt-lg-0">
+                        <InputImage htmlId="course-image" placeholder="Картинка" {...inputProps.img} />
                     </div>
                 </div>
-                <InputNumber
-                    htmlId="course-sort"
-                    placeholder="Порядок соритровки"
-                    className="mt-2"
-                    {...inputProps.sort}
-                />
-                <FloatingLabelTextareaAutosize
-                    htmlId="course-description"
-                    {...inputProps.description}
-                    placeholder="Описание"
-                    className="mt-2"
-                    rows={6}
-                />
-                <InputImage htmlId="course-image" placeholder="Картинка" className="mt-2" {...inputProps.img} />
 
                 <div>
                     <ProcessingButtonBlock
                         onSubmit={handleProcessing}
                         onDelete={handleDelete}
                         processingType={processingType}
+                        requireDeleteConfirm
                     />
                     <InputError message={error} />
                 </div>

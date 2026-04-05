@@ -148,27 +148,31 @@ const LessonProcessingPage = ({ processingType }: LessonProcessingPageProps) => 
         <div className="container mb-5 pb-5">
             <PageTitle title="授業" urlBack={`/courses/${courseId}`} />
             <div className="container mt-5 d-flex flex-column">
-                <InputText placeholder="Название" htmlId="course-name" className="mt-2" {...inputProps.name} />
-                <InputNumber
-                    htmlId="course-sort"
-                    placeholder="Порядок соритровки"
-                    className="mt-2"
-                    {...inputProps.number}
-                />
-                <FloatingLabelTextareaAutosize
-                    htmlId="course-description"
-                    {...inputProps.description}
-                    placeholder="Описание"
-                    className="mt-2"
-                    rows={6}
-                />
-                <InputImage htmlId="course-image" placeholder="Картинка" className="mt-2" {...inputProps.img} />
+                <div className="row gx-4 align-items-start mt-2">
+                    <div className="col-lg-7 d-flex flex-column">
+                        <InputText placeholder="Название" htmlId="course-name" {...inputProps.name} />
+                        <FloatingLabelTextareaAutosize
+                            htmlId="course-description"
+                            {...inputProps.description}
+                            placeholder="Описание"
+                            className="mt-2"
+                            rows={6}
+                        />
+                        <div className="mt-2 col-md-4 col-lg-3 px-0">
+                            <InputNumber htmlId="course-sort" placeholder="Сортировка" {...inputProps.number} />
+                        </div>
+                    </div>
+                    <div className="col-lg-5 mt-3 mt-lg-0">
+                        <InputImage htmlId="course-image" placeholder="Картинка" {...inputProps.img} />
+                    </div>
+                </div>
 
                 <div>
                     <ProcessingButtonBlock
                         onSubmit={handleProcessing}
                         onDelete={handleDelete}
                         processingType={processingType}
+                        requireDeleteConfirm
                     />
                     <InputError message={error} />
                 </div>

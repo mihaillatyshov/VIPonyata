@@ -111,3 +111,14 @@
 .inputTimeField {
     min-width: 0;
 }
+
+.inputNumberNoSpinner {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+.inputNumberNoSpinner::-webkit-outer-spin-button,
+.inputNumberNoSpinner::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}

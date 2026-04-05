@@ -2,6 +2,7 @@ import React from "react";
 
 import { InputBaseProps } from "./InputBase";
 import InputError from "./InputError";
+import styles from "./Styles.module.css";
 
 interface InputNumberProps extends InputBaseProps {
     value: number;
@@ -26,7 +27,7 @@ const InputNumber = ({ htmlId, placeholder, value, errorMessage, className, onCh
         <div className={`form-floating ${className}`}>
             <input
                 type="number"
-                className={`form-control ${hasError ? "is-invalid" : ""}`}
+                className={`form-control ${styles.inputNumberNoSpinner} ${hasError ? "is-invalid" : ""}`}
                 value={value}
                 id={htmlId}
                 placeholder={placeholder}
