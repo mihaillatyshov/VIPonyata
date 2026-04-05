@@ -29,18 +29,18 @@ const InputImageLabel = ({ htmlId, value, placeholder }: InputImageLabelProps) =
 
     if (hasValue) {
         return (
-            <label htmlFor={htmlId} className={`${styles.inputFilePrev} ${borderClassName}`}>
-                <img src={value.url} alt={placeholder} className={styles.inputFilePrevImg} />
-                {isLoading ? (
-                    <div className={styles.inputFilePrevEdit}>
-                        <Loading />
-                    </div>
-                ) : (
-                    <div className={styles.inputFilePrevEdit}>
-                        <i className="bi bi-pencil-square" style={{ fontSize: "48px" }} />
-                    </div>
-                )}
-            </label>
+            <div className="d-flex align-items-center gap-2 justify-content-center px-5">
+                <div className={`${styles.inputFilePrev} ${borderClassName}`} style={{ flex: 1 }}>
+                    <img src={value.url} alt={placeholder} className={styles.inputFilePrevImg} />
+                </div>
+                <label
+                    htmlFor={htmlId}
+                    className="btn btn-outline-secondary flex-shrink-0"
+                    style={{ cursor: "pointer" }}
+                >
+                    {isLoading ? <Loading /> : <i className="bi bi-plus-lg" style={{ fontSize: "1.2em" }} />}
+                </label>
+            </div>
         );
     }
 

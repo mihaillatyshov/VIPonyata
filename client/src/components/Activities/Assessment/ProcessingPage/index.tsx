@@ -21,7 +21,7 @@ import {
     TTeacherAssessmentItems,
 } from "models/Activity/Items/TAssessmentItems";
 import { TProcessingType } from "models/Processing";
-import { ProcessingButtonBlock } from "ui/Processing/ProcessingButtonBlock";
+import { ProcessingDeleteButton } from "ui/Processing/ProcessingDeleteButton";
 
 import AddTaskButton from "./AddTaskButton";
 import { getProcessingData, processingAliases, TAliasProp } from "./AssessmentProcessingUtils";
@@ -60,6 +60,7 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
     const navigate = useNavigate();
 
     const [isShowSelectTypeModal, setIsShowSelectTypeModal] = useState<boolean>(false);
+    const [isDeleteConfirming, setIsDeleteConfirming] = useState<boolean>(false);
     const [taskIdToAdd, setTaskIdToAdd] = useState<number | undefined>(undefined);
 
     const [loadStatus, setLoadStatus] = useState<LoadStatus.Type>(LoadStatus.NONE);
@@ -190,6 +191,19 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
         AjaxDelete({ url: `/api/${name}/${id}` }).then(() => {
             navigate(`/lessons/${lessonId}`);
         });
+    };
+
+    const openDeleteConfirm = () => {
+        setIsDeleteConfirming(true);
+    };
+
+    const closeDeleteConfirm = () => {
+        setIsDeleteConfirming(false);
+    };
+
+    const confirmDelete = () => {
+        closeDeleteConfirm();
+        handleDelete();
     };
 
     const openModal = (id: number) => {
@@ -391,31 +405,42 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
         <div className="container mb-5" style={{ maxWidth: "1100px", paddingBottom: 320, position: "relative" }}>
             <PageTitle title={title} urlBack={`/lessons/${lessonId}`} />
             <div className="teacher-assessment-page mt-3">
-                <div>
-                    <ProcessingButtonBlock
-                        onSubmit={handleProcessing}
-                        onDelete={handleDelete}
-                        processingType={processingType}
-                    />
+                <div className="pt-3 px-3">
+                    <div className="d-flex align-items-start gap-3 flex-wrap">
+                        <div style={{ width: "50%", minWidth: "320px", maxWidth: "100%" }}>
+                            <FloatingLabelTextareaAutosize
+                                htmlId="description"
+                                placeholder="Описание"
+                                rows={6}
+                                onChangeHandler={setDescription}
+                                value={description}
+                            />
+                        </div>
+                        <InputTime
+                            placeholder="Таймер"
+                            value={timelimit}
+                            onChangeHandler={setTimelimit}
+                            htmlId="timelimit"
+                        />
+                        {processingType === "edit" &&
+                            (isDeleteConfirming ? (
+                                <div className="d-flex align-items-center gap-2 flex-wrap justify-content-end ms-auto">
+                                    <button type="button" className="btn btn-danger" onClick={confirmDelete}>
+                                        Точно?
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-secondary student-assessment-back-btn"
+                                        onClick={closeDeleteConfirm}
+                                    >
+                                        Отмена
+                                    </button>
+                                </div>
+                            ) : (
+                                <ProcessingDeleteButton onDelete={openDeleteConfirm} extraClassName="ms-auto" />
+                            ))}
+                    </div>
                     <InputError message={errors.message} />
-                </div>
-
-                <div className="mt-3">
-                    <InputTime
-                        placeholder="Лимит времени"
-                        value={timelimit}
-                        onChangeHandler={setTimelimit}
-                        htmlId="timelimit"
-                    />
-                </div>
-                <div className="mt-3">
-                    <FloatingLabelTextareaAutosize
-                        htmlId="description"
-                        placeholder="Описание"
-                        rows={6}
-                        onChangeHandler={setDescription}
-                        value={description}
-                    />
                 </div>
                 <hr className="student-assessment-divider" />
 
@@ -435,6 +460,15 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
                 close={() => setIsShowSelectTypeModal(false)}
                 addTasks={addTasks}
             />
+            <div style={{ position: "fixed", bottom: "32px", right: "32px", zIndex: 1000 }}>
+                <button
+                    type="button"
+                    className="btn btn-secondary student-assessment-back-btn"
+                    onClick={handleProcessing}
+                >
+                    {processingType === "edit" ? "Сохранить" : "Создать"}
+                </button>
+            </div>
         </div>
     );
 };

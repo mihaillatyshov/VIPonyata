@@ -2,6 +2,7 @@ import React from "react";
 
 import { InputBaseProps } from "./InputBase";
 import InputError from "./InputError";
+import styles from "./Styles.module.css";
 
 interface InputTimeProps extends InputBaseProps {
     value: string;
@@ -28,12 +29,20 @@ const InputTime = ({
 
     return (
         <>
-            <div className="input-group">
-                <input type="button" className="btn btn-secondary " value="Сброс" onClick={clearHandler} />
-                <div className={`form-floating ${className}`}>
+            <div className={`input-group ${styles.inputTimeGroup}`}>
+                <button
+                    type="button"
+                    className={`btn btn-secondary student-assessment-back-btn ${styles.inputTimeResetButton}`}
+                    onClick={clearHandler}
+                    title="Сбросить время"
+                    aria-label="Сбросить время"
+                >
+                    <i className="bi bi-clock-history" aria-hidden="true" />
+                </button>
+                <div className={`form-floating ${styles.inputTimeFieldWrapper} ${className}`}>
                     <input
                         type="time"
-                        className={`form-control ${hasError ? "is-invalid" : ""}`}
+                        className={`form-control ${styles.inputTimeField} ${hasError ? "is-invalid" : ""}`}
                         value={value}
                         id={htmlId}
                         placeholder={placeholder}

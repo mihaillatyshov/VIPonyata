@@ -89,3 +89,25 @@
     border-radius: 0 0 10px 10px;
     border-top: none;
 }
+
+.inputTimeGroup {
+    width: fit-content;
+    max-width: 100%;
+}
+
+.inputTimeResetButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 46px;
+    white-space: nowrap;
+}
+
+.inputTimeFieldWrapper {
+    flex: 0 0 170px;
+    width: 170px;
+}
+
+.inputTimeField {
+    min-width: 0;
+}

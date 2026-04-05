@@ -29,32 +29,21 @@ const InputAudioLabel = ({ htmlId, value, placeholder }: InputAudioLabelProps) =
 
     if (hasValue) {
         return (
-            <>
+            <div className="d-flex align-items-center gap-2 justify-content-center px-5">
                 <div className={styles.inputFilePrevAudio}>
-                    {hasValue ? (
-                        <audio controls key={value.url}>
-                            <source src={value.url} type="audio/mpeg" />
-                            Your browser does not support the audio.
-                        </audio>
-                    ) : null}
+                    <audio controls key={value.url}>
+                        <source src={value.url} type="audio/mpeg" />
+                        Your browser does not support the audio.
+                    </audio>
                 </div>
                 <label
                     htmlFor={htmlId}
-                    className={`${styles.inputFilePrev} ${styles.inputFilePrevAudioLabel} ${borderClassName}`}
-                    style={{ height: "100px", width: "100%" }}
+                    className="btn btn-outline-secondary flex-shrink-0"
+                    style={{ cursor: "pointer" }}
                 >
-                    {/* <img src={value.url} alt={placeholder} className={styles.inputFilePrevAudio} /> */}
-                    {isLoading ? (
-                        <div className={styles.inputFilePrevEdit}>
-                            <Loading />
-                        </div>
-                    ) : (
-                        <div className={styles.inputFilePrevEdit}>
-                            <i className="bi bi-pencil-square" style={{ fontSize: "48px" }} />
-                        </div>
-                    )}
+                    {isLoading ? <Loading /> : <i className="bi bi-plus-lg" style={{ fontSize: "1.2em" }} />}
                 </label>
-            </>
+            </div>
         );
     }
 
