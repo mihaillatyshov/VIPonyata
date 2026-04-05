@@ -136,7 +136,7 @@ const UnfinishedLessonsCard = ({ summary, onChanged }: UnfinishedLessonsCardProp
                             onClick={() => finishUnfinished(item)}
                             disabled={isFinishing}
                         >
-                            {isFinishing ? "Завершение..." : "Завершить"}
+                            Завершить
                         </button>
                     </div>
                 </div>
