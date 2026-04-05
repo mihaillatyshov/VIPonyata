@@ -3,6 +3,7 @@ import { useLayoutEffect } from "react";
 import ErrorPage from "components/ErrorPages/ErrorPage";
 import { AjaxGet } from "libs/ServerAPI";
 import { TCourse } from "models/TCourse";
+import { TUnfinishedLessonsSummary } from "models/TLesson";
 import { useUserIsTeacher } from "redux/funcs/user";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { selectCourses, setCourses } from "redux/slices/coursesSlice";
@@ -12,9 +13,14 @@ import CourseCardWithContent from "./Cards/CourseCardWithContent";
 
 type ResponseData = {
     items: TCourse[];
+    unfinished_lessons?: TUnfinishedLessonsSummary;
 };
 
-const CoursesList = () => {
+type CoursesListProps = {
+    onLoaded?: (data: ResponseData) => void;
+};
+
+const CoursesList = ({ onLoaded }: CoursesListProps) => {
     const courses = useAppSelector(selectCourses);
     const dispatch = useAppDispatch();
 
@@ -25,6 +31,9 @@ const CoursesList = () => {
             url: "/api/courses",
         }).then((json) => {
             dispatch(setCourses(json.items));
+            if (onLoaded) {
+                onLoaded(json);
+            }
         });
 
         return () => {

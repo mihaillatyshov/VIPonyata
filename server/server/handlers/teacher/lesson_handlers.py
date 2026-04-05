@@ -1,26 +1,35 @@
 from flask import request
 
 import server.queries.OtherDBqueries as DBQO
+import server.queries.StudentDBqueries as DBQS
 import server.queries.TeacherDBqueries as DBQT
 from server.exceptions.ApiExceptions import (CourseNotFoundException, InvalidRequestJson, LessonNotFoundException,
                                              UserNotFoundException)
 from server.models.lesson import LessonCreateReq
 from server.models.user import ShareUserReq
 from server.models.utils import validate_req
+from server.routes.routes_utils import get_current_user_id
 
 
 def get_lessons_by_course_id(course_id: int):
+    user_id = get_current_user_id()
     if course := DBQT.get_course_by_id(course_id):
-        return {"course": course, "items": DBQT.get_lessons_by_course_id(course_id)}
+        return {
+            "course": course,
+            "items": DBQT.get_lessons_by_course_id(course_id),
+            "unfinished_lessons": DBQS.get_unfinished_lessons_summary_by_course_id(course_id, user_id)
+        }
 
-    return {"course": None, "items": None}, 403
+    return {"course": None, "items": None, "unfinished_lessons": None}, 403
 
 
 def get_lesson_activities(lesson_id: int):
+    user_id = get_current_user_id()
     if lesson := DBQT.get_lesson_by_id(lesson_id):
 
         return {
             "lesson": lesson,
+            "unfinished_lessons": DBQS.get_unfinished_lessons_summary_by_course_id(lesson.course_id, user_id),
             "items": {
                 "drilling": DBQT.DrillingQueries.get_by_lesson_id(lesson_id),
                 "assessment": DBQT.AssessmentQueries.get_by_lesson_id(lesson_id),
@@ -29,7 +38,7 @@ def get_lesson_activities(lesson_id: int):
             }
         }
 
-    return {"lesson": None, "items": None}, 404
+    return {"lesson": None, "items": None, "unfinished_lessons": None}, 404
 
 
 def create_lesson(course_id: int):

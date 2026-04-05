@@ -39,6 +39,12 @@ def get_all_courses():
     return user_selector_function(teacher_funcs.get_all_courses, student_funcs.get_all_courses)
 
 
+@routes_bp.route("/activities/unfinished/end", methods=["POST"])
+@login_required
+def finish_unfinished_activity():
+    return user_selector_function(teacher_funcs.finish_unfinished_activity, student_funcs.finish_unfinished_activity)
+
+
 @routes_bp.route("/courses/<int:course_id>", methods=["PATCH"])
 @login_required
 def update_course(course_id):

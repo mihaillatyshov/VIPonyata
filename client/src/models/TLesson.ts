@@ -19,8 +19,19 @@ export interface TLessonCreate {
     img: string | null;
 }
 
+export interface TUnfinishedLessonsSummary {
+    has_unfinished_lessons: boolean;
+    unfinished_lessons_count: number;
+    next_unfinished_lesson_id: number | null;
+    next_unfinished_lesson_name: string | null;
+    next_unfinished_activity_type: "drilling" | "hieroglyph" | "assessment" | null;
+    next_unfinished_activity_id: number | null;
+    next_unfinished_activity_started_at: string | null;
+}
+
 export type TLessonResponse = {
     lesson: TLesson;
+    unfinished_lessons?: TUnfinishedLessonsSummary;
     items: {
         drilling: TDrilling;
         hieroglyph: THieroglyph;

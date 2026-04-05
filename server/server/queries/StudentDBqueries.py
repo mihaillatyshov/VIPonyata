@@ -1,9 +1,9 @@
 from datetime import datetime
 import json
 import random
-from typing import Generic, TypedDict
+from typing import Generic, Literal, TypedDict
 
-from sqlalchemy import delete, select, union_all, update
+from sqlalchemy import delete, literal, select, union_all, update
 from sqlalchemy.sql.expression import func
 
 from server.common import DBsession
@@ -99,6 +99,141 @@ class ActivityTryForNotificationType(TypedDict):
     start_datetime: datetime
     end_datetime: datetime
     mistakes_count: int | None
+
+
+class UnfinishedLessonsSummaryType(TypedDict):
+    has_unfinished_lessons: bool
+    unfinished_lessons_count: int
+    next_unfinished_lesson_id: int | None
+    next_unfinished_lesson_name: str | None
+    next_unfinished_activity_type: Literal["drilling", "hieroglyph", "assessment"] | None
+    next_unfinished_activity_id: int | None
+    next_unfinished_activity_started_at: datetime | None
+
+
+def _unfinished_lesson_ids_subquery(user_id: int):
+    drilling_unfinished = select(Drilling.lesson_id.label("lesson_id")).join(
+        DrillingTry, DrillingTry.base_id == Drilling.id).where(DrillingTry.user_id == user_id).where(
+            DrillingTry.end_datetime == None)
+
+    hieroglyph_unfinished = select(Hieroglyph.lesson_id.label("lesson_id")).join(
+        HieroglyphTry, HieroglyphTry.base_id == Hieroglyph.id).where(HieroglyphTry.user_id == user_id).where(
+            HieroglyphTry.end_datetime == None)
+
+    assessment_unfinished = select(Assessment.lesson_id.label("lesson_id")).join(
+        AssessmentTry, AssessmentTry.base_id == Assessment.id).where(AssessmentTry.user_id == user_id).where(
+            AssessmentTry.end_datetime == None)
+
+    return union_all(drilling_unfinished, hieroglyph_unfinished, assessment_unfinished).subquery()
+
+
+def _unfinished_activities_subquery(user_id: int):
+    drilling_unfinished = select(Drilling.lesson_id.label("lesson_id"), Drilling.id.label("activity_id"),
+                                 DrillingTry.start_datetime.label("started_at"),
+                                 literal("drilling").label("activity_type")).join(
+                                     DrillingTry, DrillingTry.base_id == Drilling.id).where(
+                                         DrillingTry.user_id == user_id).where(DrillingTry.end_datetime == None)
+
+    hieroglyph_unfinished = select(Hieroglyph.lesson_id.label("lesson_id"), Hieroglyph.id.label("activity_id"),
+                                   HieroglyphTry.start_datetime.label("started_at"),
+                                   literal("hieroglyph").label("activity_type")).join(
+                                       HieroglyphTry, HieroglyphTry.base_id == Hieroglyph.id).where(
+                                           HieroglyphTry.user_id == user_id).where(HieroglyphTry.end_datetime == None)
+
+    assessment_unfinished = select(Assessment.lesson_id.label("lesson_id"), Assessment.id.label("activity_id"),
+                                   AssessmentTry.start_datetime.label("started_at"),
+                                   literal("assessment").label("activity_type")).join(
+                                       AssessmentTry, AssessmentTry.base_id == Assessment.id).where(
+                                           AssessmentTry.user_id == user_id).where(AssessmentTry.end_datetime == None)
+
+    return union_all(drilling_unfinished, hieroglyph_unfinished, assessment_unfinished).subquery()
+
+
+def _build_unfinished_lessons_summary(user_id: int, course_id: int | None = None) -> UnfinishedLessonsSummaryType:
+    with DBsession.begin() as session:
+        unfinished_lesson_ids_subquery = _unfinished_lesson_ids_subquery(user_id)
+        unfinished_lesson_ids = select(unfinished_lesson_ids_subquery.c.lesson_id).distinct()
+
+        lessons_query = select(Lesson.id, Lesson.name).join(Lesson.users).where(User.id == user_id).where(
+            Lesson.id.in_(unfinished_lesson_ids))
+        if course_id is not None:
+            lessons_query = lessons_query.where(Lesson.course_id == course_id)
+
+        unfinished_lessons = session.execute(lessons_query.order_by(Lesson.number).order_by(Lesson.id)).all()
+        if not unfinished_lessons:
+            return {
+                "has_unfinished_lessons": False,
+                "unfinished_lessons_count": 0,
+                "next_unfinished_lesson_id": None,
+                "next_unfinished_lesson_name": None,
+                "next_unfinished_activity_type": None,
+                "next_unfinished_activity_id": None,
+                "next_unfinished_activity_started_at": None,
+            }
+
+        unfinished_activities_subquery = _unfinished_activities_subquery(user_id)
+        next_activity_query = select(
+            unfinished_activities_subquery.c.activity_type,
+            unfinished_activities_subquery.c.activity_id,
+            unfinished_activities_subquery.c.started_at,
+            Lesson.id,
+            Lesson.name,
+        ).join(Lesson,
+               Lesson.id == unfinished_activities_subquery.c.lesson_id).join(Lesson.users).where(User.id == user_id)
+        if course_id is not None:
+            next_activity_query = next_activity_query.where(Lesson.course_id == course_id)
+
+        next_activity = session.execute(
+            next_activity_query.order_by(unfinished_activities_subquery.c.started_at.desc(), Lesson.number,
+                                         Lesson.id).limit(1)).one_or_none()
+
+        next_lesson_id, next_lesson_name = unfinished_lessons[0]
+        if next_activity is not None:
+            return {
+                "has_unfinished_lessons": True,
+                "unfinished_lessons_count": len(unfinished_lessons),
+                "next_unfinished_lesson_id": next_activity[3],
+                "next_unfinished_lesson_name": next_activity[4],
+                "next_unfinished_activity_type": next_activity[0],
+                "next_unfinished_activity_id": next_activity[1],
+                "next_unfinished_activity_started_at": next_activity[2],
+            }
+
+        return {
+            "has_unfinished_lessons": True,
+            "unfinished_lessons_count": len(unfinished_lessons),
+            "next_unfinished_lesson_id": next_lesson_id,
+            "next_unfinished_lesson_name": next_lesson_name,
+            "next_unfinished_activity_type": None,
+            "next_unfinished_activity_id": None,
+            "next_unfinished_activity_started_at": None,
+        }
+
+
+def get_unfinished_lessons_summary_by_course_id(course_id: int, user_id: int) -> UnfinishedLessonsSummaryType:
+    return _build_unfinished_lessons_summary(user_id=user_id, course_id=course_id)
+
+
+def get_unfinished_lessons_summary(user_id: int) -> UnfinishedLessonsSummaryType:
+    return _build_unfinished_lessons_summary(user_id=user_id)
+
+
+def finish_unfinished_activity(user_id: int, activity_type: str, activity_id: int) -> None:
+    activity_queries_by_type: dict[str, ActivityQueries] = {
+        "drilling": DrillingQueries,
+        "hieroglyph": HieroglyphQueries,
+        "assessment": AssessmentQueries,
+    }
+    activity_queries = activity_queries_by_type.get(activity_type)
+    if activity_queries is None:
+        raise InvalidAPIUsage("Unsupported activity type", 400)
+
+    activity_try = activity_queries.get_unfinished_try_by_activity_id(activity_id, user_id)
+    activity_try_type = getattr(activity_queries, "_activity_try_type")
+    with DBsession.begin() as session:
+        session.execute(
+            update(activity_try_type).where(activity_try_type.id == activity_try.id).values(
+                end_datetime=datetime.now()))
 
 
 class ActivityQueries(Generic[ActivityType, ActivityTryType]):

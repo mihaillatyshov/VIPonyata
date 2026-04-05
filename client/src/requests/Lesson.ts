@@ -8,7 +8,7 @@ import { useAppDispatch } from "redux/hooks";
 import { setAssessmentInfo } from "redux/slices/assessmentSlice";
 import { setLexisInfo as setDrillingInfo } from "redux/slices/drillingSlice";
 import { setLexisInfo as setHieroglyphInfo } from "redux/slices/hieroglyphSlice";
-import { setSelectedLesson } from "redux/slices/lessonsSlice";
+import { setSelectedLesson, setUnfinishedLessonsSummary } from "redux/slices/lessonsSlice";
 
 export const useRequestLesson = (lessonId: string | undefined) => {
     const dispatch = useAppDispatch();
@@ -18,6 +18,7 @@ export const useRequestLesson = (lessonId: string | undefined) => {
 
     useLayoutEffect(() => {
         dispatch(setSelectedLesson(undefined));
+        dispatch(setUnfinishedLessonsSummary(undefined));
         dispatch(setDrillingInfo(undefined));
         dispatch(setHieroglyphInfo(undefined));
         dispatch(setAssessmentInfo(undefined));
@@ -25,6 +26,7 @@ export const useRequestLesson = (lessonId: string | undefined) => {
         AjaxGet<TLessonResponse>({ url: `/api/lessons/${lessonId}` })
             .then((json) => {
                 dispatch(setSelectedLesson(json.lesson));
+                dispatch(setUnfinishedLessonsSummary(json.unfinished_lessons));
                 setILexisInfo("drilling", json, setDrillingInfo);
                 setILexisInfo("hieroglyph", json, setHieroglyphInfo);
                 setIAssessmentInfo("assessment", json, setAssessmentInfo);
@@ -38,6 +40,7 @@ export const useRequestLesson = (lessonId: string | undefined) => {
 
         return () => {
             dispatch(setSelectedLesson(undefined));
+            dispatch(setUnfinishedLessonsSummary(undefined));
             dispatch(setDrillingInfo(undefined));
             dispatch(setHieroglyphInfo(undefined));
             dispatch(setAssessmentInfo(undefined));

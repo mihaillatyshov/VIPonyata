@@ -1,15 +1,18 @@
 from flask import request
 
 import server.queries.OtherDBqueries as DBQO
+import server.queries.StudentDBqueries as DBQS
 import server.queries.TeacherDBqueries as DBQT
 from server.exceptions.ApiExceptions import (CourseNotFoundException, InvalidRequestJson, UserNotFoundException)
 from server.models.course import CourseCreateReq
 from server.models.user import ShareUserReq
 from server.models.utils import validate_req
+from server.routes.routes_utils import get_current_user_id
 
 
 def get_all_courses():
-    return {"items": DBQT.get_all_courses()}
+    user_id = get_current_user_id()
+    return {"items": DBQT.get_all_courses(), "unfinished_lessons": DBQS.get_unfinished_lessons_summary(user_id)}
 
 
 def create_course():
@@ -69,3 +72,16 @@ def add_or_remove_user_from_course(course_id):
         DBQT.add_course_notification(course_id, user_req_data.user_id)
 
     return {"message": "User added to course"}
+
+
+def finish_unfinished_activity():
+    if not request.json:
+        raise InvalidRequestJson()
+
+    activity_type = request.json.get("activity_type")
+    activity_id = request.json.get("activity_id")
+    if not isinstance(activity_type, str) or not isinstance(activity_id, int):
+        raise InvalidRequestJson()
+
+    DBQS.finish_unfinished_activity(get_current_user_id(), activity_type, activity_id)
+    return {"message": "Activity closed"}
