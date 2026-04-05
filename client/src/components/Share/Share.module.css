@@ -1,26 +1,48 @@
 .shareUser {
     display: flex;
     justify-content: space-between;
-    padding: 10px;
-    margin: 10px;
-    border-radius: 10px;
-    border: 1px solid #aaaaaa;
+    align-items: center;
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition:
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.shareUser:hover {
+    border-color: rgba(99, 102, 241, 0.35);
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.12);
 }
 
 .userAvatar {
-    width: 100%;
-    aspect-ratio: 1/1;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
 }
 
+.profileFallbackIcon {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    font-size: 40px;
+    line-height: 1;
+    color: #6a826a;
+}
+
 .userLink:hover {
-    color: #555555;
+    color: #4a3b6d;
 }
 
 .shareAddButton {
     color: #059a05;
     cursor: pointer;
+    flex-shrink: 0;
 }
 
 .shareAddButton:hover {
@@ -30,6 +52,7 @@
 .shareRemoveButton {
     color: #8f0101;
     cursor: pointer;
+    flex-shrink: 0;
 }
 
 .shareRemoveButton:hover {

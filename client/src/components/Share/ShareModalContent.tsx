@@ -1,5 +1,3 @@
-import React from "react";
-
 import Loading from "components/Common/Loading";
 import { LoadStatus } from "libs/Status";
 import { GetShareUsersDataType } from "requests/User";
@@ -30,9 +28,17 @@ const ShareModalContent = ({ users, errorMessage, share, onShare }: ShareModalCo
     return (
         <div className="row">
             <div className="col-6">
+                <div className="share-column-title">
+                    <i className="bi bi-x-circle" aria-hidden="true"></i>
+                    Нет доступа
+                </div>
                 <ShareUserList users={users.data.outside} usersType="outside" share={share} onShare={onShare} />
             </div>
             <div className="col-6">
+                <div className="share-column-title">
+                    <i className="bi bi-check-circle" aria-hidden="true"></i>
+                    Есть доступ
+                </div>
                 <ShareUserList users={users.data.inside} usersType="inside" share={share} onShare={onShare} />
             </div>
         </div>

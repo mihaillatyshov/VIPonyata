@@ -1,5 +1,3 @@
-import React from "react";
-
 import { TUserData } from "models/TUser";
 
 import ShareUser, { ShareResponse, TShareUserType } from "./ShareUser";
@@ -13,11 +11,11 @@ interface ShareUserListProps {
 
 const ShareUserList = ({ users, usersType, share, onShare }: ShareUserListProps) => {
     return (
-        <>
+        <div className="d-flex flex-column gap-2">
             {users.map((user) => (
                 <ShareUser key={user.id} user={user} userType={usersType} share={share} onShare={onShare} />
             ))}
-        </>
+        </div>
     );
 };
 

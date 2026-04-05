@@ -55,7 +55,7 @@ const ShareModal = ({ id, name, type, isShow, close }: ShareModalProps) => {
 
     return (
         <div onClick={fixOtherClicks}>
-            <Modal size="xl" show={isShow} onHide={close} dialogClassName="modal-dialog">
+            <Modal size="xl" show={isShow} onHide={close} className="share-modal">
                 <Modal.Header closeButton className="modal-bg">
                     <Modal.Title>{name}</Modal.Title>
                 </Modal.Header>
