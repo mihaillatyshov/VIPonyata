@@ -40,6 +40,23 @@
     color: #41506a;
 }
 
+.student-assessment-block-icon__unfinished-mark {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    color: #ffffff;
+    background-color: #c46b7f;
+}
+
 .student-assessment-task-title {
     line-height: 1;
     font-size: 0.9rem;
@@ -95,6 +112,10 @@
     color: #c46b7f;
     font-size: 28px;
     line-height: 1;
+}
+
+.student-assessment-end-error small {
+    color: #c46b7f !important;
 }
 
 @media screen and (max-width: 768px) {

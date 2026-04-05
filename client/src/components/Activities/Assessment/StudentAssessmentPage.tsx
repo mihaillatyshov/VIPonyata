@@ -102,9 +102,10 @@ interface BlockIconProps {
     blockId: number;
     onClick: () => void;
     status: TBlockIconStatus;
+    showUnfinishedMark: boolean;
 }
 
-const BlockIcon = ({ blockId, onClick, status }: BlockIconProps) => {
+const BlockIcon = ({ blockId, onClick, status, showUnfinishedMark }: BlockIconProps) => {
     const getClassByStatus = () => {
         switch (status) {
             case "valid":
@@ -121,7 +122,7 @@ const BlockIcon = ({ blockId, onClick, status }: BlockIconProps) => {
     return (
         <button
             type="button"
-            className={`btn border rounded d-flex justify-content-center align-items-center ${getClassByStatus()}`}
+            className={`btn border rounded d-flex justify-content-center align-items-center position-relative ${getClassByStatus()}`}
             style={{ width: 28, height: 36 }}
             onClick={(event) => {
                 onClick();
@@ -129,6 +130,14 @@ const BlockIcon = ({ blockId, onClick, status }: BlockIconProps) => {
             }}
         >
             {blockId + 1}
+            {showUnfinishedMark && (
+                <span
+                    className="student-assessment-block-icon__unfinished-mark"
+                    aria-label="Есть незаполненные задания"
+                >
+                    !
+                </span>
+            )}
         </button>
     );
 };
@@ -421,6 +430,7 @@ const StudentAssessmentPage = () => {
                             <BlockIcon
                                 key={index}
                                 blockId={index}
+                                showUnfinishedMark={isNeedDrawFullValidation && isBlockHasError(index)}
                                 status={getIconStatus(
                                     index,
                                     blockIdCurrent,
@@ -481,9 +491,14 @@ const StudentAssessmentPage = () => {
                         </button>
                     )}
                     {blockIdCurrent === blocks.length - 1 ? (
-                        <button type="button" className="btn btn-success mt-3" onClick={handleEndAssessment}>
-                            Завершить
-                        </button>
+                        <div className="d-flex align-items-center gap-2 ms-auto mt-3">
+                            {isNeedDrawFullValidation && errors.message !== "" && (
+                                <InputError className="mb-0 student-assessment-end-error" message={errors.message} />
+                            )}
+                            <button type="button" className="btn btn-success" onClick={handleEndAssessment}>
+                                Завершить
+                            </button>
+                        </div>
                     ) : (
                         <button
                             type="button"
@@ -498,7 +513,6 @@ const StudentAssessmentPage = () => {
                     )}
                 </div>
             </div>
-            {isNeedDrawFullValidation && <InputError className="mt-1 mb-5" message={errors.message} />}
         </div>
     );
 };

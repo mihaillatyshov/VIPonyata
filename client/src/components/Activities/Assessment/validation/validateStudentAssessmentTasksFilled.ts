@@ -60,7 +60,7 @@ export const validateStudentAssessmentTasksFilled = (
     if (tasks === undefined) {
         return undefined;
     }
-    const errors: PyErrorDict = { errors: {}, message: "Не все задания были выполнены" };
+    const errors: PyErrorDict = { errors: {}, message: "есть невыполненные задания" };
 
     tasks.forEach((task, i) => {
         const validateResult = validateTask(task);
