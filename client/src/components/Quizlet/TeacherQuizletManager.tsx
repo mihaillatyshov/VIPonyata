@@ -52,9 +52,10 @@ interface TopicEditorProps {
     subgroup: TQuizletSubgroup;
     initialWords: TQuizletWord[];
     onDelete: () => void;
+    onSaved: () => void;
 }
 
-const TopicEditor = ({ subgroup, initialWords, onDelete }: TopicEditorProps) => {
+const TopicEditor = ({ subgroup, initialWords, onDelete, onSaved }: TopicEditorProps) => {
     const [rows, setRows] = useState<EditorRow[]>(() =>
         initialWords.length > 0 ? wordsToRows(initialWords) : [makeEmptyRow()],
     );
@@ -304,6 +305,7 @@ const TopicEditor = ({ subgroup, initialWords, onDelete }: TopicEditorProps) => 
                 }
             }
             setCommittedWords(newCommitted);
+            onSaved();
         } catch {
             setSaveError("Ошибка при сохранении");
         } finally {
@@ -375,8 +377,8 @@ const TopicEditor = ({ subgroup, initialWords, onDelete }: TopicEditorProps) => 
                                                     field === "char_jp"
                                                         ? "漢字"
                                                         : field === "word_jp"
-                                                        ? "かな"
-                                                        : "перевод"
+                                                          ? "かな"
+                                                          : "перевод"
                                                 }
                                             />
                                         </td>
@@ -796,14 +798,20 @@ interface TopicPageProps {
     subgroup: TQuizletSubgroup;
     words: TQuizletWord[];
     onDeleteTopic: (subgroup: TQuizletSubgroup) => Promise<void>;
+    onWordsSaved: () => void;
 }
 
-const TopicPage = ({ group, subgroup, words, onDeleteTopic }: TopicPageProps) => {
+const TopicPage = ({ group, subgroup, words, onDeleteTopic, onWordsSaved }: TopicPageProps) => {
     return (
         <>
             <QuizletBreadcrumbs group={group} subgroup={subgroup} />
             <div className="quizlet-main-container">
-                <TopicEditor subgroup={subgroup} initialWords={words} onDelete={() => onDeleteTopic(subgroup)} />
+                <TopicEditor
+                    subgroup={subgroup}
+                    initialWords={words}
+                    onDelete={() => onDeleteTopic(subgroup)}
+                    onSaved={onWordsSaved}
+                />
             </div>
         </>
     );
@@ -951,6 +959,7 @@ const TeacherQuizletManager = () => {
                         subgroup={activeSubgroup}
                         words={getSubgroupWords(activeSubgroup.id)}
                         onDeleteTopic={handleDeleteTopic}
+                        onWordsSaved={fetchCatalog}
                     />
                 )}
 
