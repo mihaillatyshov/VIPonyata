@@ -1,5 +1,3 @@
-import { useMemo } from "react";
-
 import { isFieldData } from "components/Activities/Assessment/Types/StudentAssessmentFillSpacesExists/FieldData";
 import { FindMaxStr, fixRubyStr } from "libs/Autisize";
 import { TAssessmentCreateSentence } from "models/Activity/Items/TAssessmentItems";
@@ -99,10 +97,7 @@ const StudentAssessmentCreateSentence = ({ data, taskId }: StudentAssessmentType
         }
     };
 
-    const longestStr = useMemo(
-        () => FindMaxStr([...inputs, ...answers].filter((item) => item !== null) as string[], fixRubyStr),
-        [answers, inputs],
-    );
+    const longestStr = FindMaxStr([...inputs, ...answers].filter((item) => item !== null) as string[], fixRubyStr);
 
     return (
         <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
