@@ -55,7 +55,7 @@ def update_activity_try_end_time(activity_try_id: int, end_time: datetime,
     if activity_try_type == AssessmentTry:
         DBQS.add_assessment_notification(activity_try_id)
         if TAH.AssessmentHandlers.is_try_checked(activity_try_id):
-            DBQT.add_assessment_notification(activity_try_id)
+            DBQT.add_assessment_notification(activity_try_id, viewed=True)
     elif activity_try_type == DrillingTry and isinstance(activity_try, DrillingTry):
         DBQS.add_drilling_notification(activity_try_id)
         # DBQO.add_user_dictionary_from_try(activity_try)

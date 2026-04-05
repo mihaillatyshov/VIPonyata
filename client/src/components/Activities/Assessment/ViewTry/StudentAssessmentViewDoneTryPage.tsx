@@ -1,10 +1,10 @@
-import React, { useLayoutEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import Loading from "components/Common/Loading";
 import PageTitle from "components/Common/PageTitle";
 import ErrorPage from "components/ErrorPages/ErrorPage";
-import { AjaxGet } from "libs/ServerAPI";
+import { AjaxGet, AjaxPost } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
 import {
     TAssessmentCheckedItemBase,
@@ -14,6 +14,7 @@ import {
     TGetAssessmentDoneTryTypeByName,
 } from "models/Activity/Items/TAssessmentItems";
 import { TAssessmentDoneTry } from "models/Activity/Try/TAssessmentTry";
+import { TStudentNotification } from "models/TNotification";
 
 import { AssessmentDoneTryTaskBaseProps } from "./Tasks/AssessmentDoneTryTaskBase";
 import { StudentAssessmentDoneTryAudio } from "./Tasks/Student/StudentAssessmentDoneTryAudio";
@@ -31,7 +32,7 @@ import { StudentAssessmentDoneTryText } from "./Tasks/Student/StudentAssessmentD
 
 type TAliasProp<T extends TAssessmentItemBase, K extends TAssessmentCheckedItemBase> = (
     props: AssessmentDoneTryTaskBaseProps<T, K>,
-) => JSX.Element;
+) => React.ReactElement;
 
 type TAliases = {
     [key in TAssessmentTaskName]: TAliasProp<TGetAssessmentDoneTryTypeByName[key], TGetAssessmentCheckTypeByName[key]>;
@@ -57,6 +58,10 @@ const aliases: TAliases = {
 interface DoneTryResponse {
     done_try: TAssessmentDoneTry;
     lesson_id: number;
+}
+
+interface NotificationsResponse {
+    notifications: TStudentNotification[];
 }
 
 interface TaskInBlock {
@@ -90,6 +95,42 @@ const StudentAssessmentViewDoneTryPage = () => {
             .catch(() => {
                 setDoneTry({ loadStatus: LoadStatus.ERROR });
             });
+    }, [id]);
+
+    useEffect(() => {
+        const doneTryId = Number(id);
+        if (Number.isNaN(doneTryId)) {
+            return;
+        }
+
+        const markDoneTryNotificationsAsRead = () => {
+            AjaxGet<NotificationsResponse>({ url: "/api/notifications" })
+                .then((json) => {
+                    const notificationIds = json.notifications
+                        .filter(
+                            (notification) =>
+                                !notification.viewed &&
+                                !notification.deleted &&
+                                notification.type === "assessment_try" &&
+                                notification.activity_try_id === doneTryId,
+                        )
+                        .map((notification) => notification.id);
+
+                    if (notificationIds.length > 0) {
+                        AjaxPost({ url: "/api/notifications/read", body: { notification_ids: notificationIds } });
+                    }
+                })
+                .catch(() => {
+                    return;
+                });
+        };
+
+        markDoneTryNotificationsAsRead();
+        const timerId = window.setInterval(markDoneTryNotificationsAsRead, 10000);
+
+        return () => {
+            window.clearInterval(timerId);
+        };
     }, [id]);
 
     if (doneTry.loadStatus === LoadStatus.ERROR) {

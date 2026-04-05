@@ -608,9 +608,9 @@ def add_final_boss_notification(final_boss_try_id: int):
         session.add(NotificationTeacherToStudent(final_boss_try_id=final_boss_try_id))
 
 
-def add_assessment_notification(assessment_try_id: int):
+def add_assessment_notification(assessment_try_id: int, viewed: bool = False):
     with DBsession.begin() as session:
-        session.add(NotificationTeacherToStudent(assessment_try_id=assessment_try_id))
+        session.add(NotificationTeacherToStudent(assessment_try_id=assessment_try_id, viewed=viewed))
 
 
 def mark_notifications_as_read(notification_ids: list[int]):
