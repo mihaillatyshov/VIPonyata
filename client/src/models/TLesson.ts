@@ -22,6 +22,7 @@ export interface TLessonCreate {
 export interface TUnfinishedLessonsSummary {
     has_unfinished_lessons: boolean;
     unfinished_lessons_count: number;
+    next_unfinished_course_name: string | null;
     next_unfinished_lesson_id: number | null;
     next_unfinished_lesson_name: string | null;
     next_unfinished_activity_type: "drilling" | "hieroglyph" | "assessment" | null;

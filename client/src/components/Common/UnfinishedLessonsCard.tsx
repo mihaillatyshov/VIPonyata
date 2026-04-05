@@ -41,19 +41,6 @@ const getActivityPath = (activityType: string, activityId: number): string | nul
     return null;
 };
 
-const getActivityTitle = (activityType: string | null): string => {
-    if (activityType === "drilling") {
-        return "Лексика";
-    }
-    if (activityType === "hieroglyph") {
-        return "Кандзи";
-    }
-    if (activityType === "assessment") {
-        return "Таск";
-    }
-    return "Активность";
-};
-
 const UnfinishedLessonsCard = ({ summary, onChanged }: UnfinishedLessonsCardProps) => {
     const navigate = useNavigate();
     const [isFinishing, setIsFinishing] = useState(false);
@@ -109,19 +96,17 @@ const UnfinishedLessonsCard = ({ summary, onChanged }: UnfinishedLessonsCardProp
     };
 
     return (
-        <div className="alert alert-warning d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2 mb-4">
-            <div>
-                <div className="fw-semibold mb-1">Есть незавершенные уроки</div>
-                <div className="small">
-                    Незавершенных: {summary.unfinished_lessons_count}
-                    {summary.next_unfinished_lesson_name ? ` • Ближайший: ${summary.next_unfinished_lesson_name}` : ""}
-                </div>
-                <div className="small">
-                    Активность: {getActivityTitle(summary.next_unfinished_activity_type)} • Начало:{" "}
-                    {formatStartDateTime(summary.next_unfinished_activity_started_at)}
-                </div>
+        <div
+            className="alert alert-warning d-flex flex-column align-items-start gap-1 mb-4 mx-auto"
+            style={{ width: "min(100%, 520px)" }}
+        >
+            <div className="text-start w-100">
+                <div className="fw-semibold mb-0">Урок не завершен</div>
+                <div className="small">Курс: {summary.next_unfinished_course_name ?? "-"}</div>
+                <div className="small">Урок: {summary.next_unfinished_lesson_name ?? "-"}</div>
+                <div className="small">Начало: {formatStartDateTime(summary.next_unfinished_activity_started_at)}</div>
             </div>
-            <div className="d-flex gap-2">
+            <div className="d-flex gap-2 flex-wrap justify-content-end w-100">
                 <button type="button" className="btn btn-warning" onClick={continueUnfinished} disabled={!canContinue}>
                     Продолжить
                 </button>

@@ -104,6 +104,7 @@ class ActivityTryForNotificationType(TypedDict):
 class UnfinishedLessonsSummaryType(TypedDict):
     has_unfinished_lessons: bool
     unfinished_lessons_count: int
+    next_unfinished_course_name: str | None
     next_unfinished_lesson_id: int | None
     next_unfinished_lesson_name: str | None
     next_unfinished_activity_type: Literal["drilling", "hieroglyph", "assessment"] | None
@@ -154,8 +155,9 @@ def _build_unfinished_lessons_summary(user_id: int, course_id: int | None = None
         unfinished_lesson_ids_subquery = _unfinished_lesson_ids_subquery(user_id)
         unfinished_lesson_ids = select(unfinished_lesson_ids_subquery.c.lesson_id).distinct()
 
-        lessons_query = select(Lesson.id, Lesson.name).join(Lesson.users).where(User.id == user_id).where(
-            Lesson.id.in_(unfinished_lesson_ids))
+        lessons_query = select(Lesson.id, Lesson.name,
+                               Course.name).join(Lesson.course).join(Lesson.users).where(User.id == user_id).where(
+                                   Lesson.id.in_(unfinished_lesson_ids))
         if course_id is not None:
             lessons_query = lessons_query.where(Lesson.course_id == course_id)
 
@@ -164,6 +166,7 @@ def _build_unfinished_lessons_summary(user_id: int, course_id: int | None = None
             return {
                 "has_unfinished_lessons": False,
                 "unfinished_lessons_count": 0,
+                "next_unfinished_course_name": None,
                 "next_unfinished_lesson_id": None,
                 "next_unfinished_lesson_name": None,
                 "next_unfinished_activity_type": None,
@@ -176,10 +179,11 @@ def _build_unfinished_lessons_summary(user_id: int, course_id: int | None = None
             unfinished_activities_subquery.c.activity_type,
             unfinished_activities_subquery.c.activity_id,
             unfinished_activities_subquery.c.started_at,
+            Course.name,
             Lesson.id,
             Lesson.name,
-        ).join(Lesson,
-               Lesson.id == unfinished_activities_subquery.c.lesson_id).join(Lesson.users).where(User.id == user_id)
+        ).join(Lesson, Lesson.id == unfinished_activities_subquery.c.lesson_id).join(Lesson.course).join(
+            Lesson.users).where(User.id == user_id)
         if course_id is not None:
             next_activity_query = next_activity_query.where(Lesson.course_id == course_id)
 
@@ -187,13 +191,14 @@ def _build_unfinished_lessons_summary(user_id: int, course_id: int | None = None
             next_activity_query.order_by(unfinished_activities_subquery.c.started_at.desc(), Lesson.number,
                                          Lesson.id).limit(1)).one_or_none()
 
-        next_lesson_id, next_lesson_name = unfinished_lessons[0]
+        next_lesson_id, next_lesson_name, next_course_name = unfinished_lessons[0]
         if next_activity is not None:
             return {
                 "has_unfinished_lessons": True,
                 "unfinished_lessons_count": len(unfinished_lessons),
-                "next_unfinished_lesson_id": next_activity[3],
-                "next_unfinished_lesson_name": next_activity[4],
+                "next_unfinished_course_name": next_activity[3],
+                "next_unfinished_lesson_id": next_activity[4],
+                "next_unfinished_lesson_name": next_activity[5],
                 "next_unfinished_activity_type": next_activity[0],
                 "next_unfinished_activity_id": next_activity[1],
                 "next_unfinished_activity_started_at": next_activity[2],
@@ -202,6 +207,7 @@ def _build_unfinished_lessons_summary(user_id: int, course_id: int | None = None
         return {
             "has_unfinished_lessons": True,
             "unfinished_lessons_count": len(unfinished_lessons),
+            "next_unfinished_course_name": next_course_name,
             "next_unfinished_lesson_id": next_lesson_id,
             "next_unfinished_lesson_name": next_lesson_name,
             "next_unfinished_activity_type": None,
