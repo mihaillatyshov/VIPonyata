@@ -28,6 +28,16 @@ export interface TUnfinishedLessonsSummary {
     next_unfinished_activity_type: "drilling" | "hieroglyph" | "assessment" | null;
     next_unfinished_activity_id: number | null;
     next_unfinished_activity_started_at: string | null;
+    items: TUnfinishedLessonItem[];
+}
+
+export interface TUnfinishedLessonItem {
+    course_name: string;
+    lesson_id: number;
+    lesson_name: string;
+    activity_type: "drilling" | "hieroglyph" | "assessment";
+    activity_id: number;
+    activity_started_at: string;
 }
 
 export type TLessonResponse = {

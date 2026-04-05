@@ -110,6 +110,16 @@ class UnfinishedLessonsSummaryType(TypedDict):
     next_unfinished_activity_type: Literal["drilling", "hieroglyph", "assessment"] | None
     next_unfinished_activity_id: int | None
     next_unfinished_activity_started_at: datetime | None
+    items: list["UnfinishedLessonItemType"]
+
+
+class UnfinishedLessonItemType(TypedDict):
+    course_name: str
+    lesson_id: int
+    lesson_name: str
+    activity_type: Literal["drilling", "hieroglyph", "assessment"]
+    activity_id: int
+    activity_started_at: datetime
 
 
 def _unfinished_lesson_ids_subquery(user_id: int):
@@ -172,6 +182,7 @@ def _build_unfinished_lessons_summary(user_id: int, course_id: int | None = None
                 "next_unfinished_activity_type": None,
                 "next_unfinished_activity_id": None,
                 "next_unfinished_activity_started_at": None,
+                "items": [],
             }
 
         unfinished_activities_subquery = _unfinished_activities_subquery(user_id)
@@ -187,21 +198,41 @@ def _build_unfinished_lessons_summary(user_id: int, course_id: int | None = None
         if course_id is not None:
             next_activity_query = next_activity_query.where(Lesson.course_id == course_id)
 
-        next_activity = session.execute(
+        all_activities = session.execute(
             next_activity_query.order_by(unfinished_activities_subquery.c.started_at.desc(), Lesson.number,
-                                         Lesson.id).limit(1)).one_or_none()
+                                         Lesson.id)).all()
+
+        unique_lessons_items: list[UnfinishedLessonItemType] = []
+        used_lessons: set[int] = set()
+        for activity in all_activities:
+            lesson_id = activity[4]
+            if lesson_id in used_lessons:
+                continue
+
+            used_lessons.add(lesson_id)
+            unique_lessons_items.append({
+                "course_name": activity[3],
+                "lesson_id": lesson_id,
+                "lesson_name": activity[5],
+                "activity_type": activity[0],
+                "activity_id": activity[1],
+                "activity_started_at": activity[2],
+            })
+
+        next_activity = unique_lessons_items[0] if unique_lessons_items else None
 
         next_lesson_id, next_lesson_name, next_course_name = unfinished_lessons[0]
         if next_activity is not None:
             return {
                 "has_unfinished_lessons": True,
-                "unfinished_lessons_count": len(unfinished_lessons),
-                "next_unfinished_course_name": next_activity[3],
-                "next_unfinished_lesson_id": next_activity[4],
-                "next_unfinished_lesson_name": next_activity[5],
-                "next_unfinished_activity_type": next_activity[0],
-                "next_unfinished_activity_id": next_activity[1],
-                "next_unfinished_activity_started_at": next_activity[2],
+                "unfinished_lessons_count": len(unique_lessons_items),
+                "next_unfinished_course_name": next_activity["course_name"],
+                "next_unfinished_lesson_id": next_activity["lesson_id"],
+                "next_unfinished_lesson_name": next_activity["lesson_name"],
+                "next_unfinished_activity_type": next_activity["activity_type"],
+                "next_unfinished_activity_id": next_activity["activity_id"],
+                "next_unfinished_activity_started_at": next_activity["activity_started_at"],
+                "items": unique_lessons_items,
             }
 
         return {
@@ -213,6 +244,7 @@ def _build_unfinished_lessons_summary(user_id: int, course_id: int | None = None
             "next_unfinished_activity_type": None,
             "next_unfinished_activity_id": None,
             "next_unfinished_activity_started_at": None,
+            "items": [],
         }
 
 

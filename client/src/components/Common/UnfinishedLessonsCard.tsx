@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AjaxPost } from "libs/ServerAPI";
-import { TUnfinishedLessonsSummary } from "models/TLesson";
+import { TUnfinishedLessonItem, TUnfinishedLessonsSummary } from "models/TLesson";
 
 interface UnfinishedLessonsCardProps {
     summary: TUnfinishedLessonsSummary | undefined;
@@ -49,15 +49,27 @@ const UnfinishedLessonsCard = ({ summary, onChanged }: UnfinishedLessonsCardProp
         return null;
     }
 
-    const canContinue = summary.next_unfinished_activity_type !== null && summary.next_unfinished_activity_id !== null;
+    const items: TUnfinishedLessonItem[] =
+        summary.items && summary.items.length > 0
+            ? summary.items
+            : summary.next_unfinished_activity_type !== null &&
+              summary.next_unfinished_activity_id !== null &&
+              summary.next_unfinished_activity_started_at !== null
+            ? [
+                  {
+                      course_name: summary.next_unfinished_course_name ?? "-",
+                      lesson_id: summary.next_unfinished_lesson_id ?? 0,
+                      lesson_name: summary.next_unfinished_lesson_name ?? "-",
+                      activity_type: summary.next_unfinished_activity_type,
+                      activity_id: summary.next_unfinished_activity_id,
+                      activity_started_at: summary.next_unfinished_activity_started_at,
+                  },
+              ]
+            : [];
 
-    const continueUnfinished = () => {
-        if (!canContinue) {
-            return;
-        }
-
-        const activityType = summary.next_unfinished_activity_type!;
-        const activityId = summary.next_unfinished_activity_id!;
+    const continueUnfinished = (item: TUnfinishedLessonItem) => {
+        const activityType = item.activity_type;
+        const activityId = item.activity_id;
         const path = getActivityPath(activityType, activityId);
         if (!path) {
             return;
@@ -72,8 +84,8 @@ const UnfinishedLessonsCard = ({ summary, onChanged }: UnfinishedLessonsCardProp
             });
     };
 
-    const finishUnfinished = () => {
-        if (!canContinue || isFinishing) {
+    const finishUnfinished = (item: TUnfinishedLessonItem) => {
+        if (isFinishing) {
             return;
         }
 
@@ -81,8 +93,8 @@ const UnfinishedLessonsCard = ({ summary, onChanged }: UnfinishedLessonsCardProp
         AjaxPost({
             url: "/api/activities/unfinished/end",
             body: {
-                activity_type: summary.next_unfinished_activity_type,
-                activity_id: summary.next_unfinished_activity_id,
+                activity_type: item.activity_type,
+                activity_id: item.activity_id,
             },
         })
             .then(() => {
@@ -96,30 +108,40 @@ const UnfinishedLessonsCard = ({ summary, onChanged }: UnfinishedLessonsCardProp
     };
 
     return (
-        <div
-            className="alert alert-warning d-flex flex-column align-items-start gap-1 mb-4 mx-auto"
-            style={{ width: "min(100%, 520px)" }}
-        >
-            <div className="text-start w-100">
-                <div className="fw-semibold mb-0">Урок не завершен</div>
-                <div className="small">Курс: {summary.next_unfinished_course_name ?? "-"}</div>
-                <div className="small">Урок: {summary.next_unfinished_lesson_name ?? "-"}</div>
-                <div className="small">Начало: {formatStartDateTime(summary.next_unfinished_activity_started_at)}</div>
-            </div>
-            <div className="d-flex gap-2 flex-wrap justify-content-end w-100">
-                <button type="button" className="btn btn-warning" onClick={continueUnfinished} disabled={!canContinue}>
-                    Продолжить
-                </button>
-                <button
-                    type="button"
-                    className="btn btn-outline-danger"
-                    onClick={finishUnfinished}
-                    disabled={!canContinue || isFinishing}
+        <>
+            {items.map((item) => (
+                <div
+                    key={`${item.activity_type}-${item.activity_id}`}
+                    className="alert alert-warning d-flex flex-column align-items-start gap-1 mb-4 mx-auto"
+                    style={{ width: "min(100%, 520px)" }}
                 >
-                    {isFinishing ? "Завершение..." : "Завершить"}
-                </button>
-            </div>
-        </div>
+                    <div className="text-start w-100">
+                        <div className="fw-semibold mb-0">Урок не завершен</div>
+                        <div className="small">Курс: {item.course_name}</div>
+                        <div className="small">Урок: {item.lesson_name}</div>
+                        <div className="small">Начало: {formatStartDateTime(item.activity_started_at)}</div>
+                    </div>
+                    <div className="d-flex gap-2 flex-wrap justify-content-end w-100">
+                        <button
+                            type="button"
+                            className="btn btn-warning"
+                            onClick={() => continueUnfinished(item)}
+                            disabled={isFinishing}
+                        >
+                            Продолжить
+                        </button>
+                        <button
+                            type="button"
+                            className="btn btn-outline-danger"
+                            onClick={() => finishUnfinished(item)}
+                            disabled={isFinishing}
+                        >
+                            {isFinishing ? "Завершение..." : "Завершить"}
+                        </button>
+                    </div>
+                </div>
+            ))}
+        </>
     );
 };
 
