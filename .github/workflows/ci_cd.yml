@@ -1,4 +1,4 @@
-on:
+"on":
     push:
         branches: [master]
 
@@ -23,7 +23,7 @@ jobs:
               uses: actions/upload-artifact@v4
               with:
                   name: build-data
-                  path: client/build
+                  path: client/dist
 
     deploy-client:
         needs: [build-client]
@@ -37,7 +37,7 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                   name: build-data
-                  path: client/build
+                  path: client/dist
 
             - name: Push build data (Deploy)
               uses: appleboy/scp-action@v0.1.4
@@ -47,7 +47,7 @@ jobs:
                   username: japan
                   overwrite: true
                   key: ${{ secrets.SSH_PRIVATE_KEY }}
-                  source: "client/build/*"
+                  source: "client/dist/*"
                   target: /home/japan/www/client
                   strip_components: 2
                   rm: true

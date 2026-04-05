@@ -61,7 +61,7 @@ const StudentLexisTaskInterface = <T extends TStudentLexisTryBase>({
     return (
         <div>
             {maincontent()}
-            {!process.env.NODE_ENV || process.env.NODE_ENV === "development" ? (
+            {import.meta.env.DEV ? (
                 <Button onClick={() => goToNextTaskCallback(taskTypeName, item.mistakeCount)}>Test Task Done</Button>
             ) : null}
         </div>

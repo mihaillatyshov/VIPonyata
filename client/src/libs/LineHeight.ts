@@ -1,5 +1,5 @@
 // Load in dependencies
-var computedStyle = require("computed-style");
+import computedStyle from "computed-style";
 
 /**
  * Calculate the `line-height` of a given node
@@ -25,8 +25,7 @@ export function lineHeight(node: HTMLElement): number {
         if (_lnHeightStyle) {
             node.style.lineHeight = _lnHeightStyle;
         } else {
-            // @ts-ignore
-            delete node.style.lineHeight;
+            node.style.lineHeight = "";
         }
     }
 

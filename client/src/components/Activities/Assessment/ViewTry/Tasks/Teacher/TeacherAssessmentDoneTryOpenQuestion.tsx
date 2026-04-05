@@ -1,11 +1,8 @@
-import React from "react";
-
 import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
+import * as Diff from "diff";
 import { TAssessmentCheckedOpenQuestion, TAssessmentDoneTryOpenQuestion } from "models/Activity/Items/TAssessmentItems";
 
 import { TeacherAssessmentDoneTryTaskProps } from "../AssessmentDoneTryTaskBase";
-
-const Diff = require("diff");
 
 export const TeacherAssessmentDoneTryOpenQuestion = ({
     data,
