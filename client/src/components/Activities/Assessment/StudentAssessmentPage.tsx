@@ -300,7 +300,8 @@ const StudentAssessmentPage = () => {
                 //         break;
                 //     }
                 // }
-                const hasError = !data.isOk; // || blockHasErrors // This commented validation cause error (only here)
+                // const hasError = !data.isOk; // || blockHasErrors // This commented validation cause error (only here)
+                const hasError = false;
                 if (!data.isOk && !serverErrorBlockIds.includes(blockIdCurrent)) {
                     setServerErrorBlockIds((prev) => [...prev, blockIdCurrent]);
                 } else if (data.isOk && serverErrorBlockIds.includes(blockIdCurrent)) {
