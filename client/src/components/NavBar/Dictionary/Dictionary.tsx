@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import Loading from "components/Common/Loading";
@@ -35,7 +35,7 @@ export const Dictionary = () => {
 
     useLayoutEffect(() => {
         getCount();
-        let timerId = setInterval(getCount, 30_000);
+        const timerId = setInterval(getCount, 30_000);
 
         return () => clearInterval(timerId);
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -43,9 +43,9 @@ export const Dictionary = () => {
     return (
         <div className="d-flex mx-auto align-items-center">
             <Link className="d-flex a-clear navbar-dictionary-title ap-japanesefont" to="/dictionary">
-                じしょ{!isTeacher && ":"} {!isTeacher && <Counter count={count} />}
+                じしょ{!isTeacher && ":"}
+                {!isTeacher && <Counter count={count} />}
             </Link>
         </div>
     );
 };
-

@@ -1,7 +1,6 @@
-import React from "react";
 import { useDispatch } from "react-redux";
 
-import StudentActivityBubble from "components/Activities/Bouble/StudentActivityBouble";
+import StudentActivityBubble from "components/Activities/Bubble/StudentActivityBubble";
 import { setAssessmentEndByTime } from "redux/slices/assessmentSlice";
 
 type StudentAssessmentBubbleProps = {

@@ -126,7 +126,7 @@ const LessonProcessingPage = ({ processingType }: LessonProcessingPageProps) => 
             .then((body) => {
                 navigate(`/lessons/${body.lesson.id}`);
             })
-            .catch(({ isServerError, response, json }) => {
+            .catch(({ isServerError, response }) => {
                 if (!isServerError) {
                     if (response.status === 404 || response.status === 403) navigate("/");
                     else setError("Неизвестная ошибка");

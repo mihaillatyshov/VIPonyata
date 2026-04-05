@@ -1,5 +1,3 @@
-import React from "react";
-
 import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 
 import { useSortable } from "@dnd-kit/sortable";
@@ -16,7 +14,7 @@ interface SortableItemProps {
     longestStr: string;
 }
 
-export function Item({ str, longestStr }: ItemProps) {
+export function Item({ str }: ItemProps) {
     return (
         <div className="prevent-select md-last-no-margin student-assessment-classification__item student-assessment-classification__item-autosize">
             <ReactMarkdownWithHtml>{str}</ReactMarkdownWithHtml>

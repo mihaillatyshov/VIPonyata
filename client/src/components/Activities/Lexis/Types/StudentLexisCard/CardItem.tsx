@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 import DictionaryAssociation from "components/Dictionary/DictionaryAssociation";
 import DictionaryImage from "components/Dictionary/DictionaryImage";
@@ -20,7 +20,6 @@ interface CardItemProps {
 const CardItem = ({
     data,
     isFirst,
-    isLast,
     openNextCardOrDone,
     openPrevCard,
     setLexisCardImg,

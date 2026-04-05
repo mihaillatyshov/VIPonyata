@@ -139,7 +139,7 @@ export const LexisProcessingPage = ({ title, name, processingType }: LexisProces
             .then((json) => {
                 navigate(`/lessons/${json.lexis.lesson_id}`);
             })
-            .catch(({ isServerError, response, json }) => {
+            .catch(({ isServerError, response }) => {
                 if (!isServerError) {
                     if (response.status === 404 || response.status === 403) navigate("/");
                     else setError("Неизвестная ошибка");

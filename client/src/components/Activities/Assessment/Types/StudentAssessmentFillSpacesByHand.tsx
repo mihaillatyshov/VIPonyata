@@ -15,8 +15,9 @@ const StudentAssessmentFillSpacesByHand = ({
     const dispatch = useAppDispatch();
 
     const onChangeHandler = (e: React.ChangeEvent<HTMLInputElement>, fieldId: number) => {
-        data.answers[fieldId] = e.target.value;
-        dispatch(setAssessmentTaskData({ id: taskId, data: data }));
+        const newAnswers = [...data.answers];
+        newAnswers[fieldId] = e.target.value;
+        dispatch(setAssessmentTaskData({ id: taskId, data: { ...data, answers: newAnswers } }));
     };
 
     return (

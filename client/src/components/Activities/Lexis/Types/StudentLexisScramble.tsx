@@ -1,5 +1,3 @@
-import React from "react";
-
 import { TScramble } from "models/Activity/Items/TLexisItems";
 import { TStudentLexisTryScrambleTask } from "models/Activity/Try/TLexisTry";
 
@@ -23,16 +21,16 @@ const StudentLexisScramble = ({ name, inData, goToNextTaskCallback }: StudentLex
 
     const doneWordClick = (id: number) => {
         if (item.doneWord[id] !== "⠀") {
-            let newDoneWord = [...item.doneWord];
-            let newUsedChars = [...item.usedChars, newDoneWord[id]];
+            const newDoneWord = [...item.doneWord];
+            const newUsedChars = [...item.usedChars, newDoneWord[id]];
             newDoneWord[id] = "⠀";
             setLexisSelectedItemField({ doneWord: newDoneWord, usedChars: newUsedChars });
         }
     };
 
     const usedCharsClick = (id: number) => {
-        let newUsedChars = [...item.usedChars];
-        let newDoneWord = [...item.doneWord];
+        const newUsedChars = [...item.usedChars];
+        const newDoneWord = [...item.doneWord];
         for (let i = 0; i < newDoneWord.length; i++) {
             if (newDoneWord[i] === "⠀") {
                 newDoneWord[i] = newUsedChars[id];

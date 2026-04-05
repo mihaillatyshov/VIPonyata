@@ -1,5 +1,3 @@
-import React from "react";
-
 import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import InputRadioSingle from "components/Form/InputRadioSingle";
 import { TAssessmentTestSingle } from "models/Activity/Items/TAssessmentItems";
@@ -12,8 +10,7 @@ const StudentAssessmentTestSingle = ({ data, taskId }: StudentAssessmentTypeProp
     const dispatch = useAppDispatch();
 
     const onChangeHandler = (newId: number) => {
-        data.answer = newId;
-        dispatch(setAssessmentTaskData({ id: taskId, data: data }));
+        dispatch(setAssessmentTaskData({ id: taskId, data: { ...data, answer: newId } }));
     };
 
     return (

@@ -1,6 +1,6 @@
 import { useDispatch } from "react-redux";
 
-import StudentActivityBubble from "components/Activities/Bouble/StudentActivityBouble";
+import StudentActivityBubble from "components/Activities/Bubble/StudentActivityBubble";
 import { setLexisEndByTime } from "redux/slices/hieroglyphSlice";
 
 type StudentHieroglyphBubbleProps = {

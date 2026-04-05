@@ -1,5 +1,3 @@
-import React from "react";
-
 import { LexisImages, LexisTaskName } from "models/Activity/ILexis";
 
 import StudentLexisNavItem from "./StudentLexisNavItem";
@@ -13,7 +11,7 @@ export type StudentLexisNavProps = {
     habUrl: string;
 };
 
-const StudentLexisNav = ({ items, doneTasks, selectedTask, setSelectedTaskCallback, habUrl }: StudentLexisNavProps) => {
+const StudentLexisNav = ({ items, doneTasks, selectedTask, setSelectedTaskCallback }: StudentLexisNavProps) => {
     const createItem = (taskName: string, name: string, to: string, imgSrc: string) => {
         return {
             [taskName]: {

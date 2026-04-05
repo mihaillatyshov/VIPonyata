@@ -67,19 +67,19 @@ const AddButton = ({ addLine, isCompact }: AddButtonProps) => {
     );
 };
 
-interface ITeacherAssessmentOrderTaskProps<T extends TTeacherAssessmentFillSpaceType>
-    extends TeacherAssessmentTypeProps<T> {
+interface ITeacherAssessmentOrderTaskProps<
+    T extends TTeacherAssessmentFillSpaceType,
+> extends TeacherAssessmentTypeProps<T> {
     isCompact: boolean;
 }
 
 const ITeacherAssessmentOrderTask = <T extends TTeacherAssessmentFillSpaceType>({
     data,
-    taskUUID,
     onChangeTask,
     isCompact,
 }: ITeacherAssessmentOrderTaskProps<T>) => {
     const onTextChange = (newValue: string, id: number) => {
-        const newParts = data.meta_parts;
+        const newParts = { ...data.meta_parts };
         newParts[id] = newValue;
         onChangeTask({ ...data, meta_parts: newParts });
     };

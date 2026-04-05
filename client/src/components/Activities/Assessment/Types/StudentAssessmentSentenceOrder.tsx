@@ -1,5 +1,3 @@
-import React from "react";
-
 import { TAssessmentSentenceOrder } from "models/Activity/Items/TAssessmentItems";
 import { useAppDispatch } from "redux/hooks";
 import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
@@ -18,12 +16,13 @@ const StudentAssessmentSentenceOrder = ({ data, taskId }: StudentAssessmentTypeP
         if (over === null) return;
 
         if (active?.data?.current?.arrayId !== over?.data?.current?.arrayId) {
-            data.parts = arrayMove(
+            const newParts = arrayMove(
                 data.parts,
                 active.data.current?.arrayId as number,
                 over.data.current?.arrayId as number,
             );
-            dispatch(setAssessmentTaskData({ id: taskId, data: data }));
+            dispatch(setAssessmentTaskData({ id: taskId, data: { ...data, parts: newParts } }));
+            console.log("new order", newParts);
         }
     };
 

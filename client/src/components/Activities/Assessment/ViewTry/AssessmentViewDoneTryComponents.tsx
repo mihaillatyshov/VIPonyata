@@ -1,14 +1,3 @@
-import { TAssessmentTaskName } from "models/Activity/Items/TAssessmentItems";
-
-export const hasMistakesMessage = (task_name: TAssessmentTaskName): boolean => {
-    const noMistakesArray: TAssessmentTaskName[] = [
-        TAssessmentTaskName.TEXT,
-        TAssessmentTaskName.IMG,
-        TAssessmentTaskName.AUDIO,
-    ];
-    return !noMistakesArray.includes(task_name);
-};
-
 interface TaskMistakesProps {
     cheked: boolean;
     mistakes_count: number;

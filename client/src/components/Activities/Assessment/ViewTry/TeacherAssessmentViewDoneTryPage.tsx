@@ -12,8 +12,8 @@ import {
     TAssessmentCheckedItemBase,
     TAssessmentItemBase,
     TAssessmentTaskName,
-    TGetAsseessmentCheckTypeByName,
-    TGetAsseessmentDoneTryTypeByName,
+    TGetAssessmentCheckTypeByName,
+    TGetAssessmentDoneTryTypeByName,
 } from "models/Activity/Items/TAssessmentItems";
 import { TAssessmentDoneTry } from "models/Activity/Try/TAssessmentTry";
 
@@ -36,10 +36,7 @@ type TAliasProp<T extends TAssessmentItemBase, K extends TAssessmentCheckedItemB
 ) => JSX.Element;
 
 type TAliases = {
-    [key in TAssessmentTaskName]: TAliasProp<
-        TGetAsseessmentDoneTryTypeByName[key],
-        TGetAsseessmentCheckTypeByName[key]
-    >;
+    [key in TAssessmentTaskName]: TAliasProp<TGetAssessmentDoneTryTypeByName[key], TGetAssessmentCheckTypeByName[key]>;
 };
 
 const aliases: TAliases = {
@@ -94,7 +91,7 @@ const TeacherAssessmentViewDoneTryPage = () => {
                 setDoneTry({ loadStatus: LoadStatus.DONE, data: json.done_try });
                 setLessonId(json.lesson_id);
             })
-            .catch((err) => {
+            .catch(() => {
                 setDoneTry({ loadStatus: LoadStatus.ERROR });
             });
     }, [id]);
@@ -157,24 +154,23 @@ const TeacherAssessmentViewDoneTryPage = () => {
             case TAssessmentTaskName.TEST_SINGLE:
                 return 1;
             case TAssessmentTaskName.TEST_MULTI:
-                return (task as TGetAsseessmentDoneTryTypeByName[TAssessmentTaskName.TEST_MULTI]).meta_answers.length;
+                return (task as TGetAssessmentDoneTryTypeByName[TAssessmentTaskName.TEST_MULTI]).meta_answers.length;
             case TAssessmentTaskName.FIND_PAIR:
-                return (task as TGetAsseessmentDoneTryTypeByName[TAssessmentTaskName.FIND_PAIR]).meta_first.length;
+                return (task as TGetAssessmentDoneTryTypeByName[TAssessmentTaskName.FIND_PAIR]).meta_first.length;
             case TAssessmentTaskName.CREATE_SENTENCE:
-                return (task as TGetAsseessmentDoneTryTypeByName[TAssessmentTaskName.CREATE_SENTENCE]).meta_parts
-                    .length;
+                return (task as TGetAssessmentDoneTryTypeByName[TAssessmentTaskName.CREATE_SENTENCE]).meta_parts.length;
             case TAssessmentTaskName.FILL_SPACES_EXISTS:
-                return (task as TGetAsseessmentDoneTryTypeByName[TAssessmentTaskName.FILL_SPACES_EXISTS]).meta_answers
+                return (task as TGetAssessmentDoneTryTypeByName[TAssessmentTaskName.FILL_SPACES_EXISTS]).meta_answers
                     .length;
             case TAssessmentTaskName.FILL_SPACES_BY_HAND:
-                return (task as TGetAsseessmentDoneTryTypeByName[TAssessmentTaskName.FILL_SPACES_BY_HAND]).meta_answers
+                return (task as TGetAssessmentDoneTryTypeByName[TAssessmentTaskName.FILL_SPACES_BY_HAND]).meta_answers
                     .length;
             case TAssessmentTaskName.CLASSIFICATION:
                 return (
-                    task as TGetAsseessmentDoneTryTypeByName[TAssessmentTaskName.CLASSIFICATION]
+                    task as TGetAssessmentDoneTryTypeByName[TAssessmentTaskName.CLASSIFICATION]
                 ).meta_answers.reduce((acc, col) => acc + col.length, 0);
             case TAssessmentTaskName.SENTENCE_ORDER:
-                return (task as TGetAsseessmentDoneTryTypeByName[TAssessmentTaskName.SENTENCE_ORDER]).meta_parts.length;
+                return (task as TGetAssessmentDoneTryTypeByName[TAssessmentTaskName.SENTENCE_ORDER]).meta_parts.length;
             case TAssessmentTaskName.OPEN_QUESTION:
                 return 1;
             case TAssessmentTaskName.TEXT:

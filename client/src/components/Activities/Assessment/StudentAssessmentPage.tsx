@@ -242,9 +242,9 @@ const StudentAssessmentPage = () => {
         }
     }, [assessment.items, blockIdCurrent, changedBlocks, isNeedDrawFullValidation]);
 
-    const backToLessonHandle = () => {
-        navigate(`/lessons/${assessment.info.lesson_id}`, { replace: true });
-    };
+    // const backToLessonHandle = () => {
+    //     navigate(`/lessons/${assessment.info.lesson_id}`, { replace: true });
+    // };
 
     const endAssessment = () => {
         setIsNeedDrawFullValidation(true);
@@ -382,7 +382,7 @@ const StudentAssessmentPage = () => {
 
     const isBlockHasError = (blockId: number) => {
         for (let i = 0; i < blocks[blockId].length; i++) {
-            if (!!errors.errors[`${blocks[blockId][i].itemId}`]) {
+            if (errors.errors[`${blocks[blockId][i].itemId}`]) {
                 return true;
             }
         }
@@ -406,7 +406,9 @@ const StudentAssessmentPage = () => {
                 isShow={blockHasErrors.isModalOpen}
                 close={() => setBlockHasErrors({ isModalOpen: false, isCheckLoading: false })}
                 onContinueWithoutFixing={() => {
-                    blockHasErrors.continueCallback !== undefined && blockHasErrors.continueCallback();
+                    if (blockHasErrors.continueCallback !== undefined) {
+                        blockHasErrors.continueCallback();
+                    }
                     setBlockHasErrors({ isModalOpen: false, isCheckLoading: false });
                 }}
             />

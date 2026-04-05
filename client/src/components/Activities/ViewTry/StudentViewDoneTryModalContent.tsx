@@ -14,7 +14,6 @@ interface StudentViewDoneTryModalContentProps {
 const StudentViewDoneTryModalContent = ({
     doneTries,
     openTryPage,
-    errorMessage,
     isAssessmentStyle = false,
 }: StudentViewDoneTryModalContentProps) => {
     if (doneTries.loadStatus === LoadStatus.ERROR) {

@@ -1,7 +1,7 @@
 import { IActivity } from "./IActivity";
 import { TLexisTry } from "./Try/TLexisTry";
 
-export interface ILexis extends IActivity<TLexisTry> {}
+export type ILexis = IActivity<TLexisTry>;
 
 export enum LexisTaskName {
     CARD = "card",

@@ -88,8 +88,8 @@ class TextareaAutosizeClass extends React.Component<InnerProps, TextareaAutosize
           - support StyledComponents (see #71)
       */
             setTimeout(() => this.textarea && autosize(this.textarea));
-        } else {
-            this.textarea && autosize(this.textarea);
+        } else if (this.textarea) {
+            autosize(this.textarea);
         }
 
         if (this.textarea) {
@@ -112,15 +112,17 @@ class TextareaAutosizeClass extends React.Component<InnerProps, TextareaAutosize
         }
     };
 
-    onChange = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
+    onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const { onChange } = this.props;
         this.currentValue = e.currentTarget.value;
-        onChange && onChange(e);
+        if (onChange) {
+            onChange(e);
+        }
     };
 
     render() {
         const {
-            props: { onResize, maxRows, onChange, style, innerRef, children, ...props },
+            props: { maxRows, style, children, ...props },
             state: { lineHeight },
         } = this;
 
@@ -147,7 +149,9 @@ class TextareaAutosizeClass extends React.Component<InnerProps, TextareaAutosize
     }
 
     componentDidUpdate() {
-        this.textarea && autosize.update(this.textarea);
+        if (this.textarea) {
+            autosize.update(this.textarea);
+        }
     }
 }
 

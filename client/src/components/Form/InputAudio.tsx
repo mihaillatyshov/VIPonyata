@@ -18,7 +18,7 @@ interface InputAudioLabelProps extends InputBaseProps {
     value: AudioState;
 }
 
-const InputAudioLabel = ({ htmlId, value, placeholder }: InputAudioLabelProps) => {
+const InputAudioLabel = ({ htmlId, value }: InputAudioLabelProps) => {
     const hasValue =
         value.loadStatus === LoadStatus.DONE ||
         ((value.loadStatus === LoadStatus.ERROR || value.loadStatus === LoadStatus.LOADING) && value.url !== undefined);

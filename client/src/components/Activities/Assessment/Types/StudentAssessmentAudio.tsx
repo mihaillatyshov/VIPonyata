@@ -3,7 +3,7 @@ import { TAssessmentAudio } from "models/Activity/Items/TAssessmentItems";
 
 import { StudentAssessmentTypeProps } from "./StudentAssessmentTypeProps";
 
-const StudentAssessmentAudio = ({ data, taskId }: StudentAssessmentTypeProps<TAssessmentAudio>) => {
+const StudentAssessmentAudio = ({ data }: StudentAssessmentTypeProps<TAssessmentAudio>) => {
     return (
         <div className="student-assessment-audio__wrapper">
             {data.description && (

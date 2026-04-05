@@ -7,7 +7,7 @@ import { TDrilling } from "models/Activity/TDrilling";
 import { THieroglyph } from "models/Activity/THieroglyph";
 
 import StudentViewDoneTryButton from "../ViewTry/StudentViewDoneTryButton";
-import ActivityBouble from "./ActivityBouble";
+import ActivityBubble from "./ActivityBubble";
 
 type StudentActivityBubbleProps = {
     title: string;
@@ -17,13 +17,7 @@ type StudentActivityBubbleProps = {
     showResultsButton?: boolean;
 };
 
-const StudentActivityBubble = ({
-    info,
-    title,
-    name,
-    onDeadline,
-    showResultsButton = true,
-}: StudentActivityBubbleProps) => {
+const StudentActivityBubble = ({ info, title, name, showResultsButton = true }: StudentActivityBubbleProps) => {
     const navigate = useNavigate();
 
     const isInProgress = () => {
@@ -38,7 +32,7 @@ const StudentActivityBubble = ({
             .then(() => {
                 navigate(`/${name}/${info.id}`);
             })
-            .catch(({ isServerError, json, response }) => {
+            .catch(({ isServerError, response }) => {
                 if (!isServerError) {
                     if (response.status === 403) navigate("/");
                 }
@@ -56,7 +50,7 @@ const StudentActivityBubble = ({
     };
 
     return (
-        <ActivityBouble title={title} bubbleClassName="student-activity-bubble">
+        <ActivityBubble title={title} bubbleClassName="student-activity-bubble">
             <div className="d-flex flex-column justify-content-center align-items-center student-activity-bubble__content">
                 <div className="mt-4">
                     <input type="button" className="btn btn-success" onClick={onButtonClick} value={getButtonText()} />
@@ -67,7 +61,7 @@ const StudentActivityBubble = ({
                     </div>
                 )}
             </div>
-        </ActivityBouble>
+        </ActivityBubble>
     );
 };
 

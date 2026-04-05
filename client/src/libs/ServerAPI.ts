@@ -67,7 +67,7 @@ const Ajax = async <T>({ method, url, urlParams, body, headers }: ServerAPIParam
             mode: "cors",
             //credentials: credentials ? "include" : undefined,
             body: body && JSON.stringify(body),
-            headers: { "Content-Type": "application/json; charset=UTF-8" },
+            headers: { "Content-Type": "application/json; charset=UTF-8", ...headers },
         });
         try {
             const json = await response.json();

@@ -1,7 +1,7 @@
 import { Navigate, useParams } from "react-router-dom";
 
-import ITeacherAsssessmentBouble from "components/Activities/Bouble/Teacher/ITeacherAsssessmentBouble";
-import TeacherLexisBouble from "components/Activities/Bouble/Teacher/TeacherLexisBouble";
+import ITeacherAsssessmentBubble from "components/Activities/Bubble/Teacher/ITeacherAsssessmentBubble";
+import TeacherLexisBubble from "components/Activities/Bubble/Teacher/TeacherLexisBubble";
 import PageDescription from "components/Common/PageDescription";
 import PageTitle from "components/Common/PageTitle";
 import { useAppSelector } from "redux/hooks";
@@ -35,18 +35,18 @@ const TeacherLessonPage = () => {
             <PageDescription description={lesson?.description} isCentered={true} />
 
             <div className="d-flex justify-content-center gap-5 flex-wrap mt-5 mb-5">
-                <TeacherLexisBouble title="ごい" name="drilling" lessonId={lessonId} info={drilling.info} />
+                <TeacherLexisBubble title="ごい" name="drilling" lessonId={lessonId} info={drilling.info} />
 
-                <ITeacherAsssessmentBouble
+                <ITeacherAsssessmentBubble
                     title="タスク"
                     name="assessment"
                     lessonId={lessonId}
                     info={assessment.info}
                 />
-                {/* <ActivityBouble title="Урок">
+                {/* <ActivityBubble title="Урок">
                     <i className="bi bi-plus-lg" style={{ fontSize: "140px" }} />
-                </ActivityBouble> */}
-                <TeacherLexisBouble title="かんじ" name="hieroglyph" lessonId={lessonId} info={hieroglyph.info} />
+                </ActivityBubble> */}
+                <TeacherLexisBubble title="かんじ" name="hieroglyph" lessonId={lessonId} info={hieroglyph.info} />
             </div>
         </div>
     );

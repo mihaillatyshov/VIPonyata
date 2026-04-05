@@ -26,7 +26,7 @@ export const registerSlice = createSlice({
     name: "register",
     initialState,
     reducers: {
-        resetRegisterForm: (state) => {
+        resetRegisterForm: () => {
             return initialState;
         },
         setRegisterValidated: (state) => {

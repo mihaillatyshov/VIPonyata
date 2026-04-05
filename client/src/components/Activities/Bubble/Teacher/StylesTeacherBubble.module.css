@@ -1,4 +1,4 @@
-.teacherBoubleTaskIcon {
+.teacherBubbleTaskIcon {
     width: 24px;
     height: 24px;
     display: inline-flex;
@@ -10,32 +10,32 @@
     border-radius: 6px;
 }
 
-.teacherBoubleIcon {
+.teacherBubbleIcon {
     color: #6c757d;
 }
 
-.teacherBoublePlusWrapper {
+.teacherBubblePlusWrapper {
     cursor: pointer;
 }
 
-.teacherBoublePlus {
+.teacherBubblePlus {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
 }
 
-.teacherBoubleClickable {
+.teacherBubbleClickable {
     cursor: pointer;
 }
 
-.teacherBoubleClickable:focus-visible {
+.teacherBubbleClickable:focus-visible {
     outline: 2px solid #adb5bd;
     outline-offset: 2px;
     border-radius: 12px;
 }
 
-.teacherBoubleWithContent :global(.textActivity > .box-shadow-main) {
+.teacherBubbleWithContent :global(.textActivity > .box-shadow-main) {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -47,24 +47,24 @@
     text-align: center;
 }
 
-.teacherBoubleWithContent :global(.bouble__title) {
+.teacherBubbleWithContent :global(.bubble__title) {
     position: static;
     transform: none;
     width: auto;
     text-align: center;
 }
 
-.teacherBoubleContent {
+.teacherBubbleContent {
     margin-top: 0;
     width: 100%;
     max-width: 210px;
 }
 
-.teacherBoubleLimit {
+.teacherBubbleLimit {
     font-size: 14px;
 }
 
-.teacherBoubleWithContent :global(.textActivity::before),
-.teacherBoubleWithContent :global(.textActivity > .box-shadow-main::before) {
+.teacherBubbleWithContent :global(.textActivity::before),
+.teacherBubbleWithContent :global(.textActivity > .box-shadow-main::before) {
     content: none;
 }

@@ -5,21 +5,21 @@ import { TAssessment } from "models/Activity/TAssessment";
 import { TDrilling } from "models/Activity/TDrilling";
 import { THieroglyph } from "models/Activity/THieroglyph";
 
-import styles from "./StylesTeacherBouble.module.css";
+import styles from "./StylesTeacherBubble.module.css";
 
-interface TeacherActivityBoubleChildProps {
+interface TeacherActivityBubbleChildProps {
     name: ActivityName;
     lessonId: number;
     info: TDrilling | THieroglyph | TAssessment | null;
     children?: React.ReactNode;
 }
 
-const TeacherActivityBoubleChild = ({ name, lessonId, info, children }: TeacherActivityBoubleChildProps) => {
+const TeacherActivityBubbleChild = ({ name, lessonId, info, children }: TeacherActivityBubbleChildProps) => {
     if (info === null) {
         return (
             <Link to={`/${name}/create/${lessonId}`} className={"a-link"}>
                 <i
-                    className={`bi bi-plus-lg ${styles.teacherBoublePlus} ${styles.teacherBoubleIcon}`}
+                    className={`bi bi-plus-lg ${styles.teacherBubblePlus} ${styles.teacherBubbleIcon}`}
                     style={{ fontSize: "140px" }}
                 />
             </Link>
@@ -28,7 +28,7 @@ const TeacherActivityBoubleChild = ({ name, lessonId, info, children }: TeacherA
 
     return (
         <>
-            <div className={`text-nowrap text-center w-100 ${styles.teacherBoubleLimit}`}>
+            <div className={`text-nowrap text-center w-100 ${styles.teacherBubbleLimit}`}>
                 Лимит: {info.time_limit ?? "Нет"}
             </div>
             {children}
@@ -36,4 +36,4 @@ const TeacherActivityBoubleChild = ({ name, lessonId, info, children }: TeacherA
     );
 };
 
-export default TeacherActivityBoubleChild;
+export default TeacherActivityBubbleChild;

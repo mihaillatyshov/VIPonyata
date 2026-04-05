@@ -8,13 +8,13 @@ import computedStyle from "computed-style";
  */
 export function lineHeight(node: HTMLElement): number {
     // Grab the line-height via style
-    var lnHeightStr = computedStyle(node, "line-height");
-    var lnHeight = parseFloat(lnHeightStr);
+    let lnHeightStr = computedStyle(node, "line-height");
+    let lnHeight = parseFloat(lnHeightStr);
 
     // If the lineHeight did not contain a unit (i.e. it was numeric), convert it to ems (e.g. '2.3' === '2.3em')
     if (lnHeightStr === lnHeight + "") {
         // Save the old lineHeight style and update the em unit to the element
-        var _lnHeightStyle = node.style.lineHeight;
+        const _lnHeightStyle = node.style.lineHeight;
         node.style.lineHeight = lnHeightStr + "em";
 
         // Calculate the em based height
@@ -57,8 +57,8 @@ export function lineHeight(node: HTMLElement): number {
     // If the line-height is "normal", calculate by font-size
     if (lnHeightStr === "normal") {
         // Create a temporary node
-        var nodeName = node.nodeName;
-        var _node = document.createElement(nodeName);
+        const nodeName = node.nodeName;
+        const _node = document.createElement(nodeName);
         _node.innerHTML = "&nbsp;";
 
         // If we have a text area, reset it to only 1 row
@@ -68,7 +68,7 @@ export function lineHeight(node: HTMLElement): number {
         }
 
         // Set the font-size of the element
-        var fontSizeStr = computedStyle(node, "font-size");
+        const fontSizeStr = computedStyle(node, "font-size");
         _node.style.fontSize = fontSizeStr;
 
         // Remove default padding/border which can affect offset height
@@ -78,11 +78,11 @@ export function lineHeight(node: HTMLElement): number {
         _node.style.border = "0px";
 
         // Append it to the body
-        var body = document.body;
+        const body = document.body;
         body.appendChild(_node);
 
         // Assume the line height of the element is the height
-        var height = _node.offsetHeight;
+        const height = _node.offsetHeight;
         lnHeight = height;
 
         // Remove our child from the DOM

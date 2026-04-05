@@ -28,7 +28,7 @@ import { getProcessingData, processingAliases, TAliasProp } from "./AssessmentPr
 import SelectTypeModal from "./SelectTypeModal";
 import TeacherAssessmentTypeBase from "./Types/TeacherAssessmentTypeBase";
 
-export function findLastIndex<T>(array: Array<T>, predicate: (value: T, index: number, obj: T[]) => boolean): number {
+function findLastIndex<T>(array: Array<T>, predicate: (value: T, index: number, obj: T[]) => boolean): number {
     let l = array.length;
     while (l--) {
         if (predicate(array[l], l, array)) return l;
@@ -145,7 +145,7 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
 
     const checkBlocks = () => {
         const blocks = tasks.filter(
-            (item, i) => item.name === TAssessmentTaskName.BLOCK_BEGIN || item.name === TAssessmentTaskName.BLOCK_END,
+            (item) => item.name === TAssessmentTaskName.BLOCK_BEGIN || item.name === TAssessmentTaskName.BLOCK_END,
         );
 
         if (blocks.length % 2 !== 0) return false;

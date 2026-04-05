@@ -58,21 +58,31 @@ export const getDragToSpread = ({
 }: DragToSpreadProps) => {
     return {
         draggable: true,
-        onDragStart(event: EventType) {
-            onDragStartCallback && onDragStartCallback(getCallbackProps(accept));
+        onDragStart() {
+            if (onDragStartCallback) {
+                onDragStartCallback(getCallbackProps(accept));
+            }
         },
-        onDragEnd(event: EventType) {
-            isAcceptable(accept) && onDragEndCallback && onDragEndCallback(getCallbackProps(accept));
+        onDragEnd() {
+            if (isAcceptable(accept) && onDragEndCallback) {
+                onDragEndCallback(getCallbackProps(accept));
+            }
         },
-        onDragEnter(event: EventType) {
-            isAcceptable(accept) && onDragLeaveCallback && onDragLeaveCallback(getCallbackProps(accept));
+        onDragEnter() {
+            if (isAcceptable(accept) && onDragEnterCallback) {
+                onDragEnterCallback(getCallbackProps(accept));
+            }
         },
-        onDragLeave(event: EventType) {
-            isAcceptable(accept) && onDragLeaveCallback && onDragLeaveCallback(getCallbackProps(accept));
+        onDragLeave() {
+            if (isAcceptable(accept) && onDragLeaveCallback) {
+                onDragLeaveCallback(getCallbackProps(accept));
+            }
         },
         onDragOver(event: EventType) {
             event.preventDefault();
-            isAcceptable(accept) && onDragOverCallback && onDragOverCallback(getCallbackProps(accept));
+            if (isAcceptable(accept) && onDragOverCallback) {
+                onDragOverCallback(getCallbackProps(accept));
+            }
         },
     };
 };
@@ -84,15 +94,21 @@ export const getDropToSpread = ({
     onDragOverCallback,
 }: DropToSpreadProps) => {
     return {
-        onDrop: (event: EventType) => {
-            isAcceptable(accept) && onDropCallback && onDropCallback(getCallbackProps(accept));
+        onDrop: () => {
+            if (isAcceptable(accept) && onDropCallback) {
+                onDropCallback(getCallbackProps(accept));
+            }
         },
-        onDragLeave(event: EventType) {
-            isAcceptable(accept) && onDragLeaveCallback && onDragLeaveCallback(getCallbackProps(accept));
+        onDragLeave() {
+            if (isAcceptable(accept) && onDragLeaveCallback) {
+                onDragLeaveCallback(getCallbackProps(accept));
+            }
         },
         onDragOver: (event: EventType) => {
             event.preventDefault();
-            isAcceptable(accept) && onDragOverCallback && onDragOverCallback(getCallbackProps(accept));
+            if (isAcceptable(accept) && onDragOverCallback) {
+                onDragOverCallback(getCallbackProps(accept));
+            }
         },
     };
 };

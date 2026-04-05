@@ -1,14 +1,12 @@
-import React from "react";
+import ActivityBubble from "./ActivityBubble";
 
-import ActivityBouble from "./ActivityBouble";
-
-interface LoadingBoubleProps {
+interface LoadingBubbleProps {
     title: string;
 }
 
-const LoadingBouble = ({ title }: LoadingBoubleProps) => {
+const LoadingBubble = ({ title }: LoadingBubbleProps) => {
     return (
-        <ActivityBouble title={title}>
+        <ActivityBubble title={title}>
             <div className="placeholder-wave">
                 <span className="placeholder bg-placeholder me-3 rounded" style={{ width: "80px" }}></span>
                 <span className="placeholder bg-placeholder me-3 rounded" style={{ width: "40px" }}></span>
@@ -17,8 +15,8 @@ const LoadingBouble = ({ title }: LoadingBoubleProps) => {
                 <span className="placeholder bg-placeholder me-3 rounded" style={{ width: "60px" }}></span>
                 <span className="placeholder bg-placeholder me-3 rounded" style={{ width: "60px" }}></span>
             </div>
-        </ActivityBouble>
+        </ActivityBubble>
     );
 };
 
-export default LoadingBouble;
+export default LoadingBubble;

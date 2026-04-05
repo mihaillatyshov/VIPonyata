@@ -1,32 +1,32 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-import ActivityBouble from "components/Activities/Bouble/ActivityBouble";
-import LoadingBouble from "components/Activities/Bouble/LoadingBouble";
+import ActivityBubble from "components/Activities/Bubble/ActivityBubble";
+import LoadingBubble from "components/Activities/Bubble/LoadingBubble";
 import { LexisName } from "models/Activity/IActivity";
 import { TDrilling } from "models/Activity/TDrilling";
 import { THieroglyph } from "models/Activity/THieroglyph";
 
-import styles from "./StylesTeacherBouble.module.css";
-import TeacherActivityBoubleChild from "./TeacherActivityBoubleChild";
+import styles from "./StylesTeacherBubble.module.css";
+import TeacherActivityBubbleChild from "./TeacherActivityBubbleChild";
 
-interface TeacherLexisBoubleProps {
+interface TeacherLexisBubbleProps {
     title: string;
     name: LexisName;
     lessonId: number;
     info: TDrilling | THieroglyph | undefined | null;
 }
 
-interface TeacherLexisBoubleChildProps {
+interface TeacherLexisBubbleChildProps {
     name: LexisName;
     lessonId: number;
     info: TDrilling | THieroglyph | null;
 }
 
-const array_chunks = <T extends any>(arr: T[], size: number): T[][] =>
+const array_chunks = <T,>(arr: T[], size: number): T[][] =>
     Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
 
-const TeacherLexisBoubleChild = ({ name, lessonId, info }: TeacherLexisBoubleChildProps) => {
+const TeacherLexisBubbleChild = ({ name, lessonId, info }: TeacherLexisBubbleChildProps) => {
     const getTasksArray = () => (info ? ["card", ...info.tasks.split(",").map((item) => item.trim())] : []);
 
     const getTaskIconClass = (taskName: string) => {
@@ -47,14 +47,14 @@ const TeacherLexisBoubleChild = ({ name, lessonId, info }: TeacherLexisBoubleChi
     };
 
     return (
-        <TeacherActivityBoubleChild name={name} info={info} lessonId={lessonId}>
+        <TeacherActivityBubbleChild name={name} info={info} lessonId={lessonId}>
             <div className="d-flex flex-wrap gap-2 justify-content-center align-items-center mt-2">
                 {array_chunks(getTasksArray(), 4).map((row, rowId) => (
                     <div className="d-flex gap-2" key={rowId}>
                         {row.map((taskName) => (
                             <div className="d-flex" key={taskName}>
                                 <i
-                                    className={`bi ${getTaskIconClass(taskName)} ${styles.teacherBoubleTaskIcon}`}
+                                    className={`bi ${getTaskIconClass(taskName)} ${styles.teacherBubbleTaskIcon}`}
                                     aria-label={taskName}
                                 />
                             </div>
@@ -62,15 +62,15 @@ const TeacherLexisBoubleChild = ({ name, lessonId, info }: TeacherLexisBoubleChi
                     </div>
                 ))}
             </div>
-        </TeacherActivityBoubleChild>
+        </TeacherActivityBubbleChild>
     );
 };
 
-const TeacherLexisBouble = ({ title, name, lessonId, info }: TeacherLexisBoubleProps) => {
+const TeacherLexisBubble = ({ title, name, lessonId, info }: TeacherLexisBubbleProps) => {
     const navigate = useNavigate();
 
     if (info === undefined) {
-        return <LoadingBouble title={title} />;
+        return <LoadingBubble title={title} />;
     }
 
     const url = info === null ? `/${name}/create/${lessonId}` : `/${name}/edit/${info.id}`;
@@ -88,21 +88,21 @@ const TeacherLexisBouble = ({ title, name, lessonId, info }: TeacherLexisBoubleP
 
     return (
         <div
-            className={`${styles.teacherBoubleClickable} ${info !== null ? styles.teacherBoubleWithContent : ""}`}
+            className={`${styles.teacherBubbleClickable} ${info !== null ? styles.teacherBubbleWithContent : ""}`}
             onClick={onBubbleClick}
             onKeyDown={onBubbleKeyDown}
             role="button"
             tabIndex={0}
         >
-            <ActivityBouble title={title}>
+            <ActivityBubble title={title}>
                 <div
-                    className={`d-flex flex-column justify-content-center align-items-center ${styles.teacherBoubleContent}`}
+                    className={`d-flex flex-column justify-content-center align-items-center ${styles.teacherBubbleContent}`}
                 >
-                    <TeacherLexisBoubleChild name={name} lessonId={lessonId} info={info} />
+                    <TeacherLexisBubbleChild name={name} lessonId={lessonId} info={info} />
                 </div>
-            </ActivityBouble>
+            </ActivityBubble>
         </div>
     );
 };
 
-export default TeacherLexisBouble;
+export default TeacherLexisBubble;

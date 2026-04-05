@@ -25,7 +25,7 @@ const NavBar = () => {
             .then((json) => {
                 setNotifications(json.notifications);
             })
-            .catch((data) => {
+            .catch(() => {
                 // TODO: handle error
             });
     };

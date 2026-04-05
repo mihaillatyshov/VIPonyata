@@ -31,9 +31,9 @@ interface TAssessmentTextBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.TEXT;
     text: string;
 }
-export interface TAssessmentText extends TAssessmentTextBase {}
-export interface TTeacherAssessmentText extends TAssessmentTextBase {}
-export interface TAssessmentCheckedText extends TAssessmentCheckedItemBase {}
+export type TAssessmentText = TAssessmentTextBase;
+export type TTeacherAssessmentText = TAssessmentTextBase;
+export type TAssessmentCheckedText = TAssessmentCheckedItemBase;
 export type TAssessmentDoneTryText = TAssessmentText & TTeacherAssessmentText;
 
 // * ==================================================================================================================
@@ -200,7 +200,7 @@ export interface TAssessmentOpenQuestion extends TAssessmentOpenQuestionBase {
 export interface TTeacherAssessmentOpenQuestion extends TAssessmentOpenQuestionBase {
     meta_answer: string;
 }
-export interface TAssessmentCheckedOpenQuestion extends TAssessmentCheckedItemBase {}
+export type TAssessmentCheckedOpenQuestion = TAssessmentCheckedItemBase;
 export type TAssessmentDoneTryOpenQuestion = TAssessmentOpenQuestion & TTeacherAssessmentOpenQuestion;
 
 // * ==================================================================================================================
@@ -211,9 +211,9 @@ interface TAssessmentImgBase extends TAssessmentItemBase {
     description?: string | null;
     url: string;
 }
-export interface TAssessmentImg extends TAssessmentImgBase {}
-export interface TTeacherAssessmentImg extends TAssessmentImgBase {}
-export interface TAssessmentCheckedImg extends TAssessmentCheckedItemBase {}
+export type TAssessmentImg = TAssessmentImgBase;
+export type TTeacherAssessmentImg = TAssessmentImgBase;
+export type TAssessmentCheckedImg = TAssessmentCheckedItemBase;
 export type TAssessmentDoneTryImg = TAssessmentImg & TTeacherAssessmentImg;
 
 // * ==================================================================================================================
@@ -224,9 +224,9 @@ interface TAssessmentAudioBase extends TAssessmentItemBase {
     description?: string | null;
     url: string;
 }
-export interface TAssessmentAudio extends TAssessmentAudioBase {}
-export interface TTeacherAssessmentAudio extends TAssessmentAudioBase {}
-export interface TAssessmentCheckedAudio extends TAssessmentCheckedItemBase {}
+export type TAssessmentAudio = TAssessmentAudioBase;
+export type TTeacherAssessmentAudio = TAssessmentAudioBase;
+export type TAssessmentCheckedAudio = TAssessmentCheckedItemBase;
 export type TAssessmentDoneTryAudio = TAssessmentAudio & TTeacherAssessmentAudio;
 
 // * ==================================================================================================================
@@ -235,9 +235,9 @@ export type TAssessmentDoneTryAudio = TAssessmentAudio & TTeacherAssessmentAudio
 interface TAssessmentBlockBeginBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.BLOCK_BEGIN;
 }
-export interface TAssessmentBlockBegin extends TAssessmentBlockBeginBase {}
-export interface TTeacherAssessmentBlockBegin extends TAssessmentBlockBeginBase {}
-export interface TAssessmentCheckedBlockBegin extends TAssessmentCheckedItemBase {}
+export type TAssessmentBlockBegin = TAssessmentBlockBeginBase;
+export type TTeacherAssessmentBlockBegin = TAssessmentBlockBeginBase;
+export type TAssessmentCheckedBlockBegin = TAssessmentCheckedItemBase;
 export type TAssessmentDoneTryBlockBegin = TAssessmentBlockBegin & TTeacherAssessmentBlockBegin;
 
 // * ==================================================================================================================
@@ -246,9 +246,9 @@ export type TAssessmentDoneTryBlockBegin = TAssessmentBlockBegin & TTeacherAsses
 interface TAssessmentBlockEndBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.BLOCK_END;
 }
-export interface TAssessmentBlockEnd extends TAssessmentBlockEndBase {}
-export interface TTeacherAssessmentBlockEnd extends TAssessmentBlockEndBase {}
-export interface TAssessmentCheckedBlockEnd extends TAssessmentCheckedItemBase {}
+export type TAssessmentBlockEnd = TAssessmentBlockEndBase;
+export type TTeacherAssessmentBlockEnd = TAssessmentBlockEndBase;
+export type TAssessmentCheckedBlockEnd = TAssessmentCheckedItemBase;
 export type TAssessmentDoneTryBlockEnd = TAssessmentBlockEnd & TTeacherAssessmentBlockEnd;
 
 // * ==================================================================================================================
@@ -271,7 +271,7 @@ export interface TGetAssessmentStudentTypeByName {
     [TAssessmentTaskName.BLOCK_END]: TAssessmentBlockEnd;
 }
 
-export interface TGetAsseessmentTeacherTypeByName {
+export interface TGetAssessmentTeacherTypeByName {
     [TAssessmentTaskName.TEXT]: TTeacherAssessmentText;
     [TAssessmentTaskName.TEST_SINGLE]: TTeacherAssessmentTestSingle;
     [TAssessmentTaskName.TEST_MULTI]: TTeacherAssessmentTestMulti;
@@ -288,7 +288,7 @@ export interface TGetAsseessmentTeacherTypeByName {
     [TAssessmentTaskName.BLOCK_END]: TTeacherAssessmentBlockEnd;
 }
 
-export interface TGetAsseessmentCheckTypeByName {
+export interface TGetAssessmentCheckTypeByName {
     [TAssessmentTaskName.TEXT]: TAssessmentCheckedText;
     [TAssessmentTaskName.TEST_SINGLE]: TAssessmentCheckedTestSingle;
     [TAssessmentTaskName.TEST_MULTI]: TAssessmentCheckedTestMulti;
@@ -305,7 +305,7 @@ export interface TGetAsseessmentCheckTypeByName {
     [TAssessmentTaskName.BLOCK_END]: TAssessmentCheckedBlockEnd;
 }
 
-export interface TGetAsseessmentDoneTryTypeByName {
+export interface TGetAssessmentDoneTryTypeByName {
     [TAssessmentTaskName.TEXT]: TAssessmentDoneTryText;
     [TAssessmentTaskName.TEST_SINGLE]: TAssessmentDoneTryTestSingle;
     [TAssessmentTaskName.TEST_MULTI]: TAssessmentDoneTryTestMulti;
@@ -323,16 +323,16 @@ export interface TGetAsseessmentDoneTryTypeByName {
 }
 
 export type TStudentAssessmentAnyItem = TGetAssessmentStudentTypeByName[keyof TGetAssessmentStudentTypeByName];
-export type TTeacherAssessmentAnyItem = TGetAsseessmentTeacherTypeByName[keyof TGetAsseessmentTeacherTypeByName];
-export type TAssessmentAnyCheckedItem = TGetAsseessmentCheckTypeByName[keyof TGetAsseessmentCheckTypeByName];
-export type TAssessmentAnyDoneTryItem = TGetAsseessmentDoneTryTypeByName[keyof TGetAsseessmentDoneTryTypeByName];
+export type TTeacherAssessmentAnyItem = TGetAssessmentTeacherTypeByName[keyof TGetAssessmentTeacherTypeByName];
+export type TAssessmentAnyCheckedItem = TGetAssessmentCheckTypeByName[keyof TGetAssessmentCheckTypeByName];
+export type TAssessmentAnyDoneTryItem = TGetAssessmentDoneTryTypeByName[keyof TGetAssessmentDoneTryTypeByName];
 
 export type TStudentAssessmentItems = TStudentAssessmentAnyItem[];
 export type TTeacherAssessmentItems = TTeacherAssessmentAnyItem[];
 export type TAssessmentCheckedItems = TAssessmentAnyCheckedItem[];
 
 type TTeacherAssessmentTaskDefaultDataAliases = {
-    [key in TAssessmentTaskName]: () => TGetAsseessmentTeacherTypeByName[key];
+    [key in TAssessmentTaskName]: () => TGetAssessmentTeacherTypeByName[key];
 };
 const teacherAssessmentTaskDefaultDataAliases: TTeacherAssessmentTaskDefaultDataAliases = {
     text: () => ({ name: TAssessmentTaskName.TEXT, text: "" }),

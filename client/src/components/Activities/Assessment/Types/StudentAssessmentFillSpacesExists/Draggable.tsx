@@ -1,17 +1,12 @@
+import {
+    DraggableType,
+    FieldData,
+} from "components/Activities/Assessment/Types/StudentAssessmentFillSpacesExists/FieldData";
 import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import CSS from "csstype";
 
 import { useDraggable } from "@dnd-kit/core";
 import { CSS as DNDCSS } from "@dnd-kit/utilities";
-
-export type DraggableType = "answer" | "inputs";
-
-export interface FieldData {
-    fieldId: number;
-    type: DraggableType;
-}
-
-export const isFieldData = (data: any): data is FieldData => data !== undefined;
 
 interface DraggableProps {
     id: number;

@@ -68,7 +68,7 @@ const App = () => {
             .then((json) => {
                 dispatch(setUserData({ loadStatus: LoadStatus.DONE, ...json }));
             })
-            .catch(({ isServerError, json, response }) => {
+            .catch(() => {
                 dispatch(setUserData({ loadStatus: LoadStatus.ERROR }));
             });
     }, []); // eslint-disable-line react-hooks/exhaustive-deps

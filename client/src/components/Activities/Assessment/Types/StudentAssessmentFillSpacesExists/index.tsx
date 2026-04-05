@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 
+import { isFieldData } from "components/Activities/Assessment/Types/StudentAssessmentFillSpacesExists/FieldData";
 import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import { FindMaxStr, fixRubyStr } from "libs/Autisize";
 import { TAssessmentFillSpacesExists, TAssessmentFillSpacesExistsEmpty } from "models/Activity/Items/TAssessmentItems";
@@ -17,7 +18,6 @@ import {
 } from "@dnd-kit/core";
 
 import { StudentAssessmentTypeProps } from "../StudentAssessmentTypeProps";
-import { isFieldData } from "./Draggable";
 import Droppable from "./Droppable";
 import InputsField from "./InputsField";
 

@@ -1,5 +1,3 @@
-import React from "react";
-
 import { InputBaseProps } from "./InputBase";
 
 interface InputCheckSingleProps extends InputBaseProps {
@@ -30,7 +28,7 @@ const InputCheckSingle = ({
                 value={id}
                 className={"form-check-input mt-0 cursor-pointer"}
                 id={htmlId}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(id)}
+                onChange={() => onChange(id)}
                 checked={selectedIds.includes(id)}
                 disabled={isDisabled}
             />

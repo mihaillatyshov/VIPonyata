@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import Loading from "components/Common/Loading";
@@ -387,8 +387,8 @@ const PersonalTopicEditor = ({ subgroup, initialWords, onSaved }: PersonalTopicE
                                                     field === "char_jp"
                                                         ? "漢字"
                                                         : field === "word_jp"
-                                                        ? "かな"
-                                                        : "перевод"
+                                                          ? "かな"
+                                                          : "перевод"
                                                 }
                                             />
                                         </td>
@@ -530,12 +530,12 @@ const StudentQuizlet = () => {
         });
     };
 
-    const loadData = () => {
+    const loadData = useEffectEvent(() => {
         setLoadStatus(LoadStatus.LOADING);
         Promise.all([fetchCatalog(), fetchPersonal()])
             .then(() => setLoadStatus(LoadStatus.DONE))
             .catch(() => setLoadStatus(LoadStatus.ERROR));
-    };
+    });
 
     const loadHistory = () => {
         setHistoryLoadStatus(LoadStatus.LOADING);
@@ -611,8 +611,8 @@ const StudentQuizlet = () => {
             const targetPath = session.is_finished
                 ? routePaths.results
                 : session.quiz_type === "flashcards"
-                ? routePaths.flashcards
-                : routePaths.pairs;
+                  ? routePaths.flashcards
+                  : routePaths.pairs;
 
             if (location.pathname !== targetPath) {
                 navigate(targetPath, { replace: true });
@@ -975,16 +975,20 @@ const StudentQuizlet = () => {
         return Array.from(topics);
     };
 
-    useEffect(() => {
+    const setPersonalLessonTitleOnLessonChange = useEffectEvent(() => {
         if (personalLesson !== null && personalLessonTitle.trim().length === 0) {
             setPersonalLessonTitle(personalLesson.title);
         }
+    });
+
+    useEffect(() => {
+        setPersonalLessonTitleOnLessonChange();
     }, [personalLesson]);
 
     useEffect(() => {
         const subgroup =
             selectedPersonalTopicId !== null
-                ? personalSubgroups.find((item) => item.id === selectedPersonalTopicId) ?? null
+                ? (personalSubgroups.find((item) => item.id === selectedPersonalTopicId) ?? null)
                 : null;
         if (subgroup !== null) {
             setIsEditingLessonTitle(false);
@@ -1037,7 +1041,7 @@ const StudentQuizlet = () => {
             window.removeEventListener("pagehide", persistProgress);
             document.removeEventListener("visibilitychange", onVisibilityChange);
         };
-    }, [session?.id, session?.is_finished]);
+    }, [session, session?.id, session?.is_finished]);
 
     useEffect(() => {
         if (
@@ -1092,7 +1096,7 @@ const StudentQuizlet = () => {
         }, 1000);
 
         return () => window.clearInterval(intervalId);
-    }, [session?.id, session?.is_finished]);
+    }, [session, session?.id, session?.is_finished]);
 
     useEffect(() => {
         if (
@@ -1143,27 +1147,27 @@ const StudentQuizlet = () => {
         // Derive from URL for view section
         (() => {
             const id = viewLessonRouteId ?? viewTopicLessonRouteId;
-            return id !== null ? groups.find((group) => group.id === id) ?? null : null;
+            return id !== null ? (groups.find((group) => group.id === id) ?? null) : null;
         })();
     const selectedLessonTopics = selectedLesson
         ? subgroups.filter((subgroup) => subgroup.group_id === selectedLesson.id)
         : [];
     const selectedTopic =
         viewTopicRouteId !== null
-            ? selectedLessonTopics.find((subgroup) => subgroup.id === viewTopicRouteId) ?? null
+            ? (selectedLessonTopics.find((subgroup) => subgroup.id === viewTopicRouteId) ?? null)
             : null;
     const selectedTopicWords = selectedTopic ? getSubgroupWords(selectedTopic.id) : [];
     const selectedPersonalSubgroup =
         selectedPersonalTopicId !== null
-            ? personalSubgroups.find((subgroup) => subgroup.id === selectedPersonalTopicId) ?? null
+            ? (personalSubgroups.find((subgroup) => subgroup.id === selectedPersonalTopicId) ?? null)
             : null;
 
     const personalRootLabel =
         personalLesson !== null
             ? personalLesson.title
             : personalLessonTitle.trim().length > 0
-            ? personalLessonTitle.trim()
-            : "Мой словарь";
+              ? personalLessonTitle.trim()
+              : "Мой словарь";
 
     const isDictionaryViewPage = session === null && isViewRoute;
     const isPersonalDictionaryPage = session === null && (isPersonalDictionaryRoute || isPersonalTopicRoute);
@@ -1173,32 +1177,32 @@ const StudentQuizlet = () => {
     const pageTitle = isDictionaryViewPage
         ? "先生の辞書"
         : isPersonalDictionaryPage
-        ? personalRootLabel
-        : isTrainingSetupPage
-        ? "トレーニング"
-        : isProgressPage
-        ? "私の結果"
-        : isFlashcardsRoute
-        ? "フラッシュカード"
-        : isResultsRoute
-        ? "スコア"
-        : isPairsRoute
-        ? "ペア"
-        : "ワードラボ";
+          ? personalRootLabel
+          : isTrainingSetupPage
+            ? "トレーニング"
+            : isProgressPage
+              ? "私の結果"
+              : isFlashcardsRoute
+                ? "フラッシュカード"
+                : isResultsRoute
+                  ? "スコア"
+                  : isPairsRoute
+                    ? "ペア"
+                    : "ワードラボ";
     const pageBackUrl =
         (session === null && location.pathname === routePaths.view) || isTrainingSetupPage || isProgressPage
             ? routePaths.modeSelection
             : session === null && viewLessonRouteId !== null && viewTopicRouteId === null
-            ? routePaths.view
-            : session === null && viewTopicRouteId !== null
-            ? getViewLessonPath(viewTopicLessonRouteId!)
-            : isPersonalTopicPage
-            ? routePaths.personalDictionary
-            : isPersonalDictionaryPage
-            ? routePaths.view
-            : isFlashcardsRoute || isResultsRoute || isPairsRoute
-            ? undefined
-            : "/";
+              ? routePaths.view
+              : session === null && viewTopicRouteId !== null
+                ? getViewLessonPath(viewTopicLessonRouteId!)
+                : isPersonalTopicPage
+                  ? routePaths.personalDictionary
+                  : isPersonalDictionaryPage
+                    ? routePaths.view
+                    : isFlashcardsRoute || isResultsRoute || isPairsRoute
+                      ? undefined
+                      : "/";
 
     const canInlineEditLessonTitle =
         isPersonalDictionaryPage && selectedPersonalTopicId === null && personalLesson !== null;

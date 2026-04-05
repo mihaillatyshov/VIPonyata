@@ -10,8 +10,7 @@ const StudentAssessmentOpenQuestion = ({ data, taskId }: StudentAssessmentTypePr
     const dispatch = useAppDispatch();
 
     const onChangeHandler = (value: string) => {
-        data.answer = value;
-        dispatch(setAssessmentTaskData({ id: taskId, data: data }));
+        dispatch(setAssessmentTaskData({ id: taskId, data: { ...data, answer: value } }));
     };
 
     return (

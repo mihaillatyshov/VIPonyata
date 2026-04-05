@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useEffectEvent, useMemo, useState } from "react";
 
+import { isFieldData } from "components/Activities/Assessment/Types/StudentAssessmentFillSpacesExists/FieldData";
 import { FindMaxStr, fixRubyStr } from "libs/Autisize";
 import { TAssessmentCreateSentence } from "models/Activity/Items/TAssessmentItems";
 import { useAppDispatch } from "redux/hooks";
@@ -15,7 +16,6 @@ import {
     useSensors,
 } from "@dnd-kit/core";
 
-import { isFieldData } from "./StudentAssessmentFillSpacesExists/Draggable";
 import Droppable from "./StudentAssessmentFillSpacesExists/Droppable";
 import InputsField from "./StudentAssessmentFillSpacesExists/InputsField";
 import { StudentAssessmentTypeProps } from "./StudentAssessmentTypeProps";
@@ -27,9 +27,13 @@ const StudentAssessmentCreateSentence = ({ data, taskId }: StudentAssessmentType
     const [answers, setAnswers] = useState<(string | null)[]>(() => Array(data.parts.length).fill(null));
     const [inputs, setInputs] = useState<string[]>(() => [...data.parts]);
 
-    useEffect(() => {
+    const firstSetAnswersAndData = useEffectEvent(() => {
         setAnswers(Array(data.parts.length).fill(null));
         setInputs([...data.parts]);
+    });
+
+    useEffect(() => {
+        firstSetAnswersAndData();
     }, [taskId]);
 
     const syncTaskData = (nextAnswers: (string | null)[], nextInputs: string[]) => {

@@ -4,23 +4,23 @@ import { useNavigate } from "react-router-dom";
 import { IAssessmentName } from "models/Activity/IActivity";
 import { TAssessment } from "models/Activity/TAssessment";
 
-import ActivityBouble from "../ActivityBouble";
-import LoadingBouble from "../LoadingBouble";
-import styles from "./StylesTeacherBouble.module.css";
-import TeacherActivityBoubleChild from "./TeacherActivityBoubleChild";
+import ActivityBubble from "../ActivityBubble";
+import LoadingBubble from "../LoadingBubble";
+import styles from "./StylesTeacherBubble.module.css";
+import TeacherActivityBubbleChild from "./TeacherActivityBubbleChild";
 
-export interface ITeacherAsssessmentBoubleProps {
+export interface ITeacherAsssessmentBubbleProps {
     title: string;
     name: IAssessmentName;
     lessonId: number;
     info: TAssessment | undefined | null;
 }
 
-const ITeacherAsssessmentBouble = ({ title, name, lessonId, info }: ITeacherAsssessmentBoubleProps) => {
+const ITeacherAsssessmentBubble = ({ title, name, lessonId, info }: ITeacherAsssessmentBubbleProps) => {
     const navigate = useNavigate();
 
     if (info === undefined) {
-        return <LoadingBouble title={title} />;
+        return <LoadingBubble title={title} />;
     }
 
     const url = info === null ? `/${name}/create/${lessonId}` : `/${name}/edit/${info.id}`;
@@ -38,21 +38,21 @@ const ITeacherAsssessmentBouble = ({ title, name, lessonId, info }: ITeacherAsss
 
     return (
         <div
-            className={`${styles.teacherBoubleClickable} ${info !== null ? styles.teacherBoubleWithContent : ""}`}
+            className={`${styles.teacherBubbleClickable} ${info !== null ? styles.teacherBubbleWithContent : ""}`}
             onClick={onBubbleClick}
             onKeyDown={onBubbleKeyDown}
             role="button"
             tabIndex={0}
         >
-            <ActivityBouble title={title}>
+            <ActivityBubble title={title}>
                 <div
-                    className={`d-flex flex-column justify-content-center align-items-center ${styles.teacherBoubleContent}`}
+                    className={`d-flex flex-column justify-content-center align-items-center ${styles.teacherBubbleContent}`}
                 >
-                    <TeacherActivityBoubleChild name={name} lessonId={lessonId} info={info} />
+                    <TeacherActivityBubbleChild name={name} lessonId={lessonId} info={info} />
                 </div>
-            </ActivityBouble>
+            </ActivityBubble>
         </div>
     );
 };
 
-export default ITeacherAsssessmentBouble;
+export default ITeacherAsssessmentBubble;

@@ -20,7 +20,9 @@ const InputNumber = ({ htmlId, placeholder, value, errorMessage, className, onCh
         }
 
         const res = parseInt(e.target.value);
-        isNaN(res) || onChangeHandler(res);
+        if (!isNaN(res)) {
+            onChangeHandler(res);
+        }
     };
 
     return (

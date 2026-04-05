@@ -1,3 +1,3 @@
 import { ILexis } from "./ILexis";
 
-export interface THieroglyph extends ILexis {}
+export type THieroglyph = ILexis;

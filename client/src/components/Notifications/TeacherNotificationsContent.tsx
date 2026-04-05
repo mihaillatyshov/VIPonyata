@@ -3,18 +3,18 @@ import { useNavigate } from "react-router-dom";
 
 import { TTeacherNotification, TTeacherNotificationWithActivity } from "models/TNotification";
 
-const getTypeName = (item: TTeacherNotificationWithActivity) => {
-    switch (item.type) {
-        case "drilling_try":
-            return "ごい";
-        case "hieroglyph_try":
-            return "かんじ";
-        case "assessment_try":
-            return "タスク";
-        case "final_boss_try":
-            return "Финальный босс";
-    }
-};
+// const getTypeName = (item: TTeacherNotificationWithActivity) => {
+//     switch (item.type) {
+//         case "drilling_try":
+//             return "ごい";
+//         case "hieroglyph_try":
+//             return "かんじ";
+//         case "assessment_try":
+//             return "タスク";
+//         case "final_boss_try":
+//             return "Финальный босс";
+//     }
+// };
 
 const splitDateTime = (datetime?: string | null) => {
     if (!datetime) {
@@ -35,7 +35,6 @@ const hasLink = (item: TTeacherNotificationWithActivity): boolean => {
         case "final_boss_try":
             return true;
     }
-    return false;
 };
 
 const getLinkByName = (item: TTeacherNotificationWithActivity) => {

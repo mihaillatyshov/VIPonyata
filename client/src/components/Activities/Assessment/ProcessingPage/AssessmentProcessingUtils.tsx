@@ -4,7 +4,7 @@ import { IAssessmentName } from "models/Activity/IActivity";
 import {
     TAssessmentItemBase,
     TAssessmentTaskName,
-    TGetAsseessmentTeacherTypeByName,
+    TGetAssessmentTeacherTypeByName,
     TTeacherAssessmentItems,
 } from "models/Activity/Items/TAssessmentItems";
 import { TAssessment } from "models/Activity/TAssessment";
@@ -32,7 +32,7 @@ interface GetAssessmentResponse {
 export type TAliasProp<T extends TAssessmentItemBase> = (props: TeacherAssessmentTypeProps<T>) => JSX.Element;
 
 type TAliases = {
-    [key in TAssessmentTaskName]: TAliasProp<TGetAsseessmentTeacherTypeByName[key]>;
+    [key in TAssessmentTaskName]: TAliasProp<TGetAssessmentTeacherTypeByName[key]>;
 };
 
 export const processingAliases: TAliases = {

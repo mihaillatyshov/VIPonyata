@@ -1,17 +1,17 @@
 import React from "react";
 
-type ActivityBoubleProps = {
+type ActivityBubbleProps = {
     title: string;
     children: React.ReactNode;
     bubbleClassName?: string;
 };
 
-const ActivityBouble = ({ title, children, bubbleClassName }: ActivityBoubleProps) => {
+const ActivityBubble = ({ title, children, bubbleClassName }: ActivityBubbleProps) => {
     return (
         <div className="wrapperActivity">
             <div className="textActivity">
                 <div className={`box-shadow-main rounded-circle ${bubbleClassName || ""}`}>
-                    <div className="bouble__title"> {title} </div>
+                    <div className="bubble__title"> {title} </div>
                     {children}
                 </div>
             </div>
@@ -19,4 +19,4 @@ const ActivityBouble = ({ title, children, bubbleClassName }: ActivityBoubleProp
     );
 };
 
-export default ActivityBouble;
+export default ActivityBubble;

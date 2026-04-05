@@ -244,7 +244,6 @@ class AutosizeInput extends Component<AutosizeInputProps, AutosizeInputState> {
             injectStyles,
             inputClassName,
             inputRef,
-            inputStyle: _inputStyle,
             minWidth,
             onAutosize,
             placeholderIsMinWidth,
