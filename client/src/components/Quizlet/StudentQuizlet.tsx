@@ -1015,11 +1015,13 @@ const StudentQuizlet = () => {
     }, [session, queue]);
 
     useEffect(() => {
-        if (session === null || session.is_finished) {
+        const sessionId = session?.id;
+        const isFinished = session?.is_finished;
+
+        if (sessionId === undefined || isFinished) {
             return;
         }
 
-        const sessionId = session.id;
         const persistProgress = () => {
             AjaxPost({
                 url: `/api/quizlet/sessions/${sessionId}/save-progress`,
@@ -1041,7 +1043,7 @@ const StudentQuizlet = () => {
             window.removeEventListener("pagehide", persistProgress);
             document.removeEventListener("visibilitychange", onVisibilityChange);
         };
-    }, [session, session?.id, session?.is_finished]);
+    }, [session?.id, session?.is_finished]);
 
     useEffect(() => {
         if (
@@ -1087,7 +1089,7 @@ const StudentQuizlet = () => {
     }, [session]);
 
     useEffect(() => {
-        if (session === null || session.is_finished) {
+        if (session?.id === undefined || session.is_finished) {
             return;
         }
 
@@ -1096,7 +1098,7 @@ const StudentQuizlet = () => {
         }, 1000);
 
         return () => window.clearInterval(intervalId);
-    }, [session, session?.id, session?.is_finished]);
+    }, [session?.id, session?.is_finished]);
 
     useEffect(() => {
         if (
