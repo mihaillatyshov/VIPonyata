@@ -73,6 +73,22 @@ const isAllEmpty = (row: EditorRow) => row.char_jp.trim() === "" && row.word_jp.
 
 const isJpEmpty = (row: EditorRow) => row.char_jp.trim() === "" && row.word_jp.trim() === "";
 
+const formatSessionStartDateTime = (value: string): string => {
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return value;
+    }
+
+    return new Intl.DateTimeFormat("ru-RU", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    }).format(date);
+};
+
 interface PersonalTopicEditorProps {
     subgroup: TQuizletSubgroup;
     initialWords: TQuizletWord[];
@@ -1272,6 +1288,9 @@ const StudentQuizlet = () => {
                                     <div className="small">
                                         Тип: {activeSession.quiz_type === "flashcards" ? "Карточки" : "Пары"} •
                                         Прогресс: {activeSession.correct_answers}/{activeSession.total_words}
+                                    </div>
+                                    <div className="small">
+                                        Начало: {formatSessionStartDateTime(activeSession.started_at)}
                                     </div>
                                 </div>
                                 <div className="d-flex gap-2">
