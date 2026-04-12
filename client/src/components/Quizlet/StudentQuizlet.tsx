@@ -474,11 +474,6 @@ const StudentQuizlet = () => {
     const queueRef = useRef<number[]>([]);
     const [liveElapsedSeconds, setLiveElapsedSeconds] = useState<number>(0);
 
-    const [matchingPageInfo, setMatchingPageInfo] = useState<{ currentPage: number; totalPages: number }>({
-        currentPage: 1,
-        totalPages: 1,
-    });
-
     const [personalLessonTitle, setPersonalLessonTitle] = useState<string>("");
     const [newPersonalTopicTitle, setNewPersonalTopicTitle] = useState<string>("");
     const [isEditingLessonTitle, setIsEditingLessonTitle] = useState(false);
@@ -941,6 +936,12 @@ const StudentQuizlet = () => {
     };
 
     const unresolvedCount = sessionWords.filter((word) => !word.is_correct).length;
+    const matchingTotalPages =
+        session !== null && session.quiz_type === "pair" ? Math.max(1, Math.ceil(session.total_words / 12)) : 1;
+    const matchingCurrentPage =
+        session !== null && session.quiz_type === "pair"
+            ? Math.min(matchingTotalPages, Math.floor(session.correct_answers / 12) + 1)
+            : 1;
 
     const orderedSessionWords = useMemo(() => {
         if (sessionWords.length === 0) {
@@ -1807,8 +1808,8 @@ const StudentQuizlet = () => {
                                     elapsedSeconds={liveElapsedSeconds}
                                     currentPosition={session.correct_answers}
                                     totalWords={session.total_words}
-                                    currentPage={matchingPageInfo.currentPage}
-                                    totalPages={matchingPageInfo.totalPages}
+                                    currentPage={matchingCurrentPage}
+                                    totalPages={matchingTotalPages}
                                     onFinishTraining={endNow}
                                 />
                             </div>
@@ -1816,9 +1817,6 @@ const StudentQuizlet = () => {
                                 words={orderedSessionWords}
                                 showHints={session.show_hints}
                                 onAttempt={submitPairAttempt}
-                                onPageChange={(page, total) =>
-                                    setMatchingPageInfo({ currentPage: page, totalPages: total })
-                                }
                             />
                         </div>
                     )}
