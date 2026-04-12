@@ -60,7 +60,7 @@
     border: 1px solid #f7c8cd;
     border-radius: var(--matching-card-radius);
     background: linear-gradient(165deg, #fefeff 0%, #f7f9fc 100%);
-    box-shadow: 0 10px 30px rgba(20, 34, 56, 0.08);
+    box-shadow: 0 2px 8px rgba(20, 34, 56, 0.05);
     color: #132033;
     padding: 10px 12px;
     font-weight: 400;
@@ -115,8 +115,8 @@
 .matching-card:focus-visible {
     border-color: #f7c8cd;
     box-shadow:
-        0 0 0 3px rgba(247, 208, 211, 0.36),
-        0 12px 26px rgba(20, 34, 56, 0.11);
+        0 0 0 2px rgba(247, 208, 211, 0.4),
+        0 4px 12px rgba(20, 34, 56, 0.07);
     outline: none;
 }
 
@@ -124,15 +124,15 @@
     background: #f5dadc;
     border-color: #f7c8cd;
     color: #3a2a2d;
-    box-shadow: 0 12px 26px rgba(247, 208, 211, 0.22);
+    box-shadow: 0 2px 8px rgba(247, 208, 211, 0.18);
 }
 
 .matching-card.is-selected:hover:not(:disabled),
 .matching-card.is-selected:focus-visible {
     border-color: #f7c8cd;
     box-shadow:
-        0 0 0 3px rgba(247, 208, 211, 0.36),
-        0 12px 26px rgba(20, 34, 56, 0.11);
+        0 0 0 2px rgba(247, 208, 211, 0.4),
+        0 4px 12px rgba(20, 34, 56, 0.07);
 }
 
 .matching-card-empty {
