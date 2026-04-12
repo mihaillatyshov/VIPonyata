@@ -1586,7 +1586,7 @@ const StudentQuizlet = () => {
             {session === null && isViewRoute && (
                 <div className="mx-auto mt-5" style={{ maxWidth: "760px" }}>
                     <div className="quizlet-main-container">
-                        <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 px-1 pt-1 pb-2">
+                        <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 px-1 pt-1 pb-4">
                             <nav
                                 aria-label="breadcrumb"
                                 className="mb-0 quizlet-teacher-breadcrumb quizlet-student-view-breadcrumb"
@@ -1596,7 +1596,11 @@ const StudentQuizlet = () => {
                                         className={`breadcrumb-item ${selectedLesson === null ? "active" : ""}`}
                                         {...(selectedLesson === null ? { "aria-current": "page" } : {})}
                                     >
-                                        {selectedLesson === null ? "Уроки" : <Link to={routePaths.view}>Уроки</Link>}
+                                        {selectedLesson === null ? (
+                                            "Словари сэнсэя"
+                                        ) : (
+                                            <Link to={routePaths.view}>Словари сэнсэя</Link>
+                                        )}
                                     </li>
                                     {selectedLesson !== null && (
                                         <li
@@ -1629,7 +1633,7 @@ const StudentQuizlet = () => {
                                     navigate(routePaths.personalDictionary);
                                 }}
                             >
-                                {personalLesson === null ? "Create personal dictionary" : "Мой словарь"}
+                                {personalLesson === null ? "создать свой словарь" : "Мой словарь"}
                             </button>
                         </div>
 
