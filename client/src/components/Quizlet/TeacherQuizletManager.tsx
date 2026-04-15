@@ -32,6 +32,12 @@ interface EditorRow {
     ru: string;
 }
 
+interface SortableItem {
+    id: number;
+    title: string;
+    sort: number;
+}
+
 type CommittedWords = Map<number, { char_jp: string | null; word_jp: string; ru: string }>;
 
 const COLS = ["char_jp", "word_jp", "ru"] as const;
@@ -40,6 +46,7 @@ type ColField = (typeof COLS)[number];
 let _keyCounter = 0;
 const makeKey = () => `row_${++_keyCounter}`;
 const makeEmptyRow = (): EditorRow => ({ key: makeKey(), char_jp: "", word_jp: "", ru: "" });
+const QUIZLET_SORT_STEP = 10;
 
 const wordsToRows = (words: TQuizletWord[]): EditorRow[] =>
     words.map((w) => ({ key: makeKey(), id: w.id, char_jp: w.char_jp ?? "", word_jp: w.word_jp, ru: w.ru }));
@@ -47,6 +54,28 @@ const wordsToRows = (words: TQuizletWord[]): EditorRow[] =>
 const isAllEmpty = (row: EditorRow) => row.char_jp.trim() === "" && row.word_jp.trim() === "" && row.ru.trim() === "";
 
 const isJpEmpty = (row: EditorRow) => row.char_jp.trim() === "" && row.word_jp.trim() === "";
+
+const getNextSort = (items: Pick<SortableItem, "sort">[]) => {
+    if (items.length === 0) {
+        return QUIZLET_SORT_STEP;
+    }
+
+    return Math.max(...items.map((item) => item.sort)) + QUIZLET_SORT_STEP;
+};
+
+const moveItem = <T extends { id: number }>(items: T[], itemId: number, direction: -1 | 1): T[] => {
+    const currentIndex = items.findIndex((item) => item.id === itemId);
+    const targetIndex = currentIndex + direction;
+
+    if (currentIndex === -1 || targetIndex < 0 || targetIndex >= items.length) {
+        return items;
+    }
+
+    const nextItems = [...items];
+    const [item] = nextItems.splice(currentIndex, 1);
+    nextItems.splice(targetIndex, 0, item);
+    return nextItems;
+};
 
 interface TopicEditorProps {
     subgroup: TQuizletSubgroup;
@@ -453,12 +482,45 @@ const QuizletBreadcrumbs = ({ group, subgroup }: QuizletBreadcrumbsProps) => {
     );
 };
 
+interface OrderControlsProps {
+    index: number;
+    total: number;
+    onMoveUp: () => void;
+    onMoveDown: () => void;
+}
+
+const OrderControls = ({ index, total, onMoveUp, onMoveDown }: OrderControlsProps) => {
+    return (
+        <div className="d-flex flex-column align-items-center justify-content-center gap-1 flex-shrink-0">
+            <button
+                type="button"
+                className="btn btn-sm btn-link p-0 text-muted"
+                title="Поднять выше"
+                onClick={onMoveUp}
+                disabled={index === 0}
+            >
+                <i className="bi bi-arrow-up" />
+            </button>
+            <button
+                type="button"
+                className="btn btn-sm btn-link p-0 text-muted"
+                title="Опустить ниже"
+                onClick={onMoveDown}
+                disabled={index === total - 1}
+            >
+                <i className="bi bi-arrow-down" />
+            </button>
+        </div>
+    );
+};
+
 interface LessonsPageProps {
     groups: TQuizletGroup[];
     subgroups: TQuizletSubgroup[];
     subgroupWords: TQuizletSubgroupWord[];
     onCreateLesson: (title: string) => Promise<void>;
     onRenameLesson: (group: TQuizletGroup, title: string) => Promise<void>;
+    onMoveLesson: (groupId: number, direction: -1 | 1) => Promise<void>;
     onDeleteLesson: (group: TQuizletGroup) => Promise<void>;
 }
 
@@ -468,6 +530,7 @@ const LessonsPage = ({
     subgroupWords,
     onCreateLesson,
     onRenameLesson,
+    onMoveLesson,
     onDeleteLesson,
 }: LessonsPageProps) => {
     const [newLessonTitle, setNewLessonTitle] = useState("");
@@ -537,7 +600,7 @@ const LessonsPage = ({
 
                 {groups.length > 0 && (
                     <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-2 pt-1">
-                        {groups.map((group) => {
+                        {groups.map((group, index) => {
                             const lessonTopics = subgroups.filter((subgroup) => subgroup.group_id === group.id);
                             const lessonTopicIds = new Set(lessonTopics.map((subgroup) => subgroup.id));
                             const lessonWordCount = subgroupWords.filter((sw) =>
@@ -548,77 +611,82 @@ const LessonsPage = ({
                                 <div className="col" key={group.id}>
                                     <div className="quizlet-topic-card-btn h-100">
                                         <div className="card quizlet-topic-card h-100">
-                                            <div className="card-body d-flex align-items-start justify-content-between gap-2">
-                                                <div
-                                                    className="d-flex flex-column justify-content-between"
-                                                    style={{ minWidth: 0, flex: 1 }}
-                                                >
-                                                    {editingLessonId === group.id ? (
-                                                        <input
-                                                            className="form-control form-control-sm"
-                                                            value={lessonTitleDraft}
-                                                            onChange={(e) => setLessonTitleDraft(e.target.value)}
-                                                            autoFocus
-                                                            onBlur={() => commitLessonRename(group)}
-                                                            onKeyDown={(e) => {
-                                                                if (e.key === "Enter") {
-                                                                    commitLessonRename(group);
-                                                                }
-                                                                if (e.key === "Escape") {
-                                                                    setLessonTitleDraft(group.title);
-                                                                    setEditingLessonId(null);
-                                                                }
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        <Link
-                                                            to={`/quizlet/lessons/${group.id}`}
-                                                            className="text-decoration-none quizlet-topic-card__link-area"
-                                                        >
-                                                            <span className="quizlet-topic-card__title fw-semibold">
-                                                                {group.title}
-                                                            </span>
-                                                            <span className="quizlet-topic-card__count text-muted mt-2">
-                                                                <i className="bi bi-collection me-1" />
-                                                                {lessonTopics.length} тем
-                                                                <span className="mx-2">•</span>
-                                                                <i className="bi bi-card-text me-1" />
-                                                                {lessonWordCount} слов
-                                                            </span>
-                                                        </Link>
-                                                    )}
-                                                </div>
-                                                <div className="d-flex gap-2 align-items-center flex-shrink-0 quizlet-lesson-delete-confirm-wrap">
-                                                    <button
-                                                        className="btn btn-sm btn-link p-0 text-muted quizlet-personal-topic-edit-btn"
-                                                        title="Переименовать"
-                                                        onClick={() => {
-                                                            setEditingLessonId(group.id);
-                                                            setLessonTitleDraft(group.title);
-                                                        }}
-                                                    >
-                                                        <i className="bi bi-pencil" />
-                                                    </button>
-                                                    {confirmDeleteLessonId === group.id ? (
+                                            <div className="card-body d-flex flex-column">
+                                                <div className="quizlet-topic-card__header">
+                                                    <OrderControls
+                                                        index={index}
+                                                        total={groups.length}
+                                                        onMoveUp={() => onMoveLesson(group.id, -1)}
+                                                        onMoveDown={() => onMoveLesson(group.id, 1)}
+                                                    />
+                                                    <div className="quizlet-topic-card__header-main">
+                                                        {editingLessonId === group.id ? (
+                                                            <input
+                                                                className="form-control form-control-sm"
+                                                                value={lessonTitleDraft}
+                                                                onChange={(e) => setLessonTitleDraft(e.target.value)}
+                                                                autoFocus
+                                                                onBlur={() => commitLessonRename(group)}
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === "Enter") {
+                                                                        commitLessonRename(group);
+                                                                    }
+                                                                    if (e.key === "Escape") {
+                                                                        setLessonTitleDraft(group.title);
+                                                                        setEditingLessonId(null);
+                                                                    }
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <Link
+                                                                to={`/quizlet/lessons/${group.id}`}
+                                                                className="text-decoration-none quizlet-topic-card__link-area"
+                                                            >
+                                                                <span className="quizlet-topic-card__title fw-semibold">
+                                                                    {group.title}
+                                                                </span>
+                                                            </Link>
+                                                        )}
+                                                    </div>
+                                                    <div className="d-flex gap-2 align-items-center flex-shrink-0 quizlet-lesson-delete-confirm-wrap">
                                                         <button
-                                                            className="btn btn-sm btn-danger"
+                                                            className="btn btn-sm btn-link p-0 text-muted quizlet-personal-topic-edit-btn"
+                                                            title="Переименовать"
                                                             onClick={() => {
-                                                                setConfirmDeleteLessonId(null);
-                                                                onDeleteLesson(group);
+                                                                setEditingLessonId(group.id);
+                                                                setLessonTitleDraft(group.title);
                                                             }}
                                                         >
-                                                            Точно?
+                                                            <i className="bi bi-pencil" />
                                                         </button>
-                                                    ) : (
-                                                        <button
-                                                            className="btn btn-sm btn-link p-0 text-danger quizlet-personal-topic-row-delete-btn"
-                                                            title="Удалить"
-                                                            onClick={() => setConfirmDeleteLessonId(group.id)}
-                                                        >
-                                                            ×
-                                                        </button>
-                                                    )}
+                                                        {confirmDeleteLessonId === group.id ? (
+                                                            <button
+                                                                className="btn btn-sm btn-danger"
+                                                                onClick={() => {
+                                                                    setConfirmDeleteLessonId(null);
+                                                                    onDeleteLesson(group);
+                                                                }}
+                                                            >
+                                                                Точно?
+                                                            </button>
+                                                        ) : (
+                                                            <button
+                                                                className="btn btn-sm btn-link p-0 text-danger quizlet-personal-topic-row-delete-btn"
+                                                                title="Удалить"
+                                                                onClick={() => setConfirmDeleteLessonId(group.id)}
+                                                            >
+                                                                ×
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
+                                                <span className="quizlet-topic-card__count text-muted">
+                                                    <i className="bi bi-collection me-1" />
+                                                    {lessonTopics.length} тем
+                                                    <span className="mx-2">•</span>
+                                                    <i className="bi bi-card-text me-1" />
+                                                    {lessonWordCount} слов
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -638,10 +706,19 @@ interface LessonPageProps {
     subgroupWords: TQuizletSubgroupWord[];
     onCreateTopic: (groupId: number, title: string) => Promise<void>;
     onRenameTopic: (subgroup: TQuizletSubgroup, title: string) => Promise<void>;
+    onMoveTopic: (groupId: number, subgroupId: number, direction: -1 | 1) => Promise<void>;
     onDeleteTopic: (subgroup: TQuizletSubgroup) => Promise<void>;
 }
 
-const LessonPage = ({ group, topics, subgroupWords, onCreateTopic, onRenameTopic, onDeleteTopic }: LessonPageProps) => {
+const LessonPage = ({
+    group,
+    topics,
+    subgroupWords,
+    onCreateTopic,
+    onRenameTopic,
+    onMoveTopic,
+    onDeleteTopic,
+}: LessonPageProps) => {
     const [newTopicTitle, setNewTopicTitle] = useState("");
     const [confirmDeleteTopicId, setConfirmDeleteTopicId] = useState<number | null>(null);
     const [editingTopicId, setEditingTopicId] = useState<number | null>(null);
@@ -704,83 +781,86 @@ const LessonPage = ({ group, topics, subgroupWords, onCreateTopic, onRenameTopic
 
                 {topics.length > 0 && (
                     <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-2 pt-1">
-                        {topics.map((subgroup) => (
+                        {topics.map((subgroup, index) => (
                             <div className="col" key={subgroup.id}>
                                 <div className="quizlet-topic-card-btn h-100">
                                     <div className="card quizlet-topic-card h-100">
-                                        <div className="card-body d-flex align-items-start justify-content-between gap-2">
-                                            <div
-                                                className="d-flex flex-column justify-content-between"
-                                                style={{ minWidth: 0, flex: 1 }}
-                                            >
-                                                {editingTopicId === subgroup.id ? (
-                                                    <input
-                                                        className="form-control form-control-sm"
-                                                        value={topicTitleDraft}
-                                                        onChange={(e) => setTopicTitleDraft(e.target.value)}
-                                                        autoFocus
-                                                        onBlur={() => commitTopicRename(subgroup)}
-                                                        onKeyDown={(e) => {
-                                                            if (e.key === "Enter") {
-                                                                commitTopicRename(subgroup);
-                                                            }
-                                                            if (e.key === "Escape") {
-                                                                setTopicTitleDraft(subgroup.title);
-                                                                setEditingTopicId(null);
-                                                            }
-                                                        }}
-                                                    />
-                                                ) : (
-                                                    <Link
-                                                        to={`/quizlet/topics/${subgroup.id}`}
-                                                        className="text-decoration-none quizlet-topic-card__link-area"
-                                                    >
-                                                        <span className="quizlet-topic-card__title">
-                                                            {subgroup.title}
-                                                        </span>
-                                                        <span className="quizlet-topic-card__count text-muted mt-2">
-                                                            <i className="bi bi-card-text me-1" />
-                                                            {
-                                                                subgroupWords.filter(
-                                                                    (sw) => sw.subgroup_id === subgroup.id,
-                                                                ).length
-                                                            }{" "}
-                                                            слов
-                                                        </span>
-                                                    </Link>
-                                                )}
-                                            </div>
-                                            <div className="d-flex gap-2 align-items-center flex-shrink-0 quizlet-topic-delete-confirm-wrap">
-                                                <button
-                                                    className="btn btn-sm btn-link p-0 text-muted quizlet-personal-topic-edit-btn"
-                                                    title="Переименовать"
-                                                    onClick={() => {
-                                                        setEditingTopicId(subgroup.id);
-                                                        setTopicTitleDraft(subgroup.title);
-                                                    }}
-                                                >
-                                                    <i className="bi bi-pencil" />
-                                                </button>
-                                                {confirmDeleteTopicId === subgroup.id ? (
+                                        <div className="card-body d-flex flex-column">
+                                            <div className="quizlet-topic-card__header">
+                                                <OrderControls
+                                                    index={index}
+                                                    total={topics.length}
+                                                    onMoveUp={() => onMoveTopic(group.id, subgroup.id, -1)}
+                                                    onMoveDown={() => onMoveTopic(group.id, subgroup.id, 1)}
+                                                />
+                                                <div className="quizlet-topic-card__header-main">
+                                                    {editingTopicId === subgroup.id ? (
+                                                        <input
+                                                            className="form-control form-control-sm"
+                                                            value={topicTitleDraft}
+                                                            onChange={(e) => setTopicTitleDraft(e.target.value)}
+                                                            autoFocus
+                                                            onBlur={() => commitTopicRename(subgroup)}
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === "Enter") {
+                                                                    commitTopicRename(subgroup);
+                                                                }
+                                                                if (e.key === "Escape") {
+                                                                    setTopicTitleDraft(subgroup.title);
+                                                                    setEditingTopicId(null);
+                                                                }
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <Link
+                                                            to={`/quizlet/topics/${subgroup.id}`}
+                                                            className="text-decoration-none quizlet-topic-card__link-area"
+                                                        >
+                                                            <span className="quizlet-topic-card__title">
+                                                                {subgroup.title}
+                                                            </span>
+                                                        </Link>
+                                                    )}
+                                                </div>
+                                                <div className="d-flex gap-2 align-items-center flex-shrink-0 quizlet-topic-delete-confirm-wrap">
                                                     <button
-                                                        className="btn btn-sm btn-danger"
+                                                        className="btn btn-sm btn-link p-0 text-muted quizlet-personal-topic-edit-btn"
+                                                        title="Переименовать"
                                                         onClick={() => {
-                                                            setConfirmDeleteTopicId(null);
-                                                            onDeleteTopic(subgroup);
+                                                            setEditingTopicId(subgroup.id);
+                                                            setTopicTitleDraft(subgroup.title);
                                                         }}
                                                     >
-                                                        Точно?
+                                                        <i className="bi bi-pencil" />
                                                     </button>
-                                                ) : (
-                                                    <button
-                                                        className="btn btn-sm btn-link p-0 text-danger quizlet-personal-topic-row-delete-btn"
-                                                        title="Удалить"
-                                                        onClick={() => setConfirmDeleteTopicId(subgroup.id)}
-                                                    >
-                                                        ×
-                                                    </button>
-                                                )}
+                                                    {confirmDeleteTopicId === subgroup.id ? (
+                                                        <button
+                                                            className="btn btn-sm btn-danger"
+                                                            onClick={() => {
+                                                                setConfirmDeleteTopicId(null);
+                                                                onDeleteTopic(subgroup);
+                                                            }}
+                                                        >
+                                                            Точно?
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            className="btn btn-sm btn-link p-0 text-danger quizlet-personal-topic-row-delete-btn"
+                                                            title="Удалить"
+                                                            onClick={() => setConfirmDeleteTopicId(subgroup.id)}
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
+                                            <span className="quizlet-topic-card__count text-muted">
+                                                <i className="bi bi-card-text me-1" />
+                                                {
+                                                    subgroupWords.filter((sw) => sw.subgroup_id === subgroup.id).length
+                                                }{" "}
+                                                слов
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -864,10 +944,56 @@ const TeacherQuizletManager = () => {
         return words.filter((word) => ids.includes(word.id));
     };
 
+    const persistGroupOrder = async (orderedGroups: TQuizletGroup[]) => {
+        const requests = orderedGroups
+            .map((group, index) => {
+                const nextSort = (index + 1) * QUIZLET_SORT_STEP;
+                if (group.sort === nextSort) {
+                    return null;
+                }
+
+                return AjaxPatch({
+                    url: `/api/quizlet/groups/${group.id}`,
+                    body: { title: group.title, sort: nextSort },
+                });
+            })
+            .filter((request): request is ReturnType<typeof AjaxPatch> => request !== null);
+
+        if (requests.length === 0) {
+            return;
+        }
+
+        await Promise.all(requests);
+        fetchCatalog();
+    };
+
+    const persistTopicOrder = async (orderedTopics: TQuizletSubgroup[]) => {
+        const requests = orderedTopics
+            .map((subgroup, index) => {
+                const nextSort = (index + 1) * QUIZLET_SORT_STEP;
+                if (subgroup.sort === nextSort) {
+                    return null;
+                }
+
+                return AjaxPatch({
+                    url: `/api/quizlet/subgroups/${subgroup.id}`,
+                    body: { title: subgroup.title, sort: nextSort },
+                });
+            })
+            .filter((request): request is ReturnType<typeof AjaxPatch> => request !== null);
+
+        if (requests.length === 0) {
+            return;
+        }
+
+        await Promise.all(requests);
+        fetchCatalog();
+    };
+
     const handleCreateLesson = async (title: string) => {
         const resp = await AjaxPost<GroupCreateResponse>({
             url: "/api/quizlet/groups",
-            body: { title },
+            body: { title, sort: getNextSort(groups) },
         });
         fetchCatalog();
         navigate(`/quizlet/lessons/${resp.group.id}`);
@@ -875,8 +1001,12 @@ const TeacherQuizletManager = () => {
 
     const handleRenameLesson = async (group: TQuizletGroup, title: string) => {
         if (!title || title.trim().length === 0) return;
-        await AjaxPatch({ url: `/api/quizlet/groups/${group.id}`, body: { title } });
+        await AjaxPatch({ url: `/api/quizlet/groups/${group.id}`, body: { title, sort: group.sort } });
         fetchCatalog();
+    };
+
+    const handleMoveLesson = async (groupId: number, direction: -1 | 1) => {
+        await persistGroupOrder(moveItem(groups, groupId, direction));
     };
 
     const handleDeleteLesson = async (group: TQuizletGroup) => {
@@ -888,9 +1018,10 @@ const TeacherQuizletManager = () => {
     };
 
     const handleCreateTopic = async (groupId: number, title: string) => {
+        const topics = subgroups.filter((subgroup) => subgroup.group_id === groupId);
         const resp = await AjaxPost<SubgroupCreateResponse>({
             url: `/api/quizlet/groups/${groupId}/subgroups`,
-            body: { title },
+            body: { title, sort: getNextSort(topics) },
         });
         fetchCatalog();
         navigate(`/quizlet/topics/${resp.subgroup.id}`);
@@ -898,8 +1029,13 @@ const TeacherQuizletManager = () => {
 
     const handleRenameTopic = async (subgroup: TQuizletSubgroup, title: string) => {
         if (!title || title.trim().length === 0) return;
-        await AjaxPatch({ url: `/api/quizlet/subgroups/${subgroup.id}`, body: { title } });
+        await AjaxPatch({ url: `/api/quizlet/subgroups/${subgroup.id}`, body: { title, sort: subgroup.sort } });
         fetchCatalog();
+    };
+
+    const handleMoveTopic = async (groupId: number, subgroupId: number, direction: -1 | 1) => {
+        const topics = subgroups.filter((subgroup) => subgroup.group_id === groupId);
+        await persistTopicOrder(moveItem(topics, subgroupId, direction));
     };
 
     const handleDeleteTopic = async (subgroup: TQuizletSubgroup) => {
@@ -938,6 +1074,7 @@ const TeacherQuizletManager = () => {
                         subgroupWords={subgroupWords}
                         onCreateLesson={handleCreateLesson}
                         onRenameLesson={handleRenameLesson}
+                        onMoveLesson={handleMoveLesson}
                         onDeleteLesson={handleDeleteLesson}
                     />
                 )}
@@ -949,6 +1086,7 @@ const TeacherQuizletManager = () => {
                         subgroupWords={subgroupWords}
                         onCreateTopic={handleCreateTopic}
                         onRenameTopic={handleRenameTopic}
+                        onMoveTopic={handleMoveTopic}
                         onDeleteTopic={handleDeleteTopic}
                     />
                 )}
