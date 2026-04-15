@@ -77,6 +77,12 @@ const moveItem = <T extends { id: number }>(items: T[], itemId: number, directio
     return nextItems;
 };
 
+const isCardInteractiveTarget = (target: EventTarget | null, currentTarget: HTMLElement | null) => {
+    const element = target as HTMLElement | null;
+    const interactiveElement = element?.closest("a, button, input, textarea, select, label, [role='button']");
+    return interactiveElement !== null && interactiveElement !== currentTarget;
+};
+
 interface TopicEditorProps {
     subgroup: TQuizletSubgroup;
     initialWords: TQuizletWord[];
@@ -533,10 +539,30 @@ const LessonsPage = ({
     onMoveLesson,
     onDeleteLesson,
 }: LessonsPageProps) => {
+    const navigate = useNavigate();
     const [newLessonTitle, setNewLessonTitle] = useState("");
     const [confirmDeleteLessonId, setConfirmDeleteLessonId] = useState<number | null>(null);
     const [editingLessonId, setEditingLessonId] = useState<number | null>(null);
     const [lessonTitleDraft, setLessonTitleDraft] = useState("");
+
+    const handleCardClick = (event: React.MouseEvent<HTMLDivElement>, lessonId: number, isEditing: boolean) => {
+        if (isEditing || isCardInteractiveTarget(event.target, event.currentTarget)) {
+            return;
+        }
+
+        navigate(`/quizlet/lessons/${lessonId}`);
+    };
+
+    const handleCardKeyDown = (event: React.KeyboardEvent<HTMLDivElement>, lessonId: number, isEditing: boolean) => {
+        if (isEditing || isCardInteractiveTarget(event.target, event.currentTarget)) {
+            return;
+        }
+
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            navigate(`/quizlet/lessons/${lessonId}`);
+        }
+    };
 
     const handleCreate = async () => {
         const title = newLessonTitle.trim();
@@ -609,7 +635,17 @@ const LessonsPage = ({
 
                             return (
                                 <div className="col" key={group.id}>
-                                    <div className="quizlet-topic-card-btn h-100">
+                                    <div
+                                        className="quizlet-topic-card-btn h-100"
+                                        role="button"
+                                        tabIndex={0}
+                                        onClick={(event) =>
+                                            handleCardClick(event, group.id, editingLessonId === group.id)
+                                        }
+                                        onKeyDown={(event) =>
+                                            handleCardKeyDown(event, group.id, editingLessonId === group.id)
+                                        }
+                                    >
                                         <div className="card quizlet-topic-card h-100">
                                             <div className="card-body d-flex flex-column">
                                                 <div className="quizlet-topic-card__header">
@@ -638,14 +674,9 @@ const LessonsPage = ({
                                                                 }}
                                                             />
                                                         ) : (
-                                                            <Link
-                                                                to={`/quizlet/lessons/${group.id}`}
-                                                                className="text-decoration-none quizlet-topic-card__link-area"
-                                                            >
-                                                                <span className="quizlet-topic-card__title fw-semibold">
-                                                                    {group.title}
-                                                                </span>
-                                                            </Link>
+                                                            <span className="quizlet-topic-card__title fw-semibold">
+                                                                {group.title}
+                                                            </span>
                                                         )}
                                                     </div>
                                                     <div className="d-flex gap-2 align-items-center flex-shrink-0 quizlet-lesson-delete-confirm-wrap">
@@ -719,10 +750,30 @@ const LessonPage = ({
     onMoveTopic,
     onDeleteTopic,
 }: LessonPageProps) => {
+    const navigate = useNavigate();
     const [newTopicTitle, setNewTopicTitle] = useState("");
     const [confirmDeleteTopicId, setConfirmDeleteTopicId] = useState<number | null>(null);
     const [editingTopicId, setEditingTopicId] = useState<number | null>(null);
     const [topicTitleDraft, setTopicTitleDraft] = useState("");
+
+    const handleCardClick = (event: React.MouseEvent<HTMLDivElement>, subgroupId: number, isEditing: boolean) => {
+        if (isEditing || isCardInteractiveTarget(event.target, event.currentTarget)) {
+            return;
+        }
+
+        navigate(`/quizlet/topics/${subgroupId}`);
+    };
+
+    const handleCardKeyDown = (event: React.KeyboardEvent<HTMLDivElement>, subgroupId: number, isEditing: boolean) => {
+        if (isEditing || isCardInteractiveTarget(event.target, event.currentTarget)) {
+            return;
+        }
+
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            navigate(`/quizlet/topics/${subgroupId}`);
+        }
+    };
 
     const handleCreate = async () => {
         const title = newTopicTitle.trim();
@@ -783,7 +834,17 @@ const LessonPage = ({
                     <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-2 pt-1">
                         {topics.map((subgroup, index) => (
                             <div className="col" key={subgroup.id}>
-                                <div className="quizlet-topic-card-btn h-100">
+                                <div
+                                    className="quizlet-topic-card-btn h-100"
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={(event) =>
+                                        handleCardClick(event, subgroup.id, editingTopicId === subgroup.id)
+                                    }
+                                    onKeyDown={(event) =>
+                                        handleCardKeyDown(event, subgroup.id, editingTopicId === subgroup.id)
+                                    }
+                                >
                                     <div className="card quizlet-topic-card h-100">
                                         <div className="card-body d-flex flex-column">
                                             <div className="quizlet-topic-card__header">
@@ -812,14 +873,9 @@ const LessonPage = ({
                                                             }}
                                                         />
                                                     ) : (
-                                                        <Link
-                                                            to={`/quizlet/topics/${subgroup.id}`}
-                                                            className="text-decoration-none quizlet-topic-card__link-area"
-                                                        >
-                                                            <span className="quizlet-topic-card__title">
-                                                                {subgroup.title}
-                                                            </span>
-                                                        </Link>
+                                                        <span className="quizlet-topic-card__title">
+                                                            {subgroup.title}
+                                                        </span>
                                                     )}
                                                 </div>
                                                 <div className="d-flex gap-2 align-items-center flex-shrink-0 quizlet-topic-delete-confirm-wrap">
