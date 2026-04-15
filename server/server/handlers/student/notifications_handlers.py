@@ -91,6 +91,17 @@ def get_notifications():
             item_data["activity_try"] = activity_try_data
             item_data["lesson"] = lesson_data
 
+        if item_data.get("type") == "quizlet_assignment":
+            assignment_id = item_data.get("assignment_id")
+            if not isinstance(assignment_id, int):
+                continue
+
+            assignment = DBQS.get_quizlet_assignment_by_id_for_student(assignment_id, get_current_user_id())
+            if assignment is None:
+                continue
+
+            item_data["quizlet_assignment"] = {"id": assignment.id, "title": assignment.title}
+
         result.append(item_data)
 
     return {"notifications": result}

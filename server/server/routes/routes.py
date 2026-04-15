@@ -536,10 +536,46 @@ def retry_quizlet_incorrect_words():
     return user_selector_function(None, student_funcs.retry_quizlet_incorrect_words)
 
 
+@routes_bp.route("/quizlet/sessions/retry-all", methods=["POST"])
+@login_required
+def retry_quizlet_all_words():
+    return user_selector_function(None, student_funcs.retry_quizlet_all_words)
+
+
 @routes_bp.route("/quizlet/sessions/stats", methods=["GET"])
 @login_required
 def get_quizlet_sessions_stats():
     return user_selector_function(None, student_funcs.get_quizlet_sessions_stats)
+
+
+@routes_bp.route("/quizlet/assignments/options", methods=["GET"])
+@login_required
+def get_quizlet_assignment_options():
+    return user_selector_function(teacher_funcs.get_quizlet_assignment_options, None)
+
+
+@routes_bp.route("/quizlet/assignments", methods=["POST"])
+@login_required
+def create_quizlet_assignment():
+    return user_selector_function(teacher_funcs.create_quizlet_assignment, None)
+
+
+@routes_bp.route("/quizlet/assignments", methods=["GET"])
+@login_required
+def get_quizlet_assignments():
+    return user_selector_function(teacher_funcs.get_quizlet_assignments, None)
+
+
+@routes_bp.route("/quizlet/assignments/my", methods=["GET"])
+@login_required
+def get_my_quizlet_assignments():
+    return user_selector_function(None, student_funcs.get_my_quizlet_assignments)
+
+
+@routes_bp.route("/quizlet/assignments/<int:assignment_id>/start", methods=["POST"])
+@login_required
+def start_quizlet_assignment_session(assignment_id):
+    return user_selector_function(None, student_funcs.start_quizlet_assignment_session, assignment_id=assignment_id)
 
 
 #########################################################################################################################

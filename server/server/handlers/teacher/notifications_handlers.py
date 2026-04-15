@@ -2,6 +2,7 @@ from typing import Callable, TypedDict
 
 from flask import request
 
+import server.queries.OtherDBqueries as DBQO
 import server.queries.TeacherDBqueries as DBQT
 from server.exceptions.ApiExceptions import InvalidRequestJson
 from server.models.notifications import NotificationsMarkAsReadReq
@@ -60,6 +61,36 @@ def get_notifications():
     notifications = DBQT.get_notifications()
     for notification in notifications:
         item_data = notification.__json__()
+        if item_data["type"] == "quizlet_assignment_result":
+            assignment_result = DBQT.get_quizlet_assignment_result_by_id(item_data["assignment_result_id"])
+            if assignment_result is None:
+                continue
+
+            assignment = DBQT.get_quizlet_assignment_by_id(assignment_result.assignment_id)
+            if assignment is None:
+                continue
+
+            student = DBQO.get_user_by_id(assignment_result.student_id)
+            if student is None:
+                continue
+
+            item_data["activity_try"] = {
+                "id": assignment_result.id,
+                "start_datetime": assignment_result.completed_at,
+                "end_datetime": assignment_result.completed_at,
+                "mistakes_count": assignment_result.incorrect_answers,
+                "correct_answers": assignment_result.correct_answers,
+                "skipped_words": assignment_result.skipped_words,
+            }
+            item_data["activity_try_id"] = assignment_result.id
+            item_data["lesson"] = {
+                "id": assignment.id,
+                "name": assignment.title,
+            }
+            item_data["user"] = student.__json__()
+            result.append(item_data)
+            continue
+
         if item_data["type"] is not None:
             activity_try_data = _get_notifications_try(item_data["activity_try_id"], item_data["type"])
             if activity_try_data is None:

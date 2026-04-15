@@ -1,11 +1,19 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 
 import Loading from "components/Common/Loading";
 import ErrorPage from "components/ErrorPages/ErrorPage";
 import { AjaxDelete, AjaxGet, AjaxPatch, AjaxPost } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
-import { TQuizletGroup, TQuizletSubgroup, TQuizletSubgroupWord, TQuizletWord } from "models/TQuizlet";
+import {
+    TQuizletAssignment,
+    TQuizletAssignmentResult,
+    TQuizletAssignmentTarget,
+    TQuizletGroup,
+    TQuizletSubgroup,
+    TQuizletSubgroupWord,
+    TQuizletWord,
+} from "models/TQuizlet";
 
 import "./QuizletShared.css";
 
@@ -22,6 +30,32 @@ interface GroupCreateResponse {
 
 interface SubgroupCreateResponse {
     subgroup: TQuizletSubgroup;
+}
+
+interface AssignmentOptionsResponse {
+    students: Array<{ id: number; name: string; nickname: string }>;
+}
+
+interface AssignmentListItem {
+    assignment: TQuizletAssignment;
+    subgroups: TQuizletSubgroup[];
+    targets: Array<{
+        id: number;
+        student: { id: number; name: string; nickname: string } | null;
+        status: TQuizletAssignmentTarget["status"];
+        assigned_at: string;
+        completed_at: string | null;
+        result: TQuizletAssignmentResult | null;
+    }>;
+    stats: {
+        total: number;
+        completed: number;
+        pending: number;
+    };
+}
+
+interface AssignmentListResponse {
+    assignments: AssignmentListItem[];
 }
 
 interface EditorRow {
@@ -955,6 +989,7 @@ const TopicPage = ({ group, subgroup, words, onDeleteTopic, onWordsSaved }: Topi
 
 const TeacherQuizletManager = () => {
     const { lessonId, topicId } = useParams<{ lessonId?: string; topicId?: string }>();
+    const location = useLocation();
     const navigate = useNavigate();
 
     const [loadStatus, setLoadStatus] = useState<LoadStatus.Type>(LoadStatus.NONE);
@@ -962,6 +997,21 @@ const TeacherQuizletManager = () => {
     const [subgroups, setSubgroups] = useState<TQuizletSubgroup[]>([]);
     const [subgroupWords, setSubgroupWords] = useState<TQuizletSubgroupWord[]>([]);
     const [words, setWords] = useState<TQuizletWord[]>([]);
+
+    const [assignmentOptions, setAssignmentOptions] = useState<AssignmentOptionsResponse | null>(null);
+    const [assignments, setAssignments] = useState<AssignmentListItem[]>([]);
+    const [assignmentTitle, setAssignmentTitle] = useState("");
+    const [assignmentQuizType, setAssignmentQuizType] = useState<"pair" | "flashcards">("flashcards");
+    const [assignmentShowHints, setAssignmentShowHints] = useState(false);
+    const [assignmentDirection, setAssignmentDirection] = useState<"jp_to_ru" | "ru_to_jp">("jp_to_ru");
+    const [assignmentSubgroupIds, setAssignmentSubgroupIds] = useState<number[]>([]);
+    const [assignmentStudentIds, setAssignmentStudentIds] = useState<number[]>([]);
+    const [assignmentError, setAssignmentError] = useState<string | null>(null);
+    const [isCreatingAssignment, setIsCreatingAssignment] = useState(false);
+
+    const isAssignmentsCreateRoute = location.pathname === "/quizlet/assignments";
+    const isAssignmentsListRoute = location.pathname === "/quizlet/assignments/list";
+    const isAssignmentsRoute = isAssignmentsCreateRoute || isAssignmentsListRoute;
 
     const fetchCatalog = () => {
         setLoadStatus(LoadStatus.LOADING);
@@ -976,9 +1026,28 @@ const TeacherQuizletManager = () => {
             .catch(() => setLoadStatus(LoadStatus.ERROR));
     };
 
+    const fetchAssignmentsData = async () => {
+        const [optionsJson, listJson] = await Promise.all([
+            AjaxGet<AssignmentOptionsResponse>({ url: "/api/quizlet/assignments/options" }),
+            AjaxGet<AssignmentListResponse>({ url: "/api/quizlet/assignments" }),
+        ]);
+        setAssignmentOptions(optionsJson);
+        setAssignments(listJson.assignments);
+    };
+
     useEffect(() => {
         fetchCatalog();
     }, []);
+
+    useEffect(() => {
+        if (!isAssignmentsRoute) {
+            return;
+        }
+
+        fetchAssignmentsData().catch(() => {
+            setLoadStatus(LoadStatus.ERROR);
+        });
+    }, [isAssignmentsRoute]);
 
     const activeLessonId = lessonId ? Number(lessonId) : undefined;
     const activeTopicId = topicId ? Number(topicId) : undefined;
@@ -994,6 +1063,51 @@ const TeacherQuizletManager = () => {
         if (!activeSubgroup || activeSubgroup.group_id === undefined) return undefined;
         return groups.find((group) => group.id === activeSubgroup.group_id);
     }, [groups, activeSubgroup]);
+
+    const wordsCountByGroup = useMemo(() => {
+        const counts = new Map<number, number>();
+
+        groups.forEach((group) => {
+            const groupSubgroupIds = subgroups.filter((item) => item.group_id === group.id).map((item) => item.id);
+            const groupWordIds = new Set(
+                subgroupWords.filter((item) => groupSubgroupIds.includes(item.subgroup_id)).map((item) => item.word_id),
+            );
+
+            counts.set(group.id, groupWordIds.size);
+        });
+
+        return counts;
+    }, [groups, subgroups, subgroupWords]);
+
+    const wordsCountBySubgroup = useMemo(() => {
+        const counts = new Map<number, number>();
+
+        subgroups.forEach((subgroup) => {
+            const subgroupWordIds = new Set(
+                subgroupWords.filter((item) => item.subgroup_id === subgroup.id).map((item) => item.word_id),
+            );
+            counts.set(subgroup.id, subgroupWordIds.size);
+        });
+
+        return counts;
+    }, [subgroups, subgroupWords]);
+
+    const assignmentSubgroupsByGroup = useMemo(() => {
+        return groups.map((group) => ({
+            group,
+            subgroups: subgroups.filter((subgroup) => subgroup.group_id === group.id),
+        }));
+    }, [groups, subgroups]);
+
+    const assignmentSelectedWordsCount = useMemo(() => {
+        const selectedWordIds = new Set(
+            subgroupWords
+                .filter((item) => assignmentSubgroupIds.includes(item.subgroup_id))
+                .map((item) => item.word_id),
+        );
+
+        return selectedWordIds.size;
+    }, [assignmentSubgroupIds, subgroupWords]);
 
     const getSubgroupWords = (subgroupId: number): TQuizletWord[] => {
         const ids = subgroupWords.filter((item) => item.subgroup_id === subgroupId).map((item) => item.word_id);
@@ -1106,6 +1220,78 @@ const TeacherQuizletManager = () => {
         }
     };
 
+    const toggleSelection = (current: number[], setCurrent: (ids: number[]) => void, id: number) => {
+        if (current.includes(id)) {
+            setCurrent(current.filter((item) => item !== id));
+            return;
+        }
+
+        setCurrent([...current, id]);
+    };
+
+    const toggleAssignmentGroup = (groupId: number) => {
+        const groupSubgroupIds = subgroups.filter((item) => item.group_id === groupId).map((item) => item.id);
+        const allSelected =
+            groupSubgroupIds.length > 0 && groupSubgroupIds.every((id) => assignmentSubgroupIds.includes(id));
+
+        if (allSelected) {
+            setAssignmentSubgroupIds((prev) => prev.filter((id) => !groupSubgroupIds.includes(id)));
+            return;
+        }
+
+        setAssignmentSubgroupIds((prev) => Array.from(new Set([...prev, ...groupSubgroupIds])));
+    };
+
+    const handleCreateAssignment = async () => {
+        setAssignmentError(null);
+
+        if (assignmentTitle.trim().length === 0) {
+            setAssignmentError("Укажите название задания");
+            return;
+        }
+
+        if (assignmentSubgroupIds.length === 0) {
+            setAssignmentError("Выберите хотя бы один словарь");
+            return;
+        }
+
+        if (assignmentStudentIds.length === 0) {
+            setAssignmentError("Выберите хотя бы одного ученика");
+            return;
+        }
+
+        setIsCreatingAssignment(true);
+        try {
+            await AjaxPost({
+                url: "/api/quizlet/assignments",
+                body: {
+                    title: assignmentTitle.trim(),
+                    quiz_type: assignmentQuizType,
+                    subgroup_ids: assignmentSubgroupIds,
+                    show_hints: assignmentShowHints,
+                    translation_direction: assignmentDirection,
+                    student_ids: assignmentStudentIds,
+                },
+            });
+
+            setAssignmentTitle("");
+            setAssignmentSubgroupIds([]);
+            setAssignmentStudentIds([]);
+            await fetchAssignmentsData();
+        } finally {
+            setIsCreatingAssignment(false);
+        }
+    };
+
+    const getAssignmentModeLabel = (item: TQuizletAssignment) => {
+        if (item.quiz_type === "pair") {
+            return "Пары";
+        }
+
+        const directionLabel = item.translation_direction === "ru_to_jp" ? "рус-яп" : "яп-рус";
+        return `Карточки (${directionLabel})`;
+    };
+
     if (loadStatus === LoadStatus.ERROR) {
         return (
             <ErrorPage
@@ -1123,7 +1309,305 @@ const TeacherQuizletManager = () => {
     return (
         <div className="container">
             <div className="quizlet-personal-dictionary-page" style={{ maxWidth: "760px", margin: "0 auto" }}>
-                {!activeLessonId && !activeTopicId && (
+                <div className="d-flex gap-2 mb-3">
+                    <button
+                        className={`btn btn-sm ${isAssignmentsRoute ? "btn-outline-secondary" : "btn-primary"}`}
+                        onClick={() => navigate("/quizlet")}
+                    >
+                        Словари
+                    </button>
+                    <button
+                        className={`btn btn-sm ${isAssignmentsRoute ? "btn-primary" : "btn-outline-secondary"}`}
+                        onClick={() => navigate("/quizlet/assignments")}
+                    >
+                        Задания
+                    </button>
+                </div>
+
+                {isAssignmentsCreateRoute && (
+                    <div className="quizlet-main-container">
+                        <h5 className="mb-3">Назначение заданий</h5>
+
+                        <div className="card mb-3">
+                            <div className="card-body d-flex flex-column gap-3">
+                                <div>
+                                    <label className="form-label">Название</label>
+                                    <input
+                                        className="form-control"
+                                        value={assignmentTitle}
+                                        onChange={(e) => setAssignmentTitle(e.target.value)}
+                                        placeholder="Например: Повторение слов N4"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="form-label">Выбери упражнение</label>
+                                    <div className="row g-2">
+                                        <div className="col-12 col-md-6">
+                                            <button
+                                                type="button"
+                                                className={`w-100 text-start border rounded p-3 bg-white ${
+                                                    assignmentQuizType === "flashcards"
+                                                        ? "border-primary shadow-sm"
+                                                        : "border-light"
+                                                }`}
+                                                onClick={() => setAssignmentQuizType("flashcards")}
+                                            >
+                                                <div className="d-flex align-items-center gap-2 mb-1">
+                                                    <i className="bi bi-card-text fs-4 text-primary" />
+                                                    <span className="fw-semibold">Карточки</span>
+                                                </div>
+                                                <div className="small text-muted">
+                                                    Классический формат карточек для запоминания.
+                                                </div>
+                                            </button>
+                                        </div>
+                                        <div className="col-12 col-md-6">
+                                            <button
+                                                type="button"
+                                                className={`w-100 text-start border rounded p-3 bg-white ${
+                                                    assignmentQuizType === "pair"
+                                                        ? "border-primary shadow-sm"
+                                                        : "border-light"
+                                                }`}
+                                                onClick={() => setAssignmentQuizType("pair")}
+                                            >
+                                                <div className="d-flex align-items-center gap-2 mb-1">
+                                                    <i className="bi bi-grid-3x3-gap fs-4 text-primary" />
+                                                    <span className="fw-semibold">Пары</span>
+                                                </div>
+                                                <div className="small text-muted">
+                                                    Соединяй совпадающие пары как можно быстрее.
+                                                </div>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="col-12 col-md-4">
+                                    <label className="form-label">Направление</label>
+                                    <select
+                                        className="form-select"
+                                        value={assignmentDirection}
+                                        onChange={(e) =>
+                                            setAssignmentDirection(e.target.value as "jp_to_ru" | "ru_to_jp")
+                                        }
+                                    >
+                                        <option value="jp_to_ru">jp → ru</option>
+                                        <option value="ru_to_jp">ru → jp</option>
+                                    </select>
+                                </div>
+
+                                <label className="form-check d-inline-flex align-items-center gap-2 mb-0">
+                                    <input
+                                        className="form-check-input mt-0"
+                                        type="checkbox"
+                                        checked={assignmentShowHints}
+                                        onChange={(e) => setAssignmentShowHints(e.target.checked)}
+                                    />
+                                    <span className="form-check-label">Показывать чтения</span>
+                                </label>
+
+                                <div>
+                                    <label className="form-label">Словари</label>
+                                    <div className="d-flex flex-column gap-2">
+                                        {assignmentSubgroupsByGroup.map(({ group, subgroups: nestedSubgroups }) => (
+                                            <div key={group.id} className="border rounded p-2">
+                                                <div className="d-flex align-items-center mb-2">
+                                                    <label className="form-check d-inline-flex align-items-center gap-2 mb-0 quizlet-group-checkbox-label">
+                                                        <input
+                                                            className="form-check-input mt-0"
+                                                            type="checkbox"
+                                                            checked={
+                                                                nestedSubgroups.length > 0 &&
+                                                                nestedSubgroups.every((subgroup) =>
+                                                                    assignmentSubgroupIds.includes(subgroup.id),
+                                                                )
+                                                            }
+                                                            disabled={nestedSubgroups.length === 0}
+                                                            ref={(input) => {
+                                                                if (input === null) {
+                                                                    return;
+                                                                }
+
+                                                                const selectedCount = nestedSubgroups.filter(
+                                                                    (subgroup) =>
+                                                                        assignmentSubgroupIds.includes(subgroup.id),
+                                                                ).length;
+                                                                input.indeterminate =
+                                                                    selectedCount > 0 &&
+                                                                    selectedCount < nestedSubgroups.length;
+                                                            }}
+                                                            onChange={(e) => {
+                                                                toggleAssignmentGroup(group.id);
+                                                                e.target.blur();
+                                                            }}
+                                                        />
+                                                        <span className="fw-bold text-dark quizlet-group-checkbox-title">
+                                                            {group.title}
+                                                            <span className="quizlet-dictionary-word-count">
+                                                                {" "}
+                                                                ({wordsCountByGroup.get(group.id) ?? 0})
+                                                            </span>
+                                                        </span>
+                                                    </label>
+                                                </div>
+
+                                                {nestedSubgroups.length === 0 && (
+                                                    <div className="text-muted small">В уроке пока нет словарей</div>
+                                                )}
+
+                                                {nestedSubgroups.length > 0 && (
+                                                    <div className="d-flex flex-wrap gap-2">
+                                                        {nestedSubgroups.map((subgroup) => (
+                                                            <label key={subgroup.id} className="form-check me-3">
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    type="checkbox"
+                                                                    checked={assignmentSubgroupIds.includes(
+                                                                        subgroup.id,
+                                                                    )}
+                                                                    onChange={(e) => {
+                                                                        toggleSelection(
+                                                                            assignmentSubgroupIds,
+                                                                            setAssignmentSubgroupIds,
+                                                                            subgroup.id,
+                                                                        );
+                                                                        e.target.blur();
+                                                                    }}
+                                                                />
+                                                                <span className="form-check-label">
+                                                                    {subgroup.title}
+                                                                    <span className="quizlet-dictionary-word-count">
+                                                                        {" "}
+                                                                        ({wordsCountBySubgroup.get(subgroup.id) ?? 0})
+                                                                    </span>
+                                                                </span>
+                                                            </label>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="form-label">Назначить конкретным ученикам</label>
+                                    <div className="d-flex flex-wrap gap-2">
+                                        {(assignmentOptions?.students ?? []).map((student) => (
+                                            <label key={student.id} className="form-check me-3">
+                                                <input
+                                                    className="form-check-input"
+                                                    type="checkbox"
+                                                    checked={assignmentStudentIds.includes(student.id)}
+                                                    onChange={() =>
+                                                        toggleSelection(
+                                                            assignmentStudentIds,
+                                                            setAssignmentStudentIds,
+                                                            student.id,
+                                                        )
+                                                    }
+                                                />
+                                                <span className="form-check-label">
+                                                    {student.nickname} ({student.name})
+                                                </span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {assignmentError && <div className="text-danger small">{assignmentError}</div>}
+
+                                <div className="d-flex align-items-center gap-3 flex-wrap">
+                                    <button
+                                        className="btn btn-primary"
+                                        onClick={handleCreateAssignment}
+                                        disabled={isCreatingAssignment}
+                                    >
+                                        {isCreatingAssignment ? "Сохранение..." : "Сохранить и назначить"}
+                                    </button>
+                                    <button
+                                        className="btn btn-outline-secondary"
+                                        onClick={() => navigate("/quizlet/assignments/list")}
+                                    >
+                                        Список назначенных заданий
+                                    </button>
+                                    <span className="text-muted small">
+                                        Слов выбрано:{" "}
+                                        <span className="fw-semibold">{assignmentSelectedWordsCount}</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {isAssignmentsListRoute && (
+                    <div className="quizlet-main-container">
+                        <div className="d-flex justify-content-between align-items-center gap-2 mb-3 flex-wrap">
+                            <h5 className="mb-0">Список назначенных заданий</h5>
+                            <button
+                                className="btn btn-outline-secondary btn-sm"
+                                onClick={() => navigate("/quizlet/assignments")}
+                            >
+                                Назад к назначению
+                            </button>
+                        </div>
+
+                        <h6 className="mb-2">Список назначенных заданий</h6>
+                        {assignments.length === 0 && <div className="text-muted">Пока нет назначенных заданий</div>}
+                        {assignments.map((item) => (
+                            <div key={item.assignment.id} className="card mb-2">
+                                <div className="card-body">
+                                    <div className="d-flex justify-content-between align-items-start gap-2">
+                                        <div>
+                                            <div className="fw-semibold">{item.assignment.title}</div>
+                                            <div className="small text-muted">
+                                                Режим: {getAssignmentModeLabel(item.assignment)}
+                                            </div>
+                                            <div className="small text-muted">
+                                                Словари: {item.subgroups.map((sg) => sg.title).join(", ") || "-"}
+                                            </div>
+                                        </div>
+                                        <div
+                                            title={
+                                                item.stats.pending === 0 ? "Задание выполнено" : "Задание не выполнено"
+                                            }
+                                        >
+                                            {item.stats.pending === 0 ? (
+                                                <i
+                                                    className="bi bi-check-circle-fill fs-3 text-success"
+                                                    aria-hidden="true"
+                                                />
+                                            ) : (
+                                                <i
+                                                    className="bi bi-x-circle-fill fs-3"
+                                                    style={{ color: "#ff4da6" }}
+                                                    aria-hidden="true"
+                                                />
+                                            )}
+                                        </div>
+                                    </div>
+                                    {item.targets.length > 0 && (
+                                        <div className="mt-2 small">
+                                            {item.targets.map((target) => (
+                                                <div key={target.id}>
+                                                    <span>
+                                                        {target.student?.nickname ?? "unknown"} (
+                                                        {target.student?.name ?? "unknown"})
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {!isAssignmentsRoute && !activeLessonId && !activeTopicId && (
                     <LessonsPage
                         groups={groups}
                         subgroups={subgroups}
@@ -1135,7 +1619,7 @@ const TeacherQuizletManager = () => {
                     />
                 )}
 
-                {activeLessonId && !activeTopicId && activeGroup && (
+                {!isAssignmentsRoute && activeLessonId && !activeTopicId && activeGroup && (
                     <LessonPage
                         group={activeGroup}
                         topics={subgroups.filter((subgroup) => subgroup.group_id === activeGroup.id)}
@@ -1147,7 +1631,7 @@ const TeacherQuizletManager = () => {
                     />
                 )}
 
-                {activeTopicId && activeSubgroup && activeSubgroupGroup && (
+                {!isAssignmentsRoute && activeTopicId && activeSubgroup && activeSubgroupGroup && (
                     <TopicPage
                         group={activeSubgroupGroup}
                         subgroup={activeSubgroup}
@@ -1157,7 +1641,7 @@ const TeacherQuizletManager = () => {
                     />
                 )}
 
-                {activeLessonId && !activeGroup && (
+                {!isAssignmentsRoute && activeLessonId && !activeGroup && (
                     <div className="quizlet-main-container">
                         <h5 className="mb-2">Lesson not found</h5>
                         <p className="text-muted mb-3">The selected lesson does not exist.</p>
@@ -1169,7 +1653,7 @@ const TeacherQuizletManager = () => {
                     </div>
                 )}
 
-                {activeTopicId && (!activeSubgroup || !activeSubgroupGroup) && (
+                {!isAssignmentsRoute && activeTopicId && (!activeSubgroup || !activeSubgroupGroup) && (
                     <div className="quizlet-main-container">
                         <h5 className="mb-2">Topic not found</h5>
                         <p className="text-muted mb-3">The selected topic does not exist.</p>

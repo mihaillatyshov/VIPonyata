@@ -9,6 +9,7 @@ const hasLink = (item: TStudentNotification): item is TStudentNotificationCustom
         case "lesson":
         case "assessment_try":
         case "final_boss_try":
+        case "quizlet_assignment":
             return true;
     }
     return false;
@@ -24,6 +25,8 @@ const getLinkByName = (item: TStudentNotificationCustom) => {
             return `/assessment/try/${item.activity_try_id}`;
         case "final_boss_try":
             return `/final_boss/try/${item.activity_try_id}`;
+        case "quizlet_assignment":
+            return `/quizlet/assignments/${item.assignment_id}`;
     }
 };
 
@@ -80,7 +83,7 @@ const getLessonTitle = (item: TStudentNotification) => {
 };
 
 const isAccessNotification = (item: TStudentNotification): boolean => {
-    return item.type === "course" || item.type === "lesson";
+    return item.type === "course" || item.type === "lesson" || item.type === "quizlet_assignment";
 };
 
 interface ItemContentProps {
@@ -120,7 +123,18 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
 
     const content = isAccessItem ? (
         <>
-            Открыт доступ к <span className="notification__item-entity-name">{lessonTitle}</span>
+            {item.type === "quizlet_assignment" ? (
+                <>
+                    Время тренировки!{" "}
+                    <span className="notification__item-entity-name">
+                        {item.quizlet_assignment?.title || "Задание Quizlet"}
+                    </span>
+                </>
+            ) : (
+                <>
+                    Открыт доступ к <span className="notification__item-entity-name">{lessonTitle}</span>
+                </>
+            )}
         </>
     ) : isMessageItem(item) ? (
         item.message || "Уведомление"

@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import Loading from "components/Common/Loading";
 import PageTitle from "components/Common/PageTitle";
 import ErrorPage from "components/ErrorPages/ErrorPage";
-import { AjaxDelete, AjaxGet, AjaxPatch, AjaxPost } from "libs/ServerAPI";
+import { AjaxDelete, AjaxGet, AjaxPatch, AjaxPost, isProcessableError } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
 import {
     TQuizletGroup,
@@ -487,9 +487,8 @@ const StudentQuizlet = () => {
     const [expandedHistorySessionId, setExpandedHistorySessionId] = useState<number | null>(null);
     const [historySessionWordsById, setHistorySessionWordsById] = useState<Record<number, TQuizletSessionWord[]>>({});
     const [historyLoadingDetailsSessionId, setHistoryLoadingDetailsSessionId] = useState<number | null>(null);
+    const [assignmentOpenError, setAssignmentOpenError] = useState<string | null>(null);
     const viewedFlashcardIdsRef = useRef<Set<number>>(new Set());
-
-    const [lastStartPayload, setLastStartPayload] = useState<any>(null);
 
     const isModeSelectionRoute = location.pathname === routePaths.modeSelection;
     const isSetupRoute = location.pathname === routePaths.setup;
@@ -508,6 +507,9 @@ const StudentQuizlet = () => {
     const personalTopicRouteId = personalTopicRouteMatch ? Number(personalTopicRouteMatch[1]) : null;
     const isPersonalTopicRoute = personalTopicRouteId !== null;
     const isProgressRoute = location.pathname === routePaths.progress;
+    const assignmentRunRouteMatch = location.pathname.match(/^\/quizlet\/assignments\/(\d+)$/);
+    const assignmentRunRouteId = assignmentRunRouteMatch ? Number(assignmentRunRouteMatch[1]) : null;
+    const isAssignmentRunRoute = assignmentRunRouteId !== null;
 
     const fetchCatalog = () => {
         return AjaxGet<CatalogResponse>({ url: "/api/quizlet/groups" }).then((json) => {
@@ -593,8 +595,20 @@ const StudentQuizlet = () => {
             return;
         }
 
+        if (isAssignmentRunRoute) {
+            setMode("training");
+            return;
+        }
+
         setMode(null);
-    }, [isSetupRoute, isViewRoute, isPersonalDictionaryRoute, isPersonalTopicRoute, isProgressRoute]);
+    }, [
+        isSetupRoute,
+        isViewRoute,
+        isPersonalDictionaryRoute,
+        isPersonalTopicRoute,
+        isProgressRoute,
+        isAssignmentRunRoute,
+    ]);
 
     useEffect(() => {
         if (session !== null) {
@@ -665,6 +679,34 @@ const StudentQuizlet = () => {
         }
     }, [mode]);
 
+    const startAssignmentSession = (assignmentId: number) => {
+        setAssignmentOpenError(null);
+        AjaxPost<{ session: TQuizletSession }>({ url: `/api/quizlet/assignments/${assignmentId}/start`, body: {} })
+            .then((json) => {
+                loadSession(json.session.id);
+            })
+            .catch((error) => {
+                if (isProcessableError<{ message?: string }>(error)) {
+                    setAssignmentOpenError(error.json?.message ?? "Не удалось открыть задание");
+                } else {
+                    setAssignmentOpenError("Не удалось открыть задание");
+                }
+            });
+    };
+
+    useEffect(() => {
+        if (!isAssignmentRunRoute || assignmentRunRouteId === null) {
+            setAssignmentOpenError(null);
+            return;
+        }
+
+        if (session !== null && session.assignment_id === assignmentRunRouteId && !session.is_finished) {
+            return;
+        }
+
+        startAssignmentSession(assignmentRunRouteId);
+    }, [isAssignmentRunRoute, assignmentRunRouteId]);
+
     useEffect(() => {
         if (!isSetupRoute || session !== null) {
             return;
@@ -722,7 +764,6 @@ const StudentQuizlet = () => {
     }, [queue]);
 
     const startSession = (payload: any) => {
-        setLastStartPayload(payload);
         setActiveSession(null);
         autoFinishSessionIdRef.current = null;
         AjaxPost<{ session: TQuizletSession }>({ url: "/api/quizlet/sessions/start", body: payload }).then((json) => {
@@ -787,10 +828,14 @@ const StudentQuizlet = () => {
     };
 
     const retryAll = () => {
-        if (lastStartPayload !== null) {
-            shouldShuffleOnSessionLoadRef.current = true;
-            startSession(lastStartPayload);
+        if (session === null) {
+            return;
         }
+
+        AjaxPost<{ session: TQuizletSession }>({
+            url: "/api/quizlet/sessions/retry-all",
+            body: { source_session_id: session.id },
+        }).then((json) => loadSession(json.session.id));
     };
 
     const submitPairAttempt = async (leftWordId: number, rightWordId: number) => {
@@ -1786,6 +1831,23 @@ const StudentQuizlet = () => {
                 </div>
             )}
 
+            {session === null && isAssignmentRunRoute && (
+                <div className="mx-auto mt-5" style={{ maxWidth: "760px" }}>
+                    <div className="quizlet-main-container">
+                        {assignmentOpenError === null ? (
+                            <div className="text-muted">Подготовка задания...</div>
+                        ) : (
+                            <>
+                                <div className="text-danger mb-3">{assignmentOpenError}</div>
+                                <button className="btn btn-outline-primary" onClick={() => navigate("/quizlet")}>
+                                    Назад к Quizlet
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {session !== null && (
                 <div className="quizlet-session-shell p-3 p-md-4">
                     {!session.is_finished && session.quiz_type !== "flashcards" && session.quiz_type !== "pair" && (
@@ -1796,8 +1858,8 @@ const StudentQuizlet = () => {
                                     elapsedSeconds={liveElapsedSeconds}
                                     currentPosition={session.correct_answers}
                                     totalWords={session.total_words}
-                                    currentPage={matchingPageInfo.currentPage}
-                                    totalPages={matchingPageInfo.totalPages}
+                                    currentPage={matchingCurrentPage}
+                                    totalPages={matchingTotalPages}
                                     onFinishTraining={endNow}
                                 />
                             </div>

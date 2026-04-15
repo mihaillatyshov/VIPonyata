@@ -31,6 +31,13 @@ type TTeacherNotificationActivity = {
           type: "assessment_try" | "final_boss_try";
           activity_try: TNotificationAssessmentType;
       }
+    | {
+          type: "quizlet_assignment_result";
+          activity_try: TNotificationAssessmentType & {
+              correct_answers: number;
+              skipped_words: number;
+          };
+      }
 );
 
 interface TStudentNotificationShareLesson {
@@ -45,8 +52,17 @@ interface TStudentNotificationShareCourse {
     course_id: number;
 }
 
+interface TStudentNotificationQuizletAssignment {
+    type: "quizlet_assignment";
+    assignment_id: number;
+    quizlet_assignment?: {
+        id: number;
+        title: string;
+    };
+}
+
 export type TStudentNotificationShareAny = TNotificationBase &
-    (TStudentNotificationShareLesson | TStudentNotificationShareCourse);
+    (TStudentNotificationShareLesson | TStudentNotificationShareCourse | TStudentNotificationQuizletAssignment);
 
 type TStudentNotificationActivityBase = {
     activity_try_id: number;

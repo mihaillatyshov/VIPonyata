@@ -52,6 +52,7 @@ export interface TQuizletSession {
     incorrect_answers: number;
     skipped_words: number;
     user_id: number;
+    assignment_id?: number | null;
 }
 
 export interface TQuizletSessionWord {
@@ -67,4 +68,35 @@ export interface TQuizletSessionWord {
     incorrect_attempts: number;
     correct_attempts: number;
     session_id: number;
+}
+
+export interface TQuizletAssignment {
+    id: number;
+    title: string;
+    quiz_type: "pair" | "flashcards";
+    show_hints: boolean;
+    translation_direction: "jp_to_ru" | "ru_to_jp";
+    max_words: number;
+    created_at: string;
+    created_by_id: number;
+}
+
+export interface TQuizletAssignmentTarget {
+    id: number;
+    status: "pending" | "completed";
+    assigned_at: string;
+    completed_at: string | null;
+}
+
+export interface TQuizletAssignmentResult {
+    id: number;
+    assignment_id: number;
+    student_id: number;
+    session_id: number;
+    completed_at: string;
+    total_words: number;
+    correct_answers: number;
+    incorrect_answers: number;
+    skipped_words: number;
+    elapsed_seconds: number;
 }

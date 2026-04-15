@@ -85,3 +85,22 @@ class QuizletEndSessionReq(BaseModel):
 
 class QuizletRetryIncorrectReq(BaseModel):
     source_session_id: int
+
+
+class QuizletAssignmentCreateReq(BaseModel):
+    title: StrExtraSpaceRemove
+    quiz_type: StrExtraSpaceRemove
+    subgroup_ids: list[int]
+    show_hints: bool = False
+    translation_direction: StrExtraSpaceRemove = "jp_to_ru"
+    student_ids: list[int] = []
+
+    @model_validator(mode="after")
+    def validate_payload(self) -> "QuizletAssignmentCreateReq":
+        if self.quiz_type not in ["pair", "flashcards"]:
+            raise ValueError("Unsupported quiz_type")
+        if len(self.subgroup_ids) == 0:
+            raise ValueError("At least one subgroup must be selected")
+        if len(self.student_ids) == 0:
+            raise ValueError("At least one student must be selected")
+        return self

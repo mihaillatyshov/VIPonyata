@@ -161,7 +161,26 @@ def retry_quizlet_incorrect_words() -> dict:
     return {"session": session}
 
 
+def retry_quizlet_all_words() -> dict:
+    user_id = get_current_user_id()
+    data = validate_req(QuizletRetryIncorrectReq, request.json)
+    session = DBQS.retry_quizlet_all_words(user_id, data)
+    return {"session": session}
+
+
 def get_quizlet_sessions_stats() -> dict:
     user_id = get_current_user_id()
     sessions = DBQS.get_quizlet_sessions_stats(user_id)
     return {"sessions": sessions}
+
+
+def get_my_quizlet_assignments() -> dict:
+    user_id = get_current_user_id()
+    assignments = DBQS.get_quizlet_assignments_for_student(user_id)
+    return {"assignments": assignments}
+
+
+def start_quizlet_assignment_session(assignment_id: int) -> dict:
+    user_id = get_current_user_id()
+    session = DBQS.start_quizlet_assignment_session(user_id, assignment_id)
+    return {"session": session}

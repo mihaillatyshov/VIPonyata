@@ -59,6 +59,12 @@ class User(Base):
                                                                                   back_populates="user",
                                                                                   uselist=False)
     quizlet_sessions: Mapped[list["QuizletSession"]] = relationship("QuizletSession", back_populates="user")
+    quizlet_assignments_created: Mapped[list["QuizletAssignment"]] = relationship("QuizletAssignment",
+                                                                                   back_populates="created_by")
+    quizlet_assignment_targets: Mapped[list["QuizletAssignmentTarget"]] = relationship("QuizletAssignmentTarget",
+                                                                                        back_populates="student")
+    quizlet_assignment_results: Mapped[list["QuizletAssignmentResult"]] = relationship("QuizletAssignmentResult",
+                                                                                        back_populates="student")
 
     __mapper_args__ = {'eager_defaults': True}
 
@@ -469,6 +475,11 @@ class NotificationStudentToTeacher(Base):
     final_boss_try_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("final_boss_tries.id"))
     final_boss_try: Mapped["FinalBossTry"] = relationship("FinalBossTry", uselist=False)
 
+    quizlet_assignment_result_id: Mapped[Optional[int]] = mapped_column(Integer,
+                                                                        ForeignKey("quizlet_assignment_results.id"))
+    quizlet_assignment_result: Mapped[Optional["QuizletAssignmentResult"]] = relationship("QuizletAssignmentResult",
+                                                                                            uselist=False)
+
     creation_datetime: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)   # pylint: disable=not-callable
 
     __mapper_args__ = {'eager_defaults': True}
@@ -488,6 +499,10 @@ class NotificationStudentToTeacher(Base):
                 data["activity_try_id"] = activity_try_id
 
                 break
+
+        if self.quizlet_assignment_result_id is not None:
+            data["type"] = "quizlet_assignment_result"
+            data["assignment_result_id"] = self.quizlet_assignment_result_id
 
         return data
 
@@ -512,6 +527,9 @@ class NotificationTeacherToStudent(Base):
 
     final_boss_try_id: Mapped[int] = mapped_column(Integer, ForeignKey("final_boss_tries.id"))
     final_boss_try: Mapped["FinalBossTry"] = relationship("FinalBossTry", uselist=False)
+
+    quizlet_assignment_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("quizlet_assignments.id"))
+    quizlet_assignment: Mapped[Optional["QuizletAssignment"]] = relationship("QuizletAssignment", uselist=False)
 
     student_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     student: Mapped["User"] = relationship("User", uselist=False)
@@ -542,6 +560,10 @@ class NotificationTeacherToStudent(Base):
         if self.lesson_id is not None:
             data["type"] = "lesson"
             data["lesson_id"] = self.lesson_id
+
+        if self.quizlet_assignment_id is not None:
+            data["type"] = "quizlet_assignment"
+            data["assignment_id"] = self.quizlet_assignment_id
 
         return data
 
@@ -761,6 +783,9 @@ class QuizletSession(Base):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey(USERS_ID), nullable=False)
     user: Mapped["User"] = relationship("User", back_populates="quizlet_sessions")
 
+    assignment_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("quizlet_assignments.id"))
+    assignment: Mapped[Optional["QuizletAssignment"]] = relationship("QuizletAssignment", back_populates="sessions")
+
     words: Mapped[list["QuizletSessionWord"]] = relationship("QuizletSessionWord",
                                                              back_populates="session",
                                                              cascade="all, delete-orphan")
@@ -787,6 +812,7 @@ class QuizletSession(Base):
             "skipped_words": self.skipped_words,
             "queue_state": self.queue_state,
             "user_id": self.user_id,
+            "assignment_id": self.assignment_id,
         }
 
 
@@ -840,6 +866,127 @@ class QuizletSessionIncorrectWord(Base):
     session_word: Mapped["QuizletSessionWord"] = relationship("QuizletSessionWord")
 
     __table_args__ = (UniqueConstraint('session_id', 'session_word_id', name='idx_quizlet_session_incorrect_word'), )
+
+
+class QuizletAssignment(Base):
+    __tablename__ = "quizlet_assignments"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    title: Mapped[str] = mapped_column(String(256), nullable=False)
+    quiz_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    show_hints: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    translation_direction: Mapped[str] = mapped_column(String(32), nullable=False)
+    max_words: Mapped[int] = mapped_column(Integer, nullable=False, default=100)
+
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text("now()"), nullable=False)
+
+    created_by_id: Mapped[int] = mapped_column(Integer, ForeignKey(USERS_ID), nullable=False)
+    created_by: Mapped["User"] = relationship("User", back_populates="quizlet_assignments_created")
+
+    subgroups: Mapped[list["QuizletAssignmentSubgroup"]] = relationship("QuizletAssignmentSubgroup",
+                                                                          back_populates="assignment",
+                                                                          cascade="all, delete-orphan")
+    targets: Mapped[list["QuizletAssignmentTarget"]] = relationship("QuizletAssignmentTarget",
+                                                                     back_populates="assignment",
+                                                                     cascade="all, delete-orphan")
+    results: Mapped[list["QuizletAssignmentResult"]] = relationship("QuizletAssignmentResult",
+                                                                     back_populates="assignment",
+                                                                     cascade="all, delete-orphan")
+    sessions: Mapped[list["QuizletSession"]] = relationship("QuizletSession", back_populates="assignment")
+
+    __mapper_args__ = {'eager_defaults': True}
+
+    def __json__(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "quiz_type": self.quiz_type,
+            "show_hints": self.show_hints,
+            "translation_direction": self.translation_direction,
+            "max_words": self.max_words,
+            "created_at": self.created_at,
+            "created_by_id": self.created_by_id,
+        }
+
+
+class QuizletAssignmentSubgroup(Base):
+    __tablename__ = "quizlet_assignment_subgroups"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    assignment_id: Mapped[int] = mapped_column(Integer, ForeignKey("quizlet_assignments.id"), nullable=False)
+    assignment: Mapped["QuizletAssignment"] = relationship("QuizletAssignment", back_populates="subgroups")
+
+    subgroup_id: Mapped[int] = mapped_column(Integer, ForeignKey("quizlet_subgroups.id"), nullable=False)
+    subgroup: Mapped["QuizletSubgroup"] = relationship("QuizletSubgroup")
+
+    __table_args__ = (UniqueConstraint('assignment_id', 'subgroup_id', name='idx_quizlet_assignment_subgroup'), )
+
+
+class QuizletAssignmentTarget(Base):
+    __tablename__ = "quizlet_assignment_targets"
+
+    class Status:
+        PENDING = "pending"
+        COMPLETED = "completed"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    assignment_id: Mapped[int] = mapped_column(Integer, ForeignKey("quizlet_assignments.id"), nullable=False)
+    assignment: Mapped["QuizletAssignment"] = relationship("QuizletAssignment", back_populates="targets")
+
+    student_id: Mapped[int] = mapped_column(Integer, ForeignKey(USERS_ID), nullable=False)
+    student: Mapped["User"] = relationship("User", back_populates="quizlet_assignment_targets")
+
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default=Status.PENDING)
+    assigned_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text("now()"), nullable=False)
+    completed_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
+
+    __table_args__ = (UniqueConstraint('assignment_id', 'student_id', name='idx_quizlet_assignment_target'), )
+
+    __mapper_args__ = {'eager_defaults': True}
+
+
+class QuizletAssignmentResult(Base):
+    __tablename__ = "quizlet_assignment_results"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    assignment_id: Mapped[int] = mapped_column(Integer, ForeignKey("quizlet_assignments.id"), nullable=False)
+    assignment: Mapped["QuizletAssignment"] = relationship("QuizletAssignment", back_populates="results")
+
+    student_id: Mapped[int] = mapped_column(Integer, ForeignKey(USERS_ID), nullable=False)
+    student: Mapped["User"] = relationship("User", back_populates="quizlet_assignment_results")
+
+    session_id: Mapped[int] = mapped_column(Integer, ForeignKey("quizlet_sessions.id"), nullable=False, unique=True)
+    session: Mapped["QuizletSession"] = relationship("QuizletSession")
+
+    completed_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text("now()"), nullable=False)
+
+    total_words: Mapped[int] = mapped_column(Integer, nullable=False)
+    correct_answers: Mapped[int] = mapped_column(Integer, nullable=False)
+    incorrect_answers: Mapped[int] = mapped_column(Integer, nullable=False)
+    skipped_words: Mapped[int] = mapped_column(Integer, nullable=False)
+    elapsed_seconds: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    __table_args__ = (UniqueConstraint('assignment_id', 'student_id', name='idx_quizlet_assignment_result'), )
+
+    __mapper_args__ = {'eager_defaults': True}
+
+    def __json__(self):
+        return {
+            "id": self.id,
+            "assignment_id": self.assignment_id,
+            "student_id": self.student_id,
+            "session_id": self.session_id,
+            "completed_at": self.completed_at,
+            "total_words": self.total_words,
+            "correct_answers": self.correct_answers,
+            "incorrect_answers": self.incorrect_answers,
+            "skipped_words": self.skipped_words,
+            "elapsed_seconds": self.elapsed_seconds,
+        }
 
 
 #########################################################################################################################

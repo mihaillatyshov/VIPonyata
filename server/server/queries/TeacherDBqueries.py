@@ -12,13 +12,14 @@ from server.models.db_models import (ActivityTryType, Assessment, AssessmentTry,
                                      Course, Dictionary, Drilling, DrillingCard, DrillingTry, FinalBoss, FinalBossTry,
                                      Hieroglyph, HieroglyphCard, HieroglyphTry, Lesson, LexisCardType, LexisTryType,
                                      LexisType, NotificationStudentToTeacher, NotificationTeacherToStudent,
-                                     QuizletDictionary, QuizletGroup, QuizletSubgroup, QuizletSubgroupWord, User,
-                                     UserDictionary, a_users_courses, a_users_lessons)
+                                     QuizletAssignment, QuizletAssignmentSubgroup, QuizletAssignmentTarget,
+                                     QuizletAssignmentResult, QuizletDictionary, QuizletGroup, QuizletSubgroup,
+                                     QuizletSubgroupWord, User, UserDictionary, a_users_courses, a_users_lessons)
 from server.models.dictionary import (DictionaryCreateReq, DictionaryCreateReqItem)
 from server.models.lesson import LessonCreateReq
 from server.models.lexis import LexisCardCreateReq, LexisCreateReq
 from server.models.quizlet import (QuizletGroupCreateReq, QuizletSubgroupCreateReq, QuizletWordCreateReq,
-                                   QuizletWordsBatchCreateReq, QuizletWordUpdateReq)
+                                   QuizletAssignmentCreateReq, QuizletWordsBatchCreateReq, QuizletWordUpdateReq)
 
 
 #########################################################################################################################
@@ -581,6 +582,118 @@ def delete_quizlet_word(word_id: int):
 
 def batch_add_quizlet_words(data: QuizletWordsBatchCreateReq) -> list[QuizletDictionary]:
     return [add_quizlet_word(word) for word in data.words]
+
+
+def get_quizlet_assignments_by_creator(teacher_id: int) -> list[QuizletAssignment]:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(QuizletAssignment).where(QuizletAssignment.created_by_id == teacher_id).order_by(
+                QuizletAssignment.id.desc())).all()
+
+
+def get_quizlet_assignment_by_id(assignment_id: int) -> QuizletAssignment | None:
+    with DBsession.begin() as session:
+        return session.scalars(select(QuizletAssignment).where(QuizletAssignment.id == assignment_id)).one_or_none()
+
+
+def get_quizlet_assignment_subgroup_ids(assignment_id: int) -> list[int]:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(QuizletAssignmentSubgroup.subgroup_id).where(
+                QuizletAssignmentSubgroup.assignment_id == assignment_id)).all()
+
+
+def get_quizlet_subgroups_by_ids(subgroup_ids: list[int]) -> list[QuizletSubgroup]:
+    if len(subgroup_ids) == 0:
+        return []
+
+    with DBsession.begin() as session:
+        return session.scalars(select(QuizletSubgroup).where(QuizletSubgroup.id.in_(subgroup_ids)).order_by(
+            QuizletSubgroup.sort).order_by(QuizletSubgroup.id)).all()
+
+
+def get_quizlet_assignment_targets(assignment_id: int) -> list[QuizletAssignmentTarget]:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(QuizletAssignmentTarget).where(QuizletAssignmentTarget.assignment_id == assignment_id)).all()
+
+
+def get_quizlet_assignment_results(assignment_id: int) -> list[QuizletAssignmentResult]:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(QuizletAssignmentResult).where(QuizletAssignmentResult.assignment_id == assignment_id)).all()
+
+
+def get_quizlet_assignment_result_by_id(result_id: int) -> QuizletAssignmentResult | None:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(QuizletAssignmentResult).where(QuizletAssignmentResult.id == result_id)).one_or_none()
+
+
+def get_all_lessons_for_assignment() -> list[Lesson]:
+    with DBsession.begin() as session:
+        return session.scalars(select(Lesson).order_by(Lesson.course_id).order_by(Lesson.number).order_by(
+            Lesson.id)).all()
+
+
+def get_students_by_ids(user_ids: list[int]) -> list[User]:
+    if len(user_ids) == 0:
+        return []
+
+    with DBsession.begin() as session:
+        return session.scalars(select(User).where(User.id.in_(user_ids)).where(User.level == User.Level.STUDENT)).all()
+
+
+def create_quizlet_assignment(teacher_id: int, data: QuizletAssignmentCreateReq) -> QuizletAssignment:
+    with DBsession.begin() as session:
+        subgroup_ids = list(set(data.subgroup_ids))
+        subgroups = session.scalars(select(QuizletSubgroup).where(QuizletSubgroup.id.in_(subgroup_ids))).all()
+        if len(subgroups) != len(subgroup_ids):
+            raise InvalidAPIUsage("Some selected dictionaries do not exist", 400)
+
+        target_student_ids: set[int] = set(data.student_ids)
+        target_student_ids = set(
+            session.scalars(select(User.id).where(User.id.in_(target_student_ids)).where(
+                User.level == User.Level.STUDENT)).all())
+
+        if len(target_student_ids) == 0:
+            raise InvalidAPIUsage("No valid students found for assignment", 400)
+
+        teacher_words = session.execute(
+            select(QuizletSubgroupWord, QuizletDictionary).join(QuizletSubgroupWord.word).where(
+                QuizletSubgroupWord.subgroup_id.in_(subgroup_ids))).all()
+        unique_assignment_words: set[tuple[str, str, str]] = set()
+        for _, word in teacher_words:
+            ensured_char = word.char_jp if word.char_jp is not None and word.char_jp != "" else word.word_jp
+            unique_assignment_words.add((ensured_char, word.word_jp, word.ru))
+
+        if len(unique_assignment_words) < 2:
+            raise InvalidAPIUsage("At least 2 words are required for assignment", 400)
+
+        max_words = len(unique_assignment_words)
+        assignment = QuizletAssignment(title=data.title,
+                                       quiz_type=data.quiz_type,
+                                       show_hints=data.show_hints,
+                                       translation_direction=data.translation_direction,
+                                       max_words=max_words,
+                                       created_by_id=teacher_id)
+        session.add(assignment)
+        session.flush()
+
+        for subgroup_id in subgroup_ids:
+            session.add(QuizletAssignmentSubgroup(assignment_id=assignment.id, subgroup_id=subgroup_id))
+
+        for student_id in target_student_ids:
+            session.add(
+                NotificationTeacherToStudent(student_id=student_id,
+                                             quizlet_assignment_id=assignment.id,
+                                             message=f"Вам выдано задание Quizlet: {assignment.title}"))
+            session.add(
+                QuizletAssignmentTarget(assignment_id=assignment.id,
+                                        student_id=student_id,
+                                        status=QuizletAssignmentTarget.Status.PENDING))
+
+        return assignment
 
 
 #########################################################################################################################
