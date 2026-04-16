@@ -9,7 +9,7 @@ from server.log_lib import LogI
 from server.models.db_models import (Assessment, Course, Dictionary, Drilling, DrillingCard, Hieroglyph, HieroglyphCard,
                                      Lesson, User)
 
-from server.models.db_models import Base, create_db_engine, load_config
+from server.models.db_models import create_db_engine, load_config
 
 config = load_config("config.json")["db"]
 
@@ -24,9 +24,6 @@ db_config = URL.create(
 engine = create_db_engine(db_config)
 
 DBsession = sessionmaker(bind=engine, expire_on_commit=False)
-
-Base.metadata.drop_all(engine)
-Base.metadata.create_all(engine)
 
 # DBsession = create_db_session_from_json_config_file()
 
@@ -151,7 +148,7 @@ if user:
             session.add_all(h_cards)
             session.commit()
 
-            with open("assessment_example.json", "r") as file:
+            with open("assessment_example.json", "r", encoding="utf-8") as file:
                 data = file.read()
                 # LogI(data)
                 # LogI(type(data))

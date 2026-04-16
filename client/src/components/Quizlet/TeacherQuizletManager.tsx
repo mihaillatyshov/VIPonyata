@@ -170,7 +170,6 @@ const TopicEditor = ({ subgroup, initialWords, onDelete, onSaved }: TopicEditorP
     const rowFlags = useMemo(() => {
         const flags = new Map<string, { danger: boolean; warning: boolean }>();
         const charSeen = new Map<string, string>();
-        const kanaSeen = new Map<string, string>();
 
         for (const row of rows) {
             let danger = false;
@@ -182,7 +181,6 @@ const TopicEditor = ({ subgroup, initialWords, onDelete, onSaved }: TopicEditorP
 
             if (!isAllEmpty(row) && !isJpEmpty(row)) {
                 const cj = row.char_jp.trim();
-                const wj = row.word_jp.trim();
 
                 if (cj) {
                     if (charSeen.has(cj)) {
@@ -192,17 +190,6 @@ const TopicEditor = ({ subgroup, initialWords, onDelete, onSaved }: TopicEditorP
                         if (prev) flags.set(first, { ...prev, warning: true });
                     } else {
                         charSeen.set(cj, row.key);
-                    }
-                }
-
-                if (wj) {
-                    if (kanaSeen.has(wj)) {
-                        warning = true;
-                        const first = kanaSeen.get(wj)!;
-                        const prev = flags.get(first);
-                        if (prev) flags.set(first, { ...prev, warning: true });
-                    } else {
-                        kanaSeen.set(wj, row.key);
                     }
                 }
             }
