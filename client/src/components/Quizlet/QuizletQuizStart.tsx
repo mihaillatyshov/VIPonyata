@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { TQuizletGroup, TQuizletLesson, TQuizletSubgroup, TQuizletSubgroupWord, TQuizletWord } from "models/TQuizlet";
 
@@ -37,6 +37,8 @@ const QuizletQuizStart = ({
     onStart,
 }: Props) => {
     const [quizType, setQuizType] = useState<"pair" | "flashcards" | null>(null);
+    const [showQuizTypeError, setShowQuizTypeError] = useState<boolean>(false);
+    const [showDictionariesError, setShowDictionariesError] = useState<boolean>(false);
     const [showHints, setShowHints] = useState<boolean>(false);
     const [direction, setDirection] = useState<"jp_to_ru" | "ru_to_jp">("jp_to_ru");
     const [selectedTeacherSubgroups, setSelectedTeacherSubgroups] = useState<number[]>([]);
@@ -107,11 +109,13 @@ const QuizletQuizStart = ({
         return uniqueWords.size;
     }, [subgroupWords, selectedTeacherSubgroups, words, personalWords, selectedPersonalSubgroups]);
 
-    const canStartTraining =
-        quizType !== null &&
-        selectedDictionariesCount > 0 &&
-        selectedWordsCount >= 2 &&
-        selectedWordsCount <= MAX_WORDS_PER_SESSION;
+    const hasValidWordsCount = selectedWordsCount >= 2 && selectedWordsCount <= MAX_WORDS_PER_SESSION;
+
+    useEffect(() => {
+        if (selectedDictionariesCount > 0 && showDictionariesError) {
+            setShowDictionariesError(false);
+        }
+    }, [selectedDictionariesCount, showDictionariesError]);
 
     const subgroupsByGroup = useMemo(() => {
         return groups.map((group) => ({
@@ -153,7 +157,19 @@ const QuizletQuizStart = ({
     };
 
     const start = () => {
-        if (!canStartTraining || quizType === null) {
+        if (quizType === null) {
+            setShowQuizTypeError(true);
+        } else {
+            setShowQuizTypeError(false);
+        }
+
+        if (selectedDictionariesCount === 0) {
+            setShowDictionariesError(true);
+        } else {
+            setShowDictionariesError(false);
+        }
+
+        if (quizType === null || selectedDictionariesCount === 0 || !hasValidWordsCount) {
             return;
         }
 
@@ -179,7 +195,10 @@ const QuizletQuizStart = ({
                             className={`w-100 text-start border rounded p-3 bg-white ${
                                 quizType === "flashcards" ? "border-primary shadow-sm" : "border-light"
                             }`}
-                            onClick={() => setQuizType("flashcards")}
+                            onClick={() => {
+                                setQuizType("flashcards");
+                                setShowQuizTypeError(false);
+                            }}
                         >
                             <div className="d-flex align-items-center gap-2 mb-1">
                                 <i className="bi bi-card-text fs-4 text-primary" />
@@ -219,7 +238,10 @@ const QuizletQuizStart = ({
                             className={`w-100 text-start border rounded p-3 bg-white ${
                                 quizType === "pair" ? "border-primary shadow-sm" : "border-light"
                             }`}
-                            onClick={() => setQuizType("pair")}
+                            onClick={() => {
+                                setQuizType("pair");
+                                setShowQuizTypeError(false);
+                            }}
                         >
                             <div className="d-flex align-items-center gap-2 mb-1">
                                 <i className="bi bi-grid-3x3-gap fs-4 text-primary" />
@@ -386,6 +408,8 @@ const QuizletQuizStart = ({
             </div>
 
             <div className="d-flex justify-content-end align-items-center flex-wrap gap-2">
+                {showDictionariesError && <span className="text-danger small">выбери словари!</span>}
+                {showQuizTypeError && <span className="text-danger small">выбери упражнение!</span>}
                 <span
                     className={`quizlet-selected-words-counter ${
                         selectedWordsCount > MAX_WORDS_PER_SESSION ? "quizlet-selected-words-counter-overlimit" : ""
@@ -397,7 +421,7 @@ const QuizletQuizStart = ({
                     type="button"
                     className="btn btn-primary quizlet-start-training-btn"
                     onClick={start}
-                    disabled={!canStartTraining}
+                    disabled={selectedWordsCount > MAX_WORDS_PER_SESSION}
                 >
                     Начать тренировку
                 </button>
