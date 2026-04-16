@@ -27,6 +27,26 @@ class TestAssessmentCreateSentence(unittest.TestCase):
         self.assertRaises(ValidationError, ClassificationTaskStudentReq, **{"name": AssessmentTaskName.TEXT})
         self.assertRaises(ValidationError, ClassificationTaskTeacherReq, **{"name": AssessmentTaskName.CLASSIFICATION})
 
+    def test_ClassificationTeacherReqAllowsEmptyCells(self):
+        value_base = {
+            "name": AssessmentTaskName.CLASSIFICATION,
+            "titles": ["Col1", "Col2"],
+        }
+
+        req_empty_cells = ClassificationTaskTeacherReq(**{**value_base, "meta_answers": [[""], [""]]})
+        self.assertEqual(req_empty_cells.meta_answers, [[""], [""]])
+
+        req = ClassificationTaskTeacherReq(**{**value_base, "meta_answers": [[a_1_1, ""], [a_2_1, a_2_2]]}, )
+        self.assertEqual(req.meta_answers[0][1], "")
+
+        req_empty_title = ClassificationTaskTeacherReq(
+            **{
+                "name": AssessmentTaskName.CLASSIFICATION,
+                "titles": ["", "Col2"],
+                "meta_answers": [[a_1_1], [a_2_1]],
+            }, )
+        self.assertEqual(req_empty_title.titles[0], "")
+
     def test_CreateSentenceRes(self):
         value_base = {
             "name": AssessmentTaskName.CLASSIFICATION,

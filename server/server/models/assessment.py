@@ -653,18 +653,6 @@ class ClassificationTaskTeacherReq(ClassificationTaskTeacherBase):
             raise ValueError(
                 f"Количество колонок ({len(self.meta_answers)}) не равно количеству названий ({len(self.titles)})")
 
-        for col in self.meta_answers:
-            if len(col) < 1:
-                raise ValueError(f"Слишком мало значений в колонке ({len(col)})")
-
-            for cell in col:
-                if not cell:
-                    raise ValueError("Поля не могут быть пустымы")
-
-        for title in self.titles:
-            if not title:
-                raise ValueError("Название не может быть пустым")
-
         return self
 
 

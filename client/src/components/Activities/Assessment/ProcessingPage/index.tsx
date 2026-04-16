@@ -161,6 +161,16 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
 
     const handleProcessing = () => {
         const ajaxMethod = processingType === "edit" ? AjaxPatch : AjaxPost;
+        const sanitizedTasks = tasks.map((task) => {
+            if (task.name !== TAssessmentTaskName.CLASSIFICATION) {
+                return task;
+            }
+
+            return {
+                ...task,
+                meta_answers: task.meta_answers.map((column) => column.filter((cell) => cell.trim() !== "")),
+            };
+        });
 
         if (!checkBlocks()) {
             setErrors({ message: "Ошибка: коллизия блоков!!!", errors: {} });
@@ -170,7 +180,7 @@ export const IAssessmentProcessingPage = ({ title, name, processingType }: IAsse
         ajaxMethod<IAssessmentProcessingResponse>({
             url: `/api/${name}/${id}`,
             body: {
-                tasks: tasks,
+                tasks: sanitizedTasks,
                 time_limit: timelimit === "00:00:00" || timelimit === "" ? null : timelimit,
                 description,
             },

@@ -325,8 +325,9 @@ const TeacherAssessmentClassification = ({
             </div>
 
             {incompleteRows.length > 0 && (
-                <div className="alert alert-warning py-2 px-3 mt-2 mb-0" role="alert">
-                    Есть незаполненные строки: {incompleteRows.join(", ")}.
+                <div className="alert alert-info py-2 px-3 mt-2 mb-0" role="alert">
+                    Есть незаполненные строки: {incompleteRows.join(", ")}. Это не мешает сохранению, пустые ячейки
+                    будут проигнорированы.
                 </div>
             )}
 
