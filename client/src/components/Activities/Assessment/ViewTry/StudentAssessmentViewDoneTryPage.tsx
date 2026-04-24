@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import Loading from "components/Common/Loading";
 import PageTitle from "components/Common/PageTitle";
@@ -79,11 +79,24 @@ type TResultViewMode = "errors" | "all";
 
 const StudentAssessmentViewDoneTryPage = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [doneTry, setDoneTry] = useState<LoadStatus.DataDoneOrNotDone<{ data: TAssessmentDoneTry }>>({
         loadStatus: LoadStatus.NONE,
     });
     const [lessonId, setLessonId] = useState<number>();
     const [viewMode, setViewMode] = useState<TResultViewMode | null>(null);
+    const [isRetrying, setIsRetrying] = useState(false);
+
+    const handleRetry = () => {
+        setIsRetrying(true);
+        AjaxPost({ url: `/api/assessment/${doneTry.data.base_id}/newtry` })
+            .then(() => {
+                navigate(`/assessment/${doneTry.data.base_id}`);
+            })
+            .catch(() => {
+                setIsRetrying(false);
+            });
+    };
 
     useLayoutEffect(() => {
         setDoneTry({ loadStatus: LoadStatus.LOADING });
@@ -259,25 +272,35 @@ const StudentAssessmentViewDoneTryPage = () => {
     return (
         <div className="container pb-5" style={{ maxWidth: "800px" }}>
             <PageTitle title="タスク" urlBack={lessonId !== undefined ? `/lessons/${lessonId}` : undefined} />
-            <div className="mt-3 mb-5 box-shadow-main rounded py-4 px-3 w-75 mx-auto d-flex flex-column align-items-center student-assessment-task-result student-assessment-task-result--error">
-                <div className="mb-2 fs-4">
-                    Ошибки в тесте: <strong>{totalMistakesCount}</strong>
-                </div>
-                <div className="student-assessment-results-mode justify-content-center">
-                    <button
-                        type="button"
-                        className={`btn btn-sm ${viewMode === "errors" ? "btn-secondary" : "btn-outline-secondary"}`}
-                        onClick={() => setViewMode("errors")}
-                    >
-                        Показать только ошибки
-                    </button>
-                    <button
-                        type="button"
-                        className={`btn btn-sm ${viewMode === "all" ? "btn-secondary" : "btn-outline-secondary"}`}
-                        onClick={() => setViewMode("all")}
-                    >
-                        Показать всё
-                    </button>
+            <div className="mt-3 mb-5 box-shadow-main rounded py-4 px-3 w-75 mx-auto position-relative student-assessment-task-result student-assessment-task-result--error">
+                <button
+                    type="button"
+                    className="btn btn-success position-absolute top-0 end-0 m-3"
+                    onClick={handleRetry}
+                    disabled={isRetrying}
+                >
+                    Выполнить ещё раз
+                </button>
+                <div className="d-flex flex-column align-items-center pt-5">
+                    <div className="mb-2 fs-4">
+                        Ошибки в тесте: <strong>{totalMistakesCount}</strong>
+                    </div>
+                    <div className="student-assessment-results-mode justify-content-center">
+                        <button
+                            type="button"
+                            className={`btn btn-sm ${viewMode === "errors" ? "btn-secondary" : "btn-outline-secondary"}`}
+                            onClick={() => setViewMode("errors")}
+                        >
+                            Показать только ошибки
+                        </button>
+                        <button
+                            type="button"
+                            className={`btn btn-sm ${viewMode === "all" ? "btn-secondary" : "btn-outline-secondary"}`}
+                            onClick={() => setViewMode("all")}
+                        >
+                            Показать всё
+                        </button>
+                    </div>
                 </div>
             </div>
             {viewMode !== null && (
