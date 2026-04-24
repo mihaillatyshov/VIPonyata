@@ -608,8 +608,9 @@ def get_quizlet_subgroups_by_ids(subgroup_ids: list[int]) -> list[QuizletSubgrou
         return []
 
     with DBsession.begin() as session:
-        return session.scalars(select(QuizletSubgroup).where(QuizletSubgroup.id.in_(subgroup_ids)).order_by(
-            QuizletSubgroup.sort).order_by(QuizletSubgroup.id)).all()
+        return session.scalars(
+            select(QuizletSubgroup).where(QuizletSubgroup.id.in_(subgroup_ids)).order_by(QuizletSubgroup.sort).order_by(
+                QuizletSubgroup.id)).all()
 
 
 def get_quizlet_assignment_targets(assignment_id: int) -> list[QuizletAssignmentTarget]:
@@ -653,8 +654,8 @@ def create_quizlet_assignment(teacher_id: int, data: QuizletAssignmentCreateReq)
 
         target_student_ids: set[int] = set(data.student_ids)
         target_student_ids = set(
-            session.scalars(select(User.id).where(User.id.in_(target_student_ids)).where(
-                User.level == User.Level.STUDENT)).all())
+            session.scalars(
+                select(User.id).where(User.id.in_(target_student_ids)).where(User.level == User.Level.STUDENT)).all())
 
         if len(target_student_ids) == 0:
             raise InvalidAPIUsage("No valid students found for assignment", 400)
@@ -724,6 +725,11 @@ def add_final_boss_notification(final_boss_try_id: int):
 def add_assessment_notification(assessment_try_id: int, viewed: bool = False):
     with DBsession.begin() as session:
         session.add(NotificationTeacherToStudent(assessment_try_id=assessment_try_id, viewed=viewed))
+
+
+def add_quizlet_personal_dictionary_notification(student_id: int, message: str):
+    with DBsession.begin() as session:
+        session.add(NotificationTeacherToStudent(student_id=student_id, message=message))
 
 
 def mark_notifications_as_read(notification_ids: list[int]):

@@ -554,6 +554,86 @@ def get_quizlet_assignment_options():
     return user_selector_function(teacher_funcs.get_quizlet_assignment_options, None)
 
 
+@routes_bp.route("/quizlet/students-dictionaries", methods=["GET"])
+@login_required
+def get_students_personal_quizlet_cards():
+    return user_selector_function(teacher_funcs.get_students_personal_quizlet_cards, None)
+
+
+@routes_bp.route("/quizlet/students-dictionaries/<int:student_id>", methods=["GET"])
+@login_required
+def get_student_personal_quizlet(student_id):
+    return user_selector_function(teacher_funcs.get_student_personal_quizlet, None, student_id=student_id)
+
+
+@routes_bp.route("/quizlet/students-dictionaries/<int:student_id>/lesson", methods=["POST"])
+@login_required
+def create_student_personal_quizlet_lesson(student_id):
+    return user_selector_function(teacher_funcs.create_student_personal_quizlet_lesson, None, student_id=student_id)
+
+
+@routes_bp.route("/quizlet/students-dictionaries/<int:student_id>/lesson", methods=["PATCH"])
+@login_required
+def update_student_personal_quizlet_lesson(student_id):
+    return user_selector_function(teacher_funcs.update_student_personal_quizlet_lesson, None, student_id=student_id)
+
+
+@routes_bp.route("/quizlet/students-dictionaries/<int:student_id>/subgroups", methods=["POST"])
+@login_required
+def create_student_personal_quizlet_subgroup(student_id):
+    return user_selector_function(teacher_funcs.create_student_personal_quizlet_subgroup, None, student_id=student_id)
+
+
+@routes_bp.route("/quizlet/students-dictionaries/<int:student_id>/subgroups/<int:subgroup_id>", methods=["PATCH"])
+@login_required
+def update_student_personal_quizlet_subgroup(student_id, subgroup_id):
+    return user_selector_function(teacher_funcs.update_student_personal_quizlet_subgroup,
+                                  None,
+                                  student_id=student_id,
+                                  subgroup_id=subgroup_id)
+
+
+@routes_bp.route("/quizlet/students-dictionaries/<int:student_id>/subgroups/<int:subgroup_id>", methods=["DELETE"])
+@login_required
+def delete_student_personal_quizlet_subgroup(student_id, subgroup_id):
+    return user_selector_function(teacher_funcs.delete_student_personal_quizlet_subgroup,
+                                  None,
+                                  student_id=student_id,
+                                  subgroup_id=subgroup_id)
+
+
+@routes_bp.route("/quizlet/students-dictionaries/<int:student_id>/words-batch", methods=["POST"])
+@login_required
+def batch_update_student_personal_quizlet_words(student_id):
+    return user_selector_function(teacher_funcs.batch_update_student_personal_quizlet_words,
+                                  None,
+                                  student_id=student_id)
+
+
+@routes_bp.route("/quizlet/students-dictionaries/<int:student_id>/words", methods=["POST"])
+@login_required
+def add_student_personal_quizlet_word(student_id):
+    return user_selector_function(teacher_funcs.add_student_personal_quizlet_word, None, student_id=student_id)
+
+
+@routes_bp.route("/quizlet/students-dictionaries/<int:student_id>/words/<int:word_id>", methods=["PATCH"])
+@login_required
+def update_student_personal_quizlet_word(student_id, word_id):
+    return user_selector_function(teacher_funcs.update_student_personal_quizlet_word,
+                                  None,
+                                  student_id=student_id,
+                                  word_id=word_id)
+
+
+@routes_bp.route("/quizlet/students-dictionaries/<int:student_id>/words/<int:word_id>", methods=["DELETE"])
+@login_required
+def delete_student_personal_quizlet_word(student_id, word_id):
+    return user_selector_function(teacher_funcs.delete_student_personal_quizlet_word,
+                                  None,
+                                  student_id=student_id,
+                                  word_id=word_id)
+
+
 @routes_bp.route("/quizlet/assignments", methods=["POST"])
 @login_required
 def create_quizlet_assignment():

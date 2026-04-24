@@ -15,6 +15,8 @@ import {
     TQuizletWord,
 } from "models/TQuizlet";
 
+import TeacherStudentDictionariesPage from "./TeacherStudentDictionariesPage";
+
 import "./QuizletShared.css";
 
 interface CatalogResponse {
@@ -1000,6 +1002,12 @@ const TeacherQuizletManager = () => {
     const isAssignmentsListRoute = location.pathname === "/quizlet/assignments/list";
     const isAssignmentsRoute = isAssignmentsCreateRoute || isAssignmentsListRoute;
 
+    const studentsDictionariesRouteMatch = location.pathname.match(/^\/quizlet\/students-dictionaries(?:\/(\d+))?$/);
+    const selectedStudentId = studentsDictionariesRouteMatch?.[1]
+        ? Number(studentsDictionariesRouteMatch[1])
+        : undefined;
+    const isStudentsDictionariesRoute = studentsDictionariesRouteMatch !== null;
+
     const fetchCatalog = () => {
         setLoadStatus(LoadStatus.LOADING);
         AjaxGet<CatalogResponse>({ url: "/api/quizlet/groups" })
@@ -1298,10 +1306,16 @@ const TeacherQuizletManager = () => {
             <div className="quizlet-personal-dictionary-page" style={{ maxWidth: "760px", margin: "0 auto" }}>
                 <div className="d-flex gap-2 mb-3">
                     <button
-                        className={`btn btn-sm ${isAssignmentsRoute ? "btn-outline-secondary" : "btn-primary"}`}
+                        className={`btn btn-sm ${!isAssignmentsRoute && !isStudentsDictionariesRoute ? "btn-primary" : "btn-outline-secondary"}`}
                         onClick={() => navigate("/quizlet")}
                     >
                         Словари
+                    </button>
+                    <button
+                        className={`btn btn-sm ${isStudentsDictionariesRoute ? "btn-primary" : "btn-outline-secondary"}`}
+                        onClick={() => navigate("/quizlet/students-dictionaries")}
+                    >
+                        Словари учеников
                     </button>
                     <button
                         className={`btn btn-sm ${isAssignmentsRoute ? "btn-primary" : "btn-outline-secondary"}`}
@@ -1594,7 +1608,11 @@ const TeacherQuizletManager = () => {
                     </div>
                 )}
 
-                {!isAssignmentsRoute && !activeLessonId && !activeTopicId && (
+                {isStudentsDictionariesRoute && (
+                    <TeacherStudentDictionariesPage selectedStudentId={selectedStudentId} />
+                )}
+
+                {!isAssignmentsRoute && !isStudentsDictionariesRoute && !activeLessonId && !activeTopicId && (
                     <LessonsPage
                         groups={groups}
                         subgroups={subgroups}
@@ -1606,29 +1624,37 @@ const TeacherQuizletManager = () => {
                     />
                 )}
 
-                {!isAssignmentsRoute && activeLessonId && !activeTopicId && activeGroup && (
-                    <LessonPage
-                        group={activeGroup}
-                        topics={subgroups.filter((subgroup) => subgroup.group_id === activeGroup.id)}
-                        subgroupWords={subgroupWords}
-                        onCreateTopic={handleCreateTopic}
-                        onRenameTopic={handleRenameTopic}
-                        onMoveTopic={handleMoveTopic}
-                        onDeleteTopic={handleDeleteTopic}
-                    />
-                )}
+                {!isAssignmentsRoute &&
+                    !isStudentsDictionariesRoute &&
+                    activeLessonId &&
+                    !activeTopicId &&
+                    activeGroup && (
+                        <LessonPage
+                            group={activeGroup}
+                            topics={subgroups.filter((subgroup) => subgroup.group_id === activeGroup.id)}
+                            subgroupWords={subgroupWords}
+                            onCreateTopic={handleCreateTopic}
+                            onRenameTopic={handleRenameTopic}
+                            onMoveTopic={handleMoveTopic}
+                            onDeleteTopic={handleDeleteTopic}
+                        />
+                    )}
 
-                {!isAssignmentsRoute && activeTopicId && activeSubgroup && activeSubgroupGroup && (
-                    <TopicPage
-                        group={activeSubgroupGroup}
-                        subgroup={activeSubgroup}
-                        words={getSubgroupWords(activeSubgroup.id)}
-                        onDeleteTopic={handleDeleteTopic}
-                        onWordsSaved={fetchCatalog}
-                    />
-                )}
+                {!isAssignmentsRoute &&
+                    !isStudentsDictionariesRoute &&
+                    activeTopicId &&
+                    activeSubgroup &&
+                    activeSubgroupGroup && (
+                        <TopicPage
+                            group={activeSubgroupGroup}
+                            subgroup={activeSubgroup}
+                            words={getSubgroupWords(activeSubgroup.id)}
+                            onDeleteTopic={handleDeleteTopic}
+                            onWordsSaved={fetchCatalog}
+                        />
+                    )}
 
-                {!isAssignmentsRoute && activeLessonId && !activeGroup && (
+                {!isAssignmentsRoute && !isStudentsDictionariesRoute && activeLessonId && !activeGroup && (
                     <div className="quizlet-main-container">
                         <h5 className="mb-2">Lesson not found</h5>
                         <p className="text-muted mb-3">The selected lesson does not exist.</p>
@@ -1640,17 +1666,20 @@ const TeacherQuizletManager = () => {
                     </div>
                 )}
 
-                {!isAssignmentsRoute && activeTopicId && (!activeSubgroup || !activeSubgroupGroup) && (
-                    <div className="quizlet-main-container">
-                        <h5 className="mb-2">Topic not found</h5>
-                        <p className="text-muted mb-3">The selected topic does not exist.</p>
-                        <div>
-                            <button className="btn btn-outline-primary" onClick={() => navigate("/quizlet")}>
-                                Back to lessons
-                            </button>
+                {!isAssignmentsRoute &&
+                    !isStudentsDictionariesRoute &&
+                    activeTopicId &&
+                    (!activeSubgroup || !activeSubgroupGroup) && (
+                        <div className="quizlet-main-container">
+                            <h5 className="mb-2">Topic not found</h5>
+                            <p className="text-muted mb-3">The selected topic does not exist.</p>
+                            <div>
+                                <button className="btn btn-outline-primary" onClick={() => navigate("/quizlet")}>
+                                    Back to lessons
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
             </div>
         </div>
     );

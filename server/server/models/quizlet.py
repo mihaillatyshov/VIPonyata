@@ -42,6 +42,13 @@ class QuizletPersonalLessonCreateReq(BaseModel):
     title: StrExtraSpaceRemove
 
 
+class QuizletPersonalWordBatchReq(BaseModel):
+    subgroup_id: int
+    deleted_ids: list[int] = []
+    created: list[QuizletWordCreateReq] = []
+    updated: list[dict] = []                                                                                            # {id: int, char_jp?: str, word_jp: str, ru: str}
+
+
 class QuizletStartSessionReq(BaseModel):
     quiz_type: StrExtraSpaceRemove
     subgroup_ids: list[int] = []

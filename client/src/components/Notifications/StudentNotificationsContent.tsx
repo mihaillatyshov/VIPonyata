@@ -27,6 +27,8 @@ const getLinkByName = (item: TStudentNotificationCustom) => {
             return `/final_boss/try/${item.activity_try_id}`;
         case "quizlet_assignment":
             return `/quizlet/assignments/${item.assignment_id}`;
+        case "quizlet_personal_dictionary_update":
+            return item.quizlet_dictionary_link;
     }
 };
 
@@ -79,6 +81,18 @@ const getLessonTitle = (item: TStudentNotification) => {
         return item.course.name;
     }
 
+    if (item.type === "quizlet_personal_dictionary_update") {
+        return item.quizlet_dictionary_title;
+    }
+
+    if (item.type === "quizlet_personal_dictionary_topic_created") {
+        return item.quizlet_dictionary_title;
+    }
+
+    if (item.type === "quizlet_personal_dictionary_topic_updated") {
+        return item.quizlet_dictionary_title;
+    }
+
     return "Уведомление";
 };
 
@@ -98,6 +112,12 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
     const mistakesCount = getMistakesCount(item);
     const lessonTitle = getLessonTitle(item);
     const isAccessItem = isAccessNotification(item);
+    const isSimpleTextItem =
+        item.type === null ||
+        item.type === undefined ||
+        item.type === "quizlet_personal_dictionary_update" ||
+        item.type === "quizlet_personal_dictionary_topic_created" ||
+        item.type === "quizlet_personal_dictionary_topic_updated";
 
     const handleClick = () => {
         if (isClickable) {
@@ -117,10 +137,6 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
         }
     };
 
-    const isMessageItem = (item: TStudentNotification): boolean => {
-        return item.type === null || item.type === undefined;
-    };
-
     const content = isAccessItem ? (
         <>
             {item.type === "quizlet_assignment" ? (
@@ -136,7 +152,17 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
                 </>
             )}
         </>
-    ) : isMessageItem(item) ? (
+    ) : item.type === "quizlet_personal_dictionary_topic_created" ? (
+        <>
+            Сэнсэй создала новый список слов{" "}
+            <span className="notification__item-entity-name">{item.quizlet_dictionary_title}</span>
+        </>
+    ) : item.type === "quizlet_personal_dictionary_topic_updated" ? (
+        <>
+            Сэнсэй кое-что изменила в{" "}
+            <span className="notification__item-entity-name">{item.quizlet_dictionary_title}</span>
+        </>
+    ) : isSimpleTextItem ? (
         item.message || "Уведомление"
     ) : (
         getLessonTitle(item)
@@ -156,13 +182,13 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
                 <i className="bi bi-calendar3" aria-hidden="true"></i>
                 <span>{date}</span>
             </div>
-            {!isAccessItem ? (
+            {!isAccessItem && !isSimpleTextItem ? (
                 <div className="notification__item-chip">
                     <i className="bi bi-clock" aria-hidden="true"></i>
                     <span>{time}</span>
                 </div>
             ) : null}
-            {!isAccessItem ? (
+            {!isAccessItem && !isSimpleTextItem ? (
                 <div className="notification__item-chip" title="Количество ошибок">
                     <i className="bi bi-exclamation-circle" aria-hidden="true"></i>
                     <span>Ошибки: {mistakesCount ?? "-"}</span>

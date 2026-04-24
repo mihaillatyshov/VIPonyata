@@ -1,3 +1,4 @@
+import re
 from typing import Callable, TypedDict
 
 from flask import request
@@ -60,6 +61,67 @@ def is_activity_try_notification(notification_data: dict) -> bool:
             and (notification_data["type"] == "assessment_try" or notification_data["type"] == "final_boss_try"))
 
 
+QUIZLET_DICTIONARY_LINK_PATTERN = re.compile(r"\[\[quizlet_dict_link:(.+?)\|(.+?)\]\]")
+QUIZLET_TOPIC_CREATED_PATTERN = re.compile(r"\[\[quizlet_topic_created:(.+?)\|(.+?)\]\]")
+QUIZLET_TOPIC_UPDATED_PATTERN = re.compile(r"\[\[quizlet_topic_updated:(.+?)\|(.+?)\]\]")
+
+
+def _parse_quizlet_dictionary_notification(item_data: dict) -> dict:
+    message = item_data.get("message")
+    if item_data.get("type") is not None or not isinstance(message, str):
+        return item_data
+
+    topic_created_marker = QUIZLET_TOPIC_CREATED_PATTERN.search(message)
+    if topic_created_marker is not None:
+        link = topic_created_marker.group(1).strip()
+        title = topic_created_marker.group(2).strip()
+        cleaned_message = QUIZLET_TOPIC_CREATED_PATTERN.sub(title, message).strip()
+
+        if len(link) == 0:
+            return item_data
+
+        item_data["type"] = "quizlet_personal_dictionary_topic_created"
+        item_data["message"] = cleaned_message
+        item_data["quizlet_dictionary_link"] = link
+        item_data["quizlet_dictionary_title"] = title
+
+        return item_data
+
+    topic_updated_marker = QUIZLET_TOPIC_UPDATED_PATTERN.search(message)
+    if topic_updated_marker is not None:
+        link = topic_updated_marker.group(1).strip()
+        title = topic_updated_marker.group(2).strip()
+        cleaned_message = QUIZLET_TOPIC_UPDATED_PATTERN.sub(title, message).strip()
+
+        if len(link) == 0:
+            return item_data
+
+        item_data["type"] = "quizlet_personal_dictionary_topic_updated"
+        item_data["message"] = cleaned_message
+        item_data["quizlet_dictionary_link"] = link
+        item_data["quizlet_dictionary_title"] = title
+
+        return item_data
+
+    marker = QUIZLET_DICTIONARY_LINK_PATTERN.search(message)
+    if marker is None:
+        return item_data
+
+    link = marker.group(1).strip()
+    title = marker.group(2).strip()
+    cleaned_message = QUIZLET_DICTIONARY_LINK_PATTERN.sub(title, message).strip()
+
+    if len(link) == 0:
+        return item_data
+
+    item_data["type"] = "quizlet_personal_dictionary_update"
+    item_data["message"] = cleaned_message
+    item_data["quizlet_dictionary_link"] = link
+    item_data["quizlet_dictionary_title"] = title
+
+    return item_data
+
+
 def get_notifications():
     result = []
     notifications = DBQS.get_notifications(get_current_user_id())
@@ -102,6 +164,7 @@ def get_notifications():
 
             item_data["quizlet_assignment"] = {"id": assignment.id, "title": assignment.title}
 
+        item_data = _parse_quizlet_dictionary_notification(item_data)
         result.append(item_data)
 
     return {"notifications": result}

@@ -62,8 +62,33 @@ interface TStudentNotificationQuizletAssignment {
     };
 }
 
+interface TStudentNotificationQuizletPersonalDictionaryUpdate {
+    type: "quizlet_personal_dictionary_update";
+    quizlet_dictionary_link: string;
+    quizlet_dictionary_title: string;
+}
+
+interface TStudentNotificationQuizletPersonalDictionaryTopicCreated {
+    type: "quizlet_personal_dictionary_topic_created";
+    quizlet_dictionary_link: string;
+    quizlet_dictionary_title: string;
+}
+
+interface TStudentNotificationQuizletPersonalDictionaryTopicUpdated {
+    type: "quizlet_personal_dictionary_topic_updated";
+    quizlet_dictionary_link: string;
+    quizlet_dictionary_title: string;
+}
+
 export type TStudentNotificationShareAny = TNotificationBase &
-    (TStudentNotificationShareLesson | TStudentNotificationShareCourse | TStudentNotificationQuizletAssignment);
+    (
+        | TStudentNotificationShareLesson
+        | TStudentNotificationShareCourse
+        | TStudentNotificationQuizletAssignment
+        | TStudentNotificationQuizletPersonalDictionaryUpdate
+        | TStudentNotificationQuizletPersonalDictionaryTopicCreated
+        | TStudentNotificationQuizletPersonalDictionaryTopicUpdated
+    );
 
 type TStudentNotificationActivityBase = {
     activity_try_id: number;
