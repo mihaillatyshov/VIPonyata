@@ -1,4 +1,5 @@
 import json
+import random
 
 from flask import request
 
@@ -13,6 +14,34 @@ from server.queries import StudentDBqueries as DBQS
 from server.routes.routes_utils import (activity_end_time_handler, get_current_user_id, start_activity_timer_limit)
 
 
+def _shuffle_test_options_for_new_try(task: dict) -> dict:
+    task_name = task.get("name")
+    if task_name not in (AssessmentTaskName.TEST_SINGLE.value, AssessmentTaskName.TEST_MULTI.value):
+        return task
+
+    options = task.get("options")
+    if not isinstance(options, list) or len(options) <= 1:
+        return task
+
+    index_order = list(range(len(options)))
+    random.shuffle(index_order)
+
+    old_to_new_index = {old_index: new_index for new_index, old_index in enumerate(index_order)}
+    task["options"] = [options[old_index] for old_index in index_order]
+
+    if task_name == AssessmentTaskName.TEST_SINGLE.value:
+        meta_answer = task.get("meta_answer")
+        if isinstance(meta_answer, int):
+            task["meta_answer"] = old_to_new_index[meta_answer]
+        return task
+
+    meta_answers = task.get("meta_answers")
+    if isinstance(meta_answers, list):
+        task["meta_answers"] = [old_to_new_index[answer] for answer in meta_answers]
+
+    return task
+
+
 def parse_new_tasks(data_str: str) -> list[dict]:
     data = json.loads(data_str)
 
@@ -21,7 +50,7 @@ def parse_new_tasks(data_str: str) -> list[dict]:
         if handler := Aliases.get(task["name"]):
             task_base = handler["create"](**task)
             task_new = handler["res"](**task_base.model_dump())
-            tasks.append(task_new.model_dump())
+            tasks.append(_shuffle_test_options_for_new_try(task_new.model_dump()))
         else:
             LogW("No parser for this task!", task["name"])
     return tasks
