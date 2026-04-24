@@ -36,6 +36,7 @@ type TTeacherNotificationActivity = {
           activity_try: TNotificationAssessmentType & {
               correct_answers: number;
               skipped_words: number;
+              elapsed_seconds: number;
           };
       }
 );

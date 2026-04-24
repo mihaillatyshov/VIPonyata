@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
+import { formatDuration } from "components/Quizlet/quizletUtils";
 import { TTeacherNotification, TTeacherNotificationWithActivity } from "models/TNotification";
 
 // const getTypeName = (item: TTeacherNotificationWithActivity) => {
@@ -85,6 +86,15 @@ const getSkippedWordsCount = (item: TTeacherNotificationWithActivity): number | 
     return typeof tryData.skipped_words === "number" ? tryData.skipped_words : null;
 };
 
+const getElapsedSeconds = (item: TTeacherNotificationWithActivity): number | null => {
+    if (item.type !== "quizlet_assignment_result") {
+        return null;
+    }
+
+    const tryData = item.activity_try as Record<string, unknown>;
+    return typeof tryData.elapsed_seconds === "number" ? tryData.elapsed_seconds : null;
+};
+
 interface ItemContentProps {
     item: TTeacherNotification;
     closeModal: () => void;
@@ -109,6 +119,7 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
     const mistakesCount = getMistakesCount(item);
     const correctAnswersCount = getCorrectAnswersCount(item);
     const skippedWordsCount = getSkippedWordsCount(item);
+    const elapsedSeconds = getElapsedSeconds(item);
 
     const handleKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (event) => {
         if (!isClickable) {
@@ -163,6 +174,10 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
                     <div className="notification__item-chip" title="Не повторено">
                         <i className="bi bi-dash-circle" aria-hidden="true"></i>
                         <span>{skippedWordsCount ?? "-"}</span>
+                    </div>
+                    <div className="notification__item-chip" title="Время выполнения">
+                        <i className="bi bi-stopwatch" aria-hidden="true"></i>
+                        <span>{elapsedSeconds !== null ? formatDuration(elapsedSeconds) : "-"}</span>
                     </div>
                 </>
             ) : (

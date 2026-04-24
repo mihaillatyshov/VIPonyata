@@ -81,6 +81,7 @@ def get_notifications():
                 "mistakes_count": assignment_result.incorrect_answers,
                 "correct_answers": assignment_result.correct_answers,
                 "skipped_words": assignment_result.skipped_words,
+                "elapsed_seconds": assignment_result.elapsed_seconds,
             }
             item_data["activity_try_id"] = assignment_result.id
             item_data["lesson"] = {
