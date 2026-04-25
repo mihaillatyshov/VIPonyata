@@ -84,7 +84,9 @@ const FlashcardExercise = ({
             {direction === "jp_to_ru" && (
                 <>
                     <div className="flashcard-main-word">{charDisplay}</div>
-                    {shouldShowKanaHint && <div className="flashcard-reading">{kanaHint}</div>}
+                    {hasValidKanaHint(currentWord) && (showHints || showTranslation) && (
+                        <div className="flashcard-reading">{kanaHint}</div>
+                    )}
                 </>
             )}
 
