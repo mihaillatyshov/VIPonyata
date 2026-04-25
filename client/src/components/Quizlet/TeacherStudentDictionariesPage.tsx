@@ -270,9 +270,13 @@ const TopicEditor = ({ studentId, subgroup, initialWords, onSaved }: TopicEditor
 
 interface TeacherStudentDictionariesPageProps {
     selectedStudentId?: number;
+    selectedTopicId?: number;
 }
 
-const TeacherStudentDictionariesPage = ({ selectedStudentId }: TeacherStudentDictionariesPageProps) => {
+const TeacherStudentDictionariesPage = ({
+    selectedStudentId,
+    selectedTopicId,
+}: TeacherStudentDictionariesPageProps) => {
     const navigate = useNavigate();
 
     const [studentsStatus, setStudentsStatus] = useState<LoadStatus.Type>(LoadStatus.NONE);
@@ -285,7 +289,6 @@ const TeacherStudentDictionariesPage = ({ selectedStudentId }: TeacherStudentDic
 
     const [lessonTitleDraft, setLessonTitleDraft] = useState("");
     const [newTopicTitle, setNewTopicTitle] = useState("");
-    const [selectedSubgroupId, setSelectedSubgroupId] = useState<number | null>(null);
     const [topicTitleDraft, setTopicTitleDraft] = useState("");
 
     const selectedStudent = useMemo(
@@ -294,17 +297,17 @@ const TeacherStudentDictionariesPage = ({ selectedStudentId }: TeacherStudentDic
     );
 
     const selectedSubgroup = useMemo(
-        () => subgroups.find((subgroup) => subgroup.id === selectedSubgroupId) ?? null,
-        [subgroups, selectedSubgroupId],
+        () => subgroups.find((subgroup) => subgroup.id === selectedTopicId) ?? null,
+        [subgroups, selectedTopicId],
     );
 
     const selectedSubgroupWords = useMemo(() => {
-        if (selectedSubgroupId === null) {
+        if (selectedTopicId === undefined) {
             return [];
         }
 
-        return words.filter((word) => word.subgroup_id === selectedSubgroupId);
-    }, [words, selectedSubgroupId]);
+        return words.filter((word) => word.subgroup_id === selectedTopicId);
+    }, [words, selectedTopicId]);
 
     const fetchStudents = () => {
         setStudentsStatus(LoadStatus.LOADING);
@@ -347,14 +350,14 @@ const TeacherStudentDictionariesPage = ({ selectedStudentId }: TeacherStudentDic
     }, [selectedStudentId]);
 
     useEffect(() => {
-        if (selectedSubgroupId === null) {
+        if (selectedTopicId === undefined) {
             setTopicTitleDraft("");
             return;
         }
 
-        const subgroup = subgroups.find((item) => item.id === selectedSubgroupId);
+        const subgroup = subgroups.find((item) => item.id === selectedTopicId);
         setTopicTitleDraft(subgroup?.title ?? "");
-    }, [selectedSubgroupId, subgroups]);
+    }, [selectedTopicId, subgroups]);
 
     const ensureLesson = async () => {
         if (selectedStudentId === undefined || lessonTitleDraft.trim().length === 0) {
@@ -388,7 +391,7 @@ const TeacherStudentDictionariesPage = ({ selectedStudentId }: TeacherStudentDic
 
         setNewTopicTitle("");
         await fetchStudentDetails(selectedStudentId);
-        setSelectedSubgroupId(resp.subgroup.id);
+        navigate(`/quizlet/students-dictionaries/${selectedStudentId}/topics/${resp.subgroup.id}`);
     };
 
     const renameSubgroup = async () => {
@@ -414,7 +417,7 @@ const TeacherStudentDictionariesPage = ({ selectedStudentId }: TeacherStudentDic
         });
 
         await fetchStudentDetails(selectedStudentId);
-        setSelectedSubgroupId(null);
+        navigate(`/quizlet/students-dictionaries/${selectedStudentId}`);
     };
 
     if (studentsStatus === LoadStatus.ERROR || detailsStatus === LoadStatus.ERROR) {
@@ -478,9 +481,23 @@ const TeacherStudentDictionariesPage = ({ selectedStudentId }: TeacherStudentDic
                             <li className="breadcrumb-item">
                                 <Link to="/quizlet/students-dictionaries">Словари учеников</Link>
                             </li>
-                            <li className="breadcrumb-item active" aria-current="page">
-                                {selectedStudent?.nickname ?? `Ученик #${selectedStudentId}`}
+                            <li
+                                className={`breadcrumb-item${selectedTopicId === undefined ? " active" : ""}`}
+                                aria-current={selectedTopicId === undefined ? "page" : undefined}
+                            >
+                                {selectedTopicId !== undefined ? (
+                                    <Link to={`/quizlet/students-dictionaries/${selectedStudentId}`}>
+                                        {selectedStudent?.nickname ?? `Ученик #${selectedStudentId}`}
+                                    </Link>
+                                ) : (
+                                    (selectedStudent?.nickname ?? `Ученик #${selectedStudentId}`)
+                                )}
                             </li>
+                            {selectedTopicId !== undefined && (
+                                <li className="breadcrumb-item active" aria-current="page">
+                                    {selectedSubgroup?.title ?? `Тема #${selectedTopicId}`}
+                                </li>
+                            )}
                         </ol>
                     </nav>
 
@@ -508,7 +525,7 @@ const TeacherStudentDictionariesPage = ({ selectedStudentId }: TeacherStudentDic
                         </div>
                     )}
 
-                    {lesson !== null && selectedSubgroup === null && (
+                    {lesson !== null && selectedSubgroup === null && selectedTopicId === undefined && (
                         <>
                             <div className="d-flex gap-2 mb-3" style={{ width: "min(100%, 560px)" }}>
                                 <input
@@ -550,7 +567,11 @@ const TeacherStudentDictionariesPage = ({ selectedStudentId }: TeacherStudentDic
                                             <div className="col" key={subgroup.id}>
                                                 <button
                                                     className="btn w-100 text-start p-0 border-0 quizlet-topic-card-btn"
-                                                    onClick={() => setSelectedSubgroupId(subgroup.id)}
+                                                    onClick={() =>
+                                                        navigate(
+                                                            `/quizlet/students-dictionaries/${selectedStudentId}/topics/${subgroup.id}`,
+                                                        )
+                                                    }
                                                 >
                                                     <div className="card quizlet-topic-card h-100">
                                                         <div className="card-body d-flex flex-column justify-content-between">
@@ -572,7 +593,7 @@ const TeacherStudentDictionariesPage = ({ selectedStudentId }: TeacherStudentDic
                         </>
                     )}
 
-                    {lesson !== null && selectedSubgroup !== null && (
+                    {lesson !== null && selectedSubgroup !== null && selectedTopicId !== undefined && (
                         <>
                             <div className="d-flex justify-content-between align-items-center gap-2 mb-3">
                                 <input
@@ -585,7 +606,7 @@ const TeacherStudentDictionariesPage = ({ selectedStudentId }: TeacherStudentDic
                                 <div className="d-flex gap-2">
                                     <button
                                         className="btn btn-outline-secondary"
-                                        onClick={() => setSelectedSubgroupId(null)}
+                                        onClick={() => navigate(`/quizlet/students-dictionaries/${selectedStudentId}`)}
                                     >
                                         К темам
                                     </button>

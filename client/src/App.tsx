@@ -166,6 +166,10 @@ const App = () => {
                     <Route path="/quizlet/lessons/:lessonId" element={getTeacherRoute(<TeacherQuizletManager />)} />
                     <Route path="/quizlet/topics/:topicId" element={getTeacherRoute(<TeacherQuizletManager />)} />
                     <Route
+                        path="/quizlet/students-dictionaries/:studentId/topics/:topicId"
+                        element={getTeacherRoute(<TeacherQuizletManager />)}
+                    />
+                    <Route
                         path="/quizlet/view/lessons/:lessonId"
                         element={getRoute(<NavigateHome />, <StudentQuizlet />)}
                     />

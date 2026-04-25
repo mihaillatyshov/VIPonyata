@@ -1002,9 +1002,14 @@ const TeacherQuizletManager = () => {
     const isAssignmentsListRoute = location.pathname === "/quizlet/assignments/list";
     const isAssignmentsRoute = isAssignmentsCreateRoute || isAssignmentsListRoute;
 
-    const studentsDictionariesRouteMatch = location.pathname.match(/^\/quizlet\/students-dictionaries(?:\/(\d+))?$/);
+    const studentsDictionariesRouteMatch = location.pathname.match(
+        /^\/quizlet\/students-dictionaries(?:\/(\d+)(?:\/topics\/(\d+))?)?$/,
+    );
     const selectedStudentId = studentsDictionariesRouteMatch?.[1]
         ? Number(studentsDictionariesRouteMatch[1])
+        : undefined;
+    const selectedStudentTopicId = studentsDictionariesRouteMatch?.[2]
+        ? Number(studentsDictionariesRouteMatch[2])
         : undefined;
     const isStudentsDictionariesRoute = studentsDictionariesRouteMatch !== null;
 
@@ -1318,10 +1323,16 @@ const TeacherQuizletManager = () => {
                         Словари учеников
                     </button>
                     <button
-                        className={`btn btn-sm ${isAssignmentsRoute ? "btn-primary" : "btn-outline-secondary"}`}
+                        className={`btn btn-sm ${isAssignmentsCreateRoute ? "btn-primary" : "btn-outline-secondary"}`}
                         onClick={() => navigate("/quizlet/assignments")}
                     >
                         Задания
+                    </button>
+                    <button
+                        className={`btn btn-sm ${isAssignmentsListRoute ? "btn-primary" : "btn-outline-secondary"}`}
+                        onClick={() => navigate("/quizlet/assignments/list")}
+                    >
+                        Список назначенных заданий
                     </button>
                 </div>
 
@@ -1528,12 +1539,6 @@ const TeacherQuizletManager = () => {
                                     >
                                         {isCreatingAssignment ? "Сохранение..." : "Сохранить и назначить"}
                                     </button>
-                                    <button
-                                        className="btn btn-outline-secondary"
-                                        onClick={() => navigate("/quizlet/assignments/list")}
-                                    >
-                                        Список назначенных заданий
-                                    </button>
                                     <span className="text-muted small">
                                         Слов выбрано:{" "}
                                         <span className="fw-semibold">{assignmentSelectedWordsCount}</span>
@@ -1609,7 +1614,10 @@ const TeacherQuizletManager = () => {
                 )}
 
                 {isStudentsDictionariesRoute && (
-                    <TeacherStudentDictionariesPage selectedStudentId={selectedStudentId} />
+                    <TeacherStudentDictionariesPage
+                        selectedStudentId={selectedStudentId}
+                        selectedTopicId={selectedStudentTopicId}
+                    />
                 )}
 
                 {!isAssignmentsRoute && !isStudentsDictionariesRoute && !activeLessonId && !activeTopicId && (
