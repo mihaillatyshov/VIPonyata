@@ -474,3 +474,55 @@
     font-size: 1.12rem;
     font-weight: 700;
 }
+
+.quizlet-student-dictionary-tabs {
+    display: inline-flex;
+    gap: 0.35rem;
+    margin-bottom: 0.9rem;
+    padding: 0.3rem;
+    border-radius: 14px;
+    border: 1px solid rgba(17, 17, 17, 0.1);
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.quizlet-student-dictionary-tab {
+    border: 0;
+    border-radius: 10px;
+    padding: 0.46rem 0.9rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #5b6671;
+    background: transparent;
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.quizlet-student-dictionary-tab:hover,
+.quizlet-student-dictionary-tab:focus-visible {
+    color: #2d3a46;
+    background: rgba(13, 110, 253, 0.08);
+}
+
+.quizlet-student-dictionary-tab.active,
+.quizlet-student-dictionary-tab.active:hover,
+.quizlet-student-dictionary-tab.active:focus-visible {
+    color: #2d3a46;
+    background: #ddebd7;
+    box-shadow: 0 6px 16px rgba(45, 58, 70, 0.14);
+}
+
+@media (max-width: 576px) {
+    .quizlet-student-dictionary-tabs {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .quizlet-student-dictionary-tab {
+        width: 100%;
+        text-align: center;
+    }
+}

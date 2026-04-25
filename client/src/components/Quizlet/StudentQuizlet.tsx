@@ -949,6 +949,14 @@ const StudentQuizlet = () => {
         fetchPersonal();
     };
 
+    const openPersonalDictionary = () => {
+        if (personalLesson === null && personalLessonTitle.trim().length === 0) {
+            setPersonalLessonTitle("Мой словарь");
+        }
+
+        navigate(routePaths.personalDictionary);
+    };
+
     const finishAndBackToStart = () => {
         autoFinishSessionIdRef.current = null;
         setSession(null);
@@ -1425,6 +1433,27 @@ const StudentQuizlet = () => {
 
             {session === null && isPersonalDictionaryPage && (
                 <div className="quizlet-personal-dictionary-page" style={{ maxWidth: "760px", margin: "0 auto" }}>
+                    <div className="quizlet-student-dictionary-tabs" role="tablist" aria-label="Переключение словарей">
+                        <button
+                            type="button"
+                            role="tab"
+                            aria-selected={false}
+                            className="btn quizlet-student-dictionary-tab"
+                            onClick={() => navigate(routePaths.view)}
+                        >
+                            Словари сэнсэя
+                        </button>
+                        <button
+                            type="button"
+                            role="tab"
+                            aria-selected={true}
+                            className="btn quizlet-student-dictionary-tab active"
+                            onClick={openPersonalDictionary}
+                        >
+                            Мой словарь
+                        </button>
+                    </div>
+
                     <div className="quizlet-main-container">
                         {personalLesson !== null && (
                             <nav
@@ -1630,8 +1659,29 @@ const StudentQuizlet = () => {
 
             {session === null && isViewRoute && (
                 <div className="mx-auto mt-5" style={{ maxWidth: "760px" }}>
+                    <div className="quizlet-student-dictionary-tabs" role="tablist" aria-label="Переключение словарей">
+                        <button
+                            type="button"
+                            role="tab"
+                            aria-selected={true}
+                            className="btn quizlet-student-dictionary-tab active"
+                            onClick={() => navigate(routePaths.view)}
+                        >
+                            Словари сэнсэя
+                        </button>
+                        <button
+                            type="button"
+                            role="tab"
+                            aria-selected={false}
+                            className="btn quizlet-student-dictionary-tab"
+                            onClick={openPersonalDictionary}
+                        >
+                            Мой словарь
+                        </button>
+                    </div>
+
                     <div className="quizlet-main-container">
-                        <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 px-1 pt-1 pb-4">
+                        <div className="d-flex align-items-center justify-content-start flex-wrap gap-2 px-1 pt-1 pb-4">
                             <nav
                                 aria-label="breadcrumb"
                                 className="mb-0 quizlet-teacher-breadcrumb quizlet-student-view-breadcrumb"
@@ -1668,18 +1718,6 @@ const StudentQuizlet = () => {
                                     )}
                                 </ol>
                             </nav>
-
-                            <button
-                                className="btn btn-success"
-                                onClick={() => {
-                                    if (personalLesson === null && personalLessonTitle.trim().length === 0) {
-                                        setPersonalLessonTitle("Мой словарь");
-                                    }
-                                    navigate(routePaths.personalDictionary);
-                                }}
-                            >
-                                {personalLesson === null ? "создать свой словарь" : "Мой словарь"}
-                            </button>
                         </div>
 
                         {groups.length === 0 && <div className="text-muted">Пока нет доступных уроков.</div>}
