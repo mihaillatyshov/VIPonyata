@@ -24,8 +24,8 @@
 }
 
 .quizlet-student-view-breadcrumb .breadcrumb {
-    font-size: 1.6rem;
-    --bs-breadcrumb-divider: "•";
+    font-size: 1rem;
+    --bs-breadcrumb-divider: "→";
 }
 
 .quizlet-teacher-breadcrumb .breadcrumb-item,
@@ -33,13 +33,34 @@
 .quizlet-teacher-breadcrumb .breadcrumb-item a:hover,
 .quizlet-teacher-breadcrumb .breadcrumb-item a:focus,
 .quizlet-teacher-breadcrumb .breadcrumb-item a:visited {
-    color: #111111;
+    color: #888;
     text-decoration: none;
 }
 
 .quizlet-teacher-breadcrumb .breadcrumb-item a:hover,
 .quizlet-teacher-breadcrumb .breadcrumb-item a:focus {
     text-decoration: underline;
+}
+
+.quizlet-breadcrumb-inline-edit-input {
+    width: auto;
+    min-width: 200px;
+    padding: 0 2px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-size: 1.6rem !important;
+    line-height: 1.2 !important;
+    font-weight: inherit !important;
+    color: inherit !important;
+    height: auto !important;
+}
+
+.quizlet-breadcrumb-inline-edit-input:focus {
+    outline: none;
+    box-shadow: none !important;
+    border-bottom: 1px solid rgba(17, 17, 17, 0.3) !important;
 }
 
 .quizlet-personal-topic-editor {

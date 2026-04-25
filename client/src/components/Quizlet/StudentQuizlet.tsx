@@ -1349,7 +1349,9 @@ const StudentQuizlet = () => {
 
     return (
         <div className="container">
-            <PageTitle title={pageTitle} titleElement={pageTitleElement} urlBack={pageBackUrl} />
+            {!isViewRoute && !isPersonalDictionaryPage && (
+                <PageTitle title={pageTitle} titleElement={pageTitleElement} urlBack={pageBackUrl} />
+            )}
 
             {session === null && isModeSelectionRoute && (
                 <div
@@ -1467,8 +1469,36 @@ const StudentQuizlet = () => {
                                         }`}
                                         {...(selectedPersonalSubgroup === null ? { "aria-current": "page" } : {})}
                                     >
-                                        {selectedPersonalSubgroup === null ? (
-                                            personalRootLabel
+                                        {selectedPersonalSubgroup === null && !isEditingLessonTitle ? (
+                                            <span className="d-inline-flex align-items-center gap-2">
+                                                <span>{personalRootLabel}</span>
+                                                <button
+                                                    className="btn btn-sm btn-link p-0 text-muted quizlet-personal-topic-edit-btn"
+                                                    title="Переименовать"
+                                                    onClick={() => {
+                                                        setIsEditingLessonTitle(true);
+                                                        setPersonalLessonTitle(personalLesson!.title);
+                                                    }}
+                                                >
+                                                    <i className="bi bi-pencil" />
+                                                </button>
+                                            </span>
+                                        ) : selectedPersonalSubgroup === null && isEditingLessonTitle ? (
+                                            <input
+                                                className="quizlet-breadcrumb-inline-edit-input"
+                                                value={personalLessonTitle}
+                                                onChange={(e) => setPersonalLessonTitle(e.target.value)}
+                                                placeholder="Например: Мой словарь"
+                                                autoFocus
+                                                onBlur={ensurePersonalLesson}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "Enter") ensurePersonalLesson();
+                                                    if (e.key === "Escape" && personalLesson !== null) {
+                                                        setIsEditingLessonTitle(false);
+                                                        setPersonalLessonTitle(personalLesson.title);
+                                                    }
+                                                }}
+                                            />
                                         ) : (
                                             <Link to={routePaths.personalDictionary}>{personalRootLabel}</Link>
                                         )}
