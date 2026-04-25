@@ -80,6 +80,12 @@ interface TStudentNotificationQuizletPersonalDictionaryTopicUpdated {
     quizlet_dictionary_title: string;
 }
 
+interface TStudentNotificationQuizletPersonalDictionaryTopicDeleted {
+    type: "quizlet_personal_dictionary_topic_deleted";
+    quizlet_dictionary_link: string;
+    quizlet_dictionary_title: string;
+}
+
 export type TStudentNotificationShareAny = TNotificationBase &
     (
         | TStudentNotificationShareLesson
@@ -88,6 +94,7 @@ export type TStudentNotificationShareAny = TNotificationBase &
         | TStudentNotificationQuizletPersonalDictionaryUpdate
         | TStudentNotificationQuizletPersonalDictionaryTopicCreated
         | TStudentNotificationQuizletPersonalDictionaryTopicUpdated
+        | TStudentNotificationQuizletPersonalDictionaryTopicDeleted
     );
 
 type TStudentNotificationActivityBase = {

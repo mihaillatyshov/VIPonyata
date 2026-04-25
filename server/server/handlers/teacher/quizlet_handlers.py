@@ -33,6 +33,10 @@ def _build_quizlet_topic_updated_message(title: str, link: str) -> str:
     return f"Сэнсэй кое-что изменила в [[quizlet_topic_updated:{link}|{_normalize_notification_title(title)}]]"
 
 
+def _build_quizlet_topic_deleted_message(title: str, link: str) -> str:
+    return f"Сэнсэй удалила [[quizlet_topic_deleted:{link}|{_normalize_notification_title(title)}]]"
+
+
 def _notify_personal_quizlet_updated(student_id: int, title: str, link: str):
     DBQT.add_quizlet_personal_dictionary_notification(student_id, _build_quizlet_dictionary_edit_message(title, link))
 
@@ -207,7 +211,10 @@ def delete_student_personal_quizlet_subgroup(student_id: int, subgroup_id: int) 
     _ensure_student_exists(student_id)
     subgroup_title = _get_personal_subgroup_title(student_id, subgroup_id)
     DBQS.delete_personal_quizlet_subgroup(student_id, subgroup_id)
-    _notify_personal_quizlet_updated(student_id, subgroup_title, "/quizlet/my-dictionary")
+    DBQT.add_quizlet_personal_dictionary_notification(
+        student_id,
+        _build_quizlet_topic_deleted_message(subgroup_title, "/quizlet/my-dictionary"),
+    )
     return {"message": "ok"}
 
 

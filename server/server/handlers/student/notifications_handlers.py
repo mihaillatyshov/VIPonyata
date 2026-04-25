@@ -64,6 +64,7 @@ def is_activity_try_notification(notification_data: dict) -> bool:
 QUIZLET_DICTIONARY_LINK_PATTERN = re.compile(r"\[\[quizlet_dict_link:(.+?)\|(.+?)\]\]")
 QUIZLET_TOPIC_CREATED_PATTERN = re.compile(r"\[\[quizlet_topic_created:(.+?)\|(.+?)\]\]")
 QUIZLET_TOPIC_UPDATED_PATTERN = re.compile(r"\[\[quizlet_topic_updated:(.+?)\|(.+?)\]\]")
+QUIZLET_TOPIC_DELETED_PATTERN = re.compile(r"\[\[quizlet_topic_deleted:(.+?)\|(.+?)\]\]")
 
 
 def _parse_quizlet_dictionary_notification(item_data: dict) -> dict:
@@ -97,6 +98,22 @@ def _parse_quizlet_dictionary_notification(item_data: dict) -> dict:
             return item_data
 
         item_data["type"] = "quizlet_personal_dictionary_topic_updated"
+        item_data["message"] = cleaned_message
+        item_data["quizlet_dictionary_link"] = link
+        item_data["quizlet_dictionary_title"] = title
+
+        return item_data
+
+    topic_deleted_marker = QUIZLET_TOPIC_DELETED_PATTERN.search(message)
+    if topic_deleted_marker is not None:
+        link = topic_deleted_marker.group(1).strip()
+        title = topic_deleted_marker.group(2).strip()
+        cleaned_message = QUIZLET_TOPIC_DELETED_PATTERN.sub(title, message).strip()
+
+        if len(link) == 0:
+            return item_data
+
+        item_data["type"] = "quizlet_personal_dictionary_topic_deleted"
         item_data["message"] = cleaned_message
         item_data["quizlet_dictionary_link"] = link
         item_data["quizlet_dictionary_title"] = title

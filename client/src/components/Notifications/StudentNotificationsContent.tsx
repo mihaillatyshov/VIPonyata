@@ -93,6 +93,10 @@ const getLessonTitle = (item: TStudentNotification) => {
         return item.quizlet_dictionary_title;
     }
 
+    if (item.type === "quizlet_personal_dictionary_topic_deleted") {
+        return item.quizlet_dictionary_title;
+    }
+
     return "Уведомление";
 };
 
@@ -117,7 +121,8 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
         item.type === undefined ||
         item.type === "quizlet_personal_dictionary_update" ||
         item.type === "quizlet_personal_dictionary_topic_created" ||
-        item.type === "quizlet_personal_dictionary_topic_updated";
+        item.type === "quizlet_personal_dictionary_topic_updated" ||
+        item.type === "quizlet_personal_dictionary_topic_deleted";
 
     const handleClick = () => {
         if (isClickable) {
@@ -161,6 +166,10 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
         <>
             Сэнсэй кое-что изменила в{" "}
             <span className="notification__item-entity-name">{item.quizlet_dictionary_title}</span>
+        </>
+    ) : item.type === "quizlet_personal_dictionary_topic_deleted" ? (
+        <>
+            Сэнсэй удалила <span className="notification__item-entity-name">{item.quizlet_dictionary_title}</span>
         </>
     ) : isSimpleTextItem ? (
         item.message || "Уведомление"

@@ -202,6 +202,28 @@ const TopicEditor = ({ studentId, subgroup, initialWords, onSaved }: TopicEditor
         }
     };
 
+    const hasChanges = useMemo(() => {
+        const nonEmptyRows = rows.filter((row) => !isAllEmpty(row));
+        const hasCreated = nonEmptyRows.some((row) => row.id === undefined);
+        const hasDeleted = deletedIds.length > 0;
+        const hasUpdated = nonEmptyRows
+            .filter((row) => row.id !== undefined)
+            .some((row) => {
+                const initialWord = initialWords.find((word) => word.id === row.id);
+                if (!initialWord) {
+                    return true;
+                }
+
+                return (
+                    (initialWord.char_jp ?? "") !== row.char_jp ||
+                    initialWord.word_jp !== row.word_jp ||
+                    initialWord.ru !== row.ru
+                );
+            });
+
+        return hasCreated || hasDeleted || hasUpdated;
+    }, [rows, deletedIds, initialWords]);
+
     return (
         <div className="quizlet-personal-topic-editor">
             <div className="table-responsive quizlet-personal-topic-editor-table-wrap">
@@ -259,9 +281,11 @@ const TopicEditor = ({ studentId, subgroup, initialWords, onSaved }: TopicEditor
                 </button>
                 <div className="d-flex align-items-center gap-2">
                     {saveError && <span className="text-danger small">{saveError}</span>}
-                    <button className="btn btn-success" onClick={handleSave} disabled={isSaving}>
-                        {isSaving ? "Сохранение..." : "Сохранить"}
-                    </button>
+                    {(hasChanges || isSaving) && (
+                        <button className="btn btn-success" onClick={handleSave} disabled={isSaving}>
+                            {isSaving ? "Сохранение..." : "Сохранить"}
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
@@ -290,6 +314,7 @@ const TeacherStudentDictionariesPage = ({
     const [lessonTitleDraft, setLessonTitleDraft] = useState("");
     const [newTopicTitle, setNewTopicTitle] = useState("");
     const [topicTitleDraft, setTopicTitleDraft] = useState("");
+    const [isDeleteTopicConfirming, setIsDeleteTopicConfirming] = useState(false);
 
     const selectedStudent = useMemo(
         () => students.find((student) => student.id === selectedStudentId) ?? null,
@@ -352,11 +377,13 @@ const TeacherStudentDictionariesPage = ({
     useEffect(() => {
         if (selectedTopicId === undefined) {
             setTopicTitleDraft("");
+            setIsDeleteTopicConfirming(false);
             return;
         }
 
         const subgroup = subgroups.find((item) => item.id === selectedTopicId);
         setTopicTitleDraft(subgroup?.title ?? "");
+        setIsDeleteTopicConfirming(false);
     }, [selectedTopicId, subgroups]);
 
     const ensureLesson = async () => {
@@ -412,6 +439,7 @@ const TeacherStudentDictionariesPage = ({
             return;
         }
 
+        setIsDeleteTopicConfirming(false);
         await AjaxDelete({
             url: `/api/quizlet/students-dictionaries/${selectedStudentId}/subgroups/${selectedSubgroup.id}`,
         });
@@ -501,15 +529,7 @@ const TeacherStudentDictionariesPage = ({
                         </ol>
                     </nav>
 
-                    <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                        <div className="fw-semibold">{selectedStudent?.name ?? ""}</div>
-                        <button
-                            className="btn btn-outline-secondary btn-sm"
-                            onClick={() => navigate("/quizlet/students-dictionaries")}
-                        >
-                            Назад к ученикам
-                        </button>
-                    </div>
+                    <div className="mb-3 fw-semibold">{selectedStudent?.name ?? ""}</div>
 
                     {lesson === null && (
                         <div className="d-flex gap-2 mb-3" style={{ width: "min(100%, 520px)" }}>
@@ -604,15 +624,26 @@ const TeacherStudentDictionariesPage = ({
                                     onBlur={renameSubgroup}
                                 />
                                 <div className="d-flex gap-2">
-                                    <button
-                                        className="btn btn-outline-secondary"
-                                        onClick={() => navigate(`/quizlet/students-dictionaries/${selectedStudentId}`)}
-                                    >
-                                        К темам
-                                    </button>
-                                    <button className="btn btn-outline-danger" onClick={deleteSubgroup}>
-                                        Удалить тему
-                                    </button>
+                                    {isDeleteTopicConfirming ? (
+                                        <>
+                                            <button className="btn btn-danger btn-sm" onClick={deleteSubgroup}>
+                                                Точно?
+                                            </button>
+                                            <button
+                                                className="btn btn-outline-secondary btn-sm"
+                                                onClick={() => setIsDeleteTopicConfirming(false)}
+                                            >
+                                                Отмена
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <button
+                                            className="btn btn-outline-danger"
+                                            onClick={() => setIsDeleteTopicConfirming(true)}
+                                        >
+                                            Удалить тему
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
