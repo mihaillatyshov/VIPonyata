@@ -1458,131 +1458,108 @@ const StudentQuizlet = () => {
 
                     <div className="quizlet-main-container">
                         {personalLesson !== null && (
-                            <nav
-                                aria-label="breadcrumb"
-                                className="mb-3 quizlet-teacher-breadcrumb quizlet-student-view-breadcrumb"
-                            >
-                                <ol className="breadcrumb mb-0">
-                                    <li
-                                        className={`breadcrumb-item ${
-                                            selectedPersonalSubgroup === null ? "active" : ""
-                                        }`}
-                                        {...(selectedPersonalSubgroup === null ? { "aria-current": "page" } : {})}
-                                    >
-                                        {selectedPersonalSubgroup === null && !isEditingLessonTitle ? (
-                                            <span className="d-inline-flex align-items-center gap-2">
-                                                <span>{personalRootLabel}</span>
-                                                <button
-                                                    className="btn btn-sm btn-link p-0 text-muted quizlet-personal-topic-edit-btn"
-                                                    title="Переименовать"
-                                                    onClick={() => {
-                                                        setIsEditingLessonTitle(true);
-                                                        setPersonalLessonTitle(personalLesson!.title);
-                                                    }}
-                                                >
-                                                    <i className="bi bi-pencil" />
-                                                </button>
-                                            </span>
-                                        ) : selectedPersonalSubgroup === null && isEditingLessonTitle ? (
-                                            <input
-                                                className="quizlet-breadcrumb-inline-edit-input"
-                                                value={personalLessonTitle}
-                                                onChange={(e) => setPersonalLessonTitle(e.target.value)}
-                                                placeholder="Например: Мой словарь"
-                                                autoFocus
-                                                onBlur={ensurePersonalLesson}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === "Enter") ensurePersonalLesson();
-                                                    if (e.key === "Escape" && personalLesson !== null) {
-                                                        setIsEditingLessonTitle(false);
-                                                        setPersonalLessonTitle(personalLesson.title);
-                                                    }
-                                                }}
-                                            />
-                                        ) : (
-                                            <Link to={routePaths.personalDictionary}>{personalRootLabel}</Link>
-                                        )}
-                                    </li>
-                                </ol>
-                            </nav>
-                        )}
-
-                        {(personalLesson === null || selectedPersonalSubgroup !== null) && (
-                            <div className="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
-                                <div className="flex-grow-1" style={{ minWidth: 0 }}>
-                                    {selectedPersonalTopicId === null && personalLesson === null ? (
-                                        <div className="d-flex gap-2 flex-grow-1">
-                                            <input
-                                                className="form-control"
-                                                value={personalLessonTitle}
-                                                onChange={(e) => setPersonalLessonTitle(e.target.value)}
-                                                placeholder="Например: Мой словарь"
-                                                autoFocus
-                                                onBlur={personalLesson !== null ? ensurePersonalLesson : undefined}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === "Enter") ensurePersonalLesson();
-                                                    if (e.key === "Escape") setPersonalLessonTitle("");
-                                                }}
-                                            />
-                                            {personalLesson === null && (
-                                                <button
-                                                    className="btn btn-outline-primary"
-                                                    onClick={ensurePersonalLesson}
-                                                >
-                                                    Создать
-                                                </button>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <div className="d-flex align-items-center gap-2 quizlet-student-topic-header-offset">
-                                            {selectedPersonalSubgroup !== null && !isEditingPersonalTopicTitle && (
-                                                <h5 className="quizlet-personal-topic-title mb-0">
-                                                    {selectedPersonalSubgroup.title}
-                                                </h5>
-                                            )}
-
-                                            {selectedPersonalSubgroup !== null && isEditingPersonalTopicTitle && (
+                            <div className="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                                <nav
+                                    aria-label="breadcrumb"
+                                    className="quizlet-teacher-breadcrumb quizlet-student-view-breadcrumb"
+                                >
+                                    <ol className="breadcrumb mb-0">
+                                        <li
+                                            className={`breadcrumb-item ${
+                                                selectedPersonalSubgroup === null ? "active" : ""
+                                            }`}
+                                            {...(selectedPersonalSubgroup === null ? { "aria-current": "page" } : {})}
+                                        >
+                                            {selectedPersonalSubgroup === null && !isEditingLessonTitle ? (
+                                                <span className="d-inline-flex align-items-center gap-2">
+                                                    <span>{personalRootLabel}</span>
+                                                    <button
+                                                        className="btn btn-sm btn-link p-0 text-muted quizlet-personal-topic-edit-btn"
+                                                        title="Переименовать"
+                                                        onClick={() => {
+                                                            setIsEditingLessonTitle(true);
+                                                            setPersonalLessonTitle(personalLesson!.title);
+                                                        }}
+                                                    >
+                                                        <i className="bi bi-pencil" />
+                                                    </button>
+                                                </span>
+                                            ) : selectedPersonalSubgroup === null && isEditingLessonTitle ? (
                                                 <input
-                                                    className="quizlet-personal-topic-title-input"
-                                                    value={personalTopicTitleDraft}
-                                                    onChange={(e) => setPersonalTopicTitleDraft(e.target.value)}
+                                                    className="quizlet-breadcrumb-inline-edit-input"
+                                                    value={personalLessonTitle}
+                                                    onChange={(e) => setPersonalLessonTitle(e.target.value)}
+                                                    placeholder="Например: Мой словарь"
                                                     autoFocus
-                                                    onBlur={() =>
-                                                        renamePersonalTopic(
-                                                            selectedPersonalSubgroup,
-                                                            personalTopicTitleDraft,
-                                                        )
-                                                    }
+                                                    onBlur={ensurePersonalLesson}
                                                     onKeyDown={(e) => {
-                                                        if (e.key === "Enter") {
-                                                            renamePersonalTopic(
-                                                                selectedPersonalSubgroup,
-                                                                personalTopicTitleDraft,
-                                                            );
-                                                        }
-                                                        if (e.key === "Escape") {
-                                                            setIsEditingPersonalTopicTitle(false);
-                                                            setPersonalTopicTitleDraft(selectedPersonalSubgroup.title);
+                                                        if (e.key === "Enter") ensurePersonalLesson();
+                                                        if (e.key === "Escape" && personalLesson !== null) {
+                                                            setIsEditingLessonTitle(false);
+                                                            setPersonalLessonTitle(personalLesson.title);
                                                         }
                                                     }}
                                                 />
+                                            ) : (
+                                                <Link to={routePaths.personalDictionary}>{personalRootLabel}</Link>
                                             )}
+                                        </li>
 
-                                            {selectedPersonalSubgroup !== null && !isEditingPersonalTopicTitle && (
-                                                <button
-                                                    className="btn btn-sm btn-link p-0 text-muted quizlet-personal-topic-edit-btn"
-                                                    title="Переименовать тему"
-                                                    onClick={() => {
-                                                        setIsEditingPersonalTopicTitle(true);
-                                                        setPersonalTopicTitleDraft(selectedPersonalSubgroup.title);
-                                                    }}
-                                                >
-                                                    <i className="bi bi-pencil" />
-                                                </button>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
+                                        {selectedPersonalSubgroup !== null && (
+                                            <li
+                                                className={`breadcrumb-item ${
+                                                    !isEditingPersonalTopicTitle ? "active" : ""
+                                                }`}
+                                                {...(!isEditingPersonalTopicTitle ? { "aria-current": "page" } : {})}
+                                            >
+                                                {!isEditingPersonalTopicTitle ? (
+                                                    <span className="d-inline-flex align-items-center gap-2">
+                                                        <span>{selectedPersonalSubgroup.title}</span>
+                                                        <button
+                                                            className="btn btn-sm btn-link p-0 text-muted quizlet-personal-topic-edit-btn"
+                                                            title="Переименовать тему"
+                                                            onClick={() => {
+                                                                setIsEditingPersonalTopicTitle(true);
+                                                                setPersonalTopicTitleDraft(
+                                                                    selectedPersonalSubgroup.title,
+                                                                );
+                                                            }}
+                                                        >
+                                                            <i className="bi bi-pencil" />
+                                                        </button>
+                                                    </span>
+                                                ) : (
+                                                    <input
+                                                        className="quizlet-breadcrumb-inline-edit-input"
+                                                        value={personalTopicTitleDraft}
+                                                        onChange={(e) => setPersonalTopicTitleDraft(e.target.value)}
+                                                        autoFocus
+                                                        onBlur={() =>
+                                                            renamePersonalTopic(
+                                                                selectedPersonalSubgroup,
+                                                                personalTopicTitleDraft,
+                                                            )
+                                                        }
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === "Enter") {
+                                                                renamePersonalTopic(
+                                                                    selectedPersonalSubgroup,
+                                                                    personalTopicTitleDraft,
+                                                                );
+                                                            }
+                                                            if (e.key === "Escape") {
+                                                                setIsEditingPersonalTopicTitle(false);
+                                                                setPersonalTopicTitleDraft(
+                                                                    selectedPersonalSubgroup.title,
+                                                                );
+                                                            }
+                                                        }}
+                                                    />
+                                                )}
+                                            </li>
+                                        )}
+                                    </ol>
+                                </nav>
 
                                 <div className="d-flex gap-2 align-items-center quizlet-personal-topic-header-actions">
                                     {selectedPersonalSubgroup !== null &&
@@ -1613,6 +1590,37 @@ const StudentQuizlet = () => {
                                                 Удалить
                                             </button>
                                         ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {(personalLesson === null || selectedPersonalSubgroup !== null) && (
+                            <div className="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                                <div className="flex-grow-1" style={{ minWidth: 0 }}>
+                                    {selectedPersonalTopicId === null && personalLesson === null ? (
+                                        <div className="d-flex gap-2 flex-grow-1">
+                                            <input
+                                                className="form-control"
+                                                value={personalLessonTitle}
+                                                onChange={(e) => setPersonalLessonTitle(e.target.value)}
+                                                placeholder="Например: Мой словарь"
+                                                autoFocus
+                                                onBlur={personalLesson !== null ? ensurePersonalLesson : undefined}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "Enter") ensurePersonalLesson();
+                                                    if (e.key === "Escape") setPersonalLessonTitle("");
+                                                }}
+                                            />
+                                            {personalLesson === null && (
+                                                <button
+                                                    className="btn btn-outline-primary"
+                                                    onClick={ensurePersonalLesson}
+                                                >
+                                                    Создать
+                                                </button>
+                                            )}
+                                        </div>
+                                    ) : null}
                                 </div>
                             </div>
                         )}
