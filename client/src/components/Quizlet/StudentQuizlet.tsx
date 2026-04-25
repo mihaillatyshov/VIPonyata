@@ -421,9 +421,11 @@ const PersonalTopicEditor = ({ subgroup, initialWords, onSaved }: PersonalTopicE
                             Есть проблемы
                         </span>
                     )}
-                    <button className="btn btn-success" onClick={handleSave} disabled={isSaving || !isDirty}>
-                        {isSaving ? "Сохранение..." : "Сохранить"}
-                    </button>
+                    {isDirty && (
+                        <button className="btn btn-success" onClick={handleSave} disabled={isSaving}>
+                            {isSaving ? "Сохранение..." : "Сохранить"}
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
