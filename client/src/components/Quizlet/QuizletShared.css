@@ -27,6 +27,8 @@
 .quizlet-student-view-breadcrumb .breadcrumb {
     font-size: 1rem;
     --bs-breadcrumb-divider: "→";
+    padding-bottom: 1rem;
+    padding-left: 0.5rem;
 }
 
 .quizlet-teacher-breadcrumb .breadcrumb-item,
@@ -65,7 +67,7 @@
 }
 
 .quizlet-personal-topic-editor {
-    margin-top: 32px;
+    /* margin-top: 32px; */
 }
 
 .quizlet-personal-topic-editor-table-wrap {
@@ -111,7 +113,7 @@
 }
 
 .quizlet-personal-topic-header-actions {
-    margin-top: 10px;
+    margin-top: 0;
 }
 
 .quizlet-student-topic-header-offset {

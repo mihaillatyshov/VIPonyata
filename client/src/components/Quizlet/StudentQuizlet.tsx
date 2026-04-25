@@ -1721,7 +1721,7 @@ const StudentQuizlet = () => {
                     </div>
 
                     <div className="quizlet-main-container">
-                        <div className="d-flex align-items-center justify-content-start flex-wrap gap-2 px-1 pt-1 pb-4">
+                        <div className="d-flex align-items-center justify-content-start flex-wrap gap-2 px-1 pt-1">
                             <nav
                                 aria-label="breadcrumb"
                                 className="mb-0 quizlet-teacher-breadcrumb quizlet-student-view-breadcrumb"
@@ -1927,7 +1927,7 @@ const StudentQuizlet = () => {
             )}
 
             {session !== null && (
-                <div className="quizlet-session-shell p-3 p-md-4">
+                <div className="quizlet-session-shell p-3 ">
                     {!session.is_finished && session.quiz_type !== "flashcards" && session.quiz_type !== "pair" && (
                         <div className="mb-3">
                             <div className="training-session-header-shell">
