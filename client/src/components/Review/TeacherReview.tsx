@@ -1223,38 +1223,40 @@ const TeacherReview = () => {
     return (
         <div className="container review-page">
             {!isFlashcardsRoute && !isResultsRoute && (
-                <div
-                    className="quizlet-student-dictionary-tabs"
-                    role="tablist"
-                    aria-label="Переключение режимов review"
-                >
-                    <button
-                        type="button"
-                        role="tab"
-                        aria-selected={isRootRoute}
-                        className={`btn quizlet-student-dictionary-tab ${isRootRoute ? "active" : ""}`}
-                        onClick={() => navigate(routePaths.root)}
+                <div className="review-mode-tabs-row">
+                    <div
+                        className="quizlet-student-dictionary-tabs"
+                        role="tablist"
+                        aria-label="Переключение режимов review"
                     >
-                        Словари
-                    </button>
-                    <button
-                        type="button"
-                        role="tab"
-                        aria-selected={isTrainingSetupRoute}
-                        className={`btn quizlet-student-dictionary-tab ${isTrainingSetupRoute ? "active" : ""}`}
-                        onClick={() => navigate(routePaths.training)}
-                    >
-                        Тренировка
-                    </button>
-                    <button
-                        type="button"
-                        role="tab"
-                        aria-selected={isTrainingHistoryRoute}
-                        className={`btn quizlet-student-dictionary-tab ${isTrainingHistoryRoute ? "active" : ""}`}
-                        onClick={() => navigate(routePaths.history)}
-                    >
-                        История
-                    </button>
+                        <button
+                            type="button"
+                            role="tab"
+                            aria-selected={isRootRoute}
+                            className={`btn quizlet-student-dictionary-tab ${isRootRoute ? "active" : ""}`}
+                            onClick={() => navigate(routePaths.root)}
+                        >
+                            Словари
+                        </button>
+                        <button
+                            type="button"
+                            role="tab"
+                            aria-selected={isTrainingSetupRoute}
+                            className={`btn quizlet-student-dictionary-tab ${isTrainingSetupRoute ? "active" : ""}`}
+                            onClick={() => navigate(routePaths.training)}
+                        >
+                            Тренировка
+                        </button>
+                        <button
+                            type="button"
+                            role="tab"
+                            aria-selected={isTrainingHistoryRoute}
+                            className={`btn quizlet-student-dictionary-tab ${isTrainingHistoryRoute ? "active" : ""}`}
+                            onClick={() => navigate(routePaths.history)}
+                        >
+                            История
+                        </button>
+                    </div>
                 </div>
             )}
 
@@ -1542,7 +1544,7 @@ const TeacherReview = () => {
             )}
 
             {(isTrainingSetupRoute || isTrainingHistoryRoute) && (
-                <div className="review-section-card">
+                <div className="review-section-card review-library-container">
                     <div className="review-training-setup">
                         {isTrainingSetupRoute && (
                             <>

@@ -2,6 +2,21 @@
     padding-bottom: 32px;
 }
 
+.review-mode-tabs-row {
+    position: sticky;
+    top: 12px;
+    z-index: 12;
+    max-width: 860px;
+    margin-inline: auto;
+    margin-top: 18px;
+    margin-bottom: 0.9rem;
+    padding-left: 28px;
+}
+
+.review-page .quizlet-student-dictionary-tabs {
+    margin: 0;
+}
+
 .review-actions-row {
     display: flex;
     gap: 12px;
@@ -22,12 +37,53 @@
     border-radius: 18px;
     background: rgba(255, 255, 255, 0.92);
     box-shadow: 0 4px 16px rgba(103, 174, 45, 0.08);
-    padding: 18px;
+    padding: 16px;
 }
 
 .review-library-container {
-    max-width: 980px;
+    max-width: 860px;
     margin-inline: auto;
+}
+
+.review-page .quizlet-main-container.review-training-history {
+    max-width: 100%;
+    padding: 12px;
+    margin-bottom: 64px;
+}
+
+.review-page .quizlet-main-container.review-training-history .quizlet-progress-history-title {
+    margin-bottom: 14px;
+}
+
+.review-page .quizlet-progress-history-table thead th,
+.review-page .quizlet-progress-history-table tbody td {
+    padding: 10px 8px;
+}
+
+.review-page .quizlet-progress-history-details-wrap {
+    padding: 8px 4px;
+}
+
+.review-page .quizlet-progress-history-topics-list {
+    padding-left: 16px;
+}
+
+.review-page .quizlet-topic-card {
+    border-radius: 10px;
+}
+
+.review-page .quizlet-topic-card .card-body {
+    padding: 0.6rem 0.7rem;
+}
+
+.review-page .quizlet-topic-card__title {
+    font-size: 0.84rem;
+    line-height: 1.25;
+}
+
+.review-page .quizlet-topic-card__count {
+    margin-top: 0.45rem !important;
+    font-size: 0.8rem;
 }
 
 .review-breadcrumb {
@@ -56,8 +112,8 @@
 .review-training-setup {
     display: flex;
     flex-direction: column;
-    gap: 18px;
-    max-width: 860px;
+    gap: 16px;
+    max-width: 740px;
     margin: 0 auto;
 }
 
@@ -89,7 +145,7 @@
 .review-training-topic-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
 }
 
 .review-direction-toggle {
@@ -103,7 +159,7 @@
 }
 
 .review-training-helper-text {
-    margin-top: 12px;
+    margin-top: 10px;
 }
 
 .review-training-start-button {
@@ -125,6 +181,11 @@
 
 .review-training-start-hint {
     margin-top: 10px;
+}
+
+.review-page .row.row-cols-1.row-cols-sm-2.row-cols-md-3.g-2.pt-1 {
+    --bs-gutter-x: 0.55rem;
+    --bs-gutter-y: 0.55rem;
 }
 
 .review-flashcard-shell {
@@ -236,6 +297,26 @@
 }
 
 @media (max-width: 768px) {
+    .review-section-card {
+        padding: 14px;
+    }
+
+    .review-mode-tabs-row {
+        max-width: 100%;
+        padding-left: 12px;
+    }
+
+    .review-library-container,
+    .review-page .quizlet-main-container.review-training-history,
+    .review-training-setup,
+    .review-page .quizlet-student-dictionary-tabs {
+        max-width: 100%;
+    }
+
+    .review-page .quizlet-topic-card .card-body {
+        padding: 0.65rem;
+    }
+
     .review-flashcard-exercise {
         --flashcard-max-width: min(100%, 460px);
     }
