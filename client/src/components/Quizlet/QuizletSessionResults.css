@@ -20,31 +20,31 @@
 .quizlet-results-stats {
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
-    margin-bottom: 28px;
+    grid-template-columns: repeat(auto-fit, minmax(138px, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
 }
 
 .quizlet-results-stat {
     border: 1px solid #dfe4eb;
-    border-radius: 14px;
-    padding: 14px 12px;
+    border-radius: 12px;
+    padding: 12px 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    gap: 4px;
+    gap: 3px;
     background: #ffffff;
 }
 
 .quizlet-results-icon {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     line-height: 1;
 }
 
 .quizlet-results-label {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: #536173;
     text-transform: uppercase;
@@ -52,7 +52,7 @@
 }
 
 .quizlet-results-value {
-    font-size: 2rem;
+    font-size: 1.75rem;
     font-weight: 700;
     color: #1f2c3d;
     line-height: 1.05;
@@ -159,11 +159,12 @@
     }
 
     .quizlet-results-stats {
-        margin-bottom: 24px;
+        grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+        margin-bottom: 22px;
     }
 
     .quizlet-results-value {
-        font-size: 1.8rem;
+        font-size: 1.6rem;
     }
 
     .quizlet-results-time {

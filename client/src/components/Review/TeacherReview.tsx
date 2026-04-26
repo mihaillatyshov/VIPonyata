@@ -9,6 +9,7 @@ import { LoadStatus } from "libs/Status";
 import { TReviewDictionary, TReviewTopic, TReviewWord } from "models/TReview";
 
 import "components/Quizlet/FlashcardExercise.css";
+import "components/Quizlet/QuizletSessionResults.css";
 import "components/Quizlet/QuizletShared.css";
 import "./TeacherReview.css";
 
@@ -35,8 +36,10 @@ interface TrainingAssessment {
 }
 
 interface TrainingSession {
+    allWordIds: number[];
     initialWordIds: number[];
     queue: number[];
+    openedWordIds: number[];
     direction: "jp_to_ru" | "ru_to_jp";
     assessments: Record<number, TrainingAssessment>;
     startedAt: number;
@@ -676,7 +679,7 @@ const TeacherReview = () => {
         });
     };
 
-    const startTraining = (wordIds?: number[]) => {
+    const startTraining = (wordIds?: number[], allWordIds?: number[]) => {
         const selectedWordIds =
             wordIds ?? words.filter((word) => selectedTrainingTopicIds.includes(word.topic_id)).map((word) => word.id);
 
@@ -685,8 +688,10 @@ const TeacherReview = () => {
         }
 
         setTrainingSession({
+            allWordIds: [...(allWordIds ?? selectedWordIds)],
             initialWordIds: [...selectedWordIds],
             queue: shuffleArray(selectedWordIds),
+            openedWordIds: [],
             direction: trainingDirection,
             assessments: {},
             startedAt: Date.now(),
@@ -709,6 +714,14 @@ const TeacherReview = () => {
                 isFinished: true,
             };
         });
+    };
+
+    const finishCurrentTraining = () => {
+        if (trainingSession === null) {
+            return;
+        }
+
+        finishTraining(trainingSession.queue, trainingSession.assessments);
     };
 
     const answerCurrentWord = (grade: "forgot" | "partial" | "remember") => {
@@ -765,7 +778,7 @@ const TeacherReview = () => {
             return;
         }
 
-        startTraining(trainingSession.initialWordIds);
+        startTraining(trainingSession.allWordIds, trainingSession.allWordIds);
     };
 
     const repeatForgotten = () => {
@@ -775,6 +788,12 @@ const TeacherReview = () => {
 
         const forgottenWordIds = trainingSession.initialWordIds.filter((wordId) => {
             const assessment = trainingSession.assessments[wordId];
+            const isOpened = trainingSession.openedWordIds.includes(wordId);
+
+            if (!isOpened) {
+                return true;
+            }
+
             return assessment !== undefined && (assessment.forgot > 0 || assessment.partial > 0);
         });
 
@@ -782,20 +801,27 @@ const TeacherReview = () => {
             return;
         }
 
-        startTraining(forgottenWordIds);
+        startTraining(forgottenWordIds, trainingSession.allWordIds);
     };
 
     const resultSummary = useMemo(() => {
         if (trainingSession === null) {
-            return { easy: 0, partial: 0, forgot: 0, forgottenIdsCount: 0 };
+            return { easy: 0, partial: 0, forgot: 0, notReviewed: 0, forgottenIdsCount: 0 };
         }
 
         let easy = 0;
         let partial = 0;
         let forgot = 0;
+        let notReviewed = 0;
 
         trainingSession.initialWordIds.forEach((wordId) => {
             const assessment = trainingSession.assessments[wordId];
+            const isOpened = trainingSession.openedWordIds.includes(wordId);
+
+            if (!isOpened) {
+                notReviewed += 1;
+                return;
+            }
 
             if (!assessment || (assessment.forgot === 0 && assessment.partial === 0)) {
                 easy += 1;
@@ -810,8 +836,22 @@ const TeacherReview = () => {
             partial += 1;
         });
 
-        return { easy, partial, forgot, forgottenIdsCount: partial + forgot };
+        return {
+            easy,
+            partial,
+            forgot,
+            notReviewed,
+            forgottenIdsCount: partial + forgot + notReviewed,
+        };
     }, [trainingSession]);
+
+    const resultPerformanceEmoji = useMemo(() => {
+        if (resultSummary.forgot === 0 && resultSummary.partial === 0) {
+            return "😍";
+        }
+
+        return resultSummary.forgot > resultSummary.easy ? "🙃" : "😊";
+    }, [resultSummary]);
 
     const trainingIncorrectAnswers = useMemo(() => {
         if (trainingSession === null) {
@@ -1312,13 +1352,36 @@ const TeacherReview = () => {
                             elapsedSeconds={elapsedSeconds}
                             currentPosition={trainingCurrentPosition}
                             totalWords={trainingSession.initialWordIds.length}
-                            onFinishTraining={resetTraining}
+                            onFinishTraining={finishCurrentTraining}
                         />
 
                         <button
                             type="button"
                             className={`flashcard-card ${isFlipped ? "is-flipped" : ""}`}
-                            onClick={() => setIsFlipped((prev) => !prev)}
+                            onClick={() => {
+                                setIsFlipped((prev) => {
+                                    const nextIsFlipped = !prev;
+
+                                    if (nextIsFlipped) {
+                                        setTrainingSession((sessionPrev) => {
+                                            if (
+                                                sessionPrev === null ||
+                                                currentWord === null ||
+                                                sessionPrev.openedWordIds.includes(currentWord.id)
+                                            ) {
+                                                return sessionPrev;
+                                            }
+
+                                            return {
+                                                ...sessionPrev,
+                                                openedWordIds: [...sessionPrev.openedWordIds, currentWord.id],
+                                            };
+                                        });
+                                    }
+
+                                    return nextIsFlipped;
+                                });
+                            }}
                         >
                             <div className="flashcard-flip-inner">
                                 <div className="flashcard-face flashcard-face-front">
@@ -1447,39 +1510,84 @@ const TeacherReview = () => {
             )}
 
             {trainingSession !== null && trainingSession.isFinished && isResultsRoute && (
-                <div className="review-section-card" style={{ maxWidth: "860px", margin: "28px auto 0" }}>
-                    <h3 className="mb-2">Результаты</h3>
-                    <div className="text-muted">Тренировка завершена за {trainingSession.elapsedSeconds} сек.</div>
+                <div className="quizlet-main-container quizlet-results" style={{ marginTop: "28px" }}>
+                    <h2 className="quizlet-results-title">
+                        Результаты <span aria-hidden>🎉</span>
+                    </h2>
 
-                    <div className="review-results-grid">
-                        <div className="review-results-card">
-                            <div className="small text-muted">Помню сразу</div>
-                            <div className="fs-3 fw-semibold">{resultSummary.easy}</div>
+                    <div className="quizlet-results-stats">
+                        <div className="quizlet-results-stat quizlet-results-stat-correct">
+                            <span className="quizlet-results-icon" aria-hidden>
+                                <i className="bi bi-check-circle-fill" />
+                            </span>
+                            <span className="quizlet-results-label">Помню сразу</span>
+                            <span className="quizlet-results-value">{resultSummary.easy}</span>
                         </div>
-                        <div className="review-results-card">
-                            <div className="small text-muted">Частично</div>
-                            <div className="fs-3 fw-semibold">{resultSummary.partial}</div>
+
+                        <div className="quizlet-results-stat quizlet-results-stat-partial">
+                            <span className="quizlet-results-icon" aria-hidden>
+                                <i className="bi bi-exclamation-triangle-fill" />
+                            </span>
+                            <span className="quizlet-results-label">Частично</span>
+                            <span className="quizlet-results-value">{resultSummary.partial}</span>
                         </div>
-                        <div className="review-results-card">
-                            <div className="small text-muted">Забыла</div>
-                            <div className="fs-3 fw-semibold">{resultSummary.forgot}</div>
+
+                        <div className="quizlet-results-stat quizlet-results-stat-incorrect">
+                            <span className="quizlet-results-icon" aria-hidden>
+                                <i className="bi bi-x-circle-fill" />
+                            </span>
+                            <span className="quizlet-results-label">Забыла</span>
+                            <span className="quizlet-results-value">
+                                {resultSummary.forgot}
+                                <span className="quizlet-results-perf-emoji" aria-hidden>
+                                    {resultPerformanceEmoji}
+                                </span>
+                            </span>
+                        </div>
+
+                        <div className="quizlet-results-stat quizlet-results-stat-not-reviewed">
+                            <span className="quizlet-results-icon" aria-hidden>
+                                <i className="bi bi-dash-circle-fill" />
+                            </span>
+                            <span className="quizlet-results-label">Не повторено</span>
+                            <span className="quizlet-results-value">{resultSummary.notReviewed}</span>
                         </div>
                     </div>
 
-                    <div className="review-flashcard-actions justify-content-start">
+                    <div className="quizlet-results-time-row">
+                        <div className="quizlet-results-time" title="Время">
+                            <span className="quizlet-results-time-value">
+                                {Math.floor(trainingSession.elapsedSeconds / 60)}:
+                                {`${trainingSession.elapsedSeconds % 60}`.padStart(2, "0")}
+                            </span>
+                            <i className="bi bi-clock quizlet-results-time-icon" aria-hidden />
+                        </div>
+                    </div>
+
+                    <div className="quizlet-results-actions">
                         <button
                             type="button"
-                            className="btn btn-warning"
+                            className="btn btn-warning quizlet-results-action-btn quizlet-btn-orange"
                             disabled={resultSummary.forgottenIdsCount === 0}
                             onClick={repeatForgotten}
                         >
-                            повторить забытое
+                            <i className="bi bi-exclamation-triangle" aria-hidden />
+                            Повторить забытое
                         </button>
-                        <button type="button" className="btn btn-success" onClick={repeatAll}>
-                            повторить всё
+                        <button
+                            type="button"
+                            className="btn btn-success quizlet-results-action-btn"
+                            onClick={repeatAll}
+                        >
+                            <i className="bi bi-arrow-repeat" aria-hidden />
+                            Повторить всё
                         </button>
-                        <button type="button" className="btn btn-outline-secondary" onClick={resetTraining}>
-                            к выбору топиков
+                        <button
+                            type="button"
+                            className="btn btn-secondary quizlet-results-action-btn"
+                            onClick={resetTraining}
+                        >
+                            <i className="bi bi-box-arrow-right" aria-hidden />К выбору топиков
                         </button>
                     </div>
                 </div>

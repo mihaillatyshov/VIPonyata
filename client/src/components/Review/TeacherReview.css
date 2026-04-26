@@ -202,18 +202,12 @@
     background-color: #e0a800;
 }
 
-.review-results-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
-    margin-top: 16px;
+.quizlet-results-stat-partial .quizlet-results-icon {
+    color: #edc34e;
 }
 
-.review-results-card {
-    border-radius: 16px;
-    padding: 16px;
-    background: rgba(247, 252, 242, 0.8);
-    border: 1px solid rgba(103, 174, 45, 0.14);
+.quizlet-results-stat-not-reviewed .quizlet-results-icon {
+    color: #6c757d;
 }
 
 @media (max-width: 768px) {
