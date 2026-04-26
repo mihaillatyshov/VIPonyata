@@ -47,6 +47,8 @@ interface TrainingSession {
     isFinished: boolean;
 }
 
+type FlashcardDetailKey = "source" | "note" | "examples";
+
 const ROW_FIELDS = ["source", "word_jp", "ru", "note", "examples"] as const;
 type RowField = (typeof ROW_FIELDS)[number];
 
@@ -444,7 +446,7 @@ const TeacherReview = () => {
     const [trainingSession, setTrainingSession] = useState<TrainingSession | null>(null);
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
-    const [openedDetailKeys, setOpenedDetailKeys] = useState<Array<"source" | "note" | "examples">>([]);
+    const [openedDetailKeys, setOpenedDetailKeys] = useState<FlashcardDetailKey[]>([]);
 
     const loadData = () => {
         setLoadStatus(LoadStatus.LOADING);
@@ -872,9 +874,99 @@ const TeacherReview = () => {
         return Math.max(1, trainingSession.initialWordIds.length - trainingSession.queue.length + 1);
     }, [trainingSession]);
 
-    const toggleDetail = (detailKey: "source" | "note" | "examples") => {
+    const toggleDetail = (detailKey: FlashcardDetailKey) => {
         setOpenedDetailKeys((prev) =>
             prev.includes(detailKey) ? prev.filter((item) => item !== detailKey) : [...prev, detailKey],
+        );
+    };
+
+    const renderFlashcardExtraZone = (cardLanguage: "jp" | "ru") => {
+        if (currentWord === null) {
+            return null;
+        }
+
+        const detailKeys: FlashcardDetailKey[] = [];
+
+        if (cardLanguage === "jp") {
+            if (currentWord.source) {
+                detailKeys.push("source");
+            }
+
+            if (currentWord.examples) {
+                detailKeys.push("examples");
+            }
+        } else if (currentWord.note) {
+            detailKeys.push("note");
+        }
+
+        if (detailKeys.length === 0) {
+            return null;
+        }
+
+        return (
+            <div className="review-flashcard-extra-zone">
+                <div className="review-flashcard-extra-toggle">
+                    {detailKeys.includes("source") && (
+                        <button
+                            type="button"
+                            className={`btn btn-sm ${openedDetailKeys.includes("source") ? "btn-success" : "btn-outline-success"}`}
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                toggleDetail("source");
+                            }}
+                        >
+                            Источник
+                        </button>
+                    )}
+                    {detailKeys.includes("note") && (
+                        <button
+                            type="button"
+                            className={`btn btn-sm ${openedDetailKeys.includes("note") ? "btn-success" : "btn-outline-success"}`}
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                toggleDetail("note");
+                            }}
+                        >
+                            Примечание
+                        </button>
+                    )}
+                    {detailKeys.includes("examples") && (
+                        <button
+                            type="button"
+                            className={`btn btn-sm ${openedDetailKeys.includes("examples") ? "btn-success" : "btn-outline-success"}`}
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                toggleDetail("examples");
+                            }}
+                        >
+                            Примеры
+                        </button>
+                    )}
+                </div>
+
+                <div className="review-flashcard-extra-list">
+                    {detailKeys.includes("source") && openedDetailKeys.includes("source") && currentWord.source && (
+                        <div className="review-flashcard-extra-item">
+                            <div className="small text-muted mb-1">Источник</div>
+                            <div>{currentWord.source}</div>
+                        </div>
+                    )}
+                    {detailKeys.includes("note") && openedDetailKeys.includes("note") && currentWord.note && (
+                        <div className="review-flashcard-extra-item">
+                            <div className="small text-muted mb-1">Примечание</div>
+                            <div>{currentWord.note}</div>
+                        </div>
+                    )}
+                    {detailKeys.includes("examples") &&
+                        openedDetailKeys.includes("examples") &&
+                        currentWord.examples && (
+                            <div className="review-flashcard-extra-item">
+                                <div className="small text-muted mb-1">Примеры</div>
+                                <div style={{ whiteSpace: "pre-wrap" }}>{currentWord.examples}</div>
+                            </div>
+                        )}
+                </div>
+            </div>
         );
     };
 
@@ -1385,16 +1477,23 @@ const TeacherReview = () => {
                         >
                             <div className="flashcard-flip-inner">
                                 <div className="flashcard-face flashcard-face-front">
-                                    <div className="flashcard-content">
-                                        <div
-                                            className={`flashcard-main-word ${
-                                                trainingSession.direction === "ru_to_jp" ? "flashcard-main-word-ru" : ""
-                                            }`}
-                                        >
-                                            {trainingSession.direction === "jp_to_ru"
-                                                ? currentWord.word_jp
-                                                : currentWord.ru}
+                                    <div className="flashcard-content review-flashcard-back-content">
+                                        <div className="review-flashcard-answer">
+                                            <div
+                                                className={`flashcard-main-word ${
+                                                    trainingSession.direction === "ru_to_jp"
+                                                        ? "flashcard-main-word-ru"
+                                                        : ""
+                                                }`}
+                                            >
+                                                {trainingSession.direction === "jp_to_ru"
+                                                    ? currentWord.word_jp
+                                                    : currentWord.ru}
+                                            </div>
                                         </div>
+                                        {renderFlashcardExtraZone(
+                                            trainingSession.direction === "jp_to_ru" ? "jp" : "ru",
+                                        )}
                                     </div>
                                 </div>
 
@@ -1413,70 +1512,9 @@ const TeacherReview = () => {
                                                     : currentWord.word_jp}
                                             </div>
                                         </div>
-
-                                        <div className="review-flashcard-extra-zone">
-                                            <div className="review-flashcard-extra-toggle">
-                                                {currentWord.source && (
-                                                    <button
-                                                        type="button"
-                                                        className={`btn btn-sm ${openedDetailKeys.includes("source") ? "btn-success" : "btn-outline-success"}`}
-                                                        onClick={(event) => {
-                                                            event.stopPropagation();
-                                                            toggleDetail("source");
-                                                        }}
-                                                    >
-                                                        Источник
-                                                    </button>
-                                                )}
-                                                {currentWord.note && (
-                                                    <button
-                                                        type="button"
-                                                        className={`btn btn-sm ${openedDetailKeys.includes("note") ? "btn-success" : "btn-outline-success"}`}
-                                                        onClick={(event) => {
-                                                            event.stopPropagation();
-                                                            toggleDetail("note");
-                                                        }}
-                                                    >
-                                                        Примечание
-                                                    </button>
-                                                )}
-                                                {currentWord.examples && (
-                                                    <button
-                                                        type="button"
-                                                        className={`btn btn-sm ${openedDetailKeys.includes("examples") ? "btn-success" : "btn-outline-success"}`}
-                                                        onClick={(event) => {
-                                                            event.stopPropagation();
-                                                            toggleDetail("examples");
-                                                        }}
-                                                    >
-                                                        Примеры
-                                                    </button>
-                                                )}
-                                            </div>
-
-                                            <div className="review-flashcard-extra-list">
-                                                {openedDetailKeys.includes("source") && currentWord.source && (
-                                                    <div className="review-flashcard-extra-item">
-                                                        <div className="small text-muted mb-1">Источник</div>
-                                                        <div>{currentWord.source}</div>
-                                                    </div>
-                                                )}
-                                                {openedDetailKeys.includes("note") && currentWord.note && (
-                                                    <div className="review-flashcard-extra-item">
-                                                        <div className="small text-muted mb-1">Примечание</div>
-                                                        <div>{currentWord.note}</div>
-                                                    </div>
-                                                )}
-                                                {openedDetailKeys.includes("examples") && currentWord.examples && (
-                                                    <div className="review-flashcard-extra-item">
-                                                        <div className="small text-muted mb-1">Примеры</div>
-                                                        <div style={{ whiteSpace: "pre-wrap" }}>
-                                                            {currentWord.examples}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
+                                        {renderFlashcardExtraZone(
+                                            trainingSession.direction === "jp_to_ru" ? "ru" : "jp",
+                                        )}
                                     </div>
                                 </div>
                             </div>
