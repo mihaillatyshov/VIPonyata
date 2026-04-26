@@ -211,7 +211,7 @@ const QuizletQuizStart = ({
                         </button>
                         {quizType === "flashcards" && (
                             <div className="mt-2 border rounded p-2 bg-light">
-                                <div className="small fw-semibold mb-2">Направление перевода</div>
+                                {/* <div className="small fw-semibold mb-2">Направление перевода</div> */}
                                 <div className="d-flex gap-2">
                                     <button
                                         type="button"
@@ -232,13 +232,16 @@ const QuizletQuizStart = ({
                                         ru → jp
                                     </button>
                                 </div>
-                                <div className="form-check mt-3 mb-0">
+                                <div className="form-check quizlet-setup-check mt-3 mb-0">
                                     <input
                                         className="form-check-input"
                                         id="quizletAutoSpeakAfterFlip"
                                         type="checkbox"
                                         checked={autoSpeakAfterFlip}
-                                        onChange={(e) => setAutoSpeakAfterFlip(e.target.checked)}
+                                        onChange={(e) => {
+                                            setAutoSpeakAfterFlip(e.target.checked);
+                                            e.target.blur();
+                                        }}
                                     />
                                     <label className="form-check-label" htmlFor="quizletAutoSpeakAfterFlip">
                                         Озвучивать после переворота
@@ -268,13 +271,16 @@ const QuizletQuizStart = ({
                 </div>
             </div>
 
-            <div className="form-check mb-3">
+            <div className="form-check quizlet-setup-check mb-3">
                 <input
                     className="form-check-input"
                     id="quizletShowHints"
                     type="checkbox"
                     checked={showHints}
-                    onChange={(e) => setShowHints(e.target.checked)}
+                    onChange={(e) => {
+                        setShowHints(e.target.checked);
+                        e.target.blur();
+                    }}
                 />
                 <label className="form-check-label" htmlFor="quizletShowHints">
                     Показывать чтения для иероглифов
@@ -325,7 +331,7 @@ const QuizletQuizStart = ({
                         {personalSubgroups.length > 0 && (
                             <div className="d-flex flex-wrap gap-2">
                                 {personalSubgroups.map((subgroup) => (
-                                    <label key={subgroup.id} className="form-check me-3">
+                                    <label key={subgroup.id} className="form-check me-3 quizlet-topic-checkbox-label">
                                         <input
                                             className="form-check-input"
                                             type="checkbox"
@@ -394,7 +400,7 @@ const QuizletQuizStart = ({
                         </div>
                         <div className="d-flex flex-wrap gap-2">
                             {nestedSubgroups.map((subgroup) => (
-                                <label key={subgroup.id} className="form-check me-3">
+                                <label key={subgroup.id} className="form-check me-3 quizlet-topic-checkbox-label">
                                     <input
                                         className="form-check-input"
                                         type="checkbox"

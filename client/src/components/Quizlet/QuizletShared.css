@@ -220,6 +220,11 @@
     white-space: nowrap;
 }
 
+.quizlet-setup-check .form-check-input,
+.quizlet-setup-check .form-check-label {
+    cursor: pointer;
+}
+
 /* ── Teacher dictionary topic cards ─────────────────────────────────────── */
 
 .quizlet-topic-card-btn {
@@ -473,6 +478,23 @@
 
 .quizlet-group-checkbox-label:hover {
     background-color: rgba(13, 110, 253, 0.08);
+}
+
+.quizlet-topic-checkbox-label {
+    cursor: pointer;
+    user-select: none;
+    padding: 2px 6px;
+    border-radius: 8px;
+    transition: background-color 0.15s ease;
+}
+
+.quizlet-topic-checkbox-label:hover {
+    background-color: rgba(13, 110, 253, 0.06);
+}
+
+.quizlet-topic-checkbox-label .form-check-input,
+.quizlet-topic-checkbox-label .form-check-label {
+    cursor: pointer;
 }
 
 .quizlet-group-checkbox-title {
