@@ -52,7 +52,9 @@
 
 .quizlet-progress-history-table tbody td:nth-child(3),
 .quizlet-progress-history-table tbody td:nth-child(4),
-.quizlet-progress-history-table tbody td:nth-child(5) {
+.quizlet-progress-history-table tbody td:nth-child(5),
+.quizlet-progress-history-table tbody td:nth-child(6),
+.quizlet-progress-history-table tbody td:nth-child(7) {
     text-align: center;
 }
 

@@ -210,6 +210,26 @@
     color: #6c757d;
 }
 
+.review-training-history {
+    max-width: 100%;
+}
+
+.review-history-details-wrap {
+    padding-top: 4px;
+}
+
+.review-history-detail-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.review-history-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
 @media (max-width: 768px) {
     .review-flashcard-exercise {
         --flashcard-max-width: min(100%, 460px);

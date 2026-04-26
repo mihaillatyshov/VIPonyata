@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import Loading from "components/Common/Loading";
 import ErrorPage from "components/ErrorPages/ErrorPage";
 import TrainingSessionHeader from "components/Quizlet/TrainingSessionHeader";
+import ReviewTrainingHistory, { ReviewTrainingHistoryEntry } from "components/Review/ReviewTrainingHistory";
 import { AjaxDelete, AjaxGet, AjaxPatch, AjaxPost } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
 import { TReviewDictionary, TReviewTopic, TReviewWord } from "models/TReview";
@@ -38,6 +39,7 @@ interface TrainingAssessment {
 interface TrainingSession {
     allWordIds: number[];
     initialWordIds: number[];
+    topicIds: number[];
     queue: number[];
     openedWordIds: number[];
     direction: "jp_to_ru" | "ru_to_jp";
@@ -151,6 +153,108 @@ const insertWordLater = (queue: number[], wordId: number, times: number) => {
 };
 
 const normalizeText = (value: string) => value.trim();
+
+const REVIEW_TRAINING_HISTORY_STORAGE_KEY = "viponyata-review-training-history";
+const REVIEW_TRAINING_HISTORY_LIMIT = 100;
+
+const isDirectionValue = (value: unknown): value is TrainingSession["direction"] =>
+    value === "jp_to_ru" || value === "ru_to_jp";
+
+const isReviewTrainingHistoryEntry = (value: unknown): value is ReviewTrainingHistoryEntry => {
+    if (typeof value !== "object" || value === null) {
+        return false;
+    }
+
+    const entry = value as Partial<ReviewTrainingHistoryEntry>;
+
+    return (
+        typeof entry.id === "string" &&
+        typeof entry.startedAt === "number" &&
+        typeof entry.endedAt === "number" &&
+        typeof entry.elapsedSeconds === "number" &&
+        typeof entry.reviewedWords === "number" &&
+        typeof entry.skippedWords === "number" &&
+        typeof entry.incorrectAnswers === "number" &&
+        typeof entry.totalWords === "number" &&
+        isDirectionValue(entry.direction) &&
+        typeof entry.easyCount === "number" &&
+        typeof entry.partialCount === "number" &&
+        typeof entry.forgotCount === "number" &&
+        Array.isArray(entry.topicTitles) &&
+        entry.topicTitles.every((item) => typeof item === "string")
+    );
+};
+
+const getReviewTrainingHistoryFingerprint = (entry: ReviewTrainingHistoryEntry) =>
+    JSON.stringify({
+        startedAt: entry.startedAt,
+        endedAt: entry.endedAt,
+        elapsedSeconds: entry.elapsedSeconds,
+        reviewedWords: entry.reviewedWords,
+        skippedWords: entry.skippedWords,
+        incorrectAnswers: entry.incorrectAnswers,
+        totalWords: entry.totalWords,
+        direction: entry.direction,
+        easyCount: entry.easyCount,
+        partialCount: entry.partialCount,
+        forgotCount: entry.forgotCount,
+        topicTitles: [...entry.topicTitles].sort(),
+    });
+
+const dedupeReviewTrainingHistoryEntries = (entries: ReviewTrainingHistoryEntry[]) => {
+    const seenFingerprints = new Set<string>();
+
+    return entries.filter((entry) => {
+        const fingerprint = getReviewTrainingHistoryFingerprint(entry);
+
+        if (seenFingerprints.has(fingerprint)) {
+            return false;
+        }
+
+        seenFingerprints.add(fingerprint);
+        return true;
+    });
+};
+
+const getTrainingResultSummary = (session: TrainingSession) => {
+    let easy = 0;
+    let partial = 0;
+    let forgot = 0;
+    let notReviewed = 0;
+
+    session.initialWordIds.forEach((wordId) => {
+        const assessment = session.assessments[wordId];
+        const isOpened = session.openedWordIds.includes(wordId);
+
+        if (!isOpened) {
+            notReviewed += 1;
+            return;
+        }
+
+        if (!assessment || (assessment.forgot === 0 && assessment.partial === 0)) {
+            easy += 1;
+            return;
+        }
+
+        if (assessment.forgot > 0) {
+            forgot += 1;
+            return;
+        }
+
+        partial += 1;
+    });
+
+    return {
+        easy,
+        partial,
+        forgot,
+        notReviewed,
+        forgottenIdsCount: partial + forgot + notReviewed,
+    };
+};
+
+const getTrainingIncorrectAnswers = (session: TrainingSession) =>
+    Object.values(session.assessments).reduce((total, assessment) => total + assessment.forgot + assessment.partial, 0);
 
 const isRowEmpty = (row: EditorRow) =>
     normalizeText(row.source) === "" &&
@@ -412,6 +516,7 @@ const TeacherReview = () => {
     const routePaths = {
         root: "/review",
         training: "/review/training",
+        history: "/review/training/history",
         flashcards: "/review/flashcards",
         results: "/review/results",
     } as const;
@@ -426,6 +531,7 @@ const TeacherReview = () => {
 
     const isRootRoute = location.pathname === routePaths.root;
     const isTrainingSetupRoute = location.pathname === routePaths.training;
+    const isTrainingHistoryRoute = location.pathname === routePaths.history;
     const isFlashcardsRoute = location.pathname === routePaths.flashcards;
     const isResultsRoute = location.pathname === routePaths.results;
 
@@ -447,6 +553,9 @@ const TeacherReview = () => {
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
     const [openedDetailKeys, setOpenedDetailKeys] = useState<FlashcardDetailKey[]>([]);
+    const [trainingHistory, setTrainingHistory] = useState<ReviewTrainingHistoryEntry[]>([]);
+    const [hasTrainingHistoryError, setHasTrainingHistoryError] = useState(false);
+    const [expandedHistoryEntryId, setExpandedHistoryEntryId] = useState<string | null>(null);
 
     const loadData = () => {
         setLoadStatus(LoadStatus.LOADING);
@@ -464,6 +573,33 @@ const TeacherReview = () => {
 
     useEffect(() => {
         loadData();
+    }, []);
+
+    useEffect(() => {
+        try {
+            const rawValue = window.localStorage.getItem(REVIEW_TRAINING_HISTORY_STORAGE_KEY);
+
+            if (rawValue === null) {
+                setTrainingHistory([]);
+                return;
+            }
+
+            const parsedValue = JSON.parse(rawValue);
+            if (!Array.isArray(parsedValue)) {
+                throw new Error("History payload is not an array");
+            }
+
+            const nextHistory = dedupeReviewTrainingHistoryEntries(parsedValue.filter(isReviewTrainingHistoryEntry));
+
+            setTrainingHistory(nextHistory);
+
+            if (nextHistory.length !== parsedValue.length) {
+                window.localStorage.setItem(REVIEW_TRAINING_HISTORY_STORAGE_KEY, JSON.stringify(nextHistory));
+            }
+        } catch {
+            setTrainingHistory([]);
+            setHasTrainingHistoryError(true);
+        }
     }, []);
 
     useEffect(() => {
@@ -681,9 +817,28 @@ const TeacherReview = () => {
         });
     };
 
-    const startTraining = (wordIds?: number[], allWordIds?: number[]) => {
+    const persistTrainingHistory = (entry: ReviewTrainingHistoryEntry) => {
+        setTrainingHistory((prev) => {
+            const nextHistory = dedupeReviewTrainingHistoryEntries([entry, ...prev]).slice(
+                0,
+                REVIEW_TRAINING_HISTORY_LIMIT,
+            );
+
+            try {
+                window.localStorage.setItem(REVIEW_TRAINING_HISTORY_STORAGE_KEY, JSON.stringify(nextHistory));
+                setHasTrainingHistoryError(false);
+            } catch {
+                setHasTrainingHistoryError(true);
+            }
+
+            return nextHistory;
+        });
+    };
+
+    const startTraining = (wordIds?: number[], allWordIds?: number[], topicIds?: number[]) => {
         const selectedWordIds =
             wordIds ?? words.filter((word) => selectedTrainingTopicIds.includes(word.topic_id)).map((word) => word.id);
+        const sessionTopicIds = topicIds ?? selectedTrainingTopicIds;
 
         if (selectedWordIds.length === 0) {
             return;
@@ -692,6 +847,7 @@ const TeacherReview = () => {
         setTrainingSession({
             allWordIds: [...(allWordIds ?? selectedWordIds)],
             initialWordIds: [...selectedWordIds],
+            topicIds: [...sessionTopicIds],
             queue: shuffleArray(selectedWordIds),
             openedWordIds: [],
             direction: trainingDirection,
@@ -703,6 +859,40 @@ const TeacherReview = () => {
     };
 
     const finishTraining = (nextQueue: number[], nextAssessments: Record<number, TrainingAssessment>) => {
+        if (trainingSession === null || trainingSession.isFinished) {
+            return;
+        }
+
+        const finishedAt = Date.now();
+        const finishedSession = {
+            ...trainingSession,
+            queue: nextQueue,
+            assessments: nextAssessments,
+            elapsedSeconds: Math.floor((finishedAt - trainingSession.startedAt) / 1000),
+            isFinished: true,
+        };
+        const summary = getTrainingResultSummary(finishedSession);
+        const reviewedWords = finishedSession.initialWordIds.length - summary.notReviewed;
+        const topicTitleById = new Map(topics.map((topic) => [topic.id, topic.title]));
+
+        persistTrainingHistory({
+            id: `${finishedSession.startedAt}_${Math.random().toString(36).slice(2, 10)}`,
+            startedAt: finishedSession.startedAt,
+            endedAt: finishedAt,
+            elapsedSeconds: finishedSession.elapsedSeconds,
+            reviewedWords,
+            skippedWords: summary.notReviewed,
+            incorrectAnswers: getTrainingIncorrectAnswers(finishedSession),
+            totalWords: finishedSession.initialWordIds.length,
+            direction: finishedSession.direction,
+            easyCount: summary.easy,
+            partialCount: summary.partial,
+            forgotCount: summary.forgot,
+            topicTitles: finishedSession.topicIds
+                .map((topicId) => topicTitleById.get(topicId))
+                .filter((topicTitle): topicTitle is string => Boolean(topicTitle)),
+        });
+
         setTrainingSession((prev) => {
             if (prev === null) {
                 return prev;
@@ -712,7 +902,7 @@ const TeacherReview = () => {
                 ...prev,
                 queue: nextQueue,
                 assessments: nextAssessments,
-                elapsedSeconds: Math.floor((Date.now() - prev.startedAt) / 1000),
+                elapsedSeconds: finishedSession.elapsedSeconds,
                 isFinished: true,
             };
         });
@@ -780,7 +970,7 @@ const TeacherReview = () => {
             return;
         }
 
-        startTraining(trainingSession.allWordIds, trainingSession.allWordIds);
+        startTraining(trainingSession.allWordIds, trainingSession.allWordIds, trainingSession.topicIds);
     };
 
     const repeatForgotten = () => {
@@ -803,7 +993,7 @@ const TeacherReview = () => {
             return;
         }
 
-        startTraining(forgottenWordIds, trainingSession.allWordIds);
+        startTraining(forgottenWordIds, trainingSession.allWordIds, trainingSession.topicIds);
     };
 
     const resultSummary = useMemo(() => {
@@ -811,40 +1001,7 @@ const TeacherReview = () => {
             return { easy: 0, partial: 0, forgot: 0, notReviewed: 0, forgottenIdsCount: 0 };
         }
 
-        let easy = 0;
-        let partial = 0;
-        let forgot = 0;
-        let notReviewed = 0;
-
-        trainingSession.initialWordIds.forEach((wordId) => {
-            const assessment = trainingSession.assessments[wordId];
-            const isOpened = trainingSession.openedWordIds.includes(wordId);
-
-            if (!isOpened) {
-                notReviewed += 1;
-                return;
-            }
-
-            if (!assessment || (assessment.forgot === 0 && assessment.partial === 0)) {
-                easy += 1;
-                return;
-            }
-
-            if (assessment.forgot > 0) {
-                forgot += 1;
-                return;
-            }
-
-            partial += 1;
-        });
-
-        return {
-            easy,
-            partial,
-            forgot,
-            notReviewed,
-            forgottenIdsCount: partial + forgot + notReviewed,
-        };
+        return getTrainingResultSummary(trainingSession);
     }, [trainingSession]);
 
     const resultPerformanceEmoji = useMemo(() => {
@@ -860,10 +1017,7 @@ const TeacherReview = () => {
             return 0;
         }
 
-        return Object.values(trainingSession.assessments).reduce(
-            (total, assessment) => total + assessment.forgot + assessment.partial,
-            0,
-        );
+        return getTrainingIncorrectAnswers(trainingSession);
     }, [trainingSession]);
 
     const trainingCurrentPosition = useMemo(() => {
@@ -878,6 +1032,10 @@ const TeacherReview = () => {
         setOpenedDetailKeys((prev) =>
             prev.includes(detailKey) ? prev.filter((item) => item !== detailKey) : [...prev, detailKey],
         );
+    };
+
+    const toggleHistoryEntry = (entryId: string) => {
+        setExpandedHistoryEntryId((prev) => (prev === entryId ? null : entryId));
     };
 
     const renderFlashcardExtraZone = (cardLanguage: "jp" | "ru") => {
@@ -995,8 +1153,8 @@ const TeacherReview = () => {
                     <button
                         type="button"
                         role="tab"
-                        aria-selected={!isTrainingSetupRoute}
-                        className={`btn quizlet-student-dictionary-tab ${!isTrainingSetupRoute ? "active" : ""}`}
+                        aria-selected={isRootRoute}
+                        className={`btn quizlet-student-dictionary-tab ${isRootRoute ? "active" : ""}`}
                         onClick={() => navigate(routePaths.root)}
                     >
                         Словари
@@ -1009,6 +1167,15 @@ const TeacherReview = () => {
                         onClick={() => navigate(routePaths.training)}
                     >
                         Тренировка
+                    </button>
+                    <button
+                        type="button"
+                        role="tab"
+                        aria-selected={isTrainingHistoryRoute}
+                        className={`btn quizlet-student-dictionary-tab ${isTrainingHistoryRoute ? "active" : ""}`}
+                        onClick={() => navigate(routePaths.history)}
+                    >
+                        История
                     </button>
                 </div>
             )}
@@ -1296,142 +1463,161 @@ const TeacherReview = () => {
                 </div>
             )}
 
-            {isTrainingSetupRoute && (
+            {(isTrainingSetupRoute || isTrainingHistoryRoute) && (
                 <div className="review-section-card">
                     <div className="review-training-setup">
-                        <section className="review-training-panel">
-                            {/* <div className="review-training-section-label">Направление</div> */}
-                            <div className="review-direction-toggle">
-                                <button
-                                    type="button"
-                                    className={`btn review-direction-button ${trainingDirection === "jp_to_ru" ? "btn-success" : "btn-outline-success"}`}
-                                    onClick={() => setTrainingDirection("jp_to_ru")}
-                                >
-                                    jp → ru
-                                </button>
-                                <button
-                                    type="button"
-                                    className={`btn review-direction-button ${trainingDirection === "ru_to_jp" ? "btn-success" : "btn-outline-success"}`}
-                                    onClick={() => setTrainingDirection("ru_to_jp")}
-                                >
-                                    ru → jp
-                                </button>
-                            </div>
+                        {isTrainingSetupRoute && (
+                            <>
+                                <section className="review-training-panel">
+                                    <div className="review-direction-toggle">
+                                        <button
+                                            type="button"
+                                            className={`btn review-direction-button ${trainingDirection === "jp_to_ru" ? "btn-success" : "btn-outline-success"}`}
+                                            onClick={() => setTrainingDirection("jp_to_ru")}
+                                        >
+                                            jp → ru
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={`btn review-direction-button ${trainingDirection === "ru_to_jp" ? "btn-success" : "btn-outline-success"}`}
+                                            onClick={() => setTrainingDirection("ru_to_jp")}
+                                        >
+                                            ru → jp
+                                        </button>
+                                    </div>
 
-                            {/* <div className="small text-muted review-training-helper-text">
-                                Без ограничений по повторениям. Повторения для «забыла» и «частично» ставятся в очередь
-                                случайно, но не раньше чем через 8 карточек, если это возможно.
-                            </div> */}
-                        </section>
+                                    {/* <div className="small text-muted review-training-helper-text">
+                                        Без ограничений по повторениям. Повторения для «забыла» и «частично» ставятся в очередь
+                                        случайно, но не раньше чем через 8 карточек, если это возможно.
+                                    </div> */}
+                                </section>
 
-                        <section className="review-training-panel">
-                            <div className="review-training-section-label">Топики</div>
-                            <div className="review-training-topic-list">
-                                {groupedTopics.map(({ dictionary, topics: dictionaryTopics }) => (
-                                    <div className="border rounded p-2 mb-2" key={dictionary.id}>
-                                        {(() => {
-                                            const dictionaryTopicIds = dictionaryTopics.map((topic) => topic.id);
-                                            const selectedTopicsCount = dictionaryTopicIds.filter((topicId) =>
-                                                selectedTrainingTopicIds.includes(topicId),
-                                            ).length;
-                                            const isDictionarySelected =
-                                                dictionaryTopicIds.length > 0 &&
-                                                selectedTopicsCount === dictionaryTopicIds.length;
-                                            const isDictionaryPartiallySelected =
-                                                selectedTopicsCount > 0 && !isDictionarySelected;
-                                            const dictionaryWordCount = words.filter((word) =>
-                                                dictionaryTopicIds.includes(word.topic_id),
-                                            ).length;
-
-                                            return (
-                                                <div className="d-flex align-items-center mb-2">
-                                                    <label className="form-check d-inline-flex align-items-center gap-2 mb-0 quizlet-group-checkbox-label">
-                                                        <input
-                                                            className="form-check-input mt-0"
-                                                            type="checkbox"
-                                                            checked={isDictionarySelected}
-                                                            disabled={dictionaryTopics.length === 0}
-                                                            ref={(input) => {
-                                                                if (input === null) {
-                                                                    return;
-                                                                }
-
-                                                                input.indeterminate = isDictionaryPartiallySelected;
-                                                            }}
-                                                            onChange={(event) => {
-                                                                toggleTrainingDictionary(dictionary.id);
-                                                                event.target.blur();
-                                                            }}
-                                                        />
-                                                        <span className="fw-bold text-dark quizlet-group-checkbox-title">
-                                                            {dictionary.title}
-                                                            <span className="quizlet-dictionary-word-count">
-                                                                {` (${dictionaryTopics.length} тем • ${dictionaryWordCount} карточек)`}
-                                                            </span>
-                                                        </span>
-                                                    </label>
-                                                </div>
-                                            );
-                                        })()}
-
-                                        {dictionaryTopics.length === 0 ? (
-                                            <div className="small text-muted">Нет топиков</div>
-                                        ) : (
-                                            <div className="d-flex flex-wrap gap-2">
-                                                {dictionaryTopics.map((topic) => {
-                                                    const topicWordCount = words.filter(
-                                                        (word) => word.topic_id === topic.id,
+                                <section className="review-training-panel">
+                                    <div className="review-training-section-label">Топики</div>
+                                    <div className="review-training-topic-list">
+                                        {groupedTopics.map(({ dictionary, topics: dictionaryTopics }) => (
+                                            <div className="border rounded p-2 mb-2" key={dictionary.id}>
+                                                {(() => {
+                                                    const dictionaryTopicIds = dictionaryTopics.map(
+                                                        (topic) => topic.id,
+                                                    );
+                                                    const selectedTopicsCount = dictionaryTopicIds.filter((topicId) =>
+                                                        selectedTrainingTopicIds.includes(topicId),
                                                     ).length;
-                                                    const isSelected = selectedTrainingTopicIds.includes(topic.id);
+                                                    const isDictionarySelected =
+                                                        dictionaryTopicIds.length > 0 &&
+                                                        selectedTopicsCount === dictionaryTopicIds.length;
+                                                    const isDictionaryPartiallySelected =
+                                                        selectedTopicsCount > 0 && !isDictionarySelected;
+                                                    const dictionaryWordCount = words.filter((word) =>
+                                                        dictionaryTopicIds.includes(word.topic_id),
+                                                    ).length;
 
                                                     return (
-                                                        <label
-                                                            key={topic.id}
-                                                            className="form-check me-3 quizlet-topic-checkbox-label"
-                                                        >
-                                                            <input
-                                                                className="form-check-input"
-                                                                type="checkbox"
-                                                                checked={isSelected}
-                                                                onChange={(event) => {
-                                                                    toggleTrainingTopic(topic.id);
-                                                                    event.target.blur();
-                                                                }}
-                                                            />
-                                                            <span className="form-check-label">
-                                                                {topic.title}
-                                                                <span className="quizlet-dictionary-word-count">
-                                                                    {` (${topicWordCount})`}
-                                                                </span>
-                                                            </span>
-                                                        </label>
-                                                    );
-                                                })}
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
+                                                        <div className="d-flex align-items-center mb-2">
+                                                            <label className="form-check d-inline-flex align-items-center gap-2 mb-0 quizlet-group-checkbox-label">
+                                                                <input
+                                                                    className="form-check-input mt-0"
+                                                                    type="checkbox"
+                                                                    checked={isDictionarySelected}
+                                                                    disabled={dictionaryTopics.length === 0}
+                                                                    ref={(input) => {
+                                                                        if (input === null) {
+                                                                            return;
+                                                                        }
 
-                        <section className="review-training-panel review-training-panel-start">
-                            <div className="review-training-start-row">
-                                <button
-                                    type="button"
-                                    className="btn btn-success review-training-start-button"
-                                    disabled={selectedTrainingTopicIds.length === 0}
-                                    onClick={() => startTraining()}
-                                >
-                                    Начать тренировку
-                                </button>
-                                <div className="review-training-selected-count">
-                                    Выбрано карточек: <span>{selectedTrainingWordsCount}</span>
-                                </div>
-                            </div>
-                            {/* <div className="small text-muted review-training-start-hint">
-                                Выберите хотя бы один топик, чтобы запустить тренировку.
-                            </div> */}
-                        </section>
+                                                                        input.indeterminate =
+                                                                            isDictionaryPartiallySelected;
+                                                                    }}
+                                                                    onChange={(event) => {
+                                                                        toggleTrainingDictionary(dictionary.id);
+                                                                        event.target.blur();
+                                                                    }}
+                                                                />
+                                                                <span className="fw-bold text-dark quizlet-group-checkbox-title">
+                                                                    {dictionary.title}
+                                                                    <span className="quizlet-dictionary-word-count">
+                                                                        {` (${dictionaryTopics.length} тем • ${dictionaryWordCount} карточек)`}
+                                                                    </span>
+                                                                </span>
+                                                            </label>
+                                                        </div>
+                                                    );
+                                                })()}
+
+                                                {dictionaryTopics.length === 0 ? (
+                                                    <div className="small text-muted">Нет топиков</div>
+                                                ) : (
+                                                    <div className="d-flex flex-wrap gap-2">
+                                                        {dictionaryTopics.map((topic) => {
+                                                            const topicWordCount = words.filter(
+                                                                (word) => word.topic_id === topic.id,
+                                                            ).length;
+                                                            const isSelected = selectedTrainingTopicIds.includes(
+                                                                topic.id,
+                                                            );
+
+                                                            return (
+                                                                <label
+                                                                    key={topic.id}
+                                                                    className="form-check me-3 quizlet-topic-checkbox-label"
+                                                                >
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        checked={isSelected}
+                                                                        onChange={(event) => {
+                                                                            toggleTrainingTopic(topic.id);
+                                                                            event.target.blur();
+                                                                        }}
+                                                                    />
+                                                                    <span className="form-check-label">
+                                                                        {topic.title}
+                                                                        <span className="quizlet-dictionary-word-count">
+                                                                            {` (${topicWordCount})`}
+                                                                        </span>
+                                                                    </span>
+                                                                </label>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+
+                                <section className="review-training-panel review-training-panel-start">
+                                    <div className="review-training-start-row">
+                                        <button
+                                            type="button"
+                                            className="btn btn-success review-training-start-button"
+                                            disabled={selectedTrainingTopicIds.length === 0}
+                                            onClick={() => startTraining()}
+                                        >
+                                            Начать тренировку
+                                        </button>
+                                        <div className="review-training-selected-count">
+                                            Выбрано карточек: <span>{selectedTrainingWordsCount}</span>
+                                        </div>
+                                    </div>
+                                    {/* <div className="small text-muted review-training-start-hint">
+                                        Выберите хотя бы один топик, чтобы запустить тренировку.
+                                    </div> */}
+                                </section>
+                            </>
+                        )}
+
+                        {isTrainingHistoryRoute && (
+                            <section className="review-training-panel">
+                                <ReviewTrainingHistory
+                                    entries={trainingHistory}
+                                    expandedEntryId={expandedHistoryEntryId}
+                                    hasStorageError={hasTrainingHistoryError}
+                                    onRowClick={toggleHistoryEntry}
+                                />
+                            </section>
+                        )}
                     </div>
                 </div>
             )}
