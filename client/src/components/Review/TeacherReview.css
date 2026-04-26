@@ -53,36 +53,78 @@
     text-decoration: none;
 }
 
-.review-training-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 16px;
+.review-training-setup {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 860px;
+    margin: 0 auto;
+}
+
+.review-training-panel {
+    padding: 0;
+}
+
+.review-training-panel-start {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.review-training-start-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.review-training-section-label {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 14px;
 }
 
 .review-training-topic-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    max-height: 420px;
-    overflow: auto;
-}
-
-.review-training-topic-group {
-    border: 1px solid rgba(103, 174, 45, 0.14);
-    border-radius: 14px;
-    padding: 12px 14px;
-    background: rgba(247, 252, 242, 0.7);
-}
-
-.review-training-topic-title {
-    font-weight: 700;
-    margin-bottom: 8px;
+    gap: 12px;
 }
 
 .review-direction-toggle {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     flex-wrap: wrap;
+}
+
+.review-direction-button {
+    min-width: 132px;
+}
+
+.review-training-helper-text {
+    margin-top: 12px;
+}
+
+.review-training-start-button {
+    min-width: min(100%, 320px);
+    min-height: 48px;
+    font-weight: 600;
+}
+
+.review-training-selected-count {
+    color: #8f98a3;
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+.review-training-selected-count span {
+    color: #212529;
+    font-weight: 600;
+}
+
+.review-training-start-hint {
+    margin-top: 10px;
 }
 
 .review-flashcard-shell {
@@ -144,6 +186,20 @@
 
 .review-flashcard-actions .btn {
     min-width: 120px;
+    border: 0;
+    color: #ffffff;
+}
+
+.review-flashcard-actions .btn:hover,
+.review-flashcard-actions .btn:focus,
+.review-flashcard-actions .btn:active {
+    color: #ffffff;
+}
+
+.review-flashcard-actions .btn-warning:hover,
+.review-flashcard-actions .btn-warning:focus,
+.review-flashcard-actions .btn-warning:active {
+    background-color: #e0a800;
 }
 
 .review-results-grid {

@@ -62,6 +62,62 @@ const wordsToRows = (words: TReviewWord[]): EditorRow[] =>
         examples: word.examples ?? "",
     }));
 
+const parseClipboardTable = (text: string): string[][] => {
+    const rows: string[][] = [];
+    let currentRow: string[] = [];
+    let currentCell = "";
+    let inQuotes = false;
+
+    const pushCell = () => {
+        currentRow.push(currentCell);
+        currentCell = "";
+    };
+
+    const pushRow = () => {
+        pushCell();
+        rows.push(currentRow);
+        currentRow = [];
+    };
+
+    for (let index = 0; index < text.length; index += 1) {
+        const char = text[index];
+        const nextChar = text[index + 1];
+
+        if (char === '"') {
+            if (inQuotes && nextChar === '"') {
+                currentCell += '"';
+                index += 1;
+                continue;
+            }
+
+            inQuotes = !inQuotes;
+            continue;
+        }
+
+        if (!inQuotes && char === "\t") {
+            pushCell();
+            continue;
+        }
+
+        if (!inQuotes && (char === "\n" || char === "\r")) {
+            if (char === "\r" && nextChar === "\n") {
+                index += 1;
+            }
+
+            pushRow();
+            continue;
+        }
+
+        currentCell += char;
+    }
+
+    if (currentCell !== "" || currentRow.length > 0) {
+        pushRow();
+    }
+
+    return rows.filter((row) => row.some((cell) => cell.trim() !== ""));
+};
+
 const shuffleArray = <T,>(items: T[]) => {
     const result = [...items];
 
@@ -210,21 +266,14 @@ const ReviewTopicEditor = ({ topic, initialWords, onSaved }: ReviewTopicEditorPr
 
         event.preventDefault();
 
-        const pastedRows: EditorRow[] = text
-            .split(/\r?\n/)
-            .filter((line) => line.trim() !== "")
-            .map((line) => {
-                const cells = line.split("\t").map((cell) => cell.trim());
-
-                return {
-                    key: makeKey(),
-                    source: cells[0] ?? "",
-                    word_jp: cells[1] ?? "",
-                    ru: cells[2] ?? "",
-                    note: cells[3] ?? "",
-                    examples: cells[4] ?? "",
-                };
-            });
+        const pastedRows: EditorRow[] = parseClipboardTable(text).map((cells) => ({
+            key: makeKey(),
+            source: cells[0]?.trim() ?? "",
+            word_jp: cells[1]?.trim() ?? "",
+            ru: cells[2]?.trim() ?? "",
+            note: cells[3]?.trim() ?? "",
+            examples: cells[4]?.trim() ?? "",
+        }));
 
         if (pastedRows.length === 0) {
             return;
@@ -504,6 +553,11 @@ const TeacherReview = () => {
         return wordsById.get(trainingSession.queue[0]) ?? null;
     }, [trainingSession, wordsById]);
 
+    const selectedTrainingWordsCount = useMemo(
+        () => words.filter((word) => selectedTrainingTopicIds.includes(word.topic_id)).length,
+        [words, selectedTrainingTopicIds],
+    );
+
     useEffect(() => {
         setIsFlipped(false);
         setOpenedDetailKeys([]);
@@ -600,6 +654,26 @@ const TeacherReview = () => {
         setSelectedTrainingTopicIds((prev) =>
             prev.includes(topicId) ? prev.filter((item) => item !== topicId) : [...prev, topicId],
         );
+    };
+
+    const toggleTrainingDictionary = (dictionaryId: number) => {
+        const dictionaryTopicIds = topics
+            .filter((topic) => topic.dictionary_id === dictionaryId)
+            .map((topic) => topic.id);
+
+        if (dictionaryTopicIds.length === 0) {
+            return;
+        }
+
+        setSelectedTrainingTopicIds((prev) => {
+            const allSelected = dictionaryTopicIds.every((topicId) => prev.includes(topicId));
+
+            if (allSelected) {
+                return prev.filter((topicId) => !dictionaryTopicIds.includes(topicId));
+            }
+
+            return [...new Set([...prev, ...dictionaryTopicIds])];
+        });
     };
 
     const startTraining = (wordIds?: number[]) => {
@@ -1092,78 +1166,140 @@ const TeacherReview = () => {
 
             {isTrainingSetupRoute && (
                 <div className="review-section-card">
-                    <div className="review-training-grid">
-                        <div>
-                            <div className="fw-semibold mb-2">Направление</div>
-                            <div className="review-direction-toggle mb-4">
+                    <div className="review-training-setup">
+                        <section className="review-training-panel">
+                            {/* <div className="review-training-section-label">Направление</div> */}
+                            <div className="review-direction-toggle">
                                 <button
                                     type="button"
-                                    className={`btn ${trainingDirection === "jp_to_ru" ? "btn-success" : "btn-outline-success"}`}
+                                    className={`btn review-direction-button ${trainingDirection === "jp_to_ru" ? "btn-success" : "btn-outline-success"}`}
                                     onClick={() => setTrainingDirection("jp_to_ru")}
                                 >
                                     jp → ru
                                 </button>
                                 <button
                                     type="button"
-                                    className={`btn ${trainingDirection === "ru_to_jp" ? "btn-success" : "btn-outline-success"}`}
+                                    className={`btn review-direction-button ${trainingDirection === "ru_to_jp" ? "btn-success" : "btn-outline-success"}`}
                                     onClick={() => setTrainingDirection("ru_to_jp")}
                                 >
                                     ru → jp
                                 </button>
                             </div>
 
-                            <button
-                                type="button"
-                                className="btn btn-success"
-                                disabled={selectedTrainingTopicIds.length === 0}
-                                onClick={() => startTraining()}
-                            >
-                                Начать тренировку
-                            </button>
-                            <div className="small text-muted mt-2">
+                            {/* <div className="small text-muted review-training-helper-text">
                                 Без ограничений по повторениям. Повторения для «забыла» и «частично» ставятся в очередь
                                 случайно, но не раньше чем через 8 карточек, если это возможно.
-                            </div>
-                        </div>
+                            </div> */}
+                        </section>
 
-                        <div>
-                            <div className="fw-semibold mb-2">Топики</div>
+                        <section className="review-training-panel">
+                            <div className="review-training-section-label">Топики</div>
                             <div className="review-training-topic-list">
                                 {groupedTopics.map(({ dictionary, topics: dictionaryTopics }) => (
-                                    <div className="review-training-topic-group" key={dictionary.id}>
-                                        <div className="review-training-topic-title">{dictionary.title}</div>
-                                        {dictionaryTopics.length === 0 ? (
-                                            <div className="small text-muted">Нет топиков</div>
-                                        ) : (
-                                            dictionaryTopics.map((topic) => {
-                                                const topicWordCount = words.filter(
-                                                    (word) => word.topic_id === topic.id,
-                                                ).length;
-                                                return (
-                                                    <label
-                                                        className="form-check d-flex gap-2 align-items-start"
-                                                        key={topic.id}
-                                                    >
+                                    <div className="border rounded p-2 mb-2" key={dictionary.id}>
+                                        {(() => {
+                                            const dictionaryTopicIds = dictionaryTopics.map((topic) => topic.id);
+                                            const selectedTopicsCount = dictionaryTopicIds.filter((topicId) =>
+                                                selectedTrainingTopicIds.includes(topicId),
+                                            ).length;
+                                            const isDictionarySelected =
+                                                dictionaryTopicIds.length > 0 &&
+                                                selectedTopicsCount === dictionaryTopicIds.length;
+                                            const isDictionaryPartiallySelected =
+                                                selectedTopicsCount > 0 && !isDictionarySelected;
+                                            const dictionaryWordCount = words.filter((word) =>
+                                                dictionaryTopicIds.includes(word.topic_id),
+                                            ).length;
+
+                                            return (
+                                                <div className="d-flex align-items-center mb-2">
+                                                    <label className="form-check d-inline-flex align-items-center gap-2 mb-0 quizlet-group-checkbox-label">
                                                         <input
-                                                            className="form-check-input mt-1"
+                                                            className="form-check-input mt-0"
                                                             type="checkbox"
-                                                            checked={selectedTrainingTopicIds.includes(topic.id)}
-                                                            onChange={() => toggleTrainingTopic(topic.id)}
+                                                            checked={isDictionarySelected}
+                                                            disabled={dictionaryTopics.length === 0}
+                                                            ref={(input) => {
+                                                                if (input === null) {
+                                                                    return;
+                                                                }
+
+                                                                input.indeterminate = isDictionaryPartiallySelected;
+                                                            }}
+                                                            onChange={(event) => {
+                                                                toggleTrainingDictionary(dictionary.id);
+                                                                event.target.blur();
+                                                            }}
                                                         />
-                                                        <span>
-                                                            <span className="fw-medium">{topic.title}</span>
-                                                            <span className="d-block small text-muted">
-                                                                {topicWordCount} карточек
+                                                        <span className="fw-bold text-dark quizlet-group-checkbox-title">
+                                                            {dictionary.title}
+                                                            <span className="quizlet-dictionary-word-count">
+                                                                {` (${dictionaryTopics.length} тем • ${dictionaryWordCount} карточек)`}
                                                             </span>
                                                         </span>
                                                     </label>
-                                                );
-                                            })
+                                                </div>
+                                            );
+                                        })()}
+
+                                        {dictionaryTopics.length === 0 ? (
+                                            <div className="small text-muted">Нет топиков</div>
+                                        ) : (
+                                            <div className="d-flex flex-wrap gap-2">
+                                                {dictionaryTopics.map((topic) => {
+                                                    const topicWordCount = words.filter(
+                                                        (word) => word.topic_id === topic.id,
+                                                    ).length;
+                                                    const isSelected = selectedTrainingTopicIds.includes(topic.id);
+
+                                                    return (
+                                                        <label
+                                                            key={topic.id}
+                                                            className="form-check me-3 quizlet-topic-checkbox-label"
+                                                        >
+                                                            <input
+                                                                className="form-check-input"
+                                                                type="checkbox"
+                                                                checked={isSelected}
+                                                                onChange={(event) => {
+                                                                    toggleTrainingTopic(topic.id);
+                                                                    event.target.blur();
+                                                                }}
+                                                            />
+                                                            <span className="form-check-label">
+                                                                {topic.title}
+                                                                <span className="quizlet-dictionary-word-count">
+                                                                    {` (${topicWordCount})`}
+                                                                </span>
+                                                            </span>
+                                                        </label>
+                                                    );
+                                                })}
+                                            </div>
                                         )}
                                     </div>
                                 ))}
                             </div>
-                        </div>
+                        </section>
+
+                        <section className="review-training-panel review-training-panel-start">
+                            <div className="review-training-start-row">
+                                <button
+                                    type="button"
+                                    className="btn btn-success review-training-start-button"
+                                    disabled={selectedTrainingTopicIds.length === 0}
+                                    onClick={() => startTraining()}
+                                >
+                                    Начать тренировку
+                                </button>
+                                <div className="review-training-selected-count">
+                                    Выбрано карточек: <span>{selectedTrainingWordsCount}</span>
+                                </div>
+                            </div>
+                            {/* <div className="small text-muted review-training-start-hint">
+                                Выберите хотя бы один топик, чтобы запустить тренировку.
+                            </div> */}
+                        </section>
                     </div>
                 </div>
             )}
