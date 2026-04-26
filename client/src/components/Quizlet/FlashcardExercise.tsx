@@ -7,6 +7,21 @@ import TrainingSessionHeader from "./TrainingSessionHeader";
 
 import "./FlashcardExercise.css";
 
+const speak = (text: string, lang: "ja-JP" | "ru-RU") => {
+    const normalizedText = text.trim();
+
+    if (!normalizedText || typeof window === "undefined" || !("speechSynthesis" in window)) {
+        return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(normalizedText);
+    utterance.lang = lang;
+
+    window.speechSynthesis.speak(utterance);
+};
+
 interface Props {
     words: TQuizletSessionWord[];
     queue: number[];
@@ -123,7 +138,18 @@ const FlashcardExercise = ({
                     onFinishTraining={onFinishTraining}
                 />
 
+                <div className="flashcard-speech-actions" aria-label="Озвучка карточки">
+                    <button
+                        type="button"
+                        className="flashcard-speech-btn"
+                        onClick={() => speak(currentWord.word_jp, "ja-JP")}
+                    >
+                        🔊 JP
+                    </button>
+                </div>
+
                 <button
+                    type="button"
                     className={`flashcard-card ${isFlipped ? "is-flipped" : ""} ${
                         disableFlipAnimation ? "is-instant" : ""
                     }`}

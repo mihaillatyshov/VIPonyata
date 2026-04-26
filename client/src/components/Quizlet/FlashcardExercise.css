@@ -22,6 +22,34 @@
     margin: 0 auto;
 }
 
+.flashcard-speech-actions {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.flashcard-speech-btn {
+    border: 1px solid #d7e0ea;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.92);
+    color: #243449;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    line-height: 1;
+    /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); */
+}
+
+.flashcard-speech-btn:hover,
+.flashcard-speech-btn:focus {
+    background: #ffffff;
+    border-color: #c7d3e1;
+}
+
 .flashcard-card-header {
     position: absolute;
     top: 18px;
