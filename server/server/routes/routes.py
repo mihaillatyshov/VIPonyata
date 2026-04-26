@@ -351,6 +351,69 @@ def add_association_to_dictionary(id):
 
 
 #########################################################################################################################
+################ Review #################################################################################################
+#########################################################################################################################
+@routes_bp.route("/review", methods=["GET"])
+@login_required
+def get_review_catalog():
+    return user_selector_function(teacher_funcs.get_review_catalog, None)
+
+
+@routes_bp.route("/review/dictionaries", methods=["POST"])
+@login_required
+def create_review_dictionary():
+    return user_selector_function(teacher_funcs.create_review_dictionary, None)
+
+
+@routes_bp.route("/review/dictionaries/<int:dictionary_id>", methods=["PATCH"])
+@login_required
+def update_review_dictionary(dictionary_id):
+    return user_selector_function(teacher_funcs.update_review_dictionary, None, dictionary_id=dictionary_id)
+
+
+@routes_bp.route("/review/dictionaries/<int:dictionary_id>", methods=["DELETE"])
+@login_required
+def delete_review_dictionary(dictionary_id):
+    return user_selector_function(teacher_funcs.delete_review_dictionary, None, dictionary_id=dictionary_id)
+
+
+@routes_bp.route("/review/topics", methods=["POST"])
+@login_required
+def create_review_topic():
+    return user_selector_function(teacher_funcs.create_review_topic, None)
+
+
+@routes_bp.route("/review/topics/<int:topic_id>", methods=["PATCH"])
+@login_required
+def update_review_topic(topic_id):
+    return user_selector_function(teacher_funcs.update_review_topic, None, topic_id=topic_id)
+
+
+@routes_bp.route("/review/topics/<int:topic_id>", methods=["DELETE"])
+@login_required
+def delete_review_topic(topic_id):
+    return user_selector_function(teacher_funcs.delete_review_topic, None, topic_id=topic_id)
+
+
+@routes_bp.route("/review/words", methods=["POST"])
+@login_required
+def create_review_word():
+    return user_selector_function(teacher_funcs.create_review_word, None)
+
+
+@routes_bp.route("/review/words/<int:word_id>", methods=["PATCH"])
+@login_required
+def update_review_word(word_id):
+    return user_selector_function(teacher_funcs.update_review_word, None, word_id=word_id)
+
+
+@routes_bp.route("/review/words/<int:word_id>", methods=["DELETE"])
+@login_required
+def delete_review_word(word_id):
+    return user_selector_function(teacher_funcs.delete_review_word, None, word_id=word_id)
+
+
+#########################################################################################################################
 ################ Quizlet ################################################################################################
 #########################################################################################################################
 @routes_bp.route("/quizlet/groups", methods=["GET"])

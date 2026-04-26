@@ -60,11 +60,12 @@ class User(Base):
                                                                                   uselist=False)
     quizlet_sessions: Mapped[list["QuizletSession"]] = relationship("QuizletSession", back_populates="user")
     quizlet_assignments_created: Mapped[list["QuizletAssignment"]] = relationship("QuizletAssignment",
-                                                                                   back_populates="created_by")
+                                                                                  back_populates="created_by")
     quizlet_assignment_targets: Mapped[list["QuizletAssignmentTarget"]] = relationship("QuizletAssignmentTarget",
-                                                                                        back_populates="student")
+                                                                                       back_populates="student")
     quizlet_assignment_results: Mapped[list["QuizletAssignmentResult"]] = relationship("QuizletAssignmentResult",
-                                                                                        back_populates="student")
+                                                                                       back_populates="student")
+    review_dictionaries: Mapped[list["ReviewDictionary"]] = relationship("ReviewDictionary", back_populates="owner")
 
     __mapper_args__ = {'eager_defaults': True}
 
@@ -478,7 +479,7 @@ class NotificationStudentToTeacher(Base):
     quizlet_assignment_result_id: Mapped[Optional[int]] = mapped_column(Integer,
                                                                         ForeignKey("quizlet_assignment_results.id"))
     quizlet_assignment_result: Mapped[Optional["QuizletAssignmentResult"]] = relationship("QuizletAssignmentResult",
-                                                                                            uselist=False)
+                                                                                          uselist=False)
 
     creation_datetime: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)   # pylint: disable=not-callable
 
@@ -885,14 +886,14 @@ class QuizletAssignment(Base):
     created_by: Mapped["User"] = relationship("User", back_populates="quizlet_assignments_created")
 
     subgroups: Mapped[list["QuizletAssignmentSubgroup"]] = relationship("QuizletAssignmentSubgroup",
-                                                                          back_populates="assignment",
-                                                                          cascade="all, delete-orphan")
+                                                                        back_populates="assignment",
+                                                                        cascade="all, delete-orphan")
     targets: Mapped[list["QuizletAssignmentTarget"]] = relationship("QuizletAssignmentTarget",
-                                                                     back_populates="assignment",
-                                                                     cascade="all, delete-orphan")
+                                                                    back_populates="assignment",
+                                                                    cascade="all, delete-orphan")
     results: Mapped[list["QuizletAssignmentResult"]] = relationship("QuizletAssignmentResult",
-                                                                     back_populates="assignment",
-                                                                     cascade="all, delete-orphan")
+                                                                    back_populates="assignment",
+                                                                    cascade="all, delete-orphan")
     sessions: Mapped[list["QuizletSession"]] = relationship("QuizletSession", back_populates="assignment")
 
     __mapper_args__ = {'eager_defaults': True}
@@ -986,6 +987,93 @@ class QuizletAssignmentResult(Base):
             "incorrect_answers": self.incorrect_answers,
             "skipped_words": self.skipped_words,
             "elapsed_seconds": self.elapsed_seconds,
+        }
+
+
+#########################################################################################################################
+################ Review #################################################################################################
+#########################################################################################################################
+class ReviewDictionary(Base):
+    __tablename__ = "review_dictionaries"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    title: Mapped[str] = mapped_column(String(128), nullable=False)
+    sort: Mapped[int] = mapped_column(Integer, default=500, nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text("now()"), nullable=False)
+
+    owner_id: Mapped[int] = mapped_column(Integer, ForeignKey(USERS_ID), nullable=False)
+    owner: Mapped["User"] = relationship("User", back_populates="review_dictionaries")
+
+    topics: Mapped[list["ReviewTopic"]] = relationship("ReviewTopic",
+                                                       back_populates="dictionary",
+                                                       cascade="all, delete-orphan")
+
+    __mapper_args__ = {'eager_defaults': True}
+
+    def __json__(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "sort": self.sort,
+            "owner_id": self.owner_id,
+            "created_at": self.created_at,
+        }
+
+
+class ReviewTopic(Base):
+    __tablename__ = "review_topics"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    title: Mapped[str] = mapped_column(String(128), nullable=False)
+    sort: Mapped[int] = mapped_column(Integer, default=500, nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text("now()"), nullable=False)
+
+    dictionary_id: Mapped[int] = mapped_column(Integer, ForeignKey("review_dictionaries.id"), nullable=False)
+    dictionary: Mapped["ReviewDictionary"] = relationship("ReviewDictionary", back_populates="topics")
+
+    words: Mapped[list["ReviewWord"]] = relationship("ReviewWord", back_populates="topic", cascade="all, delete-orphan")
+
+    __mapper_args__ = {'eager_defaults': True}
+
+    def __json__(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "sort": self.sort,
+            "dictionary_id": self.dictionary_id,
+            "created_at": self.created_at,
+        }
+
+
+class ReviewWord(Base):
+    __tablename__ = "review_words"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    source: Mapped[Optional[str]] = mapped_column(String(256))
+    word_jp: Mapped[str] = mapped_column(String(256), nullable=False)
+    ru: Mapped[str] = mapped_column(String(256), nullable=False)
+    note: Mapped[Optional[str]] = mapped_column(Text)
+    examples: Mapped[Optional[str]] = mapped_column(Text)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text("now()"), nullable=False)
+
+    topic_id: Mapped[int] = mapped_column(Integer, ForeignKey("review_topics.id"), nullable=False)
+    topic: Mapped["ReviewTopic"] = relationship("ReviewTopic", back_populates="words")
+
+    __mapper_args__ = {'eager_defaults': True}
+
+    def __json__(self):
+        return {
+            "id": self.id,
+            "source": self.source,
+            "word_jp": self.word_jp,
+            "ru": self.ru,
+            "note": self.note,
+            "examples": self.examples,
+            "topic_id": self.topic_id,
+            "created_at": self.created_at,
         }
 
 

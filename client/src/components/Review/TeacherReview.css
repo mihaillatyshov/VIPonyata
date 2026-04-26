@@ -1,0 +1,171 @@
+.review-page {
+    padding-bottom: 32px;
+}
+
+.review-actions-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.review-inline-edit {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.review-section-card {
+    border: 1px solid rgba(103, 174, 45, 0.16);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 4px 16px rgba(103, 174, 45, 0.08);
+    padding: 18px;
+}
+
+.review-library-container {
+    max-width: 980px;
+    margin-inline: auto;
+}
+
+.review-breadcrumb {
+    margin-bottom: 14px;
+}
+
+.review-topic-table input {
+    min-width: 120px;
+}
+
+.review-topic-table td {
+    min-height: 44px;
+}
+
+.review-topic-table input.form-control {
+    width: 100%;
+    min-height: 44px;
+}
+
+.review-table-remove-btn,
+.review-table-remove-btn:hover,
+.review-table-remove-btn:focus {
+    text-decoration: none;
+}
+
+.review-training-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.review-training-topic-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 420px;
+    overflow: auto;
+}
+
+.review-training-topic-group {
+    border: 1px solid rgba(103, 174, 45, 0.14);
+    border-radius: 14px;
+    padding: 12px 14px;
+    background: rgba(247, 252, 242, 0.7);
+}
+
+.review-training-topic-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.review-direction-toggle {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.review-flashcard-shell {
+    margin-top: 28px;
+}
+
+.review-flashcard-exercise {
+    --flashcard-max-width: 600px;
+}
+
+.review-flashcard-back-content {
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 14px;
+    overflow-y: auto;
+}
+
+.review-flashcard-answer {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.review-flashcard-extra-zone {
+    margin-top: auto;
+    display: grid;
+    gap: 10px;
+}
+
+.review-flashcard-extra-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+.review-flashcard-extra-list {
+    display: grid;
+    gap: 10px;
+    text-align: left;
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.review-flashcard-extra-item {
+    border-radius: 14px;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(103, 174, 45, 0.14);
+}
+
+.review-flashcard-actions {
+    margin-top: 12px;
+}
+
+.review-flashcard-actions .btn {
+    min-width: 120px;
+}
+
+.review-results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.review-results-card {
+    border-radius: 16px;
+    padding: 16px;
+    background: rgba(247, 252, 242, 0.8);
+    border: 1px solid rgba(103, 174, 45, 0.14);
+}
+
+@media (max-width: 768px) {
+    .review-flashcard-exercise {
+        --flashcard-max-width: min(100%, 460px);
+    }
+
+    .review-flashcard-back-content {
+        gap: 10px;
+    }
+}

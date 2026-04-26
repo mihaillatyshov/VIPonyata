@@ -530,11 +530,13 @@
     display: inline-flex;
     gap: 0.35rem;
     margin-bottom: 0.9rem;
+    margin-top: 3rem;
+    margin-left: 3rem;
     padding: 0.3rem;
     border-radius: 14px;
     border: 1px solid rgba(17, 17, 17, 0.1);
     background: rgba(255, 255, 255, 0.85);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    /* box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06); */
 }
 
 .quizlet-student-dictionary-tab {
@@ -562,7 +564,7 @@
 .quizlet-student-dictionary-tab.active:focus-visible {
     color: #2d3a46;
     background: #ddebd7;
-    box-shadow: 0 6px 16px rgba(45, 58, 70, 0.14);
+    /* box-shadow: 0 6px 16px rgba(45, 58, 70, 0.14); */
 }
 
 @media (max-width: 576px) {

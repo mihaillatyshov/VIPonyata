@@ -21,6 +21,7 @@ import ErrorPage from "components/ErrorPages/ErrorPage";
 import { LessonCreatePage, LessonEditPage } from "components/Lessons/LessonProcessingPage";
 import TeacherLessonPage from "components/Lessons/TeacherLessonPage";
 import { StudentQuizlet, TeacherQuizletManager } from "components/Quizlet";
+import TeacherReview from "components/Review/TeacherReview";
 import { LoadStatus } from "libs/Status";
 import { isTeacher } from "redux/funcs/user";
 
@@ -162,6 +163,7 @@ const App = () => {
                     <Route path="/profile" element={getRoute(<StudentProfilePage />, <StudentProfilePage />)} />
 
                     <Route path="/dictionary" element={getLoggedRoute(<DictionaryPage />)} />
+                    <Route path="/review/*" element={getTeacherRoute(<TeacherReview />)} />
                     <Route path="/quizlet/*" element={getRoute(<TeacherQuizletManager />, <StudentQuizlet />)} />
                     <Route path="/quizlet/lessons/:lessonId" element={getTeacherRoute(<TeacherQuizletManager />)} />
                     <Route path="/quizlet/topics/:topicId" element={getTeacherRoute(<TeacherQuizletManager />)} />

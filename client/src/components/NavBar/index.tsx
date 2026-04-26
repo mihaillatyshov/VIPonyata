@@ -3,7 +3,9 @@ import { Link, useLocation } from "react-router-dom";
 
 import Notifications from "components/Notifications/Notifications";
 import { AjaxGet, AjaxPost } from "libs/ServerAPI";
+import { LoadStatus } from "libs/Status";
 import { TAnyNotifications, TNotificationBase } from "models/TNotification";
+import { isTeacher } from "redux/funcs/user";
 import { useAppSelector } from "redux/hooks";
 import { selectUser } from "redux/slices/userSlice";
 
@@ -16,6 +18,8 @@ const NavBar = () => {
     const user = useAppSelector(selectUser);
     const location = useLocation();
     const isFlashcardExerciseRoute = location.pathname === "/quizlet/flashcards";
+    const isReviewRoute = location.pathname.startsWith("/review");
+    const isTeacherUser = user.data.loadStatus === LoadStatus.DONE && user.data.isAuth && isTeacher(user.data.userData);
 
     const openNotifications = () => setShowNotifications(true);
     const closeNotifications = () => setShowNotifications(false);
@@ -84,17 +88,34 @@ const NavBar = () => {
                         />
                     </Link>
                 </div>
-                <div className="col-6 col-lg-4 mx-auto d-flex align-items-center">
+                <div className="col-6 col-lg-4 mx-auto d-flex align-items-center justify-content-center gap-2 gap-lg-3">
+                    {isTeacherUser &&
+                        (isReviewRoute ? (
+                            <span
+                                className={`d-flex a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton} ${styles.quizletButtonDisabled}`}
+                                aria-disabled="true"
+                            >
+                                復習
+                            </span>
+                        ) : (
+                            <Link
+                                className={`d-flex a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton}`}
+                                to="/review"
+                            >
+                                復習
+                            </Link>
+                        ))}
+
                     {isFlashcardExerciseRoute ? (
                         <span
-                            className={`d-flex mx-auto a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton} ${styles.quizletButtonDisabled}`}
+                            className={`d-flex a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton} ${styles.quizletButtonDisabled}`}
                             aria-disabled="true"
                         >
                             ワードラボ
                         </span>
                     ) : (
                         <Link
-                            className={`d-flex mx-auto a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton}`}
+                            className={`d-flex a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton}`}
                             to="/quizlet"
                         >
                             ワードラボ
