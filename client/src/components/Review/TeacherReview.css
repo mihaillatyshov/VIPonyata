@@ -135,6 +135,11 @@
     --flashcard-max-width: 600px;
 }
 
+.review-flashcard-speech-actions {
+    top: 65px;
+    bottom: auto;
+}
+
 .review-flashcard-back-content {
     justify-content: flex-start;
     align-items: stretch;

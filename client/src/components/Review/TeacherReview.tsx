@@ -154,6 +154,29 @@ const insertWordLater = (queue: number[], wordId: number, times: number) => {
 
 const normalizeText = (value: string) => value.trim();
 
+const stopSpeaking = () => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+        return;
+    }
+
+    window.speechSynthesis.cancel();
+};
+
+const speak = (text: string, lang: "ja-JP" | "ru-RU") => {
+    const normalizedText = text.trim();
+
+    if (!normalizedText || typeof window === "undefined" || !("speechSynthesis" in window)) {
+        return;
+    }
+
+    stopSpeaking();
+
+    const utterance = new SpeechSynthesisUtterance(normalizedText);
+    utterance.lang = lang;
+
+    window.speechSynthesis.speak(utterance);
+};
+
 const REVIEW_TRAINING_HISTORY_STORAGE_KEY = "viponyata-review-training-history";
 const REVIEW_TRAINING_HISTORY_LIMIT = 100;
 
@@ -549,6 +572,8 @@ const TeacherReview = () => {
     const [isDeleteTopicConfirming, setIsDeleteTopicConfirming] = useState(false);
     const [selectedTrainingTopicIds, setSelectedTrainingTopicIds] = useState<number[]>([]);
     const [trainingDirection, setTrainingDirection] = useState<"jp_to_ru" | "ru_to_jp">("jp_to_ru");
+    const [speakJpAfterFlip, setSpeakJpAfterFlip] = useState(false);
+    const [autoSpeakCards, setAutoSpeakCards] = useState(false);
     const [trainingSession, setTrainingSession] = useState<TrainingSession | null>(null);
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
@@ -844,6 +869,10 @@ const TeacherReview = () => {
             return;
         }
 
+        stopSpeaking();
+        setIsFlipped(false);
+        setOpenedDetailKeys([]);
+
         setTrainingSession({
             allWordIds: [...(allWordIds ?? selectedWordIds)],
             initialWordIds: [...selectedWordIds],
@@ -863,6 +892,7 @@ const TeacherReview = () => {
             return;
         }
 
+        stopSpeaking();
         const finishedAt = Date.now();
         const finishedSession = {
             ...trainingSession,
@@ -940,6 +970,9 @@ const TeacherReview = () => {
             nextQueue = insertWordLater(queueWithoutCurrent, currentWordId, 1);
         }
 
+        setIsFlipped(false);
+        setOpenedDetailKeys([]);
+
         if (nextQueue.length === 0) {
             finishTraining(nextQueue, nextAssessments);
             return;
@@ -959,6 +992,7 @@ const TeacherReview = () => {
     };
 
     const resetTraining = () => {
+        stopSpeaking();
         setTrainingSession(null);
         setIsFlipped(false);
         setOpenedDetailKeys([]);
@@ -1027,6 +1061,45 @@ const TeacherReview = () => {
 
         return Math.max(1, trainingSession.initialWordIds.length - trainingSession.queue.length + 1);
     }, [trainingSession]);
+
+    const currentFlashcardSpeech = useMemo(() => {
+        if (trainingSession === null || currentWord === null) {
+            return null;
+        }
+
+        const visibleCardLanguage = isFlipped
+            ? trainingSession.direction === "jp_to_ru"
+                ? "ru"
+                : "jp"
+            : trainingSession.direction === "jp_to_ru"
+              ? "jp"
+              : "ru";
+
+        return visibleCardLanguage === "jp"
+            ? { text: currentWord.word_jp, lang: "ja-JP" as const, label: "JP", cardLanguage: "jp" as const }
+            : { text: currentWord.ru, lang: "ru-RU" as const, label: "RU", cardLanguage: "ru" as const };
+    }, [currentWord, isFlipped, trainingSession]);
+
+    useEffect(() => {
+        if (
+            trainingSession === null ||
+            trainingSession.isFinished ||
+            !isFlashcardsRoute ||
+            currentFlashcardSpeech === null
+        ) {
+            return;
+        }
+
+        if (autoSpeakCards) {
+            speak(currentFlashcardSpeech.text, currentFlashcardSpeech.lang);
+
+            return;
+        }
+
+        if (speakJpAfterFlip && isFlipped && currentFlashcardSpeech.cardLanguage === "jp") {
+            speak(currentFlashcardSpeech.text, currentFlashcardSpeech.lang);
+        }
+    }, [autoSpeakCards, currentFlashcardSpeech, isFlipped, isFlashcardsRoute, speakJpAfterFlip, trainingSession]);
 
     const toggleDetail = (detailKey: FlashcardDetailKey) => {
         setOpenedDetailKeys((prev) =>
@@ -1486,6 +1559,48 @@ const TeacherReview = () => {
                                         </button>
                                     </div>
 
+                                    <div className="form-check mt-3 mb-0">
+                                        <input
+                                            className="form-check-input"
+                                            id="reviewSpeakJpAfterFlip"
+                                            type="checkbox"
+                                            checked={speakJpAfterFlip}
+                                            onChange={(event) => {
+                                                const nextChecked = event.target.checked;
+
+                                                setSpeakJpAfterFlip(nextChecked);
+                                                if (nextChecked) {
+                                                    setAutoSpeakCards(false);
+                                                }
+                                                event.target.blur();
+                                            }}
+                                        />
+                                        <label className="form-check-label" htmlFor="reviewSpeakJpAfterFlip">
+                                            Озвучка после переворота (jp)
+                                        </label>
+                                    </div>
+
+                                    <div className="form-check mt-2 mb-0">
+                                        <input
+                                            className="form-check-input"
+                                            id="reviewAutoSpeakCards"
+                                            type="checkbox"
+                                            checked={autoSpeakCards}
+                                            onChange={(event) => {
+                                                const nextChecked = event.target.checked;
+
+                                                setAutoSpeakCards(nextChecked);
+                                                if (nextChecked) {
+                                                    setSpeakJpAfterFlip(false);
+                                                }
+                                                event.target.blur();
+                                            }}
+                                        />
+                                        <label className="form-check-label" htmlFor="reviewAutoSpeakCards">
+                                            Автоозвучка
+                                        </label>
+                                    </div>
+
                                     {/* <div className="small text-muted review-training-helper-text">
                                         Без ограничений по повторениям. Повторения для «забыла» и «частично» ставятся в очередь
                                         случайно, но не раньше чем через 8 карточек, если это возможно.
@@ -1632,6 +1747,25 @@ const TeacherReview = () => {
                             totalWords={trainingSession.initialWordIds.length}
                             onFinishTraining={finishCurrentTraining}
                         />
+
+                        <div
+                            className="flashcard-speech-actions review-flashcard-speech-actions"
+                            aria-label="Озвучка карточки"
+                        >
+                            <button
+                                type="button"
+                                className="flashcard-speech-btn"
+                                onClick={() => {
+                                    if (currentFlashcardSpeech === null) {
+                                        return;
+                                    }
+
+                                    speak(currentFlashcardSpeech.text, currentFlashcardSpeech.lang);
+                                }}
+                            >
+                                {`🔊 ${currentFlashcardSpeech?.label ?? "JP"}`}
+                            </button>
+                        </div>
 
                         <button
                             type="button"
