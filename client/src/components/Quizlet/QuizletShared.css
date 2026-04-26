@@ -15,6 +15,11 @@
     margin-top: 56px !important;
 }
 
+.quizlet-student-dictionary-page {
+    max-width: 760px;
+    margin: 56px auto 0;
+}
+
 .quizlet-personal-breadcrumb {
     padding-top: 14px;
     padding-left: 18px;

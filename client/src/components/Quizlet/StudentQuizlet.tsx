@@ -1471,7 +1471,7 @@ const StudentQuizlet = () => {
             )}
 
             {session === null && isPersonalDictionaryPage && (
-                <div className="quizlet-personal-dictionary-page" style={{ maxWidth: "760px", margin: "0 auto" }}>
+                <div className="quizlet-personal-dictionary-page quizlet-student-dictionary-page">
                     <div className="quizlet-student-dictionary-tabs" role="tablist" aria-label="Переключение словарей">
                         <button
                             type="button"
@@ -1733,7 +1733,7 @@ const StudentQuizlet = () => {
             )}
 
             {session === null && isViewRoute && (
-                <div className="mx-auto mt-5" style={{ maxWidth: "760px" }}>
+                <div className="quizlet-student-dictionary-page">
                     <div className="quizlet-student-dictionary-tabs" role="tablist" aria-label="Переключение словарей">
                         <button
                             type="button"
