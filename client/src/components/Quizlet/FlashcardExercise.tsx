@@ -27,6 +27,7 @@ interface Props {
     queue: number[];
     showHints: boolean;
     direction: "jp_to_ru" | "ru_to_jp";
+    autoSpeakAfterFlip: boolean;
     totalWords: number;
     unresolvedCount: number;
     incorrectAnswers: number;
@@ -41,6 +42,7 @@ const FlashcardExercise = ({
     queue,
     showHints,
     direction,
+    autoSpeakAfterFlip,
     totalWords,
     unresolvedCount,
     incorrectAnswers,
@@ -65,6 +67,14 @@ const FlashcardExercise = ({
 
         onWordVisible(currentWord.id);
     }, [currentWord, onWordVisible]);
+
+    useEffect(() => {
+        if (!autoSpeakAfterFlip || !isFlipped || currentWord === null) {
+            return;
+        }
+
+        speak(currentWord.word_jp, "ja-JP");
+    }, [autoSpeakAfterFlip, isFlipped, currentWord]);
 
     const submit = async (recognized: boolean) => {
         if (isSending || currentWord === null) {

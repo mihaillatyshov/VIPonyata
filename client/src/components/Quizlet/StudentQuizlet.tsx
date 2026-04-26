@@ -22,7 +22,7 @@ import MatchingExercise from "./MatchingExercise";
 import "./QuizletShared.css";
 
 import QuizletProgressHistory from "./QuizletProgressHistory";
-import QuizletQuizStart from "./QuizletQuizStart";
+import QuizletQuizStart, { type StartPayload } from "./QuizletQuizStart";
 import QuizletSessionResults from "./QuizletSessionResults";
 import { parseQueue, shuffleArray } from "./quizletUtils";
 import TrainingSessionHeader from "./TrainingSessionHeader";
@@ -68,6 +68,24 @@ const makeEmptyRow = (): EditorRow => ({ key: makeKey(), char_jp: "", word_jp: "
 
 const wordsToRows = (words: TQuizletWord[]): EditorRow[] =>
     words.map((w) => ({ key: makeKey(), id: w.id, char_jp: w.char_jp ?? "", word_jp: w.word_jp, ru: w.ru }));
+
+const getFlashcardAutoSpeakStorageKey = (sessionId: number) => `quizlet.flashcards.autoSpeakAfterFlip.${sessionId}`;
+
+const readFlashcardAutoSpeakSetting = (sessionId: number): boolean => {
+    if (typeof window === "undefined") {
+        return false;
+    }
+
+    return window.sessionStorage.getItem(getFlashcardAutoSpeakStorageKey(sessionId)) === "1";
+};
+
+const writeFlashcardAutoSpeakSetting = (sessionId: number, enabled: boolean) => {
+    if (typeof window === "undefined") {
+        return;
+    }
+
+    window.sessionStorage.setItem(getFlashcardAutoSpeakStorageKey(sessionId), enabled ? "1" : "0");
+};
 
 const isAllEmpty = (row: EditorRow) => row.char_jp.trim() === "" && row.word_jp.trim() === "" && row.ru.trim() === "";
 
@@ -470,6 +488,7 @@ const StudentQuizlet = () => {
     const [activeSession, setActiveSession] = useState<(TQuizletSession & { queue_state?: string }) | null>(null);
     const [activeSessionLoadStatus, setActiveSessionLoadStatus] = useState<LoadStatus.Type>(LoadStatus.NONE);
     const [isFinishingActiveSession, setIsFinishingActiveSession] = useState<boolean>(false);
+    const [autoSpeakAfterFlip, setAutoSpeakAfterFlip] = useState<boolean>(false);
     const autoFinishSessionIdRef = useRef<number | null>(null);
     const timerSessionIdRef = useRef<number | null>(null);
     const shouldShuffleOnSessionLoadRef = useRef<boolean>(false);
@@ -736,11 +755,15 @@ const StudentQuizlet = () => {
                 }
 
                 shouldShuffleOnSessionLoadRef.current = false;
+                setAutoSpeakAfterFlip(
+                    nextSession.quiz_type === "flashcards" ? readFlashcardAutoSpeakSetting(nextSession.id) : false,
+                );
                 setSession(nextSession);
                 setSessionWords(nextWords);
             })
             .catch(() => {
                 shouldShuffleOnSessionLoadRef.current = false;
+                setAutoSpeakAfterFlip(false);
                 setSession(null);
                 setSessionWords([]);
             });
@@ -765,10 +788,15 @@ const StudentQuizlet = () => {
         queueRef.current = queue;
     }, [queue]);
 
-    const startSession = (payload: any) => {
+    const startSession = ({ auto_speak_after_flip, ...payload }: StartPayload) => {
         setActiveSession(null);
+        setAutoSpeakAfterFlip(auto_speak_after_flip);
         autoFinishSessionIdRef.current = null;
         AjaxPost<{ session: TQuizletSession }>({ url: "/api/quizlet/sessions/start", body: payload }).then((json) => {
+            writeFlashcardAutoSpeakSetting(
+                json.session.id,
+                payload.quiz_type === "flashcards" && auto_speak_after_flip,
+            );
             navigate(payload.quiz_type === "flashcards" ? routePaths.flashcards : routePaths.pairs);
             loadSession(json.session.id);
         });
@@ -822,7 +850,10 @@ const StudentQuizlet = () => {
             url: "/api/quizlet/sessions/retry-incorrect",
             body: { source_session_id: session.id },
         })
-            .then((json) => loadSession(json.session.id))
+            .then((json) => {
+                writeFlashcardAutoSpeakSetting(json.session.id, autoSpeakAfterFlip);
+                loadSession(json.session.id);
+            })
             .catch(() => {
                 shouldShuffleOnSessionLoadRef.current = false;
                 return undefined;
@@ -837,7 +868,10 @@ const StudentQuizlet = () => {
         AjaxPost<{ session: TQuizletSession }>({
             url: "/api/quizlet/sessions/retry-all",
             body: { source_session_id: session.id },
-        }).then((json) => loadSession(json.session.id));
+        }).then((json) => {
+            writeFlashcardAutoSpeakSetting(json.session.id, autoSpeakAfterFlip);
+            loadSession(json.session.id);
+        });
     };
 
     const submitPairAttempt = async (leftWordId: number, rightWordId: number) => {
@@ -961,6 +995,7 @@ const StudentQuizlet = () => {
 
     const finishAndBackToStart = () => {
         autoFinishSessionIdRef.current = null;
+        setAutoSpeakAfterFlip(false);
         setSession(null);
         setSessionWords([]);
         navigate(routePaths.modeSelection);
@@ -1971,6 +2006,7 @@ const StudentQuizlet = () => {
                             queue={queue}
                             showHints={session.show_hints}
                             direction={session.translation_direction}
+                            autoSpeakAfterFlip={autoSpeakAfterFlip}
                             totalWords={session.total_words}
                             unresolvedCount={unresolvedCount}
                             incorrectAnswers={session.incorrect_answers}

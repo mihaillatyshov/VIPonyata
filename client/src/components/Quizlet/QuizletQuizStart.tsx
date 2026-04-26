@@ -4,13 +4,14 @@ import { TQuizletGroup, TQuizletLesson, TQuizletSubgroup, TQuizletSubgroupWord, 
 
 import "./QuizletShared.css";
 
-interface StartPayload {
+export interface StartPayload {
     quiz_type: "pair" | "flashcards";
     subgroup_ids: number[];
     user_subgroup_ids: number[];
     show_hints: boolean;
     translation_direction: "jp_to_ru" | "ru_to_jp";
     max_words: number;
+    auto_speak_after_flip: boolean;
 }
 
 interface Props {
@@ -41,6 +42,7 @@ const QuizletQuizStart = ({
     const [showDictionariesError, setShowDictionariesError] = useState<boolean>(false);
     const [showHints, setShowHints] = useState<boolean>(false);
     const [direction, setDirection] = useState<"jp_to_ru" | "ru_to_jp">("jp_to_ru");
+    const [autoSpeakAfterFlip, setAutoSpeakAfterFlip] = useState<boolean>(false);
     const [selectedTeacherSubgroups, setSelectedTeacherSubgroups] = useState<number[]>([]);
     const [selectedPersonalSubgroups, setSelectedPersonalSubgroups] = useState<number[]>([]);
 
@@ -180,6 +182,7 @@ const QuizletQuizStart = ({
             show_hints: showHints,
             translation_direction: direction,
             max_words: MAX_WORDS_PER_SESSION,
+            auto_speak_after_flip: quizType === "flashcards" ? autoSpeakAfterFlip : false,
         });
     };
 
@@ -228,6 +231,18 @@ const QuizletQuizStart = ({
                                     >
                                         ru → jp
                                     </button>
+                                </div>
+                                <div className="form-check mt-3 mb-0">
+                                    <input
+                                        className="form-check-input"
+                                        id="quizletAutoSpeakAfterFlip"
+                                        type="checkbox"
+                                        checked={autoSpeakAfterFlip}
+                                        onChange={(e) => setAutoSpeakAfterFlip(e.target.checked)}
+                                    />
+                                    <label className="form-check-label" htmlFor="quizletAutoSpeakAfterFlip">
+                                        Озвучивать после переворота
+                                    </label>
                                 </div>
                             </div>
                         )}
