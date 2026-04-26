@@ -1080,6 +1080,11 @@ const TeacherReview = () => {
             : { text: currentWord.ru, lang: "ru-RU" as const, label: "RU", cardLanguage: "ru" as const };
     }, [currentWord, isFlipped, trainingSession]);
 
+    const shouldShowFlashcardSpeechButton =
+        trainingSession !== null &&
+        currentFlashcardSpeech !== null &&
+        !(trainingSession.direction === "ru_to_jp" && currentFlashcardSpeech.cardLanguage === "ru");
+
     useEffect(() => {
         if (
             trainingSession === null ||
@@ -1752,19 +1757,21 @@ const TeacherReview = () => {
                             className="flashcard-speech-actions review-flashcard-speech-actions"
                             aria-label="Озвучка карточки"
                         >
-                            <button
-                                type="button"
-                                className="flashcard-speech-btn"
-                                onClick={() => {
-                                    if (currentFlashcardSpeech === null) {
-                                        return;
-                                    }
+                            {shouldShowFlashcardSpeechButton ? (
+                                <button
+                                    type="button"
+                                    className="flashcard-speech-btn"
+                                    onClick={() => {
+                                        if (currentFlashcardSpeech === null) {
+                                            return;
+                                        }
 
-                                    speak(currentFlashcardSpeech.text, currentFlashcardSpeech.lang);
-                                }}
-                            >
-                                {`🔊 ${currentFlashcardSpeech?.label ?? "JP"}`}
-                            </button>
+                                        speak(currentFlashcardSpeech.text, currentFlashcardSpeech.lang);
+                                    }}
+                                >
+                                    {`🔊 ${currentFlashcardSpeech?.label ?? "JP"}`}
+                                </button>
+                            ) : null}
                         </div>
 
                         <button

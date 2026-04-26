@@ -103,6 +103,7 @@ const FlashcardExercise = ({
     const kanaHint = currentWord.word_jp.trim();
     const currentPosition = unresolvedCount > 0 ? totalWords - unresolvedCount + 1 : totalWords;
     const revealedText = direction === "jp_to_ru" ? currentWord.ru : charDisplay;
+    const shouldShowSpeechButton = direction === "jp_to_ru" || isFlipped;
 
     const renderFaceContent = (showTranslation: boolean) => (
         <div className="flashcard-content">
@@ -148,15 +149,17 @@ const FlashcardExercise = ({
                     onFinishTraining={onFinishTraining}
                 />
 
-                <div className="flashcard-speech-actions" aria-label="Озвучка карточки">
-                    <button
-                        type="button"
-                        className="flashcard-speech-btn"
-                        onClick={() => speak(currentWord.word_jp, "ja-JP")}
-                    >
-                        🔊 JP
-                    </button>
-                </div>
+                {shouldShowSpeechButton && (
+                    <div className="flashcard-speech-actions" aria-label="Озвучка карточки">
+                        <button
+                            type="button"
+                            className="flashcard-speech-btn"
+                            onClick={() => speak(currentWord.word_jp, "ja-JP")}
+                        >
+                            🔊 JP
+                        </button>
+                    </div>
+                )}
 
                 <button
                     type="button"
