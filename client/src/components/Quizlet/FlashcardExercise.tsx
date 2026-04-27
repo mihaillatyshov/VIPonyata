@@ -22,6 +22,12 @@ const speak = (text: string, lang: "ja-JP" | "ru-RU") => {
     window.speechSynthesis.speak(utterance);
 };
 
+const getSpeechText = (word: Pick<TQuizletSessionWord, "char_jp" | "word_jp">) => {
+    const kanji = word.char_jp?.trim();
+
+    return kanji ? kanji : word.word_jp;
+};
+
 interface Props {
     words: TQuizletSessionWord[];
     queue: number[];
@@ -73,7 +79,7 @@ const FlashcardExercise = ({
             return;
         }
 
-        speak(currentWord.word_jp, "ja-JP");
+        speak(getSpeechText(currentWord), "ja-JP");
     }, [autoSpeakAfterFlip, isFlipped, currentWord]);
 
     const submit = async (recognized: boolean) => {
@@ -154,7 +160,7 @@ const FlashcardExercise = ({
                         <button
                             type="button"
                             className="flashcard-speech-btn"
-                            onClick={() => speak(currentWord.word_jp, "ja-JP")}
+                            onClick={() => speak(getSpeechText(currentWord), "ja-JP")}
                         >
                             🔊 JP
                         </button>
