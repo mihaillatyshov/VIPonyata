@@ -165,6 +165,37 @@ const TopicEditor = ({ studentId, subgroup, initialWords, onSaved }: TopicEditor
         }
     };
 
+    const handlePaste = (event: React.ClipboardEvent<HTMLTableElement>) => {
+        const text = event.clipboardData.getData("text");
+        if (!text.includes("\t") && !text.includes("\n")) {
+            return;
+        }
+
+        event.preventDefault();
+
+        const pastedRows: EditorRow[] = text
+            .split(/\r?\n/)
+            .filter((line) => line.trim() !== "")
+            .map((line) => {
+                const cells = line.split("\t").map((cell) => cell.trim());
+                return {
+                    key: makeKey(),
+                    char_jp: cells[0] ?? "",
+                    word_jp: cells[1] ?? "",
+                    ru: cells[2] ?? "",
+                };
+            });
+
+        if (pastedRows.length === 0) {
+            return;
+        }
+
+        setRows((prev) => {
+            const nonEmptyRows = prev.filter((row) => !isAllEmpty(row));
+            return [...nonEmptyRows, ...pastedRows];
+        });
+    };
+
     const handleSave = async () => {
         setIsSaving(true);
         setSaveError(null);
@@ -230,6 +261,7 @@ const TopicEditor = ({ studentId, subgroup, initialWords, onSaved }: TopicEditor
                 <table
                     ref={tableRef}
                     className="table table-sm table-bordered align-middle mb-1 quizlet-personal-topic-editor-table"
+                    onPaste={handlePaste}
                 >
                     <thead>
                         <tr className="table-light">
