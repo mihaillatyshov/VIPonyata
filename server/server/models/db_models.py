@@ -940,6 +940,9 @@ class QuizletAssignmentTarget(Base):
     student_id: Mapped[int] = mapped_column(Integer, ForeignKey(USERS_ID), nullable=False)
     student: Mapped["User"] = relationship("User", back_populates="quizlet_assignment_targets")
 
+    personal_subgroups: Mapped[list["QuizletAssignmentTargetSubgroup"]] = relationship(
+        "QuizletAssignmentTargetSubgroup", back_populates="target", cascade="all, delete-orphan")
+
     status: Mapped[str] = mapped_column(String(32), nullable=False, default=Status.PENDING)
     assigned_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text("now()"), nullable=False)
     completed_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
@@ -947,6 +950,21 @@ class QuizletAssignmentTarget(Base):
     __table_args__ = (UniqueConstraint('assignment_id', 'student_id', name='idx_quizlet_assignment_target'), )
 
     __mapper_args__ = {'eager_defaults': True}
+
+
+class QuizletAssignmentTargetSubgroup(Base):
+    __tablename__ = "quizlet_assignment_target_subgroups"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    target_id: Mapped[int] = mapped_column(Integer, ForeignKey("quizlet_assignment_targets.id"), nullable=False)
+    target: Mapped["QuizletAssignmentTarget"] = relationship("QuizletAssignmentTarget",
+                                                             back_populates="personal_subgroups")
+
+    subgroup_id: Mapped[int] = mapped_column(Integer, ForeignKey("user_quizlet_subgroups.id"), nullable=False)
+    subgroup: Mapped["UserQuizletSubgroup"] = relationship("UserQuizletSubgroup")
+
+    __table_args__ = (UniqueConstraint('target_id', 'subgroup_id', name='idx_quizlet_assignment_target_subgroup'), )
 
 
 class QuizletAssignmentResult(Base):

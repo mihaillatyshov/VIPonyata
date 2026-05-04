@@ -322,11 +322,13 @@ def get_quizlet_assignments() -> dict:
         target_items: list[dict] = []
         for target in targets:
             student = all_students_map.get(target.student_id)
+            personal_subgroups = DBQT.get_quizlet_assignment_target_personal_subgroups(target.id)
             target_items.append({
                 "id":
                 target.id,
                 "student":
                 None if student is None else student.__json__(),
+                "personal_subgroups": [subgroup.__json__() for subgroup in personal_subgroups],
                 "status":
                 target.status,
                 "assigned_at":

@@ -8,13 +8,13 @@ from server.common import DBsession
 from server.exceptions.ApiExceptions import InvalidAPIUsage
 from server.models.assessment import AssessmentCreateReqStr
 from server.models.course import CourseCreateReq
-from server.models.db_models import (ActivityTryType, Assessment, AssessmentTry, AssessmentTryType, AssessmentType,
-                                     Course, Dictionary, Drilling, DrillingCard, DrillingTry, FinalBoss, FinalBossTry,
-                                     Hieroglyph, HieroglyphCard, HieroglyphTry, Lesson, LexisCardType, LexisTryType,
-                                     LexisType, NotificationStudentToTeacher, NotificationTeacherToStudent,
-                                     QuizletAssignment, QuizletAssignmentSubgroup, QuizletAssignmentTarget,
-                                     QuizletAssignmentResult, QuizletDictionary, QuizletGroup, QuizletSubgroup,
-                                     QuizletSubgroupWord, User, UserDictionary, a_users_courses, a_users_lessons)
+from server.models.db_models import (
+    ActivityTryType, Assessment, AssessmentTry, AssessmentTryType, AssessmentType, Course, Dictionary, Drilling,
+    DrillingCard, DrillingTry, FinalBoss, FinalBossTry, Hieroglyph, HieroglyphCard, HieroglyphTry, Lesson,
+    LexisCardType, LexisTryType, LexisType, NotificationStudentToTeacher, NotificationTeacherToStudent,
+    QuizletAssignment, QuizletAssignmentResult, QuizletAssignmentSubgroup, QuizletAssignmentTarget,
+    QuizletAssignmentTargetSubgroup, QuizletDictionary, QuizletGroup, QuizletSubgroup, QuizletSubgroupWord, User,
+    UserDictionary, UserQuizletLesson, UserQuizletSubgroup, UserQuizletWord, a_users_courses, a_users_lessons)
 from server.models.dictionary import (DictionaryCreateReq, DictionaryCreateReqItem)
 from server.models.lesson import LessonCreateReq
 from server.models.lexis import LexisCardCreateReq, LexisCreateReq
@@ -645,6 +645,46 @@ def get_students_by_ids(user_ids: list[int]) -> list[User]:
         return session.scalars(select(User).where(User.id.in_(user_ids)).where(User.level == User.Level.STUDENT)).all()
 
 
+def _ensure_char(word_char_jp: str | None, word_jp: str) -> str:
+    return word_char_jp if word_char_jp is not None and word_char_jp != "" else word_jp
+
+
+def _collect_teacher_assignment_word_keys(session, subgroup_ids: list[int]) -> set[tuple[str, str, str]]:
+    if len(subgroup_ids) == 0:
+        return set()
+
+    teacher_words = session.execute(
+        select(QuizletSubgroupWord, QuizletDictionary).join(QuizletSubgroupWord.word).where(
+            QuizletSubgroupWord.subgroup_id.in_(subgroup_ids))).all()
+
+    result: set[tuple[str, str, str]] = set()
+    for _, word in teacher_words:
+        result.add((_ensure_char(word.char_jp, word.word_jp), word.word_jp, word.ru))
+    return result
+
+
+def _collect_personal_assignment_word_keys(session, subgroup_ids: list[int]) -> set[tuple[str, str, str]]:
+    if len(subgroup_ids) == 0:
+        return set()
+
+    personal_words = session.scalars(select(UserQuizletWord).where(UserQuizletWord.subgroup_id.in_(subgroup_ids))).all()
+
+    result: set[tuple[str, str, str]] = set()
+    for word in personal_words:
+        result.add((_ensure_char(word.char_jp, word.word_jp), word.word_jp, word.ru))
+    return result
+
+
+def get_quizlet_assignment_target_personal_subgroups(target_id: int) -> list[UserQuizletSubgroup]:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(UserQuizletSubgroup).join(
+                QuizletAssignmentTargetSubgroup,
+                QuizletAssignmentTargetSubgroup.subgroup_id == UserQuizletSubgroup.id).where(
+                    QuizletAssignmentTargetSubgroup.target_id == target_id).order_by(UserQuizletSubgroup.sort).order_by(
+                        UserQuizletSubgroup.id)).all()
+
+
 def create_quizlet_assignment(teacher_id: int, data: QuizletAssignmentCreateReq) -> QuizletAssignment:
     with DBsession.begin() as session:
         subgroup_ids = list(set(data.subgroup_ids))
@@ -660,18 +700,34 @@ def create_quizlet_assignment(teacher_id: int, data: QuizletAssignmentCreateReq)
         if len(target_student_ids) == 0:
             raise InvalidAPIUsage("No valid students found for assignment", 400)
 
-        teacher_words = session.execute(
-            select(QuizletSubgroupWord, QuizletDictionary).join(QuizletSubgroupWord.word).where(
-                QuizletSubgroupWord.subgroup_id.in_(subgroup_ids))).all()
-        unique_assignment_words: set[tuple[str, str, str]] = set()
-        for _, word in teacher_words:
-            ensured_char = word.char_jp if word.char_jp is not None and word.char_jp != "" else word.word_jp
-            unique_assignment_words.add((ensured_char, word.word_jp, word.ru))
+        personal_subgroup_ids_by_student: dict[int, list[int]] = {}
+        for personal_target in data.personal_targets:
+            if personal_target.student_id not in target_student_ids:
+                raise InvalidAPIUsage("Personal dictionaries can be assigned only to selected students", 400)
 
-        if len(unique_assignment_words) < 2:
-            raise InvalidAPIUsage("At least 2 words are required for assignment", 400)
+            personal_subgroup_ids = list(set(personal_target.subgroup_ids))
+            valid_personal_subgroup_ids = session.scalars(
+                select(UserQuizletSubgroup.id).join(UserQuizletSubgroup.lesson).where(
+                    UserQuizletSubgroup.id.in_(personal_subgroup_ids)).where(
+                        UserQuizletLesson.user_id == personal_target.student_id)).all()
+            if len(valid_personal_subgroup_ids) != len(personal_subgroup_ids):
+                raise InvalidAPIUsage("Some selected personal dictionaries do not belong to the chosen student", 400)
 
-        max_words = len(unique_assignment_words)
+            personal_subgroup_ids_by_student[personal_target.student_id] = personal_subgroup_ids
+
+        teacher_word_keys = _collect_teacher_assignment_word_keys(session, subgroup_ids)
+        max_words = 0
+
+        for student_id in target_student_ids:
+            assignment_word_keys = set(teacher_word_keys)
+            assignment_word_keys.update(
+                _collect_personal_assignment_word_keys(session, personal_subgroup_ids_by_student.get(student_id, [])))
+
+            if len(assignment_word_keys) < 2:
+                raise InvalidAPIUsage("At least 2 words are required for each selected student", 400)
+
+            max_words = max(max_words, len(assignment_word_keys))
+
         assignment = QuizletAssignment(title=data.title,
                                        quiz_type=data.quiz_type,
                                        show_hints=data.show_hints,
@@ -685,14 +741,19 @@ def create_quizlet_assignment(teacher_id: int, data: QuizletAssignmentCreateReq)
             session.add(QuizletAssignmentSubgroup(assignment_id=assignment.id, subgroup_id=subgroup_id))
 
         for student_id in target_student_ids:
+            target = QuizletAssignmentTarget(assignment_id=assignment.id,
+                                             student_id=student_id,
+                                             status=QuizletAssignmentTarget.Status.PENDING)
+            session.add(target)
+            session.flush()
+
+            for subgroup_id in personal_subgroup_ids_by_student.get(student_id, []):
+                session.add(QuizletAssignmentTargetSubgroup(target_id=target.id, subgroup_id=subgroup_id))
+
             session.add(
                 NotificationTeacherToStudent(student_id=student_id,
                                              quizlet_assignment_id=assignment.id,
                                              message=f"Вам выдано задание Quizlet: {assignment.title}"))
-            session.add(
-                QuizletAssignmentTarget(assignment_id=assignment.id,
-                                        student_id=student_id,
-                                        status=QuizletAssignmentTarget.Status.PENDING))
 
         return assignment
 

@@ -10,6 +10,7 @@ import {
     TQuizletAssignmentResult,
     TQuizletAssignmentTarget,
     TQuizletGroup,
+    TQuizletLesson,
     TQuizletSubgroup,
     TQuizletSubgroupWord,
     TQuizletWord,
@@ -44,6 +45,7 @@ interface AssignmentListItem {
     targets: Array<{
         id: number;
         student: { id: number; name: string; nickname: string } | null;
+        personal_subgroups: TQuizletSubgroup[];
         status: TQuizletAssignmentTarget["status"];
         assigned_at: string;
         completed_at: string | null;
@@ -58,6 +60,19 @@ interface AssignmentListItem {
 
 interface AssignmentListResponse {
     assignments: AssignmentListItem[];
+}
+
+interface StudentPersonalDictionaryResponse {
+    lesson: TQuizletLesson | null;
+    subgroups: TQuizletSubgroup[];
+    words: TQuizletWord[];
+}
+
+interface AssignmentStudentPersonalState {
+    status: LoadStatus.Type;
+    lesson: TQuizletLesson | null;
+    subgroups: TQuizletSubgroup[];
+    words: TQuizletWord[];
 }
 
 interface EditorRow {
@@ -995,6 +1010,12 @@ const TeacherQuizletManager = () => {
     const [assignmentDirection, setAssignmentDirection] = useState<"jp_to_ru" | "ru_to_jp">("jp_to_ru");
     const [assignmentSubgroupIds, setAssignmentSubgroupIds] = useState<number[]>([]);
     const [assignmentStudentIds, setAssignmentStudentIds] = useState<number[]>([]);
+    const [assignmentPersonalDictionariesByStudent, setAssignmentPersonalDictionariesByStudent] = useState<
+        Record<number, AssignmentStudentPersonalState>
+    >({});
+    const [assignmentPersonalSubgroupIdsByStudent, setAssignmentPersonalSubgroupIdsByStudent] = useState<
+        Record<number, number[]>
+    >({});
     const [assignmentError, setAssignmentError] = useState<string | null>(null);
     const [isCreatingAssignment, setIsCreatingAssignment] = useState(false);
 
@@ -1106,8 +1127,82 @@ const TeacherQuizletManager = () => {
                 .map((item) => item.word_id),
         );
 
-        return selectedWordIds.size;
-    }, [assignmentSubgroupIds, subgroupWords]);
+        let selectedPersonalWordsCount = 0;
+        for (const studentId of assignmentStudentIds) {
+            const studentState = assignmentPersonalDictionariesByStudent[studentId];
+            const selectedPersonalSubgroupIds = assignmentPersonalSubgroupIdsByStudent[studentId] ?? [];
+
+            if (studentState?.status !== LoadStatus.DONE || selectedPersonalSubgroupIds.length === 0) {
+                continue;
+            }
+
+            selectedPersonalWordsCount += studentState.words.filter((word) =>
+                selectedPersonalSubgroupIds.includes(word.subgroup_id ?? -1),
+            ).length;
+        }
+
+        return selectedWordIds.size + selectedPersonalWordsCount;
+    }, [
+        assignmentSubgroupIds,
+        assignmentStudentIds,
+        assignmentPersonalDictionariesByStudent,
+        assignmentPersonalSubgroupIdsByStudent,
+        subgroupWords,
+    ]);
+
+    const assignmentSelectedStudents = useMemo(() => {
+        const selectedStudentIds = new Set(assignmentStudentIds);
+        return (assignmentOptions?.students ?? []).filter((student) => selectedStudentIds.has(student.id));
+    }, [assignmentOptions?.students, assignmentStudentIds]);
+
+    useEffect(() => {
+        setAssignmentPersonalSubgroupIdsByStudent((prev) => {
+            const selectedStudentIds = new Set(assignmentStudentIds);
+            const nextEntries = Object.entries(prev).filter(([studentId]) => selectedStudentIds.has(Number(studentId)));
+            return Object.fromEntries(nextEntries);
+        });
+
+        for (const studentId of assignmentStudentIds) {
+            const currentState = assignmentPersonalDictionariesByStudent[studentId];
+            if (currentState !== undefined) {
+                continue;
+            }
+
+            setAssignmentPersonalDictionariesByStudent((prev) => ({
+                ...prev,
+                [studentId]: {
+                    status: LoadStatus.LOADING,
+                    lesson: prev[studentId]?.lesson ?? null,
+                    subgroups: prev[studentId]?.subgroups ?? [],
+                    words: prev[studentId]?.words ?? [],
+                },
+            }));
+
+            AjaxGet<StudentPersonalDictionaryResponse>({ url: `/api/quizlet/students-dictionaries/${studentId}` })
+                .then((json) => {
+                    setAssignmentPersonalDictionariesByStudent((prev) => ({
+                        ...prev,
+                        [studentId]: {
+                            status: LoadStatus.DONE,
+                            lesson: json.lesson,
+                            subgroups: json.subgroups,
+                            words: json.words,
+                        },
+                    }));
+                })
+                .catch(() => {
+                    setAssignmentPersonalDictionariesByStudent((prev) => ({
+                        ...prev,
+                        [studentId]: {
+                            status: LoadStatus.ERROR,
+                            lesson: null,
+                            subgroups: [],
+                            words: [],
+                        },
+                    }));
+                });
+        }
+    }, [assignmentPersonalDictionariesByStudent, assignmentStudentIds]);
 
     const getSubgroupWords = (subgroupId: number): TQuizletWord[] => {
         const ids = subgroupWords.filter((item) => item.subgroup_id === subgroupId).map((item) => item.word_id);
@@ -1245,12 +1340,19 @@ const TeacherQuizletManager = () => {
     const handleCreateAssignment = async () => {
         setAssignmentError(null);
 
+        const selectedPersonalTargets = assignmentStudentIds
+            .map((studentId) => ({
+                student_id: studentId,
+                subgroup_ids: assignmentPersonalSubgroupIdsByStudent[studentId] ?? [],
+            }))
+            .filter((item) => item.subgroup_ids.length > 0);
+
         if (assignmentTitle.trim().length === 0) {
             setAssignmentError("Укажите название задания");
             return;
         }
 
-        if (assignmentSubgroupIds.length === 0) {
+        if (assignmentSubgroupIds.length === 0 && selectedPersonalTargets.length === 0) {
             setAssignmentError("Выберите хотя бы один словарь");
             return;
         }
@@ -1268,6 +1370,7 @@ const TeacherQuizletManager = () => {
                     title: assignmentTitle.trim(),
                     quiz_type: assignmentQuizType,
                     subgroup_ids: assignmentSubgroupIds,
+                    personal_targets: selectedPersonalTargets,
                     show_hints: assignmentShowHints,
                     translation_direction: assignmentDirection,
                     student_ids: assignmentStudentIds,
@@ -1277,6 +1380,7 @@ const TeacherQuizletManager = () => {
             setAssignmentTitle("");
             setAssignmentSubgroupIds([]);
             setAssignmentStudentIds([]);
+            setAssignmentPersonalSubgroupIdsByStudent({});
             await fetchAssignmentsData();
         } finally {
             setIsCreatingAssignment(false);
@@ -1529,6 +1633,108 @@ const TeacherQuizletManager = () => {
                                     </div>
                                 </div>
 
+                                {assignmentSelectedStudents.length > 0 && (
+                                    <div>
+                                        <label className="form-label mb-2">Личные словари выбранных учеников</label>
+                                        <div className="d-flex flex-column gap-2">
+                                            {assignmentSelectedStudents.map((student) => {
+                                                const personalState =
+                                                    assignmentPersonalDictionariesByStudent[student.id];
+                                                const selectedPersonalSubgroupIds =
+                                                    assignmentPersonalSubgroupIdsByStudent[student.id] ?? [];
+
+                                                return (
+                                                    <div key={student.id} className="border rounded p-2">
+                                                        <div className="fw-semibold mb-1">
+                                                            {student.nickname} ({student.name})
+                                                        </div>
+
+                                                        {personalState === undefined ||
+                                                        personalState.status === LoadStatus.LOADING ? (
+                                                            <div className="text-muted small">
+                                                                Загружаю личные словари ученика...
+                                                            </div>
+                                                        ) : null}
+
+                                                        {personalState?.status === LoadStatus.ERROR && (
+                                                            <div className="text-danger small">
+                                                                Не удалось загрузить личные словари ученика
+                                                            </div>
+                                                        )}
+
+                                                        {personalState?.status === LoadStatus.DONE &&
+                                                            personalState.subgroups.length === 0 && (
+                                                                <div className="text-muted small">
+                                                                    У ученика пока нет личных словарей
+                                                                </div>
+                                                            )}
+
+                                                        {personalState?.status === LoadStatus.DONE &&
+                                                            personalState.subgroups.length > 0 && (
+                                                                <div className="d-flex flex-wrap gap-2">
+                                                                    {personalState.subgroups.map((subgroup) => {
+                                                                        const subgroupWordCount =
+                                                                            personalState.words.filter(
+                                                                                (word) =>
+                                                                                    word.subgroup_id === subgroup.id,
+                                                                            ).length;
+
+                                                                        return (
+                                                                            <label
+                                                                                key={subgroup.id}
+                                                                                className="form-check me-3"
+                                                                            >
+                                                                                <input
+                                                                                    className="form-check-input"
+                                                                                    type="checkbox"
+                                                                                    checked={selectedPersonalSubgroupIds.includes(
+                                                                                        subgroup.id,
+                                                                                    )}
+                                                                                    onChange={(event) => {
+                                                                                        setAssignmentPersonalSubgroupIdsByStudent(
+                                                                                            (prev) => ({
+                                                                                                ...prev,
+                                                                                                [student.id]: prev[
+                                                                                                    student.id
+                                                                                                ]?.includes(subgroup.id)
+                                                                                                    ? (
+                                                                                                          prev[
+                                                                                                              student.id
+                                                                                                          ] ?? []
+                                                                                                      ).filter(
+                                                                                                          (item) =>
+                                                                                                              item !==
+                                                                                                              subgroup.id,
+                                                                                                      )
+                                                                                                    : [
+                                                                                                          ...(prev[
+                                                                                                              student.id
+                                                                                                          ] ?? []),
+                                                                                                          subgroup.id,
+                                                                                                      ],
+                                                                                            }),
+                                                                                        );
+                                                                                        event.target.blur();
+                                                                                    }}
+                                                                                />
+                                                                                <span className="form-check-label">
+                                                                                    {subgroup.title}
+                                                                                    <span className="quizlet-dictionary-word-count">
+                                                                                        {` (${subgroupWordCount})`}
+                                                                                    </span>
+                                                                                </span>
+                                                                            </label>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+
                                 {assignmentError && <div className="text-danger small">{assignmentError}</div>}
 
                                 <div className="d-flex align-items-center gap-3 flex-wrap">
@@ -1603,6 +1809,11 @@ const TeacherQuizletManager = () => {
                                                         {target.student?.nickname ?? "unknown"} (
                                                         {target.student?.name ?? "unknown"})
                                                     </span>
+                                                    {target.personal_subgroups.length > 0 && (
+                                                        <span className="text-muted">
+                                                            {` • личные: ${target.personal_subgroups.map((sg) => sg.title).join(", ")}`}
+                                                        </span>
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>

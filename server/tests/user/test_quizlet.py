@@ -1,12 +1,17 @@
 import datetime
 import json
 
+import pytest
 from sqlalchemy import select
 
 from server.common import DBsession
-from server.models.db_models import QuizletSession, QuizletSessionIncorrectWord, QuizletSessionWord, User
-from server.models.quizlet import QuizletEndSessionReq, QuizletFlashcardAnswerReq, QuizletRetryIncorrectReq
-from server.queries import StudentDBqueries
+from server.exceptions.ApiExceptions import InvalidAPIUsage
+from server.models.db_models import (QuizletDictionary, QuizletGroup, QuizletSession, QuizletSessionIncorrectWord,
+                                     QuizletSessionWord, QuizletSubgroup, QuizletSubgroupWord, User, UserQuizletLesson,
+                                     UserQuizletSubgroup, UserQuizletWord)
+from server.models.quizlet import (QuizletAssignmentCreateReq, QuizletAssignmentPersonalTargetReq, QuizletEndSessionReq,
+                                   QuizletFlashcardAnswerReq, QuizletRetryIncorrectReq)
+from server.queries import StudentDBqueries, TeacherDBqueries
 
 
 def test_flashcard_incorrect_answer_requeues_word_at_random_later_position(create_db, monkeypatch):
@@ -442,3 +447,131 @@ def test_get_quizlet_sessions_stats_excludes_empty_finished_sessions(create_db):
     sessions = StudentDBqueries.get_quizlet_sessions_stats(user.id)
 
     assert [item.id for item in sessions] == [completed.id]
+
+
+def test_start_quizlet_assignment_session_includes_student_personal_subgroups(create_db, monkeypatch):
+    DBsession.init(create_db)
+
+    with DBsession.begin() as session:
+        teacher = User(name="Quizlet Teacher",
+                       nickname="quizlet_teacher",
+                       password="password123",
+                       birthday=datetime.date(1990, 1, 1),
+                       level=User.Level.TEACHER)
+        student = User(name="Quizlet Student",
+                       nickname="quizlet_student",
+                       password="password123",
+                       birthday=datetime.date(2000, 1, 1),
+                       level=User.Level.STUDENT)
+        session.add_all([teacher, student])
+        session.flush()
+
+        group = QuizletGroup(title="Teacher lesson", sort=10)
+        session.add(group)
+        session.flush()
+
+        subgroup = QuizletSubgroup(title="Teacher subgroup", sort=10, group_id=group.id)
+        session.add(subgroup)
+        session.flush()
+
+        teacher_words = [
+            QuizletDictionary(char_jp="漢字1", word_jp="かな1", ru="перевод1"),
+            QuizletDictionary(char_jp="漢字2", word_jp="かな2", ru="перевод2"),
+        ]
+        session.add_all(teacher_words)
+        session.flush()
+        session.add_all([
+            QuizletSubgroupWord(subgroup_id=subgroup.id, word_id=teacher_words[0].id),
+            QuizletSubgroupWord(subgroup_id=subgroup.id, word_id=teacher_words[1].id),
+        ])
+
+        lesson = UserQuizletLesson(title="Personal lesson", user_id=student.id)
+        session.add(lesson)
+        session.flush()
+
+        personal_subgroup = UserQuizletSubgroup(title="Personal subgroup", sort=10, lesson_id=lesson.id)
+        session.add(personal_subgroup)
+        session.flush()
+
+        session.add_all([
+            UserQuizletWord(char_jp="個1", word_jp="こ1", ru="личный1", subgroup_id=personal_subgroup.id),
+            UserQuizletWord(char_jp="個2", word_jp="こ2", ru="личный2", subgroup_id=personal_subgroup.id),
+        ])
+
+    monkeypatch.setattr(StudentDBqueries.random, "shuffle", lambda items: None)
+
+    assignment = TeacherDBqueries.create_quizlet_assignment(
+        teacher.id,
+        QuizletAssignmentCreateReq(
+            title="Assignment with personal",
+            quiz_type="flashcards",
+            subgroup_ids=[subgroup.id],
+            personal_targets=[
+                QuizletAssignmentPersonalTargetReq(student_id=student.id, subgroup_ids=[personal_subgroup.id])
+            ],
+            student_ids=[student.id],
+            show_hints=False,
+            translation_direction="jp_to_ru",
+        ),
+    )
+
+    quiz_session = StudentDBqueries.start_quizlet_assignment_session(student.id, assignment.id)
+
+    with DBsession.begin() as session:
+        saved_session = session.get(QuizletSession, quiz_session.id)
+        session_words = session.scalars(
+            select(QuizletSessionWord).where(QuizletSessionWord.session_id == quiz_session.id).order_by(
+                QuizletSessionWord.id)).all()
+
+        assert saved_session is not None
+        assert saved_session.assignment_id == assignment.id
+        assert saved_session.total_words == 4
+        assert {word.word_jp for word in session_words} == {"かな1", "かな2", "こ1", "こ2"}
+
+
+def test_create_quizlet_assignment_rejects_personal_subgroup_of_another_student(create_db):
+    DBsession.init(create_db)
+
+    with DBsession.begin() as session:
+        teacher = User(name="Quizlet Teacher",
+                       nickname="quizlet_teacher_2",
+                       password="password123",
+                       birthday=datetime.date(1990, 1, 1),
+                       level=User.Level.TEACHER)
+        student = User(name="Quizlet Student",
+                       nickname="quizlet_student_2",
+                       password="password123",
+                       birthday=datetime.date(2000, 1, 1),
+                       level=User.Level.STUDENT)
+        another_student = User(name="Another Student",
+                               nickname="quizlet_student_3",
+                               password="password123",
+                               birthday=datetime.date(2000, 2, 2),
+                               level=User.Level.STUDENT)
+        session.add_all([teacher, student, another_student])
+        session.flush()
+
+        lesson = UserQuizletLesson(title="Another personal lesson", user_id=another_student.id)
+        session.add(lesson)
+        session.flush()
+
+        personal_subgroup = UserQuizletSubgroup(title="Another personal subgroup", sort=10, lesson_id=lesson.id)
+        session.add(personal_subgroup)
+
+    with pytest.raises(InvalidAPIUsage) as exc_info:
+        TeacherDBqueries.create_quizlet_assignment(
+            teacher.id,
+            QuizletAssignmentCreateReq(
+                title="Invalid assignment",
+                quiz_type="flashcards",
+                subgroup_ids=[],
+                personal_targets=[
+                    QuizletAssignmentPersonalTargetReq(student_id=student.id, subgroup_ids=[personal_subgroup.id])
+                ],
+                student_ids=[student.id],
+                show_hints=False,
+                translation_direction="jp_to_ru",
+            ),
+        )
+
+    assert "personal dictionaries do not belong" in exc_info.value.message

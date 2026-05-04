@@ -94,10 +94,22 @@ class QuizletRetryIncorrectReq(BaseModel):
     source_session_id: int
 
 
+class QuizletAssignmentPersonalTargetReq(BaseModel):
+    student_id: int
+    subgroup_ids: list[int] = []
+
+    @model_validator(mode="after")
+    def validate_payload(self) -> "QuizletAssignmentPersonalTargetReq":
+        if len(self.subgroup_ids) == 0:
+            raise ValueError("At least one personal subgroup must be selected")
+        return self
+
+
 class QuizletAssignmentCreateReq(BaseModel):
     title: StrExtraSpaceRemove
     quiz_type: StrExtraSpaceRemove
-    subgroup_ids: list[int]
+    subgroup_ids: list[int] = []
+    personal_targets: list[QuizletAssignmentPersonalTargetReq] = []
     show_hints: bool = False
     translation_direction: StrExtraSpaceRemove = "jp_to_ru"
     student_ids: list[int] = []
@@ -106,8 +118,10 @@ class QuizletAssignmentCreateReq(BaseModel):
     def validate_payload(self) -> "QuizletAssignmentCreateReq":
         if self.quiz_type not in ["pair", "flashcards"]:
             raise ValueError("Unsupported quiz_type")
-        if len(self.subgroup_ids) == 0:
+        if len(self.subgroup_ids) == 0 and len(self.personal_targets) == 0:
             raise ValueError("At least one subgroup must be selected")
         if len(self.student_ids) == 0:
             raise ValueError("At least one student must be selected")
+        if any(item.student_id not in self.student_ids for item in self.personal_targets):
+            raise ValueError("Personal targets must match selected students")
         return self

@@ -15,8 +15,9 @@ from server.models.db_models import (
     Drilling, DrillingCard, DrillingTry, FinalBoss, FinalBossTry, Hieroglyph, HieroglyphCard, HieroglyphTry, Lesson,
     LexisCardType, LexisTryType, LexisType, NotificationStudentToTeacher, NotificationTeacherToStudent,
     QuizletAssignment, QuizletAssignmentResult, QuizletAssignmentSubgroup, QuizletAssignmentTarget,
-    QuizletDictionary, QuizletGroup, QuizletSession, QuizletSessionIncorrectWord, QuizletSessionWord, QuizletSubgroup,
-    QuizletSubgroupWord, User, UserDictionary, UserQuizletLesson, UserQuizletSubgroup, UserQuizletWord)
+    QuizletAssignmentTargetSubgroup, QuizletDictionary, QuizletGroup, QuizletSession, QuizletSessionIncorrectWord,
+    QuizletSessionWord, QuizletSubgroup, QuizletSubgroupWord, User, UserDictionary, UserQuizletLesson,
+    UserQuizletSubgroup, UserQuizletWord)
 from server.models.dictionary import DictionaryAssociationReq, DictionaryImgReq
 from server.models.quizlet import (QuizletEndSessionReq, QuizletFlashcardAnswerReq, QuizletPersonalLessonCreateReq,
                                    QuizletRetryIncorrectReq, QuizletSaveProgressReq, QuizletStartSessionReq,
@@ -829,6 +830,11 @@ def get_quizlet_assignments_for_student(user_id: int) -> list[dict]:
                 select(QuizletAssignmentSubgroup.subgroup_id).where(
                     QuizletAssignmentSubgroup.assignment_id == assignment.id)).all()
             subgroups = session.scalars(select(QuizletSubgroup).where(QuizletSubgroup.id.in_(subgroup_ids))).all()
+            personal_subgroup_ids = session.scalars(
+                select(QuizletAssignmentTargetSubgroup.subgroup_id).where(
+                    QuizletAssignmentTargetSubgroup.target_id == target.id)).all()
+            personal_subgroups = session.scalars(
+                select(UserQuizletSubgroup).where(UserQuizletSubgroup.id.in_(personal_subgroup_ids))).all()
             result_row = session.scalars(
                 select(QuizletAssignmentResult).where(QuizletAssignmentResult.assignment_id == assignment.id).where(
                     QuizletAssignmentResult.student_id == user_id)).one_or_none()
@@ -839,16 +845,20 @@ def get_quizlet_assignments_for_student(user_id: int) -> list[dict]:
                         QuizletSession.id.desc())).first()
 
             result.append({
-                "assignment": assignment.__json__(),
+                "assignment":
+                assignment.__json__(),
                 "target": {
                     "id": target.id,
                     "status": target.status,
                     "assigned_at": target.assigned_at,
                     "completed_at": target.completed_at,
                 },
-                "subgroups": [subgroup.__json__() for subgroup in subgroups],
-                "result": None if result_row is None else result_row.__json__(),
-                "active_session_id": None if active_session is None else active_session.id,
+                "subgroups": [subgroup.__json__()
+                              for subgroup in subgroups] + [subgroup.__json__() for subgroup in personal_subgroups],
+                "result":
+                None if result_row is None else result_row.__json__(),
+                "active_session_id":
+                None if active_session is None else active_session.id,
             })
 
         return result
@@ -864,7 +874,8 @@ def get_quizlet_assignment_by_id_for_student(assignment_id: int, user_id: int) -
 
 def start_quizlet_assignment_session(user_id: int, assignment_id: int) -> QuizletSession:
     with DBsession.begin() as session:
-        assignment = session.scalars(select(QuizletAssignment).where(QuizletAssignment.id == assignment_id)).one_or_none()
+        assignment = session.scalars(
+            select(QuizletAssignment).where(QuizletAssignment.id == assignment_id)).one_or_none()
         if assignment is None:
             raise InvalidAPIUsage("Assignment not found", 404)
 
@@ -895,15 +906,18 @@ def start_quizlet_assignment_session(user_id: int, assignment_id: int) -> Quizle
         subgroup_ids = session.scalars(
             select(QuizletAssignmentSubgroup.subgroup_id).where(
                 QuizletAssignmentSubgroup.assignment_id == assignment_id)).all()
-        if len(subgroup_ids) == 0:
+        personal_subgroup_ids = session.scalars(
+            select(QuizletAssignmentTargetSubgroup.subgroup_id).where(
+                QuizletAssignmentTargetSubgroup.target_id == target.id)).all()
+        if len(subgroup_ids) == 0 and len(personal_subgroup_ids) == 0:
             raise InvalidAPIUsage("Assignment has no dictionaries", 400)
 
         start_data = QuizletStartSessionReq(quiz_type=assignment.quiz_type,
                                             subgroup_ids=subgroup_ids,
-                                            user_subgroup_ids=[],
+                                            user_subgroup_ids=personal_subgroup_ids,
                                             show_hints=assignment.show_hints,
                                             translation_direction=assignment.translation_direction)
-        words_data = _collect_teacher_words_for_assignment(session, subgroup_ids)
+        words_data = _collect_words_for_session(session, user_id, start_data)
 
         return _create_quizlet_session(session,
                                        user_id,
@@ -1143,12 +1157,12 @@ def retry_quizlet_incorrect_words(user_id: int, data: QuizletRetryIncorrectReq) 
             raise InvalidAPIUsage("No incorrect or unviewed words to retry", 400)
 
         retry_session = QuizletSession(quiz_type=source_session.quiz_type,
-                           show_hints=source_session.show_hints,
-                           translation_direction=source_session.translation_direction,
-                           total_words=len(retry_words),
-                           user_id=user_id,
-                           assignment_id=source_session.assignment_id,
-                           queue_state="[]")
+                                       show_hints=source_session.show_hints,
+                                       translation_direction=source_session.translation_direction,
+                                       total_words=len(retry_words),
+                                       user_id=user_id,
+                                       assignment_id=source_session.assignment_id,
+                                       queue_state="[]")
         session.add(retry_session)
         session.flush()
 
@@ -1189,15 +1203,24 @@ def retry_quizlet_all_words(user_id: int, data: QuizletRetryIncorrectReq) -> Qui
             subgroup_ids = session.scalars(
                 select(QuizletAssignmentSubgroup.subgroup_id).where(
                     QuizletAssignmentSubgroup.assignment_id == assignment.id)).all()
-            if len(subgroup_ids) == 0:
+            target = session.scalars(
+                select(QuizletAssignmentTarget).where(QuizletAssignmentTarget.assignment_id == assignment.id).where(
+                    QuizletAssignmentTarget.student_id == user_id)).one_or_none()
+            if target is None:
+                raise InvalidAPIUsage("You do not have access to this assignment", 403)
+
+            personal_subgroup_ids = session.scalars(
+                select(QuizletAssignmentTargetSubgroup.subgroup_id).where(
+                    QuizletAssignmentTargetSubgroup.target_id == target.id)).all()
+            if len(subgroup_ids) == 0 and len(personal_subgroup_ids) == 0:
                 raise InvalidAPIUsage("Assignment has no dictionaries", 400)
 
             start_data = QuizletStartSessionReq(quiz_type=assignment.quiz_type,
                                                 subgroup_ids=subgroup_ids,
-                                                user_subgroup_ids=[],
+                                                user_subgroup_ids=personal_subgroup_ids,
                                                 show_hints=assignment.show_hints,
                                                 translation_direction=assignment.translation_direction)
-            words_data = _collect_teacher_words_for_assignment(session, subgroup_ids)
+            words_data = _collect_words_for_session(session, user_id, start_data)
 
             return _create_quizlet_session(session,
                                            user_id,
