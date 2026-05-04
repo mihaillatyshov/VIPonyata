@@ -173,6 +173,7 @@ const speak = (text: string, lang: "ja-JP" | "ru-RU") => {
 
     const utterance = new SpeechSynthesisUtterance(normalizedText);
     utterance.lang = lang;
+    utterance.rate = lang === "ru-RU" ? 2 : 1.3;
 
     window.speechSynthesis.speak(utterance);
 };
