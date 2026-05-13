@@ -45,6 +45,10 @@
     margin-inline: auto;
 }
 
+.review-resume-banner {
+    margin-bottom: 18px;
+}
+
 .review-page .quizlet-main-container.review-training-history {
     max-width: 100%;
     padding: 12px;

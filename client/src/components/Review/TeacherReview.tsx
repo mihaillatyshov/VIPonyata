@@ -276,6 +276,7 @@ const speak = (text: string, lang: "ja-JP" | "ru-RU") => {
 };
 
 const REVIEW_TRAINING_HISTORY_STORAGE_KEY = "viponyata-review-training-history";
+const REVIEW_ACTIVE_TRAINING_STORAGE_KEY = "viponyata-review-active-training";
 const REVIEW_TRAINING_HISTORY_LIMIT = 100;
 const REVIEW_ROUTE_PATHS = {
     root: "/review",
@@ -288,6 +289,114 @@ const REVIEW_ROUTE_PATHS = {
 
 const isDirectionValue = (value: unknown): value is TrainingSession["direction"] =>
     value === "jp_to_ru" || value === "ru_to_jp";
+
+const isTrainingModeValue = (value: unknown): value is ReviewTrainingMode =>
+    value === "topics" || value === "random" || value === "smart_random";
+
+const isTrainingAssessmentValue = (value: unknown): value is TrainingAssessment => {
+    if (typeof value !== "object" || value === null) {
+        return false;
+    }
+
+    const assessment = value as Partial<TrainingAssessment>;
+
+    return (
+        typeof assessment.forgot === "number" &&
+        typeof assessment.partial === "number" &&
+        typeof assessment.remember === "number"
+    );
+};
+
+const isTrainingSessionValue = (value: unknown): value is TrainingSession => {
+    if (typeof value !== "object" || value === null) {
+        return false;
+    }
+
+    const session = value as Partial<TrainingSession>;
+
+    return (
+        Array.isArray(session.allWordIds) &&
+        session.allWordIds.every((item) => typeof item === "number") &&
+        Array.isArray(session.initialWordIds) &&
+        session.initialWordIds.every((item) => typeof item === "number") &&
+        Array.isArray(session.topicIds) &&
+        session.topicIds.every((item) => typeof item === "number") &&
+        Array.isArray(session.queue) &&
+        session.queue.every((item) => typeof item === "number") &&
+        Array.isArray(session.openedWordIds) &&
+        session.openedWordIds.every((item) => typeof item === "number") &&
+        isTrainingModeValue(session.mode) &&
+        isDirectionValue(session.direction) &&
+        typeof session.assessments === "object" &&
+        session.assessments !== null &&
+        Object.values(session.assessments).every(isTrainingAssessmentValue) &&
+        typeof session.startedAt === "number" &&
+        typeof session.elapsedSeconds === "number" &&
+        typeof session.isFinished === "boolean"
+    );
+};
+
+const sanitizeTrainingSession = (
+    value: TrainingSession,
+    availableWords: TReviewWord[],
+    availableTopics: TReviewTopic[],
+): TrainingSession | null => {
+    const validWordIds = new Set(availableWords.map((word) => word.id));
+    const validTopicIds = new Set(availableTopics.map((topic) => topic.id));
+
+    const initialWordIds = value.initialWordIds.filter((wordId) => validWordIds.has(wordId));
+    const allWordIds = value.allWordIds.filter((wordId) => validWordIds.has(wordId));
+    const queue = value.queue.filter((wordId) => validWordIds.has(wordId));
+    const openedWordIds = value.openedWordIds.filter((wordId) => validWordIds.has(wordId));
+    const topicIds = value.topicIds.filter((topicId) => validTopicIds.has(topicId));
+    const assessments = Object.fromEntries(
+        Object.entries(value.assessments).filter(([wordId, assessment]) => {
+            return validWordIds.has(Number(wordId)) && isTrainingAssessmentValue(assessment);
+        }),
+    ) as Record<number, TrainingAssessment>;
+
+    if (initialWordIds.length === 0 || (!value.isFinished && queue.length === 0)) {
+        return null;
+    }
+
+    return {
+        ...value,
+        allWordIds: allWordIds.length > 0 ? allWordIds : initialWordIds,
+        initialWordIds,
+        topicIds,
+        queue,
+        openedWordIds,
+        assessments,
+    };
+};
+
+const getReviewTrainingModeLabel = (mode: ReviewTrainingMode) => {
+    if (mode === "topics") {
+        return "По топикам";
+    }
+
+    if (mode === "smart_random") {
+        return "Smart Random Review";
+    }
+
+    return "Random Review";
+};
+
+const formatSessionStartDateTime = (value: number): string => {
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return "-";
+    }
+
+    return new Intl.DateTimeFormat("ru-RU", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    }).format(date);
+};
 
 const isReviewTrainingHistoryEntry = (value: unknown): value is ReviewTrainingHistoryEntry => {
     if (typeof value !== "object" || value === null) {
@@ -689,6 +798,8 @@ const TeacherReview = () => {
     const [openedDetailKeys, setOpenedDetailKeys] = useState<FlashcardDetailKey[]>([]);
     const [trainingHistory, setTrainingHistory] = useState<ReviewTrainingHistoryEntry[]>([]);
     const [hasTrainingHistoryError, setHasTrainingHistoryError] = useState(false);
+    const [savedTrainingSession, setSavedTrainingSession] = useState<TrainingSession | null>(null);
+    const [hasSavedTrainingSessionError, setHasSavedTrainingSessionError] = useState(false);
     const [expandedHistoryEntryId, setExpandedHistoryEntryId] = useState<string | null>(null);
     const [memoryStateError, setMemoryStateError] = useState<string | null>(null);
     const [isUpdatingWordMemoryState, setIsUpdatingWordMemoryState] = useState(false);
@@ -739,6 +850,44 @@ const TeacherReview = () => {
     }, []);
 
     useEffect(() => {
+        if (loadStatus !== LoadStatus.DONE || trainingSession !== null) {
+            return;
+        }
+
+        try {
+            const rawValue = window.localStorage.getItem(REVIEW_ACTIVE_TRAINING_STORAGE_KEY);
+
+            if (rawValue === null) {
+                setSavedTrainingSession(null);
+                return;
+            }
+
+            const parsedValue = JSON.parse(rawValue);
+            if (!isTrainingSessionValue(parsedValue)) {
+                throw new Error("Saved training payload is invalid");
+            }
+
+            const nextSession = sanitizeTrainingSession(parsedValue, words, topics);
+
+            if (nextSession === null || nextSession.isFinished) {
+                window.localStorage.removeItem(REVIEW_ACTIVE_TRAINING_STORAGE_KEY);
+                setSavedTrainingSession(null);
+                return;
+            }
+
+            setSavedTrainingSession(nextSession);
+            setHasSavedTrainingSessionError(false);
+
+            if (JSON.stringify(nextSession) !== rawValue) {
+                window.localStorage.setItem(REVIEW_ACTIVE_TRAINING_STORAGE_KEY, JSON.stringify(nextSession));
+            }
+        } catch {
+            setSavedTrainingSession(null);
+            setHasSavedTrainingSessionError(true);
+        }
+    }, [loadStatus, topics, trainingSession, words]);
+
+    useEffect(() => {
         if (selectedDictionaryId !== null) {
             const dictionary = dictionaries.find((item) => item.id === selectedDictionaryId);
             setDictionaryTitleDraft(dictionary?.title ?? "");
@@ -773,6 +922,32 @@ const TeacherReview = () => {
         }, 1000);
 
         return () => window.clearInterval(intervalId);
+    }, [trainingSession]);
+
+    useEffect(() => {
+        if (trainingSession === null) {
+            return;
+        }
+
+        if (trainingSession.isFinished) {
+            try {
+                window.localStorage.removeItem(REVIEW_ACTIVE_TRAINING_STORAGE_KEY);
+                setHasSavedTrainingSessionError(false);
+            } catch {
+                setHasSavedTrainingSessionError(true);
+            }
+
+            setSavedTrainingSession(null);
+            return;
+        }
+
+        try {
+            window.localStorage.setItem(REVIEW_ACTIVE_TRAINING_STORAGE_KEY, JSON.stringify(trainingSession));
+            setSavedTrainingSession(trainingSession);
+            setHasSavedTrainingSessionError(false);
+        } catch {
+            setHasSavedTrainingSessionError(true);
+        }
     }, [trainingSession]);
 
     useEffect(() => {
@@ -869,6 +1044,17 @@ const TeacherReview = () => {
 
         return Math.min(randomReviewCount, nonFrozenWords.length);
     }, [nonFrozenWords.length, randomReviewCount, selectedTrainingWordsCount, trainingMode]);
+    const savedTrainingTopicTitles = useMemo(() => {
+        if (savedTrainingSession === null) {
+            return [] as string[];
+        }
+
+        const topicTitleById = new Map(topics.map((topic) => [topic.id, topic.title]));
+
+        return savedTrainingSession.topicIds
+            .map((topicId) => topicTitleById.get(topicId))
+            .filter((topicTitle): topicTitle is string => Boolean(topicTitle));
+    }, [savedTrainingSession, topics]);
 
     useEffect(() => {
         setIsFlipped(false);
@@ -1098,18 +1284,18 @@ const TeacherReview = () => {
         );
     };
 
-    const finishTraining = (nextQueue: number[], nextAssessments: Record<number, TrainingAssessment>) => {
-        if (trainingSession === null || trainingSession.isFinished) {
-            return;
-        }
-
+    const finalizeTrainingSession = (
+        sessionToFinish: TrainingSession,
+        nextQueue: number[],
+        nextAssessments: Record<number, TrainingAssessment>,
+    ) => {
         stopSpeaking();
         const finishedAt = Date.now();
         const finishedSession = {
-            ...trainingSession,
+            ...sessionToFinish,
             queue: nextQueue,
             assessments: nextAssessments,
-            elapsedSeconds: Math.floor((finishedAt - trainingSession.startedAt) / 1000),
+            elapsedSeconds: Math.floor((finishedAt - sessionToFinish.startedAt) / 1000),
             isFinished: true,
         };
         const summary = getTrainingResultSummary(finishedSession);
@@ -1135,19 +1321,23 @@ const TeacherReview = () => {
         });
         syncTrainingMemoryStates(finishedSession);
 
-        setTrainingSession((prev) => {
-            if (prev === null) {
-                return prev;
-            }
+        try {
+            window.localStorage.removeItem(REVIEW_ACTIVE_TRAINING_STORAGE_KEY);
+            setHasSavedTrainingSessionError(false);
+        } catch {
+            setHasSavedTrainingSessionError(true);
+        }
 
-            return {
-                ...prev,
-                queue: nextQueue,
-                assessments: nextAssessments,
-                elapsedSeconds: finishedSession.elapsedSeconds,
-                isFinished: true,
-            };
-        });
+        setSavedTrainingSession(null);
+        setTrainingSession(finishedSession);
+    };
+
+    const finishTraining = (nextQueue: number[], nextAssessments: Record<number, TrainingAssessment>) => {
+        if (trainingSession === null || trainingSession.isFinished) {
+            return;
+        }
+
+        finalizeTrainingSession(trainingSession, nextQueue, nextAssessments);
     };
 
     const finishCurrentTraining = () => {
@@ -1156,6 +1346,26 @@ const TeacherReview = () => {
         }
 
         finishTraining(trainingSession.queue, trainingSession.assessments);
+    };
+
+    const continueSavedTraining = () => {
+        if (savedTrainingSession === null || savedTrainingSession.isFinished) {
+            return;
+        }
+
+        stopSpeaking();
+        setMemoryStateError(null);
+        setIsFlipped(false);
+        setOpenedDetailKeys([]);
+        setTrainingSession(savedTrainingSession);
+    };
+
+    const finishSavedTraining = () => {
+        if (savedTrainingSession === null || savedTrainingSession.isFinished) {
+            return;
+        }
+
+        finalizeTrainingSession(savedTrainingSession, savedTrainingSession.queue, savedTrainingSession.assessments);
     };
 
     const answerCurrentWord = (grade: "forgot" | "partial" | "remember") => {
@@ -1205,6 +1415,14 @@ const TeacherReview = () => {
 
     const resetTraining = () => {
         stopSpeaking();
+        try {
+            window.localStorage.removeItem(REVIEW_ACTIVE_TRAINING_STORAGE_KEY);
+            setHasSavedTrainingSessionError(false);
+        } catch {
+            setHasSavedTrainingSessionError(true);
+        }
+
+        setSavedTrainingSession(null);
         setTrainingSession(null);
         setIsFlipped(false);
         setOpenedDetailKeys([]);
@@ -1558,6 +1776,45 @@ const TeacherReview = () => {
                             Статусы
                         </button>
                     </div>
+                </div>
+            )}
+
+            {trainingSession === null &&
+                savedTrainingSession !== null &&
+                !savedTrainingSession.isFinished &&
+                !isFlashcardsRoute &&
+                !isResultsRoute && (
+                    <div className="review-library-container review-resume-banner">
+                        <div className="alert alert-warning d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2 mb-0">
+                            <div>
+                                <div className="fw-semibold mb-1">Есть незавершенное повторение</div>
+                                <div className="small">
+                                    Тип: {getReviewTrainingModeLabel(savedTrainingSession.mode)} • Прогресс:{" "}
+                                    {savedTrainingSession.openedWordIds.length}/
+                                    {savedTrainingSession.initialWordIds.length}
+                                </div>
+                                <div className="small">
+                                    Начало: {formatSessionStartDateTime(savedTrainingSession.startedAt)}
+                                </div>
+                                {savedTrainingTopicTitles.length > 0 && (
+                                    <div className="small">Темы: {savedTrainingTopicTitles.join(", ")}</div>
+                                )}
+                            </div>
+                            <div className="d-flex gap-2">
+                                <button type="button" className="btn btn-warning" onClick={continueSavedTraining}>
+                                    Продолжить
+                                </button>
+                                <button type="button" className="btn btn-outline-danger" onClick={finishSavedTraining}>
+                                    Завершить
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+            {trainingSession === null && hasSavedTrainingSessionError && !isFlashcardsRoute && !isResultsRoute && (
+                <div className="review-library-container review-resume-banner">
+                    <div className="alert alert-warning mb-0">Не удалось восстановить незавершенное повторение</div>
                 </div>
             )}
 
