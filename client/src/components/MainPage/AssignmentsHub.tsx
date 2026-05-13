@@ -57,6 +57,25 @@ const formatStartDate = (value?: string | null): string => {
     }).format(date);
 };
 
+const formatAssignmentMode = (
+    quizType?: THubAssignmentItem["quizType"],
+    value?: THubAssignmentItem["translationDirection"],
+): string => {
+    if (quizType === "pair") {
+        return "пары";
+    }
+
+    if (value === "ru_to_jp") {
+        return "rus-jp";
+    }
+
+    if (value === "jp_to_ru") {
+        return "jp-rus";
+    }
+
+    return "-";
+};
+
 const formatElapsedDuration = (startedAt: string, nowTimestamp: number) => {
     const startedTimestamp = new Date(startedAt).getTime();
 
@@ -106,6 +125,43 @@ const formatRoundedDuration = (seconds: number) => {
 };
 
 const COMPLETED_ITEMS_PREVIEW_COUNT = 10;
+
+const getPendingAssignmentMeta = (item: THubAssignmentItem) => {
+    const metaItems = [
+        {
+            key: "assignedAt",
+            iconClassName: "bi bi-calendar3",
+            value: formatStartDate(item.assignedAt ?? item.sortDate),
+            isFullRow: false,
+        },
+    ];
+
+    if (item.kind === "quizlet_assignment") {
+        metaItems.push(
+            {
+                key: "direction",
+                iconClassName: "bi bi-arrow-left-right",
+                value: formatAssignmentMode(item.quizType, item.translationDirection),
+                isFullRow: false,
+            },
+            {
+                key: "totalWords",
+                iconClassName: "bi bi-list-ol",
+                value: item.totalWords !== null && item.totalWords !== undefined ? `${item.totalWords}` : "-",
+                isFullRow: false,
+            },
+            {
+                key: "dictionaries",
+                iconClassName: "bi bi-collection",
+                value:
+                    item.dictionaryTitles && item.dictionaryTitles.length > 0 ? item.dictionaryTitles.join(", ") : "-",
+                isFullRow: true,
+            },
+        );
+    }
+
+    return metaItems;
+};
 
 const AssignmentsHub = ({ unfinishedSummary, onUnfinishedChanged }: AssignmentsHubProps) => {
     const navigate = useNavigate();
@@ -310,7 +366,7 @@ const AssignmentsHub = ({ unfinishedSummary, onUnfinishedChanged }: AssignmentsH
                                           <div className={styles.assignmentActions}>
                                               <button
                                                   type="button"
-                                                  className="btn btn-warning"
+                                                  className={`btn ${styles.assignmentButton} ${styles.assignmentButtonPrimary}`}
                                                   onClick={() => continueUnfinished(item)}
                                                   disabled={isFinishingUnfinished}
                                               >
@@ -318,7 +374,7 @@ const AssignmentsHub = ({ unfinishedSummary, onUnfinishedChanged }: AssignmentsH
                                               </button>
                                               <button
                                                   type="button"
-                                                  className="btn btn-outline-danger"
+                                                  className={`btn ${styles.assignmentButton} ${styles.assignmentButtonDanger}`}
                                                   onClick={() => finishUnfinished(item)}
                                                   disabled={isFinishingUnfinished}
                                               >
@@ -334,6 +390,19 @@ const AssignmentsHub = ({ unfinishedSummary, onUnfinishedChanged }: AssignmentsH
                                     <div className={styles.assignmentInfo}>
                                         <div className={styles.assignmentTitle}>{item.title}</div>
                                         <div className={styles.assignmentType}>{item.typeLabel}</div>
+                                        {activeTab === "pending" ? (
+                                            <div className={styles.assignmentPendingMetaGrid}>
+                                                {getPendingAssignmentMeta(item).map((metaItem) => (
+                                                    <div
+                                                        key={metaItem.key}
+                                                        className={`${styles.assignmentPendingMetaItem} ${metaItem.isFullRow ? styles.assignmentPendingMetaItemFullRow : ""}`}
+                                                    >
+                                                        <i className={metaItem.iconClassName} aria-hidden="true" />
+                                                        <span>{metaItem.value}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : null}
                                         {activeTab === "completed" ? (
                                             <div className={styles.assignmentResultGrid}>
                                                 <div className={styles.assignmentResultItem}>
@@ -368,7 +437,7 @@ const AssignmentsHub = ({ unfinishedSummary, onUnfinishedChanged }: AssignmentsH
                                     </div>
                                     <button
                                         type="button"
-                                        className="btn btn-warning"
+                                        className={`btn ${styles.assignmentButton} ${styles.assignmentButtonPrimary}`}
                                         onClick={() => handleAction(item)}
                                         disabled={runningItemId === item.id}
                                     >
@@ -380,7 +449,7 @@ const AssignmentsHub = ({ unfinishedSummary, onUnfinishedChanged }: AssignmentsH
                             {activeTab === "completed" && completedItems.length > COMPLETED_ITEMS_PREVIEW_COUNT ? (
                                 <button
                                     type="button"
-                                    className={`btn btn-outline-secondary ${styles.showAllButton}`}
+                                    className={`btn ${styles.assignmentButton} ${styles.assignmentButtonNeutral} ${styles.showAllButton}`}
                                     onClick={() => setShowAllCompleted((prev) => !prev)}
                                 >
                                     {showAllCompleted ? "Скрыть" : "Посмотреть всё"}

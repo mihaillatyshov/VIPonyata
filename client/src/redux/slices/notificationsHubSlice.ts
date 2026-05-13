@@ -7,6 +7,10 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 export interface TStudentQuizletAssignmentRecord {
     assignment: TQuizletAssignment;
     target: TQuizletAssignmentTarget;
+    subgroups?: Array<{
+        id: number;
+        title: string;
+    }>;
     result: TQuizletAssignmentResult | null;
     active_session_id: number | null;
 }
@@ -30,7 +34,12 @@ export interface THubAssignmentItem {
     activityBaseId?: number;
     assignmentId?: number;
     sortDate: string | null;
+    assignedAt?: string | null;
     startedAt?: string | null;
+    quizType?: TQuizletAssignment["quiz_type"];
+    translationDirection?: TQuizletAssignment["translation_direction"];
+    dictionaryTitles?: string[];
+    totalWords?: number | null;
     elapsedSeconds?: number | null;
     mistakesCount?: number | null;
     correctAnswersCount?: number | null;
@@ -115,6 +124,7 @@ const buildAssignmentsHubViewModel = (
                 kind: "lesson",
                 lessonId: item.lesson_id,
                 sortDate: item.creation_datetime,
+                assignedAt: item.creation_datetime,
             };
             const prevItem = latestLessonNotifications.get(item.lesson_id);
             if (!prevItem || sortByDateDesc(nextItem, prevItem) < 0) {
@@ -165,11 +175,16 @@ const buildAssignmentsHubViewModel = (
                 id: `quizlet_${item.assignment.id}`,
                 title: item.assignment.title,
                 typeLabel: "Повторение слов",
-                buttonLabel: "Начать",
+                buttonLabel: item.active_session_id !== null ? "Продолжить" : "Начать",
                 status: "pending",
                 kind: "quizlet_assignment",
                 assignmentId: item.assignment.id,
                 sortDate: item.target.assigned_at,
+                assignedAt: item.target.assigned_at,
+                quizType: item.assignment.quiz_type,
+                translationDirection: item.assignment.translation_direction,
+                dictionaryTitles: [...new Set((item.subgroups ?? []).map((subgroup) => subgroup.title))],
+                totalWords: item.assignment.max_words,
             })),
     );
 

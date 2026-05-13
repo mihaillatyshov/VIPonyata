@@ -1,17 +1,15 @@
 .assignmentsSection {
-    margin: 1.5rem 0 2rem;
+    margin: 2.5rem 0 2rem;
 }
 
 .assignmentsShell {
-    background: linear-gradient(145deg, #fff7ef 0%, #fffdf8 48%, #f6f8ff 100%);
-    border: 1px solid rgba(134, 92, 54, 0.14);
-    border-radius: 24px;
-    box-shadow: 0 16px 36px rgba(88, 66, 40, 0.08);
+    background: var(--css-var-card-bg);
+    box-shadow: 3px 3px 8px 2px #ffc0c033;
     overflow: hidden;
 }
 
 .assignmentsMain {
-    padding: 1.5rem;
+    padding: 1rem 1.1rem 1.25rem;
 }
 
 .assignmentsHeader {
@@ -19,50 +17,70 @@
     justify-content: space-between;
     align-items: flex-start;
     gap: 1rem;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
 }
 
 .sectionTitle {
     margin: 0;
-    font-size: 1.75rem;
+    font-size: clamp(2rem, 1.6rem + 1vw, 2.4rem);
+    line-height: 1.1;
     font-weight: 700;
-    color: #5b3420;
+    color: #2d2d2d;
 }
 
 .sectionSubtitle {
-    margin: 0.35rem 0 0;
-    color: #8f6b54;
+    margin: 0.45rem 0 0;
+    color: #676767;
 }
 
 .tabsRow {
-    display: flex;
-    gap: 0.5rem;
+    display: inline-flex;
+    gap: 0.35rem;
     flex-wrap: wrap;
+    padding: 0.3rem;
+    border: 1px solid rgba(17, 17, 17, 0.1);
+    background: rgba(255, 255, 255, 0.85);
 }
 
 .tabButton {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    border: 1px solid rgba(121, 89, 53, 0.18);
-    background: rgba(255, 255, 255, 0.72);
-    color: #6f513d;
-    border-radius: 999px;
-    padding: 0.6rem 1rem;
-    font-weight: 600;
+    border: 0;
+    background: transparent;
+    color: #5b6671;
+    border-radius: 0;
+    padding: 0.46rem 0.9rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.tabButton:hover,
+.tabButton:focus-visible {
+    color: #2d3a46;
+    background: rgba(13, 110, 253, 0.08);
 }
 
 .tabButtonActive {
-    background: #f1b85b;
-    color: #402617;
-    border-color: #f1b85b;
+    color: #2d3a46;
+    background: #ddebd7;
+}
+
+.tabButtonActive:hover,
+.tabButtonActive:focus-visible {
+    color: #2d3a46;
+    background: #ddebd7;
 }
 
 .tabCounter {
     min-width: 1.6rem;
     padding: 0.15rem 0.45rem;
-    border-radius: 999px;
-    background: rgba(64, 38, 23, 0.12);
+    border-radius: 0;
+    background: rgba(0, 0, 0, 0.06);
     text-align: center;
     font-size: 0.82rem;
 }
@@ -77,7 +95,8 @@
 .assignmentsList {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 1rem;
+    width: min(100%, 48rem);
 }
 
 .assignmentCard {
@@ -85,63 +104,113 @@
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
-    padding: 1rem 1.1rem;
-    border-radius: 18px;
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(129, 99, 71, 0.12);
+    padding: 0.9rem 1rem;
+    min-height: 170px;
+    background: var(--css-var-card-bg);
+    box-shadow: 3px 3px 8px 2px #ffc0c033;
+    transition:
+        box-shadow 0.5s,
+        transform 0.25s ease;
+    position: relative;
+}
+
+.assignmentCard:hover {
+    box-shadow: 5px 5px 10px 4px #ffc0c05c;
+    transform: translateY(-1px);
 }
 
 .assignmentCardActive {
-    background: linear-gradient(180deg, rgba(255, 248, 228, 0.98) 0%, rgba(255, 255, 255, 0.92) 100%);
-    border-color: rgba(214, 156, 53, 0.3);
+    background: var(--css-var-card-bg);
+    outline: 2px solid rgba(241, 184, 91, 0.55);
+    outline-offset: -2px;
 }
 
 .assignmentInfo {
     min-width: 0;
+    flex: 1 1 auto;
 }
 
 .assignmentTitle {
-    font-size: 1rem;
+    font-size: clamp(1.35rem, 1.15rem + 0.5vw, 1.7rem);
+    line-height: 1.1;
     font-weight: 700;
-    color: #493022;
+    color: #222222;
     word-break: break-word;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
 }
 
 .assignmentType {
-    margin-top: 0.25rem;
-    color: #8d7058;
-    font-size: 0.92rem;
+    margin-top: 0.5rem;
+    color: #666666;
+    font-size: 0.95rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
 }
 
 .assignmentMeta {
-    margin-top: 0.45rem;
+    margin-top: 0.9rem;
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
-    font-size: 0.88rem;
-    color: #6f513d;
+    gap: 0.35rem;
+    font-size: 0.9rem;
+    color: #555555;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+
+.assignmentPendingMetaGrid {
+    margin-top: 0.9rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem 1rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+
+.assignmentPendingMetaItem {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-width: 0;
+    font-size: 0.9rem;
+    color: #555555;
+}
+
+.assignmentPendingMetaItemFullRow {
+    flex-basis: 100%;
+}
+
+.assignmentPendingMetaItem i {
+    color: #444444;
+}
+
+.assignmentPendingMetaItem span {
+    word-break: break-word;
 }
 
 .assignmentResultGrid {
-    margin-top: 0.65rem;
+    margin-top: 0.9rem;
     display: flex;
     align-items: center;
-    gap: 0.45rem 1rem;
+    gap: 0.6rem 1rem;
     flex-wrap: nowrap;
     overflow-x: auto;
     scrollbar-width: thin;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
 }
 
 .assignmentResultItem {
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
-    font-size: 0.88rem;
-    color: #6f513d;
+    font-size: 0.9rem;
+    color: #555555;
 }
 
 .assignmentResultItem i {
-    color: #a86c2b;
+    color: #444444;
 }
 
 .assignmentActions {
@@ -150,19 +219,115 @@
     justify-content: flex-end;
     gap: 0.5rem;
     flex-wrap: wrap;
+    align-self: stretch;
+    min-width: 180px;
+}
+
+.assignmentButton {
+    min-height: 48px;
+    padding: 0.7rem 1.1rem;
+    border-radius: 20px;
+    border-width: 1px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1;
+    color: #ffffff;
+    box-shadow: 0 5px 12px rgba(31, 47, 70, 0.1);
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        filter 0.18s ease,
+        border-color 0.18s ease,
+        background-color 0.18s ease,
+        color 0.18s ease;
+}
+
+.assignmentButton:hover,
+.assignmentButton:focus-visible {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
+    filter: brightness(1.06) saturate(1.08);
+}
+
+.assignmentButton:active {
+    transform: translateY(0);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.1);
+}
+
+.assignmentButton:disabled,
+.assignmentButton:disabled:hover,
+.assignmentButton:disabled:focus-visible,
+.assignmentButton:disabled:active {
+    background-color: #9aa3ad;
+    border-color: #9aa3ad;
+    color: #ffffff;
+    opacity: 0.65;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+    filter: none;
+}
+
+.assignmentButtonPrimary {
+    background: #a9e289;
+    border-color: #a9e289;
+    color: #ffffff;
+}
+
+.assignmentButtonPrimary:hover,
+.assignmentButtonPrimary:focus-visible,
+.assignmentButtonPrimary:active {
+    background: #98cb7b;
+    border-color: #98cb7b;
+    color: #ffffff;
+    box-shadow: 0 8px 18px rgba(25, 135, 84, 0.2);
+}
+
+.assignmentButtonDanger {
+    background: rgba(255, 188, 205, 0.12);
+    border-color: #ffbccd;
+    color: #ff7295;
+    box-shadow: 0 3px 8px rgba(255, 129, 167, 0.12);
+}
+
+.assignmentButtonDanger:hover,
+.assignmentButtonDanger:focus-visible,
+.assignmentButtonDanger:active {
+    background: rgba(255, 79, 139, 0.1);
+    border-color: #ff4f8b;
+    color: #ff4f8b;
+    box-shadow: 0 6px 14px rgba(255, 129, 167, 0.18);
+}
+
+.assignmentButtonNeutral {
+    background: #9aa3ad;
+    border-color: #9aa3ad;
+    color: #ffffff;
+}
+
+.assignmentButtonNeutral:hover,
+.assignmentButtonNeutral:focus-visible,
+.assignmentButtonNeutral:active {
+    background: #8b95a0;
+    border-color: #8b95a0;
+    color: #ffffff;
+    box-shadow: 0 8px 18px rgba(74, 85, 104, 0.16);
 }
 
 .showAllButton {
     align-self: center;
     margin-top: 0.25rem;
-    border-radius: 999px;
+    border-radius: 0;
     padding-inline: 1.25rem;
 }
 
 .statsCard {
-    border-radius: 18px;
-    background: #fffdf9;
-    border: 1px solid rgba(129, 99, 71, 0.12);
+    background: var(--css-var-card-bg);
+    box-shadow: 3px 3px 8px 2px #ffc0c033;
     padding: 1rem;
     display: flex;
     flex-direction: column;
@@ -178,32 +343,35 @@
 
 .statsTitle {
     font-weight: 700;
-    color: #5b3420;
+    color: #2d2d2d;
 }
 
 .statRow {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: calc(88px + 3rem) max-content;
     align-items: center;
-    gap: 1rem;
-    color: #755945;
+    gap: 3rem;
+    color: #555555;
+}
+
+.statRow > span:first-child {
+    padding-left: 3rem;
 }
 
 .statsDivider {
     height: 1px;
-    background: rgba(129, 99, 71, 0.16);
+    background: rgba(0, 0, 0, 0.08);
 }
 
 .emptyState {
     min-height: 120px;
-    border-radius: 18px;
-    border: 1px dashed rgba(129, 99, 71, 0.2);
-    background: rgba(255, 255, 255, 0.7);
+    background: var(--css-var-card-bg);
+    box-shadow: 3px 3px 8px 2px #ffc0c033;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 1rem;
-    color: #8d7058;
+    color: #666666;
     text-align: center;
 }
 
@@ -225,10 +393,12 @@
     .assignmentCard {
         flex-direction: column;
         align-items: stretch;
+        min-height: unset;
     }
 
     .assignmentActions {
         width: 100%;
+        min-width: 0;
     }
 
     .showAllButton {
@@ -237,6 +407,11 @@
 
     .assignmentResultGrid {
         flex-wrap: wrap;
+    }
+
+    .assignmentPendingMetaGrid {
+        flex-direction: column;
+        gap: 0.55rem;
     }
 
     .assignmentCard :global(.btn) {
