@@ -15,6 +15,9 @@ import {
     TQuizletSubgroupWord,
     TQuizletWord,
 } from "models/TQuizlet";
+import { useNotificationsHubSync } from "redux/funcs/notificationsHub";
+import { useAppSelector } from "redux/hooks";
+import { selectNotificationsHub } from "redux/slices/notificationsHubSlice";
 
 import FlashcardExercise from "./FlashcardExercise";
 import MatchingExercise from "./MatchingExercise";
@@ -451,6 +454,8 @@ const PersonalTopicEditor = ({ subgroup, initialWords, onSaved }: PersonalTopicE
 };
 
 const StudentQuizlet = () => {
+    const { refreshHub } = useNotificationsHubSync();
+    const { quizletAssignments } = useAppSelector(selectNotificationsHub);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -704,6 +709,7 @@ const StudentQuizlet = () => {
         setAssignmentOpenError(null);
         AjaxPost<{ session: TQuizletSession }>({ url: `/api/quizlet/assignments/${assignmentId}/start`, body: {} })
             .then((json) => {
+                refreshHub(true);
                 loadSession(json.session.id);
             })
             .catch((error) => {
@@ -822,6 +828,7 @@ const StudentQuizlet = () => {
                 url: `/api/quizlet/sessions/${activeSession.id}/end`,
                 body: { force_finish: true },
             });
+            refreshHub(true);
             fetchActiveSession();
         } finally {
             setIsFinishingActiveSession(false);
@@ -836,6 +843,7 @@ const StudentQuizlet = () => {
             url: `/api/quizlet/sessions/${session.id}/end`,
             body: { force_finish: true },
         }).then((json) => {
+            refreshHub(true);
             setSession({ ...json.session, is_finished: true });
             loadSession(json.session.id);
         });
@@ -918,6 +926,7 @@ const StudentQuizlet = () => {
                 url: `/api/quizlet/sessions/${session.id}/end`,
                 body: { force_finish: false },
             });
+            refreshHub(true);
         }
 
         loadSession(session.id);
@@ -1000,6 +1009,24 @@ const StudentQuizlet = () => {
         setSessionWords([]);
         navigate(routePaths.modeSelection);
     };
+
+    const setupActiveSession = useMemo(() => {
+        if (activeSession === null || activeSession.is_finished) {
+            return null;
+        }
+
+        if (activeSession.assignment_id === null || activeSession.assignment_id === undefined) {
+            return activeSession;
+        }
+
+        const relatedAssignment = quizletAssignments.find((item) => item.assignment.id === activeSession.assignment_id);
+
+        if (relatedAssignment?.result !== null && relatedAssignment?.result !== undefined) {
+            return null;
+        }
+
+        return activeSession;
+    }, [activeSession, quizletAssignments]);
 
     const loadHistorySessionWords = (sessionId: number) => {
         setHistoryLoadingDetailsSessionId(sessionId);
@@ -1202,7 +1229,10 @@ const StudentQuizlet = () => {
             url: `/api/quizlet/sessions/${session.id}/end`,
             body: { force_finish: false },
         })
-            .then(() => loadSession(session.id))
+            .then(() => {
+                refreshHub(true);
+                loadSession(session.id);
+            })
             .catch(() => {
                 autoFinishSessionIdRef.current = null;
             });
@@ -1257,7 +1287,10 @@ const StudentQuizlet = () => {
             url: `/api/quizlet/sessions/${session.id}/end`,
             body: { force_finish: false },
         })
-            .then(() => loadSession(session.id))
+            .then(() => {
+                refreshHub(true);
+                loadSession(session.id);
+            })
             .catch(() => {
                 autoFinishSessionIdRef.current = null;
             });
@@ -1428,35 +1461,33 @@ const StudentQuizlet = () => {
 
             {session === null && isSetupRoute && (
                 <div className="mx-auto mt-5" style={{ maxWidth: "760px" }}>
-                    {activeSessionLoadStatus === LoadStatus.DONE &&
-                        activeSession !== null &&
-                        !activeSession.is_finished && (
-                            <div className="alert alert-warning d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2">
-                                <div>
-                                    <div className="fw-semibold mb-1">Есть незавершенная тренировка</div>
-                                    <div className="small">
-                                        Тип: {activeSession.quiz_type === "flashcards" ? "Карточки" : "Пары"} •
-                                        Прогресс: {activeSession.correct_answers}/{activeSession.total_words}
-                                    </div>
-                                    <div className="small">
-                                        Начало: {formatSessionStartDateTime(activeSession.started_at)}
-                                    </div>
+                    {activeSessionLoadStatus === LoadStatus.DONE && setupActiveSession !== null && (
+                        <div className="alert alert-warning d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2">
+                            <div>
+                                <div className="fw-semibold mb-1">Есть незавершенная тренировка</div>
+                                <div className="small">
+                                    Тип: {setupActiveSession.quiz_type === "flashcards" ? "Карточки" : "Пары"} •
+                                    Прогресс: {setupActiveSession.correct_answers}/{setupActiveSession.total_words}
                                 </div>
-                                <div className="d-flex gap-2">
-                                    <button type="button" className="btn btn-warning" onClick={continueSession}>
-                                        Продолжить
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="btn btn-outline-danger"
-                                        onClick={finishActiveSession}
-                                        disabled={isFinishingActiveSession}
-                                    >
-                                        {isFinishingActiveSession ? "Завершение..." : "Завершить"}
-                                    </button>
+                                <div className="small">
+                                    Начало: {formatSessionStartDateTime(setupActiveSession.started_at)}
                                 </div>
                             </div>
-                        )}
+                            <div className="d-flex gap-2">
+                                <button type="button" className="btn btn-warning" onClick={continueSession}>
+                                    Продолжить
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-outline-danger"
+                                    onClick={finishActiveSession}
+                                    disabled={isFinishingActiveSession}
+                                >
+                                    {isFinishingActiveSession ? "Завершение..." : "Завершить"}
+                                </button>
+                            </div>
+                        </div>
+                    )}
                     <QuizletQuizStart
                         groups={groups}
                         subgroups={subgroups}

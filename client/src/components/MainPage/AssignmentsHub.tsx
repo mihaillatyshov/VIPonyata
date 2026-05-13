@@ -458,29 +458,39 @@ const AssignmentsHub = ({ unfinishedSummary, onUnfinishedChanged }: AssignmentsH
                         </div>
 
                         <aside className={styles.statsCard}>
-                            <div className={styles.statsGroup}>
-                                <div className={styles.statsTitle}>Статистика ワードラボ</div>
-                                <div className={styles.statRow}>
-                                    <span>Повторено</span>
-                                    <strong>{stats.reviewWords} слов</strong>
-                                </div>
-                                <div className={styles.statRow}>
-                                    <span>Время</span>
-                                    <strong>{formatRoundedDuration(stats.reviewSeconds)}</strong>
-                                </div>
+                            <div className={styles.statsImageWrap}>
+                                <img
+                                    src="/img/achievements/babies.png"
+                                    alt=""
+                                    className={styles.statsImage}
+                                    aria-hidden="true"
+                                />
                             </div>
-
-                            <div className={styles.statsDivider} />
-
-                            <div className={styles.statsGroup}>
-                                <div className={styles.statsTitle}>Статистика тестов</div>
-                                <div className={styles.statRow}>
-                                    <span>Выполнено</span>
-                                    <strong>{stats.testsCompleted} тестов</strong>
+                            <div className={styles.statsContent}>
+                                <div className={styles.statsGroup}>
+                                    <div className={styles.statsTitle}>Статистика ワードラボ</div>
+                                    <div className={styles.statRow}>
+                                        <span>Повторено</span>
+                                        <strong>{stats.reviewWords} слов</strong>
+                                    </div>
+                                    <div className={styles.statRow}>
+                                        <span>Время</span>
+                                        <strong>{formatRoundedDuration(stats.reviewSeconds)}</strong>
+                                    </div>
                                 </div>
-                                <div className={styles.statRow}>
-                                    <span>Время</span>
-                                    <strong>{formatRoundedDuration(stats.testsSeconds)}</strong>
+
+                                <div className={styles.statsDivider} />
+
+                                <div className={styles.statsGroup}>
+                                    <div className={styles.statsTitle}>Статистика тестов</div>
+                                    <div className={styles.statRow}>
+                                        <span>Выполнено</span>
+                                        <strong>{stats.testsCompleted} тестов</strong>
+                                    </div>
+                                    <div className={styles.statRow}>
+                                        <span>Время</span>
+                                        <strong>{formatRoundedDuration(stats.testsSeconds)}</strong>
+                                    </div>
                                 </div>
                             </div>
                         </aside>
