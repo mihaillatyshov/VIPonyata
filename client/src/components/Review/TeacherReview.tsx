@@ -1387,7 +1387,7 @@ const TeacherReview = () => {
         let nextQueue = queueWithoutCurrent;
 
         if (grade === "forgot") {
-            nextQueue = insertWordLater(queueWithoutCurrent, currentWordId, 2);
+            nextQueue = insertWordLater(queueWithoutCurrent, currentWordId, 1);
         } else if (grade === "partial") {
             nextQueue = insertWordLater(queueWithoutCurrent, currentWordId, 1);
         }
