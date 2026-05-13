@@ -3,6 +3,7 @@ import { useCallback, useEffect } from "react";
 import { AjaxGet } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
 import { TAnyNotifications } from "models/TNotification";
+import { TQuizletSession } from "models/TQuizlet";
 import { isTeacher } from "redux/funcs/user";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
@@ -49,6 +50,7 @@ export const useNotificationsHubSync = () => {
             const requests: [
                 Promise<{ notifications: TAnyNotifications }>,
                 Promise<{ assignments: TStudentQuizletAssignmentRecord[] }> | null,
+                Promise<{ sessions: TQuizletSession[] }> | null,
             ] = [
                 AjaxGet<{ notifications: TAnyNotifications }>({ url: "/api/notifications" }),
                 isTeacher(user.userData)
@@ -56,14 +58,20 @@ export const useNotificationsHubSync = () => {
                     : AjaxGet<{ assignments: TStudentQuizletAssignmentRecord[] }>({
                           url: "/api/quizlet/assignments/my",
                       }),
+                isTeacher(user.userData)
+                    ? null
+                    : AjaxGet<{ sessions: TQuizletSession[] }>({
+                          url: "/api/quizlet/sessions/stats",
+                      }),
             ];
 
-            Promise.all([requests[0], requests[1]])
-                .then(([notificationsResponse, assignmentsResponse]) => {
+            Promise.all([requests[0], requests[1], requests[2]])
+                .then(([notificationsResponse, assignmentsResponse, sessionsResponse]) => {
                     dispatch(
                         setNotificationsHubData({
                             notifications: notificationsResponse.notifications,
                             quizletAssignments: assignmentsResponse?.assignments ?? [],
+                            quizletSessions: sessionsResponse?.sessions ?? [],
                             loadedAt: Date.now(),
                         }),
                     );

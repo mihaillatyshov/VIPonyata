@@ -174,7 +174,8 @@ const AssignmentsHub = ({ unfinishedSummary, onUnfinishedChanged }: AssignmentsH
     const [showAllCompleted, setShowAllCompleted] = useState(false);
 
     const { pendingItems, completedItems, stats } = useAppSelector(selectStudentAssignmentsHub);
-    const { notificationsStatus, quizletAssignmentsStatus } = useAppSelector(selectNotificationsHub);
+    const { notificationsStatus, quizletAssignmentsStatus, quizletSessionsStatus } =
+        useAppSelector(selectNotificationsHub);
 
     useEffect(() => {
         const timerId = window.setInterval(() => setNowTimestamp(Date.now()), 60_000);
@@ -222,8 +223,12 @@ const AssignmentsHub = ({ unfinishedSummary, onUnfinishedChanged }: AssignmentsH
             : completedItems.slice(0, COMPLETED_ITEMS_PREVIEW_COUNT);
 
     const items = activeTab === "pending" ? filteredPendingItems : visibleCompletedItems;
-    const isLoading = notificationsStatus === "loading" || quizletAssignmentsStatus === "loading";
-    const hasError = notificationsStatus === "error" || quizletAssignmentsStatus === "error";
+    const isLoading =
+        notificationsStatus === "loading" ||
+        quizletAssignmentsStatus === "loading" ||
+        quizletSessionsStatus === "loading";
+    const hasError =
+        notificationsStatus === "error" || quizletAssignmentsStatus === "error" || quizletSessionsStatus === "error";
 
     useEffect(() => {
         if (activeTab !== "completed") {
