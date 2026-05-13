@@ -1068,6 +1068,11 @@ class ReviewTopic(Base):
 class ReviewWord(Base):
     __tablename__ = "review_words"
 
+    class Status:
+        SHAKY = "shaky"
+        PASSIVE = "passive"
+        ACTIVE = "active"
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
     source: Mapped[Optional[str]] = mapped_column(String(256))
@@ -1075,6 +1080,12 @@ class ReviewWord(Base):
     ru: Mapped[str] = mapped_column(String(256), nullable=False)
     note: Mapped[Optional[str]] = mapped_column(Text)
     examples: Mapped[Optional[str]] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(32),
+                                        nullable=False,
+                                        default=Status.PASSIVE,
+                                        server_default=Status.PASSIVE)
+    stage: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default=text("1"))
+    is_frozen: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=text("false"))
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text("now()"), nullable=False)
 
     topic_id: Mapped[int] = mapped_column(Integer, ForeignKey("review_topics.id"), nullable=False)
@@ -1090,6 +1101,9 @@ class ReviewWord(Base):
             "ru": self.ru,
             "note": self.note,
             "examples": self.examples,
+            "status": self.status,
+            "stage": self.stage,
+            "is_frozen": self.is_frozen,
             "topic_id": self.topic_id,
             "created_at": self.created_at,
         }

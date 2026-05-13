@@ -1,7 +1,8 @@
 from flask import request
 
 import server.queries.ReviewDBqueries as DBQR
-from server.models.review import ReviewDictionaryCreateReq, ReviewTopicCreateReq, ReviewWordCreateReq, ReviewWordUpdateReq
+from server.models.review import (ReviewDictionaryCreateReq, ReviewTopicCreateReq, ReviewTrainingSessionResultsReq,
+                                  ReviewWordCreateReq, ReviewWordMemoryStateUpdateReq, ReviewWordUpdateReq)
 from server.models.utils import validate_req
 from server.routes.routes_utils import get_current_user_id
 
@@ -63,6 +64,20 @@ def update_review_word(word_id: int) -> dict:
     data = validate_req(ReviewWordUpdateReq, request.json)
     DBQR.update_review_word(user_id, word_id, data)
     return {"message": "ok"}
+
+
+def update_review_word_memory_state(word_id: int) -> dict:
+    user_id = get_current_user_id()
+    data = validate_req(ReviewWordMemoryStateUpdateReq, request.json)
+    word = DBQR.update_review_word_memory_state(user_id, word_id, data)
+    return {"word": word.__json__()}
+
+
+def apply_review_training_session_results() -> dict:
+    user_id = get_current_user_id()
+    data = validate_req(ReviewTrainingSessionResultsReq, request.json)
+    updated_words = DBQR.apply_review_training_session_results(user_id, data)
+    return {"words": [word.__json__() for word in updated_words]}
 
 
 def delete_review_word(word_id: int) -> dict:

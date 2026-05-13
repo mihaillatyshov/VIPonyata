@@ -3,13 +3,54 @@ from sqlalchemy import delete, select, update
 from server.common import DBsession
 from server.exceptions.ApiExceptions import InvalidAPIUsage
 from server.models.db_models import ReviewDictionary, ReviewTopic, ReviewWord
-from server.models.review import ReviewDictionaryCreateReq, ReviewTopicCreateReq, ReviewWordCreateReq, ReviewWordUpdateReq
+from server.models.review import (ReviewDictionaryCreateReq, ReviewTopicCreateReq, ReviewTrainingSessionResultsReq,
+                                  ReviewWordCreateReq, ReviewWordMemoryStateUpdateReq, ReviewWordUpdateReq)
+
+REVIEW_WORD_STAGE_FLOW: list[tuple[str, int]] = [
+    (ReviewWord.Status.SHAKY, 1),
+    (ReviewWord.Status.SHAKY, 2),
+    (ReviewWord.Status.SHAKY, 3),
+    (ReviewWord.Status.PASSIVE, 1),
+    (ReviewWord.Status.PASSIVE, 2),
+    (ReviewWord.Status.PASSIVE, 3),
+    (ReviewWord.Status.ACTIVE, 1),
+    (ReviewWord.Status.ACTIVE, 2),
+    (ReviewWord.Status.ACTIVE, 3),
+]
+
+REVIEW_WORD_SESSION_RESULT_STEP = {
+    "remember": 1,
+    "partial": 0,
+    "forgot": -1,
+}
 
 
 def _get_next_sort(items: list[ReviewDictionary] | list[ReviewTopic]) -> int:
     if len(items) == 0:
         return 10
     return max(item.sort for item in items) + 10
+
+
+def _get_review_word_state_index(status: str, stage: int) -> int:
+    for index, state in enumerate(REVIEW_WORD_STAGE_FLOW):
+        if state == (status, stage):
+            return index
+
+    raise InvalidAPIUsage("Review word memory state is invalid", 500)
+
+
+def _normalize_review_word_memory_state(word: ReviewWord):
+    try:
+        _get_review_word_state_index(word.status, word.stage)
+    except InvalidAPIUsage:
+        word.status = ReviewWord.Status.PASSIVE
+        word.stage = 1
+
+
+def _apply_review_training_result(word: ReviewWord, result: str):
+    current_index = _get_review_word_state_index(word.status, word.stage)
+    next_index = max(0, min(len(REVIEW_WORD_STAGE_FLOW) - 1, current_index + REVIEW_WORD_SESSION_RESULT_STEP[result]))
+    word.status, word.stage = REVIEW_WORD_STAGE_FLOW[next_index]
 
 
 def get_review_catalog(user_id: int) -> dict:
@@ -31,6 +72,8 @@ def get_review_catalog(user_id: int) -> dict:
         if len(topic_ids) > 0:
             words = session.scalars(
                 select(ReviewWord).where(ReviewWord.topic_id.in_(topic_ids)).order_by(ReviewWord.id), ).all()
+            for word in words:
+                _normalize_review_word_memory_state(word)
 
         return {
             "dictionaries": [item.__json__() for item in dictionaries],
@@ -138,6 +181,9 @@ def create_review_word(user_id: int, data: ReviewWordCreateReq) -> ReviewWord:
             ru=data.ru,
             note=data.note.strip() if isinstance(data.note, str) else data.note,
             examples=data.examples.strip() if isinstance(data.examples, str) else data.examples,
+            status=ReviewWord.Status.PASSIVE,
+            stage=1,
+            is_frozen=False,
         )
         session.add(word)
         return word
@@ -151,6 +197,8 @@ def update_review_word(user_id: int, word_id: int, data: ReviewWordUpdateReq):
         if word is None:
             raise InvalidAPIUsage("Review word not found", 404)
 
+        _normalize_review_word_memory_state(word)
+
         session.execute(
             update(ReviewWord).where(ReviewWord.id == word_id).values(
                 source=data.source,
@@ -159,6 +207,42 @@ def update_review_word(user_id: int, word_id: int, data: ReviewWordUpdateReq):
                 note=data.note.strip() if isinstance(data.note, str) else data.note,
                 examples=data.examples.strip() if isinstance(data.examples, str) else data.examples,
             ), )
+
+
+def update_review_word_memory_state(user_id: int, word_id: int, data: ReviewWordMemoryStateUpdateReq) -> ReviewWord:
+    with DBsession.begin() as session:
+        word = session.scalars(
+            select(ReviewWord).join(ReviewWord.topic).join(ReviewTopic.dictionary).where(
+                ReviewWord.id == word_id).where(ReviewDictionary.owner_id == user_id), ).one_or_none()
+        if word is None:
+            raise InvalidAPIUsage("Review word not found", 404)
+
+        _normalize_review_word_memory_state(word)
+        word.is_frozen = data.is_frozen
+        session.flush()
+        return word
+
+
+def apply_review_training_session_results(user_id: int, data: ReviewTrainingSessionResultsReq) -> list[ReviewWord]:
+    if len(data.results) == 0:
+        return []
+
+    result_by_word_id = {item.word_id: item.result for item in data.results}
+
+    with DBsession.begin() as session:
+        words = session.scalars(
+            select(ReviewWord).join(ReviewWord.topic).join(ReviewTopic.dictionary).where(
+                ReviewWord.id.in_(result_by_word_id.keys())).where(ReviewDictionary.owner_id == user_id), ).all()
+
+        if len(words) != len(result_by_word_id):
+            raise InvalidAPIUsage("Review word not found", 404)
+
+        for word in words:
+            _normalize_review_word_memory_state(word)
+            _apply_review_training_result(word, result_by_word_id[word.id])
+
+        session.flush()
+        return words
 
 
 def delete_review_word(user_id: int, word_id: int):

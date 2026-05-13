@@ -407,6 +407,18 @@ def update_review_word(word_id):
     return user_selector_function(teacher_funcs.update_review_word, None, word_id=word_id)
 
 
+@routes_bp.route("/review/words/<int:word_id>/memory-state", methods=["PATCH"])
+@login_required
+def update_review_word_memory_state(word_id):
+    return user_selector_function(teacher_funcs.update_review_word_memory_state, None, word_id=word_id)
+
+
+@routes_bp.route("/review/training/session-results", methods=["POST"])
+@login_required
+def apply_review_training_session_results():
+    return user_selector_function(teacher_funcs.apply_review_training_session_results, None)
+
+
 @routes_bp.route("/review/words/<int:word_id>", methods=["DELETE"])
 @login_required
 def delete_review_word(word_id):

@@ -7,7 +7,7 @@ import TrainingSessionHeader from "components/Quizlet/TrainingSessionHeader";
 import ReviewTrainingHistory, { ReviewTrainingHistoryEntry } from "components/Review/ReviewTrainingHistory";
 import { AjaxDelete, AjaxGet, AjaxPatch, AjaxPost } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
-import { TReviewDictionary, TReviewTopic, TReviewWord } from "models/TReview";
+import { TReviewDictionary, TReviewTopic, TReviewWord, TReviewWordStatus } from "models/TReview";
 
 import "components/Quizlet/FlashcardExercise.css";
 import "components/Quizlet/QuizletSessionResults.css";
@@ -42,12 +42,16 @@ interface TrainingSession {
     topicIds: number[];
     queue: number[];
     openedWordIds: number[];
+    mode: ReviewTrainingMode;
     direction: "jp_to_ru" | "ru_to_jp";
     assessments: Record<number, TrainingAssessment>;
     startedAt: number;
     elapsedSeconds: number;
     isFinished: boolean;
 }
+
+type ReviewTrainingMode = "topics" | "random" | "smart_random";
+type ReviewTrainingResult = "remember" | "partial" | "forgot";
 
 type FlashcardDetailKey = "source" | "note" | "examples";
 
@@ -136,6 +140,77 @@ const shuffleArray = <T,>(items: T[]) => {
     return result;
 };
 
+const REVIEW_RANDOM_SESSION_SIZES = [50, 100, 150, 200] as const;
+const SMART_RANDOM_WEIGHTS: Record<TReviewWordStatus, number> = {
+    shaky: 0.6,
+    passive: 0.35,
+    active: 0.05,
+};
+
+const pickRandomWordIds = (items: TReviewWord[], requestedCount: number) =>
+    shuffleArray(items)
+        .slice(0, Math.min(requestedCount, items.length))
+        .map((item) => item.id);
+
+const getSmartRandomTargetCounts = (requestedCount: number) => {
+    const baseCounts = (Object.entries(SMART_RANDOM_WEIGHTS) as [TReviewWordStatus, number][]).map(
+        ([status, weight]) => ({
+            status,
+            count: Math.floor(requestedCount * weight),
+            fraction: requestedCount * weight - Math.floor(requestedCount * weight),
+        }),
+    );
+
+    let remaining = requestedCount - baseCounts.reduce((total, item) => total + item.count, 0);
+    const sortedByFraction = [...baseCounts].sort((left, right) => right.fraction - left.fraction);
+
+    for (const item of sortedByFraction) {
+        if (remaining === 0) {
+            break;
+        }
+
+        item.count += 1;
+        remaining -= 1;
+    }
+
+    return baseCounts.reduce<Record<TReviewWordStatus, number>>(
+        (result, item) => ({ ...result, [item.status]: item.count }),
+        { shaky: 0, passive: 0, active: 0 },
+    );
+};
+
+const pickSmartRandomWordIds = (items: TReviewWord[], requestedCount: number) => {
+    const availableWords = items.filter((item) => !item.is_frozen);
+    const limitedCount = Math.min(requestedCount, availableWords.length);
+
+    if (limitedCount === 0) {
+        return [];
+    }
+
+    const targetCounts = getSmartRandomTargetCounts(limitedCount);
+    const selectedIds = new Set<number>();
+    const selectedWords: TReviewWord[] = [];
+
+    (Object.keys(targetCounts) as TReviewWordStatus[]).forEach((status) => {
+        const pickedWords = shuffleArray(availableWords.filter((item) => item.status === status)).slice(
+            0,
+            targetCounts[status],
+        );
+
+        pickedWords.forEach((word) => {
+            selectedIds.add(word.id);
+            selectedWords.push(word);
+        });
+    });
+
+    const remainingWords = shuffleArray(availableWords.filter((item) => !selectedIds.has(item.id))).slice(
+        0,
+        limitedCount - selectedWords.length,
+    );
+
+    return shuffleArray([...selectedWords, ...remainingWords]).map((item) => item.id);
+};
+
 const insertWordLater = (queue: number[], wordId: number, times: number) => {
     const nextQueue = [...queue];
 
@@ -153,6 +228,28 @@ const insertWordLater = (queue: number[], wordId: number, times: number) => {
 };
 
 const normalizeText = (value: string) => value.trim();
+
+const getTrainingResultForWord = (session: TrainingSession, wordId: number): ReviewTrainingResult | null => {
+    if (!session.openedWordIds.includes(wordId)) {
+        return null;
+    }
+
+    const assessment = session.assessments[wordId];
+
+    if (assessment === undefined) {
+        return "remember";
+    }
+
+    if (assessment.forgot > 0) {
+        return "forgot";
+    }
+
+    if (assessment.partial > 0) {
+        return "partial";
+    }
+
+    return "remember";
+};
 
 const stopSpeaking = () => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) {
@@ -180,6 +277,14 @@ const speak = (text: string, lang: "ja-JP" | "ru-RU") => {
 
 const REVIEW_TRAINING_HISTORY_STORAGE_KEY = "viponyata-review-training-history";
 const REVIEW_TRAINING_HISTORY_LIMIT = 100;
+const REVIEW_ROUTE_PATHS = {
+    root: "/review",
+    training: "/review/training",
+    history: "/review/training/history",
+    statuses: "/review/training/statuses",
+    flashcards: "/review/flashcards",
+    results: "/review/results",
+} as const;
 
 const isDirectionValue = (value: unknown): value is TrainingSession["direction"] =>
     value === "jp_to_ru" || value === "ru_to_jp";
@@ -286,6 +391,14 @@ const isRowEmpty = (row: EditorRow) =>
     normalizeText(row.ru) === "" &&
     normalizeText(row.note) === "" &&
     normalizeText(row.examples) === "";
+
+const mergeUpdatedWords = (currentWords: TReviewWord[], updatedWords: TReviewWord[]) => {
+    const updatedWordById = new Map(updatedWords.map((word) => [word.id, word]));
+
+    return currentWords.map((word) => updatedWordById.get(word.id) ?? word);
+};
+
+const createEmptyStageSummary = () => ({ 1: 0, 2: 0, 3: 0 });
 
 interface ReviewTopicEditorProps {
     topic: TReviewTopic;
@@ -537,14 +650,6 @@ const TeacherReview = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const routePaths = {
-        root: "/review",
-        training: "/review/training",
-        history: "/review/training/history",
-        flashcards: "/review/flashcards",
-        results: "/review/results",
-    } as const;
-
     const getDictionaryPath = (dictionaryId: number) => `/review/dictionaries/${dictionaryId}`;
     const getTopicPath = (topicId: number) => `/review/topics/${topicId}`;
 
@@ -553,11 +658,12 @@ const TeacherReview = () => {
     const selectedDictionaryId = dictionaryRouteMatch ? Number(dictionaryRouteMatch[1]) : null;
     const selectedTopicId = topicRouteMatch ? Number(topicRouteMatch[1]) : null;
 
-    const isRootRoute = location.pathname === routePaths.root;
-    const isTrainingSetupRoute = location.pathname === routePaths.training;
-    const isTrainingHistoryRoute = location.pathname === routePaths.history;
-    const isFlashcardsRoute = location.pathname === routePaths.flashcards;
-    const isResultsRoute = location.pathname === routePaths.results;
+    const isRootRoute = location.pathname === REVIEW_ROUTE_PATHS.root;
+    const isTrainingSetupRoute = location.pathname === REVIEW_ROUTE_PATHS.training;
+    const isTrainingHistoryRoute = location.pathname === REVIEW_ROUTE_PATHS.history;
+    const isTrainingStatusesRoute = location.pathname === REVIEW_ROUTE_PATHS.statuses;
+    const isFlashcardsRoute = location.pathname === REVIEW_ROUTE_PATHS.flashcards;
+    const isResultsRoute = location.pathname === REVIEW_ROUTE_PATHS.results;
 
     const [loadStatus, setLoadStatus] = useState<LoadStatus.Type>(LoadStatus.NONE);
     const [dictionaries, setDictionaries] = useState<TReviewDictionary[]>([]);
@@ -572,6 +678,8 @@ const TeacherReview = () => {
     const [isDeleteDictionaryConfirming, setIsDeleteDictionaryConfirming] = useState(false);
     const [isDeleteTopicConfirming, setIsDeleteTopicConfirming] = useState(false);
     const [selectedTrainingTopicIds, setSelectedTrainingTopicIds] = useState<number[]>([]);
+    const [trainingMode, setTrainingMode] = useState<ReviewTrainingMode>("topics");
+    const [randomReviewCount, setRandomReviewCount] = useState<(typeof REVIEW_RANDOM_SESSION_SIZES)[number]>(50);
     const [trainingDirection, setTrainingDirection] = useState<"jp_to_ru" | "ru_to_jp">("jp_to_ru");
     const [speakJpAfterFlip, setSpeakJpAfterFlip] = useState(false);
     const [autoSpeakCards, setAutoSpeakCards] = useState(false);
@@ -582,6 +690,8 @@ const TeacherReview = () => {
     const [trainingHistory, setTrainingHistory] = useState<ReviewTrainingHistoryEntry[]>([]);
     const [hasTrainingHistoryError, setHasTrainingHistoryError] = useState(false);
     const [expandedHistoryEntryId, setExpandedHistoryEntryId] = useState<string | null>(null);
+    const [memoryStateError, setMemoryStateError] = useState<string | null>(null);
+    const [isUpdatingWordMemoryState, setIsUpdatingWordMemoryState] = useState(false);
 
     const loadData = () => {
         setLoadStatus(LoadStatus.LOADING);
@@ -667,7 +777,7 @@ const TeacherReview = () => {
 
     useEffect(() => {
         if (trainingSession !== null) {
-            const targetPath = trainingSession.isFinished ? routePaths.results : routePaths.flashcards;
+            const targetPath = trainingSession.isFinished ? REVIEW_ROUTE_PATHS.results : REVIEW_ROUTE_PATHS.flashcards;
 
             if (location.pathname !== targetPath) {
                 navigate(targetPath, { replace: true });
@@ -677,7 +787,7 @@ const TeacherReview = () => {
         }
 
         if (isFlashcardsRoute || isResultsRoute) {
-            navigate(routePaths.training, { replace: true });
+            navigate(REVIEW_ROUTE_PATHS.training, { replace: true });
         }
     }, [trainingSession, location.pathname, navigate, isFlashcardsRoute, isResultsRoute]);
 
@@ -724,6 +834,41 @@ const TeacherReview = () => {
         () => words.filter((word) => selectedTrainingTopicIds.includes(word.topic_id)).length,
         [words, selectedTrainingTopicIds],
     );
+    const nonFrozenWords = useMemo(() => words.filter((word) => !word.is_frozen), [words]);
+    const reviewStatusSummary = useMemo(
+        () =>
+            words.reduce(
+                (summary, word) => {
+                    if (word.is_frozen) {
+                        summary.frozen += 1;
+                        return summary;
+                    }
+
+                    summary[word.status] += 1;
+                    summary.stages[word.status][word.stage] += 1;
+                    return summary;
+                },
+                {
+                    shaky: 0,
+                    passive: 0,
+                    active: 0,
+                    frozen: 0,
+                    stages: {
+                        shaky: createEmptyStageSummary(),
+                        passive: createEmptyStageSummary(),
+                        active: createEmptyStageSummary(),
+                    },
+                },
+            ),
+        [words],
+    );
+    const trainingWordCountForMode = useMemo(() => {
+        if (trainingMode === "topics") {
+            return selectedTrainingWordsCount;
+        }
+
+        return Math.min(randomReviewCount, nonFrozenWords.length);
+    }, [nonFrozenWords.length, randomReviewCount, selectedTrainingWordsCount, trainingMode]);
 
     useEffect(() => {
         setIsFlipped(false);
@@ -766,7 +911,7 @@ const TeacherReview = () => {
 
         setIsDeleteDictionaryConfirming(false);
         await AjaxDelete({ url: `/api/review/dictionaries/${selectedDictionary.id}` });
-        navigate(routePaths.root);
+        navigate(REVIEW_ROUTE_PATHS.root);
         loadData();
     };
 
@@ -861,10 +1006,49 @@ const TeacherReview = () => {
         });
     };
 
-    const startTraining = (wordIds?: number[], allWordIds?: number[], topicIds?: number[]) => {
+    const syncTrainingMemoryStates = (session: TrainingSession) => {
+        const results = session.initialWordIds
+            .map((wordId) => {
+                const result = getTrainingResultForWord(session, wordId);
+                if (result === null) {
+                    return null;
+                }
+
+                return {
+                    word_id: wordId,
+                    result,
+                };
+            })
+            .filter((item): item is { word_id: number; result: ReviewTrainingResult } => item !== null);
+
+        if (results.length === 0) {
+            return;
+        }
+
+        AjaxPost<{ words: TReviewWord[] }>({
+            url: "/api/review/training/session-results",
+            body: { results },
+        })
+            .then((json) => {
+                setWords((prev) => mergeUpdatedWords(prev, json.words));
+                setMemoryStateError(null);
+            })
+            .catch(() => {
+                setMemoryStateError("Не удалось обновить статусы слов после тренировки");
+            });
+    };
+
+    const startTraining = (
+        wordIds?: number[],
+        allWordIds?: number[],
+        topicIds?: number[],
+        mode: ReviewTrainingMode = trainingMode,
+    ) => {
         const selectedWordIds =
             wordIds ?? words.filter((word) => selectedTrainingTopicIds.includes(word.topic_id)).map((word) => word.id);
-        const sessionTopicIds = topicIds ?? selectedTrainingTopicIds;
+        const sessionTopicIds =
+            topicIds ??
+            Array.from(new Set(words.filter((word) => selectedWordIds.includes(word.id)).map((word) => word.topic_id)));
 
         if (selectedWordIds.length === 0) {
             return;
@@ -873,6 +1057,7 @@ const TeacherReview = () => {
         stopSpeaking();
         setIsFlipped(false);
         setOpenedDetailKeys([]);
+        setMemoryStateError(null);
 
         setTrainingSession({
             allWordIds: [...(allWordIds ?? selectedWordIds)],
@@ -880,12 +1065,37 @@ const TeacherReview = () => {
             topicIds: [...sessionTopicIds],
             queue: shuffleArray(selectedWordIds),
             openedWordIds: [],
+            mode,
             direction: trainingDirection,
             assessments: {},
             startedAt: Date.now(),
             elapsedSeconds: 0,
             isFinished: false,
         });
+    };
+
+    const startConfiguredTraining = () => {
+        if (trainingMode === "topics") {
+            startTraining();
+            return;
+        }
+
+        const availableWords = words.filter((word) => !word.is_frozen);
+        const selectedWordIds =
+            trainingMode === "random"
+                ? pickRandomWordIds(availableWords, randomReviewCount)
+                : pickSmartRandomWordIds(availableWords, randomReviewCount);
+
+        startTraining(
+            selectedWordIds,
+            selectedWordIds,
+            Array.from(
+                new Set(
+                    availableWords.filter((word) => selectedWordIds.includes(word.id)).map((word) => word.topic_id),
+                ),
+            ),
+            trainingMode,
+        );
     };
 
     const finishTraining = (nextQueue: number[], nextAssessments: Record<number, TrainingAssessment>) => {
@@ -923,6 +1133,7 @@ const TeacherReview = () => {
                 .map((topicId) => topicTitleById.get(topicId))
                 .filter((topicTitle): topicTitle is string => Boolean(topicTitle)),
         });
+        syncTrainingMemoryStates(finishedSession);
 
         setTrainingSession((prev) => {
             if (prev === null) {
@@ -997,7 +1208,8 @@ const TeacherReview = () => {
         setTrainingSession(null);
         setIsFlipped(false);
         setOpenedDetailKeys([]);
-        navigate(routePaths.training);
+        setMemoryStateError(null);
+        navigate(REVIEW_ROUTE_PATHS.training);
     };
 
     const repeatAll = () => {
@@ -1115,6 +1327,28 @@ const TeacherReview = () => {
 
     const toggleHistoryEntry = (entryId: string) => {
         setExpandedHistoryEntryId((prev) => (prev === entryId ? null : entryId));
+    };
+
+    const toggleCurrentWordFrozen = async () => {
+        if (currentWord === null || isUpdatingWordMemoryState) {
+            return;
+        }
+
+        setIsUpdatingWordMemoryState(true);
+
+        try {
+            const json = await AjaxPatch<{ word: TReviewWord }>({
+                url: `/api/review/words/${currentWord.id}/memory-state`,
+                body: { is_frozen: !currentWord.is_frozen },
+            });
+
+            setWords((prev) => mergeUpdatedWords(prev, [json.word]));
+            setMemoryStateError(null);
+        } catch {
+            setMemoryStateError("Не удалось изменить состояние заморозки слова");
+        } finally {
+            setIsUpdatingWordMemoryState(false);
+        }
     };
 
     const renderFlashcardExtraZone = (cardLanguage: "jp" | "ru") => {
@@ -1235,7 +1469,7 @@ const TeacherReview = () => {
                             role="tab"
                             aria-selected={isRootRoute}
                             className={`btn quizlet-student-dictionary-tab ${isRootRoute ? "active" : ""}`}
-                            onClick={() => navigate(routePaths.root)}
+                            onClick={() => navigate(REVIEW_ROUTE_PATHS.root)}
                         >
                             Словари
                         </button>
@@ -1244,7 +1478,7 @@ const TeacherReview = () => {
                             role="tab"
                             aria-selected={isTrainingSetupRoute}
                             className={`btn quizlet-student-dictionary-tab ${isTrainingSetupRoute ? "active" : ""}`}
-                            onClick={() => navigate(routePaths.training)}
+                            onClick={() => navigate(REVIEW_ROUTE_PATHS.training)}
                         >
                             Тренировка
                         </button>
@@ -1253,9 +1487,18 @@ const TeacherReview = () => {
                             role="tab"
                             aria-selected={isTrainingHistoryRoute}
                             className={`btn quizlet-student-dictionary-tab ${isTrainingHistoryRoute ? "active" : ""}`}
-                            onClick={() => navigate(routePaths.history)}
+                            onClick={() => navigate(REVIEW_ROUTE_PATHS.history)}
                         >
                             История
+                        </button>
+                        <button
+                            type="button"
+                            role="tab"
+                            aria-selected={isTrainingStatusesRoute}
+                            className={`btn quizlet-student-dictionary-tab ${isTrainingStatusesRoute ? "active" : ""}`}
+                            onClick={() => navigate(REVIEW_ROUTE_PATHS.statuses)}
+                        >
+                            Статусы
                         </button>
                     </div>
                 </div>
@@ -1334,7 +1577,7 @@ const TeacherReview = () => {
                         >
                             <ol className="breadcrumb mb-0">
                                 <li className="breadcrumb-item">
-                                    <Link to={routePaths.root}>復習</Link>
+                                    <Link to={REVIEW_ROUTE_PATHS.root}>復習</Link>
                                 </li>
                                 <li
                                     className={`breadcrumb-item ${!editingDictionaryTitle ? "active" : ""}`}
@@ -1465,7 +1708,7 @@ const TeacherReview = () => {
                             >
                                 <ol className="breadcrumb mb-0">
                                     <li className="breadcrumb-item">
-                                        <Link to={routePaths.root}>復習</Link>
+                                        <Link to={REVIEW_ROUTE_PATHS.root}>復習</Link>
                                     </li>
                                     <li className="breadcrumb-item">
                                         <Link to={getDictionaryPath(selectedTopic.dictionary_id)}>
@@ -1544,12 +1787,36 @@ const TeacherReview = () => {
                 </div>
             )}
 
-            {(isTrainingSetupRoute || isTrainingHistoryRoute) && (
+            {(isTrainingSetupRoute || isTrainingHistoryRoute || isTrainingStatusesRoute) && (
                 <div className="review-section-card review-library-container">
                     <div className="review-training-setup">
                         {isTrainingSetupRoute && (
                             <>
                                 <section className="review-training-panel">
+                                    <div className="review-training-mode-toggle">
+                                        <button
+                                            type="button"
+                                            className={`btn review-direction-button ${trainingMode === "topics" ? "btn-success" : "btn-outline-success"}`}
+                                            onClick={() => setTrainingMode("topics")}
+                                        >
+                                            По топикам
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={`btn review-direction-button ${trainingMode === "random" ? "btn-success" : "btn-outline-success"}`}
+                                            onClick={() => setTrainingMode("random")}
+                                        >
+                                            Random Review
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={`btn review-direction-button ${trainingMode === "smart_random" ? "btn-success" : "btn-outline-success"}`}
+                                            onClick={() => setTrainingMode("smart_random")}
+                                        >
+                                            Smart Random Review
+                                        </button>
+                                    </div>
+
                                     <div className="review-direction-toggle">
                                         <button
                                             type="button"
@@ -1609,119 +1876,156 @@ const TeacherReview = () => {
                                         </label>
                                     </div>
 
+                                    {memoryStateError && (
+                                        <div className="alert alert-warning mt-3 mb-0">{memoryStateError}</div>
+                                    )}
+
                                     {/* <div className="small text-muted review-training-helper-text">
                                         Без ограничений по повторениям. Повторения для «забыла» и «частично» ставятся в очередь
                                         случайно, но не раньше чем через 8 карточек, если это возможно.
                                     </div> */}
                                 </section>
 
-                                <section className="review-training-panel">
-                                    <div className="review-training-section-label">Топики</div>
-                                    <div className="review-training-topic-list">
-                                        {groupedTopics.map(({ dictionary, topics: dictionaryTopics }) => (
-                                            <div className="border rounded p-2 mb-2" key={dictionary.id}>
-                                                {(() => {
-                                                    const dictionaryTopicIds = dictionaryTopics.map(
-                                                        (topic) => topic.id,
-                                                    );
-                                                    const selectedTopicsCount = dictionaryTopicIds.filter((topicId) =>
-                                                        selectedTrainingTopicIds.includes(topicId),
-                                                    ).length;
-                                                    const isDictionarySelected =
-                                                        dictionaryTopicIds.length > 0 &&
-                                                        selectedTopicsCount === dictionaryTopicIds.length;
-                                                    const isDictionaryPartiallySelected =
-                                                        selectedTopicsCount > 0 && !isDictionarySelected;
-                                                    const dictionaryWordCount = words.filter((word) =>
-                                                        dictionaryTopicIds.includes(word.topic_id),
-                                                    ).length;
+                                {trainingMode === "topics" ? (
+                                    <section className="review-training-panel">
+                                        <div className="review-training-section-label">Топики</div>
+                                        <div className="review-training-topic-list">
+                                            {groupedTopics.map(({ dictionary, topics: dictionaryTopics }) => (
+                                                <div className="border rounded p-2 mb-2" key={dictionary.id}>
+                                                    {(() => {
+                                                        const dictionaryTopicIds = dictionaryTopics.map(
+                                                            (topic) => topic.id,
+                                                        );
+                                                        const selectedTopicsCount = dictionaryTopicIds.filter(
+                                                            (topicId) => selectedTrainingTopicIds.includes(topicId),
+                                                        ).length;
+                                                        const isDictionarySelected =
+                                                            dictionaryTopicIds.length > 0 &&
+                                                            selectedTopicsCount === dictionaryTopicIds.length;
+                                                        const isDictionaryPartiallySelected =
+                                                            selectedTopicsCount > 0 && !isDictionarySelected;
+                                                        const dictionaryWordCount = words.filter((word) =>
+                                                            dictionaryTopicIds.includes(word.topic_id),
+                                                        ).length;
 
-                                                    return (
-                                                        <div className="d-flex align-items-center mb-2">
-                                                            <label className="form-check d-inline-flex align-items-center gap-2 mb-0 quizlet-group-checkbox-label">
-                                                                <input
-                                                                    className="form-check-input mt-0"
-                                                                    type="checkbox"
-                                                                    checked={isDictionarySelected}
-                                                                    disabled={dictionaryTopics.length === 0}
-                                                                    ref={(input) => {
-                                                                        if (input === null) {
-                                                                            return;
-                                                                        }
-
-                                                                        input.indeterminate =
-                                                                            isDictionaryPartiallySelected;
-                                                                    }}
-                                                                    onChange={(event) => {
-                                                                        toggleTrainingDictionary(dictionary.id);
-                                                                        event.target.blur();
-                                                                    }}
-                                                                />
-                                                                <span className="fw-bold text-dark quizlet-group-checkbox-title">
-                                                                    {dictionary.title}
-                                                                    <span className="quizlet-dictionary-word-count">
-                                                                        {` (${dictionaryTopics.length} тем • ${dictionaryWordCount} карточек)`}
-                                                                    </span>
-                                                                </span>
-                                                            </label>
-                                                        </div>
-                                                    );
-                                                })()}
-
-                                                {dictionaryTopics.length === 0 ? (
-                                                    <div className="small text-muted">Нет топиков</div>
-                                                ) : (
-                                                    <div className="d-flex flex-wrap gap-2">
-                                                        {dictionaryTopics.map((topic) => {
-                                                            const topicWordCount = words.filter(
-                                                                (word) => word.topic_id === topic.id,
-                                                            ).length;
-                                                            const isSelected = selectedTrainingTopicIds.includes(
-                                                                topic.id,
-                                                            );
-
-                                                            return (
-                                                                <label
-                                                                    key={topic.id}
-                                                                    className="form-check me-3 quizlet-topic-checkbox-label"
-                                                                >
+                                                        return (
+                                                            <div className="d-flex align-items-center mb-2">
+                                                                <label className="form-check d-inline-flex align-items-center gap-2 mb-0 quizlet-group-checkbox-label">
                                                                     <input
-                                                                        className="form-check-input"
+                                                                        className="form-check-input mt-0"
                                                                         type="checkbox"
-                                                                        checked={isSelected}
+                                                                        checked={isDictionarySelected}
+                                                                        disabled={dictionaryTopics.length === 0}
+                                                                        ref={(input) => {
+                                                                            if (input === null) {
+                                                                                return;
+                                                                            }
+
+                                                                            input.indeterminate =
+                                                                                isDictionaryPartiallySelected;
+                                                                        }}
                                                                         onChange={(event) => {
-                                                                            toggleTrainingTopic(topic.id);
+                                                                            toggleTrainingDictionary(dictionary.id);
                                                                             event.target.blur();
                                                                         }}
                                                                     />
-                                                                    <span className="form-check-label">
-                                                                        {topic.title}
+                                                                    <span className="fw-bold text-dark quizlet-group-checkbox-title">
+                                                                        {dictionary.title}
                                                                         <span className="quizlet-dictionary-word-count">
-                                                                            {` (${topicWordCount})`}
+                                                                            {` (${dictionaryTopics.length} тем • ${dictionaryWordCount} карточек)`}
                                                                         </span>
                                                                     </span>
                                                                 </label>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </section>
+                                                            </div>
+                                                        );
+                                                    })()}
+
+                                                    {dictionaryTopics.length === 0 ? (
+                                                        <div className="small text-muted">Нет топиков</div>
+                                                    ) : (
+                                                        <div className="d-flex flex-wrap gap-2">
+                                                            {dictionaryTopics.map((topic) => {
+                                                                const topicWordCount = words.filter(
+                                                                    (word) => word.topic_id === topic.id,
+                                                                ).length;
+                                                                const isSelected = selectedTrainingTopicIds.includes(
+                                                                    topic.id,
+                                                                );
+
+                                                                return (
+                                                                    <label
+                                                                        key={topic.id}
+                                                                        className="form-check me-3 quizlet-topic-checkbox-label"
+                                                                    >
+                                                                        <input
+                                                                            className="form-check-input"
+                                                                            type="checkbox"
+                                                                            checked={isSelected}
+                                                                            onChange={(event) => {
+                                                                                toggleTrainingTopic(topic.id);
+                                                                                event.target.blur();
+                                                                            }}
+                                                                        />
+                                                                        <span className="form-check-label">
+                                                                            {topic.title}
+                                                                            <span className="quizlet-dictionary-word-count">
+                                                                                {` (${topicWordCount})`}
+                                                                            </span>
+                                                                        </span>
+                                                                    </label>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </section>
+                                ) : (
+                                    <section className="review-training-panel">
+                                        <div className="review-training-section-label">
+                                            {trainingMode === "random" ? "Random Review" : "Smart Random Review"}
+                                        </div>
+                                        <div
+                                            className="review-random-size-list"
+                                            role="radiogroup"
+                                            aria-label="Размер сессии"
+                                        >
+                                            {REVIEW_RANDOM_SESSION_SIZES.map((size) => (
+                                                <button
+                                                    key={size}
+                                                    type="button"
+                                                    className={`btn ${randomReviewCount === size ? "btn-success" : "btn-outline-success"}`}
+                                                    onClick={() => setRandomReviewCount(size)}
+                                                >
+                                                    {size}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <div className="small text-muted mt-3">
+                                            {trainingMode === "random"
+                                                ? "Случайная сессия берёт слова из всех незамороженных карточек."
+                                                : "Smart Random Review смешивает незамороженные слова как 60% shaky, 35% passive и 5% active с добором из оставшихся слов при нехватке."}
+                                        </div>
+                                        <div className="review-random-summary mt-3">
+                                            Доступно незамороженных карточек: <strong>{nonFrozenWords.length}</strong>
+                                        </div>
+                                    </section>
+                                )}
 
                                 <section className="review-training-panel review-training-panel-start">
                                     <div className="review-training-start-row">
                                         <button
                                             type="button"
                                             className="btn btn-success review-training-start-button"
-                                            disabled={selectedTrainingTopicIds.length === 0}
-                                            onClick={() => startTraining()}
+                                            disabled={trainingWordCountForMode === 0}
+                                            onClick={startConfiguredTraining}
                                         >
                                             Начать тренировку
                                         </button>
                                         <div className="review-training-selected-count">
-                                            Выбрано карточек: <span>{selectedTrainingWordsCount}</span>
+                                            {trainingMode === "topics" ? "Выбрано карточек:" : "Размер сессии:"}{" "}
+                                            <span>{trainingWordCountForMode}</span>
                                         </div>
                                     </div>
                                     {/* <div className="small text-muted review-training-start-hint">
@@ -1739,6 +2043,63 @@ const TeacherReview = () => {
                                     hasStorageError={hasTrainingHistoryError}
                                     onRowClick={toggleHistoryEntry}
                                 />
+                            </section>
+                        )}
+
+                        {isTrainingStatusesRoute && (
+                            <section className="review-training-panel">
+                                <div className="review-status-grid">
+                                    <div className="review-status-card shaky">
+                                        <span className="review-status-card-label">🔴 shaky</span>
+                                        <span className="review-status-card-value">{reviewStatusSummary.shaky}</span>
+                                        <div className="review-status-card-stages">
+                                            <span className="review-status-card-stage-pill">
+                                                ◔ {reviewStatusSummary.stages.shaky[1]}
+                                            </span>
+                                            <span className="review-status-card-stage-pill">
+                                                ◑ {reviewStatusSummary.stages.shaky[2]}
+                                            </span>
+                                            <span className="review-status-card-stage-pill">
+                                                ◕ {reviewStatusSummary.stages.shaky[3]}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="review-status-card passive">
+                                        <span className="review-status-card-label">🟡 passive</span>
+                                        <span className="review-status-card-value">{reviewStatusSummary.passive}</span>
+                                        <div className="review-status-card-stages">
+                                            <span className="review-status-card-stage-pill">
+                                                ◔ {reviewStatusSummary.stages.passive[1]}
+                                            </span>
+                                            <span className="review-status-card-stage-pill">
+                                                ◑ {reviewStatusSummary.stages.passive[2]}
+                                            </span>
+                                            <span className="review-status-card-stage-pill">
+                                                ◕ {reviewStatusSummary.stages.passive[3]}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="review-status-card active">
+                                        <span className="review-status-card-label">🟢 active</span>
+                                        <span className="review-status-card-value">{reviewStatusSummary.active}</span>
+                                        <div className="review-status-card-stages">
+                                            <span className="review-status-card-stage-pill">
+                                                ◔ {reviewStatusSummary.stages.active[1]}
+                                            </span>
+                                            <span className="review-status-card-stage-pill">
+                                                ◑ {reviewStatusSummary.stages.active[2]}
+                                            </span>
+                                            <span className="review-status-card-stage-pill">
+                                                ◕ {reviewStatusSummary.stages.active[3]}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="review-status-card frozen">
+                                        <span className="review-status-card-label">❄️ frozen</span>
+                                        <span className="review-status-card-value">{reviewStatusSummary.frozen}</span>
+                                        <div className="review-status-card-note">Скрыты из smart review</div>
+                                    </div>
+                                </div>
                             </section>
                         )}
                     </div>
@@ -1775,6 +2136,18 @@ const TeacherReview = () => {
                                     {`🔊 ${currentFlashcardSpeech?.label ?? "JP"}`}
                                 </button>
                             ) : null}
+                        </div>
+
+                        <div className="review-flashcard-memory-actions" aria-label="Управление заморозкой слова">
+                            <button
+                                type="button"
+                                className={`review-freeze-word-btn ${currentWord.is_frozen ? "is-active" : ""}`}
+                                onClick={toggleCurrentWordFrozen}
+                                disabled={isUpdatingWordMemoryState}
+                                title={currentWord.is_frozen ? "Снять заморозку" : "Заморозить слово"}
+                            >
+                                ❄️
+                            </button>
                         </div>
 
                         <button
@@ -1857,7 +2230,7 @@ const TeacherReview = () => {
                             className="btn btn-danger btn-lg"
                             onClick={() => answerCurrentWord("forgot")}
                         >
-                            забыла
+                            не помню
                         </button>
                         <button
                             type="button"
@@ -1958,6 +2331,8 @@ const TeacherReview = () => {
                             <i className="bi bi-box-arrow-right" aria-hidden />К выбору топиков
                         </button>
                     </div>
+
+                    {memoryStateError && <div className="alert alert-warning mt-3 mb-0">{memoryStateError}</div>}
                 </div>
             )}
         </div>

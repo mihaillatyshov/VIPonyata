@@ -154,6 +154,13 @@
     flex-wrap: wrap;
 }
 
+.review-training-mode-toggle {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
 .review-direction-button {
     min-width: 132px;
 }
@@ -189,6 +196,7 @@
 }
 
 .review-flashcard-shell {
+    position: relative;
     margin-top: 28px;
 }
 
@@ -199,6 +207,27 @@
 .review-flashcard-speech-actions {
     top: 65px;
     bottom: auto;
+}
+
+.review-flashcard-memory-actions {
+    position: absolute;
+    left: 14px;
+    bottom: 14px;
+    z-index: 3;
+}
+
+.review-freeze-word-btn {
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 6px 18px rgba(27, 57, 84, 0.16);
+    font-size: 1.15rem;
+}
+
+.review-freeze-word-btn.is-active {
+    background: #d8efff;
 }
 
 .review-flashcard-back-content {
@@ -294,6 +323,81 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+}
+
+.review-random-size-list {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.review-random-summary {
+    color: #55606d;
+}
+
+.review-status-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.review-status-card {
+    display: grid;
+    gap: 8px;
+    padding: 16px;
+    border-radius: 16px;
+    border: 1px solid rgba(103, 174, 45, 0.14);
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.review-status-card.shaky {
+    background: rgba(255, 233, 233, 0.95);
+}
+
+.review-status-card.passive {
+    background: rgba(255, 248, 219, 0.96);
+}
+
+.review-status-card.active {
+    background: rgba(232, 249, 235, 0.96);
+}
+
+.review-status-card.frozen {
+    background: rgba(230, 244, 255, 0.96);
+}
+
+.review-status-card-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.review-status-card-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.review-status-card-stages {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    color: #55606d;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.review-status-card-stage-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.58);
+}
+
+.review-status-card-note {
+    color: #55606d;
+    font-size: 0.9rem;
 }
 
 @media (max-width: 768px) {

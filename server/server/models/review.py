@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel
 
 from server.models.utils import StrExtraSpaceRemove
@@ -29,3 +31,20 @@ class ReviewWordUpdateReq(BaseModel):
     ru: StrExtraSpaceRemove
     note: str | None = None
     examples: str | None = None
+
+
+ReviewWordMemoryStatus = Literal["shaky", "passive", "active"]
+ReviewWordSessionResult = Literal["remember", "partial", "forgot"]
+
+
+class ReviewWordMemoryStateUpdateReq(BaseModel):
+    is_frozen: bool
+
+
+class ReviewTrainingSessionResultReq(BaseModel):
+    word_id: int
+    result: ReviewWordSessionResult
+
+
+class ReviewTrainingSessionResultsReq(BaseModel):
+    results: list[ReviewTrainingSessionResultReq]

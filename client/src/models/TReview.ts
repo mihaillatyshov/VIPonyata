@@ -1,3 +1,5 @@
+export type TReviewWordStatus = "shaky" | "passive" | "active";
+
 export interface TReviewDictionary {
     id: number;
     title: string;
@@ -21,6 +23,9 @@ export interface TReviewWord {
     ru: string;
     note: string | null;
     examples: string | null;
+    status: TReviewWordStatus;
+    stage: 1 | 2 | 3;
+    is_frozen: boolean;
     topic_id: number;
     created_at: string;
 }
