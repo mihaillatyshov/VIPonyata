@@ -1298,6 +1298,31 @@ const TeacherReview = () => {
         currentFlashcardSpeech !== null &&
         !(trainingSession.direction === "ru_to_jp" && currentFlashcardSpeech.cardLanguage === "ru");
 
+    const toggleFlashcardFlip = () => {
+        setIsFlipped((prev) => {
+            const nextIsFlipped = !prev;
+
+            if (nextIsFlipped) {
+                setTrainingSession((sessionPrev) => {
+                    if (
+                        sessionPrev === null ||
+                        currentWord === null ||
+                        sessionPrev.openedWordIds.includes(currentWord.id)
+                    ) {
+                        return sessionPrev;
+                    }
+
+                    return {
+                        ...sessionPrev,
+                        openedWordIds: [...sessionPrev.openedWordIds, currentWord.id],
+                    };
+                });
+            }
+
+            return nextIsFlipped;
+        });
+    };
+
     useEffect(() => {
         if (
             trainingSession === null ||
@@ -1318,6 +1343,38 @@ const TeacherReview = () => {
             speak(currentFlashcardSpeech.text, currentFlashcardSpeech.lang);
         }
     }, [autoSpeakCards, currentFlashcardSpeech, isFlipped, isFlashcardsRoute, speakJpAfterFlip, trainingSession]);
+
+    useEffect(() => {
+        if (trainingSession === null || trainingSession.isFinished || currentWord === null || !isFlashcardsRoute) {
+            return;
+        }
+
+        const handleFlashcardSpace = (event: KeyboardEvent) => {
+            if (event.key !== " " || event.repeat || event.altKey || event.ctrlKey || event.metaKey) {
+                return;
+            }
+
+            const target = event.target;
+
+            if (
+                target instanceof HTMLElement &&
+                (target.isContentEditable ||
+                    target.closest("input, textarea, select, button, a, [role='button'], [contenteditable='true']") !==
+                        null)
+            ) {
+                return;
+            }
+
+            event.preventDefault();
+            toggleFlashcardFlip();
+        };
+
+        window.addEventListener("keydown", handleFlashcardSpace);
+
+        return () => {
+            window.removeEventListener("keydown", handleFlashcardSpace);
+        };
+    }, [currentWord, isFlashcardsRoute, trainingSession]);
 
     const toggleDetail = (detailKey: FlashcardDetailKey) => {
         setOpenedDetailKeys((prev) =>
@@ -2153,30 +2210,7 @@ const TeacherReview = () => {
                         <button
                             type="button"
                             className={`flashcard-card ${isFlipped ? "is-flipped" : ""}`}
-                            onClick={() => {
-                                setIsFlipped((prev) => {
-                                    const nextIsFlipped = !prev;
-
-                                    if (nextIsFlipped) {
-                                        setTrainingSession((sessionPrev) => {
-                                            if (
-                                                sessionPrev === null ||
-                                                currentWord === null ||
-                                                sessionPrev.openedWordIds.includes(currentWord.id)
-                                            ) {
-                                                return sessionPrev;
-                                            }
-
-                                            return {
-                                                ...sessionPrev,
-                                                openedWordIds: [...sessionPrev.openedWordIds, currentWord.id],
-                                            };
-                                        });
-                                    }
-
-                                    return nextIsFlipped;
-                                });
-                            }}
+                            onClick={toggleFlashcardFlip}
                         >
                             <div className="flashcard-flip-inner">
                                 <div className="flashcard-face flashcard-face-front">
