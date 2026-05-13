@@ -2,11 +2,13 @@ import { useLayoutEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import Notifications from "components/Notifications/Notifications";
-import { AjaxGet, AjaxPost } from "libs/ServerAPI";
+import { AjaxPost } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
-import { TAnyNotifications, TNotificationBase } from "models/TNotification";
+import { TNotificationBase } from "models/TNotification";
+import { useNotificationsHubSync } from "redux/funcs/notificationsHub";
 import { isTeacher } from "redux/funcs/user";
 import { useAppSelector } from "redux/hooks";
+import { selectHubNotifications } from "redux/slices/notificationsHubSlice";
 import { selectUser } from "redux/slices/userSlice";
 
 import Profile from "./Profile";
@@ -14,38 +16,17 @@ import styles from "./StyleNavBar.module.css";
 
 const NavBar = () => {
     const [showNotifications, setShowNotifications] = useState<boolean>(false);
-    const [notifications, setNotifications] = useState<TAnyNotifications>([]);
     const user = useAppSelector(selectUser);
+    const notifications = useAppSelector(selectHubNotifications);
     const location = useLocation();
     const isFlashcardExerciseRoute = location.pathname === "/quizlet/flashcards";
     const isReviewRoute = location.pathname.startsWith("/review");
     const isTeacherUser = user.data.loadStatus === LoadStatus.DONE && user.data.isAuth && isTeacher(user.data.userData);
 
+    useNotificationsHubSync();
+
     const openNotifications = () => setShowNotifications(true);
     const closeNotifications = () => setShowNotifications(false);
-
-    const getNotifications = () => {
-        AjaxGet<{ notifications: TAnyNotifications }>({ url: "/api/notifications" })
-            .then((json) => {
-                setNotifications(json.notifications);
-            })
-            .catch(() => {
-                // TODO: handle error
-            });
-    };
-
-    useLayoutEffect(() => {
-        if (!showNotifications) {
-            getNotifications();
-        }
-        const timerId = setInterval(() => {
-            if (!showNotifications) {
-                getNotifications();
-            }
-        }, 60_000);
-
-        return () => clearInterval(timerId);
-    }, [user, showNotifications]);
 
     useLayoutEffect(() => {
         if (showNotifications && notifications.length > 0) {

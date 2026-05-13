@@ -1,0 +1,250 @@
+.assignmentsSection {
+    margin: 1.5rem 0 2rem;
+}
+
+.assignmentsShell {
+    background: linear-gradient(145deg, #fff7ef 0%, #fffdf8 48%, #f6f8ff 100%);
+    border: 1px solid rgba(134, 92, 54, 0.14);
+    border-radius: 24px;
+    box-shadow: 0 16px 36px rgba(88, 66, 40, 0.08);
+    overflow: hidden;
+}
+
+.assignmentsMain {
+    padding: 1.5rem;
+}
+
+.assignmentsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.sectionTitle {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #5b3420;
+}
+
+.sectionSubtitle {
+    margin: 0.35rem 0 0;
+    color: #8f6b54;
+}
+
+.tabsRow {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.tabButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid rgba(121, 89, 53, 0.18);
+    background: rgba(255, 255, 255, 0.72);
+    color: #6f513d;
+    border-radius: 999px;
+    padding: 0.6rem 1rem;
+    font-weight: 600;
+}
+
+.tabButtonActive {
+    background: #f1b85b;
+    color: #402617;
+    border-color: #f1b85b;
+}
+
+.tabCounter {
+    min-width: 1.6rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    background: rgba(64, 38, 23, 0.12);
+    text-align: center;
+    font-size: 0.82rem;
+}
+
+.assignmentsBody {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(260px, 0.9fr);
+    align-items: start;
+    gap: 1rem;
+}
+
+.assignmentsList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.assignmentCard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.1rem;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(129, 99, 71, 0.12);
+}
+
+.assignmentCardActive {
+    background: linear-gradient(180deg, rgba(255, 248, 228, 0.98) 0%, rgba(255, 255, 255, 0.92) 100%);
+    border-color: rgba(214, 156, 53, 0.3);
+}
+
+.assignmentInfo {
+    min-width: 0;
+}
+
+.assignmentTitle {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #493022;
+    word-break: break-word;
+}
+
+.assignmentType {
+    margin-top: 0.25rem;
+    color: #8d7058;
+    font-size: 0.92rem;
+}
+
+.assignmentMeta {
+    margin-top: 0.45rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    font-size: 0.88rem;
+    color: #6f513d;
+}
+
+.assignmentResultGrid {
+    margin-top: 0.65rem;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem 1rem;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+.assignmentResultItem {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.88rem;
+    color: #6f513d;
+}
+
+.assignmentResultItem i {
+    color: #a86c2b;
+}
+
+.assignmentActions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.showAllButton {
+    align-self: center;
+    margin-top: 0.25rem;
+    border-radius: 999px;
+    padding-inline: 1.25rem;
+}
+
+.statsCard {
+    border-radius: 18px;
+    background: #fffdf9;
+    border: 1px solid rgba(129, 99, 71, 0.12);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-self: start;
+    gap: 1rem;
+}
+
+.statsGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.statsTitle {
+    font-weight: 700;
+    color: #5b3420;
+}
+
+.statRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    color: #755945;
+}
+
+.statsDivider {
+    height: 1px;
+    background: rgba(129, 99, 71, 0.16);
+}
+
+.emptyState {
+    min-height: 120px;
+    border-radius: 18px;
+    border: 1px dashed rgba(129, 99, 71, 0.2);
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    color: #8d7058;
+    text-align: center;
+}
+
+@media (max-width: 991px) {
+    .assignmentsHeader {
+        flex-direction: column;
+    }
+
+    .assignmentsBody {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 575px) {
+    .assignmentsMain {
+        padding: 1rem;
+    }
+
+    .assignmentCard {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .assignmentActions {
+        width: 100%;
+    }
+
+    .showAllButton {
+        width: 100%;
+    }
+
+    .assignmentResultGrid {
+        flex-wrap: wrap;
+    }
+
+    .assignmentCard :global(.btn) {
+        width: 100%;
+    }
+
+    .tabButton {
+        width: 100%;
+        justify-content: space-between;
+    }
+}

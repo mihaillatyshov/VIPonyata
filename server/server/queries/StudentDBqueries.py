@@ -18,6 +18,7 @@ from server.models.db_models import (
     QuizletAssignmentTargetSubgroup, QuizletDictionary, QuizletGroup, QuizletSession, QuizletSessionIncorrectWord,
     QuizletSessionWord, QuizletSubgroup, QuizletSubgroupWord, User, UserDictionary, UserQuizletLesson,
     UserQuizletSubgroup, UserQuizletWord)
+from server.models.assessment import AssessmentTaskName
 from server.models.dictionary import DictionaryAssociationReq, DictionaryImgReq
 from server.models.quizlet import (QuizletEndSessionReq, QuizletFlashcardAnswerReq, QuizletPersonalLessonCreateReq,
                                    QuizletRetryIncorrectReq, QuizletSaveProgressReq, QuizletStartSessionReq,
@@ -101,6 +102,7 @@ class ActivityTryForNotificationType(TypedDict):
     start_datetime: datetime
     end_datetime: datetime
     mistakes_count: int | None
+    correct_answers: int | None
 
 
 class UnfinishedLessonsSummaryType(TypedDict):
@@ -138,6 +140,29 @@ def _unfinished_lesson_ids_subquery(user_id: int):
             AssessmentTry.end_datetime == None)
 
     return union_all(drilling_unfinished, hieroglyph_unfinished, assessment_unfinished).subquery()
+
+
+NON_ANSWER_TASK_NAMES = {
+    AssessmentTaskName.TEXT,
+    AssessmentTaskName.IMG,
+    AssessmentTaskName.AUDIO,
+    AssessmentTaskName.BLOCK_BEGIN,
+    AssessmentTaskName.BLOCK_END,
+}
+
+
+def _get_correct_answers_count(done_tasks: list[dict], checked_tasks: list[dict]) -> int:
+    correct_answers = 0
+
+    for done_task, checked_task in zip(done_tasks, checked_tasks):
+        task_name = done_task.get("name")
+        if task_name in NON_ANSWER_TASK_NAMES:
+            continue
+
+        if checked_task.get("cheked", False) and checked_task.get("mistakes_count", 0) == 0:
+            correct_answers += 1
+
+    return correct_answers
 
 
 def _unfinished_activities_subquery(user_id: int):
@@ -450,7 +475,7 @@ class AssessmentQueriesClass(ActivityQueries[AssessmentType, AssessmentTryType])
             result = session.execute(                                                                                   #
                 select(self._activity_try_type.id, self._activity_try_type.base_id,
                        self._activity_try_type.start_datetime, self._activity_try_type.end_datetime,
-                       self._activity_try_type.checked_tasks)                                                           #
+                       self._activity_try_type.done_tasks, self._activity_try_type.checked_tasks)                       #
                 .where(self._activity_try_type.id == activity_try_id)                                                   #
                 .where(self._activity_try_type.end_datetime != None)                                                    #
                 .where(self._activity_try_type.user_id == user_id)                                                      #
@@ -459,14 +484,17 @@ class AssessmentQueriesClass(ActivityQueries[AssessmentType, AssessmentTryType])
             if result is None:
                 return None
 
-            checked_tasks = json.loads(result[4] or "[]")
+            done_tasks = json.loads(result[4] or "[]")
+            checked_tasks = json.loads(result[5] or "[]")
             mistakes_count = sum(task.get("mistakes_count", 0) for task in checked_tasks)
+            correct_answers = _get_correct_answers_count(done_tasks, checked_tasks)
             return {
                 "id": result[0],
                 "base_id": result[1],
                 "start_datetime": result[2],
                 "end_datetime": result[3],
-                "mistakes_count": mistakes_count
+                "mistakes_count": mistakes_count,
+                "correct_answers": correct_answers,
             }
 
     def get_viewed_notifications_by_try_ids(self, activity_try_ids: list[int]) -> set[int]:
@@ -1106,7 +1134,9 @@ def end_quizlet_session(user_id: int, session_id: int, _data: QuizletEndSessionR
             quiz_session.updated_at = datetime.now()
             quiz_session.elapsed_seconds = int((quiz_session.ended_at - quiz_session.started_at).total_seconds())
 
-            if quiz_session.assignment_id is not None:
+            viewed_cards_count = quiz_session.correct_answers + quiz_session.incorrect_answers
+
+            if quiz_session.assignment_id is not None and viewed_cards_count > 0:
                 assignment_id = quiz_session.assignment_id
                 existing_result = session.scalars(
                     select(QuizletAssignmentResult).where(QuizletAssignmentResult.assignment_id == assignment_id).where(

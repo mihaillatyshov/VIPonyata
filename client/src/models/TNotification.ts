@@ -5,10 +5,12 @@ import { TCourse } from "./TCourse";
 import { TLesson } from "./TLesson";
 import { TUserData } from "./TUser";
 
-type TNotificationLexisType = Pick<TLexisTry, "id" | "start_datetime" | "end_datetime">;
-type TNotificationAssessmentType = Pick<TAssessmentTry, "id" | "start_datetime" | "end_datetime"> & {
+type TNotificationAssessmentType = Pick<TAssessmentTry, "id" | "base_id" | "start_datetime" | "end_datetime"> & {
     mistakes_count: number | null;
+    correct_answers?: number | null;
 };
+
+type TNotificationLexisType = Pick<TLexisTry, "id" | "start_datetime" | "end_datetime">;
 
 export interface TNotificationBase {
     id: number;

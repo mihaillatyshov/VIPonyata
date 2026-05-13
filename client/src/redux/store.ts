@@ -7,6 +7,7 @@ import drillingSlice from "./slices/drillingSlice";
 import hieroglyphSlice from "./slices/hieroglyphSlice";
 import lessonsSlice from "./slices/lessonsSlice";
 import loginReducer from "./slices/loginSlice";
+import notificationsHubSlice from "./slices/notificationsHubSlice";
 import registerSlice from "./slices/registerSlice";
 import userReducer from "./slices/userSlice";
 
@@ -15,6 +16,7 @@ const store = configureStore({
         user: userReducer,
         login: loginReducer,
         register: registerSlice,
+        notificationsHub: notificationsHubSlice,
         courses: coursesSlice,
         lessons: lessonsSlice,
         drilling: drillingSlice,
