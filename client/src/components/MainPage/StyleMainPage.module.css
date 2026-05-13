@@ -38,6 +38,7 @@
     gap: 0.35rem;
     flex-wrap: wrap;
     padding: 0.3rem;
+    border-radius: 14px;
     border: 1px solid rgba(17, 17, 17, 0.1);
     background: rgba(255, 255, 255, 0.85);
 }
@@ -49,7 +50,7 @@
     border: 0;
     background: transparent;
     color: #5b6671;
-    border-radius: 0;
+    border-radius: 10px;
     padding: 0.46rem 0.9rem;
     font-size: 0.9rem;
     font-weight: 500;
