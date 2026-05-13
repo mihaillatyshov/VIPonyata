@@ -47,10 +47,10 @@ export const StudentAssessmentDoneTryTestSingle = ({
     taskId,
 }: AssessmentDoneTryTaskBaseProps<TAssessmentDoneTryTestSingle, TAssessmentCheckedTestSingle>) => {
     const getValidationStr = (fieldId: number): TValidationStr => {
-        if (checks.mistake_answer === fieldId || (checks.mistakes_count > 0 && data.meta_answer === fieldId)) {
+        if (checks.mistake_answer === fieldId) {
             return "wrong";
         }
-        if (data.meta_answer === fieldId && data.answer === data.meta_answer) {
+        if (data.meta_answer === fieldId) {
             return "good";
         }
     };

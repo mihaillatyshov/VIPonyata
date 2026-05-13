@@ -177,6 +177,15 @@
     margin: 2px 0 6px;
 }
 
+.student-assessment-results-summary {
+    box-shadow: 5px 5px 10px 5px #ffc0c041 !important;
+    transition: none !important;
+}
+
+.student-assessment-results-summary:hover {
+    box-shadow: 5px 5px 10px 5px #ffc0c041 !important;
+}
+
 .student-assessment-results-empty {
     text-align: center;
     color: #7f8ea3;
@@ -206,7 +215,7 @@
 
 .student-assessment-correct-answer-muted {
     color: #6f7784 !important;
-    background-color: #eef1f4 !important;
+    background-color: #ffffff !important;
     border-color: #d7dde5 !important;
 }
 
@@ -373,8 +382,12 @@
 }
 
 .student-assessment-sentence-order__label {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
     text-align: center;
-    margin-bottom: 2px;
+    min-height: 3.25rem;
+    margin-bottom: 10px;
 }
 
 .student-assessment-sentence-order__col .student-assessment-sortable-order.vertical {
@@ -553,7 +566,9 @@
     padding: 10px;
     gap: 8px;
     min-height: 64px;
-    background-color: #ffffff66;
+    background-color: rgba(255, 255, 255, 0.8);
+    box-shadow: none;
+    border: 1px solid rgba(178, 192, 212, 0.45);
 
     &.inputs {
         flex: 1 0;
@@ -616,7 +631,7 @@ $item-padding: 6px;
 }
 
 .student-assessment-classification__card--correct .student-assessment-classification__item {
-    border: 1px solid rgba(150, 167, 190, 0.9) !important;
+    border: 1px solid rgba(176, 192, 214, 0.4) !important;
 }
 
 .student-assessment-classification__item-autosize {

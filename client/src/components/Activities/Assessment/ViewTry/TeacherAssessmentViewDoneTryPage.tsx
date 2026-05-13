@@ -181,6 +181,21 @@ const TeacherAssessmentViewDoneTryPage = () => {
         }
     };
 
+    const getTaskCorrectAnswersCount = (task: TAssessmentItemBase, mistakesCount: number): number => {
+        switch (task.name) {
+            case TAssessmentTaskName.TEST_MULTI: {
+                const doneTask = task as TGetAssessmentDoneTryTypeByName[TAssessmentTaskName.TEST_MULTI];
+
+                return doneTask.answers.filter((answer) => doneTask.meta_answers.includes(answer)).length;
+            }
+            default: {
+                const total = getTaskCorrectAnswersTotal(task);
+
+                return Math.max(0, Math.min(total, total - mistakesCount));
+            }
+        }
+    };
+
     const createBlocks = (): TaskBlock[] => {
         const blocks: TaskBlock[] = [];
         let currentBlock: TaskBlock = { id: 1, tasks: [] };
@@ -244,7 +259,7 @@ const TeacherAssessmentViewDoneTryPage = () => {
     return (
         <div className="container pb-5" style={{ maxWidth: "800px" }}>
             <PageTitle title="タスク" urlBack={lessonId !== undefined ? `/lessons/${lessonId}` : undefined} />
-            <div className="mt-3 mb-5 box-shadow-main rounded py-4 px-3 w-75 mx-auto d-flex flex-column align-items-center student-assessment-task-result student-assessment-task-result--error">
+            <div className="mt-3 mb-5 box-shadow-main student-assessment-results-summary rounded py-4 px-3 w-75 mx-auto d-flex flex-column align-items-center student-assessment-task-result student-assessment-task-result--error">
                 <div className="mb-2 fs-4">
                     Ошибки в тесте: <strong>{totalMistakesCount}</strong>
                 </div>
@@ -285,7 +300,7 @@ const TeacherAssessmentViewDoneTryPage = () => {
                                                 (() => {
                                                     const total = getTaskCorrectAnswersTotal(doneTask);
                                                     const mistakes = checkedTask.mistakes_count;
-                                                    const correct = Math.max(0, Math.min(total, total - mistakes));
+                                                    const correct = getTaskCorrectAnswersCount(doneTask, mistakes);
                                                     const resultClassName =
                                                         mistakes > 0
                                                             ? "student-assessment-task-result student-assessment-task-result--error"

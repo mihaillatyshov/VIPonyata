@@ -49,11 +49,11 @@ export const StudentAssessmentDoneTryTestMulti = ({
         const isSelected = data.answers.includes(fieldId);
         const isCorrect = data.meta_answers.includes(fieldId);
 
-        if (isSelected && isCorrect) {
+        if (isCorrect) {
             return "good";
         }
 
-        if ((isCorrect && !isSelected) || (!isCorrect && isSelected)) {
+        if (!isCorrect && isSelected) {
             return "wrong";
         }
     };
