@@ -3,16 +3,17 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 32px;
-    padding: 0 14px;
+    min-height: clamp(28px, 4.2vw, 32px);
+    padding: 0 clamp(10px, 1.8vw, 14px);
     border-radius: 10px;
     border: 1px solid rgba(230, 157, 180, 0.42);
     background: rgba(255, 244, 247, 0.82);
     color: #b76a86;
-    font-size: 0.85rem;
+    font-size: clamp(0.76rem, 1.4vw, 0.85rem);
     font-weight: 400;
     line-height: 1;
     cursor: pointer;
+    white-space: nowrap;
     transition:
         color 0.15s,
         border-color 0.15s,
@@ -56,5 +57,19 @@
 @media (max-width: 576px) {
     .training-session-header-shell .flashcard-card-header {
         top: 12px;
+    }
+
+    .training-finish-btn {
+        border-radius: 9px;
+        padding-inline: 10px;
+    }
+}
+
+@media (max-width: 380px) {
+    .training-finish-btn {
+        min-height: 26px;
+        padding-inline: 8px;
+        font-size: 0.74rem;
+        border-radius: 8px;
     }
 }
