@@ -344,7 +344,7 @@ const TeacherHistoryPage = () => {
         return (
             <div className={`container ${styles.page}`}>
                 <div className={styles.header}>
-                    <div>
+                    <div className={styles.studentDetailsHeader}>
                         <button
                             type="button"
                             className={`btn btn-link ps-0 ${styles.backButton}`}
@@ -352,12 +352,12 @@ const TeacherHistoryPage = () => {
                         >
                             Назад к ученикам
                         </button>
-                        <h1 className={styles.title}>
+                        <h1 className={`${styles.title} ${styles.studentDetailsTitle}`}>
                             {selectedStudent
                                 ? `История: ${selectedStudent.nickname} (${selectedStudent.name})`
                                 : "История ученика"}
                         </h1>
-                        <p className={styles.subtitle}>Последние действия выбранного ученика.</p>
+                        {/* <p className={styles.subtitle}>Последние действия выбранного ученика.</p> */}
                     </div>
                 </div>
 

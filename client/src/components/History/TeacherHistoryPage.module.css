@@ -23,6 +23,14 @@
     text-align: center;
 }
 
+.studentDetailsHeader {
+    width: 100%;
+}
+
+.studentDetailsTitle {
+    text-align: center;
+}
+
 .title {
     margin: 0;
     font-size: 2rem;
