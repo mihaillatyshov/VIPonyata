@@ -259,9 +259,14 @@
 
 .metaGridCompact {
     display: grid;
-    grid-template-columns: minmax(0, 140px);
+    grid-template-columns: minmax(0, 168px);
     gap: 12px;
     margin-top: 0;
+}
+
+.metaGridCompact .metaItem {
+    min-height: 40px;
+    padding: 9px 14px;
 }
 
 .metaItem {

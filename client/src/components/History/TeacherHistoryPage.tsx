@@ -69,6 +69,15 @@ const lowerFirst = (value: string) => {
     return value[0].toLowerCase() + value.slice(1);
 };
 
+const splitDictionaryTargetName = (targetName: string) => {
+    const [dictionaryTitle, ...topicParts] = targetName.split(" • ");
+
+    return {
+        dictionaryTitle,
+        topicTitle: topicParts.join(" • "),
+    };
+};
+
 const getHistoryCardTitle = (item: TTeacherHistoryEvent) => {
     const studentLabel = getStudentTitleLabel(item.student);
 
@@ -89,6 +98,16 @@ const getHistoryCardTitle = (item: TTeacherHistoryEvent) => {
     }
 
     if (item.training_kind === "dictionary") {
+        const { dictionaryTitle, topicTitle } = splitDictionaryTargetName(item.target_name);
+
+        if (item.action_type === "personal_dictionary_updated") {
+            return `${studentLabel}・изменил (${dictionaryTitle})`;
+        }
+
+        if (item.action_type === "personal_dictionary_topic_created") {
+            return `${studentLabel}・создал (${topicTitle || item.target_name})`;
+        }
+
         return `${studentLabel} ${lowerFirst(item.action_label)} ${item.target_name}`;
     }
 
