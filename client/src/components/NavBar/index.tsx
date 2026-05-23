@@ -53,38 +53,40 @@ const NavBar = () => {
 
     return (
         <div className={`container mainNavBar ${styles.navShell}`}>
-            <div className={`d-flex justify-content-center align-items-center ${styles.navInner}`}>
-                <div className="col-2 col-lg-4 px-0 align-items-center">
-                    <Link to="/">
-                        <img
-                            className={`d-none d-lg-block ${styles.logoFull}`}
-                            src="/svg/LogoFull.svg"
-                            alt="Главная"
-                            height={100}
-                        />
+            <div className={styles.navInner}>
+                <div className={styles.logoSection}>
+                    <Link to="/" className={styles.logoLink}>
+                        <img className={`d-none d-lg-block ${styles.logoFull}`} src="/svg/LogoFull.svg" alt="Главная" />
                         <img
                             className={`d-block d-lg-none ${styles.logoSmall}`}
                             src="/svg/LogoSmall.svg"
                             alt="Главная"
-                            height={60}
                         />
                     </Link>
                 </div>
-                <div className="col-6 col-lg-4 mx-auto d-flex align-items-center justify-content-center gap-2 gap-lg-3">
+                <div className={styles.centerSection}>
                     {isTeacherUser &&
                         (isReviewRoute ? (
                             <span
                                 className={`d-flex a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton} ${styles.quizletButtonDisabled}`}
                                 aria-disabled="true"
                             >
-                                復習
+                                <span className={styles.quizletButtonLabel}>復習</span>
+                                <i
+                                    className={`bi bi-journal-bookmark ${styles.quizletButtonIcon}`}
+                                    aria-hidden="true"
+                                ></i>
                             </span>
                         ) : (
                             <Link
                                 className={`d-flex a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton}`}
                                 to="/review"
                             >
-                                復習
+                                <span className={styles.quizletButtonLabel}>復習</span>
+                                <i
+                                    className={`bi bi-journal-bookmark ${styles.quizletButtonIcon}`}
+                                    aria-hidden="true"
+                                ></i>
                             </Link>
                         ))}
 
@@ -93,51 +95,48 @@ const NavBar = () => {
                             className={`d-flex a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton} ${styles.quizletButtonDisabled}`}
                             aria-disabled="true"
                         >
-                            ワードラボ
+                            <span className={styles.quizletButtonLabel}>ワードラボ</span>
+                            <i className={`bi bi-magic ${styles.quizletButtonIcon}`} aria-hidden="true"></i>
                         </span>
                     ) : (
                         <Link
                             className={`d-flex a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton}`}
                             to="/quizlet"
                         >
-                            ワードラボ
+                            <span className={styles.quizletButtonLabel}>ワードラボ</span>
+                            <i className={`bi bi-magic ${styles.quizletButtonIcon}`} aria-hidden="true"></i>
                         </Link>
                     )}
                 </div>
-                <div className="col-4 align-items-end">
-                    <div className="d-flex justify-content-end align-items-center">
-                        {isTeacherUser && (
-                            <Link
-                                to="/teacher/history"
-                                aria-label="История"
-                                className={`a-clear me-2 ${styles.notificationsBlock} ${
-                                    isTeacherHistoryRoute ? styles.navIconButtonActive : ""
-                                }`}
-                            >
-                                <i className={`bi bi-book font-icon-height-0 ${styles.notificationIcon}`}></i>
-                            </Link>
-                        )}
-                        <div
-                            className={`position-relative me-3 ${styles.notificationsBlock}`}
-                            onClick={openNotifications}
+                <div className={styles.actionsSection}>
+                    {isTeacherUser && (
+                        <Link
+                            to="/teacher/history"
+                            aria-label="История"
+                            className={`a-clear ${styles.notificationsBlock} ${
+                                isTeacherHistoryRoute ? styles.navIconButtonActive : ""
+                            }`}
                         >
-                            <i className={`bi bi-bell font-icon-height-0 ${styles.notificationIcon}`}></i>
-                            <span
-                                className={`position-absolute top-0 start-100 translate-middle badge rounded-pill ${
-                                    styles.notificationBadge
-                                } ${!notificationStr ? styles.notificationBadgeHidden : ""}`}
-                            >
-                                {notificationStr}
-                            </span>
-                        </div>
-                        <Notifications
-                            isShow={showNotifications}
-                            close={closeNotifications}
-                            notifications={notifications}
-                        />
-
-                        <Profile />
+                            <i className={`bi bi-book font-icon-height-0 ${styles.notificationIcon}`}></i>
+                        </Link>
+                    )}
+                    <div className={`position-relative ${styles.notificationsBlock}`} onClick={openNotifications}>
+                        <i className={`bi bi-bell font-icon-height-0 ${styles.notificationIcon}`}></i>
+                        <span
+                            className={`position-absolute top-0 start-100 translate-middle badge rounded-pill ${
+                                styles.notificationBadge
+                            } ${!notificationStr ? styles.notificationBadgeHidden : ""}`}
+                        >
+                            {notificationStr}
+                        </span>
                     </div>
+                    <Notifications
+                        isShow={showNotifications}
+                        close={closeNotifications}
+                        notifications={notifications}
+                    />
+
+                    <Profile />
                 </div>
             </div>
         </div>

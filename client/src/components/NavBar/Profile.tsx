@@ -9,7 +9,7 @@ const Profile = () => {
     const user = useGetAuthorizedUserSafe();
 
     return (
-        <div className="col-auto">
+        <div className={styles.profileSlot}>
             <div
                 className={`d-flex flex-column align-items-center ${styles.profileBlock}`}
                 onClick={() => navigate("/profile")}

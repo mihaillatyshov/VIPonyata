@@ -8,14 +8,62 @@
 }
 
 .navInner {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 16px;
+    row-gap: 10px;
     min-height: 92px;
     padding: 2px 10px;
 }
 
+.logoSection {
+    width: max-content;
+    min-width: 0;
+    justify-self: start;
+}
+
+.logoLink {
+    display: inline-flex;
+    align-items: center;
+}
+
+.centerSection {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: clamp(8px, 1.4vw, 14px);
+    justify-self: center;
+}
+
+.actionsSection {
+    width: max-content;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: clamp(8px, 1vw, 12px);
+    justify-self: end;
+}
+
 .logoFull,
 .logoSmall {
+    width: auto;
+    max-width: 100%;
+    height: auto;
     filter: none;
     transition: transform 160ms ease;
+}
+
+.logoFull {
+    width: clamp(180px, 18vw, 260px);
+}
+
+.logoSmall {
+    width: clamp(58px, 11vw, 82px);
 }
 
 .logoFull:hover,
@@ -27,8 +75,9 @@
     cursor: pointer;
     display: grid;
     place-items: center;
-    width: 44px;
-    height: 44px;
+    flex: 0 0 auto;
+    width: clamp(38px, 4vw, 44px);
+    height: clamp(38px, 4vw, 44px);
     border-radius: 14px;
     border: 1px solid rgba(65, 92, 65, 0.14);
     background: rgba(255, 255, 255, 0.96);
@@ -54,7 +103,7 @@
 }
 
 .notificationIcon {
-    font-size: 23px;
+    font-size: clamp(19px, 2vw, 23px);
     color: #5f7a5f;
     line-height: 1;
 }
@@ -73,12 +122,17 @@
 }
 
 .quizletButton {
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: center;
-    padding: 4px 16px 6px;
+    max-width: 100%;
+    white-space: nowrap;
+    padding: clamp(4px, 0.8vw, 6px) clamp(10px, 1.5vw, 16px) clamp(5px, 0.8vw, 7px);
+    gap: 10px;
     border-radius: 999px;
     border: 1px solid rgba(103, 174, 45, 0.22);
-    font-size: 48px;
+    font-size: clamp(24px, 4vw, 48px);
     color: #4f9716;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(237, 250, 227, 0.98) 100%);
     box-shadow: 0 2px 8px rgba(103, 174, 45, 0.14);
@@ -100,43 +154,115 @@
     opacity: 0.82;
 }
 
+.quizletButtonLabel {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.quizletButtonIcon {
+    display: none;
+    flex: 0 0 auto;
+    font-size: 22px;
+    line-height: 1;
+}
+
+.profileSlot {
+    flex: 0 0 auto;
+}
+
 @media (max-width: 576px) {
     .navShell {
         border-radius: 14px;
     }
 
     .navInner {
+        grid-template-columns: auto 1fr auto;
+        grid-template-areas: "logo center actions";
         min-height: 76px;
         padding: 2px 6px;
     }
 
+    .logoSection {
+        grid-area: logo;
+    }
+
+    .centerSection {
+        grid-area: center;
+        justify-content: center;
+        flex-wrap: nowrap;
+        width: max-content;
+        max-width: 100%;
+        justify-self: center;
+    }
+
+    .actionsSection {
+        grid-area: actions;
+        gap: 8px;
+    }
+
     .quizletButton {
-        font-size: 36px;
+        font-size: clamp(22px, 7vw, 36px);
+        min-width: 42px;
         padding: 4px 10px 5px;
+    }
+
+    .quizletButtonLabel {
+        display: none;
+    }
+
+    .quizletButtonIcon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
     }
 
     .notificationsBlock {
         width: 38px;
         height: 38px;
-        margin-right: 0.5rem;
     }
 
     .notificationIcon {
         font-size: 20px;
     }
+
+    .profileBlock {
+        width: 44px;
+        min-height: 44px;
+        padding: 3px;
+    }
+
+    .profileImgWrapper {
+        min-width: 36px;
+        min-height: 36px;
+    }
+
+    .profileFallbackIcon {
+        font-size: 32px;
+    }
 }
 
 @media (max-width: 400px) {
+    .navInner {
+        column-gap: 8px;
+    }
+
     .quizletButton {
         font-size: 24px;
+    }
+
+    .actionsSection {
+        gap: 6px;
     }
 }
 
 .profileBlock {
     cursor: pointer;
     position: relative;
-    width: 52px;
-    min-height: 52px;
+    width: clamp(44px, 4.8vw, 52px);
+    min-height: clamp(44px, 4.8vw, 52px);
     border-radius: 14px;
     padding: 4px;
     border: 1px solid rgba(65, 92, 65, 0.14);
@@ -157,8 +283,8 @@
 .profileImgWrapper {
     width: 100%;
     height: 100%;
-    min-width: 42px;
-    min-height: 42px;
+    min-width: clamp(36px, 4vw, 42px);
+    min-height: clamp(36px, 4vw, 42px);
     display: grid;
     place-items: center;
 }
@@ -177,7 +303,7 @@
     height: 100%;
     display: grid;
     place-items: center;
-    font-size: 40px;
+    font-size: clamp(32px, 3.8vw, 40px);
     line-height: 1;
     color: #6a826a;
 }
