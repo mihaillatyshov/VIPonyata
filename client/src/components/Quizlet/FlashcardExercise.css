@@ -162,15 +162,15 @@
     padding: 0 10px;
     font-size: 0.85rem;
     line-height: 1;
-    color: #425466;
-    background: #f3f6f9;
-    border: 1px solid #d7e0ea;
+    color: #5b6b7c;
+    background: rgba(250, 252, 253, 0.9);
+    border: 1px solid rgba(215, 224, 234, 0.72);
 }
 
 .flashcard-error-badge {
-    color: #8f2f2f;
-    background: #fdeeee;
-    border-color: #f2d7d7;
+    color: #9d5b6d;
+    background: rgba(255, 245, 247, 0.9);
+    border-color: rgba(236, 195, 207, 0.72);
 }
 
 .flashcard-card {

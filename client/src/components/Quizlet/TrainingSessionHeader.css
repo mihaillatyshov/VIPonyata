@@ -6,38 +6,33 @@
     min-height: 32px;
     padding: 0 14px;
     border-radius: 10px;
-    border: 2px solid #ffbccd;
-    background: rgba(255, 188, 205, 0.12);
-    color: #ffc3d2;
+    border: 1px solid rgba(230, 157, 180, 0.42);
+    background: rgba(255, 244, 247, 0.82);
+    color: #b76a86;
     font-size: 0.85rem;
     font-weight: 400;
     line-height: 1;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(255, 129, 167, 0.2);
     transition:
         color 0.15s,
         border-color 0.15s,
         background-color 0.15s,
-        transform 0.1s,
-        box-shadow 0.15s;
+        transform 0.1s;
 }
 
 .training-finish-btn:hover {
-    color: #ff4f8b;
-    border-color: #ff4f8b;
-    background: rgba(255, 79, 139, 0.1);
+    color: #9f4867;
+    border-color: rgba(210, 112, 146, 0.5);
+    background: rgba(255, 238, 243, 0.96);
 }
 
 .training-finish-btn:active {
     transform: translateY(1px);
-    box-shadow: 0 1px 4px rgba(255, 129, 167, 0.2);
 }
 
 .training-finish-btn:focus-visible {
     outline: none;
-    box-shadow:
-        0 0 0 3px rgba(255, 188, 205, 0.4),
-        0 2px 8px rgba(255, 129, 167, 0.2);
+    box-shadow: 0 0 0 3px rgba(243, 189, 207, 0.28);
 }
 
 .training-session-header-shell {
