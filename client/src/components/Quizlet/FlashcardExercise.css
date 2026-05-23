@@ -22,6 +22,10 @@
     margin: 0 auto;
 }
 
+.flashcard-card-shell.is-card-entering {
+    animation: flashcard-card-enter 260ms cubic-bezier(0.2, 0.85, 0.3, 1);
+}
+
 .flashcard-speech-actions {
     position: absolute;
     bottom: 16px;
@@ -144,6 +148,11 @@
 }
 
 .flashcard-card {
+    --flashcard-swipe-x: 0px;
+    --flashcard-swipe-rotate: 0deg;
+    --flashcard-swipe-progress: 0;
+    --flashcard-swipe-right-opacity: 0;
+    --flashcard-swipe-left-opacity: 0;
     width: 100%;
     aspect-ratio: 5 / 4;
     margin: 0;
@@ -154,13 +163,60 @@
     background: linear-gradient(165deg, #fefeff 0%, #f7f9fc 100%);
     perspective: 1200px;
     cursor: pointer;
+    overflow: hidden;
+    isolation: isolate;
+    touch-action: pan-y;
+    user-select: none;
+    will-change: transform;
+    transform: translate3d(var(--flashcard-swipe-x), 0, 0) rotate(var(--flashcard-swipe-rotate));
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.flashcard-card::before,
+.flashcard-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease;
+}
+
+.flashcard-card::before {
+    background:
+        radial-gradient(circle at 80% 50%, rgba(57, 176, 117, 0.2), transparent 48%),
+        linear-gradient(90deg, transparent 48%, rgba(91, 190, 138, 0.18) 100%);
+    opacity: var(--flashcard-swipe-right-opacity);
+}
+
+.flashcard-card::after {
+    background:
+        radial-gradient(circle at 20% 50%, rgba(209, 86, 86, 0.2), transparent 48%),
+        linear-gradient(270deg, transparent 48%, rgba(216, 95, 95, 0.18) 100%);
+    opacity: var(--flashcard-swipe-left-opacity);
+}
+
+.flashcard-card.is-swipe-returning,
+.flashcard-card.is-swipe-exiting {
+    transition:
+        transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.flashcard-card.is-swipe-active {
+    box-shadow:
+        0 16px 34px rgba(17, 24, 39, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.28);
+}
+
+.flashcard-card.is-swipe-exiting {
+    pointer-events: none;
 }
 
 .flashcard-flip-inner {
     position: absolute;
     inset: 0;
     border-radius: inherit;
+    z-index: 1;
     transform-style: preserve-3d;
     transition: transform 340ms cubic-bezier(0.22, 0.61, 0.36, 1);
 }
@@ -183,6 +239,65 @@
 
 .flashcard-face-back {
     transform: rotateY(180deg);
+}
+
+.flashcard-swipe-indicator {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    pointer-events: none;
+    backdrop-filter: blur(8px);
+    transition:
+        opacity 160ms ease,
+        transform 160ms ease;
+}
+
+.flashcard-swipe-indicator-left {
+    left: 20px;
+    color: #a73737;
+    background: rgba(255, 245, 245, 0.88);
+    border: 1px solid rgba(214, 118, 118, 0.26);
+    box-shadow: 0 8px 24px rgba(168, 63, 63, 0.08);
+    opacity: var(--flashcard-swipe-left-opacity);
+    transform: translate(-10px, -50%);
+}
+
+.flashcard-swipe-indicator-right {
+    right: 20px;
+    color: #1c7a4f;
+    background: rgba(244, 255, 248, 0.88);
+    border: 1px solid rgba(95, 176, 127, 0.26);
+    box-shadow: 0 8px 24px rgba(41, 129, 82, 0.08);
+    opacity: var(--flashcard-swipe-right-opacity);
+    transform: translate(10px, -50%);
+}
+
+.flashcard-card.is-swipe-active .flashcard-swipe-indicator-left,
+.flashcard-card.is-swipe-returning .flashcard-swipe-indicator-left {
+    transform: translate(0, -50%);
+}
+
+.flashcard-card.is-swipe-active .flashcard-swipe-indicator-right,
+.flashcard-card.is-swipe-returning .flashcard-swipe-indicator-right {
+    transform: translate(0, -50%);
+}
+
+.flashcard-swipe-indicator-icon {
+    font-size: 1.05rem;
+    line-height: 1;
+}
+
+.flashcard-swipe-indicator-label {
+    opacity: 1;
+    white-space: nowrap;
 }
 
 .flashcard-content {
@@ -263,6 +378,18 @@
     text-align: center;
 }
 
+@keyframes flashcard-card-enter {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
 @media (max-width: 576px) {
     .flashcard-exercise {
         --flashcard-max-width: min(100%, 460px);
@@ -302,5 +429,19 @@
         min-height: 30px;
         padding: 0 8px;
         font-size: 0.8rem;
+    }
+
+    .flashcard-swipe-indicator {
+        gap: 6px;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+
+    .flashcard-swipe-indicator-left {
+        left: 12px;
+    }
+
+    .flashcard-swipe-indicator-right {
+        right: 12px;
     }
 }
