@@ -47,9 +47,10 @@ const speak = (text: string, lang: "ja-JP" | "ru-RU") => {
 };
 
 const getSpeechText = (word: Pick<TQuizletSessionWord, "char_jp" | "word_jp">) => {
+    const reading = word.word_jp.trim();
     const kanji = word.char_jp?.trim();
 
-    return kanji ? kanji : word.word_jp;
+    return reading || kanji || word.word_jp;
 };
 
 interface Props {
