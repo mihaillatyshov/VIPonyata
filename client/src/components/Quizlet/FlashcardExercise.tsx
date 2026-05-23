@@ -439,12 +439,12 @@ const FlashcardExercise = ({
             </div>
 
             <div className={`flashcard-actions ${isFlipped ? "is-visible" : ""}`}>
-                <button className="btn btn-success" disabled={isSending || !isFlipped} onClick={() => submit(true)}>
-                    Помню
-                </button>
-                <div className="flashcard-remaining">Еще: {unresolvedCount}</div>
                 <button className="btn btn-danger" disabled={isSending || !isFlipped} onClick={() => submit(false)}>
                     Не помню
+                </button>
+                <div className="flashcard-remaining">Еще: {unresolvedCount}</div>
+                <button className="btn btn-success" disabled={isSending || !isFlipped} onClick={() => submit(true)}>
+                    Помню
                 </button>
             </div>
         </div>
