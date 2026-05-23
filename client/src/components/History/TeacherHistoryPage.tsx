@@ -115,7 +115,6 @@ const getHistoryCardIconClass = (item: TTeacherHistoryEvent) => {
 
 interface HistoryItemProps {
     item: TTeacherHistoryEvent;
-    showStudent: boolean;
 }
 
 interface HistoryMetaItemProps {
@@ -135,7 +134,7 @@ const HistoryMetaItem = ({ iconClass, value, title }: HistoryMetaItemProps) => {
     );
 };
 
-const HistoryItem = ({ item, showStudent }: HistoryItemProps) => {
+const HistoryItem = ({ item }: HistoryItemProps) => {
     const navigate = useNavigate();
     const isCompactDictionaryItem = isCompactDictionaryHistoryItem(item);
     const isTestHistoryItem = item.training_kind === "test";
@@ -346,7 +345,7 @@ const TeacherHistoryPage = () => {
                 {selectedStudentHistory.length > 0 ? (
                     <div className={styles.historyList}>
                         {visibleStudentHistory.map((item) => (
-                            <HistoryItem key={item.id} item={item} showStudent={false} />
+                            <HistoryItem key={item.id} item={item} />
                         ))}
                         {canShowMoreStudentHistory && (
                             <div className={styles.showMoreRow}>
@@ -407,7 +406,7 @@ const TeacherHistoryPage = () => {
                 history.length > 0 ? (
                     <div className={styles.historyList}>
                         {visibleAllHistory.map((item) => (
-                            <HistoryItem key={item.id} item={item} showStudent={true} />
+                            <HistoryItem key={item.id} item={item} />
                         ))}
                         {canShowMoreAllHistory && (
                             <div className={styles.showMoreRow}>
