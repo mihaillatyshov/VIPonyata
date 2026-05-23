@@ -593,6 +593,10 @@ def _load_queue(queue_data: str) -> list[int]:
     return []
 
 
+def _dump_ids_state(ids: list[int]) -> str:
+    return json.dumps(list(dict.fromkeys(int(item) for item in ids)), ensure_ascii=False)
+
+
 def _ensure_char(word_char_jp: str | None, word_jp: str) -> str:
     return word_char_jp if word_char_jp is not None and word_char_jp != "" else word_jp
 
@@ -787,7 +791,9 @@ def _create_quizlet_session(session,
                                   total_words=len(words_data),
                                   user_id=user_id,
                                   assignment_id=assignment_id,
-                                  queue_state="[]")
+                                  queue_state="[]",
+                                  subgroup_ids=_dump_ids_state(data.subgroup_ids),
+                                  user_subgroup_ids=_dump_ids_state(data.user_subgroup_ids))
     session.add(quiz_session)
     session.flush()
 
@@ -1192,7 +1198,9 @@ def retry_quizlet_incorrect_words(user_id: int, data: QuizletRetryIncorrectReq) 
                                        total_words=len(retry_words),
                                        user_id=user_id,
                                        assignment_id=source_session.assignment_id,
-                                       queue_state="[]")
+                                       queue_state="[]",
+                                       subgroup_ids=source_session.subgroup_ids,
+                                       user_subgroup_ids=source_session.user_subgroup_ids)
         session.add(retry_session)
         session.flush()
 
@@ -1270,7 +1278,9 @@ def retry_quizlet_all_words(user_id: int, data: QuizletRetryIncorrectReq) -> Qui
                                        translation_direction=source_session.translation_direction,
                                        total_words=len(retry_words),
                                        user_id=user_id,
-                                       queue_state="[]")
+                                       queue_state="[]",
+                                       subgroup_ids=source_session.subgroup_ids,
+                                       user_subgroup_ids=source_session.user_subgroup_ids)
         session.add(retry_session)
         session.flush()
 

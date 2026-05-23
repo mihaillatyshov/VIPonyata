@@ -616,6 +616,16 @@ def get_quizlet_subgroups_by_ids(subgroup_ids: list[int]) -> list[QuizletSubgrou
                 QuizletSubgroup.id)).all()
 
 
+def get_personal_quizlet_subgroups_by_ids(subgroup_ids: list[int]) -> list[UserQuizletSubgroup]:
+    if len(subgroup_ids) == 0:
+        return []
+
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(UserQuizletSubgroup).where(UserQuizletSubgroup.id.in_(subgroup_ids)).order_by(
+                UserQuizletSubgroup.sort).order_by(UserQuizletSubgroup.id)).all()
+
+
 def get_quizlet_assignment_targets(assignment_id: int) -> list[QuizletAssignmentTarget]:
     with DBsession.begin() as session:
         return session.scalars(

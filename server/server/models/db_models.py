@@ -780,6 +780,8 @@ class QuizletSession(Base):
     skipped_words: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     queue_state: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
+    subgroup_ids: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
+    user_subgroup_ids: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
 
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey(USERS_ID), nullable=False)
     user: Mapped["User"] = relationship("User", back_populates="quizlet_sessions")
@@ -795,6 +797,23 @@ class QuizletSession(Base):
                                                                                 cascade="all, delete-orphan")
 
     __mapper_args__ = {'eager_defaults': True}
+
+    @staticmethod
+    def _load_id_state(value: str | None) -> list[int]:
+        try:
+            parsed = json.loads(value or "[]")
+            if isinstance(parsed, list):
+                return list(dict.fromkeys(int(item) for item in parsed))
+        except (json.JSONDecodeError, TypeError, ValueError):
+            return []
+
+        return []
+
+    def get_subgroup_ids(self) -> list[int]:
+        return self._load_id_state(self.subgroup_ids)
+
+    def get_user_subgroup_ids(self) -> list[int]:
+        return self._load_id_state(self.user_subgroup_ids)
 
     def __json__(self):
         return {
@@ -812,6 +831,8 @@ class QuizletSession(Base):
             "incorrect_answers": self.incorrect_answers,
             "skipped_words": self.skipped_words,
             "queue_state": self.queue_state,
+            "subgroup_ids": self.get_subgroup_ids(),
+            "user_subgroup_ids": self.get_user_subgroup_ids(),
             "user_id": self.user_id,
             "assignment_id": self.assignment_id,
         }

@@ -10,7 +10,7 @@ from server.models.db_models import (QuizletDictionary, QuizletGroup, QuizletSes
                                      QuizletSessionWord, QuizletSubgroup, QuizletSubgroupWord, User, UserQuizletLesson,
                                      UserQuizletSubgroup, UserQuizletWord)
 from server.models.quizlet import (QuizletAssignmentCreateReq, QuizletAssignmentPersonalTargetReq, QuizletEndSessionReq,
-                                   QuizletFlashcardAnswerReq, QuizletRetryIncorrectReq)
+                                   QuizletFlashcardAnswerReq, QuizletRetryIncorrectReq, QuizletStartSessionReq)
 from server.queries import StudentDBqueries, TeacherDBqueries
 
 
@@ -449,6 +449,70 @@ def test_get_quizlet_sessions_stats_excludes_empty_finished_sessions(create_db):
     assert [item.id for item in sessions] == [completed.id]
 
 
+def test_start_quizlet_session_persists_selected_subgroup_ids(create_db, monkeypatch):
+    DBsession.init(create_db)
+
+    with DBsession.begin() as session:
+        user = User(name="Quizlet Student",
+                    nickname="quizlet_student_persist",
+                    password="password123",
+                    birthday=datetime.date(2000, 1, 1),
+                    level=User.Level.STUDENT)
+        session.add(user)
+        session.flush()
+
+        group = QuizletGroup(title="Teacher lesson", sort=10)
+        session.add(group)
+        session.flush()
+
+        subgroup = QuizletSubgroup(title="Teacher subgroup", sort=10, group_id=group.id)
+        session.add(subgroup)
+        session.flush()
+
+        session.add_all([
+            QuizletDictionary(char_jp="漢字1", word_jp="かな1", ru="перевод1"),
+            QuizletDictionary(char_jp="漢字2", word_jp="かな2", ru="перевод2"),
+        ])
+        session.flush()
+        teacher_words = session.scalars(select(QuizletDictionary).order_by(QuizletDictionary.id)).all()
+        session.add_all([
+            QuizletSubgroupWord(subgroup_id=subgroup.id, word_id=teacher_words[0].id),
+            QuizletSubgroupWord(subgroup_id=subgroup.id, word_id=teacher_words[1].id),
+        ])
+
+        lesson = UserQuizletLesson(title="Personal lesson", user_id=user.id)
+        session.add(lesson)
+        session.flush()
+
+        personal_subgroup = UserQuizletSubgroup(title="Personal subgroup", sort=10, lesson_id=lesson.id)
+        session.add(personal_subgroup)
+        session.flush()
+
+        session.add_all([
+            UserQuizletWord(char_jp="個1", word_jp="こ1", ru="личный1", subgroup_id=personal_subgroup.id),
+            UserQuizletWord(char_jp="個2", word_jp="こ2", ru="личный2", subgroup_id=personal_subgroup.id),
+        ])
+
+    monkeypatch.setattr(StudentDBqueries.random, "shuffle", lambda items: None)
+
+    quiz_session = StudentDBqueries.start_quizlet_session(
+        user.id,
+        QuizletStartSessionReq(
+            quiz_type="flashcards",
+            subgroup_ids=[subgroup.id],
+            user_subgroup_ids=[personal_subgroup.id],
+            translation_direction="jp_to_ru",
+        ),
+    )
+
+    with DBsession.begin() as session:
+        saved_session = session.get(QuizletSession, quiz_session.id)
+
+        assert saved_session is not None
+        assert saved_session.get_subgroup_ids() == [subgroup.id]
+        assert saved_session.get_user_subgroup_ids() == [personal_subgroup.id]
+
+
 def test_start_quizlet_assignment_session_includes_student_personal_subgroups(create_db, monkeypatch):
     DBsession.init(create_db)
 
@@ -526,7 +590,61 @@ def test_start_quizlet_assignment_session_includes_student_personal_subgroups(cr
         assert saved_session is not None
         assert saved_session.assignment_id == assignment.id
         assert saved_session.total_words == 4
+        assert saved_session.get_subgroup_ids() == [subgroup.id]
+        assert saved_session.get_user_subgroup_ids() == [personal_subgroup.id]
         assert {word.word_jp for word in session_words} == {"かな1", "かな2", "こ1", "こ2"}
+
+
+def test_retry_quizlet_incorrect_words_preserves_selected_subgroup_ids(create_db, monkeypatch):
+    DBsession.init(create_db)
+
+    with DBsession.begin() as session:
+        user = User(name="Quizlet Student",
+                    nickname="quizlet_student_retry_ids",
+                    password="password123",
+                    birthday=datetime.date(2000, 1, 1),
+                    level=User.Level.STUDENT)
+        session.add(user)
+        session.flush()
+
+        source_session = QuizletSession(quiz_type=QuizletSession.Type.FLASHCARDS,
+                                        show_hints=True,
+                                        translation_direction="jp_to_ru",
+                                        total_words=3,
+                                        user_id=user.id,
+                                        is_finished=True,
+                                        queue_state="[]",
+                                        subgroup_ids=json.dumps([11, 12]),
+                                        user_subgroup_ids=json.dumps([21]))
+        session.add(source_session)
+        session.flush()
+
+        words = [
+            QuizletSessionWord(source_type="combined",
+                               source_word_id=index + 1,
+                               char_jp=f"漢字{index + 1}",
+                               word_jp=f"かな{index + 1}",
+                               ru=f"перевод {index + 1}",
+                               session_id=source_session.id) for index in range(3)
+        ]
+        session.add_all(words)
+        session.flush()
+
+        words[0].incorrect_attempts = 1
+
+    monkeypatch.setattr(StudentDBqueries.random, "shuffle", lambda items: None)
+
+    retry_session = StudentDBqueries.retry_quizlet_incorrect_words(
+        user.id,
+        QuizletRetryIncorrectReq(source_session_id=source_session.id),
+    )
+
+    with DBsession.begin() as session:
+        saved_retry_session = session.get(QuizletSession, retry_session.id)
+
+        assert saved_retry_session is not None
+        assert saved_retry_session.get_subgroup_ids() == [11, 12]
+        assert saved_retry_session.get_user_subgroup_ids() == [21]
 
 
 def test_create_quizlet_assignment_rejects_personal_subgroup_of_another_student(create_db):

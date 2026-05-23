@@ -92,6 +92,15 @@ def _get_quizlet_mode_label(quiz_type: str) -> str:
 
 
 def _get_quizlet_topic_titles(quizlet_session: DBQT.QuizletSession) -> list[str]:
+    topic_titles = [
+        subgroup.title for subgroup in DBQT.get_quizlet_subgroups_by_ids(quizlet_session.get_subgroup_ids())
+    ]
+    topic_titles.extend(
+        subgroup.title
+        for subgroup in DBQT.get_personal_quizlet_subgroups_by_ids(quizlet_session.get_user_subgroup_ids()))
+    if len(topic_titles) > 0:
+        return list(dict.fromkeys(topic_titles))
+
     if quizlet_session.assignment_id is not None:
         assignment_subgroup_ids = DBQT.get_quizlet_assignment_subgroup_ids(quizlet_session.assignment_id)
         assignment_subgroups = DBQT.get_quizlet_subgroups_by_ids(assignment_subgroup_ids)
@@ -105,11 +114,7 @@ def _get_quizlet_topic_titles(quizlet_session: DBQT.QuizletSession) -> list[str]
 
         return list(dict.fromkeys(topic_titles))
 
-    source_word_ids = [word.source_word_id for word in quizlet_session.words]
-    topic_titles = []
-    topic_titles.extend(DBQT.get_quizlet_subgroup_titles_by_dictionary_word_ids(source_word_ids))
-    topic_titles.extend(DBQT.get_personal_quizlet_subgroup_titles_by_word_ids(source_word_ids))
-    return list(dict.fromkeys(topic_titles))
+    return []
 
 
 def _append_history_item(result: List[dict[str, Any]], item: dict[str, Any]):

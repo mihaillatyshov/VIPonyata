@@ -78,7 +78,7 @@ const getHistoryCardTitle = (item: TTeacherHistoryEvent) => {
 
     if (item.training_kind === "quizlet") {
         if (item.quiz_type === "flashcards") {
-            return `${studentLabel} ・ флешкарточки (${item.total_words ?? "-"})`;
+            return `${studentLabel} ・ ${getDirectionLabel(item.translation_direction)} (${item.total_words ?? "-"})`;
         }
 
         if (item.quiz_type === "pair") {

@@ -51,6 +51,8 @@ export interface TQuizletSession {
     correct_answers: number;
     incorrect_answers: number;
     skipped_words: number;
+    subgroup_ids?: number[];
+    user_subgroup_ids?: number[];
     user_id: number;
     assignment_id?: number | null;
 }
