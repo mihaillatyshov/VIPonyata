@@ -37,6 +37,32 @@
     gap: 8px;
 }
 
+.flashcard-auto-speak-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #d7e0ea;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.92);
+    color: #425466;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    line-height: 1;
+    pointer-events: auto;
+}
+
+.flashcard-auto-speak-toggle input {
+    pointer-events: auto;
+    cursor: pointer;
+    box-shadow: none !important;
+}
+
+.flashcard-auto-speak-toggle input:focus,
+.flashcard-auto-speak-toggle input:active {
+    box-shadow: none !important;
+    outline: none;
+}
+
 .flashcard-speech-btn {
     border: 1px solid #d7e0ea;
     border-radius: 999px;

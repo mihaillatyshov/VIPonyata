@@ -1272,6 +1272,14 @@ const StudentQuizlet = () => {
     }, [session?.id, session?.is_finished]);
 
     useEffect(() => {
+        if (session?.id === undefined || session.quiz_type !== "flashcards") {
+            return;
+        }
+
+        writeFlashcardAutoSpeakSetting(session.id, autoSpeakAfterFlip);
+    }, [session?.id, session?.quiz_type, autoSpeakAfterFlip]);
+
+    useEffect(() => {
         if (
             session === null ||
             session.is_finished ||
@@ -2038,6 +2046,7 @@ const StudentQuizlet = () => {
                             showHints={session.show_hints}
                             direction={session.translation_direction}
                             autoSpeakAfterFlip={autoSpeakAfterFlip}
+                            onAutoSpeakAfterFlipChange={setAutoSpeakAfterFlip}
                             totalWords={session.total_words}
                             unresolvedCount={unresolvedCount}
                             incorrectAnswers={session.incorrect_answers}

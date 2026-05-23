@@ -58,6 +58,7 @@ interface Props {
     showHints: boolean;
     direction: "jp_to_ru" | "ru_to_jp";
     autoSpeakAfterFlip: boolean;
+    onAutoSpeakAfterFlipChange: (enabled: boolean) => void;
     totalWords: number;
     unresolvedCount: number;
     incorrectAnswers: number;
@@ -73,6 +74,7 @@ const FlashcardExercise = ({
     showHints,
     direction,
     autoSpeakAfterFlip,
+    onAutoSpeakAfterFlipChange,
     totalWords,
     unresolvedCount,
     incorrectAnswers,
@@ -385,8 +387,8 @@ const FlashcardExercise = ({
                     onFinishTraining={onFinishTraining}
                 />
 
-                {shouldShowSpeechButton && (
-                    <div className="flashcard-speech-actions" aria-label="Озвучка карточки">
+                <div className="flashcard-speech-actions" aria-label="Настройки озвучки">
+                    {shouldShowSpeechButton && (
                         <button
                             type="button"
                             className="flashcard-speech-btn"
@@ -394,8 +396,23 @@ const FlashcardExercise = ({
                         >
                             🔊 JP
                         </button>
-                    </div>
-                )}
+                    )}
+                    <label
+                        className="flashcard-auto-speak-toggle"
+                        onClick={(event) => event.stopPropagation()}
+                        onPointerDown={(event) => event.stopPropagation()}
+                    >
+                        <input
+                            type="checkbox"
+                            className="form-check-input m-0"
+                            checked={autoSpeakAfterFlip}
+                            onClick={(event) => event.stopPropagation()}
+                            onPointerDown={(event) => event.stopPropagation()}
+                            onChange={(event) => onAutoSpeakAfterFlipChange(event.target.checked)}
+                        />
+                        <span>авто</span>
+                    </label>
+                </div>
 
                 <button
                     type="button"
