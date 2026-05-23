@@ -46,6 +46,13 @@
     box-shadow: 0 1px 3px rgba(103, 174, 45, 0.12);
 }
 
+.navIconButtonActive,
+.navIconButtonActive:hover {
+    border-color: rgba(103, 174, 45, 0.42);
+    background: rgba(232, 245, 222, 0.98);
+    box-shadow: 0 1px 3px rgba(103, 174, 45, 0.14);
+}
+
 .notificationIcon {
     font-size: 23px;
     color: #5f7a5f;

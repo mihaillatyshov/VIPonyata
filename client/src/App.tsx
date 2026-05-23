@@ -18,6 +18,7 @@ import StudentProfilePage from "components/Authentication/StudentProfilePage";
 import { CourseCreatePage, CourseEditPage } from "components/Courses/CourseProcessingPage";
 import DictionaryPage from "components/Dictionary/DictionaryPage";
 import ErrorPage from "components/ErrorPages/ErrorPage";
+import TeacherHistoryPage from "components/History/TeacherHistoryPage";
 import { LessonCreatePage, LessonEditPage } from "components/Lessons/LessonProcessingPage";
 import TeacherLessonPage from "components/Lessons/TeacherLessonPage";
 import { StudentQuizlet, TeacherQuizletManager } from "components/Quizlet";
@@ -163,6 +164,11 @@ const App = () => {
                     <Route path="/profile" element={getRoute(<StudentProfilePage />, <StudentProfilePage />)} />
 
                     <Route path="/dictionary" element={getLoggedRoute(<DictionaryPage />)} />
+                    <Route path="/teacher/history" element={getTeacherRoute(<TeacherHistoryPage />)} />
+                    <Route
+                        path="/teacher/history/students/:studentId"
+                        element={getTeacherRoute(<TeacherHistoryPage />)}
+                    />
                     <Route path="/review/*" element={getTeacherRoute(<TeacherReview />)} />
                     <Route path="/quizlet/*" element={getRoute(<TeacherQuizletManager />, <StudentQuizlet />)} />
                     <Route path="/quizlet/lessons/:lessonId" element={getTeacherRoute(<TeacherQuizletManager />)} />

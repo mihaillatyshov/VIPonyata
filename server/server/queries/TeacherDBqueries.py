@@ -3,18 +3,21 @@ import json
 from typing import Generic, Type, TypedDict
 
 from sqlalchemy import Delete, Select, delete, select, update
+from sqlalchemy.orm import selectinload
 
 from server.common import DBsession
 from server.exceptions.ApiExceptions import InvalidAPIUsage
 from server.models.assessment import AssessmentCreateReqStr
 from server.models.course import CourseCreateReq
-from server.models.db_models import (
-    ActivityTryType, Assessment, AssessmentTry, AssessmentTryType, AssessmentType, Course, Dictionary, Drilling,
-    DrillingCard, DrillingTry, FinalBoss, FinalBossTry, Hieroglyph, HieroglyphCard, HieroglyphTry, Lesson,
-    LexisCardType, LexisTryType, LexisType, NotificationStudentToTeacher, NotificationTeacherToStudent,
-    QuizletAssignment, QuizletAssignmentResult, QuizletAssignmentSubgroup, QuizletAssignmentTarget,
-    QuizletAssignmentTargetSubgroup, QuizletDictionary, QuizletGroup, QuizletSubgroup, QuizletSubgroupWord, User,
-    UserDictionary, UserQuizletLesson, UserQuizletSubgroup, UserQuizletWord, a_users_courses, a_users_lessons)
+from server.models.db_models import (ActivityTryType, Assessment, AssessmentTry, AssessmentTryType, AssessmentType,
+                                     Course, Dictionary, Drilling, DrillingCard, DrillingTry, FinalBoss, FinalBossTry,
+                                     Hieroglyph, HieroglyphCard, HieroglyphTry, Lesson, LexisCardType, LexisTryType,
+                                     LexisType, NotificationStudentToTeacher, NotificationTeacherToStudent,
+                                     QuizletAssignment, QuizletAssignmentResult, QuizletAssignmentSubgroup,
+                                     QuizletAssignmentTarget, QuizletAssignmentTargetSubgroup, QuizletDictionary,
+                                     QuizletGroup, QuizletSubgroup, QuizletSubgroupWord, User, UserDictionary,
+                                     UserQuizletLesson, UserQuizletSubgroup, UserQuizletWord, QuizletSession,
+                                     a_users_courses, a_users_lessons)
 from server.models.dictionary import (DictionaryCreateReq, DictionaryCreateReqItem)
 from server.models.lesson import LessonCreateReq
 from server.models.lexis import LexisCardCreateReq, LexisCreateReq
@@ -629,6 +632,68 @@ def get_quizlet_assignment_result_by_id(result_id: int) -> QuizletAssignmentResu
     with DBsession.begin() as session:
         return session.scalars(
             select(QuizletAssignmentResult).where(QuizletAssignmentResult.id == result_id)).one_or_none()
+
+
+def get_history_quizlet_sessions() -> list[QuizletSession]:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(QuizletSession).options(selectinload(QuizletSession.words)).join(
+                QuizletSession.user).where(User.level == User.Level.STUDENT).order_by(
+                    QuizletSession.updated_at.desc()).order_by(QuizletSession.id.desc())).all()
+
+
+def get_quizlet_assignment_target(assignment_id: int, student_id: int) -> QuizletAssignmentTarget | None:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(QuizletAssignmentTarget).where(QuizletAssignmentTarget.assignment_id == assignment_id).where(
+                QuizletAssignmentTarget.student_id == student_id)).one_or_none()
+
+
+def get_quizlet_subgroup_titles_by_dictionary_word_ids(word_ids: list[int]) -> list[str]:
+    if len(word_ids) == 0:
+        return []
+
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(QuizletSubgroup.title).join(QuizletSubgroupWord,
+                                               QuizletSubgroupWord.subgroup_id == QuizletSubgroup.id).where(
+                                                   QuizletSubgroupWord.word_id.in_(word_ids)).distinct().order_by(
+                                                       QuizletSubgroup.sort).order_by(QuizletSubgroup.id)).all()
+
+
+def get_personal_quizlet_subgroup_titles_by_word_ids(word_ids: list[int]) -> list[str]:
+    if len(word_ids) == 0:
+        return []
+
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(UserQuizletSubgroup.title).join(
+                UserQuizletWord, UserQuizletWord.subgroup_id == UserQuizletSubgroup.id).where(
+                    UserQuizletWord.id.in_(word_ids)).distinct().order_by(UserQuizletSubgroup.sort).order_by(
+                        UserQuizletSubgroup.id)).all()
+
+
+def get_history_personal_quizlet_lessons() -> list[UserQuizletLesson]:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(UserQuizletLesson).join(UserQuizletLesson.user).where(User.level == User.Level.STUDENT).order_by(
+                UserQuizletLesson.created_at.desc()).order_by(UserQuizletLesson.id.desc())).all()
+
+
+def get_history_personal_quizlet_subgroups() -> list[UserQuizletSubgroup]:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(UserQuizletSubgroup).join(UserQuizletSubgroup.lesson).join(
+                UserQuizletLesson.user).where(User.level == User.Level.STUDENT).order_by(
+                    UserQuizletSubgroup.created_at.desc()).order_by(UserQuizletSubgroup.id.desc())).all()
+
+
+def get_history_personal_quizlet_words() -> list[UserQuizletWord]:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(UserQuizletWord).join(UserQuizletWord.subgroup).join(UserQuizletSubgroup.lesson).join(
+                UserQuizletLesson.user).where(User.level == User.Level.STUDENT).order_by(
+                    UserQuizletWord.created_at.desc()).order_by(UserQuizletWord.id.desc())).all()
 
 
 def get_all_lessons_for_assignment() -> list[Lesson]:

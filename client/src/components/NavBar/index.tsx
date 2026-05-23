@@ -21,6 +21,7 @@ const NavBar = () => {
     const location = useLocation();
     const isFlashcardExerciseRoute = location.pathname === "/quizlet/flashcards";
     const isReviewRoute = location.pathname.startsWith("/review");
+    const isTeacherHistoryRoute = location.pathname.startsWith("/teacher/history");
     const isTeacherUser = user.data.loadStatus === LoadStatus.DONE && user.data.isAuth && isTeacher(user.data.userData);
 
     useNotificationsHubSync();
@@ -105,6 +106,17 @@ const NavBar = () => {
                 </div>
                 <div className="col-4 align-items-end">
                     <div className="d-flex justify-content-end align-items-center">
+                        {isTeacherUser && (
+                            <Link
+                                to="/teacher/history"
+                                aria-label="История"
+                                className={`a-clear me-2 ${styles.notificationsBlock} ${
+                                    isTeacherHistoryRoute ? styles.navIconButtonActive : ""
+                                }`}
+                            >
+                                <i className={`bi bi-book font-icon-height-0 ${styles.notificationIcon}`}></i>
+                            </Link>
+                        )}
                         <div
                             className={`position-relative me-3 ${styles.notificationsBlock}`}
                             onClick={openNotifications}

@@ -742,6 +742,12 @@ def get_notifications():
     return user_selector_function(teacher_funcs.get_notifications, student_funcs.get_notifications)
 
 
+@routes_bp.route("/notifications/history", methods=["GET"])
+@login_required
+def get_notifications_history():
+    return user_selector_function(teacher_funcs.get_history, None)
+
+
 @routes_bp.route("/notifications/read", methods=["POST"])
 @login_required
 def mark_notifications_as_read():
