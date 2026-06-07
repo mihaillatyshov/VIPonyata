@@ -23,6 +23,7 @@ import { LessonCreatePage, LessonEditPage } from "components/Lessons/LessonProce
 import TeacherLessonPage from "components/Lessons/TeacherLessonPage";
 import { StudentQuizlet, TeacherQuizletManager } from "components/Quizlet";
 import TeacherReview from "components/Review/TeacherReview";
+import WheelTrainerPage from "components/WheelTrainer/WheelTrainerPage";
 import { LoadStatus } from "libs/Status";
 import { isTeacher } from "redux/funcs/user";
 
@@ -169,6 +170,9 @@ const App = () => {
                         path="/teacher/history/students/:studentId"
                         element={getTeacherRoute(<TeacherHistoryPage />)}
                     />
+                    <Route path="/teacher/wheel-trainer" element={getTeacherRoute(<WheelTrainerPage />)} />
+                    <Route path="/teacher/wheel-trainer/new" element={getTeacherRoute(<WheelTrainerPage />)} />
+                    <Route path="/teacher/wheel-trainer/templates" element={getTeacherRoute(<WheelTrainerPage />)} />
                     <Route path="/review/*" element={getTeacherRoute(<TeacherReview />)} />
                     <Route path="/quizlet/*" element={getRoute(<TeacherQuizletManager />, <StudentQuizlet />)} />
                     <Route path="/quizlet/lessons/:lessonId" element={getTeacherRoute(<TeacherQuizletManager />)} />

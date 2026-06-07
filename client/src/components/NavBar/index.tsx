@@ -21,6 +21,7 @@ const NavBar = () => {
     const location = useLocation();
     const isFlashcardExerciseRoute = location.pathname === "/quizlet/flashcards";
     const isReviewRoute = location.pathname.startsWith("/review");
+    const isWheelTrainerRoute = location.pathname.startsWith("/teacher/wheel-trainer");
     const isTeacherHistoryRoute = location.pathname.startsWith("/teacher/history");
     const isTeacherUser = user.data.loadStatus === LoadStatus.DONE && user.data.isAuth && isTeacher(user.data.userData);
 
@@ -87,6 +88,25 @@ const NavBar = () => {
                                     className={`bi bi-journal-bookmark ${styles.quizletButtonIcon}`}
                                     aria-hidden="true"
                                 ></i>
+                            </Link>
+                        ))}
+
+                    {isTeacherUser &&
+                        (isWheelTrainerRoute ? (
+                            <span
+                                className={`d-flex a-clear navbar-dictionary-title ${styles.quizletButton} ${styles.quizletButtonDisabled}`}
+                                aria-disabled="true"
+                            >
+                                <span className={styles.quizletButtonLabel}>🎯</span>
+                                <i className={`bi bi-disc ${styles.quizletButtonIcon}`} aria-hidden="true"></i>
+                            </span>
+                        ) : (
+                            <Link
+                                className={`d-flex a-clear navbar-dictionary-title ${styles.quizletButton}`}
+                                to="/teacher/wheel-trainer"
+                            >
+                                <span className={styles.quizletButtonLabel}>🎯</span>
+                                <i className={`bi bi-disc ${styles.quizletButtonIcon}`} aria-hidden="true"></i>
                             </Link>
                         ))}
 

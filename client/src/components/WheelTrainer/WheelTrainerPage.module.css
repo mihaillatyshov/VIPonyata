@@ -1,0 +1,1216 @@
+.page {
+    min-height: calc(100vh - 110px);
+    padding: 22px 0 48px;
+    color: #102115;
+    background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.95) 100%);
+}
+
+.pageInner {
+    width: min(1480px, calc(100% - 32px));
+    margin: 0 auto;
+}
+
+.pageHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.eyebrow {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.72);
+    color: #4a6b47;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.pageTitle {
+    margin: 10px 0 6px;
+    font-size: clamp(38px, 4.5vw, 64px);
+    line-height: 0.95;
+}
+
+.pageSubtitle {
+    max-width: 760px;
+    margin: 0;
+    font-size: 17px;
+    color: rgba(16, 33, 21, 0.78);
+}
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.banner {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    margin-bottom: 18px;
+    border: 1px solid rgba(89, 137, 53, 0.16);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.88);
+    box-shadow: 0 10px 22px rgba(35, 46, 28, 0.08);
+    color: #38502d;
+    font-weight: 600;
+}
+
+.hubGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.hubCard {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    min-height: 320px;
+    padding: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.64);
+    border-radius: 30px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 252, 245, 0.94));
+    box-shadow: 0 24px 48px rgba(48, 66, 39, 0.12);
+    color: inherit;
+    text-align: left;
+    text-decoration: none;
+}
+
+.hubCardGlow {
+    position: absolute;
+    inset: auto -30px -30px auto;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 135, 168, 0.28) 0%, transparent 72%);
+    pointer-events: none;
+}
+
+.hubCardIcon {
+    display: grid;
+    place-items: center;
+    width: 70px;
+    height: 70px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(255, 77, 129, 0.2), rgba(71, 169, 207, 0.22));
+    font-size: 31px;
+}
+
+.hubCard h2,
+.templateCard h2 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.hubCard p,
+.templateCard p {
+    margin: 0;
+    font-size: 16px;
+    color: rgba(16, 33, 21, 0.76);
+}
+
+.hubCardHint {
+    margin-top: auto;
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(16, 33, 21, 0.07);
+    font-weight: 700;
+}
+
+.templatesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 18px;
+}
+
+.templateCard {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.62);
+    border-radius: 26px;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 16px 36px rgba(39, 54, 33, 0.09);
+}
+
+.templateCardTop {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.templatePreviewRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.templatePreviewChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--wheel-color-1), var(--wheel-color-3));
+    color: var(--wheel-contrast);
+    font-weight: 700;
+}
+
+.templatePreviewChip strong {
+    display: grid;
+    place-items: center;
+    min-width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.toolbar {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 18px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.93);
+    box-shadow: 0 18px 36px rgba(43, 55, 35, 0.08);
+}
+
+.toolbarMain,
+.toolbarMeta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.editSaveBar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 18px;
+    padding: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.93);
+    box-shadow: 0 10px 20px rgba(43, 55, 35, 0.05);
+}
+
+.studioTabs {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    margin-bottom: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.88);
+    box-shadow: 0 16px 32px rgba(43, 55, 35, 0.08);
+}
+
+.studioTabButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 0 18px;
+    border: 1px solid rgba(62, 86, 45, 0.14);
+    border-radius: 14px;
+    background: rgba(245, 248, 243, 0.96);
+    color: #355020;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.studioTabButtonActive {
+    border-color: rgba(79, 151, 22, 0.18);
+    background: linear-gradient(135deg, #4f9716, #79bb28);
+    box-shadow: 0 12px 24px rgba(79, 151, 22, 0.18);
+    color: #ffffff;
+}
+
+.spinToolbarHint {
+    display: inline-flex;
+    align-items: center;
+    min-height: 50px;
+    padding: 0 16px;
+    border-radius: 16px;
+    background: rgba(244, 248, 240, 0.96);
+    color: rgba(16, 33, 21, 0.76);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.templateNameField {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 280px;
+    color: rgba(16, 33, 21, 0.78);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.templateNameField input,
+.wheelTitleInput,
+.optionTextEditor textarea {
+    width: 100%;
+    border: 1px solid rgba(54, 78, 42, 0.14);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.92);
+    color: inherit;
+    outline: none;
+    transition:
+        border-color 140ms ease,
+        box-shadow 140ms ease;
+}
+
+.templateNameField input,
+.optionTextEditor textarea {
+    padding: 11px 14px;
+}
+
+.templateNameField input:focus,
+.wheelTitleInput:focus,
+.optionTextEditor textarea:focus {
+    border-color: rgba(89, 137, 53, 0.35);
+    box-shadow: 0 0 0 4px rgba(113, 180, 57, 0.1);
+}
+
+.primaryAction,
+.secondaryAction,
+.ghostLink,
+.iconButton,
+.themeSwatch {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 16px;
+    text-decoration: none;
+    transition:
+        transform 140ms ease,
+        box-shadow 140ms ease,
+        background-color 140ms ease,
+        border-color 140ms ease;
+}
+
+.primaryAction,
+.secondaryAction,
+.ghostLink {
+    min-height: 50px;
+    padding: 0 18px;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.primaryAction {
+    border: none;
+    background: linear-gradient(135deg, #4f9716, #79bb28);
+    box-shadow: 0 14px 28px rgba(79, 151, 22, 0.2);
+    color: #ffffff;
+}
+
+.secondaryAction {
+    border: 1px solid rgba(62, 86, 45, 0.14);
+    background: rgba(244, 248, 240, 0.96);
+    color: #355020;
+}
+
+.ghostLink,
+.iconButton,
+.themeSwatch {
+    border: 1px solid rgba(56, 80, 45, 0.12);
+    background: rgba(255, 255, 255, 0.92);
+    color: #355020;
+}
+
+.iconButton {
+    width: 46px;
+    height: 46px;
+    padding: 0;
+}
+
+.primaryAction:hover,
+.secondaryAction:hover,
+.ghostLink:hover,
+.iconButton:hover,
+.themeSwatch:hover {
+    transform: translateY(-1px);
+}
+
+.primaryAction:disabled,
+.secondaryAction:disabled {
+    opacity: 0.58;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.hotkeysPanel {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.hotkeysPanel span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 38px;
+    padding: 0 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.76);
+    color: #476535;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.studioLayout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 18px;
+    align-items: start;
+}
+
+.studioLayoutSpin {
+    grid-template-columns: 1fr;
+}
+
+.wheelsColumn {
+    display: grid;
+    gap: 18px;
+}
+
+.wheelsColumnSpin {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    padding: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 18px 36px rgba(43, 55, 35, 0.08);
+    align-items: start;
+}
+
+.wheelCard {
+    padding: 18px;
+    border: 1px solid color-mix(in srgb, var(--wheel-color-1) 26%, #ffffff);
+    border-radius: 30px;
+    background:
+        radial-gradient(
+            circle at top left,
+            color-mix(in srgb, var(--wheel-color-4) 18%, transparent) 0%,
+            transparent 34%
+        ),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), color-mix(in srgb, var(--wheel-color-2) 14%, #ffffff));
+    box-shadow: 0 12px 24px rgba(31, 38, 28, 0.07);
+    cursor: pointer;
+}
+
+.wheelCardActive {
+    box-shadow: 0 16px 30px color-mix(in srgb, var(--wheel-color-1) 14%, rgba(31, 38, 28, 0.08));
+}
+
+.wheelCardSpin {
+    height: 100%;
+    padding: 14px;
+    border-radius: 24px;
+    border-color: color-mix(in srgb, var(--wheel-color-1) 22%, transparent);
+    background: transparent;
+    box-shadow: none;
+}
+
+.wheelCardHeader,
+.wheelCardBody,
+.wheelFooterBar,
+.wheelBadges,
+.wheelHeaderActions,
+.wheelTitleGroup {
+    display: flex;
+}
+
+.wheelCardHeader {
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.wheelTitleGroup {
+    flex: 1;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.wheelTitleInput {
+    max-width: 380px;
+    padding: 10px 14px;
+    border-radius: 16px;
+    font-size: clamp(24px, 2.6vw, 32px);
+    font-weight: 800;
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.wheelTitleStatic {
+    max-width: 420px;
+    font-size: clamp(24px, 2.6vw, 32px);
+    font-weight: 800;
+    line-height: 1.05;
+    color: rgba(16, 33, 21, 0.94);
+}
+
+.wheelBadges,
+.wheelHeaderActions,
+.wheelFooterBar {
+    gap: 10px;
+}
+
+.spinGlobalControls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.spinGlobalField {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 180px;
+    padding: 10px 12px;
+    border: 1px solid rgba(113, 137, 110, 0.16);
+    border-radius: 14px;
+    background: rgba(250, 252, 248, 0.94);
+    box-shadow: 0 8px 20px rgba(43, 55, 35, 0.05);
+    color: rgba(16, 33, 21, 0.74);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.spinGlobalFieldTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.spinGlobalField input[type="range"] {
+    width: 100%;
+    height: 4px;
+    accent-color: #87ab74;
+}
+
+.spinGlobalField strong {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 46px;
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: rgba(135, 171, 116, 0.14);
+    color: rgba(40, 62, 31, 0.9);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.spinActionBar {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 14px;
+}
+
+.spinAllAction {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 0 24px;
+    border: 1px solid rgba(128, 163, 114, 0.18);
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(244, 250, 239, 0.98), rgba(229, 240, 220, 0.96));
+    box-shadow: 0 14px 28px rgba(96, 124, 82, 0.12);
+    color: #456037;
+    font-size: 15px;
+    font-weight: 800;
+    transition:
+        transform 140ms ease,
+        box-shadow 140ms ease,
+        background-color 140ms ease,
+        border-color 140ms ease;
+}
+
+.spinAllAction:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 18px 30px rgba(96, 124, 82, 0.16);
+}
+
+.spinAllAction:disabled {
+    opacity: 0.58;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.badgeAccent,
+.badgeSoft {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.badgeAccent {
+    background: color-mix(in srgb, var(--wheel-color-1) 20%, #ffffff);
+    color: color-mix(in srgb, var(--wheel-color-1) 88%, #13210d);
+}
+
+.badgeSoft {
+    background: rgba(16, 33, 21, 0.08);
+    color: rgba(16, 33, 21, 0.8);
+}
+
+.wheelCardBody {
+    gap: 20px;
+    align-items: stretch;
+}
+
+.wheelCardBodySpin {
+    justify-content: center;
+    gap: 0;
+    align-items: center;
+}
+
+.wheelSpinHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.wheelVisualBlock {
+    position: relative;
+    flex: 0 0 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: center;
+}
+
+.wheelVisualBlockSpin {
+    position: relative;
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    cursor: pointer;
+}
+
+.wheelPointer {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: -18px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--wheel-color-1), var(--wheel-color-4));
+    box-shadow: 0 10px 22px color-mix(in srgb, var(--wheel-color-1) 28%, transparent);
+    color: var(--wheel-contrast);
+    font-size: 26px;
+    z-index: 2;
+}
+
+.wheelPointerRight {
+    position: absolute;
+    top: 50%;
+    left: calc(50% + 156px);
+    margin: 0;
+    transform: translate(0, -50%);
+}
+
+.wheelFrame {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    min-height: 350px;
+    padding: 18px;
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.58);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.76);
+}
+
+.wheelFrameSpin {
+    width: 100%;
+    min-height: 320px;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.wheelDisc {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    border: 12px solid rgba(255, 255, 255, 0.92);
+    border-radius: 50%;
+    box-shadow: 0 20px 40px rgba(24, 33, 21, 0.18);
+    transition-property: transform;
+    transition-timing-function: cubic-bezier(0.18, 0.82, 0.2, 1);
+}
+
+.wheelCenterCap {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 94px;
+    height: 94px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.9);
+    color: rgba(16, 33, 21, 0.84);
+    box-shadow: 0 8px 18px rgba(22, 31, 18, 0.18);
+    text-align: center;
+}
+
+.wheelCenterCap span {
+    font-size: 28px;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.wheelCenterCap small {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.segmentLabel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    text-align: center;
+    color: var(--wheel-canvas-text);
+    font-weight: 800;
+    line-height: 1;
+    pointer-events: none;
+    transform-origin: center center;
+}
+
+.segmentLabel span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: clip;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.wheelEmptyState {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%);
+    color: var(--wheel-canvas-text);
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.wheelFooterBar {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    min-height: 0;
+}
+
+.wheelAddButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    border: 1px solid color-mix(in srgb, var(--wheel-color-1) 26%, rgba(255, 255, 255, 0.88));
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 12px 24px rgba(31, 38, 28, 0.1);
+    color: color-mix(in srgb, var(--wheel-color-1) 82%, #1d3013);
+    font-size: 22px;
+    transition:
+        transform 140ms ease,
+        box-shadow 140ms ease,
+        border-color 140ms ease;
+}
+
+.wheelAddButton:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 28px rgba(31, 38, 28, 0.14);
+}
+
+.wheelConfigBlock {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.configGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.configField {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.64);
+    color: rgba(16, 33, 21, 0.8);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.configField input[type="range"] {
+    width: 100%;
+}
+
+.configField strong {
+    font-size: 18px;
+    color: rgba(16, 33, 21, 0.96);
+}
+
+.themeStrip {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.themeSwatch {
+    min-height: 72px;
+    padding: 12px;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 900;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+.themeSwatchActive {
+    box-shadow:
+        0 0 0 3px rgba(255, 255, 255, 0.8),
+        0 0 0 6px rgba(79, 151, 22, 0.18);
+}
+
+.optionTextEditor {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.66);
+    color: rgba(16, 33, 21, 0.82);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.optionTextEditor textarea {
+    min-height: 320px;
+    resize: vertical;
+    line-height: 1.45;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.optionTextEditor small {
+    color: rgba(16, 33, 21, 0.64);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.sidePanel {
+    display: grid;
+    gap: 16px;
+}
+
+.sideCard {
+    padding: 18px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 10px 20px rgba(36, 49, 31, 0.05);
+}
+
+.sideCardTitle {
+    margin-bottom: 12px;
+    font-size: 18px;
+    font-weight: 900;
+}
+
+.sideCardEmpty,
+.sideCardText {
+    margin: 0;
+    color: rgba(16, 33, 21, 0.72);
+    line-height: 1.5;
+}
+
+.historyList {
+    display: grid;
+    gap: 12px;
+}
+
+.historyItem {
+    display: grid;
+    gap: 10px;
+    padding: 14px;
+    border-radius: 18px;
+    background: rgba(244, 248, 240, 0.9);
+}
+
+.historyItemTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 12px;
+    color: rgba(16, 33, 21, 0.72);
+}
+
+.historyTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.historyTag {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 10px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--wheel-color-1), var(--wheel-color-3));
+    color: var(--wheel-contrast);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    min-height: 320px;
+    padding: 32px;
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 20px 40px rgba(35, 49, 30, 0.08);
+    text-align: center;
+}
+
+.emptyState i {
+    font-size: 42px;
+}
+
+.resultModal {
+    border-radius: 0;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--wheel-color-1) 16%, rgba(255, 255, 255, 0.7));
+    background:
+        linear-gradient(160deg, rgba(255, 255, 255, 0.98), color-mix(in srgb, var(--wheel-color-2) 16%, #ffffff)),
+        radial-gradient(circle at top right, color-mix(in srgb, var(--wheel-color-1) 8%, transparent), transparent 48%);
+    box-shadow:
+        0 28px 60px rgba(24, 33, 21, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.55);
+    color: var(--wheel-contrast);
+}
+
+.resultModalHeader,
+.resultModalBody,
+.resultModalFooter {
+    background: transparent;
+    border: 0;
+}
+
+.resultModalHeader {
+    padding: 28px 28px 16px;
+}
+
+.resultModalBody {
+    padding: 8px 28px 14px;
+    overflow-y: visible;
+}
+
+.resultModalFooter {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 28px 22px;
+    border-top: 1px solid rgba(63, 87, 49, 0.08);
+}
+
+.resultHero {
+    display: grid;
+    gap: 12px;
+}
+
+.resultHeroBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: max-content;
+    min-height: 34px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--wheel-color-1) 18%, rgba(255, 255, 255, 0.42));
+    background: rgba(255, 255, 255, 0.62);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.42),
+        0 10px 20px rgba(30, 40, 25, 0.05);
+    color: rgba(16, 33, 21, 0.76);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.resultHero :global(.modal-title) {
+    margin: 0;
+    font-size: clamp(28px, 2vw + 1rem, 40px);
+    line-height: 0.98;
+    letter-spacing: -0.03em;
+    color: rgba(16, 33, 21, 0.96);
+}
+
+.resultList {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 12px;
+    max-height: min(56vh, 520px);
+    padding-right: 6px;
+}
+
+.resultCard {
+    position: relative;
+    box-sizing: border-box;
+    overflow: hidden;
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+    flex: 0 1 calc((100% - 24px) / 3);
+    min-width: 0;
+    max-width: calc((100% - 24px) / 3);
+    padding: 16px 18px;
+    border-radius: 22px;
+    border: 1px solid color-mix(in srgb, var(--wheel-color-1) 42%, rgba(255, 255, 255, 0.38));
+    background:
+        linear-gradient(
+            155deg,
+            color-mix(in srgb, var(--wheel-color-1) 24%, rgba(255, 255, 255, 0.92)),
+            color-mix(in srgb, var(--wheel-color-3) 20%, rgba(255, 255, 255, 0.72))
+        ),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.24));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.48),
+        0 14px 28px color-mix(in srgb, var(--wheel-color-1) 14%, rgba(28, 37, 24, 0.06));
+    backdrop-filter: blur(8px);
+    text-align: center;
+}
+
+.resultCardGlow {
+    display: none;
+}
+
+.resultWheelName {
+    width: 100%;
+    font-size: 12px;
+    font-weight: 800;
+    color: color-mix(in srgb, var(--wheel-color-1) 60%, rgba(16, 33, 21, 0.72));
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.resultValue {
+    width: 100%;
+    font-size: clamp(13px, 0.78vw + 0.58rem, 24px);
+    font-weight: 900;
+    color: rgba(16, 33, 21, 0.94);
+    line-height: 1.08;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.34);
+}
+
+.resultActionSecondary,
+.resultActionPrimary {
+    min-width: 220px;
+    border-radius: 999px;
+}
+
+.resultActionSecondary {
+    border-color: rgba(103, 123, 95, 0.16);
+    background: rgba(243, 246, 240, 0.96);
+    color: #53674c;
+    box-shadow: 0 8px 18px rgba(43, 55, 35, 0.045);
+}
+
+.resultActionPrimary {
+    background: linear-gradient(135deg, #7b946d, #8ca57d);
+    box-shadow: 0 10px 22px rgba(92, 115, 81, 0.14);
+    color: #f8fbf5;
+}
+
+@media (max-width: 900px) {
+    .resultCard {
+        flex-basis: calc((100% - 12px) / 2);
+        max-width: calc((100% - 12px) / 2);
+    }
+
+    .resultModalFooter {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .resultActionSecondary,
+    .resultActionPrimary {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+@media (max-width: 1180px) {
+    .studioLayout {
+        grid-template-columns: 1fr;
+    }
+
+    .sidePanel {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .wheelsColumnSpin {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .spinGlobalControls {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .wheelCardBody {
+        flex-direction: column;
+    }
+
+    .wheelVisualBlock {
+        flex-basis: auto;
+        width: 100%;
+    }
+}
+
+@media (max-width: 900px) {
+    .editSaveBar {
+        align-items: stretch;
+    }
+
+    .editSaveBar .primaryAction {
+        width: 100%;
+    }
+
+    .spinGlobalControls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .spinGlobalField {
+        min-width: 0;
+    }
+
+    .hubGrid,
+    .sidePanel {
+        grid-template-columns: 1fr;
+    }
+
+    .wheelsColumnSpin {
+        grid-template-columns: 1fr;
+    }
+
+    .spinGlobalField {
+        min-width: 0;
+    }
+
+    .toolbar,
+    .pageHeader {
+        flex-direction: column;
+    }
+
+    .themeStrip,
+    .configGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 720px) {
+    .pageInner {
+        width: min(100%, calc(100% - 20px));
+    }
+
+    .wheelDisc {
+        width: 260px;
+        height: 260px;
+    }
+
+    .segmentLabel {
+        width: 92px;
+    }
+
+    .themeStrip,
+    .configGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .resultCard {
+        flex-basis: 100%;
+        max-width: 100%;
+    }
+}
