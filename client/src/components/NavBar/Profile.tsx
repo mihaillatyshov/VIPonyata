@@ -18,7 +18,7 @@ const Profile = () => {
                     {user.userData.avatar ? (
                         <img className={styles.profileImg} alt="profile" src={user.userData.avatar} />
                     ) : (
-                        <i className={`bi bi-person a-clear navbar-profile ${styles.profileFallbackIcon}`} />
+                        <img className={styles.profileFallbackIcon} alt="profile" src="/img/users/icon_octopus.png" />
                     )}
                 </div>
                 <div className={`ms-1 d-none d-lg-block navbar-profile-name text-center ${styles.profileName}`}>
