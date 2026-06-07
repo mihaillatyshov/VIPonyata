@@ -1453,7 +1453,7 @@ const TeacherQuizletManager = () => {
             return { text: "Отменено", className: "text-muted" };
         }
 
-        return { text: "Активно", className: "text-muted" };
+        return { text: "", className: "text-muted" };
     };
 
     if (loadStatus === LoadStatus.ERROR) {
@@ -1903,102 +1903,106 @@ const TeacherQuizletManager = () => {
                 )}
 
                 {isAssignmentsListRoute && (
-                    <div className="quizlet-main-container">
-                        <div className="d-flex justify-content-between align-items-center gap-2 mb-3 flex-wrap">
-                            <h5 className="mb-0">Список назначенных заданий</h5>
-                            <button
-                                className="btn btn-outline-secondary btn-sm"
-                                onClick={() => navigate("/quizlet/assignments")}
-                            >
-                                Назад к назначению
-                            </button>
-                        </div>
-
-                        <h6 className="mb-2">Список назначенных заданий</h6>
+                    <div className="quizlet-main-container quizlet-main-container--plain">
                         {assignmentListError && <div className="text-danger small mb-2">{assignmentListError}</div>}
                         {assignments.length === 0 && <div className="text-muted">Пока нет назначенных заданий</div>}
-                        {assignments.map((item) => (
-                            <div key={item.assignment.id} className="card mb-2">
-                                <div className="card-body">
-                                    <div className="d-flex justify-content-between align-items-start gap-2">
-                                        <div>
-                                            <div className="fw-semibold">{item.assignment.title}</div>
-                                            <div className="small text-muted">
-                                                Режим: {getAssignmentModeLabel(item.assignment)}
+                        <div className="quizlet-assignment-list">
+                            {assignments.map((item) => (
+                                <div key={item.assignment.id} className="card quizlet-assignment-card">
+                                    <div className="card-body quizlet-assignment-card__body">
+                                        <div className="quizlet-assignment-card__header">
+                                            <div className="quizlet-assignment-card__main">
+                                                <div className="quizlet-assignment-card__title fw-semibold">
+                                                    {item.assignment.title}
+                                                </div>
+                                                <div className="quizlet-assignment-card__meta small text-muted">
+                                                    <span className="quizlet-assignment-pill">
+                                                        {getAssignmentModeLabel(item.assignment)}
+                                                    </span>
+                                                    <span className="quizlet-assignment-card__dictionaries">
+                                                        {item.subgroups.map((sg) => sg.title).join(", ") || "-"}
+                                                    </span>
+                                                </div>
                                             </div>
-                                            <div className="small text-muted">
-                                                Словари: {item.subgroups.map((sg) => sg.title).join(", ") || "-"}
+                                            <div
+                                                className={`quizlet-assignment-card__status ${item.stats.pending === 0 && item.stats.cancelled === 0 ? "quizlet-assignment-card__status--emoji" : item.stats.pending > 0 && item.stats.cancelled === 0 ? "quizlet-assignment-card__status--emoji" : ""}`}
+                                                title={
+                                                    item.stats.pending === 0
+                                                        ? item.stats.cancelled > 0
+                                                            ? "Есть отмененные назначения"
+                                                            : "Задание выполнено"
+                                                        : "Задание не выполнено"
+                                                }
+                                            >
+                                                {item.stats.pending === 0 && item.stats.cancelled === 0 ? (
+                                                    <span
+                                                        className="quizlet-assignment-card__status-emoji"
+                                                        role="img"
+                                                        aria-label="Задание выполнено"
+                                                    >
+                                                        🗾
+                                                    </span>
+                                                ) : item.stats.cancelled > 0 ? (
+                                                    <i
+                                                        className="bi bi-dash-circle-fill fs-4 text-secondary"
+                                                        aria-hidden="true"
+                                                    />
+                                                ) : (
+                                                    <span
+                                                        className="quizlet-assignment-card__status-emoji quizlet-assignment-card__status-emoji--pending"
+                                                        role="img"
+                                                        aria-label="Задание не выполнено"
+                                                    >
+                                                        🎐
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
-                                        <div
-                                            title={
-                                                item.stats.pending === 0
-                                                    ? item.stats.cancelled > 0
-                                                        ? "Есть отмененные назначения"
-                                                        : "Задание выполнено"
-                                                    : "Задание не выполнено"
-                                            }
-                                        >
-                                            {item.stats.pending === 0 && item.stats.cancelled === 0 ? (
-                                                <i
-                                                    className="bi bi-check-circle-fill fs-3 text-success"
-                                                    aria-hidden="true"
-                                                />
-                                            ) : item.stats.cancelled > 0 ? (
-                                                <i
-                                                    className="bi bi-dash-circle-fill fs-3 text-secondary"
-                                                    aria-hidden="true"
-                                                />
-                                            ) : (
-                                                <i
-                                                    className="bi bi-x-circle-fill fs-3"
-                                                    style={{ color: "#ff4da6" }}
-                                                    aria-hidden="true"
-                                                />
-                                            )}
-                                        </div>
-                                    </div>
-                                    {item.targets.length > 0 && (
-                                        <div className="mt-2 small">
-                                            {item.targets.map((target) => (
-                                                <div
-                                                    key={target.id}
-                                                    className="d-flex justify-content-between align-items-start gap-2 py-1"
-                                                >
-                                                    <div>
-                                                        <span>
-                                                            {target.student?.nickname ?? "unknown"} (
-                                                            {target.student?.name ?? "unknown"})
-                                                        </span>
-                                                        <span
-                                                            className={`ms-2 ${getAssignmentTargetStatusLabel(target.status).className}`}
-                                                        >
-                                                            {getAssignmentTargetStatusLabel(target.status).text}
-                                                        </span>
-                                                        {target.personal_subgroups.length > 0 && (
-                                                            <span className="text-muted">
-                                                                {` • личные: ${target.personal_subgroups.map((sg) => sg.title).join(", ")}`}
-                                                            </span>
+                                        {item.targets.length > 0 && (
+                                            <div className="quizlet-assignment-targets small">
+                                                {item.targets.map((target) => (
+                                                    <div key={target.id} className="quizlet-assignment-target-row">
+                                                        <div className="quizlet-assignment-target-row__main">
+                                                            <div className="quizlet-assignment-target-row__student">
+                                                                <span className="quizlet-assignment-target-row__nickname">
+                                                                    {target.student?.nickname ?? "unknown"}
+                                                                </span>
+                                                                <span className="text-muted">
+                                                                    {` (${target.student?.name ?? "unknown"})`}
+                                                                </span>
+                                                                <span
+                                                                    className={`quizlet-assignment-target-row__status ${getAssignmentTargetStatusLabel(target.status).className}`}
+                                                                >
+                                                                    {getAssignmentTargetStatusLabel(target.status).text}
+                                                                </span>
+                                                            </div>
+                                                            {target.personal_subgroups.length > 0 && (
+                                                                <div className="quizlet-assignment-target-row__personal text-muted">
+                                                                    {`Личные: ${target.personal_subgroups.map((sg) => sg.title).join(", ")}`}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        {target.status === "pending" && (
+                                                            <button
+                                                                className="btn btn-sm quizlet-assignment-cancel-btn"
+                                                                onClick={() => handleCancelAssignmentTarget(target.id)}
+                                                                disabled={cancellingAssignmentTargetIds.includes(
+                                                                    target.id,
+                                                                )}
+                                                            >
+                                                                {cancellingAssignmentTargetIds.includes(target.id)
+                                                                    ? "Отмена..."
+                                                                    : "Отменить"}
+                                                            </button>
                                                         )}
                                                     </div>
-                                                    {target.status === "pending" && (
-                                                        <button
-                                                            className="btn btn-outline-danger btn-sm"
-                                                            onClick={() => handleCancelAssignmentTarget(target.id)}
-                                                            disabled={cancellingAssignmentTargetIds.includes(target.id)}
-                                                        >
-                                                            {cancellingAssignmentTargetIds.includes(target.id)
-                                                                ? "Отмена..."
-                                                                : "Отменить"}
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
                 )}
 
