@@ -71,10 +71,6 @@
     border-bottom: 1px solid rgba(17, 17, 17, 0.3) !important;
 }
 
-.quizlet-personal-topic-editor {
-    /* margin-top: 32px; */
-}
-
 .quizlet-personal-topic-editor-table-wrap {
     margin-bottom: 10px;
 }
@@ -404,6 +400,27 @@
     margin-bottom: 0.4rem;
     color: currentColor;
     opacity: 0.95;
+}
+
+.quizlet-mode-icon-bg {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.72) 0%,
+        rgba(255, 255, 255, 0.4) 58%,
+        rgba(255, 255, 255, 0) 100%
+    );
+}
+
+.quizlet-mode-icon-image {
+    width: 1.8rem;
+    height: 1.8rem;
+    object-fit: contain;
 }
 
 .quizlet-mode-label {

@@ -1444,7 +1444,9 @@ const StudentQuizlet = () => {
                             style={{ width: "220px", height: "140px" }}
                             onClick={() => navigate(routePaths.view)}
                         >
-                            <i className="bi bi-journal-text quizlet-mode-icon" />
+                            <span className="quizlet-mode-icon quizlet-mode-icon-bg" aria-hidden="true">
+                                <img className="quizlet-mode-icon-image" src="/img/icons/icon_silkscroll.png" alt="" />
+                            </span>
                             <span className="quizlet-mode-label">Все словари</span>
                         </button>
                         <button
@@ -1452,7 +1454,9 @@ const StudentQuizlet = () => {
                             style={{ width: "220px", height: "140px" }}
                             onClick={() => navigate(routePaths.setup)}
                         >
-                            <i className="bi bi-lightning quizlet-mode-icon" />
+                            <span className="quizlet-mode-icon quizlet-mode-icon-bg" aria-hidden="true">
+                                <img className="quizlet-mode-icon-image" src="/img/icons/icon_torii.png" alt="" />
+                            </span>
                             <span className="quizlet-mode-label">Потренируемся?</span>
                         </button>
                         <button
@@ -1460,7 +1464,9 @@ const StudentQuizlet = () => {
                             style={{ width: "220px", height: "140px" }}
                             onClick={() => navigate(routePaths.progress)}
                         >
-                            <i className="bi bi-bar-chart-line quizlet-mode-icon" />
+                            <span className="quizlet-mode-icon quizlet-mode-icon-bg" aria-hidden="true">
+                                <img className="quizlet-mode-icon-image" src="/img/icons/icon_sakura.png" alt="" />
+                            </span>
                             <span className="quizlet-mode-label">Мои успехи</span>
                         </button>
                     </div>

@@ -54,7 +54,7 @@ const NavBar = () => {
 
     return (
         <div className={`container mainNavBar ${styles.navShell}`}>
-            <div className={styles.navInner}>
+            <div className={`${styles.navInner} ${!isTeacherUser ? styles.studentNavInner : ""}`}>
                 <div className={styles.logoSection}>
                     <Link to="/" className={styles.logoLink}>
                         <img className={`d-none d-lg-block ${styles.logoFull}`} src="/svg/LogoFull.svg" alt="Главная" />
