@@ -1026,9 +1026,9 @@ const WheelTrainerPage = () => {
                             </button>
                         </div>
 
-                        {isSpinTab && (
-                            <div className={styles.toolbar}>
-                                <div className={styles.toolbarMain}>
+                        <div className={styles.toolbar}>
+                            <div className={styles.toolbarMain}>
+                                {isEditTab ? null : (
                                     <div className={styles.spinGlobalControls}>
                                         <label className={styles.spinGlobalField}>
                                             <div className={styles.spinGlobalFieldTop}>
@@ -1076,9 +1076,11 @@ const WheelTrainerPage = () => {
                                             />
                                         </label>
                                     </div>
-                                </div>
+                                )}
                             </div>
-                        )}
+
+                            <div className={styles.toolbarMeta}></div>
+                        </div>
 
                         {isSpinTab ? (
                             <>

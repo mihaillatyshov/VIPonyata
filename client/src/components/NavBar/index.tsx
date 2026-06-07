@@ -69,62 +69,84 @@ const NavBar = () => {
                     {isTeacherUser &&
                         (isReviewRoute ? (
                             <span
-                                className={`d-flex a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton} ${styles.quizletButtonDisabled}`}
+                                className={`d-flex a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton} ${styles.softNavButton} ${styles.reviewButton} ${styles.quizletButtonDisabled}`}
                                 aria-disabled="true"
                             >
-                                <span className={styles.quizletButtonLabel}>復習</span>
-                                <i
-                                    className={`bi bi-journal-bookmark ${styles.quizletButtonIcon}`}
+                                <img
+                                    className={styles.reviewButtonIcon}
+                                    src="/img/icons/icon_bonsai.png"
+                                    alt=""
                                     aria-hidden="true"
-                                ></i>
+                                />
+                                <span className={styles.quizletButtonLabel}>復習</span>
                             </span>
                         ) : (
                             <Link
-                                className={`d-flex a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton}`}
+                                className={`d-flex a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton} ${styles.softNavButton} ${styles.reviewButton}`}
                                 to="/review"
                             >
-                                <span className={styles.quizletButtonLabel}>復習</span>
-                                <i
-                                    className={`bi bi-journal-bookmark ${styles.quizletButtonIcon}`}
+                                <img
+                                    className={styles.reviewButtonIcon}
+                                    src="/img/icons/icon_bonsai.png"
+                                    alt=""
                                     aria-hidden="true"
-                                ></i>
+                                />
+                                <span className={styles.quizletButtonLabel}>復習</span>
                             </Link>
                         ))}
 
                     {isTeacherUser &&
                         (isWheelTrainerRoute ? (
                             <span
-                                className={`d-flex a-clear navbar-dictionary-title ${styles.quizletButton} ${styles.quizletButtonDisabled}`}
+                                className={`d-flex a-clear navbar-dictionary-title ${styles.quizletButton} ${styles.softNavButton} ${styles.wheelButton} ${styles.quizletButtonDisabled}`}
                                 aria-disabled="true"
                             >
-                                <span className={styles.quizletButtonLabel}>🎯</span>
-                                <i className={`bi bi-disc ${styles.quizletButtonIcon}`} aria-hidden="true"></i>
+                                <img
+                                    className={styles.wheelButtonIcon}
+                                    src="/img/icons/icon_bamboo.png"
+                                    alt=""
+                                    aria-hidden="true"
+                                />
                             </span>
                         ) : (
                             <Link
-                                className={`d-flex a-clear navbar-dictionary-title ${styles.quizletButton}`}
+                                className={`d-flex a-clear navbar-dictionary-title ${styles.quizletButton} ${styles.softNavButton} ${styles.wheelButton}`}
                                 to="/teacher/wheel-trainer"
                             >
-                                <span className={styles.quizletButtonLabel}>🎯</span>
-                                <i className={`bi bi-disc ${styles.quizletButtonIcon}`} aria-hidden="true"></i>
+                                <img
+                                    className={styles.wheelButtonIcon}
+                                    src="/img/icons/icon_bamboo.png"
+                                    alt=""
+                                    aria-hidden="true"
+                                />
                             </Link>
                         ))}
 
                     {isFlashcardExerciseRoute ? (
                         <span
-                            className={`d-flex a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton} ${styles.quizletButtonDisabled}`}
+                            className={`d-flex a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton} ${styles.softNavButton} ${styles.cardsButton} ${styles.quizletButtonDisabled}`}
                             aria-disabled="true"
                         >
-                            <span className={styles.quizletButtonLabel}>ワードラボ</span>
-                            <i className={`bi bi-magic ${styles.quizletButtonIcon}`} aria-hidden="true"></i>
+                            <img
+                                className={styles.cardsButtonIcon}
+                                src="/img/icons/icon_cards.png"
+                                alt=""
+                                aria-hidden="true"
+                            />
+                            <span className={styles.quizletButtonLabel}>カード</span>
                         </span>
                     ) : (
                         <Link
-                            className={`d-flex a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton}`}
+                            className={`d-flex a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton} ${styles.softNavButton} ${styles.cardsButton}`}
                             to="/quizlet"
                         >
-                            <span className={styles.quizletButtonLabel}>ワードラボ</span>
-                            <i className={`bi bi-magic ${styles.quizletButtonIcon}`} aria-hidden="true"></i>
+                            <img
+                                className={styles.cardsButtonIcon}
+                                src="/img/icons/icon_cards.png"
+                                alt=""
+                                aria-hidden="true"
+                            />
+                            <span className={styles.quizletButtonLabel}>カード</span>
                         </Link>
                     )}
                 </div>
@@ -137,11 +159,21 @@ const NavBar = () => {
                                 isTeacherHistoryRoute ? styles.navIconButtonActive : ""
                             }`}
                         >
-                            <i className={`bi bi-book font-icon-height-0 ${styles.notificationIcon}`}></i>
+                            <img
+                                className={styles.notificationIconImage}
+                                src="/img/icons/icon_stones.png"
+                                alt=""
+                                aria-hidden="true"
+                            />
                         </Link>
                     )}
                     <div className={`position-relative ${styles.notificationsBlock}`} onClick={openNotifications}>
-                        <i className={`bi bi-bell font-icon-height-0 ${styles.notificationIcon}`}></i>
+                        <img
+                            className={styles.notificationIconImage}
+                            src="/img/icons/icon_scroll.png"
+                            alt=""
+                            aria-hidden="true"
+                        />
                         <span
                             className={`position-absolute top-0 start-100 translate-middle badge rounded-pill ${
                                 styles.notificationBadge

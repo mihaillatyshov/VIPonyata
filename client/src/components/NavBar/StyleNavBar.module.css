@@ -108,6 +108,12 @@
     line-height: 1;
 }
 
+.notificationIconImage {
+    width: clamp(19px, 2vw, 23px);
+    height: clamp(19px, 2vw, 23px);
+    object-fit: contain;
+}
+
 .notificationBadge {
     min-width: 18px;
     min-height: 18px;
@@ -168,6 +174,53 @@
     line-height: 1;
 }
 
+.softNavButton {
+    color: #000000;
+    border-color: rgba(0, 0, 0, 0.08);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(249, 250, 252, 0.98) 100%);
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+}
+
+.softNavButton:hover {
+    color: #000000;
+    border-color: rgba(0, 0, 0, 0.12);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(246, 248, 250, 0.98) 100%);
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+}
+
+.cardsButton {
+    gap: 12px;
+}
+
+.cardsButtonIcon {
+    width: clamp(28px, 2.6vw, 34px);
+    height: clamp(28px, 2.6vw, 34px);
+    flex: 0 0 auto;
+    object-fit: contain;
+}
+
+.reviewButton {
+    gap: 12px;
+}
+
+.reviewButtonIcon {
+    width: clamp(28px, 2.6vw, 34px);
+    height: clamp(28px, 2.6vw, 34px);
+    flex: 0 0 auto;
+    object-fit: contain;
+}
+
+.wheelButton {
+    padding-inline: 12px;
+}
+
+.wheelButtonIcon {
+    width: clamp(28px, 2.6vw, 34px);
+    height: clamp(28px, 2.6vw, 34px);
+    flex: 0 0 auto;
+    object-fit: contain;
+}
+
 .profileSlot {
     flex: 0 0 auto;
 }
@@ -208,6 +261,16 @@
         padding: 4px 10px 5px;
     }
 
+    .cardsButton {
+        gap: 0;
+        padding-inline: 8px;
+    }
+
+    .reviewButton {
+        gap: 0;
+        padding-inline: 8px;
+    }
+
     .quizletButtonLabel {
         display: none;
     }
@@ -219,6 +282,25 @@
         font-size: 22px;
     }
 
+    .cardsButtonIcon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .reviewButtonIcon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .wheelButton {
+        padding-inline: 8px;
+    }
+
+    .wheelButtonIcon {
+        width: 24px;
+        height: 24px;
+    }
+
     .notificationsBlock {
         width: 38px;
         height: 38px;
@@ -226,6 +308,11 @@
 
     .notificationIcon {
         font-size: 20px;
+    }
+
+    .notificationIconImage {
+        width: 20px;
+        height: 20px;
     }
 
     .profileBlock {
