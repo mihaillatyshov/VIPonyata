@@ -226,6 +226,154 @@
     cursor: pointer;
 }
 
+.quizlet-setup-expand-all-btn {
+    white-space: nowrap;
+}
+
+.quizlet-setup-dictionary-card {
+    border: 1px solid rgba(63, 75, 87, 0.12);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 4px 18px rgba(30, 41, 59, 0.05);
+    padding: 0.65rem 0.8rem;
+}
+
+.quizlet-setup-dictionary-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.quizlet-setup-dictionary-checkbox-wrap {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+}
+
+.quizlet-setup-dictionary-checkbox-wrap .form-check-input {
+    margin-left: 0;
+}
+
+.quizlet-setup-dictionary-toggle {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    padding: 0.15rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 0;
+    text-align: left;
+    color: inherit;
+}
+
+.quizlet-setup-dictionary-toggle:hover .quizlet-group-checkbox-title,
+.quizlet-setup-dictionary-toggle:focus-visible .quizlet-group-checkbox-title {
+    color: #0f172a !important;
+}
+
+.quizlet-setup-dictionary-toggle:focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.35);
+    outline-offset: 2px;
+    border-radius: 10px;
+}
+
+.quizlet-setup-dictionary-toggle-icon {
+    width: 1.5rem;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgba(59, 130, 246, 0.1);
+    color: #2563eb;
+    font-size: 1rem;
+    line-height: 1;
+    font-weight: 700;
+}
+
+.quizlet-setup-selected-badge {
+    margin-left: auto;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(14, 165, 233, 0.12);
+    color: #0369a1;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.quizlet-setup-topics-collapse {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.24s ease;
+}
+
+.quizlet-setup-topics-collapse.is-expanded {
+    grid-template-rows: 1fr;
+}
+
+.quizlet-setup-topics-collapse-inner {
+    overflow: hidden;
+}
+
+.quizlet-setup-topic-list {
+    padding-top: 0.7rem;
+    padding-left: 0.9rem;
+    gap: 1.1rem !important;
+}
+
+.quizlet-setup-topic-chip {
+    margin-right: 0 !important;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.4rem;
+    padding: 0.5rem 0.85rem 0.5rem 2.6rem;
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    border-radius: 999px;
+    background: rgba(248, 250, 252, 0.95);
+}
+
+.quizlet-setup-topic-chip .form-check-input {
+    position: absolute;
+    top: 50%;
+    left: -0.18rem;
+    margin: 0;
+    transform: translate(-50%, -50%);
+}
+
+.quizlet-setup-topic-chip .form-check-label {
+    display: block;
+    line-height: 1.25;
+}
+
+.quizlet-setup-empty-state {
+    padding-top: 0.35rem;
+}
+
+@media (max-width: 576px) {
+    .quizlet-setup-dictionary-card {
+        padding: 0.6rem 0.7rem;
+    }
+
+    .quizlet-setup-dictionary-header {
+        align-items: flex-start;
+    }
+
+    .quizlet-setup-dictionary-toggle {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .quizlet-setup-selected-badge {
+        margin-left: 2.15rem;
+    }
+}
+
 /* ── Teacher dictionary topic cards ─────────────────────────────────────── */
 
 .quizlet-topic-card-btn {

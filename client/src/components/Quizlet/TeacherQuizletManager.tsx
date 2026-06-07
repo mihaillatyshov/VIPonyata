@@ -1016,6 +1016,7 @@ const TeacherQuizletManager = () => {
     const [assignmentPersonalSubgroupIdsByStudent, setAssignmentPersonalSubgroupIdsByStudent] = useState<
         Record<number, number[]>
     >({});
+    const [assignmentExpandedGroupIds, setAssignmentExpandedGroupIds] = useState<number[]>([]);
     const [assignmentError, setAssignmentError] = useState<string | null>(null);
     const [isCreatingAssignment, setIsCreatingAssignment] = useState(false);
 
@@ -1120,6 +1121,11 @@ const TeacherQuizletManager = () => {
         }));
     }, [groups, subgroups]);
 
+    const assignmentAllGroupIds = useMemo(
+        () => assignmentSubgroupsByGroup.map(({ group }) => group.id),
+        [assignmentSubgroupsByGroup],
+    );
+
     const assignmentSelectedWordsCount = useMemo(() => {
         const selectedWordIds = new Set(
             subgroupWords
@@ -1154,6 +1160,16 @@ const TeacherQuizletManager = () => {
         const selectedStudentIds = new Set(assignmentStudentIds);
         return (assignmentOptions?.students ?? []).filter((student) => selectedStudentIds.has(student.id));
     }, [assignmentOptions?.students, assignmentStudentIds]);
+
+    const areAllAssignmentDictionariesExpanded = useMemo(() => {
+        const expandedGroupIds = new Set(assignmentExpandedGroupIds);
+
+        return assignmentAllGroupIds.every((groupId) => expandedGroupIds.has(groupId));
+    }, [assignmentAllGroupIds, assignmentExpandedGroupIds]);
+
+    useEffect(() => {
+        setAssignmentExpandedGroupIds((prev) => prev.filter((groupId) => assignmentAllGroupIds.includes(groupId)));
+    }, [assignmentAllGroupIds]);
 
     useEffect(() => {
         setAssignmentPersonalSubgroupIdsByStudent((prev) => {
@@ -1335,6 +1351,21 @@ const TeacherQuizletManager = () => {
         }
 
         setAssignmentSubgroupIds((prev) => Array.from(new Set([...prev, ...groupSubgroupIds])));
+    };
+
+    const toggleAssignmentGroupExpanded = (groupId: number) => {
+        setAssignmentExpandedGroupIds((prev) =>
+            prev.includes(groupId) ? prev.filter((item) => item !== groupId) : [...prev, groupId],
+        );
+    };
+
+    const toggleAllAssignmentDictionariesExpanded = () => {
+        if (areAllAssignmentDictionariesExpanded) {
+            setAssignmentExpandedGroupIds([]);
+            return;
+        }
+
+        setAssignmentExpandedGroupIds(assignmentAllGroupIds);
     };
 
     const handleCreateAssignment = async () => {
@@ -1525,12 +1556,21 @@ const TeacherQuizletManager = () => {
                                 </label>
 
                                 <div>
-                                    <label className="form-label">Словари</label>
+                                    <div className="d-flex align-items-center justify-content-between gap-2 mb-2 flex-wrap">
+                                        <label className="form-label mb-0">Словари</label>
+                                        <button
+                                            type="button"
+                                            className="btn btn-sm btn-outline-secondary quizlet-setup-expand-all-btn"
+                                            onClick={toggleAllAssignmentDictionariesExpanded}
+                                        >
+                                            {areAllAssignmentDictionariesExpanded ? "Свернуть все" : "Раскрыть все"}
+                                        </button>
+                                    </div>
                                     <div className="d-flex flex-column gap-2">
                                         {assignmentSubgroupsByGroup.map(({ group, subgroups: nestedSubgroups }) => (
-                                            <div key={group.id} className="border rounded p-2">
-                                                <div className="d-flex align-items-center mb-2">
-                                                    <label className="form-check d-inline-flex align-items-center gap-2 mb-0 quizlet-group-checkbox-label">
+                                            <div key={group.id} className="quizlet-setup-dictionary-card">
+                                                <div className="quizlet-setup-dictionary-header">
+                                                    <div className="quizlet-setup-dictionary-checkbox-wrap">
                                                         <input
                                                             className="form-check-input mt-0"
                                                             type="checkbox"
@@ -1559,6 +1599,20 @@ const TeacherQuizletManager = () => {
                                                                 e.target.blur();
                                                             }}
                                                         />
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        className="quizlet-setup-dictionary-toggle"
+                                                        onClick={() => toggleAssignmentGroupExpanded(group.id)}
+                                                        aria-expanded={assignmentExpandedGroupIds.includes(group.id)}
+                                                        aria-controls={`assignment-group-subgroups-${group.id}`}
+                                                    >
+                                                        <span
+                                                            className="quizlet-setup-dictionary-toggle-icon"
+                                                            aria-hidden="true"
+                                                        >
+                                                            {assignmentExpandedGroupIds.includes(group.id) ? "−" : "+"}
+                                                        </span>
                                                         <span className="fw-bold text-dark quizlet-group-checkbox-title">
                                                             {group.title}
                                                             <span className="quizlet-dictionary-word-count">
@@ -1566,41 +1620,69 @@ const TeacherQuizletManager = () => {
                                                                 ({wordsCountByGroup.get(group.id) ?? 0})
                                                             </span>
                                                         </span>
-                                                    </label>
+                                                        {nestedSubgroups.filter((subgroup) =>
+                                                            assignmentSubgroupIds.includes(subgroup.id),
+                                                        ).length > 0 && (
+                                                            <span className="quizlet-setup-selected-badge">
+                                                                {
+                                                                    nestedSubgroups.filter((subgroup) =>
+                                                                        assignmentSubgroupIds.includes(subgroup.id),
+                                                                    ).length
+                                                                }{" "}
+                                                                выбрано
+                                                            </span>
+                                                        )}
+                                                    </button>
                                                 </div>
 
                                                 {nestedSubgroups.length === 0 && (
-                                                    <div className="text-muted small">В уроке пока нет словарей</div>
+                                                    <div className="text-muted small quizlet-setup-empty-state">
+                                                        В уроке пока нет словарей
+                                                    </div>
                                                 )}
 
                                                 {nestedSubgroups.length > 0 && (
-                                                    <div className="d-flex flex-wrap gap-2">
-                                                        {nestedSubgroups.map((subgroup) => (
-                                                            <label key={subgroup.id} className="form-check me-3">
-                                                                <input
-                                                                    className="form-check-input"
-                                                                    type="checkbox"
-                                                                    checked={assignmentSubgroupIds.includes(
-                                                                        subgroup.id,
-                                                                    )}
-                                                                    onChange={(e) => {
-                                                                        toggleSelection(
-                                                                            assignmentSubgroupIds,
-                                                                            setAssignmentSubgroupIds,
-                                                                            subgroup.id,
-                                                                        );
-                                                                        e.target.blur();
-                                                                    }}
-                                                                />
-                                                                <span className="form-check-label">
-                                                                    {subgroup.title}
-                                                                    <span className="quizlet-dictionary-word-count">
-                                                                        {" "}
-                                                                        ({wordsCountBySubgroup.get(subgroup.id) ?? 0})
-                                                                    </span>
-                                                                </span>
-                                                            </label>
-                                                        ))}
+                                                    <div
+                                                        id={`assignment-group-subgroups-${group.id}`}
+                                                        className={`quizlet-setup-topics-collapse ${assignmentExpandedGroupIds.includes(group.id) ? "is-expanded" : ""}`}
+                                                    >
+                                                        <div className="quizlet-setup-topics-collapse-inner">
+                                                            <div className="d-flex flex-wrap gap-2 quizlet-setup-topic-list">
+                                                                {nestedSubgroups.map((subgroup) => (
+                                                                    <label
+                                                                        key={subgroup.id}
+                                                                        className="form-check me-3 quizlet-topic-checkbox-label quizlet-setup-topic-chip"
+                                                                    >
+                                                                        <input
+                                                                            className="form-check-input"
+                                                                            type="checkbox"
+                                                                            checked={assignmentSubgroupIds.includes(
+                                                                                subgroup.id,
+                                                                            )}
+                                                                            onChange={(e) => {
+                                                                                toggleSelection(
+                                                                                    assignmentSubgroupIds,
+                                                                                    setAssignmentSubgroupIds,
+                                                                                    subgroup.id,
+                                                                                );
+                                                                                e.target.blur();
+                                                                            }}
+                                                                        />
+                                                                        <span className="form-check-label">
+                                                                            {subgroup.title}
+                                                                            <span className="quizlet-dictionary-word-count">
+                                                                                {" "}
+                                                                                (
+                                                                                {wordsCountBySubgroup.get(
+                                                                                    subgroup.id,
+                                                                                ) ?? 0}
+                                                                                )
+                                                                            </span>
+                                                                        </span>
+                                                                    </label>
+                                                                ))}
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>
@@ -1642,90 +1724,126 @@ const TeacherQuizletManager = () => {
                                                     assignmentPersonalDictionariesByStudent[student.id];
                                                 const selectedPersonalSubgroupIds =
                                                     assignmentPersonalSubgroupIdsByStudent[student.id] ?? [];
+                                                const hasPersonalSubgroups =
+                                                    personalState?.status === LoadStatus.DONE &&
+                                                    personalState.subgroups.length > 0;
 
                                                 return (
-                                                    <div key={student.id} className="border rounded p-2">
-                                                        <div className="fw-semibold mb-1">
-                                                            {student.nickname} ({student.name})
+                                                    <div key={student.id} className="quizlet-setup-dictionary-card">
+                                                        <div className="quizlet-setup-dictionary-toggle">
+                                                            {hasPersonalSubgroups && (
+                                                                <span
+                                                                    className="quizlet-setup-dictionary-toggle-icon"
+                                                                    aria-hidden="true"
+                                                                >
+                                                                    −
+                                                                </span>
+                                                            )}
+                                                            <span className="fw-bold text-dark quizlet-group-checkbox-title">
+                                                                {student.nickname} ({student.name})
+                                                            </span>
+                                                            {selectedPersonalSubgroupIds.length > 0 && (
+                                                                <span className="quizlet-setup-selected-badge">
+                                                                    {selectedPersonalSubgroupIds.length} выбрано
+                                                                </span>
+                                                            )}
                                                         </div>
 
                                                         {personalState === undefined ||
                                                         personalState.status === LoadStatus.LOADING ? (
-                                                            <div className="text-muted small">
+                                                            <div className="text-muted small quizlet-setup-empty-state">
                                                                 Загружаю личные словари ученика...
                                                             </div>
                                                         ) : null}
 
                                                         {personalState?.status === LoadStatus.ERROR && (
-                                                            <div className="text-danger small">
+                                                            <div className="text-danger small quizlet-setup-empty-state">
                                                                 Не удалось загрузить личные словари ученика
                                                             </div>
                                                         )}
 
                                                         {personalState?.status === LoadStatus.DONE &&
                                                             personalState.subgroups.length === 0 && (
-                                                                <div className="text-muted small">
+                                                                <div className="text-muted small quizlet-setup-empty-state">
                                                                     У ученика пока нет личных словарей
                                                                 </div>
                                                             )}
 
                                                         {personalState?.status === LoadStatus.DONE &&
                                                             personalState.subgroups.length > 0 && (
-                                                                <div className="d-flex flex-wrap gap-2">
-                                                                    {personalState.subgroups.map((subgroup) => {
-                                                                        const subgroupWordCount =
-                                                                            personalState.words.filter(
-                                                                                (word) =>
-                                                                                    word.subgroup_id === subgroup.id,
-                                                                            ).length;
+                                                                <div
+                                                                    id={`assignment-personal-subgroups-${student.id}`}
+                                                                    className="quizlet-setup-topics-collapse is-expanded"
+                                                                >
+                                                                    <div className="quizlet-setup-topics-collapse-inner">
+                                                                        <div className="d-flex flex-wrap gap-2 quizlet-setup-topic-list">
+                                                                            {personalState.subgroups.map((subgroup) => {
+                                                                                const subgroupWordCount =
+                                                                                    personalState.words.filter(
+                                                                                        (word) =>
+                                                                                            word.subgroup_id ===
+                                                                                            subgroup.id,
+                                                                                    ).length;
 
-                                                                        return (
-                                                                            <label
-                                                                                key={subgroup.id}
-                                                                                className="form-check me-3"
-                                                                            >
-                                                                                <input
-                                                                                    className="form-check-input"
-                                                                                    type="checkbox"
-                                                                                    checked={selectedPersonalSubgroupIds.includes(
-                                                                                        subgroup.id,
-                                                                                    )}
-                                                                                    onChange={(event) => {
-                                                                                        setAssignmentPersonalSubgroupIdsByStudent(
-                                                                                            (prev) => ({
-                                                                                                ...prev,
-                                                                                                [student.id]: prev[
-                                                                                                    student.id
-                                                                                                ]?.includes(subgroup.id)
-                                                                                                    ? (
-                                                                                                          prev[
-                                                                                                              student.id
-                                                                                                          ] ?? []
-                                                                                                      ).filter(
-                                                                                                          (item) =>
-                                                                                                              item !==
-                                                                                                              subgroup.id,
-                                                                                                      )
-                                                                                                    : [
-                                                                                                          ...(prev[
-                                                                                                              student.id
-                                                                                                          ] ?? []),
-                                                                                                          subgroup.id,
-                                                                                                      ],
-                                                                                            }),
-                                                                                        );
-                                                                                        event.target.blur();
-                                                                                    }}
-                                                                                />
-                                                                                <span className="form-check-label">
-                                                                                    {subgroup.title}
-                                                                                    <span className="quizlet-dictionary-word-count">
-                                                                                        {` (${subgroupWordCount})`}
-                                                                                    </span>
-                                                                                </span>
-                                                                            </label>
-                                                                        );
-                                                                    })}
+                                                                                return (
+                                                                                    <label
+                                                                                        key={subgroup.id}
+                                                                                        className="form-check me-3 quizlet-topic-checkbox-label quizlet-setup-topic-chip"
+                                                                                    >
+                                                                                        <input
+                                                                                            className="form-check-input"
+                                                                                            type="checkbox"
+                                                                                            checked={selectedPersonalSubgroupIds.includes(
+                                                                                                subgroup.id,
+                                                                                            )}
+                                                                                            onChange={(event) => {
+                                                                                                setAssignmentPersonalSubgroupIdsByStudent(
+                                                                                                    (prev) => ({
+                                                                                                        ...prev,
+                                                                                                        [student.id]:
+                                                                                                            prev[
+                                                                                                                student
+                                                                                                                    .id
+                                                                                                            ]?.includes(
+                                                                                                                subgroup.id,
+                                                                                                            )
+                                                                                                                ? (
+                                                                                                                      prev[
+                                                                                                                          student
+                                                                                                                              .id
+                                                                                                                      ] ??
+                                                                                                                      []
+                                                                                                                  ).filter(
+                                                                                                                      (
+                                                                                                                          item,
+                                                                                                                      ) =>
+                                                                                                                          item !==
+                                                                                                                          subgroup.id,
+                                                                                                                  )
+                                                                                                                : [
+                                                                                                                      ...(prev[
+                                                                                                                          student
+                                                                                                                              .id
+                                                                                                                      ] ??
+                                                                                                                          []),
+                                                                                                                      subgroup.id,
+                                                                                                                  ],
+                                                                                                    }),
+                                                                                                );
+                                                                                                event.target.blur();
+                                                                                            }}
+                                                                                        />
+                                                                                        <span className="form-check-label">
+                                                                                            {subgroup.title}
+                                                                                            <span className="quizlet-dictionary-word-count">
+                                                                                                {` (${subgroupWordCount})`}
+                                                                                            </span>
+                                                                                        </span>
+                                                                                    </label>
+                                                                                );
+                                                                            })}
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                             )}
                                                     </div>

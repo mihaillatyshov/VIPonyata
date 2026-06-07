@@ -45,6 +45,8 @@ const QuizletQuizStart = ({
     const [autoSpeakAfterFlip, setAutoSpeakAfterFlip] = useState<boolean>(false);
     const [selectedTeacherSubgroups, setSelectedTeacherSubgroups] = useState<number[]>([]);
     const [selectedPersonalSubgroups, setSelectedPersonalSubgroups] = useState<number[]>([]);
+    const [expandedTeacherGroups, setExpandedTeacherGroups] = useState<number[]>([]);
+    const [isPersonalExpanded, setIsPersonalExpanded] = useState<boolean>(false);
 
     const selectedDictionariesCount = selectedTeacherSubgroups.length + selectedPersonalSubgroups.length;
 
@@ -126,6 +128,28 @@ const QuizletQuizStart = ({
         }));
     }, [groups, subgroups]);
 
+    const allTeacherGroupIds = useMemo(() => groups.map((group) => group.id), [groups]);
+
+    const allDictionaryIds = useMemo(
+        () =>
+            personalLesson !== null ? ["personal", ...allTeacherGroupIds.map(String)] : allTeacherGroupIds.map(String),
+        [allTeacherGroupIds, personalLesson],
+    );
+
+    const areAllDictionariesExpanded = useMemo(() => {
+        const expandedIds = new Set(expandedTeacherGroups.map(String));
+
+        if (personalLesson !== null && !isPersonalExpanded) {
+            return false;
+        }
+
+        return allDictionaryIds.every((id) => id === "personal" || expandedIds.has(id));
+    }, [allDictionaryIds, expandedTeacherGroups, isPersonalExpanded, personalLesson]);
+
+    useEffect(() => {
+        setExpandedTeacherGroups((prev) => prev.filter((groupId) => allTeacherGroupIds.includes(groupId)));
+    }, [allTeacherGroupIds]);
+
     const toggleSelection = (ids: number[], setIds: (value: number[]) => void, id: number) => {
         if (ids.includes(id)) {
             setIds(ids.filter((item) => item !== id));
@@ -156,6 +180,23 @@ const QuizletQuizStart = ({
         }
 
         setSelectedPersonalSubgroups(Array.from(new Set([...selectedPersonalSubgroups, ...personalSubgroupIds])));
+    };
+
+    const toggleTeacherGroupExpanded = (groupId: number) => {
+        setExpandedTeacherGroups((prev) =>
+            prev.includes(groupId) ? prev.filter((item) => item !== groupId) : [...prev, groupId],
+        );
+    };
+
+    const toggleAllDictionariesExpanded = () => {
+        if (areAllDictionariesExpanded) {
+            setExpandedTeacherGroups([]);
+            setIsPersonalExpanded(false);
+            return;
+        }
+
+        setExpandedTeacherGroups(allTeacherGroupIds);
+        setIsPersonalExpanded(personalLesson !== null);
     };
 
     const start = () => {
@@ -287,12 +328,21 @@ const QuizletQuizStart = ({
                 </label>
             </div>
 
-            <h4 className="mt-4 mb-3">Выбери словари</h4>
+            <div className="d-flex align-items-center justify-content-between gap-2 mt-4 mb-3 flex-wrap">
+                <h4 className="mb-0">Выбери словари</h4>
+                <button
+                    type="button"
+                    className="btn btn-sm btn-outline-secondary quizlet-setup-expand-all-btn"
+                    onClick={toggleAllDictionariesExpanded}
+                >
+                    {areAllDictionariesExpanded ? "Свернуть все" : "Раскрыть все"}
+                </button>
+            </div>
             <div className="mb-4">
                 {personalLesson !== null && (
-                    <div className="border rounded p-2 mb-2">
-                        <div className="d-flex align-items-center mb-2">
-                            <label className="form-check d-inline-flex align-items-center gap-2 mb-0 quizlet-group-checkbox-label">
+                    <div className="quizlet-setup-dictionary-card mb-2">
+                        <div className="quizlet-setup-dictionary-header">
+                            <div className="quizlet-setup-dictionary-checkbox-wrap">
                                 <input
                                     className="form-check-input mt-0"
                                     type="checkbox"
@@ -319,50 +369,78 @@ const QuizletQuizStart = ({
                                         e.target.blur();
                                     }}
                                 />
+                            </div>
+                            <button
+                                type="button"
+                                className="quizlet-setup-dictionary-toggle"
+                                onClick={() => setIsPersonalExpanded((prev) => !prev)}
+                                aria-expanded={isPersonalExpanded}
+                                aria-controls="quizlet-personal-subgroups"
+                            >
+                                <span className="quizlet-setup-dictionary-toggle-icon" aria-hidden="true">
+                                    {isPersonalExpanded ? "−" : "+"}
+                                </span>
                                 <span className="fw-bold text-dark quizlet-group-checkbox-title">
                                     Мой словарь
                                     <span className="quizlet-dictionary-word-count"> ({personalLessonWordsCount})</span>
                                 </span>
-                            </label>
+                                {selectedPersonalSubgroups.length > 0 && (
+                                    <span className="quizlet-setup-selected-badge">
+                                        {selectedPersonalSubgroups.length} выбрано
+                                    </span>
+                                )}
+                            </button>
                         </div>
                         {personalSubgroups.length === 0 && (
-                            <div className="text-muted small">Добавьте подгруппы в личный урок</div>
+                            <div className="text-muted small quizlet-setup-empty-state">
+                                Добавьте подгруппы в личный урок
+                            </div>
                         )}
                         {personalSubgroups.length > 0 && (
-                            <div className="d-flex flex-wrap gap-2">
-                                {personalSubgroups.map((subgroup) => (
-                                    <label key={subgroup.id} className="form-check me-3 quizlet-topic-checkbox-label">
-                                        <input
-                                            className="form-check-input"
-                                            type="checkbox"
-                                            checked={selectedPersonalSubgroups.includes(subgroup.id)}
-                                            onChange={(e) => {
-                                                toggleSelection(
-                                                    selectedPersonalSubgroups,
-                                                    setSelectedPersonalSubgroups,
-                                                    subgroup.id,
-                                                );
-                                                e.target.blur();
-                                            }}
-                                        />
-                                        <span className="form-check-label">
-                                            {subgroup.title}
-                                            <span className="quizlet-dictionary-word-count">
-                                                {" "}
-                                                ({personalWordsCountBySubgroup.get(subgroup.id) ?? 0})
-                                            </span>
-                                        </span>
-                                    </label>
-                                ))}
+                            <div
+                                id="quizlet-personal-subgroups"
+                                className={`quizlet-setup-topics-collapse ${isPersonalExpanded ? "is-expanded" : ""}`}
+                            >
+                                <div className="quizlet-setup-topics-collapse-inner">
+                                    <div className="d-flex flex-wrap gap-2 quizlet-setup-topic-list">
+                                        {personalSubgroups.map((subgroup) => (
+                                            <label
+                                                key={subgroup.id}
+                                                className="form-check me-3 quizlet-topic-checkbox-label quizlet-setup-topic-chip"
+                                            >
+                                                <input
+                                                    className="form-check-input"
+                                                    type="checkbox"
+                                                    checked={selectedPersonalSubgroups.includes(subgroup.id)}
+                                                    onChange={(e) => {
+                                                        toggleSelection(
+                                                            selectedPersonalSubgroups,
+                                                            setSelectedPersonalSubgroups,
+                                                            subgroup.id,
+                                                        );
+                                                        e.target.blur();
+                                                    }}
+                                                />
+                                                <span className="form-check-label">
+                                                    {subgroup.title}
+                                                    <span className="quizlet-dictionary-word-count">
+                                                        {" "}
+                                                        ({personalWordsCountBySubgroup.get(subgroup.id) ?? 0})
+                                                    </span>
+                                                </span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>
                 )}
 
                 {subgroupsByGroup.map(({ group, subgroups: nestedSubgroups }) => (
-                    <div key={group.id} className="border rounded p-2 mb-2">
-                        <div className="d-flex align-items-center mb-2">
-                            <label className="form-check d-inline-flex align-items-center gap-2 mb-0 quizlet-group-checkbox-label">
+                    <div key={group.id} className="quizlet-setup-dictionary-card mb-2">
+                        <div className="quizlet-setup-dictionary-header">
+                            <div className="quizlet-setup-dictionary-checkbox-wrap">
                                 <input
                                     className="form-check-input mt-0"
                                     type="checkbox"
@@ -389,6 +467,17 @@ const QuizletQuizStart = ({
                                         e.target.blur();
                                     }}
                                 />
+                            </div>
+                            <button
+                                type="button"
+                                className="quizlet-setup-dictionary-toggle"
+                                onClick={() => toggleTeacherGroupExpanded(group.id)}
+                                aria-expanded={expandedTeacherGroups.includes(group.id)}
+                                aria-controls={`quizlet-group-subgroups-${group.id}`}
+                            >
+                                <span className="quizlet-setup-dictionary-toggle-icon" aria-hidden="true">
+                                    {expandedTeacherGroups.includes(group.id) ? "−" : "+"}
+                                </span>
                                 <span className="fw-bold text-dark quizlet-group-checkbox-title">
                                     {group.title}
                                     <span className="quizlet-dictionary-word-count">
@@ -396,33 +485,54 @@ const QuizletQuizStart = ({
                                         ({wordsCountByGroup.get(group.id) ?? 0})
                                     </span>
                                 </span>
-                            </label>
-                        </div>
-                        <div className="d-flex flex-wrap gap-2">
-                            {nestedSubgroups.map((subgroup) => (
-                                <label key={subgroup.id} className="form-check me-3 quizlet-topic-checkbox-label">
-                                    <input
-                                        className="form-check-input"
-                                        type="checkbox"
-                                        checked={selectedTeacherSubgroups.includes(subgroup.id)}
-                                        onChange={(e) => {
-                                            toggleSelection(
-                                                selectedTeacherSubgroups,
-                                                setSelectedTeacherSubgroups,
-                                                subgroup.id,
-                                            );
-                                            e.target.blur();
-                                        }}
-                                    />
-                                    <span className="form-check-label">
-                                        {subgroup.title}
-                                        <span className="quizlet-dictionary-word-count">
-                                            {" "}
-                                            ({wordsCountBySubgroup.get(subgroup.id) ?? 0})
-                                        </span>
+                                {nestedSubgroups.filter((subgroup) => selectedTeacherSubgroups.includes(subgroup.id))
+                                    .length > 0 && (
+                                    <span className="quizlet-setup-selected-badge">
+                                        {
+                                            nestedSubgroups.filter((subgroup) =>
+                                                selectedTeacherSubgroups.includes(subgroup.id),
+                                            ).length
+                                        }{" "}
+                                        выбрано
                                     </span>
-                                </label>
-                            ))}
+                                )}
+                            </button>
+                        </div>
+                        <div
+                            id={`quizlet-group-subgroups-${group.id}`}
+                            className={`quizlet-setup-topics-collapse ${expandedTeacherGroups.includes(group.id) ? "is-expanded" : ""}`}
+                        >
+                            <div className="quizlet-setup-topics-collapse-inner">
+                                <div className="d-flex flex-wrap gap-2 quizlet-setup-topic-list">
+                                    {nestedSubgroups.map((subgroup) => (
+                                        <label
+                                            key={subgroup.id}
+                                            className="form-check me-3 quizlet-topic-checkbox-label quizlet-setup-topic-chip"
+                                        >
+                                            <input
+                                                className="form-check-input"
+                                                type="checkbox"
+                                                checked={selectedTeacherSubgroups.includes(subgroup.id)}
+                                                onChange={(e) => {
+                                                    toggleSelection(
+                                                        selectedTeacherSubgroups,
+                                                        setSelectedTeacherSubgroups,
+                                                        subgroup.id,
+                                                    );
+                                                    e.target.blur();
+                                                }}
+                                            />
+                                            <span className="form-check-label">
+                                                {subgroup.title}
+                                                <span className="quizlet-dictionary-word-count">
+                                                    {" "}
+                                                    ({wordsCountBySubgroup.get(subgroup.id) ?? 0})
+                                                </span>
+                                            </span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 ))}
