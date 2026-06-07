@@ -304,6 +304,12 @@ def create_quizlet_assignment() -> dict:
     return {"assignment": assignment.__json__()}
 
 
+def cancel_quizlet_assignment_target(target_id: int) -> dict:
+    teacher_id = get_current_user_id()
+    DBQT.cancel_quizlet_assignment_target(teacher_id, target_id)
+    return {"message": "ok"}
+
+
 def get_quizlet_assignments() -> dict:
     teacher_id = get_current_user_id()
     assignments = DBQT.get_quizlet_assignments_by_creator(teacher_id)
@@ -341,6 +347,7 @@ def get_quizlet_assignments() -> dict:
             })
 
         completed_count = len([item for item in target_items if item["status"] == "completed"])
+        cancelled_count = len([item for item in target_items if item["status"] == "cancelled"])
 
         result.append({
             "assignment": assignment.__json__(),
@@ -350,7 +357,8 @@ def get_quizlet_assignments() -> dict:
                 "total": len(target_items),
                 "completed": completed_count,
                 "pending": max(0,
-                               len(target_items) - completed_count),
+                               len(target_items) - completed_count - cancelled_count),
+                "cancelled": cancelled_count,
             },
         })
 

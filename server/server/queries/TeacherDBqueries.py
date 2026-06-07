@@ -632,6 +632,24 @@ def get_quizlet_assignment_targets(assignment_id: int) -> list[QuizletAssignment
             select(QuizletAssignmentTarget).where(QuizletAssignmentTarget.assignment_id == assignment_id)).all()
 
 
+def cancel_quizlet_assignment_target(teacher_id: int, target_id: int) -> QuizletAssignmentTarget:
+    with DBsession.begin() as session:
+        target = session.scalars(
+            select(QuizletAssignmentTarget).join(QuizletAssignment,
+                                                 QuizletAssignment.id == QuizletAssignmentTarget.assignment_id).where(
+                                                     QuizletAssignmentTarget.id == target_id).where(
+                                                         QuizletAssignment.created_by_id == teacher_id)).one_or_none()
+        if target is None:
+            raise InvalidAPIUsage("Assignment target not found", 404)
+        if target.status == QuizletAssignmentTarget.Status.COMPLETED:
+            raise InvalidAPIUsage("Completed assignment cannot be cancelled", 400)
+
+        target.status = QuizletAssignmentTarget.Status.CANCELLED
+        target.completed_at = None
+        session.flush()
+        return target
+
+
 def get_quizlet_assignment_results(assignment_id: int) -> list[QuizletAssignmentResult]:
     with DBsession.begin() as session:
         return session.scalars(

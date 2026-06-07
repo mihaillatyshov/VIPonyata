@@ -952,6 +952,7 @@ class QuizletAssignmentTarget(Base):
     class Status:
         PENDING = "pending"
         COMPLETED = "completed"
+        CANCELLED = "cancelled"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
 

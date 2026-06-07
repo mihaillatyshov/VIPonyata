@@ -721,6 +721,12 @@ def get_quizlet_assignments():
     return user_selector_function(teacher_funcs.get_quizlet_assignments, None)
 
 
+@routes_bp.route("/quizlet/assignment-targets/<int:target_id>", methods=["DELETE"])
+@login_required
+def cancel_quizlet_assignment_target(target_id):
+    return user_selector_function(teacher_funcs.cancel_quizlet_assignment_target, None, target_id=target_id)
+
+
 @routes_bp.route("/quizlet/assignments/my", methods=["GET"])
 @login_required
 def get_my_quizlet_assignments():

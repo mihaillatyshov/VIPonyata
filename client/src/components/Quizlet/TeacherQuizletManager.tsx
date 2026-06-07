@@ -55,6 +55,7 @@ interface AssignmentListItem {
         total: number;
         completed: number;
         pending: number;
+        cancelled: number;
     };
 }
 
@@ -1018,7 +1019,9 @@ const TeacherQuizletManager = () => {
     >({});
     const [assignmentExpandedGroupIds, setAssignmentExpandedGroupIds] = useState<number[]>([]);
     const [assignmentError, setAssignmentError] = useState<string | null>(null);
+    const [assignmentListError, setAssignmentListError] = useState<string | null>(null);
     const [isCreatingAssignment, setIsCreatingAssignment] = useState(false);
+    const [cancellingAssignmentTargetIds, setCancellingAssignmentTargetIds] = useState<number[]>([]);
 
     const isAssignmentsCreateRoute = location.pathname === "/quizlet/assignments";
     const isAssignmentsListRoute = location.pathname === "/quizlet/assignments/list";
@@ -1418,6 +1421,20 @@ const TeacherQuizletManager = () => {
         }
     };
 
+    const handleCancelAssignmentTarget = async (targetId: number) => {
+        setAssignmentListError(null);
+        setCancellingAssignmentTargetIds((prev) => [...prev, targetId]);
+
+        try {
+            await AjaxDelete({ url: `/api/quizlet/assignment-targets/${targetId}` });
+            await fetchAssignmentsData();
+        } catch {
+            setAssignmentListError("Не удалось отменить задание");
+        } finally {
+            setCancellingAssignmentTargetIds((prev) => prev.filter((item) => item !== targetId));
+        }
+    };
+
     const getAssignmentModeLabel = (item: TQuizletAssignment) => {
         if (item.quiz_type === "pair") {
             return "Пары";
@@ -1425,6 +1442,18 @@ const TeacherQuizletManager = () => {
 
         const directionLabel = item.translation_direction === "ru_to_jp" ? "рус-яп" : "яп-рус";
         return `Карточки (${directionLabel})`;
+    };
+
+    const getAssignmentTargetStatusLabel = (status: TQuizletAssignmentTarget["status"]) => {
+        if (status === "completed") {
+            return { text: "Выполнено", className: "text-success" };
+        }
+
+        if (status === "cancelled") {
+            return { text: "Отменено", className: "text-muted" };
+        }
+
+        return { text: "Активно", className: "text-muted" };
     };
 
     if (loadStatus === LoadStatus.ERROR) {
@@ -1886,6 +1915,7 @@ const TeacherQuizletManager = () => {
                         </div>
 
                         <h6 className="mb-2">Список назначенных заданий</h6>
+                        {assignmentListError && <div className="text-danger small mb-2">{assignmentListError}</div>}
                         {assignments.length === 0 && <div className="text-muted">Пока нет назначенных заданий</div>}
                         {assignments.map((item) => (
                             <div key={item.assignment.id} className="card mb-2">
@@ -1902,12 +1932,21 @@ const TeacherQuizletManager = () => {
                                         </div>
                                         <div
                                             title={
-                                                item.stats.pending === 0 ? "Задание выполнено" : "Задание не выполнено"
+                                                item.stats.pending === 0
+                                                    ? item.stats.cancelled > 0
+                                                        ? "Есть отмененные назначения"
+                                                        : "Задание выполнено"
+                                                    : "Задание не выполнено"
                                             }
                                         >
-                                            {item.stats.pending === 0 ? (
+                                            {item.stats.pending === 0 && item.stats.cancelled === 0 ? (
                                                 <i
                                                     className="bi bi-check-circle-fill fs-3 text-success"
+                                                    aria-hidden="true"
+                                                />
+                                            ) : item.stats.cancelled > 0 ? (
+                                                <i
+                                                    className="bi bi-dash-circle-fill fs-3 text-secondary"
                                                     aria-hidden="true"
                                                 />
                                             ) : (
@@ -1922,15 +1961,36 @@ const TeacherQuizletManager = () => {
                                     {item.targets.length > 0 && (
                                         <div className="mt-2 small">
                                             {item.targets.map((target) => (
-                                                <div key={target.id}>
-                                                    <span>
-                                                        {target.student?.nickname ?? "unknown"} (
-                                                        {target.student?.name ?? "unknown"})
-                                                    </span>
-                                                    {target.personal_subgroups.length > 0 && (
-                                                        <span className="text-muted">
-                                                            {` • личные: ${target.personal_subgroups.map((sg) => sg.title).join(", ")}`}
+                                                <div
+                                                    key={target.id}
+                                                    className="d-flex justify-content-between align-items-start gap-2 py-1"
+                                                >
+                                                    <div>
+                                                        <span>
+                                                            {target.student?.nickname ?? "unknown"} (
+                                                            {target.student?.name ?? "unknown"})
                                                         </span>
+                                                        <span
+                                                            className={`ms-2 ${getAssignmentTargetStatusLabel(target.status).className}`}
+                                                        >
+                                                            {getAssignmentTargetStatusLabel(target.status).text}
+                                                        </span>
+                                                        {target.personal_subgroups.length > 0 && (
+                                                            <span className="text-muted">
+                                                                {` • личные: ${target.personal_subgroups.map((sg) => sg.title).join(", ")}`}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    {target.status === "pending" && (
+                                                        <button
+                                                            className="btn btn-outline-danger btn-sm"
+                                                            onClick={() => handleCancelAssignmentTarget(target.id)}
+                                                            disabled={cancellingAssignmentTargetIds.includes(target.id)}
+                                                        >
+                                                            {cancellingAssignmentTargetIds.includes(target.id)
+                                                                ? "Отмена..."
+                                                                : "Отменить"}
+                                                        </button>
                                                     )}
                                                 </div>
                                             ))}

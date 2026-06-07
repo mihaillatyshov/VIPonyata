@@ -85,7 +85,7 @@ export interface TQuizletAssignment {
 
 export interface TQuizletAssignmentTarget {
     id: number;
-    status: "pending" | "completed";
+    status: "pending" | "completed" | "cancelled";
     assigned_at: string;
     completed_at: string | null;
 }

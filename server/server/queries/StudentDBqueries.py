@@ -850,8 +850,9 @@ def _collect_teacher_words_for_assignment(
 def get_quizlet_assignments_for_student(user_id: int) -> list[dict]:
     with DBsession.begin() as session:
         targets = session.scalars(
-            select(QuizletAssignmentTarget).where(QuizletAssignmentTarget.student_id == user_id).order_by(
-                QuizletAssignmentTarget.assigned_at.desc())).all()
+            select(QuizletAssignmentTarget).where(QuizletAssignmentTarget.student_id == user_id).where(
+                QuizletAssignmentTarget.status != QuizletAssignmentTarget.Status.CANCELLED).order_by(
+                    QuizletAssignmentTarget.assigned_at.desc())).all()
 
         result: list[dict] = []
         for target in targets:
@@ -903,7 +904,8 @@ def get_quizlet_assignment_by_id_for_student(assignment_id: int, user_id: int) -
         return session.scalars(
             select(QuizletAssignment).where(QuizletAssignment.id == assignment_id).join(
                 QuizletAssignmentTarget, QuizletAssignmentTarget.assignment_id == QuizletAssignment.id).where(
-                    QuizletAssignmentTarget.student_id == user_id)).one_or_none()
+                    QuizletAssignmentTarget.student_id == user_id).where(
+                        QuizletAssignmentTarget.status != QuizletAssignmentTarget.Status.CANCELLED)).one_or_none()
 
 
 def start_quizlet_assignment_session(user_id: int, assignment_id: int) -> QuizletSession:
@@ -918,6 +920,8 @@ def start_quizlet_assignment_session(user_id: int, assignment_id: int) -> Quizle
                 QuizletAssignmentTarget.student_id == user_id)).one_or_none()
         if target is None:
             raise InvalidAPIUsage("You do not have access to this assignment", 403)
+        if target.status == QuizletAssignmentTarget.Status.CANCELLED:
+            raise InvalidAPIUsage("Assignment was cancelled", 403)
 
         existing_result = session.scalars(
             select(QuizletAssignmentResult).where(QuizletAssignmentResult.assignment_id == assignment_id).where(
