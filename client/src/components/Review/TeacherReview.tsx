@@ -1592,7 +1592,7 @@ const TeacherReview = () => {
         return () => {
             window.removeEventListener("keydown", handleFlashcardSpace);
         };
-    }, [currentWord, isFlashcardsRoute, trainingSession]);
+    }, [currentWord, isFlashcardsRoute, trainingSession]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const toggleDetail = (detailKey: FlashcardDetailKey) => {
         setOpenedDetailKeys((prev) =>

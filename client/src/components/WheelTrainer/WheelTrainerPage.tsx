@@ -60,11 +60,11 @@ interface RemovedOptionEntry {
     insertIndex: number;
 }
 
-interface RemovedOptionAction {
-    id: string;
-    removedAt: string;
-    entries: RemovedOptionEntry[];
-}
+// interface RemovedOptionAction {
+//     id: string;
+//     removedAt: string;
+//     entries: RemovedOptionEntry[];
+// }
 
 interface ThemePreset {
     label: string;
@@ -75,7 +75,7 @@ interface ThemePreset {
 
 const WHEEL_TRAINER_TEMPLATE_STORAGE_KEY = "wheel-trainer-templates-v1";
 const WHEEL_TRAINER_DRAFT_STORAGE_KEY = "wheel-trainer-draft-v1";
-const WHEEL_TRAINER_ROUTE_ROOT = "/teacher/wheel-trainer";
+// const WHEEL_TRAINER_ROUTE_ROOT = "/teacher/wheel-trainer";
 const WHEEL_TRAINER_ROUTE_STUDIO = "/teacher/wheel-trainer/new";
 const WHEEL_TRAINER_ROUTE_TEMPLATES = "/teacher/wheel-trainer/templates";
 const MAX_HISTORY_ENTRIES = 12;
@@ -436,7 +436,7 @@ const WheelTrainerPage = () => {
     const [templateNameDraft, setTemplateNameDraft] = useState<string>(buildDefaultTemplateName());
     const [loadedTemplateId, setLoadedTemplateId] = useState<string | null>(null);
     const [resultDialog, setResultDialog] = useState<ResultDialogState | null>(null);
-    const [lastRemovedAction, setLastRemovedAction] = useState<RemovedOptionAction | null>(null);
+    // const [lastRemovedAction, setLastRemovedAction] = useState<RemovedOptionAction | null>(null);
     const [banner, setBanner] = useState<string>("");
     const [studioTab, setStudioTab] = useState<StudioTab>("edit");
 
@@ -494,9 +494,9 @@ const WheelTrainerPage = () => {
             setWheels([createWheel(1)]);
             setActiveWheelId(null);
         }
-
+        const timersRefCurrent = timersRef.current;
         return () => {
-            Object.values(timersRef.current).forEach((timerId) => window.clearTimeout(timerId));
+            Object.values(timersRefCurrent).forEach((timerId) => window.clearTimeout(timerId));
             if (bannerTimerRef.current !== null) {
                 window.clearTimeout(bannerTimerRef.current);
             }
@@ -571,7 +571,7 @@ const WheelTrainerPage = () => {
 
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [isStudioView, resultDialog, activeWheelId, wheels]);
+    }, [isStudioView, resultDialog, activeWheelId, wheels]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const persistTemplates = (nextTemplates: WheelTrainerTemplate[]) => {
         setTemplates(nextTemplates);
@@ -621,50 +621,50 @@ const WheelTrainerPage = () => {
         }));
     };
 
-    const registerRemovedOptions = (entries: RemovedOptionEntry[]) => {
-        if (entries.length === 0) {
-            return;
-        }
+    // const registerRemovedOptions = (entries: RemovedOptionEntry[]) => {
+    //     if (entries.length === 0) {
+    //         return;
+    //     }
 
-        setLastRemovedAction({
-            id: createId("removed"),
-            removedAt: new Date().toISOString(),
-            entries,
-        });
-    };
+    //     setLastRemovedAction({
+    //         id: createId("removed"),
+    //         removedAt: new Date().toISOString(),
+    //         entries,
+    //     });
+    // };
 
-    const undoLastRemoval = () => {
-        if (lastRemovedAction === null) {
-            setBannerMessage("Последнее удаление не найдено.");
-            return;
-        }
+    // const undoLastRemoval = () => {
+    //     if (lastRemovedAction === null) {
+    //         setBannerMessage("Последнее удаление не найдено.");
+    //         return;
+    //     }
 
-        setWheels((currentWheels) =>
-            currentWheels.map((wheel) => {
-                const wheelEntries = lastRemovedAction.entries
-                    .filter((entry) => entry.wheelId === wheel.id)
-                    .sort((first, second) => first.insertIndex - second.insertIndex);
+    //     setWheels((currentWheels) =>
+    //         currentWheels.map((wheel) => {
+    //             const wheelEntries = lastRemovedAction.entries
+    //                 .filter((entry) => entry.wheelId === wheel.id)
+    //                 .sort((first, second) => first.insertIndex - second.insertIndex);
 
-                if (wheelEntries.length === 0) {
-                    return wheel;
-                }
+    //             if (wheelEntries.length === 0) {
+    //                 return wheel;
+    //             }
 
-                const nextOptions = [...wheel.options];
-                wheelEntries.forEach((entry) => {
-                    const safeIndex = clampNumber(entry.insertIndex, 0, nextOptions.length);
-                    nextOptions.splice(safeIndex, 0, entry.option);
-                });
+    //             const nextOptions = [...wheel.options];
+    //             wheelEntries.forEach((entry) => {
+    //                 const safeIndex = clampNumber(entry.insertIndex, 0, nextOptions.length);
+    //                 nextOptions.splice(safeIndex, 0, entry.option);
+    //             });
 
-                return syncWheelOptionEditor({
-                    ...wheel,
-                    options: nextOptions,
-                });
-            }),
-        );
+    //             return syncWheelOptionEditor({
+    //                 ...wheel,
+    //                 options: nextOptions,
+    //             });
+    //         }),
+    //     );
 
-        setLastRemovedAction(null);
-        setBannerMessage("Последний удаленный вариант восстановлен.");
-    };
+    //     setLastRemovedAction(null);
+    //     setBannerMessage("Последний удаленный вариант восстановлен.");
+    // };
 
     const finalizePendingRun = () => {
         const pendingRun = pendingRunRef.current;

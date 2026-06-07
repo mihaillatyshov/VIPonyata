@@ -732,7 +732,7 @@ const StudentQuizlet = () => {
         }
 
         startAssignmentSession(assignmentRunRouteId);
-    }, [isAssignmentRunRoute, assignmentRunRouteId]);
+    }, [isAssignmentRunRoute, assignmentRunRouteId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (!isSetupRoute || session !== null) {
@@ -1236,7 +1236,7 @@ const StudentQuizlet = () => {
             .catch(() => {
                 autoFinishSessionIdRef.current = null;
             });
-    }, [session, unresolvedCount]);
+    }, [session, unresolvedCount]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (session === null) {
@@ -1302,7 +1302,7 @@ const StudentQuizlet = () => {
             .catch(() => {
                 autoFinishSessionIdRef.current = null;
             });
-    }, [session, unresolvedCount]);
+    }, [session, unresolvedCount]); // eslint-disable-line react-hooks/exhaustive-deps
 
     if (loadStatus === LoadStatus.ERROR) {
         return (
