@@ -1478,36 +1478,36 @@ const TeacherQuizletManager = () => {
                         className={`btn btn-sm ${!isAssignmentsRoute && !isStudentsDictionariesRoute ? "btn-primary" : "btn-outline-secondary"}`}
                         onClick={() => navigate("/quizlet")}
                     >
-                        Словари
+                        📜 Словари
                     </button>
                     <button
                         className={`btn btn-sm ${isStudentsDictionariesRoute ? "btn-primary" : "btn-outline-secondary"}`}
                         onClick={() => navigate("/quizlet/students-dictionaries")}
                     >
-                        Словари учеников
+                        🍶 Словари учеников
                     </button>
                     <button
                         className={`btn btn-sm ${isAssignmentsCreateRoute ? "btn-primary" : "btn-outline-secondary"}`}
                         onClick={() => navigate("/quizlet/assignments")}
                     >
-                        Задания
+                        🍱 Задания
                     </button>
                     <button
                         className={`btn btn-sm ${isAssignmentsListRoute ? "btn-primary" : "btn-outline-secondary"}`}
                         onClick={() => navigate("/quizlet/assignments/list")}
                     >
-                        Список назначенных заданий
+                        📑 Назначенное
                     </button>
                 </div>
 
                 {isAssignmentsCreateRoute && (
                     <div className="quizlet-main-container">
-                        <h5 className="mb-3">Назначение заданий</h5>
+                        {/* <h5 className="mb-3">Назначение заданий</h5> */}
 
                         <div className="card mb-3">
                             <div className="card-body d-flex flex-column gap-3">
                                 <div>
-                                    <label className="form-label">Название</label>
+                                    {/* <label className="form-label">Название</label> */}
                                     <input
                                         className="form-control"
                                         value={assignmentTitle}
@@ -1517,7 +1517,7 @@ const TeacherQuizletManager = () => {
                                 </div>
 
                                 <div>
-                                    <label className="form-label">Выбери упражнение</label>
+                                    {/* <label className="form-label">Выбери упражнение</label> */}
                                     <div className="row g-2">
                                         <div className="col-12 col-md-6">
                                             <button
@@ -1561,7 +1561,7 @@ const TeacherQuizletManager = () => {
                                 </div>
 
                                 <div className="col-12 col-md-4">
-                                    <label className="form-label">Направление</label>
+                                    {/* <label className="form-label">Направление</label> */}
                                     <select
                                         className="form-select"
                                         value={assignmentDirection}
@@ -1720,7 +1720,7 @@ const TeacherQuizletManager = () => {
                                 </div>
 
                                 <div>
-                                    <label className="form-label">Назначить конкретным ученикам</label>
+                                    <label className="form-label">👻</label>
                                     <div className="d-flex flex-wrap gap-2">
                                         {(assignmentOptions?.students ?? []).map((student) => (
                                             <label key={student.id} className="form-check me-3">
