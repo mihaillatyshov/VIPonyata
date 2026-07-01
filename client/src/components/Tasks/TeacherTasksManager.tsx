@@ -918,9 +918,6 @@ const TeacherTasksManager = () => {
                                         <div className="d-flex justify-content-between align-items-center gap-3 flex-wrap">
                                             <div>
                                                 <h5 className="mb-1">Уроки</h5>
-                                                <div className="small text-muted">
-                                                    Пока урок не выбран, список заданий скрыт.
-                                                </div>
                                             </div>
                                             <button
                                                 type="button"
@@ -960,17 +957,7 @@ const TeacherTasksManager = () => {
                                 <div className="d-flex justify-content-between align-items-center gap-3 flex-wrap">
                                     <div>
                                         <h5 className="mb-1">Задания из выбранных уроков</h5>
-                                        <div className="small text-muted">
-                                            Слева выбор, клик по карточке открывает предпоказ.
-                                        </div>
                                     </div>
-                                    <button
-                                        type="button"
-                                        className="btn btn-sm btn-outline-primary"
-                                        onClick={() => navigate("/tasks/bank")}
-                                    >
-                                        Редактировать банк
-                                    </button>
                                 </div>
                                 {selectedLessonIds.length === 0 ? (
                                     <div className="text-muted">Сначала выберите один или несколько уроков сверху.</div>
@@ -1088,7 +1075,7 @@ const TeacherTasksManager = () => {
                             <div className="card-body">
                                 <div className="d-flex justify-content-between align-items-center mb-3">
                                     <h5 className="mb-0">Предпросмотр</h5>
-                                    {previewTask ? <span className="small text-muted">Без редактирования</span> : null}
+                                    {/* {previewTask ? <span className="small text-muted">Без редактирования</span> : null} */}
                                 </div>
                                 {previewTask === null ? (
                                     <div className="text-muted">
@@ -1635,7 +1622,7 @@ const TeacherTasksManager = () => {
                                                         role="img"
                                                         aria-label="Задание выполнено"
                                                     >
-                                                        🗾
+                                                        🎋
                                                     </span>
                                                 ) : item.stats.cancelled > 0 ? (
                                                     <i
@@ -1648,7 +1635,7 @@ const TeacherTasksManager = () => {
                                                         role="img"
                                                         aria-label="Задание ожидает выполнения"
                                                     >
-                                                        🎐
+                                                        🍵
                                                     </span>
                                                 )}
                                             </div>

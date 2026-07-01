@@ -4,6 +4,7 @@ import random
 from typing import Generic, Literal, TypedDict
 
 from sqlalchemy import delete, literal, select, union_all, update
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql.expression import func
 
 from server.common import DBsession
@@ -966,6 +967,10 @@ def get_homework_assignment_by_id_for_student(assignment_id: int, user_id: int) 
 
 
 def start_homework_assignment(user_id: int, assignment_id: int) -> HomeworkTry:
+    def get_existing_try(session, target_id: int) -> HomeworkTry | None:
+        return session.scalars(
+            select(HomeworkTry).where(HomeworkTry.target_id == target_id).order_by(HomeworkTry.id.desc())).first()
+
     with DBsession.begin() as session:
         assignment = session.scalars(
             select(HomeworkAssignment).where(HomeworkAssignment.id == assignment_id)).one_or_none()
@@ -980,8 +985,7 @@ def start_homework_assignment(user_id: int, assignment_id: int) -> HomeworkTry:
         if target.status == HomeworkAssignmentTarget.Status.CANCELLED:
             raise InvalidAPIUsage("Assignment was cancelled", 403)
 
-        existing_try = session.scalars(
-            select(HomeworkTry).where(HomeworkTry.target_id == target.id).order_by(HomeworkTry.id.desc())).first()
+        existing_try = get_existing_try(session, target.id)
         if existing_try is not None:
             return existing_try
 
@@ -1002,7 +1006,18 @@ def start_homework_assignment(user_id: int, assignment_id: int) -> HomeworkTry:
                                    done_tasks=json.dumps(new_tasks, ensure_ascii=False),
                                    checked_tasks=json.dumps(checked_tasks, ensure_ascii=False))
         session.add(homework_try)
-        session.flush()
+        try:
+            session.flush()
+        except IntegrityError:
+            session.rollback()
+
+            with DBsession.begin() as retry_session:
+                existing_try = get_existing_try(retry_session, target.id)
+                if existing_try is not None:
+                    return existing_try
+
+            raise
+
         return homework_try
 
 

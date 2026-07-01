@@ -33,8 +33,6 @@ interface HomeworkTryResponse {
     try: THomeworkTry;
 }
 
-type TResultViewMode = "errors" | "all";
-
 type TAliasProp<T extends TAssessmentItemBase, K extends TAssessmentCheckedItemBase> = (
     props: AssessmentDoneTryTaskBaseProps<T, K>,
 ) => React.ReactElement;
@@ -65,7 +63,6 @@ const HomeworkResultPage = () => {
     const [loadStatus, setLoadStatus] = useState<LoadStatus.Type>(LoadStatus.NONE);
     const [assignment, setAssignment] = useState<THomeworkAssignment | null>(null);
     const [homeworkTry, setHomeworkTry] = useState<THomeworkTry | null>(null);
-    const [viewMode, setViewMode] = useState<TResultViewMode>("errors");
 
     useLayoutEffect(() => {
         setLoadStatus(LoadStatus.LOADING);
@@ -107,14 +104,12 @@ const HomeworkResultPage = () => {
 
     const visibleTaskIndexes = homeworkTry.done_tasks
         .map((task, index) => ({ task, index }))
-        .filter(({ task, index }) => {
+        .filter(({ task }) => {
             if (!isDrawableItem(task)) {
                 return false;
             }
-            if (viewMode === "all") {
-                return true;
-            }
-            return (homeworkTry.checked_tasks[index]?.mistakes_count ?? 0) > 0;
+
+            return true;
         });
 
     const totalMistakesCount =
@@ -129,28 +124,12 @@ const HomeworkResultPage = () => {
                     <div className="mb-2 fs-4">
                         Ошибки в задании: <strong>{totalMistakesCount}</strong>
                     </div>
-                    <div className="student-assessment-results-mode justify-content-center">
-                        <button
-                            type="button"
-                            className={`btn btn-sm ${viewMode === "errors" ? "btn-secondary" : "btn-outline-secondary"}`}
-                            onClick={() => setViewMode("errors")}
-                        >
-                            Показать только ошибки
-                        </button>
-                        <button
-                            type="button"
-                            className={`btn btn-sm ${viewMode === "all" ? "btn-secondary" : "btn-outline-secondary"}`}
-                            onClick={() => setViewMode("all")}
-                        >
-                            Показать всё
-                        </button>
-                    </div>
                 </div>
             </div>
             <div className="student-assessment-page">
                 <div className="student-assessment-tasks">
                     {visibleTaskIndexes.length === 0 ? (
-                        <div className="alert alert-success">Ошибок нет.</div>
+                        <div className="alert alert-success">Заданий для отображения нет.</div>
                     ) : (
                         visibleTaskIndexes.map(({ task, index }) => (
                             <div
