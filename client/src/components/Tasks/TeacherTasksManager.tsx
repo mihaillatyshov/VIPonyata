@@ -663,10 +663,17 @@ const TeacherTasksManager = () => {
         try {
             await AjaxPost({ url: `/api/tasks/bank/lessons/${lessonId}/hidden`, body: {} });
             setConfirmHideLessonId(null);
+            setOptions((prev) =>
+                prev.hidden_lesson_ids.includes(lessonId)
+                    ? prev
+                    : {
+                          ...prev,
+                          hidden_lesson_ids: [...prev.hidden_lesson_ids, lessonId],
+                      },
+            );
             if (currentBankLessonId === lessonId) {
                 navigate("/tasks/bank");
             }
-            await fetchAll(statusStudentId);
         } catch {
             setErrorMessage("Не удалось скрыть урок из банка заданий");
         } finally {
@@ -679,7 +686,10 @@ const TeacherTasksManager = () => {
         setProcessingLessonId(lessonId);
         try {
             await AjaxDelete({ url: `/api/tasks/bank/lessons/${lessonId}/hidden` });
-            await fetchAll(statusStudentId);
+            setOptions((prev) => ({
+                ...prev,
+                hidden_lesson_ids: prev.hidden_lesson_ids.filter((id) => id !== lessonId),
+            }));
         } catch {
             setErrorMessage("Не удалось вернуть урок в банк заданий");
         } finally {
