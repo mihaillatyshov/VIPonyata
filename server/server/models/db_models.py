@@ -65,6 +65,11 @@ class User(Base):
                                                                                        back_populates="student")
     quizlet_assignment_results: Mapped[list["QuizletAssignmentResult"]] = relationship("QuizletAssignmentResult",
                                                                                        back_populates="student")
+    homework_assignments_created: Mapped[list["HomeworkAssignment"]] = relationship("HomeworkAssignment",
+                                                                                    back_populates="created_by")
+    homework_assignment_targets: Mapped[list["HomeworkAssignmentTarget"]] = relationship("HomeworkAssignmentTarget",
+                                                                                         back_populates="student")
+    homework_tries: Mapped[list["HomeworkTry"]] = relationship("HomeworkTry", back_populates="student")
     review_dictionaries: Mapped[list["ReviewDictionary"]] = relationship("ReviewDictionary", back_populates="owner")
 
     __mapper_args__ = {'eager_defaults': True}
@@ -481,6 +486,9 @@ class NotificationStudentToTeacher(Base):
     quizlet_assignment_result: Mapped[Optional["QuizletAssignmentResult"]] = relationship("QuizletAssignmentResult",
                                                                                           uselist=False)
 
+    homework_try_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("homework_tries.id"))
+    homework_try: Mapped[Optional["HomeworkTry"]] = relationship("HomeworkTry", uselist=False)
+
     creation_datetime: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)   # pylint: disable=not-callable
 
     __mapper_args__ = {'eager_defaults': True}
@@ -504,6 +512,10 @@ class NotificationStudentToTeacher(Base):
         if self.quizlet_assignment_result_id is not None:
             data["type"] = "quizlet_assignment_result"
             data["assignment_result_id"] = self.quizlet_assignment_result_id
+
+        if self.homework_try_id is not None:
+            data["type"] = "homework_try"
+            data["homework_try_id"] = self.homework_try_id
 
         return data
 
@@ -531,6 +543,9 @@ class NotificationTeacherToStudent(Base):
 
     quizlet_assignment_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("quizlet_assignments.id"))
     quizlet_assignment: Mapped[Optional["QuizletAssignment"]] = relationship("QuizletAssignment", uselist=False)
+
+    homework_assignment_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("homework_assignments.id"))
+    homework_assignment: Mapped[Optional["HomeworkAssignment"]] = relationship("HomeworkAssignment", uselist=False)
 
     student_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     student: Mapped["User"] = relationship("User", uselist=False)
@@ -565,6 +580,10 @@ class NotificationTeacherToStudent(Base):
         if self.quizlet_assignment_id is not None:
             data["type"] = "quizlet_assignment"
             data["assignment_id"] = self.quizlet_assignment_id
+
+        if self.homework_assignment_id is not None:
+            data["type"] = "homework_assignment"
+            data["assignment_id"] = self.homework_assignment_id
 
         return data
 
@@ -1027,6 +1046,197 @@ class QuizletAssignmentResult(Base):
             "incorrect_answers": self.incorrect_answers,
             "skipped_words": self.skipped_words,
             "elapsed_seconds": self.elapsed_seconds,
+        }
+
+
+class TaskBankItem(Base):
+    __tablename__ = "task_bank_items"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    title: Mapped[str] = mapped_column(String(256), nullable=False)
+    sort: Mapped[int] = mapped_column(Integer, default=500, nullable=False)
+    task_name: Mapped[str] = mapped_column(String(64), nullable=False)
+    task_json: Mapped[str] = mapped_column(Text, nullable=False)
+    is_hidden: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    is_customized: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+    lesson_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey(LESSONS_ID))
+    lesson: Mapped[Optional["Lesson"]] = relationship("Lesson", uselist=False)
+
+    source_assessment_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("assessments.id"))
+    source_assessment: Mapped[Optional["Assessment"]] = relationship("Assessment", uselist=False)
+
+    source_task_index: Mapped[Optional[int]] = mapped_column(Integer)
+    source_block_index: Mapped[Optional[int]] = mapped_column(Integer)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text("now()"), nullable=False)
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text("now()"), nullable=False)
+
+    assignment_tasks: Mapped[list["HomeworkAssignmentTask"]] = relationship("HomeworkAssignmentTask",
+                                                                            back_populates="task_bank_item")
+
+    __table_args__ = (UniqueConstraint('source_assessment_id', 'source_task_index', name='idx_task_bank_source_task'), )
+    __mapper_args__ = {'eager_defaults': True}
+
+    def __json__(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "sort": self.sort,
+            "task_name": self.task_name,
+            "task": json.loads(self.task_json),
+            "is_hidden": self.is_hidden,
+            "is_customized": self.is_customized,
+            "lesson_id": self.lesson_id,
+            "source_assessment_id": self.source_assessment_id,
+            "source_task_index": self.source_task_index,
+            "source_block_index": self.source_block_index,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
+        }
+
+
+class HomeworkAssignment(Base):
+    __tablename__ = "homework_assignments"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    title: Mapped[str] = mapped_column(String(256), nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text("now()"), nullable=False)
+
+    created_by_id: Mapped[int] = mapped_column(Integer, ForeignKey(USERS_ID), nullable=False)
+    created_by: Mapped["User"] = relationship("User", back_populates="homework_assignments_created")
+
+    tasks: Mapped[list["HomeworkAssignmentTask"]] = relationship("HomeworkAssignmentTask",
+                                                                 back_populates="assignment",
+                                                                 cascade="all, delete-orphan")
+    targets: Mapped[list["HomeworkAssignmentTarget"]] = relationship("HomeworkAssignmentTarget",
+                                                                     back_populates="assignment",
+                                                                     cascade="all, delete-orphan")
+
+    __mapper_args__ = {'eager_defaults': True}
+
+    def __json__(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "created_at": self.created_at,
+            "created_by_id": self.created_by_id,
+        }
+
+
+class TaskBankHiddenLesson(Base):
+    __tablename__ = "task_bank_hidden_lessons"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    lesson_id: Mapped[int] = mapped_column(Integer, ForeignKey(LESSONS_ID), nullable=False, unique=True)
+    lesson: Mapped["Lesson"] = relationship("Lesson", uselist=False)
+
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text("now()"), nullable=False)
+
+    __mapper_args__ = {'eager_defaults': True}
+
+    def __json__(self):
+        return {
+            "id": self.id,
+            "lesson_id": self.lesson_id,
+            "created_at": self.created_at,
+        }
+
+
+class HomeworkAssignmentTask(Base):
+    __tablename__ = "homework_assignment_tasks"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    assignment_id: Mapped[int] = mapped_column(Integer, ForeignKey("homework_assignments.id"), nullable=False)
+    assignment: Mapped["HomeworkAssignment"] = relationship("HomeworkAssignment", back_populates="tasks")
+
+    task_bank_item_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("task_bank_items.id"))
+    task_bank_item: Mapped[Optional["TaskBankItem"]] = relationship("TaskBankItem", back_populates="assignment_tasks")
+
+    lesson_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey(LESSONS_ID))
+    lesson: Mapped[Optional["Lesson"]] = relationship("Lesson", uselist=False)
+
+    title: Mapped[str] = mapped_column(String(256), nullable=False)
+    task_name: Mapped[str] = mapped_column(String(64), nullable=False)
+    task_json: Mapped[str] = mapped_column(Text, nullable=False)
+    sort: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+    def __json__(self):
+        return {
+            "id": self.id,
+            "assignment_id": self.assignment_id,
+            "task_bank_item_id": self.task_bank_item_id,
+            "lesson_id": self.lesson_id,
+            "title": self.title,
+            "task_name": self.task_name,
+            "task": json.loads(self.task_json),
+            "sort": self.sort,
+        }
+
+
+class HomeworkAssignmentTarget(Base):
+    __tablename__ = "homework_assignment_targets"
+
+    class Status:
+        PENDING = "pending"
+        COMPLETED = "completed"
+        CANCELLED = "cancelled"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    assignment_id: Mapped[int] = mapped_column(Integer, ForeignKey("homework_assignments.id"), nullable=False)
+    assignment: Mapped["HomeworkAssignment"] = relationship("HomeworkAssignment", back_populates="targets")
+
+    student_id: Mapped[int] = mapped_column(Integer, ForeignKey(USERS_ID), nullable=False)
+    student: Mapped["User"] = relationship("User", back_populates="homework_assignment_targets")
+
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default=Status.PENDING)
+    assigned_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text("now()"), nullable=False)
+    completed_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
+
+    tries: Mapped[list["HomeworkTry"]] = relationship("HomeworkTry",
+                                                      back_populates="target",
+                                                      cascade="all, delete-orphan")
+
+    __table_args__ = (UniqueConstraint('assignment_id', 'student_id', name='idx_homework_assignment_target'), )
+    __mapper_args__ = {'eager_defaults': True}
+
+
+class HomeworkTry(Base):
+    __tablename__ = "homework_tries"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    assignment_id: Mapped[int] = mapped_column(Integer, ForeignKey("homework_assignments.id"), nullable=False)
+    assignment: Mapped["HomeworkAssignment"] = relationship("HomeworkAssignment", uselist=False)
+
+    target_id: Mapped[int] = mapped_column(Integer, ForeignKey("homework_assignment_targets.id"), nullable=False)
+    target: Mapped["HomeworkAssignmentTarget"] = relationship("HomeworkAssignmentTarget", back_populates="tries")
+
+    student_id: Mapped[int] = mapped_column(Integer, ForeignKey(USERS_ID), nullable=False)
+    student: Mapped["User"] = relationship("User", back_populates="homework_tries")
+
+    start_datetime: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
+    end_datetime: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
+    done_tasks: Mapped[str] = mapped_column(Text, nullable=False)
+    checked_tasks: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (UniqueConstraint('target_id', name='idx_homework_try_target'), )
+    __mapper_args__ = {'eager_defaults': True}
+
+    def __json__(self):
+        return {
+            "id": self.id,
+            "assignment_id": self.assignment_id,
+            "target_id": self.target_id,
+            "student_id": self.student_id,
+            "start_datetime": self.start_datetime,
+            "end_datetime": self.end_datetime,
+            "done_tasks": json.loads(self.done_tasks),
+            "checked_tasks": json.loads(self.checked_tasks),
         }
 
 

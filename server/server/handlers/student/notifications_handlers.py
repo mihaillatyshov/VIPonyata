@@ -181,6 +181,17 @@ def get_notifications():
 
             item_data["quizlet_assignment"] = {"id": assignment.id, "title": assignment.title}
 
+        if item_data.get("type") == "homework_assignment":
+            assignment_id = item_data.get("assignment_id")
+            if not isinstance(assignment_id, int):
+                continue
+
+            assignment = DBQS.get_homework_assignment_by_id_for_student(assignment_id, get_current_user_id())
+            if assignment is None:
+                continue
+
+            item_data["homework_assignment"] = {"id": assignment.id, "title": assignment.title}
+
         item_data = _parse_quizlet_dictionary_notification(item_data)
         result.append(item_data)
 

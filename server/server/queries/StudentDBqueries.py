@@ -9,15 +9,16 @@ from sqlalchemy.sql.expression import func
 from server.common import DBsession
 from server.exceptions.ApiExceptions import (ActivityNotFoundException, CourseNotFoundException, InvalidAPIUsage,
                                              LessonNotFoundException)
+from server.handlers.common.assessment_task_flow import check_task_req, parse_new_tasks, parse_student_req
 from server.log_lib import LogI
 from server.models.db_models import (
     ActivityTryType, ActivityType, Assessment, AssessmentTry, AssessmentTryType, AssessmentType, Course, Dictionary,
     Drilling, DrillingCard, DrillingTry, FinalBoss, FinalBossTry, Hieroglyph, HieroglyphCard, HieroglyphTry, Lesson,
-    LexisCardType, LexisTryType, LexisType, NotificationStudentToTeacher, NotificationTeacherToStudent,
-    QuizletAssignment, QuizletAssignmentResult, QuizletAssignmentSubgroup, QuizletAssignmentTarget,
-    QuizletAssignmentTargetSubgroup, QuizletDictionary, QuizletGroup, QuizletSession, QuizletSessionIncorrectWord,
-    QuizletSessionWord, QuizletSubgroup, QuizletSubgroupWord, User, UserDictionary, UserQuizletLesson,
-    UserQuizletSubgroup, UserQuizletWord)
+    HomeworkAssignment, HomeworkAssignmentTask, HomeworkAssignmentTarget, HomeworkTry, LexisCardType, LexisTryType,
+    LexisType, NotificationStudentToTeacher, NotificationTeacherToStudent, QuizletAssignment, QuizletAssignmentResult,
+    QuizletAssignmentSubgroup, QuizletAssignmentTarget, QuizletAssignmentTargetSubgroup, QuizletDictionary,
+    QuizletGroup, QuizletSession, QuizletSessionIncorrectWord, QuizletSessionWord, QuizletSubgroup, QuizletSubgroupWord,
+    TaskBankItem, User, UserDictionary, UserQuizletLesson, UserQuizletSubgroup, UserQuizletWord)
 from server.models.assessment import AssessmentTaskName
 from server.models.dictionary import DictionaryAssociationReq, DictionaryImgReq
 from server.models.quizlet import (QuizletEndSessionReq, QuizletFlashcardAnswerReq, QuizletPersonalLessonCreateReq,
@@ -906,6 +907,160 @@ def get_quizlet_assignment_by_id_for_student(assignment_id: int, user_id: int) -
                 QuizletAssignmentTarget, QuizletAssignmentTarget.assignment_id == QuizletAssignment.id).where(
                     QuizletAssignmentTarget.student_id == user_id).where(
                         QuizletAssignmentTarget.status != QuizletAssignmentTarget.Status.CANCELLED)).one_or_none()
+
+
+def get_task_bank_items_for_student(task_bank_item_ids: list[int]) -> list[TaskBankItem]:
+    if len(task_bank_item_ids) == 0:
+        return []
+
+    with DBsession.begin() as session:
+        return session.scalars(select(TaskBankItem).where(TaskBankItem.id.in_(task_bank_item_ids))).all()
+
+
+def get_homework_assignments_for_student(user_id: int) -> list[dict]:
+    with DBsession.begin() as session:
+        targets = session.scalars(
+            select(HomeworkAssignmentTarget).where(HomeworkAssignmentTarget.student_id == user_id).where(
+                HomeworkAssignmentTarget.status != HomeworkAssignmentTarget.Status.CANCELLED).order_by(
+                    HomeworkAssignmentTarget.assigned_at.desc()).order_by(HomeworkAssignmentTarget.id.desc())).all()
+
+        result: list[dict] = []
+        for target in targets:
+            assignment = session.scalars(
+                select(HomeworkAssignment).where(HomeworkAssignment.id == target.assignment_id)).one_or_none()
+            if assignment is None:
+                continue
+
+            assignment_tasks = session.scalars(
+                select(HomeworkAssignmentTask).where(HomeworkAssignmentTask.assignment_id == assignment.id).order_by(
+                    HomeworkAssignmentTask.sort).order_by(HomeworkAssignmentTask.id)).all()
+            homework_try = session.scalars(
+                select(HomeworkTry).where(HomeworkTry.target_id == target.id).order_by(HomeworkTry.id.desc())).first()
+
+            result.append({
+                "assignment":
+                assignment.__json__(),
+                "target": {
+                    "id": target.id,
+                    "status": target.status,
+                    "assigned_at": target.assigned_at,
+                    "completed_at": target.completed_at,
+                },
+                "tasks": [task.__json__() for task in assignment_tasks],
+                "try":
+                None if homework_try is None else homework_try.__json__(),
+                "active_try_id":
+                None if homework_try is None or homework_try.end_datetime is not None else homework_try.id,
+            })
+
+        return result
+
+
+def get_homework_assignment_by_id_for_student(assignment_id: int, user_id: int) -> HomeworkAssignment | None:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(HomeworkAssignment).where(HomeworkAssignment.id == assignment_id).join(
+                HomeworkAssignmentTarget, HomeworkAssignmentTarget.assignment_id == HomeworkAssignment.id).where(
+                    HomeworkAssignmentTarget.student_id == user_id).where(
+                        HomeworkAssignmentTarget.status != HomeworkAssignmentTarget.Status.CANCELLED)).one_or_none()
+
+
+def start_homework_assignment(user_id: int, assignment_id: int) -> HomeworkTry:
+    with DBsession.begin() as session:
+        assignment = session.scalars(
+            select(HomeworkAssignment).where(HomeworkAssignment.id == assignment_id)).one_or_none()
+        if assignment is None:
+            raise InvalidAPIUsage("Homework assignment not found", 404)
+
+        target = session.scalars(
+            select(HomeworkAssignmentTarget).where(HomeworkAssignmentTarget.assignment_id == assignment_id).where(
+                HomeworkAssignmentTarget.student_id == user_id)).one_or_none()
+        if target is None:
+            raise InvalidAPIUsage("You do not have access to this homework assignment", 403)
+        if target.status == HomeworkAssignmentTarget.Status.CANCELLED:
+            raise InvalidAPIUsage("Assignment was cancelled", 403)
+
+        existing_try = session.scalars(
+            select(HomeworkTry).where(HomeworkTry.target_id == target.id).order_by(HomeworkTry.id.desc())).first()
+        if existing_try is not None:
+            return existing_try
+
+        assignment_tasks = session.scalars(
+            select(HomeworkAssignmentTask).where(HomeworkAssignmentTask.assignment_id == assignment_id).order_by(
+                HomeworkAssignmentTask.sort).order_by(HomeworkAssignmentTask.id)).all()
+        if len(assignment_tasks) == 0:
+            raise InvalidAPIUsage("Assignment has no tasks", 400)
+
+        teacher_tasks = [json.loads(task.task_json) for task in assignment_tasks]
+        new_tasks = parse_new_tasks(json.dumps(teacher_tasks, ensure_ascii=False))
+        checked_tasks = check_task_req(new_tasks)
+
+        homework_try = HomeworkTry(assignment_id=assignment_id,
+                                   target_id=target.id,
+                                   student_id=user_id,
+                                   start_datetime=datetime.now(),
+                                   done_tasks=json.dumps(new_tasks, ensure_ascii=False),
+                                   checked_tasks=json.dumps(checked_tasks, ensure_ascii=False))
+        session.add(homework_try)
+        session.flush()
+        return homework_try
+
+
+def get_homework_try(homework_try_id: int, user_id: int) -> HomeworkTry:
+    with DBsession.begin() as session:
+        homework_try = session.scalars(
+            select(HomeworkTry).where(HomeworkTry.id == homework_try_id).where(
+                HomeworkTry.student_id == user_id)).one_or_none()
+        if homework_try is None:
+            raise InvalidAPIUsage("Homework try not found", 404)
+        return homework_try
+
+
+def _save_homework_try_state(session, user_id: int, assignment_id: int, done_tasks_json: list[dict]) -> HomeworkTry:
+    target = session.scalars(
+        select(HomeworkAssignmentTarget).where(HomeworkAssignmentTarget.assignment_id == assignment_id).where(
+            HomeworkAssignmentTarget.student_id == user_id)).one_or_none()
+    if target is None:
+        raise InvalidAPIUsage("Homework assignment target not found", 404)
+    if target.status == HomeworkAssignmentTarget.Status.CANCELLED:
+        raise InvalidAPIUsage("Assignment was cancelled", 403)
+
+    homework_try = session.scalars(
+        select(HomeworkTry).where(HomeworkTry.target_id == target.id).order_by(HomeworkTry.id.desc())).first()
+    if homework_try is None:
+        raise InvalidAPIUsage("Homework try not found", 404)
+    if homework_try.end_datetime is not None:
+        return homework_try
+
+    db_done_tasks = json.loads(homework_try.done_tasks)
+    done_tasks_list = parse_student_req(done_tasks_json, db_done_tasks)
+    checked_tasks_list = check_task_req(done_tasks_list)
+    homework_try.done_tasks = json.dumps(done_tasks_list, ensure_ascii=False)
+    homework_try.checked_tasks = json.dumps(checked_tasks_list, ensure_ascii=False)
+    return homework_try
+
+
+def save_homework_assignment_progress(user_id: int, assignment_id: int, done_tasks_json: list[dict]) -> HomeworkTry:
+    with DBsession.begin() as session:
+        return _save_homework_try_state(session, user_id, assignment_id, done_tasks_json)
+
+
+def end_homework_assignment(user_id: int, assignment_id: int, done_tasks_json: list[dict]) -> HomeworkTry:
+    with DBsession.begin() as session:
+        homework_try = _save_homework_try_state(session, user_id, assignment_id, done_tasks_json)
+        if homework_try.end_datetime is None:
+            homework_try.end_datetime = datetime.now()
+
+            target = session.scalars(
+                select(HomeworkAssignmentTarget).where(
+                    HomeworkAssignmentTarget.id == homework_try.target_id)).one_or_none()
+            if target is not None:
+                target.status = HomeworkAssignmentTarget.Status.COMPLETED
+                target.completed_at = homework_try.end_datetime
+
+            session.add(NotificationStudentToTeacher(homework_try_id=homework_try.id, viewed=False))
+
+        return homework_try
 
 
 def start_quizlet_assignment_session(user_id: int, assignment_id: int) -> QuizletSession:

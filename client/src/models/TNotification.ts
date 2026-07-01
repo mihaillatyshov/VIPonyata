@@ -41,6 +41,12 @@ type TTeacherNotificationActivity = {
               elapsed_seconds: number;
           };
       }
+    | {
+          type: "homework_try";
+          activity_try: TNotificationAssessmentType & {
+              elapsed_seconds?: number | null;
+          };
+      }
 );
 
 interface TStudentNotificationShareLesson {
@@ -59,6 +65,15 @@ interface TStudentNotificationQuizletAssignment {
     type: "quizlet_assignment";
     assignment_id: number;
     quizlet_assignment?: {
+        id: number;
+        title: string;
+    };
+}
+
+interface TStudentNotificationHomeworkAssignment {
+    type: "homework_assignment";
+    assignment_id: number;
+    homework_assignment?: {
         id: number;
         title: string;
     };
@@ -93,19 +108,27 @@ export type TStudentNotificationShareAny = TNotificationBase &
         | TStudentNotificationShareLesson
         | TStudentNotificationShareCourse
         | TStudentNotificationQuizletAssignment
+        | TStudentNotificationHomeworkAssignment
         | TStudentNotificationQuizletPersonalDictionaryUpdate
         | TStudentNotificationQuizletPersonalDictionaryTopicCreated
         | TStudentNotificationQuizletPersonalDictionaryTopicUpdated
         | TStudentNotificationQuizletPersonalDictionaryTopicDeleted
     );
 
-type TStudentNotificationActivityBase = {
-    activity_try_id: number;
-    lesson: TLesson;
-    type: "assessment_try" | "final_boss_try";
-    activity: TAssessment;
-    activity_try: TNotificationAssessmentType;
-};
+type TStudentNotificationActivityBase =
+    | {
+          activity_try_id: number;
+          lesson: TLesson;
+          type: "assessment_try" | "final_boss_try";
+          activity: TAssessment;
+      }
+    | {
+          type: "homework_try";
+          activity_try: TNotificationAssessmentType & {
+              elapsed_seconds?: number | null;
+          };
+          activity_try: TNotificationAssessmentType;
+      };
 
 export type TStudentNotificationActivity = TNotificationBase & TStudentNotificationActivityBase;
 

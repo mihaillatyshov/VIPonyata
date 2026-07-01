@@ -740,6 +740,101 @@ def start_quizlet_assignment_session(assignment_id):
 
 
 #########################################################################################################################
+################ Tasks ##################################################################################################
+#########################################################################################################################
+@routes_bp.route("/tasks/options", methods=["GET"])
+@login_required
+def get_tasks_options():
+    return user_selector_function(teacher_funcs.get_tasks_options, None)
+
+
+@routes_bp.route("/tasks/bank", methods=["GET"])
+@login_required
+def get_task_bank():
+    return user_selector_function(teacher_funcs.get_task_bank, None)
+
+
+@routes_bp.route("/tasks/bank", methods=["POST"])
+@login_required
+def create_task_bank_item():
+    return user_selector_function(teacher_funcs.create_task_bank_item, None)
+
+
+@routes_bp.route("/tasks/bank/<int:item_id>", methods=["PATCH"])
+@login_required
+def update_task_bank_item(item_id):
+    return user_selector_function(teacher_funcs.update_task_bank_item, None, item_id=item_id)
+
+
+@routes_bp.route("/tasks/bank/<int:item_id>", methods=["DELETE"])
+@login_required
+def delete_task_bank_item(item_id):
+    return user_selector_function(teacher_funcs.delete_task_bank_item, None, item_id=item_id)
+
+
+@routes_bp.route("/tasks/bank/lessons/<int:lesson_id>/hidden", methods=["POST"])
+@login_required
+def hide_task_bank_lesson(lesson_id):
+    return user_selector_function(teacher_funcs.hide_task_bank_lesson, None, lesson_id=lesson_id)
+
+
+@routes_bp.route("/tasks/bank/lessons/<int:lesson_id>/hidden", methods=["DELETE"])
+@login_required
+def show_task_bank_lesson(lesson_id):
+    return user_selector_function(teacher_funcs.show_task_bank_lesson, None, lesson_id=lesson_id)
+
+
+@routes_bp.route("/tasks/assignments", methods=["POST"])
+@login_required
+def create_homework_assignment():
+    return user_selector_function(teacher_funcs.create_homework_assignment, None)
+
+
+@routes_bp.route("/tasks/assignments", methods=["GET"])
+@login_required
+def get_homework_assignments():
+    return user_selector_function(teacher_funcs.get_homework_assignments, None)
+
+
+@routes_bp.route("/tasks/assignment-targets/<int:target_id>", methods=["DELETE"])
+@login_required
+def cancel_homework_assignment_target(target_id):
+    return user_selector_function(teacher_funcs.cancel_homework_assignment_target, None, target_id=target_id)
+
+
+@routes_bp.route("/tasks/assignments/my", methods=["GET"])
+@login_required
+def get_my_homework_assignments():
+    return user_selector_function(None, student_funcs.get_my_homework_assignments)
+
+
+@routes_bp.route("/tasks/assignments/<int:assignment_id>/start", methods=["POST"])
+@login_required
+def start_homework_assignment(assignment_id):
+    return user_selector_function(None, student_funcs.start_homework_assignment, assignment_id=assignment_id)
+
+
+@routes_bp.route("/tasks/assignments/<int:assignment_id>/save", methods=["POST"])
+@login_required
+def save_homework_assignment(assignment_id):
+    return user_selector_function(None, student_funcs.save_homework_assignment, assignment_id=assignment_id)
+
+
+@routes_bp.route("/tasks/assignments/<int:assignment_id>/end", methods=["POST"])
+@login_required
+def end_homework_assignment(assignment_id):
+    return user_selector_function(None, student_funcs.end_homework_assignment, assignment_id=assignment_id)
+
+
+@routes_bp.route("/tasks/tries/<int:homework_try_id>", methods=["GET"])
+@login_required
+def get_homework_try(homework_try_id):
+    return user_selector_function(teacher_funcs.get_homework_try_result,
+                                  student_funcs.get_homework_try,
+                                  homework_try_id=homework_try_id)
+
+
+#########################################################################################################################
 ################ Notifications ##########################################################################################
 #########################################################################################################################
 @routes_bp.route("/notifications", methods=["GET"])

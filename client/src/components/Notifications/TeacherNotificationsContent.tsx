@@ -33,6 +33,8 @@ const hasLink = (item: TTeacherNotificationWithActivity): boolean => {
         case "hieroglyph_try":
         case "quizlet_assignment_result":
             return false;
+        case "homework_try":
+            return true;
         case "assessment_try":
         case "final_boss_try":
             return true;
@@ -51,6 +53,8 @@ const getLinkByName = (item: TTeacherNotificationWithActivity) => {
             return "final_boss/try";
         case "quizlet_assignment_result":
             return "";
+        case "homework_try":
+            return "tasks/tries";
     }
 };
 
@@ -69,7 +73,7 @@ const getMistakesCount = (item: TTeacherNotificationWithActivity): number | null
 };
 
 const getCorrectAnswersCount = (item: TTeacherNotificationWithActivity): number | null => {
-    if (item.type !== "quizlet_assignment_result") {
+    if (item.type !== "quizlet_assignment_result" && item.type !== "homework_try") {
         return null;
     }
 
@@ -87,7 +91,7 @@ const getSkippedWordsCount = (item: TTeacherNotificationWithActivity): number | 
 };
 
 const getElapsedSeconds = (item: TTeacherNotificationWithActivity): number | null => {
-    if (item.type !== "quizlet_assignment_result") {
+    if (item.type !== "quizlet_assignment_result" && item.type !== "homework_try") {
         return null;
     }
 
@@ -161,7 +165,7 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
                 <i className="bi bi-clock" aria-hidden="true"></i>
                 <span>{time}</span>
             </div>
-            {item.type === "quizlet_assignment_result" ? (
+            {item.type === "quizlet_assignment_result" || item.type === "homework_try" ? (
                 <>
                     <div className="notification__item-chip" title="Количество ошибок">
                         <i className="bi bi-exclamation-circle" aria-hidden="true"></i>
@@ -171,10 +175,12 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
                         <i className="bi bi-check-circle" aria-hidden="true"></i>
                         <span>{correctAnswersCount ?? "-"}</span>
                     </div>
-                    <div className="notification__item-chip" title="Не повторено">
-                        <i className="bi bi-dash-circle" aria-hidden="true"></i>
-                        <span>{skippedWordsCount ?? "-"}</span>
-                    </div>
+                    {item.type === "quizlet_assignment_result" ? (
+                        <div className="notification__item-chip" title="Не повторено">
+                            <i className="bi bi-dash-circle" aria-hidden="true"></i>
+                            <span>{skippedWordsCount ?? "-"}</span>
+                        </div>
+                    ) : null}
                     <div className="notification__item-chip" title="Время выполнения">
                         <i className="bi bi-stopwatch" aria-hidden="true"></i>
                         <span>{elapsedSeconds !== null ? formatDuration(elapsedSeconds) : "-"}</span>

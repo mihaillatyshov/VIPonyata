@@ -9,20 +9,20 @@ from server.common import DBsession
 from server.exceptions.ApiExceptions import InvalidAPIUsage
 from server.models.assessment import AssessmentCreateReqStr
 from server.models.course import CourseCreateReq
-from server.models.db_models import (ActivityTryType, Assessment, AssessmentTry, AssessmentTryType, AssessmentType,
-                                     Course, Dictionary, Drilling, DrillingCard, DrillingTry, FinalBoss, FinalBossTry,
-                                     Hieroglyph, HieroglyphCard, HieroglyphTry, Lesson, LexisCardType, LexisTryType,
-                                     LexisType, NotificationStudentToTeacher, NotificationTeacherToStudent,
-                                     QuizletAssignment, QuizletAssignmentResult, QuizletAssignmentSubgroup,
-                                     QuizletAssignmentTarget, QuizletAssignmentTargetSubgroup, QuizletDictionary,
-                                     QuizletGroup, QuizletSubgroup, QuizletSubgroupWord, User, UserDictionary,
-                                     UserQuizletLesson, UserQuizletSubgroup, UserQuizletWord, QuizletSession,
-                                     a_users_courses, a_users_lessons)
+from server.models.db_models import (
+    ActivityTryType, Assessment, AssessmentTry, AssessmentTryType, AssessmentType, Course, Dictionary, Drilling,
+    DrillingCard, DrillingTry, FinalBoss, FinalBossTry, HomeworkAssignment, HomeworkAssignmentTarget,
+    HomeworkAssignmentTask, HomeworkTry, Hieroglyph, HieroglyphCard, HieroglyphTry, Lesson, LexisCardType, LexisTryType,
+    LexisType, NotificationStudentToTeacher, NotificationTeacherToStudent, QuizletAssignment, QuizletAssignmentResult,
+    QuizletAssignmentSubgroup, QuizletAssignmentTarget, QuizletAssignmentTargetSubgroup, QuizletDictionary,
+    QuizletGroup, QuizletSubgroup, QuizletSubgroupWord, TaskBankHiddenLesson, TaskBankItem, User, UserDictionary,
+    UserQuizletLesson, UserQuizletSubgroup, UserQuizletWord, QuizletSession, a_users_courses, a_users_lessons)
 from server.models.dictionary import (DictionaryCreateReq, DictionaryCreateReqItem)
 from server.models.lesson import LessonCreateReq
 from server.models.lexis import LexisCardCreateReq, LexisCreateReq
 from server.models.quizlet import (QuizletGroupCreateReq, QuizletSubgroupCreateReq, QuizletWordCreateReq,
                                    QuizletAssignmentCreateReq, QuizletWordsBatchCreateReq, QuizletWordUpdateReq)
+from server.models.tasks import HomeworkAssignmentCreateReq, TaskBankItemCreateReq, TaskBankItemUpdateReq
 
 
 #########################################################################################################################
@@ -730,12 +730,329 @@ def get_all_lessons_for_assignment() -> list[Lesson]:
             Lesson.id)).all()
 
 
+def get_hidden_task_bank_lesson_ids() -> list[int]:
+    with DBsession.begin() as session:
+        return session.scalars(select(TaskBankHiddenLesson.lesson_id).order_by(TaskBankHiddenLesson.lesson_id)).all()
+
+
+def hide_task_bank_lesson(lesson_id: int) -> TaskBankHiddenLesson:
+    with DBsession.begin() as session:
+        _ensure_task_bank_lesson_exists(session, lesson_id)
+
+        hidden_lesson = session.scalars(
+            select(TaskBankHiddenLesson).where(TaskBankHiddenLesson.lesson_id == lesson_id)).one_or_none()
+        if hidden_lesson is not None:
+            return hidden_lesson
+
+        hidden_lesson = TaskBankHiddenLesson(lesson_id=lesson_id)
+        session.add(hidden_lesson)
+        session.flush()
+        return hidden_lesson
+
+
+def show_task_bank_lesson(lesson_id: int) -> None:
+    with DBsession.begin() as session:
+        hidden_lesson = session.scalars(
+            select(TaskBankHiddenLesson).where(TaskBankHiddenLesson.lesson_id == lesson_id)).one_or_none()
+        if hidden_lesson is None:
+            return
+
+        session.delete(hidden_lesson)
+
+
+def _task_title_from_source(lesson_name: str, task_name: str, task_index: int, block_index: int | None) -> str:
+    if block_index is None:
+        return f"{lesson_name}_{task_name}_{task_index}"
+
+    return f"{lesson_name}_блок_{block_index}_{task_name}_{task_index}"
+
+
+def _is_bankable_task_name(task_name: str) -> bool:
+    return task_name not in ["block_begin", "block_end"]
+
+
+def _ensure_task_bank_lesson_exists(session, lesson_id: int | None) -> None:
+    if lesson_id is None:
+        return
+
+    lesson_exists = session.scalars(select(Lesson.id).where(Lesson.id == lesson_id)).one_or_none()
+    if lesson_exists is None:
+        raise InvalidAPIUsage("Lesson not found", 404)
+
+
+def sync_task_bank_items_from_assessments() -> None:
+    with DBsession.begin() as session:
+        existing_items = {(item.source_assessment_id, item.source_task_index): item
+                          for item in session.scalars(
+                              select(TaskBankItem).where(TaskBankItem.source_assessment_id != None).where(
+                                  TaskBankItem.source_task_index != None)).all()}
+        lesson_names_by_id = {lesson.id: lesson.name for lesson in session.scalars(select(Lesson)).all()}
+
+        assessments = session.scalars(select(Assessment).order_by(Assessment.lesson_id).order_by(Assessment.id)).all()
+        for assessment in assessments:
+            tasks = json.loads(assessment.tasks or "[]")
+            lesson_name = lesson_names_by_id.get(assessment.lesson_id, f"lesson_{assessment.lesson_id}")
+            lesson_task_index = 0
+            current_block_index: int | None = None
+            next_block_index = 1
+            for task_index, task in enumerate(tasks):
+                task_name = str(task.get("name") or "task")
+
+                if task_name == "block_begin":
+                    current_block_index = next_block_index
+                    next_block_index += 1
+                    continue
+
+                if task_name == "block_end":
+                    current_block_index = None
+                    continue
+
+                if not _is_bankable_task_name(task_name):
+                    continue
+
+                lesson_task_index += 1
+                source_key = (assessment.id, task_index)
+                title = _task_title_from_source(lesson_name, task_name, lesson_task_index, current_block_index)
+                task_json = json.dumps(task, ensure_ascii=False)
+                existing_item = existing_items.get(source_key)
+
+                if existing_item is None:
+                    session.add(
+                        TaskBankItem(title=title,
+                                     task_name=task_name,
+                                     task_json=task_json,
+                                     lesson_id=assessment.lesson_id,
+                                     source_assessment_id=assessment.id,
+                                     source_task_index=task_index,
+                                     source_block_index=current_block_index))
+                    continue
+
+                if existing_item.is_customized:
+                    continue
+
+                existing_item.title = title
+                existing_item.task_name = task_name
+                existing_item.task_json = task_json
+                existing_item.lesson_id = assessment.lesson_id
+                existing_item.source_block_index = current_block_index
+                existing_item.updated_at = datetime.now()
+
+
+def get_task_bank_items() -> list[TaskBankItem]:
+    sync_task_bank_items_from_assessments()
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(TaskBankItem).where(TaskBankItem.is_hidden == False).outerjoin(TaskBankItem.lesson).order_by(
+                TaskBankItem.lesson_id.is_(None)).order_by(Lesson.course_id).order_by(Lesson.number).order_by(
+                    Lesson.id).order_by(TaskBankItem.source_block_index.is_(None)).order_by(
+                        TaskBankItem.source_block_index).order_by(TaskBankItem.sort).order_by(
+                            TaskBankItem.source_task_index).order_by(TaskBankItem.id)).all()
+
+
+def get_task_bank_item_by_id(item_id: int) -> TaskBankItem | None:
+    with DBsession.begin() as session:
+        return session.scalars(select(TaskBankItem).where(TaskBankItem.id == item_id)).one_or_none()
+
+
+def create_task_bank_item(data: TaskBankItemCreateReq) -> TaskBankItem:
+    with DBsession.begin() as session:
+        _ensure_task_bank_lesson_exists(session, data.lesson_id)
+        task_json = json.dumps(data.task.model_dump(), ensure_ascii=False)
+        item = TaskBankItem(title=data.title,
+                            sort=data.sort,
+                            task_name=data.task.name,
+                            task_json=task_json,
+                            lesson_id=data.lesson_id,
+                            updated_at=datetime.now())
+        session.add(item)
+        session.flush()
+        return item
+
+
+def update_task_bank_item(item_id: int, data: TaskBankItemUpdateReq) -> TaskBankItem:
+    with DBsession.begin() as session:
+        item = session.scalars(select(TaskBankItem).where(TaskBankItem.id == item_id)).one_or_none()
+        if item is None:
+            raise InvalidAPIUsage("Task bank item not found", 404)
+
+        _ensure_task_bank_lesson_exists(session, data.lesson_id)
+        lesson_changed = item.lesson_id != data.lesson_id
+        item.title = data.title
+        item.sort = data.sort
+        item.task_name = data.task.name
+        item.task_json = json.dumps(data.task.model_dump(), ensure_ascii=False)
+        item.lesson_id = data.lesson_id
+        if lesson_changed:
+            item.source_block_index = None
+        item.is_customized = True
+        item.updated_at = datetime.now()
+        session.flush()
+        return item
+
+
+def delete_task_bank_item(item_id: int) -> None:
+    with DBsession.begin() as session:
+        item = session.scalars(select(TaskBankItem).where(TaskBankItem.id == item_id)).one_or_none()
+        if item is None:
+            raise InvalidAPIUsage("Task bank item not found", 404)
+
+        linked_assignment_task = session.scalars(
+            select(HomeworkAssignmentTask.id).where(HomeworkAssignmentTask.task_bank_item_id == item_id)).one_or_none()
+        if linked_assignment_task is not None:
+            raise InvalidAPIUsage("Task bank item is already used in assignments", 400)
+
+        if item.source_assessment_id is not None and item.source_task_index is not None:
+            item.is_hidden = True
+            item.updated_at = datetime.now()
+            session.flush()
+            return
+
+        session.delete(item)
+
+
+def get_task_bank_completion_counts(student_id: int, task_bank_item_ids: list[int]) -> dict[int, int]:
+    if len(task_bank_item_ids) == 0:
+        return {}
+
+    with DBsession.begin() as session:
+        rows = session.execute(
+            select(HomeworkAssignmentTask.task_bank_item_id, HomeworkTry.id).join(
+                HomeworkAssignment, HomeworkAssignment.id == HomeworkAssignmentTask.assignment_id).join(
+                    HomeworkAssignmentTarget, HomeworkAssignmentTarget.assignment_id == HomeworkAssignment.id).join(
+                        HomeworkTry, HomeworkTry.target_id == HomeworkAssignmentTarget.id).where(
+                            HomeworkAssignmentTask.task_bank_item_id.in_(task_bank_item_ids)).where(
+                                HomeworkTry.student_id == student_id).where(HomeworkTry.end_datetime != None)).all()
+
+        counts: dict[int, int] = {}
+        for task_bank_item_id, _ in rows:
+            if task_bank_item_id is None:
+                continue
+            counts[task_bank_item_id] = counts.get(task_bank_item_id, 0) + 1
+
+        return counts
+
+
 def get_students_by_ids(user_ids: list[int]) -> list[User]:
     if len(user_ids) == 0:
         return []
 
     with DBsession.begin() as session:
         return session.scalars(select(User).where(User.id.in_(user_ids)).where(User.level == User.Level.STUDENT)).all()
+
+
+def create_homework_assignment(teacher_id: int, data: HomeworkAssignmentCreateReq) -> HomeworkAssignment:
+    with DBsession.begin() as session:
+        student_ids = list(dict.fromkeys(data.student_ids))
+        valid_student_ids = set(
+            session.scalars(select(User.id).where(
+                User.id.in_(student_ids)).where(User.level == User.Level.STUDENT)).all())
+        if len(valid_student_ids) == 0:
+            raise InvalidAPIUsage("No valid students found for assignment", 400)
+
+        if len(valid_student_ids) != len(student_ids):
+            raise InvalidAPIUsage("Some selected students do not exist", 400)
+
+        task_bank_item_ids = [task.task_bank_item_id for task in data.tasks if task.task_bank_item_id is not None]
+        existing_bank_item_ids = set()
+        if len(task_bank_item_ids) > 0:
+            existing_bank_item_ids = set(
+                session.scalars(select(TaskBankItem.id).where(TaskBankItem.id.in_(task_bank_item_ids))).all())
+            if len(existing_bank_item_ids) != len(set(task_bank_item_ids)):
+                raise InvalidAPIUsage("Some task bank items do not exist", 400)
+
+        assignment = HomeworkAssignment(title=data.title, created_by_id=teacher_id)
+        session.add(assignment)
+        session.flush()
+
+        for task in data.tasks:
+            _ensure_task_bank_lesson_exists(session, task.lesson_id)
+            if task.task_bank_item_id is not None and task.task_bank_item_id not in existing_bank_item_ids:
+                raise InvalidAPIUsage("Task bank item not found", 404)
+
+            session.add(
+                HomeworkAssignmentTask(assignment_id=assignment.id,
+                                       task_bank_item_id=task.task_bank_item_id,
+                                       lesson_id=task.lesson_id,
+                                       title=task.title,
+                                       task_name=task.task.name,
+                                       task_json=json.dumps(task.task.model_dump(), ensure_ascii=False),
+                                       sort=task.sort))
+
+        for student_id in student_ids:
+            target = HomeworkAssignmentTarget(assignment_id=assignment.id,
+                                              student_id=student_id,
+                                              status=HomeworkAssignmentTarget.Status.PENDING)
+            session.add(target)
+            session.add(
+                NotificationTeacherToStudent(student_id=student_id,
+                                             homework_assignment_id=assignment.id,
+                                             message=f"Вам выдано домашнее задание: {assignment.title}"))
+
+        session.flush()
+        return assignment
+
+
+def get_homework_assignments_by_creator(teacher_id: int) -> list[HomeworkAssignment]:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(HomeworkAssignment).where(HomeworkAssignment.created_by_id == teacher_id).order_by(
+                HomeworkAssignment.created_at.desc()).order_by(HomeworkAssignment.id.desc())).all()
+
+
+def get_homework_assignment_by_id(assignment_id: int) -> HomeworkAssignment | None:
+    with DBsession.begin() as session:
+        return session.scalars(select(HomeworkAssignment).where(HomeworkAssignment.id == assignment_id)).one_or_none()
+
+
+def get_homework_assignment_tasks(assignment_id: int) -> list[HomeworkAssignmentTask]:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(HomeworkAssignmentTask).where(HomeworkAssignmentTask.assignment_id == assignment_id).order_by(
+                HomeworkAssignmentTask.sort).order_by(HomeworkAssignmentTask.id)).all()
+
+
+def get_homework_assignment_targets(assignment_id: int) -> list[HomeworkAssignmentTarget]:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(HomeworkAssignmentTarget).where(HomeworkAssignmentTarget.assignment_id == assignment_id).order_by(
+                HomeworkAssignmentTarget.assigned_at.desc()).order_by(HomeworkAssignmentTarget.id.desc())).all()
+
+
+def get_homework_assignment_target(assignment_id: int, student_id: int) -> HomeworkAssignmentTarget | None:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(HomeworkAssignmentTarget).where(HomeworkAssignmentTarget.assignment_id == assignment_id).where(
+                HomeworkAssignmentTarget.student_id == student_id)).one_or_none()
+
+
+def get_homework_try_by_id(homework_try_id: int) -> HomeworkTry | None:
+    with DBsession.begin() as session:
+        return session.scalars(select(HomeworkTry).where(HomeworkTry.id == homework_try_id)).one_or_none()
+
+
+def get_homework_tries_by_assignment(assignment_id: int) -> list[HomeworkTry]:
+    with DBsession.begin() as session:
+        return session.scalars(
+            select(HomeworkTry).where(HomeworkTry.assignment_id == assignment_id).order_by(
+                HomeworkTry.start_datetime.desc()).order_by(HomeworkTry.id.desc())).all()
+
+
+def cancel_homework_assignment_target(teacher_id: int, target_id: int) -> HomeworkAssignmentTarget:
+    with DBsession.begin() as session:
+        target = session.scalars(
+            select(HomeworkAssignmentTarget).join(
+                HomeworkAssignment, HomeworkAssignment.id == HomeworkAssignmentTarget.assignment_id).where(
+                    HomeworkAssignmentTarget.id == target_id).where(
+                        HomeworkAssignment.created_by_id == teacher_id)).one_or_none()
+        if target is None:
+            raise InvalidAPIUsage("Assignment target not found", 404)
+        if target.status == HomeworkAssignmentTarget.Status.COMPLETED:
+            raise InvalidAPIUsage("Completed assignment cannot be cancelled", 400)
+
+        target.status = HomeworkAssignmentTarget.Status.CANCELLED
+        target.completed_at = None
+        session.flush()
+        return target
 
 
 def _ensure_char(word_char_jp: str | None, word_jp: str) -> str:

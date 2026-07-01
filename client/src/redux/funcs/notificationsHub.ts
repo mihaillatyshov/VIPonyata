@@ -12,6 +12,7 @@ import {
     setNotificationsHubData,
     setNotificationsHubError,
     setNotificationsHubLoading,
+    TStudentHomeworkAssignmentRecord,
     TStudentQuizletAssignmentRecord,
 } from "redux/slices/notificationsHubSlice";
 import { selectUser } from "redux/slices/userSlice";
@@ -50,6 +51,7 @@ export const useNotificationsHubSync = () => {
             const requests: [
                 Promise<{ notifications: TAnyNotifications }>,
                 Promise<{ assignments: TStudentQuizletAssignmentRecord[] }> | null,
+                Promise<{ assignments: TStudentHomeworkAssignmentRecord[] }> | null,
                 Promise<{ sessions: TQuizletSession[] }> | null,
             ] = [
                 AjaxGet<{ notifications: TAnyNotifications }>({ url: "/api/notifications" }),
@@ -60,17 +62,23 @@ export const useNotificationsHubSync = () => {
                       }),
                 isTeacher(user.userData)
                     ? null
+                    : AjaxGet<{ assignments: TStudentHomeworkAssignmentRecord[] }>({
+                          url: "/api/tasks/assignments/my",
+                      }),
+                isTeacher(user.userData)
+                    ? null
                     : AjaxGet<{ sessions: TQuizletSession[] }>({
                           url: "/api/quizlet/sessions/stats",
                       }),
             ];
 
-            Promise.all([requests[0], requests[1], requests[2]])
-                .then(([notificationsResponse, assignmentsResponse, sessionsResponse]) => {
+            Promise.all([requests[0], requests[1], requests[2], requests[3]])
+                .then(([notificationsResponse, assignmentsResponse, homeworkAssignmentsResponse, sessionsResponse]) => {
                     dispatch(
                         setNotificationsHubData({
                             notifications: notificationsResponse.notifications,
                             quizletAssignments: assignmentsResponse?.assignments ?? [],
+                            homeworkAssignments: homeworkAssignmentsResponse?.assignments ?? [],
                             quizletSessions: sessionsResponse?.sessions ?? [],
                             loadedAt: Date.now(),
                         }),

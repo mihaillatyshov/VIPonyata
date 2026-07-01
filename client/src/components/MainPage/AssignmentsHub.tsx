@@ -160,6 +160,15 @@ const getPendingAssignmentMeta = (item: THubAssignmentItem) => {
         );
     }
 
+    if (item.kind === "homework_assignment") {
+        metaItems.push({
+            key: "tasksCount",
+            iconClassName: "bi bi-list-task",
+            value: item.tasksCount !== null && item.tasksCount !== undefined ? `${item.tasksCount}` : "-",
+            isFullRow: false,
+        });
+    }
+
     return metaItems;
 };
 
@@ -174,7 +183,7 @@ const AssignmentsHub = ({ unfinishedSummary, onUnfinishedChanged }: AssignmentsH
     const [showAllCompleted, setShowAllCompleted] = useState(false);
 
     const { pendingItems, completedItems, stats } = useAppSelector(selectStudentAssignmentsHub);
-    const { notificationsStatus, quizletAssignmentsStatus, quizletSessionsStatus } =
+    const { notificationsStatus, quizletAssignmentsStatus, homeworkAssignmentsStatus, quizletSessionsStatus } =
         useAppSelector(selectNotificationsHub);
 
     useEffect(() => {
@@ -226,9 +235,13 @@ const AssignmentsHub = ({ unfinishedSummary, onUnfinishedChanged }: AssignmentsH
     const isLoading =
         notificationsStatus === "loading" ||
         quizletAssignmentsStatus === "loading" ||
+        homeworkAssignmentsStatus === "loading" ||
         quizletSessionsStatus === "loading";
     const hasError =
-        notificationsStatus === "error" || quizletAssignmentsStatus === "error" || quizletSessionsStatus === "error";
+        notificationsStatus === "error" ||
+        quizletAssignmentsStatus === "error" ||
+        homeworkAssignmentsStatus === "error" ||
+        quizletSessionsStatus === "error";
 
     useEffect(() => {
         if (activeTab !== "completed") {
@@ -239,6 +252,16 @@ const AssignmentsHub = ({ unfinishedSummary, onUnfinishedChanged }: AssignmentsH
     const openItem = (item: THubAssignmentItem) => {
         if (item.kind === "quizlet_assignment" && item.assignmentId !== undefined) {
             navigate(`/quizlet/assignments/${item.assignmentId}`);
+            return;
+        }
+
+        if (item.kind === "homework_assignment" && item.assignmentId !== undefined) {
+            if (item.status === "completed") {
+                navigate(`/tasks/assignments/${item.assignmentId}`);
+                return;
+            }
+
+            navigate(`/tasks/assignments/${item.assignmentId}`);
             return;
         }
 

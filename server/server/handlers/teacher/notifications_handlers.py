@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from typing import Any, Callable, List, TypedDict
 
@@ -385,6 +386,50 @@ def get_notifications():
                 "elapsed_seconds": assignment_result.elapsed_seconds,
             }
             item_data["activity_try_id"] = assignment_result.id
+            item_data["lesson"] = {
+                "id": assignment.id,
+                "name": assignment.title,
+            }
+            item_data["user"] = student.__json__()
+            result.append(item_data)
+            continue
+
+        if item_data["type"] == "homework_try":
+            homework_try_id = item_data.get("homework_try_id")
+            if not isinstance(homework_try_id, int):
+                continue
+
+            homework_try = DBQT.get_homework_try_by_id(homework_try_id)
+            if homework_try is None or homework_try.end_datetime is None:
+                continue
+
+            assignment = DBQT.get_homework_assignment_by_id(homework_try.assignment_id)
+            if assignment is None:
+                continue
+
+            student = DBQO.get_user_by_id(homework_try.student_id)
+            if student is None:
+                continue
+
+            checked_tasks = json.loads(homework_try.checked_tasks)
+            mistakes_count = sum(task.get("mistakes_count", 0) for task in checked_tasks)
+            correct_answers = 0
+            for done_task, checked_task in zip(json.loads(homework_try.done_tasks), checked_tasks):
+                if done_task.get("name") in ["text", "img", "audio", "block_begin", "block_end"]:
+                    continue
+                if checked_task.get("cheked", False) and checked_task.get("mistakes_count", 0) == 0:
+                    correct_answers += 1
+
+            item_data["activity_try"] = {
+                "id": homework_try.id,
+                "start_datetime": homework_try.start_datetime,
+                "end_datetime": homework_try.end_datetime,
+                "mistakes_count": mistakes_count,
+                "correct_answers": correct_answers,
+                "elapsed_seconds": max(0, int(
+                    (homework_try.end_datetime - homework_try.start_datetime).total_seconds())),
+            }
+            item_data["activity_try_id"] = homework_try.id
             item_data["lesson"] = {
                 "id": assignment.id,
                 "name": assignment.title,

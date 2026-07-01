@@ -5,6 +5,7 @@ import {
     TQuizletAssignmentTarget,
     TQuizletSession,
 } from "models/TQuizlet";
+import { THomeworkAssignment, THomeworkAssignmentTarget, THomeworkAssignmentTask, THomeworkTry } from "models/TTasks";
 import { RootState } from "redux/store";
 
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
@@ -20,11 +21,21 @@ export interface TStudentQuizletAssignmentRecord {
     active_session_id: number | null;
 }
 
+export interface TStudentHomeworkAssignmentRecord {
+    assignment: THomeworkAssignment;
+    target: THomeworkAssignmentTarget;
+    tasks: THomeworkAssignmentTask[];
+    try: THomeworkTry | null;
+    active_try_id: number | null;
+}
+
 export interface NotificationsHubState {
     notifications: TAnyNotifications;
     notificationsStatus: "idle" | "loading" | "done" | "error";
     quizletAssignments: TStudentQuizletAssignmentRecord[];
     quizletAssignmentsStatus: "idle" | "loading" | "done" | "error";
+    homeworkAssignments: TStudentHomeworkAssignmentRecord[];
+    homeworkAssignmentsStatus: "idle" | "loading" | "done" | "error";
     quizletSessions: TQuizletSession[];
     quizletSessionsStatus: "idle" | "loading" | "done" | "error";
     lastLoadedAt: number | null;
@@ -36,7 +47,7 @@ export interface THubAssignmentItem {
     typeLabel: string;
     buttonLabel: string;
     status: "pending" | "completed";
-    kind: "lesson" | "assessment_try" | "final_boss_try" | "quizlet_assignment";
+    kind: "lesson" | "assessment_try" | "final_boss_try" | "quizlet_assignment" | "homework_assignment";
     lessonId?: number;
     activityBaseId?: number;
     assignmentId?: number;
@@ -47,6 +58,7 @@ export interface THubAssignmentItem {
     translationDirection?: TQuizletAssignment["translation_direction"];
     dictionaryTitles?: string[];
     totalWords?: number | null;
+    tasksCount?: number | null;
     elapsedSeconds?: number | null;
     mistakesCount?: number | null;
     correctAnswersCount?: number | null;
@@ -71,6 +83,8 @@ const initialState: NotificationsHubState = {
     notificationsStatus: "idle",
     quizletAssignments: [],
     quizletAssignmentsStatus: "idle",
+    homeworkAssignments: [],
+    homeworkAssignmentsStatus: "idle",
     quizletSessions: [],
     quizletSessionsStatus: "idle",
     lastLoadedAt: null,
@@ -117,6 +131,7 @@ const dedupeAssignmentItems = (items: THubAssignmentItem[]) => {
 const buildAssignmentsHubViewModel = (
     notifications: TAnyNotifications,
     quizletAssignments: TStudentQuizletAssignmentRecord[],
+    homeworkAssignments: TStudentHomeworkAssignmentRecord[],
     quizletSessions: TQuizletSession[],
 ): TAssignmentsHubViewModel => {
     const studentNotifications = (notifications as TStudentNotification[]).filter((item) => item.deleted !== true);
@@ -220,12 +235,54 @@ const buildAssignmentsHubViewModel = (
             })),
     );
 
+    const pendingHomeworkItems = dedupeAssignmentItems(
+        homeworkAssignments
+            .filter((item) => item.try === null || item.try.end_datetime === null)
+            .map<THubAssignmentItem>((item) => ({
+                id: `homework_${item.assignment.id}`,
+                title: item.assignment.title,
+                typeLabel: "Задание",
+                buttonLabel: item.active_try_id !== null ? "Продолжить" : "Начать",
+                status: "pending",
+                kind: "homework_assignment",
+                assignmentId: item.assignment.id,
+                sortDate: item.target.assigned_at,
+                assignedAt: item.target.assigned_at,
+                tasksCount: item.tasks.length,
+            })),
+    );
+
+    const completedHomeworkItems = dedupeAssignmentItems(
+        homeworkAssignments
+            .filter((item) => item.try !== null && item.try.end_datetime !== null)
+            .map<THubAssignmentItem>((item) => ({
+                id: `homework_${item.assignment.id}`,
+                title: item.assignment.title,
+                typeLabel: "Задание",
+                buttonLabel: "Открыть результат",
+                status: "completed",
+                kind: "homework_assignment",
+                assignmentId: item.assignment.id,
+                sortDate: item.try?.end_datetime || item.target.completed_at,
+                assignedAt: item.target.assigned_at,
+                startedAt: item.try?.start_datetime,
+                tasksCount: item.tasks.length,
+                mistakesCount:
+                    item.try?.checked_tasks.reduce((sum, task) => sum + (task?.mistakes_count || 0), 0) ?? null,
+                correctAnswersCount: item.try?.correct_answers ?? null,
+            })),
+    );
+
     const pendingLessonItems = [...latestLessonNotifications.values()].filter(
         (item) => item.lessonId === undefined || !completedTestLessonIds.has(item.lessonId),
     );
 
-    const pendingItems = dedupeAssignmentItems([...pendingLessonItems, ...pendingReviewItems]);
-    const completedItems = dedupeAssignmentItems([...completedTestItems, ...completedReviewItems]);
+    const pendingItems = dedupeAssignmentItems([...pendingLessonItems, ...pendingReviewItems, ...pendingHomeworkItems]);
+    const completedItems = dedupeAssignmentItems([
+        ...completedTestItems,
+        ...completedReviewItems,
+        ...completedHomeworkItems,
+    ]);
     const selfTrainingSessions = quizletSessions.filter((session) => session.assignment_id == null);
 
     const stats: THubStats = {
@@ -235,11 +292,21 @@ const buildAssignmentsHubViewModel = (
         reviewSeconds:
             quizletAssignments.reduce((sum, item) => sum + (item.result?.elapsed_seconds ?? 0), 0) +
             selfTrainingSessions.reduce((sum, item) => sum + item.elapsed_seconds, 0),
-        testsCompleted: completedTestNotifications.length,
-        testsSeconds: completedTestNotifications.reduce(
-            (sum, item) => sum + getElapsedSeconds(item.activity_try.start_datetime, item.activity_try.end_datetime),
-            0,
-        ),
+        testsCompleted: completedTestNotifications.length + completedHomeworkItems.length,
+        testsSeconds:
+            completedTestNotifications.reduce(
+                (sum, item) =>
+                    sum + getElapsedSeconds(item.activity_try.start_datetime, item.activity_try.end_datetime),
+                0,
+            ) +
+            homeworkAssignments.reduce(
+                (sum, item) =>
+                    sum +
+                    (item.try?.start_datetime && item.try?.end_datetime
+                        ? getElapsedSeconds(item.try.start_datetime, item.try.end_datetime)
+                        : 0),
+                0,
+            ),
     };
 
     return {
@@ -256,6 +323,7 @@ export const notificationsHubSlice = createSlice({
         setNotificationsHubLoading: (state) => {
             state.notificationsStatus = "loading";
             state.quizletAssignmentsStatus = "loading";
+            state.homeworkAssignmentsStatus = "loading";
             state.quizletSessionsStatus = "loading";
         },
         setNotificationsHubData: (
@@ -263,21 +331,25 @@ export const notificationsHubSlice = createSlice({
             action: PayloadAction<{
                 notifications: TAnyNotifications;
                 quizletAssignments: TStudentQuizletAssignmentRecord[];
+                homeworkAssignments: TStudentHomeworkAssignmentRecord[];
                 quizletSessions: TQuizletSession[];
                 loadedAt: number;
             }>,
         ) => {
             state.notifications = action.payload.notifications;
             state.quizletAssignments = action.payload.quizletAssignments;
+            state.homeworkAssignments = action.payload.homeworkAssignments;
             state.quizletSessions = action.payload.quizletSessions;
             state.notificationsStatus = "done";
             state.quizletAssignmentsStatus = "done";
+            state.homeworkAssignmentsStatus = "done";
             state.quizletSessionsStatus = "done";
             state.lastLoadedAt = action.payload.loadedAt;
         },
         setNotificationsHubError: (state) => {
             state.notificationsStatus = "error";
             state.quizletAssignmentsStatus = "error";
+            state.homeworkAssignmentsStatus = "error";
             state.quizletSessionsStatus = "error";
         },
         resetNotificationsHub: () => initialState,
@@ -290,6 +362,7 @@ export const selectStudentAssignmentsHub = (state: RootState) =>
     buildAssignmentsHubViewModel(
         state.notificationsHub.notifications,
         state.notificationsHub.quizletAssignments,
+        state.notificationsHub.homeworkAssignments,
         state.notificationsHub.quizletSessions,
     );
 

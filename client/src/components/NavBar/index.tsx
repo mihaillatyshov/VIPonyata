@@ -20,6 +20,7 @@ const NavBar = () => {
     const notifications = useAppSelector(selectHubNotifications);
     const location = useLocation();
     const isFlashcardExerciseRoute = location.pathname === "/quizlet/flashcards";
+    const isTasksRoute = location.pathname.startsWith("/tasks");
     const isReviewRoute = location.pathname.startsWith("/review");
     const isWheelTrainerRoute = location.pathname.startsWith("/teacher/wheel-trainer");
     const isTeacherHistoryRoute = location.pathname.startsWith("/teacher/history");
@@ -149,6 +150,25 @@ const NavBar = () => {
                             <span className={styles.quizletButtonLabel}>カード</span>
                         </Link>
                     )}
+
+                    {isTeacherUser &&
+                        (isTasksRoute ? (
+                            <span
+                                className={`d-flex a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton} ${styles.softNavButton} ${styles.tasksButton} ${styles.quizletButtonDisabled}`}
+                                aria-disabled="true"
+                            >
+                                <i className={`bi bi-list-task ${styles.tasksButtonIcon}`} aria-hidden="true" />
+                                <span className={styles.quizletButtonLabel}>タスク</span>
+                            </span>
+                        ) : (
+                            <Link
+                                className={`d-flex a-clear navbar-dictionary-title ap-japanesefont ${styles.quizletButton} ${styles.softNavButton} ${styles.tasksButton}`}
+                                to="/tasks"
+                            >
+                                <i className={`bi bi-list-task ${styles.tasksButtonIcon}`} aria-hidden="true" />
+                                <span className={styles.quizletButtonLabel}>タスク</span>
+                            </Link>
+                        ))}
                 </div>
                 <div className={styles.actionsSection}>
                     {isTeacherUser && (
