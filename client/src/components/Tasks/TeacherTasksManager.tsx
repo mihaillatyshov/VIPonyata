@@ -1239,6 +1239,50 @@ const TeacherTasksManager = () => {
                                             {visibleTaskLessonCards.map((lessonCard) => (
                                                 <div className="col" key={lessonCard.key}>
                                                     <div className="card quizlet-topic-card tasks-lesson-card h-100">
+                                                        {lessonCard.lesson_id !== null ? (
+                                                            <div className="tasks-lesson-card__actions">
+                                                                {confirmHideLessonId === lessonCard.lesson_id ? (
+                                                                    <div className="tasks-lesson-card__confirm-actions">
+                                                                        <button
+                                                                            type="button"
+                                                                            className="btn btn-sm btn-danger tasks-lesson-card__confirm-btn"
+                                                                            disabled={
+                                                                                processingLessonId ===
+                                                                                lessonCard.lesson_id
+                                                                            }
+                                                                            onClick={() =>
+                                                                                handleHideLesson(
+                                                                                    lessonCard.lesson_id as number,
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            Да
+                                                                        </button>
+                                                                        <button
+                                                                            type="button"
+                                                                            className="tasks-lesson-card__hide-btn"
+                                                                            aria-label="Отмена"
+                                                                            title="Отмена"
+                                                                            onClick={() => setConfirmHideLessonId(null)}
+                                                                        >
+                                                                            <i className="bi bi-x" />
+                                                                        </button>
+                                                                    </div>
+                                                                ) : (
+                                                                    <button
+                                                                        type="button"
+                                                                        className="tasks-lesson-card__hide-btn"
+                                                                        aria-label="Скрыть урок"
+                                                                        title="Скрыть урок"
+                                                                        onClick={() =>
+                                                                            setConfirmHideLessonId(lessonCard.lesson_id)
+                                                                        }
+                                                                    >
+                                                                        <i className="bi bi-x" />
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        ) : null}
                                                         <button
                                                             type="button"
                                                             className="tasks-lesson-card__content w-100 text-start"
@@ -1246,7 +1290,7 @@ const TeacherTasksManager = () => {
                                                                 navigate(getTaskLessonRoute(lessonCard.lesson_id))
                                                             }
                                                         >
-                                                            <div className="card-body d-flex flex-column gap-3">
+                                                            <div className="card-body d-flex flex-column gap-3 tasks-lesson-card__body">
                                                                 <div className="d-flex justify-content-between gap-3 align-items-start">
                                                                     <div>
                                                                         <div className="quizlet-topic-card__title fw-semibold">
@@ -1276,63 +1320,11 @@ const TeacherTasksManager = () => {
                                                                 </div>
                                                                 {lessonCard.lesson_id === null ? (
                                                                     <div className="small text-muted">
-                                                                        Сюда попадают задания без урока. Их можно быстро
-                                                                        открыть и перенести в нужный урок.
+                                                                        задания без урока
                                                                     </div>
                                                                 ) : null}
                                                             </div>
                                                         </button>
-                                                        {lessonCard.lesson_id !== null ? (
-                                                            <div className="tasks-lesson-card__footer">
-                                                                {confirmHideLessonId === lessonCard.lesson_id ? (
-                                                                    <div className="d-flex align-items-center justify-content-between gap-2">
-                                                                        <span className="small text-muted">
-                                                                            Скрыть урок из банка?
-                                                                        </span>
-                                                                        <div className="d-flex gap-2">
-                                                                            <button
-                                                                                type="button"
-                                                                                className="btn btn-sm btn-danger"
-                                                                                disabled={
-                                                                                    processingLessonId ===
-                                                                                    lessonCard.lesson_id
-                                                                                }
-                                                                                onClick={() =>
-                                                                                    handleHideLesson(
-                                                                                        lessonCard.lesson_id as number,
-                                                                                    )
-                                                                                }
-                                                                            >
-                                                                                Точно?
-                                                                            </button>
-                                                                            <button
-                                                                                type="button"
-                                                                                className="btn btn-sm btn-outline-secondary"
-                                                                                onClick={() =>
-                                                                                    setConfirmHideLessonId(null)
-                                                                                }
-                                                                            >
-                                                                                Отмена
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-                                                                ) : (
-                                                                    <div className="d-flex justify-content-end">
-                                                                        <button
-                                                                            type="button"
-                                                                            className="btn btn-sm btn-outline-secondary"
-                                                                            onClick={() =>
-                                                                                setConfirmHideLessonId(
-                                                                                    lessonCard.lesson_id,
-                                                                                )
-                                                                            }
-                                                                        >
-                                                                            Скрыть
-                                                                        </button>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        ) : null}
                                                     </div>
                                                 </div>
                                             ))}

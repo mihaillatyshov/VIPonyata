@@ -17,22 +17,24 @@
 }
 
 .pageTitleBack {
-    height: calc(var(--var-page-title-size) - 2px);
-    min-width: calc(var(--var-page-title-size) - 2px);
-    font-size: 28px;
+    --page-title-back-base: #1b2109;
+    --page-title-back-accent: #537317;
+    height: calc(var(--var-page-title-size) - 6px);
+    min-width: calc(var(--var-page-title-size) - 6px);
+    font-size: 24px;
     line-height: 1;
-    border-radius: 10px;
-    border: 2px solid #ffbccd;
-    background: rgba(255, 188, 205, 0.12);
+    border-radius: 999px;
+    border: 1px solid rgba(83, 115, 23, 0.26);
+    background: rgba(83, 115, 23, 0.08);
 
     cursor: pointer;
-    margin-right: 10px;
-    margin-left: -5px;
+    margin-right: 12px;
+    margin-left: -1px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #ffc3d2;
-    box-shadow: 0 2px 8px rgba(255, 129, 167, 0.2);
+    color: var(--page-title-back-base);
+    box-shadow: 0 4px 14px rgba(27, 33, 9, 0.08);
     transition:
         color 0.15s,
         border-color 0.15s,
@@ -42,21 +44,22 @@
 }
 
 .pageTitleBack:hover {
-    color: #ff4f8b;
-    border-color: #ff4f8b;
-    background: rgba(255, 79, 139, 0.1);
+    color: #ffffff;
+    border-color: var(--page-title-back-accent);
+    background: var(--page-title-back-accent);
+    box-shadow: 0 6px 18px rgba(83, 115, 23, 0.22);
 }
 
 .pageTitleBack:active {
     transform: translateY(1px);
-    box-shadow: 0 1px 4px rgba(255, 129, 167, 0.2);
+    box-shadow: 0 3px 10px rgba(27, 33, 9, 0.16);
 }
 
 .pageTitleBack:focus-visible {
     outline: none;
     box-shadow:
-        0 0 0 3px rgba(255, 188, 205, 0.4),
-        0 2px 8px rgba(255, 129, 167, 0.2);
+        0 0 0 3px rgba(83, 115, 23, 0.18),
+        0 4px 14px rgba(27, 33, 9, 0.12);
 }
 
 .pageTitleAdd {

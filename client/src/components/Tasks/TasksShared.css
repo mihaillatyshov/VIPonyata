@@ -340,6 +340,27 @@
     box-shadow: 0 14px 28px rgba(15, 23, 42, 0.1);
 }
 
+.tasks-lesson-card {
+    position: relative;
+}
+
+.tasks-lesson-card__actions {
+    position: absolute;
+    top: 0.55rem;
+    right: 0.55rem;
+    z-index: 2;
+}
+
+.tasks-lesson-card__confirm-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.tasks-lesson-card__body {
+    padding-right: 3.25rem;
+}
+
 .tasks-lesson-card__content {
     display: block;
     padding: 0;
@@ -347,8 +368,48 @@
     background: transparent;
 }
 
-.tasks-lesson-card__footer {
-    padding: 0 1rem 1rem;
+.tasks-lesson-card__hide-btn {
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.86);
+    color: #94a3b8;
+    line-height: 1;
+    transition:
+        color 0.15s ease,
+        background-color 0.15s ease,
+        transform 0.1s ease;
+}
+
+.tasks-lesson-card__hide-btn:hover,
+.tasks-lesson-card__hide-btn:focus-visible {
+    color: #ef4444;
+    background: rgba(255, 255, 255, 0.98);
+}
+
+.tasks-lesson-card__hide-btn:active {
+    transform: translateY(1px);
+}
+
+.tasks-lesson-card__hide-btn:focus-visible {
+    outline: none;
+}
+
+.tasks-lesson-card__hide-btn i {
+    font-size: 0.8rem;
+}
+
+.tasks-lesson-card__confirm-btn {
+    --bs-btn-padding-y: 0.1rem;
+    --bs-btn-padding-x: 0.45rem;
+    --bs-btn-font-size: 0.7rem;
+    --bs-btn-border-radius: 999px;
 }
 
 .tasks-lesson-card__thumb-wrap {
