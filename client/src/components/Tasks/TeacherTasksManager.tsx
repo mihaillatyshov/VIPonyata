@@ -127,6 +127,8 @@ interface AssignmentDraftTask {
     task: TTeacherAssessmentAnyItem;
 }
 
+const HISTORY_PAGE_SIZE = 10;
+
 const formatDateTime = (value: string | null) => {
     if (!value) {
         return "-";
@@ -145,6 +147,30 @@ const formatDateTime = (value: string | null) => {
         minute: "2-digit",
     }).format(date);
 };
+
+const getHomeworkTargetStatusLabel = (status: HomeworkAssignmentListItem["targets"][number]["status"]) => {
+    if (status === "completed") {
+        return { text: "Выполнено", className: "text-success" };
+    }
+
+    if (status === "cancelled") {
+        return { text: "Отменено", className: "text-muted" };
+    }
+
+    return { text: "Ожидает", className: "text-secondary" };
+};
+
+const getHomeworkAssignmentTypeLabels = (tasks: THomeworkAssignmentTask[]) => [
+    ...new Set(tasks.map((task) => assessmentTaskRusNameAliases[task.task.name])),
+];
+
+const getHomeworkAssignmentLessonLabels = (tasks: THomeworkAssignmentTask[], lessons: LessonOption[]) => [
+    ...new Set(
+        tasks
+            .map((task) => lessons.find((lesson) => lesson.id === task.lesson_id)?.name ?? null)
+            .filter((lessonName): lessonName is string => lessonName !== null),
+    ),
+];
 
 const getTaskBlockTitle = (item: TTaskBankItem) => {
     if (item.source_block_index === null || item.source_block_index === undefined) {
@@ -440,6 +466,7 @@ const TeacherTasksManager = () => {
     const [showHiddenLessons, setShowHiddenLessons] = useState(false);
     const [confirmHideLessonId, setConfirmHideLessonId] = useState<number | null>(null);
     const [processingLessonId, setProcessingLessonId] = useState<number | null>(null);
+    const [visibleHistoryCount, setVisibleHistoryCount] = useState(HISTORY_PAGE_SIZE);
 
     const activeTab: TabKey = location.pathname.startsWith("/tasks/bank")
         ? "bank"
@@ -556,6 +583,13 @@ const TeacherTasksManager = () => {
         currentBankLessonId !== null &&
         options.hidden_lesson_ids.includes(currentBankLessonId);
 
+    const visibleAssignments = useMemo(
+        () => assignments.slice(0, visibleHistoryCount),
+        [assignments, visibleHistoryCount],
+    );
+
+    const hasMoreAssignments = visibleAssignments.length < assignments.length;
+
     useEffect(() => {
         if (availableLessonTasks.length === 0) {
             setPreviewTaskId(null);
@@ -571,6 +605,10 @@ const TeacherTasksManager = () => {
         const availableTaskIds = new Set(availableLessonTasks.map((item) => item.id));
         setSelectedTaskIds((prev) => prev.filter((id) => availableTaskIds.has(id)));
     }, [availableLessonTasks]);
+
+    useEffect(() => {
+        setVisibleHistoryCount(HISTORY_PAGE_SIZE);
+    }, [assignments]);
 
     const openCreateEditor = (taskName: TAssessmentTaskName) => {
         setEditor({
@@ -1550,78 +1588,159 @@ const TeacherTasksManager = () => {
 
             {activeTab === "history" ? (
                 <div className="d-flex flex-column gap-3">
-                    {assignments.map((item) => (
-                        <div key={item.assignment.id} className="card tasks-card">
-                            <div className="card-body">
-                                <div className="d-flex justify-content-between align-items-start gap-3 mb-3">
-                                    <div>
-                                        <h5 className="mb-1">{item.assignment.title}</h5>
-                                        <div className="small text-muted">
-                                            {formatDateTime(item.assignment.created_at)}
+                    {assignments.length === 0 ? <div className="text-muted">Пока нет назначенных заданий</div> : null}
+                    <div className="quizlet-assignment-list tasks-history-list">
+                        {visibleAssignments.map((item) => {
+                            const taskTypeLabels = getHomeworkAssignmentTypeLabels(item.tasks);
+                            const lessonLabels = getHomeworkAssignmentLessonLabels(item.tasks, options.lessons);
+
+                            return (
+                                <div
+                                    key={item.assignment.id}
+                                    className="card quizlet-assignment-card tasks-history-card"
+                                >
+                                    <div className="card-body quizlet-assignment-card__body">
+                                        <div className="quizlet-assignment-card__header">
+                                            <div className="quizlet-assignment-card__main">
+                                                <div className="quizlet-assignment-card__title fw-semibold">
+                                                    {item.assignment.title}
+                                                </div>
+                                                <div className="quizlet-assignment-card__meta small text-muted">
+                                                    <span>{formatDateTime(item.assignment.created_at)}</span>
+                                                </div>
+                                            </div>
+                                            <div
+                                                className={`quizlet-assignment-card__status ${item.stats.pending === 0 && item.stats.cancelled === 0 ? "quizlet-assignment-card__status--emoji" : item.stats.pending > 0 && item.stats.cancelled === 0 ? "quizlet-assignment-card__status--emoji" : ""}`}
+                                                title={
+                                                    item.stats.pending === 0
+                                                        ? item.stats.cancelled > 0
+                                                            ? "Есть отмененные назначения"
+                                                            : "Задание выполнено"
+                                                        : "Задание ожидает выполнения"
+                                                }
+                                            >
+                                                {item.stats.pending === 0 && item.stats.cancelled === 0 ? (
+                                                    <span
+                                                        className="quizlet-assignment-card__status-emoji"
+                                                        role="img"
+                                                        aria-label="Задание выполнено"
+                                                    >
+                                                        🗾
+                                                    </span>
+                                                ) : item.stats.cancelled > 0 ? (
+                                                    <i
+                                                        className="bi bi-dash-circle-fill fs-4 text-secondary"
+                                                        aria-hidden="true"
+                                                    />
+                                                ) : (
+                                                    <span
+                                                        className="quizlet-assignment-card__status-emoji quizlet-assignment-card__status-emoji--pending"
+                                                        role="img"
+                                                        aria-label="Задание ожидает выполнения"
+                                                    >
+                                                        🎐
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
+
+                                        <div className="tasks-history-card__chips-wrap">
+                                            {taskTypeLabels.length > 0 ? (
+                                                <div className="tasks-history-card__chips">
+                                                    {taskTypeLabels.map((label) => (
+                                                        <span key={`type-${label}`} className="quizlet-assignment-pill">
+                                                            {label}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            ) : null}
+                                            {lessonLabels.length > 0 ? (
+                                                <div className="tasks-history-card__chips tasks-history-card__chips--lessons">
+                                                    {lessonLabels.map((label) => (
+                                                        <span
+                                                            key={`lesson-${label}`}
+                                                            className="quizlet-assignment-pill tasks-history-card__lesson-pill"
+                                                        >
+                                                            {label}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            ) : null}
+                                        </div>
+
+                                        {item.targets.length > 0 ? (
+                                            <div className="quizlet-assignment-targets small">
+                                                {item.targets.map((target) => {
+                                                    const statusLabel = getHomeworkTargetStatusLabel(target.status);
+
+                                                    return (
+                                                        <div key={target.id} className="quizlet-assignment-target-row">
+                                                            <div className="quizlet-assignment-target-row__main">
+                                                                <div className="quizlet-assignment-target-row__student">
+                                                                    <span className="quizlet-assignment-target-row__nickname">
+                                                                        {target.student?.nickname ?? "unknown"}
+                                                                    </span>
+                                                                    <span className="text-muted">
+                                                                        {`(${target.student?.name ?? "unknown"})`}
+                                                                    </span>
+                                                                    <span
+                                                                        className={`quizlet-assignment-target-row__status ${statusLabel.className}`}
+                                                                    >
+                                                                        {statusLabel.text}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="tasks-history-card__target-meta text-muted">
+                                                                    <span>
+                                                                        Завершено: {formatDateTime(target.completed_at)}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div className="d-flex gap-2 flex-wrap">
+                                                                {target.result ? (
+                                                                    <button
+                                                                        type="button"
+                                                                        className="btn btn-sm btn-outline-primary"
+                                                                        onClick={() =>
+                                                                            navigate(`/tasks/tries/${target.result.id}`)
+                                                                        }
+                                                                    >
+                                                                        Результат
+                                                                    </button>
+                                                                ) : null}
+                                                                {target.status === "pending" ? (
+                                                                    <button
+                                                                        type="button"
+                                                                        className="btn btn-sm quizlet-assignment-cancel-btn"
+                                                                        onClick={() => handleCancelTarget(target.id)}
+                                                                        disabled={cancellingTargetIds.includes(
+                                                                            target.id,
+                                                                        )}
+                                                                    >
+                                                                        Отменить
+                                                                    </button>
+                                                                ) : null}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        ) : null}
                                     </div>
-                                    <div className="small text-end text-muted">
-                                        <div>Всего: {item.stats.total}</div>
-                                        <div>Выполнено: {item.stats.completed}</div>
-                                        <div>Ожидают: {item.stats.pending}</div>
-                                    </div>
                                 </div>
-                                <div className="small text-muted mb-2">
-                                    Задания: {item.tasks.map((task) => task.title).join(", ")}
-                                </div>
-                                <div className="table-responsive">
-                                    <table className="table table-sm align-middle mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th>Ученик</th>
-                                                <th>Статус</th>
-                                                <th>Назначено</th>
-                                                <th>Завершено</th>
-                                                <th></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {item.targets.map((target) => (
-                                                <tr key={target.id}>
-                                                    <td>
-                                                        {target.student
-                                                            ? `${target.student.nickname} (${target.student.name})`
-                                                            : "-"}
-                                                    </td>
-                                                    <td>{target.status}</td>
-                                                    <td>{formatDateTime(target.assigned_at)}</td>
-                                                    <td>{formatDateTime(target.completed_at)}</td>
-                                                    <td className="text-end">
-                                                        {target.result ? (
-                                                            <button
-                                                                type="button"
-                                                                className="btn btn-sm btn-outline-primary me-2"
-                                                                onClick={() =>
-                                                                    navigate(`/tasks/tries/${target.result.id}`)
-                                                                }
-                                                            >
-                                                                Результат
-                                                            </button>
-                                                        ) : null}
-                                                        {target.status === "pending" ? (
-                                                            <button
-                                                                type="button"
-                                                                className="btn btn-sm btn-outline-danger"
-                                                                onClick={() => handleCancelTarget(target.id)}
-                                                                disabled={cancellingTargetIds.includes(target.id)}
-                                                            >
-                                                                Отменить
-                                                            </button>
-                                                        ) : null}
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                            );
+                        })}
+                    </div>
+                    {hasMoreAssignments ? (
+                        <div className="d-flex justify-content-center">
+                            <button
+                                type="button"
+                                className="btn btn-outline-secondary"
+                                onClick={() => setVisibleHistoryCount((prev) => prev + HISTORY_PAGE_SIZE)}
+                            >
+                                Показать еще 10
+                            </button>
                         </div>
-                    ))}
+                    ) : null}
                 </div>
             ) : null}
 

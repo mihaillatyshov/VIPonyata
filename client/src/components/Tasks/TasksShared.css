@@ -16,6 +16,118 @@
     margin-bottom: 0.5rem;
 }
 
+.tasks-history-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.tasks-history-card {
+    --tasks-history-color-primary: #314b0d;
+    --tasks-history-color-deep: #1b2109;
+    --tasks-history-color-accent: #537317;
+    --tasks-history-color-muted: #57603e;
+    --tasks-history-color-soft: #7b924f;
+    --tasks-history-color-earth: #3e3726;
+    --tasks-history-color-light: #b6c598;
+    width: min(100%, 560px);
+    border-color: rgba(49, 75, 13, 0.28);
+    background: linear-gradient(180deg, rgba(182, 197, 152, 0.34), rgba(255, 255, 255, 0.98));
+    box-shadow: 0 10px 24px rgba(27, 33, 9, 0.1);
+}
+
+.tasks-history-card .quizlet-assignment-card__title {
+    color: var(--tasks-history-color-deep);
+    font-size: 2.28rem;
+    line-height: 1.15;
+}
+
+.tasks-history-card .quizlet-assignment-card__meta,
+.tasks-history-card .tasks-history-card__target-meta,
+.tasks-history-card .text-muted {
+    color: var(--tasks-history-color-muted) !important;
+}
+
+.tasks-history-card .quizlet-assignment-pill {
+    background: rgba(182, 197, 152, 0.72);
+    color: var(--tasks-history-color-primary);
+    box-shadow: inset 0 0 0 1px rgba(83, 115, 23, 0.16);
+}
+
+.tasks-history-card__chips-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    margin-top: 0.75rem;
+}
+
+.tasks-history-card__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.tasks-history-card__lesson-pill {
+    background: rgba(123, 146, 79, 0.26) !important;
+    color: var(--tasks-history-color-earth) !important;
+}
+
+.tasks-history-card__target-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin-top: 0.2rem;
+    line-height: 1.35;
+}
+
+.tasks-history-card .quizlet-assignment-card__status {
+    background: rgba(182, 197, 152, 0.46);
+    box-shadow: inset 0 0 0 1px rgba(62, 55, 38, 0.14);
+}
+
+.tasks-history-card .quizlet-assignment-target-row + .quizlet-assignment-target-row {
+    border-top-color: rgba(83, 115, 23, 0.2);
+}
+
+.tasks-history-card .quizlet-assignment-target-row__nickname {
+    color: var(--tasks-history-color-primary);
+}
+
+.tasks-history-card .text-success {
+    color: var(--tasks-history-color-accent) !important;
+}
+
+.tasks-history-card .text-secondary {
+    color: var(--tasks-history-color-soft) !important;
+}
+
+.tasks-history-card .btn-outline-primary {
+    --bs-btn-color: var(--tasks-history-color-primary);
+    --bs-btn-border-color: rgba(49, 75, 13, 0.32);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--tasks-history-color-primary);
+    --bs-btn-hover-border-color: var(--tasks-history-color-primary);
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: var(--tasks-history-color-deep);
+    --bs-btn-active-border-color: var(--tasks-history-color-deep);
+}
+
+.tasks-history-card .quizlet-assignment-cancel-btn {
+    --bs-btn-color: var(--tasks-history-color-earth);
+    --bs-btn-bg: rgba(182, 197, 152, 0.34);
+    --bs-btn-border-color: rgba(83, 115, 23, 0.28);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--tasks-history-color-accent);
+    --bs-btn-hover-border-color: var(--tasks-history-color-accent);
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: var(--tasks-history-color-primary);
+    --bs-btn-active-border-color: var(--tasks-history-color-primary);
+    --bs-btn-disabled-color: rgba(62, 55, 38, 0.45);
+    --bs-btn-disabled-bg: rgba(182, 197, 152, 0.16);
+    --bs-btn-disabled-border-color: rgba(83, 115, 23, 0.16);
+}
+
 .tasks-bank-item {
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.98));
 }
@@ -197,6 +309,11 @@
 }
 
 @media (max-width: 767.98px) {
+    .tasks-history-card__target-meta {
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
     .tasks-editor-meta-row {
         grid-template-columns: 1fr;
     }
