@@ -119,10 +119,11 @@ const HomeworkResultPage = () => {
     return (
         <div className="container pb-5" style={{ maxWidth: "860px" }}>
             <PageTitle title={assignment.title} urlBack="/" />
-            <div className="mt-3 mb-4 box-shadow-main student-assessment-results-summary rounded py-4 px-3 mx-auto position-relative student-assessment-task-result student-assessment-task-result--error">
+            <div className="mt-3 mb-4 student-assessment-task-result student-assessment-task-result--error">
                 <div className="d-flex flex-column align-items-center">
-                    <div className="mb-2 fs-4">
-                        Ошибки в задании: <strong>{totalMistakesCount}</strong>
+                    <div className="student-assessment-task-result-summary">
+                        <span className="student-assessment-task-result-label">Ошибки</span>
+                        <strong className="student-assessment-task-result-count">{totalMistakesCount}</strong>
                     </div>
                 </div>
             </div>

@@ -1,10 +1,9 @@
 @use "../../Common";
 
 .student-assessment-page {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 251, 255, 0.9) 100%);
-    border: 1px solid rgba(160, 178, 200, 0.28);
-    border-radius: 14px;
-    box-shadow: 0 8px 22px rgba(84, 106, 141, 0.1);
+    background: rgba(236, 240, 233, 0.445);
+    // border: 1px solid rgba(160, 178, 200, 0.28);
+    border-radius: 8px;
     padding: 14px 16px 20px;
 }
 
@@ -87,7 +86,6 @@
     border: 1px solid rgba(178, 192, 212, 0.45);
     border-radius: 10px;
     padding: 12px 12px 18px;
-    box-shadow: 0 4px 12px rgba(85, 102, 130, 0.1);
 
     .prevent-select,
     .form-control,
@@ -162,8 +160,28 @@
     font-size: 1rem;
 }
 
+.student-assessment-task-result-summary {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.student-assessment-task-result-label {
+    color: #7f8ea3;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.student-assessment-task-result-count {
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
 .student-assessment-task-result--error {
-    color: #c46b7f;
+    color: #83070ee8;
 }
 
 .student-assessment-task-result--success {
@@ -255,12 +273,12 @@
     }
 
     .big-check.check-good > input:checked {
-        background-color: #80bf63;
+        background-color: #42971b;
         border-color: #80bf63;
     }
 
     .big-check.check-wrong > input:checked {
-        background-color: #f0ced5;
+        background-color: #e4113b;
         border-color: #f0ced5;
     }
 
@@ -270,12 +288,12 @@
     }
 
     .big-check.check-good + .form-control {
-        background-color: #80bf63;
+        background-color: #a1e15397;
         border-color: #80bf63;
     }
 
     .big-check.check-wrong + .form-control {
-        background-color: #f0ced5;
+        background-color: #f8a6b6a4;
         border-color: #d4a6b0;
     }
 }
