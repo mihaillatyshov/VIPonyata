@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 
+import { AddBlockButton } from "components/Activities/Assessment/ProcessingPage/AddBlockButton";
 import {
     processingAliases,
     TAliasProp,
@@ -82,7 +83,7 @@ interface HomeworkAssignmentsResponse {
     assignments: HomeworkAssignmentListItem[];
 }
 
-type TTeacherAliasProp<T extends TAssessmentItemBase> = (props: TeacherAssessmentTypeProps<T>) => JSX.Element;
+type TTeacherAliasProp<T extends TAssessmentItemBase> = (props: TeacherAssessmentTypeProps<T>) => React.ReactElement;
 
 type TTeacherAliases = {
     [key in TAssessmentTaskName]: TTeacherAliasProp<TGetAssessmentTeacherTypeByName[key]>;
@@ -128,6 +129,17 @@ interface AssignmentDraftTask {
 }
 
 const HISTORY_PAGE_SIZE = 10;
+
+function findLastIndex<T>(array: Array<T>, predicate: (value: T, index: number, obj: T[]) => boolean): number {
+    let length = array.length;
+    while (length--) {
+        if (predicate(array[length], length, array)) {
+            return length;
+        }
+    }
+
+    return -1;
+}
 
 const formatDateTime = (value: string | null) => {
     if (!value) {
@@ -282,6 +294,53 @@ const buildTaskLessonCards = (
             isHidden: false,
         },
     ];
+};
+
+const createDraftTaskFromBankItem = (item: TTaskBankItem): AssignmentDraftTask => ({
+    client_id: uuid(),
+    task_bank_item_id: item.id,
+    lesson_id: item.lesson_id,
+    title: item.title,
+    task: JSON.parse(JSON.stringify(item.task)) as TTeacherAssessmentAnyItem,
+});
+
+const createDraftBlockBoundaryTask = (taskName: TAssessmentTaskName.BLOCK_BEGIN | TAssessmentTaskName.BLOCK_END) => ({
+    client_id: uuid(),
+    task_bank_item_id: null,
+    lesson_id: null,
+    title: assessmentTaskRusNameAliases[taskName],
+    task: getTeacherAssessmentTaskDefaultData(taskName),
+});
+
+const buildDraftTasksFromSelection = (items: TTaskBankItem[]): AssignmentDraftTask[] => {
+    const nextDraftTasks: AssignmentDraftTask[] = [];
+    let activeBlockKey: string | null = null;
+
+    items.forEach((item) => {
+        const currentBlockKey =
+            item.source_block_index === null || item.source_block_index === undefined
+                ? null
+                : `${item.lesson_id ?? "no-lesson"}:${item.source_block_index}`;
+
+        if (activeBlockKey !== currentBlockKey) {
+            if (activeBlockKey !== null) {
+                nextDraftTasks.push(createDraftBlockBoundaryTask(TAssessmentTaskName.BLOCK_END));
+            }
+
+            if (currentBlockKey !== null) {
+                nextDraftTasks.push(createDraftBlockBoundaryTask(TAssessmentTaskName.BLOCK_BEGIN));
+            }
+        }
+
+        nextDraftTasks.push(createDraftTaskFromBankItem(item));
+        activeBlockKey = currentBlockKey;
+    });
+
+    if (activeBlockKey !== null) {
+        nextDraftTasks.push(createDraftBlockBoundaryTask(TAssessmentTaskName.BLOCK_END));
+    }
+
+    return nextDraftTasks;
 };
 
 const TaskBankLessonBreadcrumb = ({ lessonName }: { lessonName?: string | null }) => {
@@ -707,6 +766,23 @@ const TeacherTasksManager = () => {
             return;
         }
 
+        const blocks = draftTasks.filter(
+            (item) =>
+                item.task.name === TAssessmentTaskName.BLOCK_BEGIN || item.task.name === TAssessmentTaskName.BLOCK_END,
+        );
+
+        if (blocks.length % 2 !== 0) {
+            setErrorMessage("Исправьте структуру блоков перед отправкой");
+            return;
+        }
+
+        for (let i = 1; i < blocks.length; i++) {
+            if (blocks[i].task.name === blocks[i - 1].task.name) {
+                setErrorMessage("Исправьте структуру блоков перед отправкой");
+                return;
+            }
+        }
+
         setErrorMessage(null);
         setIsCreatingAssignment(true);
         try {
@@ -781,16 +857,42 @@ const TeacherTasksManager = () => {
         if (assignmentTitle.trim() === "") {
             setAssignmentTitle("Домашнее задание");
         }
-        setDraftTasks(
-            selectedTasks.map((item) => ({
-                client_id: uuid(),
-                task_bank_item_id: item.id,
-                lesson_id: item.lesson_id,
-                title: item.title,
-                task: JSON.parse(JSON.stringify(item.task)) as TTeacherAssessmentAnyItem,
-            })),
-        );
+        setDraftTasks(buildDraftTasksFromSelection(selectedTasks));
         navigate("/tasks/finalize");
+    };
+
+    const isDraftInsertionInsideBlock = (insertionIndex: number) => {
+        let depth = 0;
+
+        for (let i = 0; i < insertionIndex; i++) {
+            if (draftTasks[i].task.name === TAssessmentTaskName.BLOCK_BEGIN) {
+                depth++;
+                continue;
+            }
+
+            if (draftTasks[i].task.name === TAssessmentTaskName.BLOCK_END) {
+                depth = Math.max(0, depth - 1);
+            }
+        }
+
+        return depth > 0;
+    };
+
+    const addDraftBlock = (index: number) => {
+        if (isDraftInsertionInsideBlock(index)) {
+            return;
+        }
+
+        setDraftTasks((prev) => {
+            const next = [...prev];
+            next.splice(
+                index,
+                0,
+                createDraftBlockBoundaryTask(TAssessmentTaskName.BLOCK_BEGIN),
+                createDraftBlockBoundaryTask(TAssessmentTaskName.BLOCK_END),
+            );
+            return next;
+        });
     };
 
     const handleMoveDraftTask = (index: number, direction: "up" | "down") => {
@@ -815,8 +917,99 @@ const TeacherTasksManager = () => {
     };
 
     const handleRemoveDraftTask = (index: number) => {
-        setDraftTasks((prev) => prev.filter((_, itemIndex) => itemIndex !== index));
+        setDraftTasks((prev) => {
+            const next = [...prev];
+            const taskName = next[index]?.task.name;
+
+            if (taskName === undefined) {
+                return prev;
+            }
+
+            if (taskName === TAssessmentTaskName.BLOCK_BEGIN) {
+                const endIndex = next.findIndex(
+                    (item, itemIndex) => itemIndex > index && item.task.name === TAssessmentTaskName.BLOCK_END,
+                );
+
+                if (endIndex !== -1) {
+                    next.splice(endIndex, 1);
+                }
+            }
+
+            next.splice(index, 1);
+
+            if (taskName === TAssessmentTaskName.BLOCK_END) {
+                const beginIndex = findLastIndex(
+                    next,
+                    (item, itemIndex) => itemIndex < index && item.task.name === TAssessmentTaskName.BLOCK_BEGIN,
+                );
+
+                if (beginIndex !== -1) {
+                    next.splice(beginIndex, 1);
+                }
+            }
+
+            return next;
+        });
     };
+
+    const renderDraftTaskByIndex = (index: number) => {
+        const item = draftTasks[index];
+        const isBlockBoundaryTask =
+            item.task.name === TAssessmentTaskName.BLOCK_BEGIN || item.task.name === TAssessmentTaskName.BLOCK_END;
+
+        return (
+            <React.Fragment key={item.client_id}>
+                <div className="text-center">
+                    {!isDraftInsertionInsideBlock(index) ? (
+                        <AddBlockButton onClick={() => addDraftBlock(index)} />
+                    ) : null}
+                </div>
+                <div className="d-flex flex-column gap-3">
+                    {!isBlockBoundaryTask ? (
+                        <div>
+                            <label className="form-label">Название задания</label>
+                            <input
+                                className="form-control"
+                                value={item.title}
+                                onChange={(event) => handleDraftTaskTitleChange(index, event.target.value)}
+                            />
+                        </div>
+                    ) : null}
+                    <TeacherAssessmentTypeBase
+                        taskName={item.task.name}
+                        moveUp={() => handleMoveDraftTask(index, "up")}
+                        moveDown={() => handleMoveDraftTask(index, "down")}
+                        removeTask={() => handleRemoveDraftTask(index)}
+                    >
+                        {drawTeacherItem(item.task, (task) => handleDraftTaskChange(index, task), item.client_id)}
+                    </TeacherAssessmentTypeBase>
+                </div>
+            </React.Fragment>
+        );
+    };
+
+    const renderedDraftTasks: React.ReactNode[] = [];
+    for (let i = 0; i < draftTasks.length; i++) {
+        if (draftTasks[i].task.name === TAssessmentTaskName.BLOCK_BEGIN) {
+            const blockEndIndex = draftTasks.findIndex(
+                (item, itemIndex) => itemIndex > i && item.task.name === TAssessmentTaskName.BLOCK_END,
+            );
+
+            if (blockEndIndex !== -1) {
+                renderedDraftTasks.push(
+                    <div className="teacher-assessment-block-container" key={`${draftTasks[i].client_id}-container`}>
+                        {Array.from({ length: blockEndIndex - i + 1 }, (_, offset) =>
+                            renderDraftTaskByIndex(i + offset),
+                        )}
+                    </div>,
+                );
+                i = blockEndIndex;
+                continue;
+            }
+        }
+
+        renderedDraftTasks.push(renderDraftTaskByIndex(i));
+    }
 
     if (isTryRoute) {
         return (
@@ -1169,39 +1362,19 @@ const TeacherTasksManager = () => {
                                 <div>
                                     <h5 className="mb-1">Проверка и редактирование</h5>
                                     <div className="small text-muted">
-                                        Можно изменить названия, содержание и порядок задач.
+                                        Можно изменить названия, содержание, порядок задач и объединить их в блоки.
                                     </div>
                                 </div>
                                 {draftTasks.length === 0 ? (
                                     <div className="text-muted">Нет выбранных задач. Вернитесь на предыдущий шаг.</div>
                                 ) : (
                                     <div className="d-flex flex-column gap-4">
-                                        {draftTasks.map((item, index) => (
-                                            <div key={item.client_id} className="d-flex flex-column gap-3">
-                                                <div>
-                                                    <label className="form-label">Название задания</label>
-                                                    <input
-                                                        className="form-control"
-                                                        value={item.title}
-                                                        onChange={(e) =>
-                                                            handleDraftTaskTitleChange(index, e.target.value)
-                                                        }
-                                                    />
-                                                </div>
-                                                <TeacherAssessmentTypeBase
-                                                    taskName={item.task.name}
-                                                    moveUp={() => handleMoveDraftTask(index, "up")}
-                                                    moveDown={() => handleMoveDraftTask(index, "down")}
-                                                    removeTask={() => handleRemoveDraftTask(index)}
-                                                >
-                                                    {drawTeacherItem(
-                                                        item.task,
-                                                        (task) => handleDraftTaskChange(index, task),
-                                                        item.client_id,
-                                                    )}
-                                                </TeacherAssessmentTypeBase>
+                                        {renderedDraftTasks}
+                                        {!isDraftInsertionInsideBlock(draftTasks.length) ? (
+                                            <div className="text-center">
+                                                <AddBlockButton onClick={() => addDraftBlock(draftTasks.length)} />
                                             </div>
-                                        ))}
+                                        ) : null}
                                     </div>
                                 )}
                             </div>
