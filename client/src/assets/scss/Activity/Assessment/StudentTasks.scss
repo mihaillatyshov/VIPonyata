@@ -525,7 +525,13 @@
 
     width: 100%;
     min-height: 80px;
-    background-color: #ffffff66;
+    padding: 10px;
+    align-items: flex-start;
+    column-gap: 8px !important;
+    row-gap: 8px !important;
+    background-color: rgba(255, 255, 255, 0.8);
+    box-shadow: none;
+    border: 1px solid rgba(178, 192, 212, 0.45);
 }
 
 .student-assessment-fill-spaces-exists__inputs .dnd__sortable-item,
