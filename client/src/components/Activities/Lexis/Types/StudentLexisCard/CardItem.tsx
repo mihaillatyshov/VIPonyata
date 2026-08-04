@@ -35,7 +35,9 @@ const CardItem = ({
         // const voices = synth.getVoices();
         // const result = voices.filter((voice) => voice.lang === "ja-JP");
         const utterance = new SpeechSynthesisUtterance(sentence);
-        utterance.lang = "ja-JP";
+        const lang = "ja-JP";
+        utterance.lang = lang;
+        utterance.voice = window.speechSynthesis.getVoices().find((voice) => voice.lang === lang) ?? null;
         speechSynthesis.speak(utterance);
     };
 
