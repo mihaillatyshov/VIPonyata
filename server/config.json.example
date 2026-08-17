@@ -1,6 +1,6 @@
 {
     "db": {
-        "url": "mysql+mysqlconnector",
+        "url": "mysql+pymysql",
         "username": "username",
         "password": "password",
         "host": "localhost",
