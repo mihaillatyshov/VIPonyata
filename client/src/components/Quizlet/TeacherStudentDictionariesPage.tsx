@@ -7,6 +7,8 @@ import { AjaxDelete, AjaxGet, AjaxPatch, AjaxPost } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
 import { TQuizletLesson, TQuizletSubgroup, TQuizletWord } from "models/TQuizlet";
 
+import { copyTableRowsAsTsv, useQuizletTableSelection } from "./quizletTableClipboard";
+
 interface StudentCard {
     id: number;
     name: string;
@@ -68,6 +70,8 @@ const TopicEditor = ({ studentId, subgroup, initialWords, onSaved }: TopicEditor
 
     const tableRef = useRef<HTMLTableElement>(null);
     const focusPending = useRef<{ rowIndex: number; col: number } | null>(null);
+    const { selection, handleCellMouseDown, handleCellMouseEnter, handleCellFocus, isCellSelected } =
+        useQuizletTableSelection(rows.length, COLS.length);
 
     useEffect(() => {
         setRows(initialWords.length > 0 ? wordsToRows(initialWords) : [makeEmptyRow()]);
@@ -196,6 +200,10 @@ const TopicEditor = ({ studentId, subgroup, initialWords, onSaved }: TopicEditor
         });
     };
 
+    const handleCopy = (event: React.ClipboardEvent<HTMLTableElement>) => {
+        copyTableRowsAsTsv(event, rows, COLS, isAllEmpty, selection);
+    };
+
     const handleSave = async () => {
         setIsSaving(true);
         setSaveError(null);
@@ -261,6 +269,7 @@ const TopicEditor = ({ studentId, subgroup, initialWords, onSaved }: TopicEditor
                 <table
                     ref={tableRef}
                     className="table table-sm table-bordered align-middle mb-1 quizlet-personal-topic-editor-table"
+                    onCopy={handleCopy}
                     onPaste={handlePaste}
                 >
                     <thead>
@@ -281,13 +290,19 @@ const TopicEditor = ({ studentId, subgroup, initialWords, onSaved }: TopicEditor
                         {rows.map((row, rowIndex) => (
                             <tr key={row.key}>
                                 {COLS.map((field, colIndex) => (
-                                    <td key={field} className="p-0">
+                                    <td
+                                        key={field}
+                                        className={`p-0${isCellSelected(rowIndex, colIndex) ? " quizlet-table-cell-selected" : ""}`}
+                                        onMouseDown={(event) => handleCellMouseDown(event, rowIndex, colIndex)}
+                                        onMouseEnter={() => handleCellMouseEnter(rowIndex, colIndex)}
+                                    >
                                         <input
                                             type="text"
                                             className="form-control form-control-sm border-0 rounded-0 shadow-none quizlet-personal-topic-editor-input"
                                             style={{ background: "transparent" }}
                                             value={row[field]}
                                             onChange={(event) => updateCell(row.key, field, event.target.value)}
+                                            onFocus={() => handleCellFocus(rowIndex, colIndex)}
                                             onKeyDown={(event) => handleKeyDown(event, rowIndex, colIndex)}
                                         />
                                     </td>

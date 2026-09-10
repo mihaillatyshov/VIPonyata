@@ -27,6 +27,7 @@ import "./QuizletShared.css";
 import QuizletProgressHistory from "./QuizletProgressHistory";
 import QuizletQuizStart, { type StartPayload } from "./QuizletQuizStart";
 import QuizletSessionResults from "./QuizletSessionResults";
+import { copyTableRowsAsTsv, useQuizletTableSelection } from "./quizletTableClipboard";
 import { parseQueue, shuffleArray } from "./quizletUtils";
 import TrainingSessionHeader from "./TrainingSessionHeader";
 
@@ -129,6 +130,8 @@ const PersonalTopicEditor = ({ subgroup, initialWords, onSaved }: PersonalTopicE
 
     const tableRef = useRef<HTMLTableElement>(null);
     const focusPending = useRef<{ rowIndex: number; col: number } | null>(null);
+    const { selection, handleCellMouseDown, handleCellMouseEnter, handleCellFocus, isCellSelected } =
+        useQuizletTableSelection(rows.length, COLS.length);
 
     useEffect(() => {
         setRows(initialWords.length > 0 ? wordsToRows(initialWords) : [makeEmptyRow()]);
@@ -299,6 +302,10 @@ const PersonalTopicEditor = ({ subgroup, initialWords, onSaved }: PersonalTopicE
         });
     };
 
+    const handleCopy = (event: React.ClipboardEvent<HTMLTableElement>) => {
+        copyTableRowsAsTsv(event, rows, COLS, isAllEmpty, selection);
+    };
+
     const handleSave = async () => {
         setIsSaving(true);
         setSaveError(null);
@@ -372,6 +379,7 @@ const PersonalTopicEditor = ({ subgroup, initialWords, onSaved }: PersonalTopicE
                 <table
                     ref={tableRef}
                     className="table table-sm table-bordered align-middle mb-1 quizlet-personal-topic-editor-table"
+                    onCopy={handleCopy}
                     onPaste={handlePaste}
                 >
                     <thead>
@@ -396,13 +404,19 @@ const PersonalTopicEditor = ({ subgroup, initialWords, onSaved }: PersonalTopicE
                             return (
                                 <tr key={row.key} className={rowClass}>
                                     {COLS.map((field, colIndex) => (
-                                        <td key={field} className="p-0">
+                                        <td
+                                            key={field}
+                                            className={`p-0${isCellSelected(rowIndex, colIndex) ? " quizlet-table-cell-selected" : ""}`}
+                                            onMouseDown={(event) => handleCellMouseDown(event, rowIndex, colIndex)}
+                                            onMouseEnter={() => handleCellMouseEnter(rowIndex, colIndex)}
+                                        >
                                             <input
                                                 type="text"
                                                 className="form-control form-control-sm border-0 rounded-0 shadow-none quizlet-personal-topic-editor-input"
                                                 style={{ background: "transparent" }}
                                                 value={row[field]}
                                                 onChange={(e) => updateCell(row.key, field, e.target.value)}
+                                                onFocus={() => handleCellFocus(rowIndex, colIndex)}
                                                 onKeyDown={(e) => handleKeyDown(e, rowIndex, colIndex)}
                                                 placeholder={
                                                     field === "char_jp"
