@@ -141,14 +141,16 @@ def delete_quizlet_word(word_id: int) -> dict:
 
 def get_quizlet_assignment_options() -> dict:
     students = DBQT.get_all_students()
+    hidden_student_ids = set(DBQT.get_hidden_quizlet_student_ids())
 
     return {
-        "students": [student.__json__() for student in students],
+        "students": [student.__json__() for student in students if student.id not in hidden_student_ids],
     }
 
 
 def get_students_personal_quizlet_cards() -> dict:
     students = DBQT.get_all_students()
+    hidden_student_ids = set(DBQT.get_hidden_quizlet_student_ids())
     result = []
     for student in students:
         has_personal_dictionary = DBQS.get_personal_quizlet_lesson(student.id) is not None
@@ -157,9 +159,22 @@ def get_students_personal_quizlet_cards() -> dict:
             "name": student.name,
             "nickname": student.nickname,
             "has_personal_dictionary": has_personal_dictionary,
+            "is_hidden": student.id in hidden_student_ids,
         })
 
     return {"students": result}
+
+
+def hide_student_personal_quizlet(student_id: int) -> dict:
+    _ensure_student_exists(student_id)
+    DBQT.hide_quizlet_student(student_id)
+    return {"message": "ok"}
+
+
+def show_student_personal_quizlet(student_id: int) -> dict:
+    _ensure_student_exists(student_id)
+    DBQT.show_quizlet_student(student_id)
+    return {"message": "ok"}
 
 
 def get_student_personal_quizlet(student_id: int) -> dict:
@@ -240,15 +255,20 @@ def batch_update_student_personal_quizlet_words(student_id: int) -> dict:
 
     # Обновить существующие слова
     for update_data in data.updated:
-        word_id = update_data.get("id")
+        updated_word_id_raw = update_data.get("id")
+        if not isinstance(updated_word_id_raw, int):
+            continue
+
+        updated_word_id = updated_word_id_raw
+
         words = DBQS.get_personal_quizlet_words(student_id)
-        word = next((item for item in words if item.id == word_id), None)
+        word = next((item for item in words if item.id == updated_word_id), None)
         if word is not None:
             update_req = QuizletWordUpdateReq(ru=update_data.get("ru", ""),
                                               word_jp=update_data.get("word_jp", ""),
                                               char_jp=update_data.get("char_jp"),
                                               img=update_data.get("img"))
-            DBQS.update_personal_quizlet_word(student_id, word_id, update_req)
+            DBQS.update_personal_quizlet_word(student_id, updated_word_id, update_req)
             changes_count += 1
 
     # Отправить одно уведомление за всё

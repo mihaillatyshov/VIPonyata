@@ -641,6 +641,18 @@ def get_student_personal_quizlet(student_id):
     return user_selector_function(teacher_funcs.get_student_personal_quizlet, None, student_id=student_id)
 
 
+@routes_bp.route("/quizlet/students-dictionaries/<int:student_id>/hidden", methods=["POST"])
+@login_required
+def hide_student_personal_quizlet(student_id):
+    return user_selector_function(teacher_funcs.hide_student_personal_quizlet, None, student_id=student_id)
+
+
+@routes_bp.route("/quizlet/students-dictionaries/<int:student_id>/hidden", methods=["DELETE"])
+@login_required
+def show_student_personal_quizlet(student_id):
+    return user_selector_function(teacher_funcs.show_student_personal_quizlet, None, student_id=student_id)
+
+
 @routes_bp.route("/quizlet/students-dictionaries/<int:student_id>/lesson", methods=["POST"])
 @login_required
 def create_student_personal_quizlet_lesson(student_id):

@@ -1145,6 +1145,26 @@ class TaskBankHiddenLesson(Base):
         }
 
 
+class QuizletHiddenStudent(Base):
+    __tablename__ = "quizlet_hidden_students"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    student_id: Mapped[int] = mapped_column(Integer, ForeignKey(USERS_ID), nullable=False, unique=True)
+    student: Mapped["User"] = relationship("User", uselist=False)
+
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text("now()"), nullable=False)
+
+    __mapper_args__ = {'eager_defaults': True}
+
+    def __json__(self):
+        return {
+            "id": self.id,
+            "student_id": self.student_id,
+            "created_at": self.created_at,
+        }
+
+
 class HomeworkAssignmentTask(Base):
     __tablename__ = "homework_assignment_tasks"
 

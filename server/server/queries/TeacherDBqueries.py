@@ -15,8 +15,9 @@ from server.models.db_models import (
     HomeworkAssignmentTask, HomeworkTry, Hieroglyph, HieroglyphCard, HieroglyphTry, Lesson, LexisCardType, LexisTryType,
     LexisType, NotificationStudentToTeacher, NotificationTeacherToStudent, QuizletAssignment, QuizletAssignmentResult,
     QuizletAssignmentSubgroup, QuizletAssignmentTarget, QuizletAssignmentTargetSubgroup, QuizletDictionary,
-    QuizletGroup, QuizletSubgroup, QuizletSubgroupWord, TaskBankHiddenLesson, TaskBankItem, User, UserDictionary,
-    UserQuizletLesson, UserQuizletSubgroup, UserQuizletWord, QuizletSession, a_users_courses, a_users_lessons)
+    QuizletHiddenStudent, QuizletGroup, QuizletSubgroup, QuizletSubgroupWord, TaskBankHiddenLesson, TaskBankItem, User,
+    UserDictionary, UserQuizletLesson, UserQuizletSubgroup, UserQuizletWord, QuizletSession, a_users_courses,
+    a_users_lessons)
 from server.models.dictionary import (DictionaryCreateReq, DictionaryCreateReqItem)
 from server.models.lesson import LessonCreateReq
 from server.models.lexis import LexisCardCreateReq, LexisCreateReq
@@ -31,6 +32,39 @@ from server.models.tasks import HomeworkAssignmentCreateReq, TaskBankItemCreateR
 def get_all_students() -> list[User]:
     with DBsession.begin() as session:
         return session.scalars(select(User).where(User.level == User.Level.STUDENT)).all()
+
+
+def get_hidden_quizlet_student_ids() -> list[int]:
+    with DBsession.begin() as session:
+        return session.scalars(select(QuizletHiddenStudent.student_id).order_by(QuizletHiddenStudent.student_id)).all()
+
+
+def hide_quizlet_student(student_id: int) -> QuizletHiddenStudent:
+    with DBsession.begin() as session:
+        student = session.scalars(
+            select(User).where(User.id == student_id).where(User.level == User.Level.STUDENT)).one_or_none()
+        if student is None:
+            raise InvalidAPIUsage("Student not found", 404)
+
+        hidden_student = session.scalars(
+            select(QuizletHiddenStudent).where(QuizletHiddenStudent.student_id == student_id)).one_or_none()
+        if hidden_student is not None:
+            return hidden_student
+
+        hidden_student = QuizletHiddenStudent(student_id=student_id)
+        session.add(hidden_student)
+        session.flush()
+        return hidden_student
+
+
+def show_quizlet_student(student_id: int) -> None:
+    with DBsession.begin() as session:
+        hidden_student = session.scalars(
+            select(QuizletHiddenStudent).where(QuizletHiddenStudent.student_id == student_id)).one_or_none()
+        if hidden_student is None:
+            return
+
+        session.delete(hidden_student)
 
 
 #########################################################################################################################

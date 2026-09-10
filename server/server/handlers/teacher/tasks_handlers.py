@@ -1,6 +1,5 @@
-from __future__ import annotations
-
 import json
+from typing import cast
 
 from flask import request
 
@@ -42,10 +41,11 @@ def _build_homework_try_summary(homework_try):
 
 def get_tasks_options() -> dict:
     students = DBQT.get_all_students()
+    hidden_student_ids = set(DBQT.get_hidden_quizlet_student_ids())
     lessons = DBQT.get_all_lessons_for_assignment()
     hidden_lesson_ids = DBQT.get_hidden_task_bank_lesson_ids()
     return {
-        "students": [student.__json__() for student in students],
+        "students": [student.__json__() for student in students if student.id not in hidden_student_ids],
         "lessons": [lesson.__json__() for lesson in lessons],
         "hidden_lesson_ids": hidden_lesson_ids,
     }
@@ -53,7 +53,9 @@ def get_tasks_options() -> dict:
 
 def get_task_bank() -> dict:
     student_id_raw = request.args.get("student_id")
-    student_id = None if student_id_raw in [None, ""] else int(student_id_raw)
+    student_id = None
+    if isinstance(student_id_raw, str) and student_id_raw != "":
+        student_id = int(cast(str, student_id_raw))
 
     items = DBQT.get_task_bank_items()
     lessons = DBQT.get_all_lessons_for_assignment()

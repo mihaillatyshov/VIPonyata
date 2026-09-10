@@ -14,6 +14,7 @@ interface StudentCard {
     name: string;
     nickname: string;
     has_personal_dictionary: boolean;
+    is_hidden: boolean;
 }
 
 interface StudentsResponse {
@@ -368,6 +369,9 @@ const TeacherStudentDictionariesPage = ({
         [students, selectedStudentId],
     );
 
+    const visibleStudents = useMemo(() => students.filter((student) => !student.is_hidden), [students]);
+    const hiddenStudents = useMemo(() => students.filter((student) => student.is_hidden), [students]);
+
     const selectedSubgroup = useMemo(
         () => subgroups.find((subgroup) => subgroup.id === selectedTopicId) ?? null,
         [subgroups, selectedTopicId],
@@ -495,6 +499,20 @@ const TeacherStudentDictionariesPage = ({
         navigate(`/quizlet/students-dictionaries/${selectedStudentId}`);
     };
 
+    const handleHideStudent = async (studentId: number) => {
+        await AjaxPost({
+            url: `/api/quizlet/students-dictionaries/${studentId}/hidden`,
+            body: {},
+        });
+
+        await fetchStudents();
+    };
+
+    const handleShowStudent = async (studentId: number) => {
+        await AjaxDelete({ url: `/api/quizlet/students-dictionaries/${studentId}/hidden` });
+        await fetchStudents();
+    };
+
     if (studentsStatus === LoadStatus.ERROR || detailsStatus === LoadStatus.ERROR) {
         return (
             <ErrorPage
@@ -515,19 +533,36 @@ const TeacherStudentDictionariesPage = ({
                 <>
                     <h5 className="mb-3">Словари учеников</h5>
                     {students.length === 0 && <div className="text-muted">Пока нет учеников</div>}
-                    {students.length > 0 && (
+                    {visibleStudents.length > 0 && (
                         <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-2 pt-1">
-                            {students.map((student) => (
+                            {visibleStudents.map((student) => (
                                 <div className="col" key={student.id}>
-                                    <button
-                                        className="btn w-100 text-start p-0 border-0 quizlet-topic-card-btn"
-                                        onClick={() => navigate(`/quizlet/students-dictionaries/${student.id}`)}
-                                    >
-                                        <div className="card quizlet-topic-card h-100">
-                                            <div className="card-body d-flex flex-column justify-content-between">
-                                                <span className="quizlet-topic-card__title fw-semibold">
-                                                    {student.nickname}
-                                                </span>
+                                    <div className="card quizlet-topic-card h-100">
+                                        <div className="card-body d-flex flex-column justify-content-between gap-3">
+                                            <div className="d-flex align-items-start justify-content-between gap-2">
+                                                <button
+                                                    className="btn flex-grow-1 text-start p-0 border-0 quizlet-topic-card-btn"
+                                                    onClick={() =>
+                                                        navigate(`/quizlet/students-dictionaries/${student.id}`)
+                                                    }
+                                                >
+                                                    <span className="quizlet-topic-card__title fw-semibold">
+                                                        {student.nickname}
+                                                    </span>
+                                                </button>
+                                                <button
+                                                    className="btn btn-sm btn-link text-secondary p-0 border-0 flex-shrink-0"
+                                                    onClick={() => handleHideStudent(student.id)}
+                                                    title="Скрыть ученика"
+                                                    aria-label={`Скрыть ученика ${student.nickname}`}
+                                                >
+                                                    <i className="bi bi-eye-slash" />
+                                                </button>
+                                            </div>
+                                            <button
+                                                className="btn w-100 text-start p-0 border-0 quizlet-topic-card-btn"
+                                                onClick={() => navigate(`/quizlet/students-dictionaries/${student.id}`)}
+                                            >
                                                 <span className="quizlet-topic-card__count text-muted mt-2">
                                                     {student.name}
                                                 </span>
@@ -536,11 +571,62 @@ const TeacherStudentDictionariesPage = ({
                                                         Словарь еще не создан
                                                     </span>
                                                 )}
-                                            </div>
+                                            </button>
                                         </div>
-                                    </button>
+                                    </div>
                                 </div>
                             ))}
+                        </div>
+                    )}
+                    {visibleStudents.length === 0 && students.length > 0 && (
+                        <div className="text-muted">Все ученики сейчас скрыты</div>
+                    )}
+                    {hiddenStudents.length > 0 && (
+                        <div className="mt-4">
+                            <div className="d-flex align-items-center justify-content-between gap-2 mb-2">
+                                <h6 className="mb-0 text-muted">Скрытые ученики</h6>
+                                <span className="small text-muted">Не попадают в выдачу assignment</span>
+                            </div>
+                            <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-2 pt-1">
+                                {hiddenStudents.map((student) => (
+                                    <div className="col" key={student.id}>
+                                        <div className="card quizlet-topic-card h-100 border-secondary-subtle">
+                                            <div className="card-body d-flex flex-column justify-content-between gap-3">
+                                                <div className="d-flex align-items-start justify-content-between gap-2">
+                                                    <button
+                                                        className="btn flex-grow-1 text-start p-0 border-0 quizlet-topic-card-btn"
+                                                        onClick={() =>
+                                                            navigate(`/quizlet/students-dictionaries/${student.id}`)
+                                                        }
+                                                    >
+                                                        <span className="quizlet-topic-card__title fw-semibold text-muted">
+                                                            {student.nickname}
+                                                        </span>
+                                                    </button>
+                                                    <button
+                                                        className="btn btn-sm btn-link text-primary p-0 border-0 flex-shrink-0"
+                                                        onClick={() => handleShowStudent(student.id)}
+                                                        title="Показать ученика"
+                                                        aria-label={`Показать ученика ${student.nickname}`}
+                                                    >
+                                                        <i className="bi bi-eye" />
+                                                    </button>
+                                                </div>
+                                                <button
+                                                    className="btn w-100 text-start p-0 border-0 quizlet-topic-card-btn"
+                                                    onClick={() =>
+                                                        navigate(`/quizlet/students-dictionaries/${student.id}`)
+                                                    }
+                                                >
+                                                    <span className="quizlet-topic-card__count text-muted mt-2">
+                                                        {student.name}
+                                                    </span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
                 </>
@@ -576,7 +662,21 @@ const TeacherStudentDictionariesPage = ({
                         </ol>
                     </nav>
 
-                    <div className="mb-3 fw-semibold">{selectedStudent?.name ?? ""}</div>
+                    <div className="mb-3 d-flex align-items-center justify-content-between gap-2 flex-wrap">
+                        <div className="fw-semibold">{selectedStudent?.name ?? ""}</div>
+                        {selectedStudent !== null && (
+                            <button
+                                className={`btn btn-sm ${selectedStudent.is_hidden ? "btn-outline-primary" : "btn-outline-secondary"}`}
+                                onClick={() =>
+                                    selectedStudent.is_hidden
+                                        ? handleShowStudent(selectedStudent.id)
+                                        : handleHideStudent(selectedStudent.id)
+                                }
+                            >
+                                {selectedStudent.is_hidden ? "Показать ученика" : "Скрыть ученика"}
+                            </button>
+                        )}
+                    </div>
 
                     {lesson === null && (
                         <div className="d-flex gap-2 mb-3" style={{ width: "min(100%, 520px)" }}>
