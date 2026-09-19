@@ -525,13 +525,14 @@ class FillSpacesExistsTaskStudentReq(FillSpacesExistsTaskBase):
 
 
 class FillSpacesExistsTaskRes(FillSpacesExistsTaskBase, IFillSpacesTaskTeacherBase, BaseModelRes):
+    meta_extra_words: list[StrExtraSpaceRemove] = []
     answers: list[StrExtraSpaceRemove | None] = []
     inputs: list[StrExtraSpaceRemove] = []
 
     @model_validator(mode="after")
     def new_inputs_validation(self) -> "FillSpacesExistsTaskRes":
         if len(self.answers) == 0:
-            self.inputs = self.meta_answers.copy()
+            self.inputs = [*self.meta_answers, *self.meta_extra_words]
             random.shuffle(self.inputs)
             for _ in range(len(self.meta_answers)):
                 self.answers.append(None)
@@ -545,14 +546,22 @@ class FillSpacesExistsTaskRes(FillSpacesExistsTaskBase, IFillSpacesTaskTeacherBa
         combo_answers = [*list(filter(lambda item: item is not None, self.answers)), *self.inputs]
         combo_answers.sort()
 
-        meta_answers = self.meta_answers.copy()
+        meta_answers = [*self.meta_answers, *self.meta_extra_words]
         meta_answers.sort()
 
         return combo_answers == meta_answers
 
 
 class FillSpacesExistsTaskTeacherReq(FillSpacesExistsTaskBase, IFillSpacesTaskTeacherReq):
-    pass
+    meta_extra_words: list[StrExtraSpaceRemove] = []
+
+    @model_validator(mode="after")
+    def validate_extra_words(self) -> "FillSpacesExistsTaskTeacherReq":
+        for word in self.meta_extra_words:
+            if not word:
+                raise ValueError(ANSWER_CANT_BE_EMPTY)
+
+        return self
 
 
 class FillSpacesExistsTaskCheck(IFillSpacesTaskCheck):

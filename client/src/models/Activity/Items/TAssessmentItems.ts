@@ -151,6 +151,7 @@ export interface TAssessmentFillSpacesExists extends TAssessmentFillSpacesExists
 }
 export interface TTeacherAssessmentFillSpacesExists extends TAssessmentFillSpacesExistsBase {
     meta_answers: string[];
+    meta_extra_words: string[];
 }
 export interface TAssessmentCheckedFillSpacesExists extends TAssessmentCheckedItemBase {
     mistake_answers: number[];
@@ -389,7 +390,7 @@ const teacherAssessmentTaskDefaultDataAliases: TTeacherAssessmentTaskDefaultData
     fill_spaces_exists: () => ({
         name: TAssessmentTaskName.FILL_SPACES_EXISTS,
         meta_answers: [],
-        inputs: [],
+        meta_extra_words: [],
         separates: [""],
         imageSize: DEFAULT_ASSESSMENT_TASK_IMAGE_SIZE,
         imagePosition: DEFAULT_ASSESSMENT_TASK_IMAGE_POSITION,

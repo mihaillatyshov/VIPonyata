@@ -1,7 +1,9 @@
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
+import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import {
+    TAssessmentTaskName,
     TTeacherAssessmentFillSpacesByHand,
     TTeacherAssessmentFillSpacesExists,
 } from "models/Activity/Items/TAssessmentItems";
@@ -10,6 +12,9 @@ import styles from "./Style.module.css";
 import { TeacherAssessmentTypeProps } from "./TeacherAssessmentTypeBase";
 
 type TTeacherAssessmentFillSpaceType = TTeacherAssessmentFillSpacesExists | TTeacherAssessmentFillSpacesByHand;
+
+const isFillSpacesExistsTask = (task: TTeacherAssessmentFillSpaceType): task is TTeacherAssessmentFillSpacesExists =>
+    task.name === TAssessmentTaskName.FILL_SPACES_EXISTS;
 
 const normalizeCell = (value: string | undefined): string => (value ?? "").trim();
 
@@ -66,8 +71,20 @@ const ITeacherAssessmentFillSpaces = <T extends TTeacherAssessmentFillSpaceType>
     const tableRef = useRef<HTMLTableElement>(null);
     const focusPending = useRef<{ rowIndex: number; caretPosition?: number } | null>(null);
     const [focusVersion, setFocusVersion] = useState(0);
+    const [extraWordsDraft, setExtraWordsDraft] = useState(
+        isFillSpacesExistsTask(data) ? (data.meta_extra_words ?? []).join("\n") : "",
+    );
 
     const rows = toRows(data.separates, data.meta_answers);
+
+    useEffect(() => {
+        if (!isFillSpacesExistsTask(data)) {
+            setExtraWordsDraft("");
+            return;
+        }
+
+        setExtraWordsDraft((data.meta_extra_words ?? []).join("\n"));
+    }, [taskUUID]);
 
     useLayoutEffect(() => {
         if (focusPending.current === null) {
@@ -190,6 +207,22 @@ const ITeacherAssessmentFillSpaces = <T extends TTeacherAssessmentFillSpaceType>
 
     const renderResult = toTaskData(rows);
 
+    const updateExtraWords = (value: string) => {
+        if (!isFillSpacesExistsTask(data)) {
+            return;
+        }
+
+        setExtraWordsDraft(value);
+
+        onChangeTask({
+            ...data,
+            meta_extra_words: value
+                .split(/\r?\n/)
+                .map((word) => word.trim())
+                .filter((word) => word !== ""),
+        } as T);
+    };
+
     return (
         <div className={styles.findPair}>
             <div className={styles.findPairHint}>Скопируйте столбец из Excel и вставьте строки в таблицу.</div>
@@ -241,6 +274,17 @@ const ITeacherAssessmentFillSpaces = <T extends TTeacherAssessmentFillSpaceType>
                 </table>
             </div>
             <div className={styles.findPairFooterHint}>Enter: следующая строка. Tab: переход по строкам.</div>
+            {isFillSpacesExistsTask(data) && (
+                <FloatingLabelTextareaAutosize
+                    htmlId={`extra_words_${taskUUID}`}
+                    placeholder="Лишние слова, по одному на строке"
+                    value={extraWordsDraft}
+                    onChangeHandler={updateExtraWords}
+                    rows={4}
+                    noErrorField={true}
+                    className="mt-3"
+                />
+            )}
             <div>
                 <div>Результат: </div>
                 <div className="d-flex flex-wrap">
@@ -260,6 +304,21 @@ const ITeacherAssessmentFillSpaces = <T extends TTeacherAssessmentFillSpaceType>
                     </div>
                 </div>
             </div>
+            {isFillSpacesExistsTask(data) && (data.meta_extra_words ?? []).length > 0 && (
+                <div className="mt-2">
+                    <div>Лишние слова: </div>
+                    <div className="d-flex flex-wrap gap-2">
+                        {(data.meta_extra_words ?? []).map((word, index) => (
+                            <div
+                                key={index}
+                                className={`prevent-select md-last-no-margin ${styles.fillSpacesResultAnswer}`}
+                            >
+                                <ReactMarkdownWithHtml>{word}</ReactMarkdownWithHtml>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

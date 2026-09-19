@@ -105,7 +105,7 @@ export const AssessmentTaskPreviewContent = ({ task }: { task: TTeacherAssessmen
             return (
                 <div className="student-assessment-fill-spaces__container">
                     <div className="d-flex gap-3 flex-wrap student-assessment-fill-spaces-exists__inputs">
-                        {task.meta_answers.map((answer, index) => (
+                        {[...task.meta_answers, ...(task.meta_extra_words ?? [])].map((answer, index) => (
                             <div
                                 key={`${task.name}_input_${index}`}
                                 className="d-flex dnd__sortable-item student-assessment-fill-spaces-exists__draggable"

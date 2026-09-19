@@ -36,6 +36,44 @@ class TestAssessmentCreateSentence(unittest.TestCase):
         self.assertTrue(
             FillSpacesExistsTaskRes(**value_base, inputs=["char", "word"], answers=[None, None]).custom_validation())
 
+    def test_CreateSentenceRes_WithExtraWords(self):
+        value_base = {
+            "name": AssessmentTaskName.FILL_SPACES_EXISTS,
+            "separates": ["Exist. Fill word after (word):", "and", ": before this (char)"],
+            "meta_answers": ["word", "char"],
+            "meta_extra_words": ["extra"]
+        }
+
+        self.assertEqual(3, len(FillSpacesExistsTaskRes(**value_base).inputs))
+        self.assertTrue(
+            FillSpacesExistsTaskRes(**value_base, inputs=["extra"], answers=["word", "char"]).custom_validation())
+        self.assertTrue(
+            FillSpacesExistsTaskRes(**value_base, inputs=["extra", "word"], answers=[None, "char"]).custom_validation())
+        self.assertFalse(FillSpacesExistsTaskRes(**value_base, inputs=[], answers=["word", "char"]).custom_validation())
+
+    def test_CreateSentenceTeacherReq_WithEmptyExtraWord(self):
+        self.assertRaises(
+            ValidationError,
+            FillSpacesExistsTaskTeacherReq,
+            **{
+                "name": AssessmentTaskName.FILL_SPACES_EXISTS,
+                "separates": ["start", "end"],
+                "meta_answers": ["word"],
+                "meta_extra_words": [""]
+            },
+        )
+
+    def test_CreateSentenceTeacherReq_SavesExtraWords(self):
+        task = FillSpacesExistsTaskTeacherReq(
+            **{
+                "name": AssessmentTaskName.FILL_SPACES_EXISTS,
+                "separates": ["start", "end"],
+                "meta_answers": ["word"],
+                "meta_extra_words": ["extra one", "extra two"],
+            }, )
+
+        self.assertEqual(["extra one", "extra two"], task.model_dump()["meta_extra_words"])
+
 
 if __name__ == '__main__':
     unittest.main()
