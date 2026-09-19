@@ -24,6 +24,15 @@ export interface TAssessmentCheckedItemBase {
     cheked: boolean;
 }
 
+export const ASSESSMENT_IMG_SIZES = ["small", "medium", "large"] as const;
+export type TAssessmentImgSize = (typeof ASSESSMENT_IMG_SIZES)[number];
+
+export const ASSESSMENT_IMG_TEXT_POSITIONS = ["top", "bottom", "left", "right"] as const;
+export type TAssessmentImgTextPosition = (typeof ASSESSMENT_IMG_TEXT_POSITIONS)[number];
+
+export const DEFAULT_ASSESSMENT_IMG_SIZE: TAssessmentImgSize = "large";
+export const DEFAULT_ASSESSMENT_IMG_TEXT_POSITION: TAssessmentImgTextPosition = "top";
+
 // * ==================================================================================================================
 // * ========== Text ==================================================================================================
 // * ==================================================================================================================
@@ -211,6 +220,8 @@ interface TAssessmentImgBase extends TAssessmentItemBase {
     name: TAssessmentTaskName.IMG;
     description?: string | null;
     url: string;
+    imageSize?: TAssessmentImgSize;
+    textPosition?: TAssessmentImgTextPosition;
 }
 export type TAssessmentImg = TAssessmentImgBase;
 export type TTeacherAssessmentImg = TAssessmentImgBase;
@@ -356,7 +367,12 @@ const teacherAssessmentTaskDefaultDataAliases: TTeacherAssessmentTaskDefaultData
     }),
     sentence_order: () => ({ name: TAssessmentTaskName.SENTENCE_ORDER, meta_parts: [] }),
     open_question: () => ({ name: TAssessmentTaskName.OPEN_QUESTION, meta_answer: "", question: "" }),
-    img: () => ({ name: TAssessmentTaskName.IMG, url: "" }),
+    img: () => ({
+        name: TAssessmentTaskName.IMG,
+        url: "",
+        imageSize: DEFAULT_ASSESSMENT_IMG_SIZE,
+        textPosition: DEFAULT_ASSESSMENT_IMG_TEXT_POSITION,
+    }),
     audio: () => ({ name: TAssessmentTaskName.AUDIO, url: "" }),
     block_begin: () => ({ name: TAssessmentTaskName.BLOCK_BEGIN }),
     block_end: () => ({ name: TAssessmentTaskName.BLOCK_END }),

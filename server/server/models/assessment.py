@@ -3,7 +3,7 @@ import datetime
 import random
 from collections import Counter
 from enum import Enum
-from typing import TypedDict
+from typing import Literal, TypedDict
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
@@ -717,6 +717,8 @@ class ImgTaskBase(BaseModelTask):
 class ImgTaskTeacherBase(ImgTaskBase):
     description: StrStrip | None = None
     url: str
+    imageSize: Literal["small", "medium", "large"] = "large"
+    textPosition: Literal["top", "bottom", "left", "right"] = "top"
 
 
 class ImgTaskStudentReq(ImgTaskBase):
