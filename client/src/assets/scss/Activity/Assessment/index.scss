@@ -367,6 +367,8 @@
     --assessment-task-image-max-width: 160px;
     --assessment-task-image-max-height: 160px;
     --assessment-task-image-column-width: min(100%, var(--assessment-task-image-max-width));
+    --assessment-task-image-mobile-max-width: var(--assessment-task-image-max-width);
+    --assessment-task-image-mobile-max-height: var(--assessment-task-image-max-height);
     display: flex;
     width: 100%;
     max-width: 100%;
@@ -478,9 +480,30 @@
         width: 100%;
         align-items: center;
         text-align: center;
+        gap: 14px;
+    }
+
+    .assessment-img-content--small {
+        --assessment-image-max-width: min(100%, 240px);
+        --assessment-image-max-height: 180px;
+    }
+
+    .assessment-img-content--medium {
+        --assessment-image-max-width: min(100%, 300px);
+        --assessment-image-max-height: 220px;
+    }
+
+    .assessment-img-content--large {
+        --assessment-image-max-width: min(100%, 320px);
+        --assessment-image-max-height: 240px;
     }
 
     .assessment-img-content__image {
+        max-width: 100%;
+    }
+
+    .assessment-img-content__text {
+        width: 100%;
         max-width: 100%;
     }
 
@@ -494,7 +517,36 @@
         gap: 16px;
     }
 
-    .assessment-task-image-content__image {
+    .assessment-task-image-content--tiny {
+        --assessment-task-image-mobile-max-width: min(100%, 120px);
+        --assessment-task-image-mobile-max-height: 120px;
+    }
+
+    .assessment-task-image-content--small {
+        --assessment-task-image-mobile-max-width: min(100%, 180px);
+        --assessment-task-image-mobile-max-height: 140px;
+    }
+
+    .assessment-task-image-content--medium {
+        --assessment-task-image-mobile-max-width: min(100%, 240px);
+        --assessment-task-image-mobile-max-height: 180px;
+    }
+
+    .assessment-task-image-content__body {
+        width: 100%;
         max-width: 100%;
+        align-self: auto;
+    }
+
+    .assessment-task-image-content__image-wrap {
+        width: 100%;
+        margin-top: 0;
+        justify-content: center;
+    }
+
+    .assessment-task-image-content__image {
+        width: auto;
+        max-width: var(--assessment-task-image-mobile-max-width);
+        max-height: var(--assessment-task-image-mobile-max-height);
     }
 }
