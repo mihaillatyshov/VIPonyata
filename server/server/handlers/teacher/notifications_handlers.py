@@ -123,6 +123,24 @@ def _append_history_item(result: List[dict[str, Any]], item: dict[str, Any]):
     result.append(item)
 
 
+def _get_homework_try_metrics(homework_try) -> dict[str, int | None]:
+    checked_tasks = json.loads(homework_try.checked_tasks)
+    mistakes_count = sum(task.get("mistakes_count", 0) for task in checked_tasks)
+    correct_answers = 0
+
+    for done_task, checked_task in zip(json.loads(homework_try.done_tasks), checked_tasks):
+        if done_task.get("name") in ["text", "img", "audio", "block_begin", "block_end"]:
+            continue
+        if checked_task.get("cheked", False) and checked_task.get("mistakes_count", 0) == 0:
+            correct_answers += 1
+
+    return {
+        "mistakes_count": mistakes_count,
+        "correct_answers": correct_answers,
+        "elapsed_seconds": _get_elapsed_seconds(homework_try.start_datetime, homework_try.end_datetime),
+    }
+
+
 def _build_activity_history(students_by_id: dict[int, dict]) -> List[dict[str, Any]]:
     result: List[dict[str, Any]] = []
 
@@ -131,7 +149,52 @@ def _build_activity_history(students_by_id: dict[int, dict]) -> List[dict[str, A
         if item_data["type"] is None or item_data["type"] == "quizlet_assignment_result":
             continue
 
-        activity_try_data = _get_notifications_try(item_data["activity_try_id"], item_data["type"])
+        if item_data["type"] == "homework_try":
+            homework_try_id = item_data.get("homework_try_id")
+            if not isinstance(homework_try_id, int):
+                continue
+
+            homework_try = DBQT.get_homework_try_by_id(homework_try_id)
+            if homework_try is None or homework_try.end_datetime is None:
+                continue
+
+            assignment = DBQT.get_homework_assignment_by_id(homework_try.assignment_id)
+            if assignment is None:
+                continue
+
+            student = students_by_id.get(homework_try.student_id)
+            if student is None:
+                continue
+
+            homework_metrics = _get_homework_try_metrics(homework_try)
+            _append_history_item(
+                result,
+                {
+                    "id": f"homework_try_{notification.id}",
+                    "event_type": "homework_completion",
+                    "action_type": "homework_try",
+                    "action_label": "Завершил домашнюю работу",
+                    "status": "completed",
+                    "created_at": homework_try.end_datetime,
+                    "started_at": homework_try.start_datetime,
+                    "completed_at": homework_try.end_datetime,
+                    "elapsed_seconds": homework_metrics["elapsed_seconds"],
+                    "mistakes_count": homework_metrics["mistakes_count"],
+                    "correct_answers": homework_metrics["correct_answers"],
+                    "skipped_words": None,
+                    "training_kind": "test",
+                    "target_name": assignment.title,
+                    "target_url": f"/tasks/tries/{homework_try.id}",
+                    "student": student,
+                },
+            )
+            continue
+
+        activity_try_id = item_data.get("activity_try_id")
+        if not isinstance(activity_try_id, int):
+            continue
+
+        activity_try_data = _get_notifications_try(activity_try_id, item_data["type"])
         if activity_try_data is None:
             continue
 
@@ -143,7 +206,7 @@ def _build_activity_history(students_by_id: dict[int, dict]) -> List[dict[str, A
         if lesson_data is None:
             continue
 
-        user_data = _get_notifications_user(item_data["activity_try_id"], item_data["type"])
+        user_data = _get_notifications_user(activity_try_id, item_data["type"])
         if user_data is None:
             continue
 
@@ -180,7 +243,7 @@ def _build_activity_history(students_by_id: dict[int, dict]) -> List[dict[str, A
                 "target_name":
                 lesson_data.name,
                 "target_url":
-                f"/{'assessment' if item_data['type'] in ['assessment_try', 'final_boss_try'] else item_data['type'].replace('_try', '')}/try/{item_data['activity_try_id']}"
+                f"/{'assessment' if item_data['type'] in ['assessment_try', 'final_boss_try'] else item_data['type'].replace('_try', '')}/try/{activity_try_id}"
                 if item_data["type"] in ["assessment_try", "final_boss_try"] else None,
                 "student":
                 students_by_id.get(user_data.id, user_data.__json__()),
@@ -411,23 +474,15 @@ def get_notifications():
             if student is None:
                 continue
 
-            checked_tasks = json.loads(homework_try.checked_tasks)
-            mistakes_count = sum(task.get("mistakes_count", 0) for task in checked_tasks)
-            correct_answers = 0
-            for done_task, checked_task in zip(json.loads(homework_try.done_tasks), checked_tasks):
-                if done_task.get("name") in ["text", "img", "audio", "block_begin", "block_end"]:
-                    continue
-                if checked_task.get("cheked", False) and checked_task.get("mistakes_count", 0) == 0:
-                    correct_answers += 1
+            homework_metrics = _get_homework_try_metrics(homework_try)
 
             item_data["activity_try"] = {
                 "id": homework_try.id,
                 "start_datetime": homework_try.start_datetime,
                 "end_datetime": homework_try.end_datetime,
-                "mistakes_count": mistakes_count,
-                "correct_answers": correct_answers,
-                "elapsed_seconds": max(0, int(
-                    (homework_try.end_datetime - homework_try.start_datetime).total_seconds())),
+                "mistakes_count": homework_metrics["mistakes_count"],
+                "correct_answers": homework_metrics["correct_answers"],
+                "elapsed_seconds": homework_metrics["elapsed_seconds"],
             }
             item_data["activity_try_id"] = homework_try.id
             item_data["lesson"] = {
