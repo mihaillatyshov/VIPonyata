@@ -1,4 +1,4 @@
-import React from "react";
+import type { KeyboardEventHandler } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { TStudentNotification, TStudentNotificationCustom } from "models/TNotification";
@@ -280,7 +280,7 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
         }
     };
 
-    const handleKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (event) => {
+    const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = (event) => {
         if (!isClickable) {
             return;
         }

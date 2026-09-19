@@ -4,11 +4,8 @@ import {
     TAssessmentTaskImageAttachment,
 } from "models/Activity/Items/TAssessmentItems";
 
-import {
-    AssessmentTaskImageEditorControls,
-    AssessmentTaskImageLayout,
-    normalizeAssessmentTaskImageAttachment,
-} from "./AssessmentTaskImageSupport";
+import { AssessmentTaskImageEditorControls, AssessmentTaskImageLayout } from "./AssessmentTaskImageSupport";
+import { normalizeAssessmentTaskImageAttachment } from "./AssessmentTaskImageUtils";
 import { AssessmentTaskPreview } from "./AssessmentTaskPreview";
 import { TeacherAssessmentTypeProps } from "./ProcessingPage/Types/TeacherAssessmentTypeBase";
 import { StudentAssessmentTypeProps } from "./Types/StudentAssessmentTypeProps";

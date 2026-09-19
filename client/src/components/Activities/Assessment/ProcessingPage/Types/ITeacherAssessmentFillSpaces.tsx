@@ -84,7 +84,7 @@ const ITeacherAssessmentFillSpaces = <T extends TTeacherAssessmentFillSpaceType>
         }
 
         setExtraWordsDraft((data.meta_extra_words ?? []).join("\n"));
-    }, [taskUUID]);
+    }, [data, taskUUID]);
 
     useLayoutEffect(() => {
         if (focusPending.current === null) {

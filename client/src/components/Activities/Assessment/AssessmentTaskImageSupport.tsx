@@ -13,6 +13,8 @@ import {
 } from "models/Activity/Items/TAssessmentItems";
 import { ImageState } from "models/Img";
 
+import { normalizeAssessmentTaskImageAttachment } from "./AssessmentTaskImageUtils";
+
 const imageSizeLabels: Record<TAssessmentTaskImageSize, string> = {
     tiny: "Мелкий",
     small: "Маленький",
@@ -40,14 +42,6 @@ interface AssessmentTaskImageEditorControlsProps<T extends TAssessmentTaskImageA
     onChange: (data: T) => void;
 }
 
-export const normalizeAssessmentTaskImageAttachment = <T extends TAssessmentTaskImageAttachment>(data: T): T => {
-    return {
-        ...data,
-        imageSize: data.imageSize ?? DEFAULT_ASSESSMENT_TASK_IMAGE_SIZE,
-        imagePosition: data.imagePosition ?? DEFAULT_ASSESSMENT_TASK_IMAGE_POSITION,
-    };
-};
-
 export const AssessmentTaskImageLayout = ({
     image,
     imageSize,
@@ -55,10 +49,6 @@ export const AssessmentTaskImageLayout = ({
     children,
     className,
 }: AssessmentTaskImageLayoutProps) => {
-    if (!image) {
-        return <>{children}</>;
-    }
-
     const contentRef = useRef<HTMLDivElement>(null);
     const imageWrapRef = useRef<HTMLDivElement>(null);
     const [imageOffsetTop, setImageOffsetTop] = useState(0);
@@ -67,7 +57,29 @@ export const AssessmentTaskImageLayout = ({
     const normalizedPosition = imagePosition ?? DEFAULT_ASSESSMENT_TASK_IMAGE_POSITION;
     const isSidePosition = normalizedPosition === "left" || normalizedPosition === "right";
 
-    const syncImageOffset = () => {
+    useLayoutEffect(() => {
+        if (!image || !isSidePosition || !contentRef.current || !imageWrapRef.current) {
+            setImageOffsetTop(0);
+            return;
+        }
+
+        const syncImageOffset = () => {
+            if (!contentRef.current || !imageWrapRef.current) {
+                return;
+            }
+
+            const contentHeight = contentRef.current.getBoundingClientRect().height;
+            const imageHeight = imageWrapRef.current.getBoundingClientRect().height;
+            setImageOffsetTop(Math.max((contentHeight - imageHeight) / 2, 0));
+        };
+
+        syncImageOffset();
+
+        window.addEventListener("resize", syncImageOffset);
+        return () => window.removeEventListener("resize", syncImageOffset);
+    }, [image, isSidePosition, normalizedSize]);
+
+    const handleImageLoad = () => {
         if (!isSidePosition || !contentRef.current || !imageWrapRef.current) {
             setImageOffsetTop(0);
             return;
@@ -78,17 +90,9 @@ export const AssessmentTaskImageLayout = ({
         setImageOffsetTop(Math.max((contentHeight - imageHeight) / 2, 0));
     };
 
-    useLayoutEffect(() => {
-        syncImageOffset();
-
-        if (!isSidePosition) {
-            return;
-        }
-
-        const handleResize = () => syncImageOffset();
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, [image, isSidePosition, normalizedSize]);
+    if (!image) {
+        return <>{children}</>;
+    }
 
     const rootClassName = [
         "assessment-task-image-content",
@@ -113,7 +117,7 @@ export const AssessmentTaskImageLayout = ({
                 alt="Task illustration"
                 className="assessment-task-image-content__image"
                 src={image}
-                onLoad={syncImageOffset}
+                onLoad={handleImageLoad}
             />
         </div>
     );
