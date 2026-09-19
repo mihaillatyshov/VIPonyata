@@ -112,6 +112,152 @@ const isAccessNotification = (item: TStudentNotification): boolean => {
     );
 };
 
+const isSimpleTextNotification = (item: TStudentNotification) => {
+    return (
+        item.type === null ||
+        item.type === undefined ||
+        item.type === "quizlet_personal_dictionary_update" ||
+        item.type === "quizlet_personal_dictionary_topic_created" ||
+        item.type === "quizlet_personal_dictionary_topic_updated" ||
+        item.type === "quizlet_personal_dictionary_topic_deleted"
+    );
+};
+
+const getNotificationMeta = (item: TStudentNotification) => {
+    switch (item.type) {
+        case "course":
+            return {
+                label: "Курс",
+                iconClass: "bi-mortarboard",
+                toneClass: "notification__item--lesson",
+            };
+        case "lesson":
+            return {
+                label: "Урок",
+                iconClass: "bi-journal-bookmark",
+                toneClass: "notification__item--lesson",
+            };
+        case "assessment_try":
+            return {
+                label: "Тест",
+                iconClass: "bi-ui-checks-grid",
+                toneClass: "notification__item--assessment",
+            };
+        case "final_boss_try":
+            return {
+                label: "Финальный босс",
+                iconClass: "bi-trophy",
+                toneClass: "notification__item--boss",
+            };
+        case "quizlet_assignment":
+            return {
+                label: "Quizlet",
+                iconClass: "bi-collection",
+                toneClass: "notification__item--quizlet",
+            };
+        case "homework_assignment":
+            return {
+                label: "Домашняя работа",
+                iconClass: "bi-journal-check",
+                toneClass: "notification__item--homework",
+            };
+        case "quizlet_personal_dictionary_update":
+        case "quizlet_personal_dictionary_topic_created":
+        case "quizlet_personal_dictionary_topic_updated":
+        case "quizlet_personal_dictionary_topic_deleted":
+            return {
+                label: "Словарь",
+                iconClass: "bi-bookmark-star",
+                toneClass: "notification__item--dictionary",
+            };
+        default:
+            return {
+                label: "Уведомление",
+                iconClass: "bi-bell",
+                toneClass: "notification__item--message",
+            };
+    }
+};
+
+const getNotificationTitle = (item: TStudentNotification) => {
+    if (item.type === "quizlet_assignment") {
+        return item.quizlet_assignment?.title || "Задание Quizlet";
+    }
+
+    if (item.type === "homework_assignment") {
+        return item.homework_assignment?.title || "Домашнее задание";
+    }
+
+    if (item.type === null || item.type === undefined) {
+        return "Сообщение";
+    }
+
+    return getLessonTitle(item);
+};
+
+const getNotificationSubtitle = (item: TStudentNotification) => {
+    if (item.type === "assessment_try" || item.type === "final_boss_try") {
+        return "Результат выполнения";
+    }
+
+    if (item.type === "course" || item.type === "lesson") {
+        return "Открыт новый доступ";
+    }
+
+    if (item.type === "quizlet_assignment") {
+        return "Новое задание для тренировки";
+    }
+
+    if (item.type === "homework_assignment") {
+        return "Новое домашнее задание";
+    }
+
+    if (
+        item.type === "quizlet_personal_dictionary_update" ||
+        item.type === "quizlet_personal_dictionary_topic_created" ||
+        item.type === "quizlet_personal_dictionary_topic_updated" ||
+        item.type === "quizlet_personal_dictionary_topic_deleted"
+    ) {
+        return "Изменения в словаре";
+    }
+
+    return "Системное уведомление";
+};
+
+interface StudentNotificationMetric {
+    iconClass: string;
+    label: string;
+    value: string;
+}
+
+const getNotificationMetrics = (item: TStudentNotification): StudentNotificationMetric[] => {
+    const { date, time } = getDisplayDateTime(item);
+    const metrics: StudentNotificationMetric[] = [
+        {
+            iconClass: "bi-calendar3",
+            label: "Дата",
+            value: date,
+        },
+    ];
+
+    if (item.type === "assessment_try" || item.type === "final_boss_try") {
+        metrics.push(
+            {
+                iconClass: "bi-clock",
+                label: "Время",
+                value: time,
+            },
+            {
+                iconClass: "bi-exclamation-circle",
+                label: "Ошибки",
+                value: `${getMistakesCount(item) ?? "-"}`,
+            },
+        );
+    }
+
+    return metrics;
+};
+
 interface ItemContentProps {
     item: TStudentNotification;
     closeModal: () => void;
@@ -120,17 +266,12 @@ interface ItemContentProps {
 const ItemContent = ({ item, closeModal }: ItemContentProps) => {
     const navigate = useNavigate();
     const isClickable = hasLink(item);
-    const { date, time } = getDisplayDateTime(item);
-    const mistakesCount = getMistakesCount(item);
-    const lessonTitle = getLessonTitle(item);
     const isAccessItem = isAccessNotification(item);
-    const isSimpleTextItem =
-        item.type === null ||
-        item.type === undefined ||
-        item.type === "quizlet_personal_dictionary_update" ||
-        item.type === "quizlet_personal_dictionary_topic_created" ||
-        item.type === "quizlet_personal_dictionary_topic_updated" ||
-        item.type === "quizlet_personal_dictionary_topic_deleted";
+    const isSimpleTextItem = isSimpleTextNotification(item);
+    const notificationMeta = getNotificationMeta(item);
+    const notificationTitle = getNotificationTitle(item);
+    const notificationSubtitle = getNotificationSubtitle(item);
+    const metrics = getNotificationMetrics(item);
 
     const handleClick = () => {
         if (isClickable) {
@@ -168,7 +309,7 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
                 </>
             ) : (
                 <>
-                    Открыт доступ к <span className="notification__item-entity-name">{lessonTitle}</span>
+                    Открыт доступ к <span className="notification__item-entity-name">{getLessonTitle(item)}</span>
                 </>
             )}
         </>
@@ -194,7 +335,7 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
 
     return (
         <div
-            className={`notification__item notification__item--compact ${item.viewed ? "viewed" : ""} ${
+            className={`notification__item notification__item--student ${notificationMeta.toneClass} ${item.viewed ? "viewed" : ""} ${
                 isClickable ? "clickable" : ""
             }`}
             onClick={handleClick}
@@ -202,23 +343,57 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
             role={isClickable ? "button" : undefined}
             tabIndex={isClickable ? 0 : undefined}
         >
-            <div className="notification__item-chip">
-                <i className="bi bi-calendar3" aria-hidden="true"></i>
-                <span>{date}</span>
+            <div className="notification__item-main">
+                <div className="notification__item-header">
+                    <div className="notification__item-title-group">
+                        <div className="notification__item-badge" title={notificationMeta.label}>
+                            <i className={`bi ${notificationMeta.iconClass}`} aria-hidden="true"></i>
+                            <span>{notificationMeta.label}</span>
+                        </div>
+                        {!item.viewed ? <span className="notification__item-state">Новое</span> : null}
+                    </div>
+                    {isClickable ? (
+                        <div className="notification__item-link-hint">
+                            <span>Открыть</span>
+                            <i className="bi bi-arrow-up-right" aria-hidden="true"></i>
+                        </div>
+                    ) : null}
+                </div>
+
+                <div className="notification__item-title-row">
+                    <div className="notification__item-icon" aria-hidden="true">
+                        <i className={`bi ${notificationMeta.iconClass}`}></i>
+                    </div>
+                    <div className="notification__item-title-block">
+                        <div className="notification__item-title">{notificationTitle}</div>
+                        <div className="notification__item-subtitle">
+                            <span>{notificationSubtitle}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="notification__item-description">{content}</div>
+
+                <div
+                    className={`notification__item-metrics ${isAccessItem || isSimpleTextItem ? "notification__item-metrics--message" : ""}`}
+                >
+                    {metrics.map((metric) => (
+                        <div
+                            key={`${item.id}_${metric.label}`}
+                            className="notification__item-metric"
+                            title={metric.label}
+                        >
+                            <span className="notification__item-metric-icon" aria-hidden="true">
+                                <i className={`bi ${metric.iconClass}`}></i>
+                            </span>
+                            <div className="notification__item-metric-text">
+                                <span className="notification__item-metric-label">{metric.label}</span>
+                                <span className="notification__item-metric-value">{metric.value}</span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
-            {!isAccessItem && !isSimpleTextItem ? (
-                <div className="notification__item-chip">
-                    <i className="bi bi-clock" aria-hidden="true"></i>
-                    <span>{time}</span>
-                </div>
-            ) : null}
-            {!isAccessItem && !isSimpleTextItem ? (
-                <div className="notification__item-chip" title="Количество ошибок">
-                    <i className="bi bi-exclamation-circle" aria-hidden="true"></i>
-                    <span>Ошибки: {mistakesCount ?? "-"}</span>
-                </div>
-            ) : null}
-            <div className="notification__item-inline-content">{content}</div>
         </div>
     );
 };
