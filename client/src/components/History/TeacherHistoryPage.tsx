@@ -6,8 +6,7 @@ import ErrorPage from "components/ErrorPages/ErrorPage";
 import { formatDuration } from "components/Quizlet/quizletUtils";
 import { AjaxGet } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
-import { TTeacherHistoryEvent, TTeacherHistoryResponse } from "models/TTeacherHistory";
-import { TUserData } from "models/TUser";
+import { TTeacherHistoryEvent, TTeacherHistoryResponse, TTeacherHistoryStudent } from "models/TTeacherHistory";
 
 import styles from "./TeacherHistoryPage.module.css";
 
@@ -57,8 +56,9 @@ const getDirectionLabel = (direction?: string) => {
     return direction === "ru_to_jp" ? "ru-jp" : "jp-ru";
 };
 
-const getStudentTitleLabel = (student: TUserData) => {
-    return `${student.name} (${student.nickname})`;
+const getStudentTitleLabel = (student: TTeacherHistoryStudent) => {
+    const hiddenSuffix = student.is_hidden ? " [скрыт]" : "";
+    return `${student.name} (${student.nickname})${hiddenSuffix}`;
 };
 
 const lowerFirst = (value: string) => {
@@ -239,7 +239,7 @@ const TeacherHistoryPage = () => {
     const params = useParams<{ studentId?: string }>();
     const [loadStatus, setLoadStatus] = useState<LoadStatus.Type>(LoadStatus.LOADING);
     const [activeTab, setActiveTab] = useState<HistoryTab>("all");
-    const [students, setStudents] = useState<TUserData[]>([]);
+    const [students, setStudents] = useState<TTeacherHistoryStudent[]>([]);
     const [history, setHistory] = useState<TTeacherHistoryEvent[]>([]);
     const [visibleAllActionsCount, setVisibleAllActionsCount] = useState<number>(INITIAL_ALL_ACTIONS_COUNT);
 
@@ -460,7 +460,17 @@ const TeacherHistoryPage = () => {
                                         onClick={() => navigate(`/teacher/history/students/${student.id}`)}
                                     >
                                         <div className={styles.studentCardCompactTopRow}>
-                                            <div className={styles.studentNick}>{student.nickname}</div>
+                                            <div
+                                                className={`${styles.studentNick} ${student.is_hidden ? styles.studentNickHidden : ""}`}
+                                            >
+                                                {student.nickname}
+                                                {student.is_hidden && (
+                                                    <span className={styles.studentHiddenBadge}>
+                                                        <i className="bi bi-eye-slash" aria-hidden="true"></i>
+                                                        скрыт
+                                                    </span>
+                                                )}
+                                            </div>
                                             <div
                                                 className={`${styles.studentActionsBadge} ${
                                                     hasActions
@@ -471,7 +481,11 @@ const TeacherHistoryPage = () => {
                                                 {student.actionsCount}
                                             </div>
                                         </div>
-                                        <div className={styles.studentName}>{student.name}</div>
+                                        <div
+                                            className={`${styles.studentName} ${student.is_hidden ? styles.studentNameHidden : ""}`}
+                                        >
+                                            {student.name}
+                                        </div>
                                     </button>
                                 );
                             })}

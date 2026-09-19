@@ -381,6 +381,10 @@
     line-height: 1.2;
 }
 
+.studentNickHidden {
+    color: #6d7a84;
+}
+
 .studentCardCompactTopRow {
     display: flex;
     align-items: flex-start;
@@ -393,6 +397,24 @@
     color: #60707d;
     font-size: 0.8rem;
     line-height: 1.2;
+}
+
+.studentNameHidden {
+    color: #7c8993;
+}
+
+.studentHiddenBadge {
+    margin-left: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border-radius: 999px;
+    padding: 2px 7px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    color: #5f6d77;
+    background: #edf1f4;
+    vertical-align: middle;
 }
 
 .studentActionsBadge {

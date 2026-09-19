@@ -520,7 +520,11 @@ def get_notifications():
 
 
 def get_history():
-    students = [student.__json__() for student in DBQT.get_all_students()]
+    hidden_student_ids = set(DBQT.get_hidden_quizlet_student_ids())
+    students = [{
+        **student.__json__(),
+        "is_hidden": student.id in hidden_student_ids,
+    } for student in DBQT.get_all_students()]
     students_by_id = {student["id"]: student for student in students}
 
     history = []

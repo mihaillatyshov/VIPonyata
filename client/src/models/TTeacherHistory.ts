@@ -3,6 +3,10 @@ import { TUserData } from "./TUser";
 export type TTeacherHistoryStatus = "completed" | "started";
 export type TTeacherHistoryTrainingKind = "quizlet" | "test" | "practice" | "dictionary";
 
+export type TTeacherHistoryStudent = TUserData & {
+    is_hidden?: boolean;
+};
+
 export interface TTeacherHistoryEvent {
     id: string;
     event_type: string;
@@ -19,7 +23,7 @@ export interface TTeacherHistoryEvent {
     training_kind: TTeacherHistoryTrainingKind;
     target_name: string;
     target_url?: string | null;
-    student: TUserData;
+    student: TTeacherHistoryStudent;
     quiz_type?: string;
     translation_direction?: "jp_to_ru" | "ru_to_jp" | string;
     total_words?: number | null;
@@ -28,6 +32,6 @@ export interface TTeacherHistoryEvent {
 }
 
 export interface TTeacherHistoryResponse {
-    students: TUserData[];
+    students: TTeacherHistoryStudent[];
     history: TTeacherHistoryEvent[];
 }
