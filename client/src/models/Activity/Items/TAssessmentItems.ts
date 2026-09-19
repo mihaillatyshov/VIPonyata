@@ -27,11 +27,25 @@ export interface TAssessmentCheckedItemBase {
 export const ASSESSMENT_IMG_SIZES = ["small", "medium", "large"] as const;
 export type TAssessmentImgSize = (typeof ASSESSMENT_IMG_SIZES)[number];
 
-export const ASSESSMENT_IMG_TEXT_POSITIONS = ["top", "bottom", "left", "right"] as const;
-export type TAssessmentImgTextPosition = (typeof ASSESSMENT_IMG_TEXT_POSITIONS)[number];
+export const ASSESSMENT_TASK_IMAGE_SIZES = ["tiny", "small", "medium"] as const;
+export type TAssessmentTaskImageSize = (typeof ASSESSMENT_TASK_IMAGE_SIZES)[number];
+
+export const ASSESSMENT_TASK_IMAGE_POSITIONS = ["top", "bottom", "left", "right"] as const;
+export type TAssessmentTaskImagePosition = (typeof ASSESSMENT_TASK_IMAGE_POSITIONS)[number];
+
+export const ASSESSMENT_IMG_TEXT_POSITIONS = ASSESSMENT_TASK_IMAGE_POSITIONS;
+export type TAssessmentImgTextPosition = TAssessmentTaskImagePosition;
 
 export const DEFAULT_ASSESSMENT_IMG_SIZE: TAssessmentImgSize = "large";
 export const DEFAULT_ASSESSMENT_IMG_TEXT_POSITION: TAssessmentImgTextPosition = "top";
+export const DEFAULT_ASSESSMENT_TASK_IMAGE_SIZE: TAssessmentTaskImageSize = "tiny";
+export const DEFAULT_ASSESSMENT_TASK_IMAGE_POSITION: TAssessmentTaskImagePosition = "right";
+
+export interface TAssessmentTaskImageAttachment {
+    image?: string;
+    imageSize?: TAssessmentTaskImageSize;
+    imagePosition?: TAssessmentTaskImagePosition;
+}
 
 // * ==================================================================================================================
 // * ========== Text ==================================================================================================
@@ -48,7 +62,7 @@ export type TAssessmentDoneTryText = TAssessmentText & TTeacherAssessmentText;
 // * ==================================================================================================================
 // * ========== TestSingle ============================================================================================
 // * ==================================================================================================================
-interface TAssessmentTestSingleBase extends TAssessmentItemBase {
+interface TAssessmentTestSingleBase extends TAssessmentItemBase, TAssessmentTaskImageAttachment {
     name: TAssessmentTaskName.TEST_SINGLE;
     options: string[];
     question: string;
@@ -67,7 +81,7 @@ export type TAssessmentDoneTryTestSingle = TAssessmentTestSingle & TTeacherAsses
 // * ==================================================================================================================
 // * ========== TestMulti =============================================================================================
 // * ==================================================================================================================
-interface TAssessmentTestMultiBase extends TAssessmentItemBase {
+interface TAssessmentTestMultiBase extends TAssessmentItemBase, TAssessmentTaskImageAttachment {
     name: TAssessmentTaskName.TEST_MULTI;
     options: string[];
     question: string;
@@ -86,7 +100,7 @@ export type TAssessmentDoneTryTestMulti = TAssessmentTestMulti & TTeacherAssessm
 // * ==================================================================================================================
 // * ========== FindPair ==============================================================================================
 // * ==================================================================================================================
-interface TAssessmentFindPairBase extends TAssessmentItemBase {
+interface TAssessmentFindPairBase extends TAssessmentItemBase, TAssessmentTaskImageAttachment {
     name: TAssessmentTaskName.FIND_PAIR;
 }
 export interface TAssessmentFindPair extends TAssessmentFindPairBase {
@@ -127,7 +141,7 @@ export type TAssessmentDoneTryCreateSentence = TAssessmentCreateSentence & TTeac
 // * ==================================================================================================================
 export const TAssessmentFillSpacesExistsEmpty = "Пусто";
 
-interface TAssessmentFillSpacesExistsBase extends TAssessmentItemBase {
+interface TAssessmentFillSpacesExistsBase extends TAssessmentItemBase, TAssessmentTaskImageAttachment {
     name: TAssessmentTaskName.FILL_SPACES_EXISTS;
     separates: string[];
 }
@@ -146,7 +160,7 @@ export type TAssessmentDoneTryFillSpacesExists = TAssessmentFillSpacesExists & T
 // * ==================================================================================================================
 // * ========== FillSpacesByHand ======================================================================================
 // * ==================================================================================================================
-interface TAssessmentFillSpacesByHandBase extends TAssessmentItemBase {
+interface TAssessmentFillSpacesByHandBase extends TAssessmentItemBase, TAssessmentTaskImageAttachment {
     name: TAssessmentTaskName.FILL_SPACES_BY_HAND;
     separates: string[];
 }
@@ -164,7 +178,7 @@ export type TAssessmentDoneTryFillSpacesByHand = TAssessmentFillSpacesByHand & T
 // * ==================================================================================================================
 // * ========== Classification ========================================================================================
 // * ==================================================================================================================
-interface TAssessmentClassificationBase extends TAssessmentItemBase {
+interface TAssessmentClassificationBase extends TAssessmentItemBase, TAssessmentTaskImageAttachment {
     name: TAssessmentTaskName.CLASSIFICATION;
     inputs: string[];
     titles: string[];
@@ -200,7 +214,7 @@ export type TAssessmentDoneTrySentenceOrder = TAssessmentSentenceOrder & TTeache
 // * ==================================================================================================================
 // * ========== OpenQuestion ==========================================================================================
 // * ==================================================================================================================
-interface TAssessmentOpenQuestionBase extends TAssessmentItemBase {
+interface TAssessmentOpenQuestionBase extends TAssessmentItemBase, TAssessmentTaskImageAttachment {
     name: TAssessmentTaskName.OPEN_QUESTION;
     question: string;
 }
@@ -231,7 +245,7 @@ export type TAssessmentDoneTryImg = TAssessmentImg & TTeacherAssessmentImg;
 // * ==================================================================================================================
 // * ========== Audio =================================================================================================
 // * ==================================================================================================================
-interface TAssessmentAudioBase extends TAssessmentItemBase {
+interface TAssessmentAudioBase extends TAssessmentItemBase, TAssessmentTaskImageAttachment {
     name: TAssessmentTaskName.AUDIO;
     description?: string | null;
     url: string;
@@ -348,32 +362,73 @@ type TTeacherAssessmentTaskDefaultDataAliases = {
 };
 const teacherAssessmentTaskDefaultDataAliases: TTeacherAssessmentTaskDefaultDataAliases = {
     text: () => ({ name: TAssessmentTaskName.TEXT, text: "" }),
-    test_single: () => ({ name: TAssessmentTaskName.TEST_SINGLE, meta_answer: null, options: [], question: "" }),
-    test_multi: () => ({ name: TAssessmentTaskName.TEST_MULTI, meta_answers: [], options: [], question: "" }),
-    find_pair: () => ({ name: TAssessmentTaskName.FIND_PAIR, meta_first: [], meta_second: [] }),
+    test_single: () => ({
+        name: TAssessmentTaskName.TEST_SINGLE,
+        meta_answer: null,
+        options: [],
+        question: "",
+        imageSize: DEFAULT_ASSESSMENT_TASK_IMAGE_SIZE,
+        imagePosition: DEFAULT_ASSESSMENT_TASK_IMAGE_POSITION,
+    }),
+    test_multi: () => ({
+        name: TAssessmentTaskName.TEST_MULTI,
+        meta_answers: [],
+        options: [],
+        question: "",
+        imageSize: DEFAULT_ASSESSMENT_TASK_IMAGE_SIZE,
+        imagePosition: DEFAULT_ASSESSMENT_TASK_IMAGE_POSITION,
+    }),
+    find_pair: () => ({
+        name: TAssessmentTaskName.FIND_PAIR,
+        meta_first: [],
+        meta_second: [],
+        imageSize: DEFAULT_ASSESSMENT_TASK_IMAGE_SIZE,
+        imagePosition: DEFAULT_ASSESSMENT_TASK_IMAGE_POSITION,
+    }),
     create_sentence: () => ({ name: TAssessmentTaskName.CREATE_SENTENCE, meta_parts: [] }),
     fill_spaces_exists: () => ({
         name: TAssessmentTaskName.FILL_SPACES_EXISTS,
         meta_answers: [],
         inputs: [],
         separates: [""],
+        imageSize: DEFAULT_ASSESSMENT_TASK_IMAGE_SIZE,
+        imagePosition: DEFAULT_ASSESSMENT_TASK_IMAGE_POSITION,
     }),
-    fill_spaces_by_hand: () => ({ name: TAssessmentTaskName.FILL_SPACES_BY_HAND, meta_answers: [], separates: [""] }),
+    fill_spaces_by_hand: () => ({
+        name: TAssessmentTaskName.FILL_SPACES_BY_HAND,
+        meta_answers: [],
+        separates: [""],
+        imageSize: DEFAULT_ASSESSMENT_TASK_IMAGE_SIZE,
+        imagePosition: DEFAULT_ASSESSMENT_TASK_IMAGE_POSITION,
+    }),
     classification: () => ({
         name: TAssessmentTaskName.CLASSIFICATION,
         inputs: [],
         titles: [],
         meta_answers: [],
+        imageSize: DEFAULT_ASSESSMENT_TASK_IMAGE_SIZE,
+        imagePosition: DEFAULT_ASSESSMENT_TASK_IMAGE_POSITION,
     }),
     sentence_order: () => ({ name: TAssessmentTaskName.SENTENCE_ORDER, meta_parts: [] }),
-    open_question: () => ({ name: TAssessmentTaskName.OPEN_QUESTION, meta_answer: "", question: "" }),
+    open_question: () => ({
+        name: TAssessmentTaskName.OPEN_QUESTION,
+        meta_answer: "",
+        question: "",
+        imageSize: DEFAULT_ASSESSMENT_TASK_IMAGE_SIZE,
+        imagePosition: DEFAULT_ASSESSMENT_TASK_IMAGE_POSITION,
+    }),
     img: () => ({
         name: TAssessmentTaskName.IMG,
         url: "",
         imageSize: DEFAULT_ASSESSMENT_IMG_SIZE,
         textPosition: DEFAULT_ASSESSMENT_IMG_TEXT_POSITION,
     }),
-    audio: () => ({ name: TAssessmentTaskName.AUDIO, url: "" }),
+    audio: () => ({
+        name: TAssessmentTaskName.AUDIO,
+        url: "",
+        imageSize: DEFAULT_ASSESSMENT_TASK_IMAGE_SIZE,
+        imagePosition: DEFAULT_ASSESSMENT_TASK_IMAGE_POSITION,
+    }),
     block_begin: () => ({ name: TAssessmentTaskName.BLOCK_BEGIN }),
     block_end: () => ({ name: TAssessmentTaskName.BLOCK_END }),
 };

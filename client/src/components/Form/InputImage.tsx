@@ -12,13 +12,25 @@ export interface InputImageProps extends InputBaseProps {
     value: ImageState;
     onChangeHandler: (value: ImageState) => void;
     customValidation?: () => void;
+    isCompact?: boolean;
+    onClear?: () => void;
 }
 
 interface InputImageLabelProps extends InputBaseProps {
     value: ImageState;
+    isCompact?: boolean;
+    canClear?: boolean;
+    onClear?: () => void;
 }
 
-const InputImageLabel = ({ htmlId, value, placeholder }: InputImageLabelProps) => {
+const InputImageLabel = ({
+    htmlId,
+    value,
+    placeholder,
+    isCompact = false,
+    canClear = false,
+    onClear,
+}: InputImageLabelProps) => {
     const hasValue =
         value.loadStatus === LoadStatus.DONE ||
         ((value.loadStatus === LoadStatus.ERROR || value.loadStatus === LoadStatus.LOADING) && value.url !== undefined);
@@ -28,8 +40,40 @@ const InputImageLabel = ({ htmlId, value, placeholder }: InputImageLabelProps) =
         value.loadStatus === LoadStatus.ERROR ? styles.inputFileBorderError : styles.inputFileBorderDefault;
 
     if (hasValue) {
+        if (isCompact) {
+            return (
+                <div className={styles.inputFileCompactPreviewWrap}>
+                    <div className={`${styles.inputFilePrev} ${borderClassName} ${styles.inputFilePrevCompact}`}>
+                        <img
+                            src={value.url}
+                            alt={placeholder}
+                            className={`${styles.inputFilePrevImg} ${styles.inputFilePrevImgCompact}`}
+                        />
+                    </div>
+                    {canClear && (
+                        <button
+                            type="button"
+                            className={`btn btn-outline-danger ${styles.inputFileButtonCompact} ${styles.inputFileButtonCompactOverlayStart}`}
+                            onClick={onClear}
+                            aria-label="Удалить картинку"
+                            title="Удалить картинку"
+                        >
+                            <i className="bi bi-trash3" />
+                        </button>
+                    )}
+                    <label
+                        htmlFor={htmlId}
+                        className={`btn btn-outline-secondary ${styles.inputFileButtonCompact} ${styles.inputFileButtonCompactOverlay}`}
+                        style={{ cursor: "pointer" }}
+                    >
+                        {isLoading ? <Loading /> : <i className="bi bi-plus-lg" style={{ fontSize: "1.2em" }} />}
+                    </label>
+                </div>
+            );
+        }
+
         return (
-            <div className="d-flex align-items-center gap-2 justify-content-center px-5">
+            <div className={`d-flex gap-2 justify-content-center ${"align-items-center px-5"}`}>
                 <div className={`${styles.inputFilePrev} ${borderClassName}`} style={{ flex: 1 }}>
                     <img src={value.url} alt={placeholder} className={styles.inputFilePrevImg} />
                 </div>
@@ -39,6 +83,19 @@ const InputImageLabel = ({ htmlId, value, placeholder }: InputImageLabelProps) =
                     style={{ cursor: "pointer" }}
                 >
                     {isLoading ? <Loading /> : <i className="bi bi-plus-lg" style={{ fontSize: "1.2em" }} />}
+                </label>
+            </div>
+        );
+    }
+
+    if (isCompact) {
+        return (
+            <div className={styles.inputFileCompactPreviewWrap}>
+                <label
+                    htmlFor={htmlId}
+                    className={`${styles.inputFileEmptyLabel} ${borderClassName} ${styles.inputFileEmptyLabelCompact}`}
+                >
+                    {isLoading ? <Loading /> : <i className="bi bi-file-earmark-plus" style={{ fontSize: "32px" }} />}
                 </label>
             </div>
         );
@@ -62,6 +119,8 @@ const InputImage = ({
     className,
     onChangeHandler,
     customValidation,
+    isCompact = false,
+    onClear,
 }: InputImageProps) => {
     className = className ?? "";
     const errorHandler = (error: ImageError) => {
@@ -118,10 +177,29 @@ const InputImage = ({
     };
 
     const imgId = `${htmlId}_img`;
+    const canClear = onClear !== undefined && value.loadStatus !== LoadStatus.NONE;
 
     return (
-        <div className={`${styles.inputFile} ${className}`}>
-            <InputImageLabel value={value} placeholder={placeholder} htmlId={imgId} />
+        <div className={`${styles.inputFile} ${isCompact ? styles.inputFileCompact : ""} ${className}`}>
+            <InputImageLabel
+                value={value}
+                placeholder={placeholder}
+                htmlId={imgId}
+                isCompact={isCompact}
+                canClear={canClear}
+                onClear={onClear}
+            />
+            {canClear && !isCompact && (
+                <button
+                    type="button"
+                    className="btn btn-outline-danger mt-2"
+                    onClick={onClear}
+                    aria-label="Удалить картинку"
+                    title="Удалить картинку"
+                >
+                    <i className="bi bi-trash3" />
+                </button>
+            )}
             <InputError {...getErrorMessage()} className="justify-content-center" />
             <input className="d-none" type="file" id={imgId} accept="image/*" onChange={handler} />
         </div>

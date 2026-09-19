@@ -4,6 +4,26 @@
     min-width: min(800px, 100%);
 }
 
+.inputFileCompact {
+    --input-file-compact-width: 180px;
+    --input-file-compact-height: 112px;
+    min-width: min(var(--input-file-compact-width), 100%);
+    width: min(var(--input-file-compact-width), 100%);
+    flex: 0 0 min(var(--input-file-compact-width), 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.inputFileCompactPreviewWrap {
+    position: relative;
+    width: 100%;
+    min-width: min(var(--input-file-compact-width), 100%);
+    max-width: min(var(--input-file-compact-width), 100%);
+    height: var(--input-file-compact-height);
+}
+
 .inputFileBorderError {
     border: 1px solid #ff0000;
 }
@@ -24,6 +44,16 @@
     border-radius: 10px;
     padding: 20px;
     margin: 0 auto;
+}
+
+.inputFilePrevCompact {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    min-height: var(--input-file-compact-height);
+    padding: 7px;
+    border-radius: 7px;
+    overflow: hidden;
 }
 
 .inputFilePrev:hover {
@@ -55,6 +85,14 @@
     margin: 0 auto;
 }
 
+.inputFileEmptyLabelCompact {
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+    height: 100%;
+    border-radius: 8px;
+}
+
 .inputFileEmptyLabel:hover {
     opacity: 70%;
 }
@@ -65,6 +103,47 @@
     width: auto;
     height: auto;
     border-radius: 10px;
+}
+
+.inputFilePrevImgCompact {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.inputFilePreviewRowCompact {
+    padding-left: 0;
+    padding-right: 0;
+    align-items: flex-start;
+}
+
+.inputFileButtonCompact {
+    padding: 0.12rem 0.35rem;
+    line-height: 1;
+}
+
+.inputFileButtonCompactOverlay {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 1;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.92);
+}
+
+.inputFileButtonCompactOverlayStart {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    z-index: 1;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.92);
+}
+
+.inputFileClearButtonCompact {
+    padding: 0.12rem 0.4rem;
+    line-height: 1;
+    border-radius: 999px;
 }
 
 .inputFilePrevAudio {

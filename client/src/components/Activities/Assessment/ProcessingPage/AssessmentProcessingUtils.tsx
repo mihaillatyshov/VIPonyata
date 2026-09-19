@@ -1,3 +1,5 @@
+import React from "react";
+
 import { AjaxGet, isProcessableError } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
 import { IAssessmentName } from "models/Activity/IActivity";
@@ -10,6 +12,7 @@ import {
 import { TAssessment } from "models/Activity/TAssessment";
 import { TProcessingType } from "models/Processing";
 
+import { withTeacherAssessmentImageAttachment } from "../AssessmentTaskImageWrappers";
 import TeacherAssessmentAudio from "./Types/TeacherAssessmentAudio";
 import TeacherAssessmentClassification from "./Types/TeacherAssessmentClassification";
 import TeacherAssessmentCreateSentence from "./Types/TeacherAssessmentCreateSentence";
@@ -29,7 +32,7 @@ interface GetAssessmentResponse {
     tasks: TTeacherAssessmentItems;
 }
 
-export type TAliasProp<T extends TAssessmentItemBase> = (props: TeacherAssessmentTypeProps<T>) => JSX.Element;
+export type TAliasProp<T extends TAssessmentItemBase> = (props: TeacherAssessmentTypeProps<T>) => React.ReactElement;
 
 type TAliases = {
     [key in TAssessmentTaskName]: TAliasProp<TGetAssessmentTeacherTypeByName[key]>;
@@ -37,17 +40,17 @@ type TAliases = {
 
 export const processingAliases: TAliases = {
     text: TeacherAssessmentText,
-    test_single: TeacherAssessmentTestSingle,
-    test_multi: TeacherAssessmentTestMulti,
-    find_pair: TeacherAssessmentFindPair,
+    test_single: withTeacherAssessmentImageAttachment(TeacherAssessmentTestSingle),
+    test_multi: withTeacherAssessmentImageAttachment(TeacherAssessmentTestMulti),
+    find_pair: withTeacherAssessmentImageAttachment(TeacherAssessmentFindPair),
     create_sentence: TeacherAssessmentCreateSentence,
-    fill_spaces_exists: TeacherAssessmentFillSpacesExists,
-    fill_spaces_by_hand: TeacherAssessmentFillSpacesByHand,
-    classification: TeacherAssessmentClassification,
+    fill_spaces_exists: withTeacherAssessmentImageAttachment(TeacherAssessmentFillSpacesExists),
+    fill_spaces_by_hand: withTeacherAssessmentImageAttachment(TeacherAssessmentFillSpacesByHand),
+    classification: withTeacherAssessmentImageAttachment(TeacherAssessmentClassification),
     sentence_order: TeacherAssessmentSentenceOrder,
-    open_question: TeacherAssessmentOpenQuestion,
+    open_question: withTeacherAssessmentImageAttachment(TeacherAssessmentOpenQuestion),
     img: TeacherAssessmentImg,
-    audio: TeacherAssessmentAudio,
+    audio: withTeacherAssessmentImageAttachment(TeacherAssessmentAudio),
     block_begin: () => <></>,
     block_end: () => <></>,
 };

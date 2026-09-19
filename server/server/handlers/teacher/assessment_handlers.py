@@ -77,7 +77,7 @@ class IAssessmentHandlers(Generic[AssessmentType, AssessmentTryType]):
 
         for i, task in enumerate(assessment_req_data.tasks):
             try:
-                tasks.append(json.dumps(parse_task(task.model_dump()).model_dump()))
+                tasks.append(json.dumps(parse_task(task.task_dict()).model_dump(), ensure_ascii=False))
             except ValidationError as ex:
                 errors[i] = format_model_error(ex.errors())
             except Exception as ex:

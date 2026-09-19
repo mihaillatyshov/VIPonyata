@@ -53,6 +53,11 @@ const TeacherAssessmentImg = ({ data, taskUUID, onChangeTask }: TeacherAssessmen
         }
     };
 
+    const clearImage = () => {
+        setImg({ loadStatus: LoadStatus.NONE });
+        onChangeTask({ ...normalizedData, url: "" });
+    };
+
     return (
         <>
             <FloatingLabelTextareaAutosize
@@ -64,51 +69,69 @@ const TeacherAssessmentImg = ({ data, taskUUID, onChangeTask }: TeacherAssessmen
                 noErrorField={true}
                 autoFocus={false}
             />
-            <div className="assessment-img-editor__controls mt-2">
-                <div className="assessment-img-editor__toggle-row">
-                    <span className="assessment-img-editor__toggle-label">Размер:</span>
-                    <div className="assessment-img-editor__toggle-group" role="group" aria-label="Размер картинки">
-                        {ASSESSMENT_IMG_SIZES.map((size) => (
-                            <button
-                                key={size}
-                                type="button"
-                                className={`assessment-img-editor__toggle-btn ${
-                                    normalizedData.imageSize === size ? "assessment-img-editor__toggle-btn--active" : ""
-                                }`}
-                                onClick={() => onChangeTask({ ...normalizedData, imageSize: size })}
-                            >
-                                {imageSizeLabels[size]}
-                            </button>
-                        ))}
+            <div className="assessment-task-image-editor mt-3">
+                <div className="assessment-task-image-editor__compact-row">
+                    <div className="assessment-task-image-editor__upload-col">
+                        <div className="assessment-task-image-editor__section-label">Картинка</div>
+                        <InputImage
+                            htmlId={taskUUID}
+                            placeholder="Картинка"
+                            value={img}
+                            onChangeHandler={setImgHandler}
+                            isCompact={true}
+                            onClear={clearImage}
+                        />
                     </div>
-                </div>
-                <div className="assessment-img-editor__toggle-row">
-                    <span className="assessment-img-editor__toggle-label">Текст:</span>
-                    <div className="assessment-img-editor__toggle-group" role="group" aria-label="Положение текста">
-                        {ASSESSMENT_IMG_TEXT_POSITIONS.map((position) => (
-                            <button
-                                key={position}
-                                type="button"
-                                className={`assessment-img-editor__toggle-btn ${
-                                    normalizedData.textPosition === position
-                                        ? "assessment-img-editor__toggle-btn--active"
-                                        : ""
-                                }`}
-                                onClick={() => onChangeTask({ ...normalizedData, textPosition: position })}
+                    <div className="assessment-task-image-editor__settings-col">
+                        <div className="assessment-img-editor__toggle-row assessment-img-editor__toggle-row--compact">
+                            <span className="assessment-img-editor__toggle-label">Размер</span>
+                            <div
+                                className="assessment-img-editor__toggle-group"
+                                role="group"
+                                aria-label="Размер картинки"
                             >
-                                {textPositionLabels[position]}
-                            </button>
-                        ))}
+                                {ASSESSMENT_IMG_SIZES.map((size) => (
+                                    <button
+                                        key={size}
+                                        type="button"
+                                        className={`assessment-img-editor__toggle-btn assessment-img-editor__toggle-btn--compact ${
+                                            normalizedData.imageSize === size
+                                                ? "assessment-img-editor__toggle-btn--active"
+                                                : ""
+                                        }`}
+                                        onClick={() => onChangeTask({ ...normalizedData, imageSize: size })}
+                                    >
+                                        {imageSizeLabels[size]}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="assessment-img-editor__toggle-row assessment-img-editor__toggle-row--compact">
+                            <span className="assessment-img-editor__toggle-label">Текст</span>
+                            <div
+                                className="assessment-img-editor__toggle-group"
+                                role="group"
+                                aria-label="Положение текста"
+                            >
+                                {ASSESSMENT_IMG_TEXT_POSITIONS.map((position) => (
+                                    <button
+                                        key={position}
+                                        type="button"
+                                        className={`assessment-img-editor__toggle-btn assessment-img-editor__toggle-btn--compact ${
+                                            normalizedData.textPosition === position
+                                                ? "assessment-img-editor__toggle-btn--active"
+                                                : ""
+                                        }`}
+                                        onClick={() => onChangeTask({ ...normalizedData, textPosition: position })}
+                                    >
+                                        {textPositionLabels[position]}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <InputImage
-                htmlId={taskUUID}
-                placeholder="Картинка"
-                className="mt-2"
-                value={img}
-                onChangeHandler={setImgHandler}
-            />
             {(normalizedData.description || normalizedData.url) && (
                 <div className="mt-3">
                     <AssessmentImgContent data={normalizedData} descriptionClassName="md-last-pad-zero" />

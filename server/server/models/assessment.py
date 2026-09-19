@@ -30,6 +30,9 @@ class AssessmentTaskName(str, Enum):
 ANSWER_CANT_BE_EMPTY = "Ответ не может быть пустым"
 QUESTION_CANT_BE_EMPTY = "Вопрос не может быть пустым"
 
+AssessmentTaskImageSize = Literal["tiny", "small", "medium"]
+AssessmentTaskImagePosition = Literal["top", "bottom", "left", "right"]
+
 
 #########################################################################################################################
 ################ Base ###################################################################################################
@@ -78,6 +81,12 @@ class BaseModelCheck(BaseModel):
     cheked: bool = True
 
 
+class TaskImageAttachmentMixin(BaseModel):
+    image: str | None = None
+    imageSize: AssessmentTaskImageSize = "tiny"
+    imagePosition: AssessmentTaskImagePosition = "right"
+
+
 #########################################################################################################################
 ################ Text ###################################################################################################
 #########################################################################################################################
@@ -117,7 +126,7 @@ class TextTaskCheck(BaseModelCheck):
 #########################################################################################################################
 ################ SingleTest #############################################################################################
 #########################################################################################################################
-class SingleTestTaskBase(BaseModelTask):
+class SingleTestTaskBase(TaskImageAttachmentMixin, BaseModelTask):
     @field_validator("name")
     @classmethod
     def name_validation(cls, v: str):
@@ -171,7 +180,7 @@ class SingleTestTaskCheck(BaseModelCheck):
 #########################################################################################################################
 ################ MultiTest ##############################################################################################
 #########################################################################################################################
-class MultiTestTaskBase(BaseModelTask):
+class MultiTestTaskBase(TaskImageAttachmentMixin, BaseModelTask):
     @field_validator("name")
     @classmethod
     def name_validation(cls, v: str):
@@ -239,7 +248,7 @@ class MultiTestTaskCheck(BaseModelCheck):
 #########################################################################################################################
 ################ FindPair ###############################################################################################
 #########################################################################################################################
-class FindPairTaskBase(BaseModelTask):
+class FindPairTaskBase(TaskImageAttachmentMixin, BaseModelTask):
     @field_validator("name")
     @classmethod
     def name_validation(cls, v: str):
@@ -503,7 +512,7 @@ class IFillSpacesTaskCheck(BaseModelCheck):
 #########################################################################################################################
 ################ FillSpacesExists #######################################################################################
 #########################################################################################################################
-class FillSpacesExistsTaskBase(BaseModelTask):
+class FillSpacesExistsTaskBase(TaskImageAttachmentMixin, BaseModelTask):
     @field_validator("name")
     @classmethod
     def name_validation(cls, v: str):
@@ -553,7 +562,7 @@ class FillSpacesExistsTaskCheck(IFillSpacesTaskCheck):
 #########################################################################################################################
 ################ FillSpacesByHand #######################################################################################
 #########################################################################################################################
-class FillSpacesByHandTaskBase(BaseModelTask):
+class FillSpacesByHandTaskBase(TaskImageAttachmentMixin, BaseModelTask):
     @field_validator("name")
     @classmethod
     def name_validation(cls, v: str):
@@ -595,7 +604,7 @@ class FillSpacesByHandTaskCheck(IFillSpacesTaskCheck):
 #########################################################################################################################
 ################ Classification #########################################################################################
 #########################################################################################################################
-class ClassificationTaskBase(BaseModelTask):
+class ClassificationTaskBase(TaskImageAttachmentMixin, BaseModelTask):
     @field_validator("name")
     @classmethod
     def name_validation(cls, v: str):
@@ -663,7 +672,7 @@ class ClassificationTaskCheck(BaseModelCheck):
 #########################################################################################################################
 ################ OpenQuestion ###########################################################################################
 #########################################################################################################################
-class OpenQuestionTaskBase(BaseModelTask):
+class OpenQuestionTaskBase(TaskImageAttachmentMixin, BaseModelTask):
     @field_validator("name")
     @classmethod
     def name_validation(cls, v: str):
@@ -746,7 +755,7 @@ class ImgTaskCheck(BaseModelCheck):
 #########################################################################################################################
 ################ Audio ##################################################################################################
 #########################################################################################################################
-class AudioTaskBase(BaseModelTask):
+class AudioTaskBase(TaskImageAttachmentMixin, BaseModelTask):
     @field_validator("name")
     @classmethod
     def name_validation(cls, v: str):
@@ -892,6 +901,9 @@ class BaseModelTaskReq(BaseModel):
     name: AssessmentTaskName
 
     model_config = ConfigDict(extra="allow")
+
+    def task_dict(self) -> dict:
+        return {"name": self.name, **(self.__pydantic_extra__ or {})}
 
 
 class AssessmentCreateReqStr(BaseModel):

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
+import { withStudentAssessmentImageAttachment } from "components/Activities/Assessment/AssessmentTaskImageWrappers";
 import StudentAssessmentAudio from "components/Activities/Assessment/Types/StudentAssessmentAudio";
 import StudentAssessmentClassification from "components/Activities/Assessment/Types/StudentAssessmentClassification";
 import StudentAssessmentCreateSentence from "components/Activities/Assessment/Types/StudentAssessmentCreateSentence";
@@ -75,17 +76,17 @@ type TAliases = {
 
 const aliases: TAliases = {
     text: StudentAssessmentText,
-    test_single: StudentAssessmentTestSingle,
-    test_multi: StudentAssessmentTestMulti,
-    find_pair: StudentAssessmentFindPair,
+    test_single: withStudentAssessmentImageAttachment(StudentAssessmentTestSingle),
+    test_multi: withStudentAssessmentImageAttachment(StudentAssessmentTestMulti),
+    find_pair: withStudentAssessmentImageAttachment(StudentAssessmentFindPair),
     create_sentence: StudentAssessmentCreateSentence,
-    fill_spaces_exists: StudentAssessmentFillSpacesExists,
-    fill_spaces_by_hand: StudentAssessmentFillSpacesByHand,
-    classification: StudentAssessmentClassification,
+    fill_spaces_exists: withStudentAssessmentImageAttachment(StudentAssessmentFillSpacesExists),
+    fill_spaces_by_hand: withStudentAssessmentImageAttachment(StudentAssessmentFillSpacesByHand),
+    classification: withStudentAssessmentImageAttachment(StudentAssessmentClassification),
     sentence_order: StudentAssessmentSentenceOrder,
-    open_question: StudentAssessmentOpenQuestion,
+    open_question: withStudentAssessmentImageAttachment(StudentAssessmentOpenQuestion),
     img: StudentAssessmentImg,
-    audio: StudentAssessmentAudio,
+    audio: withStudentAssessmentImageAttachment(StudentAssessmentAudio),
     block_begin: () => <></>,
     block_end: () => <></>,
 };

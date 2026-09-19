@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 
+import { AssessmentTaskPreviewContent } from "components/Activities/Assessment/AssessmentTaskPreview";
 import { AddBlockButton } from "components/Activities/Assessment/ProcessingPage/AddBlockButton";
 import {
     processingAliases,
@@ -353,153 +354,6 @@ const TaskBankLessonBreadcrumb = ({ lessonName }: { lessonName?: string | null }
             <span>{lessonName ?? "Урок"}</span>
         </div>
     );
-};
-
-const renderTaskPreviewContent = (task: TTeacherAssessmentAnyItem) => {
-    switch (task.name) {
-        case TAssessmentTaskName.TEXT:
-            return <div className="tasks-preview-copy">{task.text || "Текст не заполнен"}</div>;
-        case TAssessmentTaskName.TEST_SINGLE:
-            return (
-                <div className="d-flex flex-column gap-3">
-                    <div className="tasks-preview-copy">{task.question || "Вопрос не заполнен"}</div>
-                    <div className="d-flex flex-column gap-2">
-                        {task.options.map((option, index) => (
-                            <div
-                                key={`${task.name}-${index}`}
-                                className={`tasks-preview-option ${task.meta_answer === index ? "tasks-preview-option--answer" : ""}`}
-                            >
-                                <span>{option || `Вариант ${index + 1}`}</span>
-                                {task.meta_answer === index ? <span className="small fw-semibold">Ответ</span> : null}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            );
-        case TAssessmentTaskName.TEST_MULTI:
-            return (
-                <div className="d-flex flex-column gap-3">
-                    <div className="tasks-preview-copy">{task.question || "Вопрос не заполнен"}</div>
-                    <div className="d-flex flex-column gap-2">
-                        {task.options.map((option, index) => {
-                            const isAnswer = task.meta_answers.includes(index);
-                            return (
-                                <div
-                                    key={`${task.name}-${index}`}
-                                    className={`tasks-preview-option ${isAnswer ? "tasks-preview-option--answer" : ""}`}
-                                >
-                                    <span>{option || `Вариант ${index + 1}`}</span>
-                                    {isAnswer ? <span className="small fw-semibold">Ответ</span> : null}
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            );
-        case TAssessmentTaskName.FIND_PAIR:
-            return (
-                <div className="d-flex flex-column gap-2">
-                    {task.meta_first.map((firstItem, index) => (
-                        <div
-                            key={`${task.name}-${index}`}
-                            className="tasks-preview-option tasks-preview-option--answer"
-                        >
-                            <span>{firstItem || `Пара ${index + 1}`}</span>
-                            <span>{task.meta_second[index] || "-"}</span>
-                        </div>
-                    ))}
-                </div>
-            );
-        case TAssessmentTaskName.CREATE_SENTENCE:
-        case TAssessmentTaskName.SENTENCE_ORDER:
-            return (
-                <div className="tasks-preview-chips">
-                    {(task.meta_parts.length > 0 ? task.meta_parts : ["Части не заполнены"]).map((part, index) => (
-                        <span key={`${task.name}-${index}`} className="tasks-preview-chip">
-                            {part || "Пустая часть"}
-                        </span>
-                    ))}
-                </div>
-            );
-        case TAssessmentTaskName.FILL_SPACES_EXISTS:
-        case TAssessmentTaskName.FILL_SPACES_BY_HAND:
-            return (
-                <div className="d-flex flex-column gap-3">
-                    <div className="tasks-preview-copy">{task.separates.join(" ___ ") || "Шаблон не заполнен"}</div>
-                    <div>
-                        <div className="small text-muted mb-2">Ответы</div>
-                        <div className="tasks-preview-chips">
-                            {(task.meta_answers.length > 0 ? task.meta_answers : ["Ответы не заполнены"]).map(
-                                (answer, index) => (
-                                    <span
-                                        key={`${task.name}-${index}`}
-                                        className="tasks-preview-chip tasks-preview-chip--answer"
-                                    >
-                                        {answer || "Пустой ответ"}
-                                    </span>
-                                ),
-                            )}
-                        </div>
-                    </div>
-                </div>
-            );
-        case TAssessmentTaskName.CLASSIFICATION:
-            return (
-                <div className="tasks-preview-classification">
-                    {task.titles.map((title, index) => (
-                        <div key={`${task.name}-${index}`} className="tasks-preview-column">
-                            <div className="tasks-preview-column__title">{title || `Колонка ${index + 1}`}</div>
-                            <div className="d-flex flex-column gap-2">
-                                {(task.meta_answers[index] ?? []).map((answer, answerIndex) => (
-                                    <div
-                                        key={`${task.name}-${index}-${answerIndex}`}
-                                        className="tasks-preview-chip tasks-preview-chip--answer"
-                                    >
-                                        {answer || "Пустое значение"}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            );
-        case TAssessmentTaskName.OPEN_QUESTION:
-            return (
-                <div className="d-flex flex-column gap-3">
-                    <div className="tasks-preview-copy">{task.question || "Вопрос не заполнен"}</div>
-                    <div>
-                        <div className="small text-muted mb-2">Ответ</div>
-                        <div className="tasks-preview-copy tasks-preview-copy--answer">
-                            {task.meta_answer || "Ответ не заполнен"}
-                        </div>
-                    </div>
-                </div>
-            );
-        case TAssessmentTaskName.IMG:
-            return (
-                <div className="d-flex flex-column gap-3">
-                    {task.url ? (
-                        <img src={task.url} alt="Предпросмотр задания" className="tasks-preview-media" />
-                    ) : null}
-                    <div className="tasks-preview-copy">
-                        {task.description || task.url || "Изображение не заполнено"}
-                    </div>
-                </div>
-            );
-        case TAssessmentTaskName.AUDIO:
-            return (
-                <div className="d-flex flex-column gap-3">
-                    {task.url ? <audio controls className="w-100" src={task.url} /> : null}
-                    <div className="tasks-preview-copy">{task.description || task.url || "Аудио не заполнено"}</div>
-                </div>
-            );
-        case TAssessmentTaskName.BLOCK_BEGIN:
-            return <div className="tasks-preview-copy">Начало блока</div>;
-        case TAssessmentTaskName.BLOCK_END:
-            return <div className="tasks-preview-copy">Конец блока</div>;
-        default:
-            return null;
-    }
 };
 
 const TeacherTasksManager = () => {
@@ -1287,7 +1141,7 @@ const TeacherTasksManager = () => {
                                             </div>
                                         </div>
                                         <div className="tasks-preview-surface">
-                                            {renderTaskPreviewContent(previewTask.task)}
+                                            <AssessmentTaskPreviewContent task={previewTask.task} />
                                         </div>
                                     </div>
                                 )}
@@ -1757,10 +1611,7 @@ const TeacherTasksManager = () => {
                             const lessonLabels = getHomeworkAssignmentLessonLabels(item.tasks, options.lessons);
 
                             return (
-                                <div
-                                    key={item.assignment.id}
-                                    className="card quizlet-assignment-card tasks-history-card"
-                                >
+                                <div key={item.assignment.id} className="card quizlet-assignment-card">
                                     <div className="card-body quizlet-assignment-card__body">
                                         <div className="quizlet-assignment-card__header">
                                             <div className="quizlet-assignment-card__main">
@@ -1862,9 +1713,13 @@ const TeacherTasksManager = () => {
                                                                     <button
                                                                         type="button"
                                                                         className="btn btn-sm btn-outline-primary"
-                                                                        onClick={() =>
-                                                                            navigate(`/tasks/tries/${target.result.id}`)
-                                                                        }
+                                                                        onClick={() => {
+                                                                            if (target.result?.id !== undefined) {
+                                                                                navigate(
+                                                                                    `/tasks/tries/${target.result.id}`,
+                                                                                );
+                                                                            }
+                                                                        }}
                                                                     >
                                                                         Результат
                                                                     </button>

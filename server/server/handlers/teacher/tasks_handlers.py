@@ -85,14 +85,14 @@ def show_task_bank_lesson(lesson_id: int) -> dict:
 
 def create_task_bank_item() -> dict:
     data = validate_req(TaskBankItemCreateReq, request.json)
-    parse_task(data.task.model_dump())
+    parse_task(data.task.task_dict())
     item = DBQT.create_task_bank_item(data)
     return {"item": item.__json__()}
 
 
 def update_task_bank_item(item_id: int) -> dict:
     data = validate_req(TaskBankItemUpdateReq, request.json)
-    parse_task(data.task.model_dump())
+    parse_task(data.task.task_dict())
     item = DBQT.update_task_bank_item(item_id, data)
     return {"item": item.__json__()}
 
@@ -106,7 +106,7 @@ def create_homework_assignment() -> dict:
     teacher_id = get_current_user_id()
     data = validate_req(HomeworkAssignmentCreateReq, request.json)
     for task in data.tasks:
-        parse_task(task.task.model_dump())
+        parse_task(task.task.task_dict())
     assignment = DBQT.create_homework_assignment(teacher_id, data)
     return {"assignment": assignment.__json__()}
 

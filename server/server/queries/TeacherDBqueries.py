@@ -891,7 +891,7 @@ def get_task_bank_item_by_id(item_id: int) -> TaskBankItem | None:
 def create_task_bank_item(data: TaskBankItemCreateReq) -> TaskBankItem:
     with DBsession.begin() as session:
         _ensure_task_bank_lesson_exists(session, data.lesson_id)
-        task_json = json.dumps(data.task.model_dump(), ensure_ascii=False)
+        task_json = json.dumps(data.task.task_dict(), ensure_ascii=False)
         item = TaskBankItem(title=data.title,
                             sort=data.sort,
                             task_name=data.task.name,
@@ -914,7 +914,7 @@ def update_task_bank_item(item_id: int, data: TaskBankItemUpdateReq) -> TaskBank
         item.title = data.title
         item.sort = data.sort
         item.task_name = data.task.name
-        item.task_json = json.dumps(data.task.model_dump(), ensure_ascii=False)
+        item.task_json = json.dumps(data.task.task_dict(), ensure_ascii=False)
         item.lesson_id = data.lesson_id
         if lesson_changed:
             item.source_block_index = None
@@ -1009,7 +1009,7 @@ def create_homework_assignment(teacher_id: int, data: HomeworkAssignmentCreateRe
                                        lesson_id=task.lesson_id,
                                        title=task.title,
                                        task_name=task.task.name,
-                                       task_json=json.dumps(task.task.model_dump(), ensure_ascii=False),
+                                       task_json=json.dumps(task.task.task_dict(), ensure_ascii=False),
                                        sort=task.sort))
 
         for student_id in student_ids:

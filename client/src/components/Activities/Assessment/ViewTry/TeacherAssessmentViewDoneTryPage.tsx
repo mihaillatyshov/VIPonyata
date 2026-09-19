@@ -17,6 +17,7 @@ import {
 } from "models/Activity/Items/TAssessmentItems";
 import { TAssessmentDoneTry } from "models/Activity/Try/TAssessmentTry";
 
+import { withDoneTryAssessmentImageAttachment } from "../AssessmentTaskImageWrappers";
 import { TeacherAssessmentDoneTryTaskProps } from "./Tasks/AssessmentDoneTryTaskBase";
 import { StudentAssessmentDoneTryAudio } from "./Tasks/Student/StudentAssessmentDoneTryAudio";
 import { StudentAssessmentDoneTryClassification } from "./Tasks/Student/StudentAssessmentDoneTryClassification";
@@ -41,17 +42,17 @@ type TAliases = {
 
 const aliases: TAliases = {
     text: StudentAssessmentDoneTryText,
-    test_single: StudentAssessmentDoneTryTestSingle,
-    test_multi: StudentAssessmentDoneTryTestMulti,
-    find_pair: StudentAssessmentDoneTryFindPair,
+    test_single: withDoneTryAssessmentImageAttachment(StudentAssessmentDoneTryTestSingle),
+    test_multi: withDoneTryAssessmentImageAttachment(StudentAssessmentDoneTryTestMulti),
+    find_pair: withDoneTryAssessmentImageAttachment(StudentAssessmentDoneTryFindPair),
     create_sentence: StudentAssessmentDoneTryCreateSentence,
-    fill_spaces_exists: StudentAssessmentDoneTryFillSpacesExists,
-    fill_spaces_by_hand: StudentAssessmentDoneTryFillSpacesByHand,
-    classification: StudentAssessmentDoneTryClassification,
+    fill_spaces_exists: withDoneTryAssessmentImageAttachment(StudentAssessmentDoneTryFillSpacesExists),
+    fill_spaces_by_hand: withDoneTryAssessmentImageAttachment(StudentAssessmentDoneTryFillSpacesByHand),
+    classification: withDoneTryAssessmentImageAttachment(StudentAssessmentDoneTryClassification),
     sentence_order: StudentAssessmentDoneTrySentenceOrder,
-    open_question: TeacherAssessmentDoneTryOpenQuestion,
+    open_question: withDoneTryAssessmentImageAttachment(TeacherAssessmentDoneTryOpenQuestion),
     img: StudentAssessmentDoneTryImg,
-    audio: StudentAssessmentDoneTryAudio,
+    audio: withDoneTryAssessmentImageAttachment(StudentAssessmentDoneTryAudio),
     block_begin: () => <></>,
     block_end: () => <></>,
 };
