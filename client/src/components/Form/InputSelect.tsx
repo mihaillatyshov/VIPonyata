@@ -18,7 +18,6 @@ const InputSelect = ({ htmlId, placeholder, value, className, onChangeHandler, o
                 className="form-select"
                 value={value}
                 id={htmlId}
-                placeholder={placeholder}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onChangeHandler(e.target.value)}
             >
                 {options.map(({ value, title }) => (

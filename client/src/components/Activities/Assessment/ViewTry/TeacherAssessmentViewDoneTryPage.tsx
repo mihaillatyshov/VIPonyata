@@ -34,7 +34,7 @@ import { TeacherAssessmentDoneTryOpenQuestion } from "./Tasks/Teacher/TeacherAss
 
 type TAliasProp<T extends TAssessmentItemBase, K extends TAssessmentCheckedItemBase> = (
     props: TeacherAssessmentDoneTryTaskProps<T, K>,
-) => JSX.Element;
+) => React.JSX.Element;
 
 type TAliases = {
     [key in TAssessmentTaskName]: TAliasProp<TGetAssessmentDoneTryTypeByName[key], TGetAssessmentCheckTypeByName[key]>;

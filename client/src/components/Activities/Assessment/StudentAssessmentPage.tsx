@@ -44,7 +44,7 @@ type ResponseData = {
     items: TStudentAssessmentItems;
 };
 
-type TAliasProp<T extends TAssessmentItemBase> = (props: StudentAssessmentTypeProps<T>) => JSX.Element;
+type TAliasProp<T extends TAssessmentItemBase> = (props: StudentAssessmentTypeProps<T>) => React.JSX.Element;
 
 type TAliases = {
     [key in TAssessmentTaskName]: TAliasProp<TGetAssessmentStudentTypeByName[key]>;

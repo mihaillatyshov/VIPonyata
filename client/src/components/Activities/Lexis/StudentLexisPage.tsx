@@ -41,7 +41,7 @@ type ResponseData<T extends TDrilling | THieroglyph> = {
 interface StudentLexisPageRouteProps<T> {
     taskName: LexisTaskName;
     path: string;
-    component: (props: StudentLexisTaskProps<T>) => JSX.Element;
+    component: (props: StudentLexisTaskProps<T>) => React.JSX.Element;
 }
 
 interface StudentLexisPageProps<T extends TDrilling | THieroglyph> {

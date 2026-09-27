@@ -6,7 +6,7 @@
 
 - `npm start` / `npm run dev` — Vite dev server на `:3000`, проксирует `/api` и `/uploads` на Flask `127.0.0.1:5000`.
 - `npm run lint` — ESLint (запускается в CI, должен проходить).
-- `npm run build` — сборка в `dist/` (в CI; ошибки TS не блокируют vite build, поэтому дополнительно проверять `npx tsc --noEmit`).
+- `npm run build` — сборка в `dist/` (в CI). vite build не проверяет типы — для этого `npm run typecheck` (`tsc --noEmit`, тоже в CI).
 - Тестов нет (test runner не настроен).
 
 ## Структура `src/`

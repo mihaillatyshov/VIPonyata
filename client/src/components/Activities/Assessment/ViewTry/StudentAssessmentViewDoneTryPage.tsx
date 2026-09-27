@@ -89,10 +89,15 @@ const StudentAssessmentViewDoneTryPage = () => {
     const [isRetrying, setIsRetrying] = useState(false);
 
     const handleRetry = () => {
+        if (doneTry.loadStatus !== LoadStatus.DONE) {
+            return;
+        }
+
+        const baseId = doneTry.data.base_id;
         setIsRetrying(true);
-        AjaxPost({ url: `/api/assessment/${doneTry.data.base_id}/newtry` })
+        AjaxPost({ url: `/api/assessment/${baseId}/newtry` })
             .then(() => {
-                navigate(`/assessment/${doneTry.data.base_id}`);
+                navigate(`/assessment/${baseId}`);
             })
             .catch(() => {
                 setIsRetrying(false);

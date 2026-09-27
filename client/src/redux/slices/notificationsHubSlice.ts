@@ -1,4 +1,4 @@
-import { TAnyNotifications, TStudentNotification } from "models/TNotification";
+import { TAnyNotifications, TStudentNotification, TStudentNotificationActivity } from "models/TNotification";
 import {
     TQuizletAssignment,
     TQuizletAssignmentResult,
@@ -158,7 +158,8 @@ const buildAssignmentsHubViewModel = (
         });
 
     const completedTestNotifications = studentNotifications.filter(
-        (item) => item.type === "assessment_try" || item.type === "final_boss_try",
+        (item): item is TStudentNotificationActivity =>
+            item.type === "assessment_try" || item.type === "final_boss_try",
     );
 
     const completedTestItems = dedupeAssignmentItems(

@@ -50,7 +50,7 @@ npm ci
 npm start           # http://localhost:3000, прокси /api и /uploads -> 127.0.0.1:5000
 npm run lint
 npm run build       # dist/
-npx tsc --noEmit    # проверка типов (vite build её не делает)
+npm run typecheck   # проверка типов tsc --noEmit (vite build её не делает; есть в CI)
 ```
 
 ## CI/CD

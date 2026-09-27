@@ -1,7 +1,10 @@
+import type { JSX } from "react";
+
 import {
     TAssessmentCheckedItemBase,
     TAssessmentItemBase,
     TAssessmentTaskImageAttachment,
+    TTeacherAssessmentAnyItem,
 } from "models/Activity/Items/TAssessmentItems";
 
 import { AssessmentTaskImageEditorControls, AssessmentTaskImageLayout } from "./AssessmentTaskImageSupport";
@@ -16,7 +19,9 @@ import {
 
 type TAssessmentTaskWithImageAttachment = TAssessmentItemBase & TAssessmentTaskImageAttachment;
 
-export const withTeacherAssessmentImageAttachment = <T extends TAssessmentTaskWithImageAttachment>(
+export const withTeacherAssessmentImageAttachment = <
+    T extends TAssessmentTaskWithImageAttachment & TTeacherAssessmentAnyItem,
+>(
     Component: (props: TeacherAssessmentTypeProps<T>) => JSX.Element,
 ) => {
     const WrappedComponent = (props: TeacherAssessmentTypeProps<T>) => {
@@ -87,6 +92,7 @@ export const withDoneTryAssessmentImageAttachment = <
 ) => {
     const WrappedComponent = (props: P) => {
         const normalizedData = normalizeAssessmentTaskImageAttachment(props.data);
+        const normalizedProps: P = { ...props, data: normalizedData };
 
         return (
             <AssessmentTaskImageLayout
@@ -94,7 +100,7 @@ export const withDoneTryAssessmentImageAttachment = <
                 imageSize={normalizedData.imageSize}
                 imagePosition={normalizedData.imagePosition}
             >
-                <Component {...props} data={normalizedData} />
+                <Component {...normalizedProps} />
             </AssessmentTaskImageLayout>
         );
     };

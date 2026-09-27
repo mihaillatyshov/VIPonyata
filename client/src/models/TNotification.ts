@@ -1,4 +1,3 @@
-import { TAssessment } from "./Activity/TAssessment";
 import { TAssessmentTry } from "./Activity/Try/TAssessmentTry";
 import { TLexisTry } from "./Activity/Try/TLexisTry";
 import { TCourse } from "./TCourse";
@@ -115,20 +114,12 @@ export type TStudentNotificationShareAny = TNotificationBase &
         | TStudentNotificationQuizletPersonalDictionaryTopicDeleted
     );
 
-type TStudentNotificationActivityBase =
-    | {
-          activity_try_id: number;
-          lesson: TLesson;
-          type: "assessment_try" | "final_boss_try";
-          activity: TAssessment;
-      }
-    | {
-          type: "homework_try";
-          activity_try: TNotificationAssessmentType & {
-              elapsed_seconds?: number | null;
-          };
-          activity_try: TNotificationAssessmentType;
-      };
+type TStudentNotificationActivityBase = {
+    activity_try_id: number;
+    lesson: TLesson;
+    type: "assessment_try" | "final_boss_try";
+    activity_try: TNotificationAssessmentType;
+};
 
 export type TStudentNotificationActivity = TNotificationBase & TStudentNotificationActivityBase;
 

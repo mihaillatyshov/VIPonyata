@@ -274,8 +274,9 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
     const metrics = getNotificationMetrics(item);
 
     const handleClick = () => {
-        if (isClickable) {
-            navigate(getLinkByName(item));
+        const link = isClickable ? getLinkByName(item) : undefined;
+        if (link) {
+            navigate(link);
             closeModal();
         }
     };

@@ -3,7 +3,8 @@ import { TAssessmentFillSpacesExistsEmpty } from "models/Activity/Items/TAssessm
 
 import { useDroppable } from "@dnd-kit/core";
 
-import Draggable, { FieldData } from "./Draggable";
+import Draggable from "./Draggable";
+import { FieldData } from "./FieldData";
 
 interface DroppableProps {
     id: number;
