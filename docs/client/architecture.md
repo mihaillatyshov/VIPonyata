@@ -16,7 +16,7 @@ components/
   Tasks/                 банк заданий и домашние работы (TeacherTasksManager, StudentTasksPage)
   Review/                повторение слов учителем
   Notifications/, History/, MainPage/, NavBar/, WheelTrainer/, ErrorPages/, Common/, Form/
-libs/                    ServerAPI (fetch-обёртка), Status (LoadStatus), useTimer, autosize-утилиты, DragAndDrop
+libs/                    ServerAPI (fetch-обёртка), Status (LoadStatus), useCursorPagedList (списки с «Показать ещё»), useTimer, autosize-утилиты, DragAndDrop
 models/                  TS-типы данных API (TCourse, TLesson, TQuizlet, TTasks, TNotification, Activity/...)
 redux/                   store.ts, hooks.ts, slices/*, funcs/* (хуки и селекторы поверх слайсов)
 requests/                вынесенные запросы (Lesson, User, Activity) — используются частично
@@ -58,7 +58,7 @@ AjaxPost<TResponse>({ url: `/api/lessons/${id}/users`, body: { user_id } })
 
 ## Состояние
 
-- **Redux** (`redux/store.ts`): `user` (текущий пользователь), `login`, `register`, `notificationsHub` (уведомления + назначения, polling раз в 60 с через `useNotificationsHubSync`), `courses`, `lessons`, `drilling`, `hyeroglyph` (sic), `assessment` (прохождение активностей), `dictionary`.
+- **Redux** (`redux/store.ts`): `user` (текущий пользователь), `login`, `register`, `notificationsHub` (счётчик непрочитанных — опрос раз в 60 с через `useNotificationsPolling` в `NotificationsPoller`, единственный на приложение; данные главной ученика — уведомления, назначения, статистика — через `useNotificationsHubSync` без своего таймера), `courses`, `lessons`, `drilling`, `hyeroglyph` (sic), `assessment` (прохождение активностей), `dictionary`.
 - Большинство новых фич (Quizlet, Tasks, Review, History) держат данные в локальном `useState` компонента и грузят их сами в `useEffect`.
 - `localStorage` — черновики/шаблоны WheelTrainer и данные TeacherReview.
 

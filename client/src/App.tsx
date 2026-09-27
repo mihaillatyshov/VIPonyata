@@ -10,6 +10,7 @@ import Loading from "./components/Common/Loading";
 import MainPage from "./components/MainPage/MainPage";
 import NavBar from "./components/NavBar";
 import NavigateHome from "./components/NavigateHome";
+import NotificationsPoller from "./components/Notifications/NotificationsPoller";
 import { AjaxGet } from "./libs/ServerAPI";
 import { useAppDispatch, useAppSelector } from "./redux/hooks";
 import { selectUser, setUserData, UserDataType } from "./redux/slices/userSlice";
@@ -152,6 +153,7 @@ const App = () => {
             <BrowserRouter>
                 <ScrollToTopOnRouteChange />
                 {user.isAuth && <NavBar />}
+                {user.isAuth && <NotificationsPoller />}
                 <Suspense fallback={<PageLoading />}>
                     <Routes>
                         <Route path="/" element={getRoute(<MainPage />, <MainPage />, <LoginPage />)} />

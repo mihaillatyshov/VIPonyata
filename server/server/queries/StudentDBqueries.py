@@ -1490,23 +1490,6 @@ def get_quizlet_sessions_stats(user_id: int) -> list[QuizletSession]:
 #########################################################################################################################
 ################ Notifications ##########################################################################################
 #########################################################################################################################
-def get_notifications(user_id: int) -> list[NotificationTeacherToStudent]:
-    with DBsession.begin() as session:
-        select_query_student = (select(NotificationTeacherToStudent).where(
-            NotificationTeacherToStudent.deleted == False).where(NotificationTeacherToStudent.student_id == user_id))
-
-        select_query_assessment_try = (select(NotificationTeacherToStudent).where(
-            NotificationTeacherToStudent.deleted == False).join(
-                NotificationTeacherToStudent.assessment_try).where(AssessmentTry.user_id == user_id))
-
-        select_query_final_boss_try = (select(NotificationTeacherToStudent).where(
-            NotificationTeacherToStudent.deleted == False).join(
-                NotificationTeacherToStudent.final_boss_try).where(FinalBossTry.user_id == user_id))
-
-        return session.scalars(
-            select(NotificationTeacherToStudent).from_statement(
-                union_all(select_query_student, select_query_assessment_try, select_query_final_boss_try).order_by(
-                    NotificationTeacherToStudent.creation_datetime.desc()))).all()
 
 
 def add_final_boss_notification(final_boss_try_id: int):

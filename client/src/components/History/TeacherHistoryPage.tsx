@@ -2,19 +2,23 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import Loading from "components/Common/Loading";
+import ShowMoreButton from "components/Common/ShowMoreButton";
 import ErrorPage from "components/ErrorPages/ErrorPage";
 import { formatDuration } from "components/Quizlet/quizletUtils";
 import { AjaxGet } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
-import { TTeacherHistoryEvent, TTeacherHistoryResponse, TTeacherHistoryStudent } from "models/TTeacherHistory";
+import { useCursorPagedList } from "libs/useCursorPagedList";
+import {
+    TTeacherHistoryEvent,
+    TTeacherHistoryStudent,
+    TTeacherHistoryStudentsResponse,
+    TTeacherHistoryStudentWithCount,
+} from "models/TTeacherHistory";
 
 import styles from "./TeacherHistoryPage.module.css";
 
 type HistoryTab = "all" | "students";
-const INITIAL_ALL_ACTIONS_COUNT = 15;
-const NEXT_ALL_ACTIONS_COUNT = 20;
-const INITIAL_STUDENT_ACTIONS_COUNT = 10;
-const NEXT_STUDENT_ACTIONS_COUNT = 20;
+const HISTORY_PAGE_SIZE = 20;
 
 const getHistoryItemKindClass = (kind: TTeacherHistoryEvent["training_kind"]) => {
     switch (kind) {
@@ -237,13 +241,10 @@ const HistoryItem = ({ item }: HistoryItemProps) => {
 const TeacherHistoryPage = () => {
     const navigate = useNavigate();
     const params = useParams<{ studentId?: string }>();
-    const [loadStatus, setLoadStatus] = useState<LoadStatus.Type>(LoadStatus.LOADING);
     const [activeTab, setActiveTab] = useState<HistoryTab>("all");
-    const [students, setStudents] = useState<TTeacherHistoryStudent[]>([]);
-    const [history, setHistory] = useState<TTeacherHistoryEvent[]>([]);
-    const [visibleAllActionsCount, setVisibleAllActionsCount] = useState<number>(INITIAL_ALL_ACTIONS_COUNT);
-
-    const [visibleStudentActionsCount, setVisibleStudentActionsCount] = useState<number>(INITIAL_STUDENT_ACTIONS_COUNT);
+    const [students, setStudents] = useState<
+        LoadStatus.DataDoneOrNotDone<{ items: TTeacherHistoryStudentWithCount[] }>
+    >({ loadStatus: LoadStatus.LOADING });
 
     const selectedStudentId = useMemo(() => {
         if (!params.studentId) {
@@ -256,77 +257,46 @@ const TeacherHistoryPage = () => {
 
     const isStudentDetailsPage = selectedStudentId !== null;
 
+    const historyUrlParams = useMemo(
+        () => (selectedStudentId !== null ? { student_id: selectedStudentId } : undefined),
+        [selectedStudentId],
+    );
+    const history = useCursorPagedList<TTeacherHistoryEvent, "history">({
+        url: "/api/notifications/history",
+        itemsKey: "history",
+        pageSize: HISTORY_PAGE_SIZE,
+        urlParams: historyUrlParams,
+    });
+
     useEffect(() => {
-        setLoadStatus(LoadStatus.LOADING);
-        AjaxGet<TTeacherHistoryResponse>({ url: "/api/notifications/history" })
+        AjaxGet<TTeacherHistoryStudentsResponse>({ url: "/api/notifications/history/students" })
             .then((json) => {
-                setStudents(json.students);
-                setHistory(json.history);
-                setLoadStatus(LoadStatus.DONE);
+                setStudents({ loadStatus: LoadStatus.DONE, items: json.students });
             })
             .catch(() => {
-                setLoadStatus(LoadStatus.ERROR);
+                setStudents({ loadStatus: LoadStatus.ERROR });
             });
     }, []);
 
-    const studentCounts = useMemo(() => {
-        const counts = new Map<number, number>();
-        history.forEach((item) => {
-            counts.set(item.student.id, (counts.get(item.student.id) ?? 0) + 1);
-        });
-        return counts;
-    }, [history]);
-
-    const studentsWithCounts = useMemo(() => {
-        return [...students]
-            .map((student) => ({
-                ...student,
-                actionsCount: studentCounts.get(student.id) ?? 0,
-            }))
-            .sort(
-                (left, right) => right.actionsCount - left.actionsCount || left.nickname.localeCompare(right.nickname),
-            );
-    }, [studentCounts, students]);
-
-    useEffect(() => {
-        if (activeTab === "all") {
-            setVisibleAllActionsCount(INITIAL_ALL_ACTIONS_COUNT);
-        }
-    }, [activeTab]);
-
-    useEffect(() => {
-        setVisibleStudentActionsCount(INITIAL_STUDENT_ACTIONS_COUNT);
-    }, [selectedStudentId]);
-
-    const selectedStudentHistory = useMemo(() => {
-        if (selectedStudentId === null) {
+    const sortedStudents = useMemo(() => {
+        if (students.loadStatus !== LoadStatus.DONE) {
             return [];
         }
 
-        return history.filter((item) => item.student.id === selectedStudentId);
-    }, [history, selectedStudentId]);
-
-    const visibleStudentHistory = useMemo(() => {
-        return selectedStudentHistory.slice(0, visibleStudentActionsCount);
-    }, [selectedStudentHistory, visibleStudentActionsCount]);
-
-    const visibleAllHistory = useMemo(() => {
-        return history.slice(0, visibleAllActionsCount);
-    }, [history, visibleAllActionsCount]);
-
-    const canShowMoreAllHistory = history.length > visibleAllActionsCount;
-
-    const canShowMoreStudentHistory = selectedStudentHistory.length > visibleStudentActionsCount;
+        return [...students.items].sort(
+            (left, right) => right.actions_count - left.actions_count || left.nickname.localeCompare(right.nickname),
+        );
+    }, [students]);
 
     const selectedStudent = useMemo(() => {
-        if (selectedStudentId === null) {
+        if (selectedStudentId === null || students.loadStatus !== LoadStatus.DONE) {
             return null;
         }
 
-        return students.find((student) => student.id === selectedStudentId) ?? null;
+        return students.items.find((student) => student.id === selectedStudentId) ?? null;
     }, [selectedStudentId, students]);
 
-    if (loadStatus === LoadStatus.ERROR) {
+    if (history.loadStatus === LoadStatus.ERROR) {
         return (
             <ErrorPage
                 errorImg="/svg/SomethingWrong.svg"
@@ -336,9 +306,90 @@ const TeacherHistoryPage = () => {
         );
     }
 
-    if (loadStatus !== LoadStatus.DONE) {
-        return <Loading />;
-    }
+    const renderHistoryList = (emptyText: string) => {
+        if (history.loadStatus !== LoadStatus.DONE) {
+            return <Loading />;
+        }
+
+        if (history.items.length === 0) {
+            return <div className={styles.emptyState}>{emptyText}</div>;
+        }
+
+        return (
+            <div className={styles.historyList}>
+                {history.items.map((item) => (
+                    <HistoryItem key={item.id} item={item} />
+                ))}
+                <ShowMoreButton
+                    hasMore={history.hasMore}
+                    isLoading={history.isLoadingMore}
+                    isError={history.isLoadMoreError}
+                    onClick={history.loadMore}
+                    className={styles.showMoreRow}
+                />
+            </div>
+        );
+    };
+
+    const renderStudents = () => {
+        if (students.loadStatus === LoadStatus.ERROR) {
+            return <div className={styles.emptyState}>Не удалось загрузить список учеников.</div>;
+        }
+
+        if (students.loadStatus !== LoadStatus.DONE) {
+            return <Loading />;
+        }
+
+        if (sortedStudents.length === 0) {
+            return <div className={styles.emptyState}>Пока нет учеников.</div>;
+        }
+
+        return (
+            <div className={styles.studentsCompactGrid}>
+                {sortedStudents.map((student) => {
+                    const isActive = student.id === selectedStudentId;
+                    const hasActions = student.actions_count > 0;
+
+                    return (
+                        <button
+                            key={student.id}
+                            type="button"
+                            className={`${styles.studentCardCompact} ${isActive ? styles.studentCardActive : ""} ${
+                                hasActions ? styles.studentCardHighlighted : ""
+                            }`}
+                            onClick={() => navigate(`/teacher/history/students/${student.id}`)}
+                        >
+                            <div className={styles.studentCardCompactTopRow}>
+                                <div
+                                    className={`${styles.studentNick} ${student.is_hidden ? styles.studentNickHidden : ""}`}
+                                >
+                                    {student.nickname}
+                                    {student.is_hidden && (
+                                        <span className={styles.studentHiddenBadge}>
+                                            <i className="bi bi-eye-slash" aria-hidden="true"></i>
+                                            скрыт
+                                        </span>
+                                    )}
+                                </div>
+                                <div
+                                    className={`${styles.studentActionsBadge} ${
+                                        hasActions ? styles.studentActionsBadgeActive : styles.studentActionsBadgeMuted
+                                    }`}
+                                >
+                                    {student.actions_count}
+                                </div>
+                            </div>
+                            <div
+                                className={`${styles.studentName} ${student.is_hidden ? styles.studentNameHidden : ""}`}
+                            >
+                                {student.name}
+                            </div>
+                        </button>
+                    );
+                })}
+            </div>
+        );
+    };
 
     if (isStudentDetailsPage) {
         return (
@@ -357,33 +408,13 @@ const TeacherHistoryPage = () => {
                                 ? `История: ${selectedStudent.nickname} (${selectedStudent.name})`
                                 : "История ученика"}
                         </h1>
-                        {/* <p className={styles.subtitle}>Последние действия выбранного ученика.</p> */}
                     </div>
                 </div>
 
-                {selectedStudentHistory.length > 0 ? (
-                    <div className={styles.historyList}>
-                        {visibleStudentHistory.map((item) => (
-                            <HistoryItem key={item.id} item={item} />
-                        ))}
-                        {canShowMoreStudentHistory && (
-                            <div className={styles.showMoreRow}>
-                                <button
-                                    type="button"
-                                    className="btn btn-outline-secondary"
-                                    onClick={() =>
-                                        setVisibleStudentActionsCount((count) => count + NEXT_STUDENT_ACTIONS_COUNT)
-                                    }
-                                >
-                                    Показать ещё
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                ) : (
-                    <div className={styles.emptyState}>
-                        {selectedStudent ? "У этого ученика пока нет действий в истории." : "Ученик не найден."}
-                    </div>
+                {renderHistoryList(
+                    students.loadStatus === LoadStatus.DONE && selectedStudent === null
+                        ? "Ученик не найден."
+                        : "У этого ученика пока нет действий в истории.",
                 )}
             </div>
         );
@@ -394,10 +425,6 @@ const TeacherHistoryPage = () => {
             <div className={`${styles.header} ${styles.headerCentered}`}>
                 <div className={styles.headerTitleCentered}>
                     <h1 className={styles.title}>История</h1>
-                    {/* <p className={styles.subtitle}>
-                        Здесь собраны действия учеников: завершения заданий, попытки Quizlet и работа с личными
-                        словарями.
-                    </p> */}
                 </div>
                 <div className={styles.tabsRow} role="tablist" aria-label="Переключение истории">
                     <button
@@ -421,80 +448,7 @@ const TeacherHistoryPage = () => {
                 </div>
             </div>
 
-            {activeTab === "all" ? (
-                history.length > 0 ? (
-                    <div className={styles.historyList}>
-                        {visibleAllHistory.map((item) => (
-                            <HistoryItem key={item.id} item={item} />
-                        ))}
-                        {canShowMoreAllHistory && (
-                            <div className={styles.showMoreRow}>
-                                <button
-                                    type="button"
-                                    className="btn btn-outline-secondary"
-                                    onClick={() => setVisibleAllActionsCount((count) => count + NEXT_ALL_ACTIONS_COUNT)}
-                                >
-                                    Показать ещё
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                ) : (
-                    <div className={styles.emptyState}>Пока в истории нет действий учеников.</div>
-                )
-            ) : (
-                <>
-                    {studentsWithCounts.length > 0 ? (
-                        <div className={styles.studentsCompactGrid}>
-                            {studentsWithCounts.map((student) => {
-                                const isActive = student.id === selectedStudentId;
-                                const hasActions = student.actionsCount > 0;
-
-                                return (
-                                    <button
-                                        key={student.id}
-                                        type="button"
-                                        className={`${styles.studentCardCompact} ${
-                                            isActive ? styles.studentCardActive : ""
-                                        } ${hasActions ? styles.studentCardHighlighted : ""}`}
-                                        onClick={() => navigate(`/teacher/history/students/${student.id}`)}
-                                    >
-                                        <div className={styles.studentCardCompactTopRow}>
-                                            <div
-                                                className={`${styles.studentNick} ${student.is_hidden ? styles.studentNickHidden : ""}`}
-                                            >
-                                                {student.nickname}
-                                                {student.is_hidden && (
-                                                    <span className={styles.studentHiddenBadge}>
-                                                        <i className="bi bi-eye-slash" aria-hidden="true"></i>
-                                                        скрыт
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <div
-                                                className={`${styles.studentActionsBadge} ${
-                                                    hasActions
-                                                        ? styles.studentActionsBadgeActive
-                                                        : styles.studentActionsBadgeMuted
-                                                }`}
-                                            >
-                                                {student.actionsCount}
-                                            </div>
-                                        </div>
-                                        <div
-                                            className={`${styles.studentName} ${student.is_hidden ? styles.studentNameHidden : ""}`}
-                                        >
-                                            {student.name}
-                                        </div>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    ) : (
-                        <div className={styles.emptyState}>Пока нет учеников.</div>
-                    )}
-                </>
-            )}
+            {activeTab === "all" ? renderHistoryList("Пока в истории нет действий учеников.") : renderStudents()}
         </div>
     );
 };

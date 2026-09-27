@@ -1,11 +1,14 @@
 import re
-from typing import Callable, TypedDict
+from typing import Callable, Sequence, TypedDict
 
 from flask import request
 
+import server.queries.NotificationsDBqueries as DBQN
 import server.queries.StudentDBqueries as DBQS
-from server.exceptions.ApiExceptions import InvalidRequestJson
-from server.models.notifications import NotificationsMarkAsReadReq
+from server.handlers.common.pagination import notification_cursor, paginate_by_cursor
+from server.models.db_models import NotificationTeacherToStudent
+from server.models.notifications import NotificationsMarkAsReadReq, NotificationsPageReq
+from server.models.utils import validate_query_args, validate_req
 from server.routes.routes_utils import get_current_user_id
 
 
@@ -139,10 +142,8 @@ def _parse_quizlet_dictionary_notification(item_data: dict) -> dict:
     return item_data
 
 
-def get_notifications():
+def _build_notifications(notifications: Sequence[NotificationTeacherToStudent]) -> list[dict]:
     result = []
-    notifications = DBQS.get_notifications(get_current_user_id())
-
     for notification in notifications:
         item_data = notification.__json__()
         if (is_lesson_or_course_notification(item_data)):
@@ -186,24 +187,46 @@ def get_notifications():
             if not isinstance(assignment_id, int):
                 continue
 
-            assignment = DBQS.get_homework_assignment_by_id_for_student(assignment_id, get_current_user_id())
-            if assignment is None:
+            homework_assignment = DBQS.get_homework_assignment_by_id_for_student(assignment_id, get_current_user_id())
+            if homework_assignment is None:
                 continue
 
-            item_data["homework_assignment"] = {"id": assignment.id, "title": assignment.title}
+            item_data["homework_assignment"] = {"id": homework_assignment.id, "title": homework_assignment.title}
 
         item_data = _parse_quizlet_dictionary_notification(item_data)
         result.append(item_data)
 
-    return {"notifications": result}
+    return result
+
+
+def get_notifications():
+    req = validate_query_args(NotificationsPageReq, request.args.to_dict())
+    user_id = get_current_user_id()
+
+    def fetch(cursor, limit):
+        return DBQN.get_student_notifications_page(user_id, cursor, limit)
+
+    if req.limit is None:
+        return {"notifications": _build_notifications(fetch(None, None))}
+
+    notifications, next_cursor = paginate_by_cursor(fetch, notification_cursor, _build_notifications, req.limit,
+                                                    req.cursor)
+    return {"notifications": notifications, "next_cursor": next_cursor}
+
+
+def get_unread_notifications_count():
+    return {"count": DBQN.get_student_unread_notifications_count(get_current_user_id())}
 
 
 def mark_notifications_as_read():
-    if not request.json:
-        raise InvalidRequestJson()
-
-    data = NotificationsMarkAsReadReq(notification_ids=request.json.get("notification_ids"))
+    data = validate_req(NotificationsMarkAsReadReq, request.json)
 
     DBQS.mark_notifications_as_read(data.notification_ids)
+
+    return {"message": "ok"}
+
+
+def mark_all_notifications_as_read():
+    DBQN.mark_all_student_notifications_as_read(get_current_user_id())
 
     return {"message": "ok"}

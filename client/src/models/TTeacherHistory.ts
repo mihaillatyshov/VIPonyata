@@ -31,7 +31,10 @@ export interface TTeacherHistoryEvent {
     is_assignment?: boolean;
 }
 
-export interface TTeacherHistoryResponse {
-    students: TTeacherHistoryStudent[];
-    history: TTeacherHistoryEvent[];
+export type TTeacherHistoryStudentWithCount = TTeacherHistoryStudent & {
+    actions_count: number;
+};
+
+export interface TTeacherHistoryStudentsResponse {
+    students: TTeacherHistoryStudentWithCount[];
 }

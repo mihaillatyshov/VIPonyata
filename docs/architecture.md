@@ -26,7 +26,16 @@
 
 ## Уведомления
 
-Две таблицы: `notifications_student_to_teacher` (ученик завершил попытку/задание — видит учитель) и `notifications_teacher_to_student` (учитель открыл курс/урок, проверил работу, назначил задание). Клиент опрашивает `/api/notifications` раз в минуту (polling, без websocket).
+Две таблицы: `notifications_student_to_teacher` (ученик завершил попытку/задание — видит учитель) и `notifications_teacher_to_student` (учитель открыл курс/урок, проверил работу, назначил задание).
+
+Эндпоинты (`handlers/{teacher,student}/notifications_handlers.py`, запросы — `queries/NotificationsDBqueries.py`):
+
+- `GET /api/notifications/unread_count` → `{count}` — единственное, что клиент опрашивает (раз в минуту, только в видимой вкладке; polling, без websocket).
+- `GET /api/notifications?limit=N&cursor=...` → `{notifications, next_cursor}` — страница ленты для окна уведомлений («Показать ещё»). Без `limit` — весь список в старом формате `{notifications}` (так его берёт главная ученика).
+- `POST /api/notifications/read_all` — пометить все прочитанными (при закрытии окна), `POST /api/notifications/read` — по списку id.
+- История учителя: `GET /api/notifications/history?limit=N&cursor=...&student_id=...` → `{history, next_cursor}` (без `limit` — старый формат со всей историей и `students`), `GET /api/notifications/history/students` → ученики с `actions_count`.
+
+Пагинация — по курсору (`models/notifications.py:PageCursor`): лента упорядочена по убыванию `(время, rank, id)`, курсор — позиция последнего элемента страницы, следующая страница — строго после него. Так новые записи, появившиеся между запросами, не сдвигают страницы (как было бы с offset). История собирается из пяти источников (уведомления, сессии Quizlet, личные словари, разделы, правки словаря): из каждого берётся не больше `limit + 1` строк после курсора, они сливаются, связанные данные страницы догружаются пачкой (`get_*_details`) — без N+1.
 
 ## Деплой
 

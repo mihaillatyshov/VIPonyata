@@ -1,14 +1,11 @@
-import { useLayoutEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import Notifications from "components/Notifications/Notifications";
-import { AjaxPost } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
-import { TNotificationBase } from "models/TNotification";
-import { useNotificationsHubSync } from "redux/funcs/notificationsHub";
 import { isTeacher } from "redux/funcs/user";
 import { useAppSelector } from "redux/hooks";
-import { selectHubNotifications } from "redux/slices/notificationsHubSlice";
+import { selectUnreadNotificationsCount } from "redux/slices/notificationsHubSlice";
 import { selectUser } from "redux/slices/userSlice";
 
 import Profile from "./Profile";
@@ -17,7 +14,7 @@ import styles from "./StyleNavBar.module.css";
 const NavBar = () => {
     const [showNotifications, setShowNotifications] = useState<boolean>(false);
     const user = useAppSelector(selectUser);
-    const notifications = useAppSelector(selectHubNotifications);
+    const unreadCount = useAppSelector(selectUnreadNotificationsCount) ?? 0;
     const location = useLocation();
     const isFlashcardExerciseRoute = location.pathname === "/quizlet/flashcards";
     const isTasksRoute = location.pathname.startsWith("/tasks");
@@ -26,29 +23,13 @@ const NavBar = () => {
     const isTeacherHistoryRoute = location.pathname.startsWith("/teacher/history");
     const isTeacherUser = user.data.loadStatus === LoadStatus.DONE && user.data.isAuth && isTeacher(user.data.userData);
 
-    useNotificationsHubSync();
-
     const openNotifications = () => setShowNotifications(true);
     const closeNotifications = () => setShowNotifications(false);
 
-    useLayoutEffect(() => {
-        if (showNotifications && notifications.length > 0) {
-            const notificationIds = (notifications as TNotificationBase[])
-                .filter((notification) => !notification.viewed && !notification.deleted)
-                .map((notification) => notification.id);
-            if (notificationIds.length > 0) {
-                AjaxPost({ url: "/api/notifications/read", body: { notification_ids: notificationIds } });
-            }
-        }
-    }, [showNotifications, notifications]);
-
     const getNotificationStr = (): string => {
-        const newNotificationsCount = (notifications as TNotificationBase[]).filter(
-            (notification) => !notification.viewed && !notification.deleted,
-        ).length;
-        if (newNotificationsCount === 0) return "";
-        if (newNotificationsCount >= 10) return "9+";
-        return newNotificationsCount.toString();
+        if (unreadCount === 0) return "";
+        if (unreadCount >= 10) return "9+";
+        return unreadCount.toString();
     };
 
     const notificationStr = getNotificationStr();
@@ -202,11 +183,7 @@ const NavBar = () => {
                             {notificationStr}
                         </span>
                     </div>
-                    <Notifications
-                        isShow={showNotifications}
-                        close={closeNotifications}
-                        notifications={notifications}
-                    />
+                    <Notifications isShow={showNotifications} close={closeNotifications} />
 
                     <Profile />
                 </div>

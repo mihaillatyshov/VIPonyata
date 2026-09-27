@@ -15,6 +15,9 @@ import {
 } from "models/Activity/Items/TAssessmentItems";
 import { TAssessmentDoneTry } from "models/Activity/Try/TAssessmentTry";
 import { TStudentNotification } from "models/TNotification";
+import { useRefreshUnreadNotificationsCount } from "redux/funcs/notificationsHub";
+import { useAppSelector } from "redux/hooks";
+import { selectUnreadNotificationsCount } from "redux/slices/notificationsHubSlice";
 
 import { withDoneTryAssessmentImageAttachment } from "../AssessmentTaskImageWrappers";
 import { AssessmentDoneTryTaskBaseProps } from "./Tasks/AssessmentDoneTryTaskBase";
@@ -87,6 +90,8 @@ const StudentAssessmentViewDoneTryPage = () => {
     const [lessonId, setLessonId] = useState<number>();
     const [viewMode, setViewMode] = useState<TResultViewMode | null>(null);
     const [isRetrying, setIsRetrying] = useState(false);
+    const unreadNotificationsCount = useAppSelector(selectUnreadNotificationsCount);
+    const refreshUnreadNotificationsCount = useRefreshUnreadNotificationsCount();
 
     const handleRetry = () => {
         if (doneTry.loadStatus !== LoadStatus.DONE) {
@@ -116,41 +121,37 @@ const StudentAssessmentViewDoneTryPage = () => {
             });
     }, [id]);
 
+    // Уведомление о проверке этой попытки помечаем прочитанным. Своего опроса нет: список уведомлений
+    // запрашивается, только когда общий счётчик (useNotificationsPolling) показывает непрочитанные.
     useEffect(() => {
         const doneTryId = Number(id);
-        if (Number.isNaN(doneTryId)) {
+        if (Number.isNaN(doneTryId) || !unreadNotificationsCount) {
             return;
         }
 
-        const markDoneTryNotificationsAsRead = () => {
-            AjaxGet<NotificationsResponse>({ url: "/api/notifications" })
-                .then((json) => {
-                    const notificationIds = json.notifications
-                        .filter(
-                            (notification) =>
-                                !notification.viewed &&
-                                !notification.deleted &&
-                                notification.type === "assessment_try" &&
-                                notification.activity_try_id === doneTryId,
-                        )
-                        .map((notification) => notification.id);
+        AjaxGet<NotificationsResponse>({ url: "/api/notifications" })
+            .then((json) => {
+                const notificationIds = json.notifications
+                    .filter(
+                        (notification) =>
+                            !notification.viewed &&
+                            !notification.deleted &&
+                            notification.type === "assessment_try" &&
+                            notification.activity_try_id === doneTryId,
+                    )
+                    .map((notification) => notification.id);
 
-                    if (notificationIds.length > 0) {
-                        AjaxPost({ url: "/api/notifications/read", body: { notification_ids: notificationIds } });
-                    }
-                })
-                .catch(() => {
-                    return;
-                });
-        };
-
-        markDoneTryNotificationsAsRead();
-        const timerId = window.setInterval(markDoneTryNotificationsAsRead, 10000);
-
-        return () => {
-            window.clearInterval(timerId);
-        };
-    }, [id]);
+                if (notificationIds.length > 0) {
+                    return AjaxPost({
+                        url: "/api/notifications/read",
+                        body: { notification_ids: notificationIds },
+                    }).then(() => refreshUnreadNotificationsCount());
+                }
+            })
+            .catch(() => {
+                return;
+            });
+    }, [id, refreshUnreadNotificationsCount, unreadNotificationsCount]);
 
     if (doneTry.loadStatus === LoadStatus.ERROR) {
         return (

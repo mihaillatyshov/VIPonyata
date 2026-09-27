@@ -13,14 +13,13 @@
    - `request.files["file"]` при другом имени поля → KeyError → 500.
 4. 🟠 **Нет защиты от перебора паролей** на `/api/login`. → rate limit (Flask-Limiter или nginx `limit_req`).
 5. 🟠 **`CORS(app)` для всех источников** (`main.py`) — не нужен, клиент и API на одном домене. Cookie-флаги (`SESSION_COOKIE_SECURE`, `SESSION_COOKIE_SAMESITE`, `REMEMBER_COOKIE_*`, срок remember) не заданы.
-6. 🟠 **Необработанные ошибки валидации → 500.** Часть хендлеров создаёт Pydantic-модель напрямую: `CourseCreateReq(**request.json)` (`handlers/teacher/course_handlers.py`), `NotificationsMarkAsReadReq(...)` и др. → везде `validate_req`.
+6. 🟠 **Необработанные ошибки валидации → 500.** Часть хендлеров создаёт Pydantic-модель напрямую: `CourseCreateReq(**request.json)` (`handlers/teacher/course_handlers.py`) и др. (в уведомлениях исправлено) → везде `validate_req`.
 7. 🟠 **Гонки check-then-insert.** Например `LexisHandlers.start_new_try`: читает попытки, потом вставляет новую в другой транзакции; от дублей спасают только триггеры БД (ответ — 500 вместо 409). То же в назначениях/сессиях quizlet.
 8. 🟢 Неверные HTTP-коды: `InvalidAPIUsage("Wrong data format", 403)`, `"No cards in lexis", 403` — должно быть 400/422/404.
 
 ## Производительность
 
-9. 🔴 **N+1 в уведомлениях и истории учителя** (`handlers/teacher/notifications_handlers.py`). `GET /api/notifications` (клиент опрашивает раз в минуту) и `/notifications/history` загружают **все** уведомления/сессии/слова за всё время, а для каждой записи делают 3–5 отдельных запросов (`_get_notifications_try`, `_get_notifications_activity`, `get_lesson_by_id`, `_get_notifications_user`, `get_quizlet_assignment_by_id`, `_get_quizlet_topic_titles`…), и каждый открывает новую транзакцию. Время ответа растёт линейно с историей.
-   → Пагинация (`limit/offset` или курсор по `creation_datetime`), выборка одним запросом с `joinedload/selectinload`, для счётчика — отдельный лёгкий эндпоинт `unread_count`.
+9. ✅ **Сделано:** уведомления и история учителя — курсорная пагинация (`limit` + `cursor`, `models/notifications.py:PageCursor`), связанные данные страницы грузятся пачкой (`queries/NotificationsDBqueries.py`), счётчик — `GET /api/notifications/unread_count`, счётчики по ученикам для истории — агрегатами (`/notifications/history/students`). Схема — в [../architecture.md](../architecture.md#уведомления). На локальной копии БД: история целиком 1.3 с → 0.15 с, страница из 20 — ~10 мс; уведомления учителя 0.75 с → страница ~5 мс. Без `limit` эндпоинты отдают весь список в старом формате (совместимость со старыми вкладками). Остаток: у ученика `GET /api/notifications` без `limit` (его берёт главная ученика) по-прежнему собирает каждую запись отдельными запросами — данных у одного ученика мало, но при росте стоит перевести на пакетную загрузку; индекс `notifications_* (deleted, creation_datetime)` — см. п.14.
 10. 🟠 **N+1 при открытии lexis учеником** (`handlers/student/lexis_handlers.py:get_by_id`): для каждой карточки `add_user_dictionary_if_not_exists` (INSERT на GET-запросе) + `get_ditcionary_item` — по 2 транзакции на слово. → Одна выборка `Dictionary LEFT JOIN UserDictionary` по списку id + bulk insert недостающих.
 11. 🟠 **Транзакция на каждую query-функцию.** Хендлер вызывает 5–20 функций, каждая делает `with DBsession.begin()` — отдельный checkout соединения и коммит; нет атомарности бизнес-операции. → Сессия на запрос (`scoped_session` + `teardown_appcontext`), query-функции принимают `session`.
 12. 🟠 **Таймеры `threading.Timer` для time_limit** (`routes/routes_utils.py`): поток на каждую попытку, всё в памяти процесса; `on_start_app` выполняется в **каждом** воркере gunicorn → дублирующиеся таймеры. → «Ленивое» закрытие: дедлайн = `start + time_limit`, просроченные попытки закрываются при чтении/следующем действии (или один периодический job).
@@ -51,6 +50,6 @@
 ## Предлагаемый порядок
 
 1. Пункты 1–3 (безопасность, небольшие изменения).
-2. Пункт 9 (самый заметный тормоз, особенно с ростом истории) + 26 (починить запуск тестов, добавить в CI).
+2. ~~Пункт 9~~ (сделано) + 26 (починить запуск тестов, добавить в CI).
 3. Пункты 6, 10, 12.
 4. Постепенно: сессия-на-запрос (11) и разбиение на пакеты по фичам (16–17) — по одной фиче за раз.

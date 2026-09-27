@@ -650,16 +650,6 @@ def get_quizlet_subgroups_by_ids(subgroup_ids: list[int]) -> list[QuizletSubgrou
                 QuizletSubgroup.id)).all()
 
 
-def get_personal_quizlet_subgroups_by_ids(subgroup_ids: list[int]) -> list[UserQuizletSubgroup]:
-    if len(subgroup_ids) == 0:
-        return []
-
-    with DBsession.begin() as session:
-        return session.scalars(
-            select(UserQuizletSubgroup).where(UserQuizletSubgroup.id.in_(subgroup_ids)).order_by(
-                UserQuizletSubgroup.sort).order_by(UserQuizletSubgroup.id)).all()
-
-
 def get_quizlet_assignment_targets(assignment_id: int) -> list[QuizletAssignmentTarget]:
     with DBsession.begin() as session:
         return session.scalars(
@@ -690,27 +680,6 @@ def get_quizlet_assignment_results(assignment_id: int) -> list[QuizletAssignment
             select(QuizletAssignmentResult).where(QuizletAssignmentResult.assignment_id == assignment_id)).all()
 
 
-def get_quizlet_assignment_result_by_id(result_id: int) -> QuizletAssignmentResult | None:
-    with DBsession.begin() as session:
-        return session.scalars(
-            select(QuizletAssignmentResult).where(QuizletAssignmentResult.id == result_id)).one_or_none()
-
-
-def get_history_quizlet_sessions() -> list[QuizletSession]:
-    with DBsession.begin() as session:
-        return session.scalars(
-            select(QuizletSession).options(selectinload(QuizletSession.words)).join(
-                QuizletSession.user).where(User.level == User.Level.STUDENT).order_by(
-                    QuizletSession.updated_at.desc()).order_by(QuizletSession.id.desc())).all()
-
-
-def get_quizlet_assignment_target(assignment_id: int, student_id: int) -> QuizletAssignmentTarget | None:
-    with DBsession.begin() as session:
-        return session.scalars(
-            select(QuizletAssignmentTarget).where(QuizletAssignmentTarget.assignment_id == assignment_id).where(
-                QuizletAssignmentTarget.student_id == student_id)).one_or_none()
-
-
 def get_quizlet_subgroup_titles_by_dictionary_word_ids(word_ids: list[int]) -> list[str]:
     if len(word_ids) == 0:
         return []
@@ -733,29 +702,6 @@ def get_personal_quizlet_subgroup_titles_by_word_ids(word_ids: list[int]) -> lis
                 UserQuizletWord, UserQuizletWord.subgroup_id == UserQuizletSubgroup.id).where(
                     UserQuizletWord.id.in_(word_ids)).distinct().order_by(UserQuizletSubgroup.sort).order_by(
                         UserQuizletSubgroup.id)).all()
-
-
-def get_history_personal_quizlet_lessons() -> list[UserQuizletLesson]:
-    with DBsession.begin() as session:
-        return session.scalars(
-            select(UserQuizletLesson).join(UserQuizletLesson.user).where(User.level == User.Level.STUDENT).order_by(
-                UserQuizletLesson.created_at.desc()).order_by(UserQuizletLesson.id.desc())).all()
-
-
-def get_history_personal_quizlet_subgroups() -> list[UserQuizletSubgroup]:
-    with DBsession.begin() as session:
-        return session.scalars(
-            select(UserQuizletSubgroup).join(UserQuizletSubgroup.lesson).join(
-                UserQuizletLesson.user).where(User.level == User.Level.STUDENT).order_by(
-                    UserQuizletSubgroup.created_at.desc()).order_by(UserQuizletSubgroup.id.desc())).all()
-
-
-def get_history_personal_quizlet_words() -> list[UserQuizletWord]:
-    with DBsession.begin() as session:
-        return session.scalars(
-            select(UserQuizletWord).join(UserQuizletWord.subgroup).join(UserQuizletSubgroup.lesson).join(
-                UserQuizletLesson.user).where(User.level == User.Level.STUDENT).order_by(
-                    UserQuizletWord.created_at.desc()).order_by(UserQuizletWord.id.desc())).all()
 
 
 def get_all_lessons_for_assignment() -> list[Lesson]:
@@ -1205,11 +1151,6 @@ def create_quizlet_assignment(teacher_id: int, data: QuizletAssignmentCreateReq)
 #########################################################################################################################
 ################ Notifications ##########################################################################################
 #########################################################################################################################
-def get_notifications() -> list[NotificationStudentToTeacher]:
-    with DBsession.begin() as session:
-        return session.scalars(
-            select(NotificationStudentToTeacher).where(NotificationStudentToTeacher.deleted == False).order_by(
-                NotificationStudentToTeacher.creation_datetime.desc())).all()
 
 
 def add_course_notification(course_id: int, student_id: int):

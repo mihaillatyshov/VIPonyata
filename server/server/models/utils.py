@@ -45,3 +45,14 @@ def validate_req(req_type: Type[T],
         raise InvalidAPIUsage(message if message is not None else validation_message, validation_code, parsed_errors)
     except ValueError as e:
         raise InvalidAPIUsage(value_message, value_code)
+
+
+def validate_query_args(req_type: Type[T],
+                        args: dict[str, str],
+                        validation_message: str = "Неверные параметры запроса") -> T:
+    """Как validate_req, но для query-параметров GET-запроса (их может не быть вовсе)."""
+    try:
+        return req_type(**args)
+    except ValidationError as e:
+        parsed_errors, message = format_errors(e.errors())
+        raise InvalidAPIUsage(message if message is not None else validation_message, 400, parsed_errors)

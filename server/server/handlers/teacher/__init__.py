@@ -4,6 +4,7 @@ from server.handlers.teacher.lesson_handlers import *
 from server.handlers.teacher.lexis_handlers import *
 from server.handlers.teacher.dictionary_handlers import *
 from server.handlers.teacher.notifications_handlers import *
+from server.handlers.teacher.history_handlers import *
 from server.handlers.teacher.quizlet_handlers import *
 from server.handlers.teacher.review_handlers import *
 from server.handlers.teacher.tasks_handlers import *

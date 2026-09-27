@@ -39,6 +39,8 @@ export interface NotificationsHubState {
     quizletSessions: TQuizletSession[];
     quizletSessionsStatus: "idle" | "loading" | "done" | "error";
     lastLoadedAt: number | null;
+    /** Непрочитанные уведомления (бейдж в шапке), null — ещё не загружено. */
+    unreadCount: number | null;
 }
 
 export interface THubAssignmentItem {
@@ -88,6 +90,7 @@ const initialState: NotificationsHubState = {
     quizletSessions: [],
     quizletSessionsStatus: "idle",
     lastLoadedAt: null,
+    unreadCount: null,
 };
 
 const parseDate = (value?: string | null) => {
@@ -353,12 +356,15 @@ export const notificationsHubSlice = createSlice({
             state.homeworkAssignmentsStatus = "error";
             state.quizletSessionsStatus = "error";
         },
+        setUnreadNotificationsCount: (state, action: PayloadAction<number>) => {
+            state.unreadCount = action.payload;
+        },
         resetNotificationsHub: () => initialState,
     },
 });
 
 export const selectNotificationsHub = (state: RootState) => state.notificationsHub;
-export const selectHubNotifications = (state: RootState) => state.notificationsHub.notifications;
+export const selectUnreadNotificationsCount = (state: RootState) => state.notificationsHub.unreadCount;
 export const selectStudentAssignmentsHub = (state: RootState) =>
     buildAssignmentsHubViewModel(
         state.notificationsHub.notifications,
@@ -367,7 +373,12 @@ export const selectStudentAssignmentsHub = (state: RootState) =>
         state.notificationsHub.quizletSessions,
     );
 
-export const { setNotificationsHubLoading, setNotificationsHubData, setNotificationsHubError, resetNotificationsHub } =
-    notificationsHubSlice.actions;
+export const {
+    setNotificationsHubLoading,
+    setNotificationsHubData,
+    setNotificationsHubError,
+    setUnreadNotificationsCount,
+    resetNotificationsHub,
+} = notificationsHubSlice.actions;
 
 export default notificationsHubSlice.reducer;

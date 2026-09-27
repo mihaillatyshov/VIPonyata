@@ -855,13 +855,33 @@ def get_notifications():
     return user_selector_function(teacher_funcs.get_notifications, student_funcs.get_notifications)
 
 
+@routes_bp.route("/notifications/unread_count", methods=["GET"])
+@login_required
+def get_unread_notifications_count():
+    return user_selector_function(teacher_funcs.get_unread_notifications_count,
+                                  student_funcs.get_unread_notifications_count)
+
+
 @routes_bp.route("/notifications/history", methods=["GET"])
 @login_required
 def get_notifications_history():
     return user_selector_function(teacher_funcs.get_history, None)
 
 
+@routes_bp.route("/notifications/history/students", methods=["GET"])
+@login_required
+def get_notifications_history_students():
+    return user_selector_function(teacher_funcs.get_history_students, None)
+
+
 @routes_bp.route("/notifications/read", methods=["POST"])
 @login_required
 def mark_notifications_as_read():
     return user_selector_function(teacher_funcs.mark_notifications_as_read, student_funcs.mark_notifications_as_read)
+
+
+@routes_bp.route("/notifications/read_all", methods=["POST"])
+@login_required
+def mark_all_notifications_as_read():
+    return user_selector_function(teacher_funcs.mark_all_notifications_as_read,
+                                  student_funcs.mark_all_notifications_as_read)
