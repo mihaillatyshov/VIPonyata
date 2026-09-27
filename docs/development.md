@@ -53,6 +53,8 @@ npm run build       # dist/
 npm run typecheck   # проверка типов tsc --noEmit (vite build её не делает; есть в CI)
 ```
 
+Шрифты: исходные TTF лежат в `client/fonts-src`, в бандл идут WOFF2 из `src/assets/fonts`. После замены TTF — `python -m pip install fonttools brotli && python scripts/build_fonts.py` (из `client/`); диапазоны в скрипте и `unicode-range` в `src/App.css` должны совпадать.
+
 ## CI/CD
 
 Push в `master` → GitHub Actions (`.github/workflows/ci_cd.yml`): lint + build клиента, выкладка `dist` по scp, запуск скрипта деплоя сервера по ssh. Тесты сервера в CI не запускаются.

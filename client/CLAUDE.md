@@ -11,7 +11,7 @@
 
 ## Структура `src/`
 
-- `App.tsx` — все маршруты. Доступ по ролям через `getRoute(teacher, student, unlogged)`, `getTeacherRoute`, `getLoggedRoute`.
+- `App.tsx` — все маршруты. Доступ по ролям через `getRoute(teacher, student, unlogged)`, `getTeacherRoute`, `getLoggedRoute`. Страницы подключаются через `lazy()` (отдельные чанки) — новые тоже, и не через барелы `index.ts`.
 - `components/<Фича>/` — страницы и компоненты по фичам (Activities, Courses, Lessons, Quizlet, Tasks, Review, Notifications, History, WheelTrainer…).
 - `libs/ServerAPI.ts` — `AjaxGet/AjaxPost/AjaxPatch/AjaxDelete<T>({ url, body, urlParams })`. Ошибка с ответом сервера проверяется `isProcessableError<T>(e)` → `e.json.message`.
 - `libs/Status.ts` — `LoadStatus` (NONE/LOADING/DONE/ERROR) и тип `LoadStatus.DataDoneOrNotDone<T>` для загружаемых данных.

@@ -34,6 +34,8 @@ themes/                  CSS-модуль тем (используется те�
 - `getRoute(teacherEl, studentEl, unloggedEl = <NavigateHome/>)` — разные страницы по роли;
 - `getTeacherRoute(el)` — только учитель; `getLoggedRoute(el)` — любой авторизованный.
 
+Страницы (кроме `LoginPage`, `MainPage`, `NavBar`, `ErrorPage`) подключаются через `lazy()` и грузятся отдельными чанками; `<Routes>` обёрнут в `Suspense`. Новую страницу добавляй так же — `lazy(() => import("components/..."))`, не через барелы `components/Quizlet`, `components/Tasks` (они склеивают страницы учителя и ученика в один чанк). Если чанк не загрузился (после деплоя старые файлы удаляются), `main.tsx` один раз перезагружает страницу по `vite:preloadError`.
+
 Проверка ролей на клиенте — только UX; реальная проверка доступа на сервере.
 
 ## Работа с API
@@ -62,8 +64,8 @@ AjaxPost<TResponse>({ url: `/api/lessons/${id}/users`, body: { user_id } })
 
 ## Стили
 
-CSS Modules (`Style*.module.css`) для старых частей, обычные `.css` рядом с компонентом для новых (Quizlet, Tasks, Review), глобальный SCSS в `assets/scss`. Шрифты — `assets/fonts` (подключаются в `App.css`).
+CSS Modules (`Style*.module.css`) для старых частей, обычные `.css` рядом с компонентом для новых (Quizlet, Tasks, Review), глобальный SCSS в `assets/scss`. Шрифты — WOFF2 в `assets/fonts` (подключаются в `App.css`), генерируются скриптом `client/scripts/build_fonts.py` из TTF в `client/fonts-src`. `APJapanesefont` разрезан на части (латиница/символы, кана, кандзи) по `unicode-range`: браузер скачивает только нужные. Семейство `APJapanesefont` — только японские символы, `APJapanesefontImportant` — весь шрифт.
 
 ## Сборка
 
-`npm run build` → `dist/` (один JS-бандл, code splitting не настроен). В `index.html` подключена Яндекс.Метрика. Содержимое `public/` копируется в `dist` как есть.
+`npm run build` → `dist/`: стартовый чанк `index-*.js` (~270 КБ, react/bootstrap/redux + логин и главная), отдельные чанки страниц и `ReactMarkdownWithHtmlImpl` (react-markdown + rehype-raw, ~290 КБ; грузится только где есть markdown). В `index.html` подключена Яндекс.Метрика. Содержимое `public/` копируется в `dist` как есть.

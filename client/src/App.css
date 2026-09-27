@@ -4,27 +4,62 @@
     box-sizing: border-box;
 }
 
+/*
+ * APJapanesefont разрезан на части (см. client/scripts/build_fonts.py): браузер скачивает только те файлы,
+ * символы из unicode-range которых есть на странице. Диапазоны должны совпадать со скриптом.
+ */
 @font-face {
     font-family: "APJapanesefontImportant";
+    font-display: swap;
     src:
-        local("APJapanesefontImportant"),
-        url(./assets/fonts/APJapanesefont.ttf) format("truetype");
+        local("APJapanesefont"),
+        url(./assets/fonts/APJapanesefont-latin.woff2) format("woff2");
+    unicode-range: U+0-A4, U+A6-2FFF, U+3100-33FF, U+4DB6-4DFF, U+A000-FEFF, U+FFA0-FFFF;
+}
+
+@font-face {
+    font-family: "APJapanesefontImportant";
+    font-display: swap;
+    src:
+        local("APJapanesefont"),
+        url(./assets/fonts/APJapanesefont-kana.woff2) format("woff2");
+    unicode-range: U+A5, U+3000-30FF, U+FF00-FF9F;
+}
+
+@font-face {
+    font-family: "APJapanesefontImportant";
+    font-display: swap;
+    src:
+        local("APJapanesefont"),
+        url(./assets/fonts/APJapanesefont-kanji.woff2) format("woff2");
+    unicode-range: U+3400-4DB5, U+4E00-9FFF;
+}
+
+/* Только японские символы; латиница и кириллица остаются шрифтом страницы */
+@font-face {
+    font-family: "APJapanesefont";
+    font-display: swap;
+    src:
+        local("APJapanesefont"),
+        url(./assets/fonts/APJapanesefont-kana.woff2) format("woff2");
+    unicode-range: U+A5, U+3000-30FF, U+FF00-FF9F;
 }
 
 @font-face {
     font-family: "APJapanesefont";
-
+    font-display: swap;
     src:
         local("APJapanesefont"),
-        url(./assets/fonts/APJapanesefont.ttf) format("truetype");
-    unicode-range: U+A5, U+4E00-9FFF, U+30??, U+FF00-FF9F, U+3400-4DB5;
+        url(./assets/fonts/APJapanesefont-kanji.woff2) format("woff2");
+    unicode-range: U+3400-4DB5, U+4E00-9FFF;
 }
 
 @font-face {
     font-family: "CenturyGothicPaneuropean";
+    font-display: swap;
     src:
         local("CenturyGothicPaneuropean"),
-        url(./assets/fonts/CenturyGothicPaneuropeanRegular.ttf) format("truetype");
+        url(./assets/fonts/CenturyGothicPaneuropeanRegular.woff2) format("woff2");
 }
 
 html {
@@ -52,7 +87,8 @@ body {
     /* background: linear-gradient(180deg, #ffffff 5%, rgba(255, 255, 255, 0) 75%),
         linear-gradient(0deg, #ffffffc7 0%, rgba(255, 255, 255, 0) 35%),
         linear-gradient(100.24deg, #fdfdfd68 0%, #f7cbe8e4 56%); */
-    background: radial-gradient(1280px 760px at 10% 0%, rgba(214, 241, 252, 0.2) 0%, rgba(214, 241, 252, 0) 62%),
+    background:
+        radial-gradient(1280px 760px at 10% 0%, rgba(214, 241, 252, 0.2) 0%, rgba(214, 241, 252, 0) 62%),
         radial-gradient(980px 600px at 96% 10%, rgba(255, 233, 238, 0.18) 0%, rgba(255, 233, 238, 0) 66%),
         linear-gradient(180deg, #ffffff 0%, #fafcff 52%, #f7faff 100%);
     background-repeat: no-repeat;
