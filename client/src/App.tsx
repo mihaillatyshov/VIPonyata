@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useLayoutEffect } from "react";
+import React, { lazy, Suspense, useEffect, useLayoutEffect } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 
 import ErrorPage from "components/ErrorPages/ErrorPage";
@@ -11,7 +11,8 @@ import MainPage from "./components/MainPage/MainPage";
 import NavBar from "./components/NavBar";
 import NavigateHome from "./components/NavigateHome";
 import NotificationsPoller from "./components/Notifications/NotificationsPoller";
-import { AjaxGet } from "./libs/ServerAPI";
+import { queryClient } from "./libs/queryClient";
+import { AjaxGet, setUnauthorizedHandler } from "./libs/ServerAPI";
 import { useAppDispatch, useAppSelector } from "./redux/hooks";
 import { selectUser, setUserData, UserDataType } from "./redux/slices/userSlice";
 import styleThemes from "./themes/StyleThemes.module.css";
@@ -102,7 +103,16 @@ const App = () => {
             .catch(() => {
                 dispatch(setUserData({ loadStatus: LoadStatus.ERROR }));
             });
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [dispatch]);
+
+    // Истекшая сессия (401 на любой запрос) — сбрасываем пользователя: роутинг покажет страницу входа.
+    useEffect(() => {
+        setUnauthorizedHandler(() => {
+            queryClient.clear();
+            dispatch(setUserData({ loadStatus: LoadStatus.DONE, isAuth: false }));
+        });
+        return () => setUnauthorizedHandler(null);
+    }, [dispatch]);
 
     // TODO Select theme
 

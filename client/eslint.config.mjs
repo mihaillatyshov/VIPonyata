@@ -4,6 +4,7 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 import js from "@eslint/js";
+import pluginQuery from "@tanstack/eslint-plugin-query";
 
 export default tseslint.config(
     {
@@ -11,7 +12,7 @@ export default tseslint.config(
     },
     {
         files: ["**/*.{js,jsx,ts,tsx}"],
-        extends: [js.configs.recommended, ...tseslint.configs.recommended],
+        extends: [js.configs.recommended, ...tseslint.configs.recommended, ...pluginQuery.configs["flat/recommended"]],
         languageOptions: {
             ecmaVersion: 2020,
             globals: globals.browser,
@@ -31,4 +32,3 @@ export default tseslint.config(
         },
     },
 );
-

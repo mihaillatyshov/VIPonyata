@@ -18,9 +18,9 @@
 | Схема запроса | `server/server/models/<feature>.py` (Pydantic) |
 | Типы заданий assessment | `server/server/models/assessment.py` + `client/src/models/Activity/Items/TAssessmentItems.ts` |
 | Страница клиента по URL | `client/src/App.tsx` → компонент |
-| Тип ответа API на клиенте | `client/src/models/T*.ts` |
+| Тип ответа API на клиенте | `client/src/models/T*.ts`, для новых разделов — `client/src/api/<фича>.ts` |
 
-Кодовая база большая, а файлы длинные (до 2600 строк): ищи через Grep по имени эндпоинта/функции и читай нужный диапазон, а не весь файл.
+Кодовая база большая: ищи через Grep по имени эндпоинта/функции и читай нужный диапазон, а не весь файл. Запросы новых разделов (Quizlet, Review, Tasks учителя) — в `client/src/api/<фича>.ts`.
 
 ## При изменениях
 

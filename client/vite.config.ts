@@ -23,6 +23,7 @@ export default defineConfig({
     },
     resolve: {
         alias: [
+            { find: /^api\/(.*)$/, replacement: resolve(__dirname, "src/api") + "/$1" },
             { find: /^assets\/(.*)$/, replacement: resolve(__dirname, "src/assets") + "/$1" },
             { find: /^components\/(.*)$/, replacement: resolve(__dirname, "src/components") + "/$1" },
             { find: /^libs\/(.*)$/, replacement: resolve(__dirname, "src/libs") + "/$1" },

@@ -1,5 +1,6 @@
 import React from "react";
 
+import { queryClient } from "libs/queryClient";
 import { AjaxPost } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
 import { useAppDispatch } from "redux/hooks";
@@ -10,6 +11,7 @@ const StudentProfilePage = () => {
 
     const handleLogout = () => {
         AjaxPost({ url: "/api/logout" }).then(() => {
+            queryClient.clear();
             dispatch(setUserData({ loadStatus: LoadStatus.DONE, isAuth: false }));
         });
     };
