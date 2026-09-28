@@ -1,13 +1,14 @@
 # Клиент: архитектура
 
-React 19 + TypeScript (strict) + Vite 8. UI: react-bootstrap / Bootstrap 5 (SCSS) + bootstrap-icons. Серверные данные: TanStack Query 5; состояние сессии/UI: Redux Toolkit (постепенно уходим) + локальный state. Роутинг: react-router-dom 7 (`BrowserRouter`). DnD: `@dnd-kit`. Markdown в заданиях: `react-markdown` + `rehype-raw`.
+React 19 + TypeScript (strict) + Vite 8. UI: react-bootstrap / Bootstrap 5 (SCSS) + bootstrap-icons. Серверные данные и сессия пользователя: TanStack Query 5; UI-состояние: локальный state, `useReducer`, React-контекст страницы. Роутинг: react-router-dom 7 (`BrowserRouter`). DnD: `@dnd-kit`. Markdown в заданиях: `react-markdown` + `rehype-raw`.
 
 ## Структура `src/`
 
 ```
-main.tsx                 корень: QueryClientProvider + Provider(store) + App, глобальные стили (bootstrap.scss, assets/scss/index.scss)
-App.tsx                  загрузка /api/islogin, обработчик 401, выбор маршрутов по роли, все <Route>
-api/                     слой запросов по фичам (quizlet, review, tasks): типы ответов, ключи кеша, queryOptions, мутации
+main.tsx                 корень: QueryClientProvider + App, глобальные стили (bootstrap.scss, assets/scss/index.scss)
+App.tsx                  сессия (userQueries.session → /api/islogin), обработчик 401, выбор маршрутов по роли, все <Route>
+api/                     слой запросов по фичам (user, courses, lessons, activities, dictionary, notifications, quizlet,
+                         review, tasks): типы ответов, ключи кеша, queryOptions, мутации
 components/
   Activities/            Lexis (Drilling, Hieroglyph), Assessment (редактор, прохождение, просмотр попыток), общие виджеты
   Authentication/        логин, регистрация, профиль
@@ -18,16 +19,16 @@ components/
   Tasks/                 банк заданий и домашние работы: TeacherTasksManager (→ Teacher/), StudentTasksPage
   Review/                повторение слов учителем: TeacherReview + страницы словарей, тренировка (useReviewTraining)
   Notifications/, History/, MainPage/, NavBar/, WheelTrainer/, ErrorPages/, Common/, Form/
-libs/                    ServerAPI (fetch-обёртка), queryClient (TanStack Query), Status (LoadStatus), useCursorPagedList (списки с «Показать ещё»), useTimer, autosize-утилиты, DragAndDrop
+libs/                    ServerAPI (fetch-обёртка), queryClient (TanStack Query), user (сессия: useUserIsTeacher, setSessionUser,
+                         resetSession), useRedirectOnApiError (уход со страницы по 403/404), Status (LoadStatus), useCursorPagedList (списки с «Показать ещё»), useTimer, autosize-утилиты, DragAndDrop
 models/                  TS-типы данных API (TCourse, TLesson, TQuizlet, TTasks, TNotification, Activity/...)
-redux/                   store.ts, hooks.ts, slices/*, funcs/* (хуки и селекторы поверх слайсов)
-requests/                старые вынесенные запросы (Lesson, User, Activity); новое — в api/
+requests/                старые вынесенные запросы (User, Activity); новое — в api/
 ui/                      мелкие переиспользуемые UI-компоненты
 validators/              валидаторы форм
 themes/                  CSS-модуль тем (используется тема Violet)
 ```
 
-Алиасы импортов (`vite.config.ts` + `tsconfig.json` `paths`): `api/`, `assets/`, `components/`, `libs/`, `models/`, `redux/`, `requests/`, `themes/`, `ui/`, `validators/`.
+Алиасы импортов (`vite.config.ts` + `tsconfig.json` `paths`): `api/`, `assets/`, `components/`, `libs/`, `models/`, `requests/`, `themes/`, `ui/`, `validators/`.
 
 ## Маршрутизация и роли
 
@@ -77,9 +78,11 @@ await queryClient.invalidateQueries({ queryKey: quizletKeys.catalog() }); // п�
 
 ## Состояние
 
-- **Redux** (`redux/store.ts`): `user` (текущий пользователь), `login`, `register`, `notificationsHub` (счётчик непрочитанных — опрос раз в 60 с через `useNotificationsPolling` в `NotificationsPoller`, единственный на приложение; данные главной ученика — уведомления, назначения, статистика — через `useNotificationsHubSync` без своего таймера), `courses`, `lessons`, `drilling`, `hyeroglyph` (sic), `assessment` (прохождение активностей), `dictionary`.
-- **Правило:** серверные данные — кеш TanStack Query (`api/`), Redux — только сессия пользователя и UI. Redux-слайсы с серверными данными — наследие, их переводим на запросы при изменениях (план — в [improvements.md](improvements.md)).
-- На TanStack Query уже работают Quizlet, Review, раздел заданий учителя. History и часть главной пока грузят данные сами в `useEffect`.
+- Глобального стора нет (Redux удалён). **Правило:** серверные данные — кеш TanStack Query (`api/`), UI-состояние — в компонентах (`useState`/`useReducer`), общее для поддерева страницы — через React-контекст.
+- **Сессия:** запрос `userQueries.session()` (`/api/islogin`, `staleTime: Infinity`); читается хуками `libs/user.ts` (`useSessionUser`, `useUserIsTeacher`, `useGetAuthorizedUserSafe`). Вход/регистрация — `setSessionUser(json)`; выход и 401 — `resetSession()` (удаляет из кеша данные прежнего пользователя).
+- **Уведомления** (`api/notifications.ts`, хуки — `components/Notifications/useNotificationsHub.ts`): счётчик непрочитанных — запрос с `refetchInterval` 60 с в `NotificationsPoller` (единственный опрос; во фоновой вкладке не идёт, при возвращении обновляется, если старше 15 с); остальные читают его через `useUnreadNotificationsCount()` без своих запросов. Данные главной ученика (уведомления, назначения, статистика) — запрос `studentHub` (`staleTime` 15 с), `useNotificationsHubSync` перезапрашивает его при росте счётчика; витрина собирается чистой функцией `MainPage/assignmentsHubModel.ts`.
+- **Прохождение активностей** (`api/activities.ts`): ответы ученика хранятся прямо в кеше запроса (`setQueryData`) и автосохраняются на сервер; у этих запросов `staleTime: Infinity` и `gcTime: 0` — пока страница открыта, данные не перезапрашиваются, а при следующем заходе прогресс берётся с сервера. Состояние текущего задания лексики — `StudentLexisContext` (`useReducer` в `StudentLexisPage`); запись ответа в задание assessment — `StudentAssessmentTaskContext` (предоставляют `StudentAssessmentPage` и `StudentHomeworkAssignmentPage`).
+- Курсы, уроки, словарь — `api/courses.ts`, `api/lessons.ts` (`useLessonQuery` — с редиректом по 403/404), `api/dictionary.ts`. History, результаты попыток и страницы создания/редактирования пока грузят данные сами в `useEffect`.
 - Большие страницы устроены как оркестратор (разбор URL → подкомпоненты) + хуки состояния (`useQuizletSession`, `useReviewTraining`, `useWheelTrainerStudio`); сложные формы — `useReducer` (`*Reducer.ts`, `assignmentWizard.ts`).
 - `localStorage` — черновики/шаблоны WheelTrainer, незавершённая тренировка и история TeacherReview.
 
@@ -89,4 +92,4 @@ CSS Modules (`Style*.module.css`) для старых частей, обычны
 
 ## Сборка
 
-`npm run build` → `dist/`: стартовый чанк `index-*.js` (~280 КБ, react/bootstrap/redux/tanstack-query + логин и главная), отдельные чанки страниц и `ReactMarkdownWithHtmlImpl` (react-markdown + rehype-raw, ~290 КБ; грузится только где есть markdown). В `index.html` подключена Яндекс.Метрика. Содержимое `public/` копируется в `dist` как есть.
+`npm run build` → `dist/`: стартовый чанк `index-*.js` (~270 КБ, react/bootstrap/tanstack-query + логин и главная), отдельные чанки страниц и `ReactMarkdownWithHtmlImpl` (react-markdown + rehype-raw, ~290 КБ; грузится только где есть markdown). В `index.html` подключена Яндекс.Метрика. Содержимое `public/` копируется в `dist` как есть.

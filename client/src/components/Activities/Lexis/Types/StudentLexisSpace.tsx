@@ -14,9 +14,9 @@ interface SpaceTaskType {
     in_parts: string[];
 }
 
-const StudentLexisSpace = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps<TSpace>) => {
-    const item = useLexisItem<TStudentLexisTrySpaceTask>(name);
-    const setLexisSelectedItemField = useSetLexisSelectedItemField<TStudentLexisTrySpaceTask>(name);
+const StudentLexisSpace = ({ inData, goToNextTaskCallback }: StudentLexisTaskProps<TSpace>) => {
+    const item = useLexisItem<TStudentLexisTrySpaceTask>();
+    const setLexisSelectedItemField = useSetLexisSelectedItemField<TStudentLexisTrySpaceTask>();
     const inputElement = useRef<HTMLInputElement>(null);
 
     const getWordData = (id: number): SpaceTaskType => {
@@ -60,7 +60,6 @@ const StudentLexisSpace = ({ name, inData, goToNextTaskCallback }: StudentLexisT
 
     return (
         <StudentLexisTaskInterface
-            name={name}
             taskTypeName="space"
             newObjectData={{
                 ...getWordData(0),

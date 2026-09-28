@@ -2,26 +2,22 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import Notifications from "components/Notifications/Notifications";
-import { LoadStatus } from "libs/Status";
-import { isTeacher } from "redux/funcs/user";
-import { useAppSelector } from "redux/hooks";
-import { selectUnreadNotificationsCount } from "redux/slices/notificationsHubSlice";
-import { selectUser } from "redux/slices/userSlice";
+import { useUnreadNotificationsCount } from "components/Notifications/useNotificationsHub";
+import { useUserIsTeacher } from "libs/user";
 
 import Profile from "./Profile";
 import styles from "./StyleNavBar.module.css";
 
 const NavBar = () => {
     const [showNotifications, setShowNotifications] = useState<boolean>(false);
-    const user = useAppSelector(selectUser);
-    const unreadCount = useAppSelector(selectUnreadNotificationsCount) ?? 0;
+    const unreadCount = useUnreadNotificationsCount() ?? 0;
     const location = useLocation();
     const isFlashcardExerciseRoute = location.pathname === "/quizlet/flashcards";
     const isTasksRoute = location.pathname.startsWith("/tasks");
     const isReviewRoute = location.pathname.startsWith("/review");
     const isWheelTrainerRoute = location.pathname.startsWith("/teacher/wheel-trainer");
     const isTeacherHistoryRoute = location.pathname.startsWith("/teacher/history");
-    const isTeacherUser = user.data.loadStatus === LoadStatus.DONE && user.data.isAuth && isTeacher(user.data.userData);
+    const isTeacherUser = useUserIsTeacher();
 
     const openNotifications = () => setShowNotifications(true);
     const closeNotifications = () => setShowNotifications(false);

@@ -5,7 +5,7 @@
 Монорепозиторий из двух независимых частей:
 
 - `server/` — Python 3.10+, Flask 2.2, SQLAlchemy 2.0, Pydantic 2, Alembic, MySQL/MariaDB. Подробности: [server/CLAUDE.md](server/CLAUDE.md).
-- `client/` — React 19 + TypeScript + Vite, Redux Toolkit, React Router 7, react-bootstrap + SCSS. Подробности: [client/CLAUDE.md](client/CLAUDE.md).
+- `client/` — React 19 + TypeScript + Vite, TanStack Query, React Router 7, react-bootstrap + SCSS. Подробности: [client/CLAUDE.md](client/CLAUDE.md).
 
 ## Документация
 

@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 
+import { useSetAssessmentTaskData } from "components/Activities/Assessment/StudentAssessmentTaskContext";
 import { FindMaxStr, fixRubyStr } from "libs/Autisize";
 import { TAssessmentClassification } from "models/Activity/Items/TAssessmentItems";
-import { useAppDispatch } from "redux/hooks";
-import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
 
 import {
     DndContext,
@@ -31,7 +30,7 @@ export interface ItemState {
 }
 
 const StudentAssessmentClassification = ({ data, taskId }: StudentAssessmentTypeProps<TAssessmentClassification>) => {
-    const dispatch = useAppDispatch();
+    const setAssessmentTaskData = useSetAssessmentTaskData();
 
     const [items, setItems] = useState<ItemState[][]>(() => {
         const inputs: ItemState[] = data.inputs.map((str, i) => ({ strId: `id_${i}`, str }));
@@ -55,7 +54,7 @@ const StudentAssessmentClassification = ({ data, taskId }: StudentAssessmentType
             answers: items.slice(1).map((col) => col.map(({ str }) => str)),
         };
 
-        dispatch(setAssessmentTaskData({ id: taskId, data: newData }));
+        setAssessmentTaskData({ id: taskId, data: newData });
     }, [items]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const [active, setActive] = useState<ItemState | null>(null);

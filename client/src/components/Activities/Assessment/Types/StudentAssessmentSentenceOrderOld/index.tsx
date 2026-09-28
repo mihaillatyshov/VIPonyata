@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 
+import { useSetAssessmentTaskData } from "components/Activities/Assessment/StudentAssessmentTaskContext";
 import { TAssessmentSentenceOrder } from "models/Activity/Items/TAssessmentItems";
-import { useAppDispatch } from "redux/hooks";
-import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
 
 import { StudentAssessmentTypeProps } from "../StudentAssessmentTypeProps";
 import DragItem from "./DragItem";
 
 const StudentAssessmentSentenceOrder = ({ data, taskId }: StudentAssessmentTypeProps<TAssessmentSentenceOrder>) => {
-    const dispatch = useAppDispatch();
+    const setAssessmentTaskData = useSetAssessmentTaskData();
     const [selectedFieldId, setSelectedFieldId] = useState<number | undefined>(undefined);
     const [fakeFieldId, setFakeFieldId] = useState<number | undefined>(undefined);
 
@@ -23,7 +22,7 @@ const StudentAssessmentSentenceOrder = ({ data, taskId }: StudentAssessmentTypeP
         }
         setSelectedFieldId(undefined);
         setFakeFieldId(undefined);
-        dispatch(setAssessmentTaskData({ id: taskId, data: data }));
+        setAssessmentTaskData({ id: taskId, data: data });
     };
 
     return (

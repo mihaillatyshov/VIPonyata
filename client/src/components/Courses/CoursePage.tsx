@@ -1,53 +1,25 @@
-import { useEffect } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
+import { coursesKeys, coursesQueries } from "api/courses";
 import PageTitle from "components/Common/PageTitle";
 import UnfinishedLessonsCard from "components/Common/UnfinishedLessonsCard";
 import LessonsList from "components/Lessons/LessonsList";
-import { AjaxGet } from "libs/ServerAPI";
-import { TCourse } from "models/TCourse";
-import { TLesson, TUnfinishedLessonsSummary } from "models/TLesson";
-import { useUserIsTeacher } from "redux/funcs/user";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { selectCourses, setSelectedCourse } from "redux/slices/coursesSlice";
-import { selectLessons, setLessons, setUnfinishedLessonsSummary } from "redux/slices/lessonsSlice";
+import { useUserIsTeacher } from "libs/user";
+import { useRedirectOnApiError } from "libs/useRedirectOnApiError";
+
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import styles from "components/Common/StyleCommon.module.css";
 
-type ResponseData = {
-    course: TCourse;
-    items: TLesson[];
-    unfinished_lessons?: TUnfinishedLessonsSummary;
-};
-
 const CoursePage = () => {
-    const { id } = useParams();
-    const navigate = useNavigate();
-    const dispatch = useAppDispatch();
-    const course = useAppSelector(selectCourses).selected;
-    const unfinishedLessonsSummary = useAppSelector(selectLessons).unfinishedLessonsSummary;
+    const { id = "" } = useParams();
+    const queryClient = useQueryClient();
+    const courseQuery = useQuery(coursesQueries.detail(id));
     const isTeacher = useUserIsTeacher();
 
-    const loadCourseData = () => {
-        AjaxGet<ResponseData>({ url: `/api/courses/${id}` })
-            .then((json) => {
-                dispatch(setSelectedCourse(json.course));
-                dispatch(setLessons(json.items));
-                dispatch(setUnfinishedLessonsSummary(json.unfinished_lessons));
-            })
-            .catch(({ isServerError, response }) => {
-                if (!isServerError) {
-                    if (response.status === 404 || response.status === 403) navigate("/", { replace: true });
-                }
-            });
-    };
+    useRedirectOnApiError(courseQuery.error, (status) => (status === 404 || status === 403 ? "/" : null));
 
-    useEffect(() => {
-        dispatch(setSelectedCourse(undefined));
-        dispatch(setLessons(undefined));
-        dispatch(setUnfinishedLessonsSummary(undefined));
-        loadCourseData();
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    const course = courseQuery.data?.course;
 
     return (
         <div className="container" style={{ maxWidth: "640px" }}>
@@ -62,8 +34,11 @@ const CoursePage = () => {
                     ) : undefined
                 }
             />
-            <UnfinishedLessonsCard summary={unfinishedLessonsSummary} onChanged={loadCourseData} />
-            <LessonsList />
+            <UnfinishedLessonsCard
+                summary={courseQuery.data?.unfinished_lessons}
+                onChanged={() => queryClient.invalidateQueries({ queryKey: coursesKeys.detail(id) })}
+            />
+            <LessonsList lessons={courseQuery.data?.items} />
         </div>
     );
 };

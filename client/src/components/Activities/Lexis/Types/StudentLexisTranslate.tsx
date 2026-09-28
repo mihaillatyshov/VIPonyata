@@ -8,8 +8,8 @@ import StudentLexisTaskInterface from "./StudentLexisTaskInterface";
 import { StudentLexisTaskTitle } from "./StudentLexisTaskTitle";
 
 const StudentLexisTranslate = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps<TTranslate>) => {
-    const item = useLexisItem<TStudentLexisTranslateTask>(name);
-    const setLexisSelectedItemField = useSetLexisSelectedItemField<TStudentLexisTranslateTask>(name);
+    const item = useLexisItem<TStudentLexisTranslateTask>();
+    const setLexisSelectedItemField = useSetLexisSelectedItemField<TStudentLexisTranslateTask>();
     const aliasJP = pickLexisWordsOrChars(name);
 
     const getObjectData = (id: number) => {
@@ -32,7 +32,6 @@ const StudentLexisTranslate = ({ name, inData, goToNextTaskCallback }: StudentLe
 
     return (
         <StudentLexisTaskInterface
-            name={name}
             taskTypeName="translate"
             newObjectData={{ ...getObjectData(0) }}
             goToNextTaskCallback={goToNextTaskCallback}

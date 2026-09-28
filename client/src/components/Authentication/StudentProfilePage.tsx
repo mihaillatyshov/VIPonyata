@@ -1,19 +1,11 @@
 import React from "react";
 
-import { queryClient } from "libs/queryClient";
 import { AjaxPost } from "libs/ServerAPI";
-import { LoadStatus } from "libs/Status";
-import { useAppDispatch } from "redux/hooks";
-import { setUserData } from "redux/slices/userSlice";
+import { resetSession } from "libs/user";
 
 const StudentProfilePage = () => {
-    const dispatch = useAppDispatch();
-
     const handleLogout = () => {
-        AjaxPost({ url: "/api/logout" }).then(() => {
-            queryClient.clear();
-            dispatch(setUserData({ loadStatus: LoadStatus.DONE, isAuth: false }));
-        });
+        AjaxPost({ url: "/api/logout" }).then(resetSession);
     };
     return (
         <div className="mt-5">

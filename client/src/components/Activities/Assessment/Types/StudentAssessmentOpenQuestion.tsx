@@ -1,16 +1,15 @@
+import { useSetAssessmentTaskData } from "components/Activities/Assessment/StudentAssessmentTaskContext";
 import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import { FloatingLabelTextareaAutosize } from "components/Form/FloatingLabelTextareaAutosize";
 import { TAssessmentOpenQuestion } from "models/Activity/Items/TAssessmentItems";
-import { useAppDispatch } from "redux/hooks";
-import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
 
 import { StudentAssessmentTypeProps } from "./StudentAssessmentTypeProps";
 
 const StudentAssessmentOpenQuestion = ({ data, taskId }: StudentAssessmentTypeProps<TAssessmentOpenQuestion>) => {
-    const dispatch = useAppDispatch();
+    const setAssessmentTaskData = useSetAssessmentTaskData();
 
     const onChangeHandler = (value: string) => {
-        dispatch(setAssessmentTaskData({ id: taskId, data: { ...data, answer: value } }));
+        setAssessmentTaskData({ id: taskId, data: { ...data, answer: value } });
     };
 
     return (

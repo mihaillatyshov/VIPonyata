@@ -1,10 +1,9 @@
 import React from "react";
 
+import { useSetAssessmentTaskData } from "components/Activities/Assessment/StudentAssessmentTaskContext";
 import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import AutosizeInput from "libs/AutosizeInput";
 import { TAssessmentFillSpacesByHand } from "models/Activity/Items/TAssessmentItems";
-import { useAppDispatch } from "redux/hooks";
-import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
 
 import { StudentAssessmentTypeProps } from "./StudentAssessmentTypeProps";
 
@@ -12,12 +11,12 @@ const StudentAssessmentFillSpacesByHand = ({
     data,
     taskId,
 }: StudentAssessmentTypeProps<TAssessmentFillSpacesByHand>) => {
-    const dispatch = useAppDispatch();
+    const setAssessmentTaskData = useSetAssessmentTaskData();
 
     const onChangeHandler = (e: React.ChangeEvent<HTMLInputElement>, fieldId: number) => {
         const newAnswers = [...data.answers];
         newAnswers[fieldId] = e.target.value;
-        dispatch(setAssessmentTaskData({ id: taskId, data: { ...data, answers: newAnswers } }));
+        setAssessmentTaskData({ id: taskId, data: { ...data, answers: newAnswers } });
     };
 
     return (

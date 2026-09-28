@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 import Loading from "components/Common/Loading";
 import { AjaxGet } from "libs/ServerAPI";
-import { useUserIsTeacher } from "redux/funcs/user";
+import { useUserIsTeacher } from "libs/user";
 
 interface CounterProps {
     count: number | undefined;

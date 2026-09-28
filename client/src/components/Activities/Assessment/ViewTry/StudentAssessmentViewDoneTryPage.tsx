@@ -1,9 +1,14 @@
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import { markNotificationsAsRead } from "api/notifications";
 import Loading from "components/Common/Loading";
 import PageTitle from "components/Common/PageTitle";
 import ErrorPage from "components/ErrorPages/ErrorPage";
+import {
+    useRefreshUnreadNotificationsCount,
+    useUnreadNotificationsCount,
+} from "components/Notifications/useNotificationsHub";
 import { AjaxGet, AjaxPost } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
 import {
@@ -15,9 +20,6 @@ import {
 } from "models/Activity/Items/TAssessmentItems";
 import { TAssessmentDoneTry } from "models/Activity/Try/TAssessmentTry";
 import { TStudentNotification } from "models/TNotification";
-import { useRefreshUnreadNotificationsCount } from "redux/funcs/notificationsHub";
-import { useAppSelector } from "redux/hooks";
-import { selectUnreadNotificationsCount } from "redux/slices/notificationsHubSlice";
 
 import { withDoneTryAssessmentImageAttachment } from "../AssessmentTaskImageWrappers";
 import { AssessmentDoneTryTaskBaseProps } from "./Tasks/AssessmentDoneTryTaskBase";
@@ -90,7 +92,7 @@ const StudentAssessmentViewDoneTryPage = () => {
     const [lessonId, setLessonId] = useState<number>();
     const [viewMode, setViewMode] = useState<TResultViewMode | null>(null);
     const [isRetrying, setIsRetrying] = useState(false);
-    const unreadNotificationsCount = useAppSelector(selectUnreadNotificationsCount);
+    const unreadNotificationsCount = useUnreadNotificationsCount();
     const refreshUnreadNotificationsCount = useRefreshUnreadNotificationsCount();
 
     const handleRetry = () => {
@@ -142,10 +144,7 @@ const StudentAssessmentViewDoneTryPage = () => {
                     .map((notification) => notification.id);
 
                 if (notificationIds.length > 0) {
-                    return AjaxPost({
-                        url: "/api/notifications/read",
-                        body: { notification_ids: notificationIds },
-                    }).then(() => refreshUnreadNotificationsCount());
+                    return markNotificationsAsRead(notificationIds).then(() => refreshUnreadNotificationsCount());
                 }
             })
             .catch(() => {

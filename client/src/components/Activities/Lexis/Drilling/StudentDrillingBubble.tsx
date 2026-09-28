@@ -1,24 +1,12 @@
-import { useDispatch } from "react-redux";
-
 import StudentActivityBubble from "components/Activities/Bubble/StudentActivityBubble";
-import { setLexisEndByTime } from "redux/slices/drillingSlice";
+import { TDrilling } from "models/Activity/TDrilling";
 
 type StudentDrillingBubbleProps = {
-    drilling: any; // TODO: Remove any
+    info: TDrilling;
 };
 
-const StudentDrillingBubble = ({ drilling }: StudentDrillingBubbleProps) => {
-    const dispatch = useDispatch();
-
-    return (
-        <StudentActivityBubble
-            title="ごい"
-            info={drilling.info}
-            name="drilling"
-            onDeadline={() => dispatch(setLexisEndByTime())}
-            showResultsButton={false}
-        />
-    );
+const StudentDrillingBubble = ({ info }: StudentDrillingBubbleProps) => {
+    return <StudentActivityBubble title="ごい" info={info} name="drilling" showResultsButton={false} />;
 };
 
 export default StudentDrillingBubble;

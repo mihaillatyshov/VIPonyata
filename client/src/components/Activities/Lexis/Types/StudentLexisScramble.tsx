@@ -6,8 +6,8 @@ import StudentLexisTaskInterface from "./StudentLexisTaskInterface";
 import { StudentLexisTaskTitle } from "./StudentLexisTaskTitle";
 
 const StudentLexisScramble = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps<TScramble>) => {
-    const item = useLexisItem<TStudentLexisTryScrambleTask>(name);
-    const setLexisSelectedItemField = useSetLexisSelectedItemField<TStudentLexisTryScrambleTask>(name);
+    const item = useLexisItem<TStudentLexisTryScrambleTask>();
+    const setLexisSelectedItemField = useSetLexisSelectedItemField<TStudentLexisTryScrambleTask>();
     const [full, symb] = pickScrambeWordOrChar(name);
 
     const setNewWord = (id: number) => {
@@ -51,7 +51,6 @@ const StudentLexisScramble = ({ name, inData, goToNextTaskCallback }: StudentLex
 
     return (
         <StudentLexisTaskInterface
-            name={name}
             taskTypeName="scramble"
             newObjectData={{
                 ...setNewWord(0),

@@ -13,7 +13,6 @@ type StudentActivityBubbleProps = {
     title: string;
     name: ActivityName;
     info: TDrilling | THieroglyph | TAssessment;
-    onDeadline: () => void;
     showResultsButton?: boolean;
 };
 

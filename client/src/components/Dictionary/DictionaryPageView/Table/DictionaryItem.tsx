@@ -1,8 +1,8 @@
 import React from "react";
 
 import DictionaryAssociation from "components/Dictionary/DictionaryAssociation";
+import { isStudent, useGetAuthorizedUserSafe } from "libs/user";
 import { TDictionaryItem } from "models/TDictionary";
-import { isStudent, useGetAuthorizedUserSafe } from "redux/funcs/user";
 
 interface DictionaryItemProps {
     item: TDictionaryItem;

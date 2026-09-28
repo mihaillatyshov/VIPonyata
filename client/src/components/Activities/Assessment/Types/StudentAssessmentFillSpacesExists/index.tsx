@@ -1,11 +1,10 @@
 import React, { useMemo } from "react";
 
+import { useSetAssessmentTaskData } from "components/Activities/Assessment/StudentAssessmentTaskContext";
 import { isFieldData } from "components/Activities/Assessment/Types/StudentAssessmentFillSpacesExists/FieldData";
 import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import { FindMaxStr, fixRubyStr } from "libs/Autisize";
 import { TAssessmentFillSpacesExists, TAssessmentFillSpacesExistsEmpty } from "models/Activity/Items/TAssessmentItems";
-import { useAppDispatch } from "redux/hooks";
-import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
 
 import {
     DndContext,
@@ -25,7 +24,7 @@ const StudentAssessmentFillSpacesExists = ({
     data,
     taskId,
 }: StudentAssessmentTypeProps<TAssessmentFillSpacesExists>) => {
-    const dispatch = useAppDispatch();
+    const setAssessmentTaskData = useSetAssessmentTaskData();
 
     const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor), useSensor(KeyboardSensor));
 
@@ -71,7 +70,7 @@ const StudentAssessmentFillSpacesExists = ({
                 handleAnsAns(activeData.fieldId, overData.fieldId);
             }
         }
-        dispatch(setAssessmentTaskData({ id: taskId, data: data }));
+        setAssessmentTaskData({ id: taskId, data: data });
     };
 
     const longestStr = useMemo(

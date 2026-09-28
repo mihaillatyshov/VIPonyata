@@ -1,15 +1,14 @@
 import React from "react";
 
+import { useSetAssessmentTaskData } from "components/Activities/Assessment/StudentAssessmentTaskContext";
 import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import InputCheckSingle from "components/Form/InputCheckSingle";
 import { TAssessmentTestMulti } from "models/Activity/Items/TAssessmentItems";
-import { useAppDispatch } from "redux/hooks";
-import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
 
 import { StudentAssessmentTypeProps } from "./StudentAssessmentTypeProps";
 
 const StudentAssessmentTestMulti = ({ data, taskId }: StudentAssessmentTypeProps<TAssessmentTestMulti>) => {
-    const dispatch = useAppDispatch();
+    const setAssessmentTaskData = useSetAssessmentTaskData();
 
     const onChangeHandler = (fieldId: number) => {
         if (data.answers.includes(fieldId)) {
@@ -17,7 +16,7 @@ const StudentAssessmentTestMulti = ({ data, taskId }: StudentAssessmentTypeProps
         } else {
             data.answers.push(fieldId);
         }
-        dispatch(setAssessmentTaskData({ id: taskId, data: data }));
+        setAssessmentTaskData({ id: taskId, data: data });
     };
 
     return (

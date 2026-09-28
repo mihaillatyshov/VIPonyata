@@ -4,14 +4,12 @@ import Loading from "components/Common/Loading";
 import ShowMoreButton from "components/Common/ShowMoreButton";
 import { LoadStatus } from "libs/Status";
 import { useCursorPagedList } from "libs/useCursorPagedList";
+import { isTeacher, useGetAuthorizedUserSafe } from "libs/user";
 import { TStudentNotification, TTeacherNotification } from "models/TNotification";
-import { useMarkAllNotificationsAsRead } from "redux/funcs/notificationsHub";
-import { isTeacher, useGetAuthorizedUserSafe } from "redux/funcs/user";
-import { useAppSelector } from "redux/hooks";
-import { selectUnreadNotificationsCount } from "redux/slices/notificationsHubSlice";
 
 import StudentNotificationsContent from "./StudentNotificationsContent";
 import TeacherNotificationsContent from "./TeacherNotificationsContent";
+import { useMarkAllNotificationsAsRead, useUnreadNotificationsCount } from "./useNotificationsHub";
 
 const NOTIFICATIONS_PAGE_SIZE = 20;
 
@@ -36,7 +34,7 @@ interface NotificationsProps {
 }
 
 const Notifications = ({ isShow, close }: NotificationsProps) => {
-    const unreadCount = useAppSelector(selectUnreadNotificationsCount);
+    const unreadCount = useUnreadNotificationsCount();
     const markAllAsRead = useMarkAllNotificationsAsRead();
     const { items, loadStatus, hasMore, isLoadingMore, isLoadMoreError, loadMore } = useCursorPagedList<
         TTeacherNotification | TStudentNotification,

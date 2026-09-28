@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
+import { UserDataType } from "api/user";
 import InputError from "components/Form/InputError";
 import InputText from "components/Form/InputText";
 import { useFormState } from "components/Form/useFormState";
 import { AjaxPost } from "libs/ServerAPI";
-import { LoadStatus } from "libs/Status";
-import { useAppDispatch } from "redux/hooks";
-import { setUserData, UserDataType } from "redux/slices/userSlice";
+import { setSessionUser } from "libs/user";
 import { ValidateEmpty } from "validators/FormValidators";
 
 export interface LoginForm {
@@ -22,8 +21,6 @@ const defaultForm: LoginForm = {
 
 const LoginPage = () => {
     const [serverError, setServerError] = useState<string>("");
-
-    const dispatch = useAppDispatch();
 
     const { inputs, validateForm, inputProps } = useFormState<LoginForm>(
         { ...defaultForm },
@@ -51,7 +48,7 @@ const LoginPage = () => {
             body: { ...inputs },
         })
             .then((json) => {
-                dispatch(setUserData({ loadStatus: LoadStatus.DONE, ...json }));
+                setSessionUser(json);
             })
             .catch(({ isServerError, json, response }) => {
                 if (!isServerError) {

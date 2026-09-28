@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-import { useUserIsTeacher } from "redux/funcs/user";
+import { useUserIsTeacher } from "libs/user";
 
 import styles from "../StyleCourses.module.css";
 import CourseCardBase from "./CourseCardBase";

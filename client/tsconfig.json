@@ -25,7 +25,6 @@
       "components/*": ["./src/components/*"],
       "libs/*": ["./src/libs/*"],
       "models/*": ["./src/models/*"],
-      "redux/*": ["./src/redux/*"],
       "requests/*": ["./src/requests/*"],
       "themes/*": ["./src/themes/*"],
       "ui/*": ["./src/ui/*"],

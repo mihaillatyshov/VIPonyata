@@ -1,16 +1,15 @@
+import { useSetAssessmentTaskData } from "components/Activities/Assessment/StudentAssessmentTaskContext";
 import { ReactMarkdownWithHtml } from "components/Common/ReactMarkdownWithHtml";
 import InputRadioSingle from "components/Form/InputRadioSingle";
 import { TAssessmentTestSingle } from "models/Activity/Items/TAssessmentItems";
-import { useAppDispatch } from "redux/hooks";
-import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
 
 import { StudentAssessmentTypeProps } from "./StudentAssessmentTypeProps";
 
 const StudentAssessmentTestSingle = ({ data, taskId }: StudentAssessmentTypeProps<TAssessmentTestSingle>) => {
-    const dispatch = useAppDispatch();
+    const setAssessmentTaskData = useSetAssessmentTaskData();
 
     const onChangeHandler = (newId: number) => {
-        dispatch(setAssessmentTaskData({ id: taskId, data: { ...data, answer: newId } }));
+        setAssessmentTaskData({ id: taskId, data: { ...data, answer: newId } });
     };
 
     return (

@@ -1,9 +1,11 @@
 import React, { lazy, Suspense, useEffect, useLayoutEffect } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 
+import { userQueries } from "api/user";
 import ErrorPage from "components/ErrorPages/ErrorPage";
-import { LoadStatus } from "libs/Status";
-import { isTeacher } from "redux/funcs/user";
+import { isTeacher, resetSession } from "libs/user";
+
+import { useQuery } from "@tanstack/react-query";
 
 import LoginPage from "./components/Authentication/LoginPage";
 import Loading from "./components/Common/Loading";
@@ -11,10 +13,7 @@ import MainPage from "./components/MainPage/MainPage";
 import NavBar from "./components/NavBar";
 import NavigateHome from "./components/NavigateHome";
 import NotificationsPoller from "./components/Notifications/NotificationsPoller";
-import { queryClient } from "./libs/queryClient";
-import { AjaxGet, setUnauthorizedHandler } from "./libs/ServerAPI";
-import { useAppDispatch, useAppSelector } from "./redux/hooks";
-import { selectUser, setUserData, UserDataType } from "./redux/slices/userSlice";
+import { setUnauthorizedHandler } from "./libs/ServerAPI";
 import styleThemes from "./themes/StyleThemes.module.css";
 
 import "./App.css";
@@ -92,31 +91,17 @@ const PageLoading = () => (
 );
 
 const App = () => {
-    const user = useAppSelector(selectUser).data;
-    const dispatch = useAppDispatch();
-
-    useLayoutEffect(() => {
-        AjaxGet<UserDataType>({ url: "/api/islogin" })
-            .then((json) => {
-                dispatch(setUserData({ loadStatus: LoadStatus.DONE, ...json }));
-            })
-            .catch(() => {
-                dispatch(setUserData({ loadStatus: LoadStatus.ERROR }));
-            });
-    }, [dispatch]);
+    const sessionQuery = useQuery(userQueries.session());
 
     // Истекшая сессия (401 на любой запрос) — сбрасываем пользователя: роутинг покажет страницу входа.
     useEffect(() => {
-        setUnauthorizedHandler(() => {
-            queryClient.clear();
-            dispatch(setUserData({ loadStatus: LoadStatus.DONE, isAuth: false }));
-        });
+        setUnauthorizedHandler(resetSession);
         return () => setUnauthorizedHandler(null);
-    }, [dispatch]);
+    }, []);
 
     // TODO Select theme
 
-    if (user.loadStatus === LoadStatus.ERROR) {
+    if (sessionQuery.isError) {
         return (
             <div className={`${styleThemes.Violet} App d-flex justify-content-center align-items-center`}>
                 <BrowserRouter>
@@ -130,13 +115,15 @@ const App = () => {
         );
     }
 
-    if (user.loadStatus !== LoadStatus.DONE) {
+    if (sessionQuery.isPending) {
         return (
             <div className={`${styleThemes.Violet} App d-flex justify-content-center align-items-center`}>
                 <Loading size="xxl" />
             </div>
         );
     }
+
+    const user = sessionQuery.data;
 
     const getRoute = (
         teacherRoute: React.ReactNode,

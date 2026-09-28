@@ -1,20 +1,23 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { TStudentHub } from "api/notifications";
+import { useNotificationsHubSync } from "components/Notifications/useNotificationsHub";
 import { formatDuration } from "components/Quizlet/quizletUtils";
 import { AjaxPost } from "libs/ServerAPI";
 import { TUnfinishedLessonItem, TUnfinishedLessonsSummary } from "models/TLesson";
-import { useNotificationsHubSync } from "redux/funcs/notificationsHub";
-import { useAppSelector } from "redux/hooks";
-import {
-    selectNotificationsHub,
-    selectStudentAssignmentsHub,
-    THubAssignmentItem,
-} from "redux/slices/notificationsHubSlice";
 
+import { buildAssignmentsHubViewModel, THubAssignmentItem } from "./assignmentsHubModel";
 import styles from "./StyleMainPage.module.css";
 
 type TabKey = "pending" | "completed";
+
+const EMPTY_HUB: TStudentHub = {
+    notifications: [],
+    quizletAssignments: [],
+    homeworkAssignments: [],
+    quizletSessions: [],
+};
 
 interface AssignmentsHubProps {
     unfinishedSummary?: TUnfinishedLessonsSummary;
@@ -174,7 +177,7 @@ const getPendingAssignmentMeta = (item: THubAssignmentItem) => {
 
 const AssignmentsHub = ({ unfinishedSummary, onUnfinishedChanged }: AssignmentsHubProps) => {
     const navigate = useNavigate();
-    const { refreshHub } = useNotificationsHubSync();
+    const { hubQuery, refreshHub } = useNotificationsHubSync();
     const [activeTab, setActiveTab] = useState<TabKey>("pending");
     const [runningItemId, setRunningItemId] = useState<string | null>(null);
     const [actionError, setActionError] = useState<string | null>(null);
@@ -182,9 +185,10 @@ const AssignmentsHub = ({ unfinishedSummary, onUnfinishedChanged }: AssignmentsH
     const [nowTimestamp, setNowTimestamp] = useState(() => Date.now());
     const [showAllCompleted, setShowAllCompleted] = useState(false);
 
-    const { pendingItems, completedItems, stats } = useAppSelector(selectStudentAssignmentsHub);
-    const { notificationsStatus, quizletAssignmentsStatus, homeworkAssignmentsStatus, quizletSessionsStatus } =
-        useAppSelector(selectNotificationsHub);
+    const { pendingItems, completedItems, stats } = useMemo(
+        () => buildAssignmentsHubViewModel(hubQuery.data ?? EMPTY_HUB),
+        [hubQuery.data],
+    );
 
     useEffect(() => {
         const timerId = window.setInterval(() => setNowTimestamp(Date.now()), 60_000);
@@ -232,16 +236,8 @@ const AssignmentsHub = ({ unfinishedSummary, onUnfinishedChanged }: AssignmentsH
             : completedItems.slice(0, COMPLETED_ITEMS_PREVIEW_COUNT);
 
     const items = activeTab === "pending" ? filteredPendingItems : visibleCompletedItems;
-    const isLoading =
-        notificationsStatus === "loading" ||
-        quizletAssignmentsStatus === "loading" ||
-        homeworkAssignmentsStatus === "loading" ||
-        quizletSessionsStatus === "loading";
-    const hasError =
-        notificationsStatus === "error" ||
-        quizletAssignmentsStatus === "error" ||
-        homeworkAssignmentsStatus === "error" ||
-        quizletSessionsStatus === "error";
+    const isLoading = hubQuery.isFetching;
+    const hasError = hubQuery.isError;
 
     useEffect(() => {
         if (activeTab !== "completed") {
@@ -282,7 +278,7 @@ const AssignmentsHub = ({ unfinishedSummary, onUnfinishedChanged }: AssignmentsH
         AjaxPost({ url: `/api/assessment/${item.activityBaseId}/newtry` })
             .then(() => {
                 navigate(`/assessment/${item.activityBaseId}`);
-                refreshHub(true);
+                refreshHub();
             })
             .catch(() => {
                 setActionError("Не удалось запустить тест повторно");
@@ -324,7 +320,7 @@ const AssignmentsHub = ({ unfinishedSummary, onUnfinishedChanged }: AssignmentsH
         })
             .then(() => {
                 onUnfinishedChanged?.();
-                refreshHub(true);
+                refreshHub();
             })
             .catch(() => {
                 setActionError("Не удалось завершить тест");

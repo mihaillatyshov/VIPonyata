@@ -1,12 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo, useReducer, useRef } from "react";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 
+import { activityQueries, saveLexisDoneTasks } from "api/activities";
 import StudentProgress from "components/Activities/StudentProgress";
 import Loading from "components/Common/Loading";
 import PageDescription from "components/Common/PageDescription";
 import PageTitle from "components/Common/PageTitle";
 import NavigateToElement from "components/NavigateToElement";
-import { AjaxGet, AjaxPost } from "libs/ServerAPI";
+import { useRedirectOnApiError } from "libs/useRedirectOnApiError";
 import { TLexisDoneTasks } from "models/Activity/DoneTasks/TLexisDoneTasks";
 import { LexisName } from "models/Activity/IActivity";
 import { LexisTaskName } from "models/Activity/ILexis";
@@ -19,12 +20,12 @@ import {
     TSpace,
     TTranslate,
 } from "models/Activity/Items/TLexisItems";
-import { TDrilling } from "models/Activity/TDrilling";
-import { THieroglyph } from "models/Activity/THieroglyph";
-import { LexisState } from "redux/slices/lexis";
+
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import StudentActivityDeadline from "../StudentActivityDeadline";
 import StudentLexisNav from "./Nav/StudentLexisNav";
+import { selectedItemReducer, StudentLexisContext, StudentLexisContextValue } from "./StudentLexisContext";
 import StudentLexisHub from "./StudentLexisHub";
 import { StudentLexisTaskProps } from "./Types/LexisUtils";
 import StudentLexisCard from "./Types/StudentLexisCard";
@@ -33,24 +34,15 @@ import StudentLexisScramble from "./Types/StudentLexisScramble";
 import StudentLexisSpace from "./Types/StudentLexisSpace";
 import StudentLexisTranslate from "./Types/StudentLexisTranslate";
 
-type ResponseData<T extends TDrilling | THieroglyph> = {
-    lexis: T;
-    items: TLexisItems;
-};
-
 interface StudentLexisPageRouteProps<T> {
     taskName: LexisTaskName;
     path: string;
     component: (props: StudentLexisTaskProps<T>) => React.JSX.Element;
 }
 
-interface StudentLexisPageProps<T extends TDrilling | THieroglyph> {
+interface StudentLexisPageProps {
     name: LexisName;
-    lexis: LexisState<T>;
     title: string;
-    setLexisInfoCallback: (info: T | undefined) => void;
-    setLexisItemsCallback: (items: TLexisItems | undefined) => void;
-    setLexisDoneTaskCallback: (doneTasks: TLexisDoneTasks | undefined) => void;
 }
 
 interface TRouteElements {
@@ -61,17 +53,56 @@ interface TRouteElements {
     space: StudentLexisPageRouteProps<TSpace>;
 }
 
-const StudentLexisPage = <T extends TDrilling | THieroglyph>({
-    name,
-    lexis,
-    title,
-    setLexisInfoCallback,
-    setLexisItemsCallback,
-    setLexisDoneTaskCallback,
-}: StudentLexisPageProps<T>) => {
-    const { id } = useParams();
+const StudentLexisPage = ({ name, title }: StudentLexisPageProps) => {
+    const { id = "" } = useParams();
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const [selectedTask, setSelectedTask] = React.useState<LexisTaskName>();
+    const [selectedItem, dispatchSelectedItem] = useReducer(selectedItemReducer, undefined);
+    const lexisQueryOptions = activityQueries.studentLexis(name, id);
+    const lexisQuery = useQuery(lexisQueryOptions);
+    const isStartedRef = useRef(false);
+
+    useRedirectOnApiError<{ lesson_id?: number }>(lexisQuery.error, (status, json) => {
+        if (status === 404) return "/";
+        if (status === 403) return `/lessons/${json.lesson_id}`;
+        return null;
+    });
+
+    const context = useMemo<StudentLexisContextValue>(() => {
+        const { queryKey } = activityQueries.studentLexis(name, id);
+        const updateCardWord = (cardId: number, fields: { img?: string; association?: string }) => {
+            queryClient.setQueryData(queryKey, (old) =>
+                old === undefined
+                    ? old
+                    : {
+                          ...old,
+                          items: {
+                              ...old.items,
+                              card: old.items.card.map((card) =>
+                                  card.id === cardId ? { ...card, word: { ...card.word, ...fields } } : card,
+                              ),
+                          },
+                      },
+            );
+        };
+
+        return {
+            selectedItem,
+            setSelectedItem: (item) => dispatchSelectedItem({ type: "set", item }),
+            setSelectedItemFields: (fields) => dispatchSelectedItem({ type: "setFields", fields }),
+            setCardImg: (cardId, img) => updateCardWord(cardId, { img }),
+            setCardAssociation: (cardId, association) => updateCardWord(cardId, { association }),
+        };
+    }, [id, name, queryClient, selectedItem]);
+
+    const setDoneTasks = (doneTasks: TLexisDoneTasks) => {
+        queryClient.setQueryData(lexisQueryOptions.queryKey, (old) =>
+            old === undefined
+                ? old
+                : { ...old, lexis: { ...old.lexis, try: { ...old.lexis.try, done_tasks: doneTasks } } },
+        );
+    };
 
     const routeElements: TRouteElements = {
         card: { taskName: LexisTaskName.CARD, path: "/card/:cardId", component: StudentLexisCard },
@@ -93,7 +124,7 @@ const StudentLexisPage = <T extends TDrilling | THieroglyph>({
 
         if (Object.keys(doneTasks).length) {
             // TODO Add some checks???
-            AjaxPost({ url: `/api/${name}/${id}/newdonetask`, body: { done_tasks: doneTasks } });
+            saveLexisDoneTasks(name, id, doneTasks);
         }
 
         if (Object.keys(doneTasks).length === Object.keys(items).length) {
@@ -102,26 +133,19 @@ const StudentLexisPage = <T extends TDrilling | THieroglyph>({
         }
     };
 
+    // После загрузки открываем первое непройденное задание.
     useEffect(() => {
-        setLexisInfoCallback(undefined);
-        AjaxGet<ResponseData<T>>({ url: `/api/${name}/${id}` })
-            .then((json) => {
-                const lexisInfo = json.lexis;
-                if (lexisInfo !== undefined) {
-                    setLexisInfoCallback(lexisInfo);
-                    setLexisItemsCallback(json.items);
-                    goToUndoneTask(json.items, lexisInfo.try.done_tasks);
-                }
-            })
-            .catch(({ isServerError, json, response }) => {
-                if (!isServerError) {
-                    if (response.status === 404) navigate("/", { replace: true });
-                    if (response.status === 403) navigate(`/lessons/${json.lesson_id}`, { replace: true });
-                }
-            });
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+        const data = lexisQuery.data;
+        if (data === undefined || data.lexis === undefined || isStartedRef.current) {
+            return;
+        }
 
-    const { info, items } = lexis;
+        isStartedRef.current = true;
+        goToUndoneTask(data.items, data.lexis.try.done_tasks);
+    }, [lexisQuery.data]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const info = lexisQuery.data?.lexis;
+    const items = lexisQuery.data?.items;
 
     if (
         info === undefined ||
@@ -140,12 +164,10 @@ const StudentLexisPage = <T extends TDrilling | THieroglyph>({
     }
 
     const goToNextTaskHandle = (taskTypeName: string, percent: number) => {
-        if (lexis.items === undefined) return;
-
         const newDoneTasks = Object.assign(structuredClone(info.try.done_tasks), { [taskTypeName]: percent });
-        setLexisDoneTaskCallback(newDoneTasks);
+        setDoneTasks(newDoneTasks);
 
-        goToUndoneTask(lexis.items, newDoneTasks);
+        goToUndoneTask(items, newDoneTasks);
     };
 
     const backToLessonHandle = () => {
@@ -155,41 +177,45 @@ const StudentLexisPage = <T extends TDrilling | THieroglyph>({
     const habUrl = `/${name}/${info.id}`;
 
     return (
-        <div className="container" style={{ maxWidth: "800px" }}>
-            <PageTitle title={title} urlBack={`/lessons/${info.lesson_id}`} />
-            <PageDescription description={info.description} className="mb-3" />
+        <StudentLexisContext value={context}>
+            <div className="container" style={{ maxWidth: "800px" }}>
+                <PageTitle title={title} urlBack={`/lessons/${info.lesson_id}`} />
+                <PageDescription description={info.description} className="mb-3" />
 
-            <StudentProgress percent={(Object.keys(info.try.done_tasks).length / Object.keys(items).length) * 100}>
-                <div className="position-absolute w-100 d-flex justify-content-center" style={{ top: "0px" }}>
-                    <StudentActivityDeadline activityInfo={info} />
-                </div>
-            </StudentProgress>
-            <StudentLexisNav
-                items={lexis.items}
-                doneTasks={info.try.done_tasks}
-                habUrl={habUrl}
-                selectedTask={selectedTask}
-                setSelectedTaskCallback={setSelectedTask}
-            />
-            <Routes>
-                <Route
-                    path="/"
-                    element={<StudentLexisHub id={id} name={name} backToLessonCallback={backToLessonHandle} />}
+                <StudentProgress percent={(Object.keys(info.try.done_tasks).length / Object.keys(items).length) * 100}>
+                    <div className="position-absolute w-100 d-flex justify-content-center" style={{ top: "0px" }}>
+                        <StudentActivityDeadline activityInfo={info} />
+                    </div>
+                </StudentProgress>
+                <StudentLexisNav
+                    items={items}
+                    doneTasks={info.try.done_tasks}
+                    habUrl={habUrl}
+                    selectedTask={selectedTask}
+                    setSelectedTaskCallback={setSelectedTask}
                 />
-                <Route path="/card" element={<NavigateToElement to="../card/0" replace />} />
-                {Object.values(routeElements).map((element: StudentLexisPageRouteProps<TLexisAnyItem>, i: number) => (
+                <Routes>
                     <Route
-                        key={i}
-                        path={element.path}
-                        element={React.createElement(element.component, {
-                            name: name,
-                            inData: items[element.taskName] as any,
-                            goToNextTaskCallback: goToNextTaskHandle,
-                        })}
+                        path="/"
+                        element={<StudentLexisHub id={id} name={name} backToLessonCallback={backToLessonHandle} />}
                     />
-                ))}
-            </Routes>
-        </div>
+                    <Route path="/card" element={<NavigateToElement to="../card/0" replace />} />
+                    {Object.values(routeElements).map(
+                        (element: StudentLexisPageRouteProps<TLexisAnyItem>, i: number) => (
+                            <Route
+                                key={i}
+                                path={element.path}
+                                element={React.createElement(element.component, {
+                                    name: name,
+                                    inData: items[element.taskName] as any,
+                                    goToNextTaskCallback: goToNextTaskHandle,
+                                })}
+                            />
+                        ),
+                    )}
+                </Routes>
+            </div>
+        </StudentLexisContext>
     );
 };
 

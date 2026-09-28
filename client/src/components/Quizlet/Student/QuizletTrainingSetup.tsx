@@ -7,8 +7,7 @@ import {
     TQuizletCatalog,
     TQuizletPersonalDictionary,
 } from "api/quizlet";
-import { useAppSelector } from "redux/hooks";
-import { selectNotificationsHub } from "redux/slices/notificationsHubSlice";
+import { useStudentHubQuery } from "components/Notifications/useNotificationsHub";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -41,7 +40,7 @@ interface QuizletTrainingSetupProps {
 /** Выбор словарей и режима тренировки; сверху — незавершённая тренировка, если она есть. */
 const QuizletTrainingSetup = ({ catalog, personal, onStart, onContinue, onHubChanged }: QuizletTrainingSetupProps) => {
     const queryClient = useQueryClient();
-    const { quizletAssignments } = useAppSelector(selectNotificationsHub);
+    const quizletAssignments = useStudentHubQuery().data?.quizletAssignments ?? [];
     const activeSessionQuery = useQuery(quizletQueries.activeSession());
     const [isFinishing, setIsFinishing] = useState(false);
 

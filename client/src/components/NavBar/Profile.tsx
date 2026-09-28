@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
-import { useGetAuthorizedUserSafe } from "redux/funcs/user";
+import { useGetAuthorizedUserSafe } from "libs/user";
 
 import styles from "./StyleNavBar.module.css";
 

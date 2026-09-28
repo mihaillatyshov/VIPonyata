@@ -1,19 +1,19 @@
 import React, { useState } from "react";
 
+import { useSetAssessmentTaskData } from "components/Activities/Assessment/StudentAssessmentTaskContext";
 import { TAssessmentCreateSentence, TAssessmentSentenceOrder } from "models/Activity/Items/TAssessmentItems";
-import { useAppDispatch } from "redux/hooks";
-import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
 
 import { StudentAssessmentTypeProps } from "../StudentAssessmentTypeProps";
 import DragItem from "./DragItem";
 
-interface MoveDragAndDropProps<T extends TAssessmentSentenceOrder | TAssessmentCreateSentence>
-    extends StudentAssessmentTypeProps<T> {
+interface MoveDragAndDropProps<
+    T extends TAssessmentSentenceOrder | TAssessmentCreateSentence,
+> extends StudentAssessmentTypeProps<T> {
     flexType: "row" | "column";
 }
 
 const MoveDragAndDrop = <T extends TAssessmentSentenceOrder>({ data, taskId, flexType }: MoveDragAndDropProps<T>) => {
-    const dispatch = useAppDispatch();
+    const setAssessmentTaskData = useSetAssessmentTaskData();
     const [selectedFieldId, setSelectedFieldId] = useState<number | undefined>(undefined);
     const [fakeFieldId, setFakeFieldId] = useState<number | undefined>(undefined);
 
@@ -28,7 +28,7 @@ const MoveDragAndDrop = <T extends TAssessmentSentenceOrder>({ data, taskId, fle
         }
         setSelectedFieldId(undefined);
         setFakeFieldId(undefined);
-        dispatch(setAssessmentTaskData({ id: taskId, data: data }));
+        setAssessmentTaskData({ id: taskId, data: data });
     };
 
     return (

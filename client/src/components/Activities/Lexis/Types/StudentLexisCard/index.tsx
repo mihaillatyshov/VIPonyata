@@ -10,7 +10,7 @@ const StudentLexisCard = ({ name, inData, goToNextTaskCallback }: StudentLexisTa
     const { cardId } = useParams();
     const navigate = useNavigate();
 
-    const { setCardImg, setCardAssociation } = useSetLexisCardExtras(name);
+    const { setCardImg, setCardAssociation } = useSetLexisCardExtras();
 
     const cardIdInt = parseInt(cardId ?? "0");
     const taskTypeName = "card";

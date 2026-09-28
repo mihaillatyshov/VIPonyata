@@ -11,10 +11,10 @@ import { StudentLexisTaskTitle } from "./StudentLexisTaskTitle";
 type AvailTypes = "words_jp" | "words_ru" | "chars_jp";
 
 const StudentLexisFindPair = ({ name, inData, goToNextTaskCallback }: StudentLexisTaskProps<TFindPair>) => {
-    const item = useLexisItem<TStudentLexisTryFindPairTask>(name);
+    const item = useLexisItem<TStudentLexisTryFindPairTask>();
     const strRU = "words_ru";
     const strJP = pickLexisWordsOrChars(name);
-    const setLexisSelectedItemField = useSetLexisSelectedItemField<TStudentLexisTryFindPairTask>(name);
+    const setLexisSelectedItemField = useSetLexisSelectedItemField<TStudentLexisTryFindPairTask>();
 
     const deselectField = () => {
         setLexisSelectedItemField({ selectedField: { id: -1, type: "None" } });
@@ -78,7 +78,6 @@ const StudentLexisFindPair = ({ name, inData, goToNextTaskCallback }: StudentLex
 
     return (
         <StudentLexisTaskInterface
-            name={name}
             taskTypeName="findpair"
             newObjectData={{
                 selectedField: { id: -1, type: "None" },

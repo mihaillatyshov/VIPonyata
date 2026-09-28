@@ -1,47 +1,27 @@
-import { useLayoutEffect } from "react";
-
+import { coursesQueries } from "api/courses";
 import ErrorPage from "components/ErrorPages/ErrorPage";
-import { AjaxGet } from "libs/ServerAPI";
-import { TCourse } from "models/TCourse";
-import { TUnfinishedLessonsSummary } from "models/TLesson";
-import { useUserIsTeacher } from "redux/funcs/user";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { selectCourses, setCourses } from "redux/slices/coursesSlice";
+import { useUserIsTeacher } from "libs/user";
+
+import { useQuery } from "@tanstack/react-query";
 
 import CourseCardLoading from "./Cards/CourseCardLoading";
 import CourseCardWithContent from "./Cards/CourseCardWithContent";
 
-type ResponseData = {
-    items: TCourse[];
-    unfinished_lessons?: TUnfinishedLessonsSummary;
-};
-
-type CoursesListProps = {
-    onLoaded?: (data: ResponseData) => void;
-};
-
-const CoursesList = ({ onLoaded }: CoursesListProps) => {
-    const courses = useAppSelector(selectCourses);
-    const dispatch = useAppDispatch();
-
+const CoursesList = () => {
+    const coursesQuery = useQuery(coursesQueries.list());
     const isTeacher = useUserIsTeacher();
 
-    useLayoutEffect(() => {
-        AjaxGet<ResponseData>({
-            url: "/api/courses",
-        }).then((json) => {
-            dispatch(setCourses(json.items));
-            if (onLoaded) {
-                onLoaded(json);
-            }
-        });
+    if (coursesQuery.isError) {
+        return (
+            <ErrorPage
+                errorImg="/svg/SomethingWrong.svg"
+                textMain="Не удалось загрузить курсы"
+                textDisabled="Попробуйте перезагрузить страницу"
+            />
+        );
+    }
 
-        return () => {
-            dispatch(setCourses(undefined));
-        };
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-    if (courses.items === undefined) {
+    if (coursesQuery.data === undefined) {
         return (
             <div className="row justify-content-center">
                 {Array.from(Array(12)).map((_, i) => (
@@ -51,7 +31,9 @@ const CoursesList = ({ onLoaded }: CoursesListProps) => {
         );
     }
 
-    if (!isTeacher && courses.items.length === 0) {
+    const courses = coursesQuery.data.items;
+
+    if (!isTeacher && courses.length === 0) {
         return (
             <ErrorPage
                 errorImg="/svg/SomethingWrong.svg"
@@ -64,7 +46,7 @@ const CoursesList = ({ onLoaded }: CoursesListProps) => {
 
     return (
         <div className="row justify-content-center">
-            {courses.items.map((course) => {
+            {courses.map((course) => {
                 return <CourseCardWithContent key={course.id} course={course} />;
             })}
         </div>

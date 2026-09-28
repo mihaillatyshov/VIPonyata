@@ -1,8 +1,7 @@
+import { useSetAssessmentTaskData } from "components/Activities/Assessment/StudentAssessmentTaskContext";
 import { isFieldData } from "components/Activities/Assessment/Types/StudentAssessmentFillSpacesExists/FieldData";
 import { FindMaxStr, fixRubyStr } from "libs/Autisize";
 import { TAssessmentCreateSentence } from "models/Activity/Items/TAssessmentItems";
-import { useAppDispatch } from "redux/hooks";
-import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
 
 import {
     DndContext,
@@ -19,7 +18,7 @@ import InputsField from "./StudentAssessmentFillSpacesExists/InputsField";
 import { StudentAssessmentTypeProps } from "./StudentAssessmentTypeProps";
 
 const StudentAssessmentCreateSentence = ({ data, taskId }: StudentAssessmentTypeProps<TAssessmentCreateSentence>) => {
-    const dispatch = useAppDispatch();
+    const setAssessmentTaskData = useSetAssessmentTaskData();
     const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor), useSensor(KeyboardSensor));
 
     const answers = data.answers ?? Array(data.parts.length).fill(null);
@@ -28,12 +27,10 @@ const StudentAssessmentCreateSentence = ({ data, taskId }: StudentAssessmentType
     const syncTaskData = (nextAnswers: (string | null)[], nextInputs: string[]) => {
         const orderedFilledParts = nextAnswers.filter((item): item is string => item !== null);
         const nextParts = [...orderedFilledParts, ...nextInputs];
-        dispatch(
-            setAssessmentTaskData({
-                id: taskId,
-                data: { ...data, parts: nextParts, answers: nextAnswers, inputs: nextInputs },
-            }),
-        );
+        setAssessmentTaskData({
+            id: taskId,
+            data: { ...data, parts: nextParts, answers: nextAnswers, inputs: nextInputs },
+        });
     };
 
     const handleAnsInp = (answerId: number) => {

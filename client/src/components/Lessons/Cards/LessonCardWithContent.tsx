@@ -1,8 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
+import { useUserIsTeacher } from "libs/user";
 import { TLesson } from "models/TLesson";
-import { useUserIsTeacher } from "redux/funcs/user";
 
 import { Description, Title } from "./BaseParts/LessonCard";
 import LessonCardBase from "./LessonCardBase";

@@ -5,7 +5,7 @@
 ## Корректность и надёжность
 
 1. ✅ **Сделано:** ошибки TypeScript исправлены (типы уведомлений ученика приведены к ответу сервера), добавлен `npm run typecheck` и шаг в CI.
-2. 🟢 **Частично сделано: отмена запросов и защита от гонок.** Подключён TanStack Query (`libs/queryClient.ts`, провайдер в `main.tsx`): `queryFn` получает `signal`, устаревшие запросы отменяются, данные кешируются. На него переведены Quizlet (ученик и учитель), Review, банк заданий/домашки учителя. **Осталось:** ~30 компонентов со старым `useEffect` + `AjaxGet` (курсы, уроки, активности, словарь, главная, `useCursorPagedList`, `redux/funcs/notificationsHub`) — переводить при изменениях. `eslint-disable react-hooks/exhaustive-deps` — 18 мест (было 25).
+2. 🟢 **Частично сделано: отмена запросов и защита от гонок.** Подключён TanStack Query (`libs/queryClient.ts`, провайдер в `main.tsx`): `queryFn` получает `signal`, устаревшие запросы отменяются, данные кешируются. На него переведены Quizlet (ученик и учитель), Review, банк заданий/домашки учителя, сессия пользователя, курсы, уроки, прохождение активностей, словарь, уведомления и главная. **Осталось:** ~10 файлов со старым `useEffect` + `AjaxGet` (History, результаты попыток, страницы создания/редактирования курсов/уроков/активностей, `useCursorPagedList`) — переводить при изменениях. `eslint-disable react-hooks/exhaustive-deps` — 13 мест (было 25).
 3. ✅ **Сделано:** `libs/ServerAPI.ts` — `urlParams` кодируются (`URLSearchParams`, `null`/`undefined` пропускаются); `Content-Type` только при наличии тела; пустой ответ (204) → `undefined`; ошибки — класс `ApiError` (`kind`: `http`/`network`/`parse`/`abort`, `status` 0 для сети) с совместимыми полями `isServerError/json/response`; `getApiErrorMessage(e, fallback)`; параметр `signal`. Ответ 401 вызывает обработчик из `App.tsx` (`setUnauthorizedHandler`): кеш запросов очищается, пользователь сбрасывается → страница входа.
 4. 🟠 **HTML в markdown без санитизации.** `components/Common/ReactMarkdownWithHtml.tsx` использует `rehype-raw` — любой HTML из текста заданий исполняется как есть. Сейчас контент пишет учитель, но если туда попадёт ввод учеников (ответы, ассоциации) — XSS. Также `dangerouslySetInnerHTML` в `libs/AutosizeDiv.tsx`, `AutosizeInput.tsx`. → `rehype-sanitize` с белым списком тегов.
 
@@ -19,12 +19,12 @@
 
 ## Архитектура и качество кода
 
-10. 🟢 **Частично сделано: слой запросов.** Модули `src/api/<фича>.ts` (алиас `api/`): типы ответов, ключи кеша (`quizletKeys`…), `queryOptions` (`quizletQueries.catalog()`…) и функции мутаций. Есть для `quizlet`, `review`, `tasks`. **Осталось:** остальные фичи (курсы, уроки, активности, словарь, уведомления) и перенос `requests/` в `api/`.
-11. 🟠 **Смешанный подход к состоянию.** Правило выбрано (см. [architecture.md](architecture.md#состояние)): серверные данные — кеш TanStack Query, Redux — только сессия пользователя и UI; в перспективе уйти от Redux. Старые разделы (`courses`, `lessons`, `drilling`, `hyeroglyph`, `assessment`, `dictionary`, `notificationsHub`) ещё в Redux-слайсах.
+10. 🟢 **Частично сделано: слой запросов.** Модули `src/api/<фича>.ts` (алиас `api/`): типы ответов, ключи кеша (`quizletKeys`…), `queryOptions` (`quizletQueries.catalog()`…) и функции мутаций. Есть для `user`, `courses`, `lessons`, `activities`, `dictionary`, `notifications`, `quizlet`, `review`, `tasks`. **Осталось:** запросы страниц создания/редактирования (`*ProcessingUtils`), History и перенос `requests/` (`User`, `Activity`) в `api/`.
+11. ✅ **Сделано:** Redux удалён целиком (`@reduxjs/toolkit`, `react-redux`, `src/redux`). Серверные данные и сессия — в кеше TanStack Query, UI-состояние — локально или в контексте страницы (см. [architecture.md](architecture.md#состояние)). Попутно удалены неиспользуемые слайсы `login`/`register` и мёртвый проп `onDeadline` у `StudentActivityBubble`.
 12. 🟢 **Типы API ведутся вручную** и расходятся с сервером (см. п.1). → Генерация из Pydantic (например, `pydantic-to-typescript`) или хотя бы zod-схемы на границе (zod уже в зависимостях, используется в одном месте).
 13. 🟢 **Тестов нет**, хотя в devDependencies есть `@testing-library/*`, а `@types/jest` — в dependencies. → Vitest + testing-library, начать с чистых функций (`quizletUtils`, `quizletTableClipboard`, валидация assessment).
 14. 🟢 **Зависимости и мусор:** `name: "test"` в package.json; `crypto-js` и `web-vitals` не используются (`reportWebVitals.js` написан под API web-vitals v2 и сломается при вызове с v5); `@types/*` и `typescript` в `dependencies`; два плагина сортировки импортов (`@ianvs/...` и `@trivago/...`); `typescript-plugin-css-modules` указан в tsconfig, но не установлен; `public/index.html` (от CRA, с `%PUBLIC_URL%`) не используется; `package-lock copy.json`; `libs/uuid.ts` — самописный, есть `crypto.randomUUID()`.
-15. 🟢 Опечатки, закрепившиеся в коде/данных: ключ стора `hyeroglyph`, `libs/Autisize.ts`, поле `cheked` из API.
+15. 🟢 Опечатки, закрепившиеся в коде/данных: `libs/Autisize.ts`, поле `cheked` из API.
 16. 🟢 Смешение стилей: CSS Modules, глобальные `.css` с BEM-подобными классами и SCSS. Для новых компонентов выбрать один вариант (рекомендуется CSS Modules).
 
 ## Предлагаемый порядок
@@ -33,4 +33,4 @@
 2. ~~п.5–6 (lazy routes, WOFF2-шрифт)~~ — сделано.
 3. ~~п.7 + серверный п.9 (уведомления)~~ — сделано.
 4. ~~п.2–3 + п.10 + п.8: TanStack Query, `ServerAPI`, модули `api/`, разбиение гигантских компонентов~~ — сделано для Quizlet/Review/Tasks/WheelTrainer.
-5. п.2/п.10/п.11 (продолжение): перевести остальные разделы с Redux-слайсов и `useEffect`-загрузок на `api/` + TanStack Query (курсы/уроки → активности → словарь → уведомления), затем удалить ненужные слайсы.
+5. ~~п.2/п.10/п.11: перевести разделы с Redux-слайсов на `api/` + TanStack Query, удалить Redux~~ — сделано. Остаток п.2/п.10 (History, результаты попыток, страницы редактирования, `requests/`) — при изменениях.

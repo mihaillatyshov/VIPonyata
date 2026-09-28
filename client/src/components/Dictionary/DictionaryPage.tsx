@@ -1,39 +1,18 @@
-import React, { useLayoutEffect } from "react";
+import React from "react";
 
+import { dictionaryQueries } from "api/dictionary";
 import Loading from "components/Common/Loading";
 import PageTitle from "components/Common/PageTitle";
 import ErrorPage from "components/ErrorPages/ErrorPage";
-import { AjaxGet } from "libs/ServerAPI";
-import { LoadStatus } from "libs/Status";
-import { TDictionary } from "models/TDictionary";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { selectDictionary, setDictionary } from "redux/slices/dictionarySlice";
+
+import { useQuery } from "@tanstack/react-query";
 
 import { DictionaryPageViewTable } from "./DictionaryPageView/Table";
 
 const TeacherDictionaryPage = () => {
-    const { dictionary } = useAppSelector(selectDictionary);
-    const dispatch = useAppDispatch();
+    const dictionaryQuery = useQuery(dictionaryQueries.list());
 
-    const fetchDictionary = () => {
-        AjaxGet<{ dictionary: TDictionary }>({ url: "/api/dictionary" })
-            .then((json) => {
-                dispatch(setDictionary({ loadStatus: LoadStatus.DONE, items: json.dictionary }));
-            })
-            .catch(() => {
-                dispatch(setDictionary({ loadStatus: LoadStatus.ERROR }));
-            });
-    };
-
-    useLayoutEffect(() => {
-        fetchDictionary();
-
-        return () => {
-            dispatch(setDictionary({ loadStatus: LoadStatus.NONE }));
-        };
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-    if (dictionary.loadStatus === LoadStatus.ERROR) {
+    if (dictionaryQuery.isError) {
         return (
             <ErrorPage
                 errorImg="/svg/SomethingWrong.svg"
@@ -43,7 +22,7 @@ const TeacherDictionaryPage = () => {
         );
     }
 
-    if (dictionary.loadStatus !== LoadStatus.DONE) {
+    if (dictionaryQuery.data === undefined) {
         return <Loading />;
     }
 
@@ -52,7 +31,7 @@ const TeacherDictionaryPage = () => {
         <div className="container">
             <PageTitle title="じしょ" />
 
-            <DictionaryPageViewTable dictionary={dictionary.items} />
+            <DictionaryPageViewTable dictionary={dictionaryQuery.data} />
         </div>
     );
 };

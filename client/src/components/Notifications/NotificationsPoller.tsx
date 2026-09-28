@@ -1,4 +1,4 @@
-import { useNotificationsPolling } from "redux/funcs/notificationsHub";
+import { useNotificationsPolling } from "./useNotificationsHub";
 
 /** Единственная точка периодического опроса уведомлений (см. `useNotificationsPolling`). */
 const NotificationsPoller = () => {

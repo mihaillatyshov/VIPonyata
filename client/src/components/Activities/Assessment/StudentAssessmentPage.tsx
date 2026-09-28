@@ -1,27 +1,28 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
+import { activityQueries } from "api/activities";
 import { StudentAssessmentCheckBlockModal } from "components/Activities/Assessment/StudentAssessmentCheckBlockModal";
 import PageTitle from "components/Common/PageTitle";
 import InputError from "components/Form/InputError";
 import { PyErrorDict } from "libs/PyError";
-import { AjaxGet, AjaxPost } from "libs/ServerAPI";
+import { AjaxPost } from "libs/ServerAPI";
+import { useRedirectOnApiError } from "libs/useRedirectOnApiError";
 import {
     studentAssessmentTaskRusNameAliases,
     TAssessmentItemBase,
     TAssessmentTaskName,
     TGetAssessmentStudentTypeByName,
     TStudentAssessmentAnyItem,
-    TStudentAssessmentItems,
     TTeacherAssessmentAnyItem,
     TTeacherAssessmentItems,
 } from "models/Activity/Items/TAssessmentItems";
-import { TAssessment } from "models/Activity/TAssessment";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { selectAssessment, setAssessmentInfo, setAssessmentItems } from "redux/slices/assessmentSlice";
+
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import StudentActivityDeadline from "../StudentActivityDeadline";
 import { withStudentAssessmentImageAttachment } from "./AssessmentTaskImageWrappers";
+import { SetAssessmentTaskData, StudentAssessmentTaskContext } from "./StudentAssessmentTaskContext";
 import StudentAssessmentAudio from "./Types/StudentAssessmentAudio";
 import StudentAssessmentClassification from "./Types/StudentAssessmentClassification";
 import StudentAssessmentCreateSentence from "./Types/StudentAssessmentCreateSentence";
@@ -38,11 +39,6 @@ import { StudentAssessmentTypeProps } from "./Types/StudentAssessmentTypeProps";
 import { validateStudentAssessmentTasksFilled } from "./validation/validateStudentAssessmentTasksFilled";
 
 // TODO: Need to refactor this file and components in it
-
-type ResponseData = {
-    assessment: TAssessment;
-    items: TStudentAssessmentItems;
-};
 
 type TAliasProp<T extends TAssessmentItemBase> = (props: StudentAssessmentTypeProps<T>) => React.JSX.Element;
 
@@ -189,8 +185,12 @@ const StudentAssessmentPage = () => {
     const { assessmentId: assessmentIdStr } = useParams();
     const [searchParams, setSearchParams] = useSearchParams({ itemId: "0" });
     const assessmentId = parseInt(assessmentIdStr || "");
-    const dispatch = useAppDispatch();
-    const assessment = useAppSelector(selectAssessment);
+    const queryClient = useQueryClient();
+    const assessmentQueryOptions = activityQueries.studentAssessment(assessmentIdStr ?? "");
+    const assessmentQuery = useQuery({ ...assessmentQueryOptions, enabled: !isNaN(assessmentId) });
+    const info = assessmentQuery.data?.assessment;
+    // TODO: fix usage of TTeacherAssessmentItems
+    const items = assessmentQuery.data?.items as TTeacherAssessmentItems | undefined;
     const navigate = useNavigate();
     const [isNeedDrawFullValidation, setIsNeedDrawFullValidation] = useState(false);
     const [errors, setErrors] = useState<PyErrorDict>({ errors: {}, message: "" });
@@ -201,42 +201,46 @@ const StudentAssessmentPage = () => {
         isCheckLoading: false,
     });
 
-    const blocks = useMemo(() => createBlocks(assessment.items), [assessment.items]);
-    const blockIdCurrent = fixBlockId(
-        searchParams.get("blockId"),
-        assessment.items !== undefined ? blocks.length : undefined,
-    );
+    const blocks = useMemo(() => createBlocks(items), [items]);
+    const blockIdCurrent = fixBlockId(searchParams.get("blockId"), items !== undefined ? blocks.length : undefined);
 
-    useEffect(() => {
-        dispatch(setAssessmentInfo(undefined));
-        AjaxGet<ResponseData>({ url: `/api/assessment/${assessmentId}` })
-            .then((json) => {
-                dispatch(setAssessmentInfo(json.assessment));
-                dispatch(setAssessmentItems(json.items));
-            })
-            .catch(({ isServerError, json, response }) => {
-                if (!isServerError) {
-                    if (response.status === 404) navigate("/", { replace: true });
-                    if (response.status === 403) navigate(`/lessons/${json.lesson_id}`, { replace: true });
-                }
-            });
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    useRedirectOnApiError<{ lesson_id?: number }>(assessmentQuery.error, (status, json) => {
+        if (status === 404) return "/";
+        if (status === 403) return `/lessons/${json.lesson_id}`;
+        return null;
+    });
+
+    // Ответы ученика хранятся в кеше запроса (см. `activityQueries.studentAssessment`).
+    const setAssessmentTaskData = useCallback<SetAssessmentTaskData>(
+        ({ id, data }) => {
+            queryClient.setQueryData(activityQueries.studentAssessment(assessmentIdStr ?? "").queryKey, (old) =>
+                old === undefined
+                    ? old
+                    : { ...old, items: old.items.map((item, itemId) => (itemId === id ? data : item)) },
+            );
+        },
+        [assessmentIdStr, queryClient],
+    );
 
     const saveCurrentState = useCallback(() => {
         return AjaxPost({
             url: `/api/assessment/${assessmentId}/newdonetasks`,
-            body: { done_tasks: assessment.items },
+            body: { done_tasks: items },
         });
-    }, [assessmentId, assessment]);
+    }, [assessmentId, items]);
 
     useEffect(() => {
+        if (items === undefined) {
+            return;
+        }
+
         const timer = setTimeout(saveCurrentState, 2000);
         return () => clearTimeout(timer);
-    }, [assessment, assessmentId, saveCurrentState]);
+    }, [items, saveCurrentState]);
 
     useEffect(() => {
         // Keep inline validation messages in sync with current answers.
-        if (assessment.items === undefined) {
+        if (items === undefined) {
             return;
         }
 
@@ -244,21 +248,21 @@ const StudentAssessmentPage = () => {
             return;
         }
 
-        const validationFieldsFilledResult = validateStudentAssessmentTasksFilled(assessment.items);
+        const validationFieldsFilledResult = validateStudentAssessmentTasksFilled(items);
         if (validationFieldsFilledResult !== undefined) {
             setErrors(validationFieldsFilledResult);
         } else {
             setErrors({ errors: {}, message: "" });
         }
-    }, [assessment.items, blockIdCurrent, changedBlocks, isNeedDrawFullValidation]);
+    }, [items, blockIdCurrent, changedBlocks, isNeedDrawFullValidation]);
 
     // const backToLessonHandle = () => {
-    //     navigate(`/lessons/${assessment.info.lesson_id}`, { replace: true });
+    //     navigate(`/lessons/${info.lesson_id}`, { replace: true });
     // };
 
     const endAssessment = () => {
         setIsNeedDrawFullValidation(true);
-        const validationFieldsFilledResult = validateStudentAssessmentTasksFilled(assessment.items);
+        const validationFieldsFilledResult = validateStudentAssessmentTasksFilled(items);
         if (validationFieldsFilledResult !== undefined) {
             setErrors(validationFieldsFilledResult);
             return;
@@ -266,9 +270,9 @@ const StudentAssessmentPage = () => {
         setErrors({ errors: {}, message: "" });
         AjaxPost({
             url: `/api/assessment/${assessmentId}/endtry`,
-            body: { done_tasks: assessment.items },
+            body: { done_tasks: items },
         }).then(() => {
-            navigate(`/assessment/try/${assessment.info.try.id}`, { replace: true });
+            navigate(`/assessment/try/${info?.try.id}`, { replace: true });
         });
     };
 
@@ -278,7 +282,7 @@ const StudentAssessmentPage = () => {
             setChangedBlocks((prev) => [...prev, blockId]);
         }
 
-        const validationFieldsFilledResult = validateStudentAssessmentTasksFilled(assessment.items);
+        const validationFieldsFilledResult = validateStudentAssessmentTasksFilled(items);
         if (validationFieldsFilledResult !== undefined) {
             setErrors(validationFieldsFilledResult);
         } else {
@@ -300,7 +304,7 @@ const StudentAssessmentPage = () => {
         }));
         AjaxPost<{ isOk: boolean }>({
             url: `/api/assessment/${assessmentId}/checkblock`,
-            body: { done_tasks: assessment.items, blockId: blockIdCurrent },
+            body: { done_tasks: items, blockId: blockIdCurrent },
         })
             .then((data) => {
                 // let blockHasErrors = false;
@@ -363,12 +367,7 @@ const StudentAssessmentPage = () => {
         return <div> Loading... </div>;
     }
 
-    if (
-        assessment.info === undefined ||
-        assessment.info.try === undefined ||
-        assessment.info.try === null ||
-        assessment.items === undefined
-    ) {
+    if (info === undefined || info.try === undefined || info.try === null || items === undefined) {
         return <div> Loading... </div>;
     }
 
@@ -412,109 +411,114 @@ const StudentAssessmentPage = () => {
     };
 
     return (
-        <div className="container pb-5" style={{ maxWidth: "800px" }}>
-            <StudentAssessmentCheckBlockModal
-                isShow={blockHasErrors.isModalOpen}
-                close={() => setBlockHasErrors({ isModalOpen: false, isCheckLoading: false })}
-                onContinueWithoutFixing={() => {
-                    if (blockHasErrors.continueCallback !== undefined) {
-                        blockHasErrors.continueCallback();
-                    }
-                    setBlockHasErrors({ isModalOpen: false, isCheckLoading: false });
-                }}
-            />
-            <PageTitle title="タスク" urlBack={`/lessons/${assessment.info.lesson_id}`} />
-            <div className="student-assessment-page mt-3">
-                <div className="student-assessment-header-row mt-2">
-                    <div className="d-flex gap-2 flex-wrap student-assessment-block-icons">
-                        {blocks.map((_, index) => (
-                            <BlockIcon
-                                key={index}
-                                blockId={index}
-                                showUnfinishedMark={isNeedDrawFullValidation && isBlockHasError(index)}
-                                status={getIconStatus(
-                                    index,
-                                    blockIdCurrent,
-                                    isNeedDrawFullValidation || changedBlocks.includes(index),
-                                    isBlockHasError(index) || serverErrorBlockIds.includes(index),
-                                )}
-                                onClick={() => {
-                                    handleGoToBlock(index);
-                                }}
-                            />
-                        ))}
-                    </div>
-                    <div className="student-assessment-deadline">
-                        <StudentActivityDeadline activityInfo={assessment.info} />
-                    </div>
-                </div>
-                <hr className="student-assessment-divider" />
-                <div className="student-assessment-tasks">
-                    {toDrawItems.map(({ item, itemId }) => {
-                        if (!isDrawableItem(item)) {
-                            return null;
+        <StudentAssessmentTaskContext value={setAssessmentTaskData}>
+            <div className="container pb-5" style={{ maxWidth: "800px" }}>
+                <StudentAssessmentCheckBlockModal
+                    isShow={blockHasErrors.isModalOpen}
+                    close={() => setBlockHasErrors({ isModalOpen: false, isCheckLoading: false })}
+                    onContinueWithoutFixing={() => {
+                        if (blockHasErrors.continueCallback !== undefined) {
+                            blockHasErrors.continueCallback();
                         }
-
-                        const hasTaskValidationError = shouldDrawTaskValidation(itemId);
-
-                        return (
-                            <React.Fragment key={itemId}>
-                                <div
-                                    className={`student-assessment-task__wrapper ${
-                                        hasTaskValidationError ? "student-assessment-task__wrapper--unanswered" : ""
-                                    }`}
-                                >
-                                    {hasTaskValidationError && (
-                                        <i
-                                            className="bi bi-exclamation-circle-fill student-assessment-task__warning"
-                                            aria-label="Ответ не выбран"
-                                        />
+                        setBlockHasErrors({ isModalOpen: false, isCheckLoading: false });
+                    }}
+                />
+                <PageTitle title="タスク" urlBack={`/lessons/${info.lesson_id}`} />
+                <div className="student-assessment-page mt-3">
+                    <div className="student-assessment-header-row mt-2">
+                        <div className="d-flex gap-2 flex-wrap student-assessment-block-icons">
+                            {blocks.map((_, index) => (
+                                <BlockIcon
+                                    key={index}
+                                    blockId={index}
+                                    showUnfinishedMark={isNeedDrawFullValidation && isBlockHasError(index)}
+                                    status={getIconStatus(
+                                        index,
+                                        blockIdCurrent,
+                                        isNeedDrawFullValidation || changedBlocks.includes(index),
+                                        isBlockHasError(index) || serverErrorBlockIds.includes(index),
                                     )}
-                                    {item.name !== TAssessmentTaskName.IMG && (
-                                        <div className="student-assessment-task-title">
-                                            {studentAssessmentTaskRusNameAliases[item.name]}
-                                        </div>
-                                    )}
-                                    {drawItem(JSON.parse(JSON.stringify(item)), itemId)}
-                                </div>
-                            </React.Fragment>
-                        );
-                    })}
-                </div>
-                <div className="mb-2 d-flex space-between w-100">
-                    {blockIdCurrent !== 0 && (
-                        <button
-                            type="button"
-                            className="btn btn-secondary mt-3 me-auto student-assessment-back-btn"
-                            onClick={handleGoPrevBlock}
-                        >
-                            Назад
-                        </button>
-                    )}
-                    {blockIdCurrent === blocks.length - 1 ? (
-                        <div className="d-flex align-items-center gap-2 ms-auto mt-3">
-                            {isNeedDrawFullValidation && errors.message !== "" && (
-                                <InputError className="mb-0 student-assessment-end-error" message={errors.message} />
-                            )}
-                            <button type="button" className="btn btn-success" onClick={handleEndAssessment}>
-                                Завершить
-                            </button>
+                                    onClick={() => {
+                                        handleGoToBlock(index);
+                                    }}
+                                />
+                            ))}
                         </div>
-                    ) : (
-                        <button
-                            type="button"
-                            className="btn btn-success mt-3 ms-auto"
-                            onClick={(event) => {
-                                handleGoNextBlock();
-                                event.currentTarget.blur();
-                            }}
-                        >
-                            Далее
-                        </button>
-                    )}
+                        <div className="student-assessment-deadline">
+                            <StudentActivityDeadline activityInfo={info} />
+                        </div>
+                    </div>
+                    <hr className="student-assessment-divider" />
+                    <div className="student-assessment-tasks">
+                        {toDrawItems.map(({ item, itemId }) => {
+                            if (!isDrawableItem(item)) {
+                                return null;
+                            }
+
+                            const hasTaskValidationError = shouldDrawTaskValidation(itemId);
+
+                            return (
+                                <React.Fragment key={itemId}>
+                                    <div
+                                        className={`student-assessment-task__wrapper ${
+                                            hasTaskValidationError ? "student-assessment-task__wrapper--unanswered" : ""
+                                        }`}
+                                    >
+                                        {hasTaskValidationError && (
+                                            <i
+                                                className="bi bi-exclamation-circle-fill student-assessment-task__warning"
+                                                aria-label="Ответ не выбран"
+                                            />
+                                        )}
+                                        {item.name !== TAssessmentTaskName.IMG && (
+                                            <div className="student-assessment-task-title">
+                                                {studentAssessmentTaskRusNameAliases[item.name]}
+                                            </div>
+                                        )}
+                                        {drawItem(JSON.parse(JSON.stringify(item)), itemId)}
+                                    </div>
+                                </React.Fragment>
+                            );
+                        })}
+                    </div>
+                    <div className="mb-2 d-flex space-between w-100">
+                        {blockIdCurrent !== 0 && (
+                            <button
+                                type="button"
+                                className="btn btn-secondary mt-3 me-auto student-assessment-back-btn"
+                                onClick={handleGoPrevBlock}
+                            >
+                                Назад
+                            </button>
+                        )}
+                        {blockIdCurrent === blocks.length - 1 ? (
+                            <div className="d-flex align-items-center gap-2 ms-auto mt-3">
+                                {isNeedDrawFullValidation && errors.message !== "" && (
+                                    <InputError
+                                        className="mb-0 student-assessment-end-error"
+                                        message={errors.message}
+                                    />
+                                )}
+                                <button type="button" className="btn btn-success" onClick={handleEndAssessment}>
+                                    Завершить
+                                </button>
+                            </div>
+                        ) : (
+                            <button
+                                type="button"
+                                className="btn btn-success mt-3 ms-auto"
+                                onClick={(event) => {
+                                    handleGoNextBlock();
+                                    event.currentTarget.blur();
+                                }}
+                            >
+                                Далее
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
-        </div>
+        </StudentAssessmentTaskContext>
     );
 };
 

@@ -1,24 +1,12 @@
-import { useDispatch } from "react-redux";
-
 import StudentActivityBubble from "components/Activities/Bubble/StudentActivityBubble";
-import { setLexisEndByTime } from "redux/slices/hieroglyphSlice";
+import { THieroglyph } from "models/Activity/THieroglyph";
 
 type StudentHieroglyphBubbleProps = {
-    hieroglyph: any;
+    info: THieroglyph;
 };
 
-const StudentHieroglyphBubble = ({ hieroglyph }: StudentHieroglyphBubbleProps) => {
-    const dispatch = useDispatch();
-
-    return (
-        <StudentActivityBubble
-            title="かんじ"
-            info={hieroglyph.info}
-            name="hieroglyph"
-            onDeadline={() => dispatch(setLexisEndByTime())}
-            showResultsButton={false}
-        />
-    );
+const StudentHieroglyphBubble = ({ info }: StudentHieroglyphBubbleProps) => {
+    return <StudentActivityBubble title="かんじ" info={info} name="hieroglyph" showResultsButton={false} />;
 };
 
 export default StudentHieroglyphBubble;

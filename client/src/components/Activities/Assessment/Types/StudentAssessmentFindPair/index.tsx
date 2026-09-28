@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { useSetAssessmentTaskData } from "components/Activities/Assessment/StudentAssessmentTaskContext";
 import { TAssessmentFindPair } from "models/Activity/Items/TAssessmentItems";
-import { useAppDispatch } from "redux/hooks";
-import { setAssessmentTaskData } from "redux/slices/assessmentSlice";
 
 import { StudentAssessmentTypeProps } from "../StudentAssessmentTypeProps";
 import { FieldRow } from "./FieldRow";
@@ -10,7 +9,7 @@ import { FieldRow } from "./FieldRow";
 const StudentAssessmentFindPair = ({ data, taskId }: StudentAssessmentTypeProps<TAssessmentFindPair>) => {
     const [selectedFirst, setSelectedFirst] = useState<number | undefined>(undefined);
     const [selectedSecond, setSelectedSecond] = useState<number | undefined>(undefined);
-    const dispatch = useAppDispatch();
+    const setAssessmentTaskData = useSetAssessmentTaskData();
 
     useEffect(() => {
         if (
@@ -26,7 +25,7 @@ const StudentAssessmentFindPair = ({ data, taskId }: StudentAssessmentTypeProps<
             newData.second.splice(newData.pars_created, 0, second);
             setSelectedFirst(undefined);
             setSelectedSecond(undefined);
-            dispatch(setAssessmentTaskData({ id: taskId, data: newData }));
+            setAssessmentTaskData({ id: taskId, data: newData });
         } else if (selectedFirst !== undefined && selectedSecond !== undefined) {
             const first = data.first.splice(selectedFirst, 1)[0];
             const second = data.second.splice(selectedSecond, 1)[0];
@@ -36,7 +35,7 @@ const StudentAssessmentFindPair = ({ data, taskId }: StudentAssessmentTypeProps<
             newData.pars_created++;
             setSelectedFirst(undefined);
             setSelectedSecond(undefined);
-            dispatch(setAssessmentTaskData({ id: taskId, data: newData }));
+            setAssessmentTaskData({ id: taskId, data: newData });
         }
     }, [selectedFirst, selectedSecond]); // eslint-disable-line react-hooks/exhaustive-deps
 

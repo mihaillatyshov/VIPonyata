@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 
 import ShareModal from "components/Share/ShareModal";
-import { useUserIsTeacher } from "redux/funcs/user";
+import { useUserIsTeacher } from "libs/user";
 
 const FONT_SIZE = "20px";
 

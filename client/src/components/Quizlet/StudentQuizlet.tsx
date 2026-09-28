@@ -5,7 +5,7 @@ import { quizletQueries } from "api/quizlet";
 import Loading from "components/Common/Loading";
 import PageTitle from "components/Common/PageTitle";
 import ErrorPage from "components/ErrorPages/ErrorPage";
-import { useNotificationsHubSync } from "redux/funcs/notificationsHub";
+import { useNotificationsHubSync } from "components/Notifications/useNotificationsHub";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -73,7 +73,7 @@ const StudentQuizlet = () => {
 
     const catalogQuery = useQuery(quizletQueries.catalog());
     const personalQuery = useQuery(quizletQueries.personal());
-    const quizletSession = useQuizletSession(() => refreshHub(true));
+    const quizletSession = useQuizletSession(() => refreshHub());
     const { session, closeSession } = quizletSession;
 
     // Страница тренировки соответствует состоянию сессии: идёт — карточки/пары, завершена — результаты.
@@ -162,7 +162,7 @@ const StudentQuizlet = () => {
                         personal={personal}
                         onStart={quizletSession.startSession}
                         onContinue={quizletSession.continueSession}
-                        onHubChanged={() => refreshHub(true)}
+                        onHubChanged={() => refreshHub()}
                     />
                 );
             case "view":

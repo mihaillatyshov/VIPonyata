@@ -2,6 +2,10 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } fro
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { withStudentAssessmentImageAttachment } from "components/Activities/Assessment/AssessmentTaskImageWrappers";
+import {
+    SetAssessmentTaskData,
+    StudentAssessmentTaskContext,
+} from "components/Activities/Assessment/StudentAssessmentTaskContext";
 import StudentAssessmentAudio from "components/Activities/Assessment/Types/StudentAssessmentAudio";
 import StudentAssessmentClassification from "components/Activities/Assessment/Types/StudentAssessmentClassification";
 import StudentAssessmentCreateSentence from "components/Activities/Assessment/Types/StudentAssessmentCreateSentence";
@@ -34,8 +38,6 @@ import {
     TTeacherAssessmentAnyItem,
     TTeacherAssessmentItems,
 } from "models/Activity/Items/TAssessmentItems";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { selectAssessment, setAssessmentInfo, setAssessmentItems } from "redux/slices/assessmentSlice";
 
 interface HomeworkStartResponse {
     assignment: {
@@ -47,6 +49,12 @@ interface HomeworkStartResponse {
         end_datetime: string | null;
     };
     items: TStudentAssessmentItems;
+}
+
+interface THomeworkAssessmentState {
+    info: any; // TODO: Remove any
+    // TODO: fix usage of TTeacherAssessmentItems
+    items: TTeacherAssessmentItems | undefined;
 }
 
 const homeworkStartRequests = new Map<number, Promise<HomeworkStartResponse>>();
@@ -208,8 +216,7 @@ const StudentHomeworkAssignmentPage = () => {
     const { assignmentId } = useParams();
     const [searchParams, setSearchParams] = useSearchParams({ blockId: "0" });
     const navigate = useNavigate();
-    const dispatch = useAppDispatch();
-    const assessment = useAppSelector(selectAssessment);
+    const [assessment, setAssessment] = useState<THomeworkAssessmentState>({ info: undefined, items: undefined });
     const assignmentIdNumber = Number(assignmentId);
     const isAssignmentIdReady = Number.isInteger(assignmentIdNumber);
     const [loadStatus, setLoadStatus] = useState<LoadStatus.Type>(LoadStatus.NONE);
@@ -230,8 +237,7 @@ const StudentHomeworkAssignmentPage = () => {
         let isDisposed = false;
 
         if (!isAssignmentIdReady) {
-            dispatch(setAssessmentInfo(undefined));
-            dispatch(setAssessmentItems(undefined));
+            setAssessment({ info: undefined, items: undefined });
             setChangedBlocks([]);
             setIsNeedDrawFullValidation(false);
             setErrors({ errors: {}, message: "" });
@@ -239,8 +245,7 @@ const StudentHomeworkAssignmentPage = () => {
             return;
         }
 
-        dispatch(setAssessmentInfo(undefined));
-        dispatch(setAssessmentItems(undefined));
+        setAssessment({ info: undefined, items: undefined });
         setChangedBlocks([]);
         setIsNeedDrawFullValidation(false);
         setErrors({ errors: {}, message: "" });
@@ -257,8 +262,10 @@ const StudentHomeworkAssignmentPage = () => {
                     return;
                 }
 
-                dispatch(setAssessmentInfo({ title: json.assignment?.title ?? "Задание", try: json.try }));
-                dispatch(setAssessmentItems(json.items));
+                setAssessment({
+                    info: { title: json.assignment?.title ?? "Задание", try: json.try },
+                    items: json.items as TTeacherAssessmentItems,
+                });
                 setLoadStatus(LoadStatus.DONE);
             })
             .catch(() => {
@@ -270,7 +277,15 @@ const StudentHomeworkAssignmentPage = () => {
         return () => {
             isDisposed = true;
         };
-    }, [assignmentIdNumber, dispatch, isAssignmentIdReady, navigate]);
+    }, [assignmentIdNumber, isAssignmentIdReady, navigate]);
+
+    const setAssessmentTaskData = useCallback<SetAssessmentTaskData>(({ id, data }) => {
+        setAssessment((prev) =>
+            prev.items === undefined
+                ? prev
+                : { ...prev, items: prev.items.map((item, itemId) => (itemId === id ? data : item)) },
+        );
+    }, []);
 
     const saveCurrentState = useCallback(() => {
         if (!isAssignmentIdReady || assessment.items === undefined) {
@@ -438,102 +453,107 @@ const StudentHomeworkAssignmentPage = () => {
     };
 
     return (
-        <div className="container pb-5" style={{ maxWidth: "800px" }}>
-            <PageTitle title={assessment.info.title} urlBack="/" />
-            <div className="student-assessment-page mt-3">
-                <div className="student-assessment-header-row mt-2">
-                    <div className="d-flex gap-2 flex-wrap student-assessment-block-icons">
-                        {blocks.map((_, index) => (
-                            <BlockIcon
-                                key={index}
-                                blockId={index}
-                                showUnfinishedMark={isNeedDrawFullValidation && isBlockHasError(index)}
-                                status={getIconStatus(
-                                    index,
-                                    blockIdCurrent,
-                                    isNeedDrawFullValidation || changedBlocks.includes(index),
-                                    isBlockHasError(index),
-                                )}
-                                onClick={() => {
-                                    handleGoToBlock(index);
-                                }}
-                            />
-                        ))}
-                    </div>
-                    {assessment.info?.deadline ? (
-                        <div className="student-assessment-deadline">
-                            <StudentActivityDeadline activityInfo={assessment.info} />
+        <StudentAssessmentTaskContext value={setAssessmentTaskData}>
+            <div className="container pb-5" style={{ maxWidth: "800px" }}>
+                <PageTitle title={assessment.info.title} urlBack="/" />
+                <div className="student-assessment-page mt-3">
+                    <div className="student-assessment-header-row mt-2">
+                        <div className="d-flex gap-2 flex-wrap student-assessment-block-icons">
+                            {blocks.map((_, index) => (
+                                <BlockIcon
+                                    key={index}
+                                    blockId={index}
+                                    showUnfinishedMark={isNeedDrawFullValidation && isBlockHasError(index)}
+                                    status={getIconStatus(
+                                        index,
+                                        blockIdCurrent,
+                                        isNeedDrawFullValidation || changedBlocks.includes(index),
+                                        isBlockHasError(index),
+                                    )}
+                                    onClick={() => {
+                                        handleGoToBlock(index);
+                                    }}
+                                />
+                            ))}
                         </div>
-                    ) : null}
-                </div>
-                <hr className="student-assessment-divider" />
-                <div className="student-assessment-tasks">
-                    {(blocks[blockIdCurrent] ?? []).map(({ item, itemId }) =>
-                        isDrawableItem(item) ? (
-                            <React.Fragment key={itemId}>
-                                <div
-                                    className={`student-assessment-task__wrapper ${
-                                        shouldDrawTaskValidation(itemId)
-                                            ? "student-assessment-task__wrapper--unanswered"
-                                            : ""
-                                    }`}
-                                >
-                                    {shouldDrawTaskValidation(itemId) && (
-                                        <i
-                                            className="bi bi-exclamation-circle-fill student-assessment-task__warning"
-                                            aria-label="Ответ не выбран"
-                                        />
-                                    )}
-                                    {item.name !== TAssessmentTaskName.IMG && (
-                                        <div className="student-assessment-task-title">
-                                            {studentAssessmentTaskRusNameAliases[item.name]}
-                                        </div>
-                                    )}
-                                    {drawItem(JSON.parse(JSON.stringify(item)), itemId)}
-                                </div>
-                            </React.Fragment>
-                        ) : null,
-                    )}
-                </div>
-                <div className="mb-2 d-flex space-between w-100">
-                    {blockIdCurrent !== 0 && (
-                        <button
-                            type="button"
-                            className="btn btn-secondary mt-3 me-auto student-assessment-back-btn"
-                            onClick={handleGoPrevBlock}
-                        >
-                            Назад
-                        </button>
-                    )}
-                    {blockIdCurrent === blocks.length - 1 ? (
-                        <div className="d-flex align-items-center gap-2 ms-auto mt-3">
-                            {isNeedDrawFullValidation && errors.message !== "" && (
-                                <InputError className="mb-0 student-assessment-end-error" message={errors.message} />
-                            )}
+                        {assessment.info?.deadline ? (
+                            <div className="student-assessment-deadline">
+                                <StudentActivityDeadline activityInfo={assessment.info} />
+                            </div>
+                        ) : null}
+                    </div>
+                    <hr className="student-assessment-divider" />
+                    <div className="student-assessment-tasks">
+                        {(blocks[blockIdCurrent] ?? []).map(({ item, itemId }) =>
+                            isDrawableItem(item) ? (
+                                <React.Fragment key={itemId}>
+                                    <div
+                                        className={`student-assessment-task__wrapper ${
+                                            shouldDrawTaskValidation(itemId)
+                                                ? "student-assessment-task__wrapper--unanswered"
+                                                : ""
+                                        }`}
+                                    >
+                                        {shouldDrawTaskValidation(itemId) && (
+                                            <i
+                                                className="bi bi-exclamation-circle-fill student-assessment-task__warning"
+                                                aria-label="Ответ не выбран"
+                                            />
+                                        )}
+                                        {item.name !== TAssessmentTaskName.IMG && (
+                                            <div className="student-assessment-task-title">
+                                                {studentAssessmentTaskRusNameAliases[item.name]}
+                                            </div>
+                                        )}
+                                        {drawItem(JSON.parse(JSON.stringify(item)), itemId)}
+                                    </div>
+                                </React.Fragment>
+                            ) : null,
+                        )}
+                    </div>
+                    <div className="mb-2 d-flex space-between w-100">
+                        {blockIdCurrent !== 0 && (
                             <button
                                 type="button"
-                                className="btn btn-success"
-                                onClick={handleFinish}
-                                disabled={isSubmitting}
+                                className="btn btn-secondary mt-3 me-auto student-assessment-back-btn"
+                                onClick={handleGoPrevBlock}
                             >
-                                {isSubmitting ? "Отправляем..." : "Завершить"}
+                                Назад
                             </button>
-                        </div>
-                    ) : (
-                        <button
-                            type="button"
-                            className="btn btn-success mt-3 ms-auto"
-                            onClick={(event) => {
-                                handleGoNextBlock();
-                                event.currentTarget.blur();
-                            }}
-                        >
-                            Далее
-                        </button>
-                    )}
+                        )}
+                        {blockIdCurrent === blocks.length - 1 ? (
+                            <div className="d-flex align-items-center gap-2 ms-auto mt-3">
+                                {isNeedDrawFullValidation && errors.message !== "" && (
+                                    <InputError
+                                        className="mb-0 student-assessment-end-error"
+                                        message={errors.message}
+                                    />
+                                )}
+                                <button
+                                    type="button"
+                                    className="btn btn-success"
+                                    onClick={handleFinish}
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? "Отправляем..." : "Завершить"}
+                                </button>
+                            </div>
+                        ) : (
+                            <button
+                                type="button"
+                                className="btn btn-success mt-3 ms-auto"
+                                onClick={(event) => {
+                                    handleGoNextBlock();
+                                    event.currentTarget.blur();
+                                }}
+                            >
+                                Далее
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
-        </div>
+        </StudentAssessmentTaskContext>
     );
 };
 

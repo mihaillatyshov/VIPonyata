@@ -1,23 +1,12 @@
-import { useDispatch } from "react-redux";
-
 import StudentActivityBubble from "components/Activities/Bubble/StudentActivityBubble";
-import { setAssessmentEndByTime } from "redux/slices/assessmentSlice";
+import { TAssessment } from "models/Activity/TAssessment";
 
 type StudentAssessmentBubbleProps = {
-    assessment: any;
+    info: TAssessment;
 };
 
-const StudentAssessmentBubble = ({ assessment }: StudentAssessmentBubbleProps) => {
-    const dispatch = useDispatch();
-
-    return (
-        <StudentActivityBubble
-            title="タスク"
-            info={assessment.info}
-            name="assessment"
-            onDeadline={() => dispatch(setAssessmentEndByTime())}
-        />
-    );
+const StudentAssessmentBubble = ({ info }: StudentAssessmentBubbleProps) => {
+    return <StudentActivityBubble title="タスク" info={info} name="assessment" />;
 };
 
 export default StudentAssessmentBubble;

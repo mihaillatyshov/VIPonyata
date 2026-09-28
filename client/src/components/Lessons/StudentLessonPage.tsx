@@ -5,21 +5,14 @@ import StudentDrillingBubble from "components/Activities/Lexis/Drilling/StudentD
 import StudentHieroglyphBubble from "components/Activities/Lexis/Hieroglyph/StudentHieroglyphBubble";
 import PageDescription from "components/Common/PageDescription";
 import PageTitle from "components/Common/PageTitle";
-import { useAppSelector } from "redux/hooks";
-import { selectAssessment } from "redux/slices/assessmentSlice";
-import { selectDrilling } from "redux/slices/drillingSlice";
-import { selectHieroglyph } from "redux/slices/hieroglyphSlice";
-import { selectLessons } from "redux/slices/lessonsSlice";
-import { useRequestLesson } from "requests/Lesson";
+
+import { useLessonQuery } from "./useLessonQuery";
 
 const StudentLessonPage = () => {
     const { id } = useParams();
-    const lesson = useAppSelector(selectLessons).selected;
-    const drilling = useAppSelector(selectDrilling);
-    const assessment = useAppSelector(selectAssessment);
-    const hieroglyph = useAppSelector(selectHieroglyph);
-
-    useRequestLesson(id);
+    const lessonData = useLessonQuery(id).data;
+    const lesson = lessonData?.lesson;
+    const activities = lessonData?.items;
 
     return (
         <div className="container">
@@ -31,9 +24,9 @@ const StudentLessonPage = () => {
                 <PageDescription description={lesson?.description} isCentered={true} />
 
                 <div className="d-flex justify-content-center gap-5 flex-wrap mt-5 mb-5">
-                    {drilling?.info && <StudentDrillingBubble drilling={drilling} />}
-                    {assessment?.info && <StudentAssessmentBubble assessment={assessment} />}
-                    {hieroglyph?.info && <StudentHieroglyphBubble hieroglyph={hieroglyph} />}
+                    {activities?.drilling && <StudentDrillingBubble info={activities.drilling} />}
+                    {activities?.assessment && <StudentAssessmentBubble info={activities.assessment} />}
+                    {activities?.hieroglyph && <StudentHieroglyphBubble info={activities.hieroglyph} />}
                 </div>
             </div>
         </div>

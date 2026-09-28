@@ -1,47 +1,6 @@
-import { TAnyNotifications, TStudentNotification, TStudentNotificationActivity } from "models/TNotification";
-import {
-    TQuizletAssignment,
-    TQuizletAssignmentResult,
-    TQuizletAssignmentTarget,
-    TQuizletSession,
-} from "models/TQuizlet";
-import { THomeworkAssignment, THomeworkAssignmentTarget, THomeworkAssignmentTask, THomeworkTry } from "models/TTasks";
-import { RootState } from "redux/store";
-
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
-export interface TStudentQuizletAssignmentRecord {
-    assignment: TQuizletAssignment;
-    target: TQuizletAssignmentTarget;
-    subgroups?: Array<{
-        id: number;
-        title: string;
-    }>;
-    result: TQuizletAssignmentResult | null;
-    active_session_id: number | null;
-}
-
-export interface TStudentHomeworkAssignmentRecord {
-    assignment: THomeworkAssignment;
-    target: THomeworkAssignmentTarget;
-    tasks: THomeworkAssignmentTask[];
-    try: THomeworkTry | null;
-    active_try_id: number | null;
-}
-
-export interface NotificationsHubState {
-    notifications: TAnyNotifications;
-    notificationsStatus: "idle" | "loading" | "done" | "error";
-    quizletAssignments: TStudentQuizletAssignmentRecord[];
-    quizletAssignmentsStatus: "idle" | "loading" | "done" | "error";
-    homeworkAssignments: TStudentHomeworkAssignmentRecord[];
-    homeworkAssignmentsStatus: "idle" | "loading" | "done" | "error";
-    quizletSessions: TQuizletSession[];
-    quizletSessionsStatus: "idle" | "loading" | "done" | "error";
-    lastLoadedAt: number | null;
-    /** Непрочитанные уведомления (бейдж в шапке), null — ещё не загружено. */
-    unreadCount: number | null;
-}
+import { TStudentHub } from "api/notifications";
+import { TStudentNotificationActivity } from "models/TNotification";
+import { TQuizletAssignment } from "models/TQuizlet";
 
 export interface THubAssignmentItem {
     id: string;
@@ -79,19 +38,6 @@ export interface TAssignmentsHubViewModel {
     completedItems: THubAssignmentItem[];
     stats: THubStats;
 }
-
-const initialState: NotificationsHubState = {
-    notifications: [],
-    notificationsStatus: "idle",
-    quizletAssignments: [],
-    quizletAssignmentsStatus: "idle",
-    homeworkAssignments: [],
-    homeworkAssignmentsStatus: "idle",
-    quizletSessions: [],
-    quizletSessionsStatus: "idle",
-    lastLoadedAt: null,
-    unreadCount: null,
-};
 
 const parseDate = (value?: string | null) => {
     if (!value) {
@@ -131,13 +77,13 @@ const dedupeAssignmentItems = (items: THubAssignmentItem[]) => {
     return [...itemsById.values()].sort(sortByDateDesc);
 };
 
-const buildAssignmentsHubViewModel = (
-    notifications: TAnyNotifications,
-    quizletAssignments: TStudentQuizletAssignmentRecord[],
-    homeworkAssignments: TStudentHomeworkAssignmentRecord[],
-    quizletSessions: TQuizletSession[],
-): TAssignmentsHubViewModel => {
-    const studentNotifications = (notifications as TStudentNotification[]).filter((item) => item.deleted !== true);
+export const buildAssignmentsHubViewModel = ({
+    notifications,
+    quizletAssignments,
+    homeworkAssignments,
+    quizletSessions,
+}: TStudentHub): TAssignmentsHubViewModel => {
+    const studentNotifications = notifications.filter((item) => item.deleted !== true);
 
     const latestLessonNotifications = new Map<number, THubAssignmentItem>();
     studentNotifications
@@ -319,66 +265,3 @@ const buildAssignmentsHubViewModel = (
         stats,
     };
 };
-
-export const notificationsHubSlice = createSlice({
-    name: "notificationsHub",
-    initialState,
-    reducers: {
-        setNotificationsHubLoading: (state) => {
-            state.notificationsStatus = "loading";
-            state.quizletAssignmentsStatus = "loading";
-            state.homeworkAssignmentsStatus = "loading";
-            state.quizletSessionsStatus = "loading";
-        },
-        setNotificationsHubData: (
-            state,
-            action: PayloadAction<{
-                notifications: TAnyNotifications;
-                quizletAssignments: TStudentQuizletAssignmentRecord[];
-                homeworkAssignments: TStudentHomeworkAssignmentRecord[];
-                quizletSessions: TQuizletSession[];
-                loadedAt: number;
-            }>,
-        ) => {
-            state.notifications = action.payload.notifications;
-            state.quizletAssignments = action.payload.quizletAssignments;
-            state.homeworkAssignments = action.payload.homeworkAssignments;
-            state.quizletSessions = action.payload.quizletSessions;
-            state.notificationsStatus = "done";
-            state.quizletAssignmentsStatus = "done";
-            state.homeworkAssignmentsStatus = "done";
-            state.quizletSessionsStatus = "done";
-            state.lastLoadedAt = action.payload.loadedAt;
-        },
-        setNotificationsHubError: (state) => {
-            state.notificationsStatus = "error";
-            state.quizletAssignmentsStatus = "error";
-            state.homeworkAssignmentsStatus = "error";
-            state.quizletSessionsStatus = "error";
-        },
-        setUnreadNotificationsCount: (state, action: PayloadAction<number>) => {
-            state.unreadCount = action.payload;
-        },
-        resetNotificationsHub: () => initialState,
-    },
-});
-
-export const selectNotificationsHub = (state: RootState) => state.notificationsHub;
-export const selectUnreadNotificationsCount = (state: RootState) => state.notificationsHub.unreadCount;
-export const selectStudentAssignmentsHub = (state: RootState) =>
-    buildAssignmentsHubViewModel(
-        state.notificationsHub.notifications,
-        state.notificationsHub.quizletAssignments,
-        state.notificationsHub.homeworkAssignments,
-        state.notificationsHub.quizletSessions,
-    );
-
-export const {
-    setNotificationsHubLoading,
-    setNotificationsHubData,
-    setNotificationsHubError,
-    setUnreadNotificationsCount,
-    resetNotificationsHub,
-} = notificationsHubSlice.actions;
-
-export default notificationsHubSlice.reducer;

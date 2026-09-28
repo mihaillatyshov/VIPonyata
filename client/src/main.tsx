@@ -4,13 +4,11 @@ import "./assets/scss/index.scss";
 
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { Provider } from "react-redux";
 
 import { QueryClientProvider } from "@tanstack/react-query";
 
 import App from "./App";
 import { queryClient } from "./libs/queryClient";
-import store from "./redux/store";
 import reportWebVitals from "./reportWebVitals";
 
 // После деплоя у открытой вкладки старые чанки страниц пропадают с сервера — перезагружаем страницу один раз.
@@ -33,9 +31,7 @@ const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement)
 root.render(
     <React.StrictMode>
         <QueryClientProvider client={queryClient}>
-            <Provider store={store}>
-                <App />
-            </Provider>
+            <App />
         </QueryClientProvider>
     </React.StrictMode>,
 );
