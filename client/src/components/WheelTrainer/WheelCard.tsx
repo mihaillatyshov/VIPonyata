@@ -1,4 +1,7 @@
-import { Dispatch } from "react";
+import { Dispatch, HTMLAttributes, useLayoutEffect, useRef, useState } from "react";
+
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS as DNDCSS } from "@dnd-kit/utilities";
 
 import { WheelStudioAction } from "./wheelStudioReducer";
 import {
@@ -7,6 +10,8 @@ import {
     getWheelGradient,
     THEME_KEYS,
     THEME_PRESETS,
+    WHEEL_STAGE_HEIGHT,
+    WHEEL_STAGE_WIDTH,
     WheelTrainerWheel,
 } from "./wheelTrainerModel";
 import styles from "./WheelTrainerPage.module.css";
@@ -25,50 +30,108 @@ const LockButton = ({ wheel, dispatch }: { wheel: WheelTrainerWheel; dispatch: D
     </button>
 );
 
+/** Ручка перетаскивания: карточку двигают только за неё, чтобы не мешать кликам, полям ввода и кручению. */
+const DragHandle = ({
+    handleRef,
+    handleProps,
+}: {
+    handleRef: (element: HTMLElement | null) => void;
+    handleProps: HTMLAttributes<HTMLButtonElement>;
+}) => (
+    <button
+        ref={handleRef}
+        type="button"
+        className={`${styles.iconButton} ${styles.dragHandle}`}
+        data-wheel-drag-handle
+        aria-label="Перетащить рулетку"
+        title="Перетащите, чтобы изменить порядок"
+        onClick={(event) => event.stopPropagation()}
+        {...handleProps}
+    >
+        <i className="bi bi-grip-vertical" aria-hidden="true"></i>
+    </button>
+);
+
 const WheelBadges = ({ wheel, isActive }: { wheel: WheelTrainerWheel; isActive: boolean }) => (
     <div className={styles.wheelBadges}>
         {isActive && <span className={styles.badgeAccent}>Активная</span>}
         {wheel.isLocked && <span className={styles.badgeSoft}>Заблокирована</span>}
+        {wheel.alwaysKeep && <span className={styles.badgeSoft}>Всегда оставлять</span>}
     </div>
 );
+
+/**
+ * Масштаб сцены «диск + стрелка» под ширину рамки. На вкладке «Кручение» рулетка растягивается на всю ширину
+ * карточки, на «Редактировании» только уменьшается, если не помещается.
+ */
+const useStageScale = (isSpinTab: boolean) => {
+    const frameRef = useRef<HTMLDivElement>(null);
+    const [frameWidth, setFrameWidth] = useState<number | null>(null);
+
+    useLayoutEffect(() => {
+        const frame = frameRef.current;
+        if (frame === null) {
+            return;
+        }
+
+        setFrameWidth(frame.clientWidth - parseFloat(getComputedStyle(frame).paddingLeft) * 2);
+        const observer = new ResizeObserver(([entry]) => setFrameWidth(entry.contentRect.width));
+        observer.observe(frame);
+        return () => observer.disconnect();
+    }, []);
+
+    if (frameWidth === null || frameWidth <= 0) {
+        return { frameRef, scale: 1 };
+    }
+
+    const fitScale = frameWidth / WHEEL_STAGE_WIDTH;
+    return { frameRef, scale: isSpinTab ? fitScale : Math.min(fitScale, 1) };
+};
 
 /** Круг рулетки с подписями секторов; поворот анимируется CSS-переходом длительностью `durationMs`. */
 const WheelDisc = ({ wheel, isSpinTab }: { wheel: WheelTrainerWheel; isSpinTab: boolean }) => {
     const angleSize = wheel.options.length > 0 ? 360 / wheel.options.length : 360;
+    const { frameRef, scale } = useStageScale(isSpinTab);
 
     return (
-        <div className={`${styles.wheelFrame} ${isSpinTab ? styles.wheelFrameSpin : ""}`}>
-            <div className={`${styles.wheelPointer} ${styles.wheelPointerRight}`}>
-                <i className="bi bi-caret-left-fill" aria-hidden="true"></i>
-            </div>
-            <div
-                className={styles.wheelDisc}
-                style={{
-                    background: getWheelGradient(wheel),
-                    transform: `rotate(${wheel.rotation}deg)`,
-                    transitionDuration: `${wheel.durationMs}ms`,
-                }}
-            >
-                {wheel.options.length === 0 ? (
-                    <div className={styles.wheelEmptyState}>Добавьте варианты</div>
-                ) : (
-                    wheel.options.map((option, index) => (
-                        <div
-                            key={option.id}
-                            className={styles.segmentLabel}
-                            style={getSegmentLabelStyle(
-                                option.label,
-                                index * angleSize + angleSize / 2,
-                                wheel.options.length,
-                            )}
-                        >
-                            <span>{option.label}</span>
-                        </div>
-                    ))
-                )}
-                <div className={styles.wheelCenterCap}>
-                    <span>{wheel.options.length}</span>
-                    <small>вариантов</small>
+        <div
+            ref={frameRef}
+            className={`${styles.wheelFrame} ${isSpinTab ? styles.wheelFrameSpin : ""}`}
+            style={isSpinTab ? { height: `${WHEEL_STAGE_HEIGHT * scale}px` } : undefined}
+        >
+            <div className={styles.wheelStage} style={{ transform: `translate(-50%, -50%) scale(${scale})` }}>
+                <div className={`${styles.wheelPointer} ${styles.wheelPointerRight}`}>
+                    <i className="bi bi-caret-left-fill" aria-hidden="true"></i>
+                </div>
+                <div
+                    className={styles.wheelDisc}
+                    style={{
+                        background: getWheelGradient(wheel),
+                        transform: `rotate(${wheel.rotation}deg)`,
+                        transitionDuration: `${wheel.durationMs}ms`,
+                    }}
+                >
+                    {wheel.options.length === 0 ? (
+                        <div className={styles.wheelEmptyState}>Добавьте варианты</div>
+                    ) : (
+                        wheel.options.map((option, index) => (
+                            <div
+                                key={option.id}
+                                className={styles.segmentLabel}
+                                style={getSegmentLabelStyle(
+                                    option.label,
+                                    index * angleSize + angleSize / 2,
+                                    wheel.options.length,
+                                )}
+                            >
+                                <span>{option.label}</span>
+                            </div>
+                        ))
+                    )}
+                    <div className={styles.wheelCenterCap}>
+                        <span>{wheel.options.length}</span>
+                        <small>вариантов</small>
+                    </div>
                 </div>
             </div>
         </div>
@@ -117,6 +180,18 @@ const WheelConfig = ({ wheel, dispatch }: { wheel: WheelTrainerWheel; dispatch: 
             </label>
         </div>
 
+        <label className={styles.alwaysKeepField}>
+            <input
+                type="checkbox"
+                checked={wheel.alwaysKeep}
+                onChange={(event) =>
+                    dispatch({ type: "updateWheel", wheelId: wheel.id, patch: { alwaysKeep: event.target.checked } })
+                }
+            />
+            <span>Всегда оставлять</span>
+            <small>Выпавший вариант не удаляется из этой рулетки, даже если в окне результата нажать «Удалить».</small>
+        </label>
+
         <div className={styles.themeStrip}>
             {THEME_KEYS.map((themeKey) => (
                 <button
@@ -158,11 +233,20 @@ interface WheelCardProps {
 
 const WheelCard = ({ wheel, isActive, isSpinTab, dispatch, onAddAfter, onRemove, onSpin }: WheelCardProps) => {
     const isEditTab = !isSpinTab;
+    const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
+        id: wheel.id,
+    });
+    const dragHandle = <DragHandle handleRef={setActivatorNodeRef} handleProps={{ ...attributes, ...listeners }} />;
 
     return (
         <article
-            className={`${styles.wheelCard} ${isActive ? styles.wheelCardActive : ""} ${isSpinTab ? styles.wheelCardSpin : ""}`}
-            style={getThemeStyle(wheel.themeKey)}
+            ref={setNodeRef}
+            className={`${styles.wheelCard} ${isActive ? styles.wheelCardActive : ""} ${isSpinTab ? styles.wheelCardSpin : ""} ${isDragging ? styles.wheelCardDragging : ""}`}
+            style={{
+                ...getThemeStyle(wheel.themeKey),
+                transform: DNDCSS.Translate.toString(transform),
+                transition,
+            }}
             onClick={() => dispatch({ type: "setActiveWheel", wheelId: wheel.id })}
         >
             {isEditTab && (
@@ -183,6 +267,7 @@ const WheelCard = ({ wheel, isActive, isSpinTab, dispatch, onAddAfter, onRemove,
                         <WheelBadges wheel={wheel} isActive={isActive} />
                     </div>
                     <div className={styles.wheelHeaderActions}>
+                        {dragHandle}
                         <button
                             type="button"
                             className={styles.wheelAddButton}
@@ -213,7 +298,10 @@ const WheelCard = ({ wheel, isActive, isSpinTab, dispatch, onAddAfter, onRemove,
             {isSpinTab && (
                 <div className={styles.wheelSpinHeader}>
                     <WheelBadges wheel={wheel} isActive={isActive} />
-                    <LockButton wheel={wheel} dispatch={dispatch} />
+                    <div className={styles.wheelHeaderActions}>
+                        {dragHandle}
+                        <LockButton wheel={wheel} dispatch={dispatch} />
+                    </div>
                 </div>
             )}
 

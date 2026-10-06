@@ -1,5 +1,17 @@
 import { useEffect, useEffectEvent, useState } from "react";
 
+import {
+    closestCenter,
+    DndContext,
+    DragEndEvent,
+    KeyboardSensor,
+    MouseSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
+} from "@dnd-kit/core";
+import { rectSortingStrategy, SortableContext, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+
 import { WheelTrainerStudio } from "./useWheelTrainerStudio";
 import WheelCard from "./WheelCard";
 import { formatDateTime, getThemeStyle, SpinHistoryEntry, StudioTab } from "./wheelTrainerModel";
@@ -91,6 +103,17 @@ const WheelStudioView = ({ studio }: { studio: WheelTrainerStudio }) => {
     const isEditTab = studioTab === "edit";
     const isSpinTab = studioTab === "spin";
     const renderedWheels = isSpinTab ? wheels.filter((wheel) => wheel.options.length > 0) : wheels;
+    const sensors = useSensors(
+        useSensor(MouseSensor),
+        useSensor(TouchSensor),
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    );
+
+    const handleDragEnd = ({ active, over }: DragEndEvent) => {
+        if (over !== null && active.id !== over.id) {
+            studio.dispatch({ type: "moveWheel", wheelId: String(active.id), overWheelId: String(over.id) });
+        }
+    };
 
     const handleKeyDown = useEffectEvent((event: KeyboardEvent) => {
         const target = event.target as HTMLElement | null;
@@ -110,7 +133,8 @@ const WheelStudioView = ({ studio }: { studio: WheelTrainerStudio }) => {
             return;
         }
 
-        if (isTypingTarget) {
+        // На ручке перетаскивания Space поднимает/бросает карточку (клавиатурный drag&drop dnd-kit).
+        if (isTypingTarget || target?.closest("[data-wheel-drag-handle]")) {
             return;
         }
 
@@ -178,22 +202,26 @@ const WheelStudioView = ({ studio }: { studio: WheelTrainerStudio }) => {
             )}
 
             <div className={`${styles.studioLayout} ${isSpinTab ? styles.studioLayoutSpin : ""}`}>
-                <div className={`${styles.wheelsColumn} ${isSpinTab ? styles.wheelsColumnSpin : ""}`}>
-                    {renderedWheels.map((wheel) => (
-                        <WheelCard
-                            key={wheel.id}
-                            wheel={wheel}
-                            isActive={activeWheelId === wheel.id}
-                            isSpinTab={isSpinTab}
-                            dispatch={studio.dispatch}
-                            onAddAfter={() => studio.addWheelAfter(wheel.id)}
-                            onRemove={() => studio.removeWheel(wheel.id)}
-                            onSpin={() => studio.startSpin([wheel])}
-                        />
-                    ))}
-                </div>
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                    <SortableContext items={renderedWheels.map((wheel) => wheel.id)} strategy={rectSortingStrategy}>
+                        <div className={`${styles.wheelsColumn} ${isSpinTab ? styles.wheelsColumnSpin : ""}`}>
+                            {renderedWheels.map((wheel) => (
+                                <WheelCard
+                                    key={wheel.id}
+                                    wheel={wheel}
+                                    isActive={activeWheelId === wheel.id}
+                                    isSpinTab={isSpinTab}
+                                    dispatch={studio.dispatch}
+                                    onAddAfter={() => studio.addWheelAfter(wheel.id)}
+                                    onRemove={() => studio.removeWheel(wheel.id)}
+                                    onSpin={() => studio.startSpin([wheel])}
+                                />
+                            ))}
+                        </div>
+                    </SortableContext>
+                </DndContext>
 
-                {isEditTab && <HistoryPanel history={studio.history} />}
+                <HistoryPanel history={studio.history} />
             </div>
 
             {isEditTab && (

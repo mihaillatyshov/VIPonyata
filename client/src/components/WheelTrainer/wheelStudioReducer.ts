@@ -1,3 +1,5 @@
+import { arrayMove } from "@dnd-kit/sortable";
+
 import {
     buildDefaultTemplateName,
     createWheel,
@@ -23,6 +25,8 @@ export type WheelStudioAction =
     | { type: "setOptionsText"; wheelId: string; text: string }
     | { type: "addWheelAfter"; wheelId: string; wheel: WheelTrainerWheel }
     | { type: "removeWheel"; wheelId: string }
+    /** Перетаскивание: рулетка `wheelId` встаёт на место рулетки `overWheelId`. */
+    | { type: "moveWheel"; wheelId: string; overWheelId: string }
     | { type: "setActiveWheel"; wheelId: string }
     | { type: "startSpin"; spins: Array<{ wheelId: string; rotation: number }> }
     | { type: "finishSpin"; wheelId: string; optionId: string }
@@ -73,6 +77,13 @@ const reduce = (state: WheelStudioState, action: WheelStudioAction): WheelStudio
             return state.wheels.length <= 1
                 ? state
                 : { ...state, wheels: state.wheels.filter((wheel) => wheel.id !== action.wheelId) };
+        case "moveWheel": {
+            const fromIndex = state.wheels.findIndex((wheel) => wheel.id === action.wheelId);
+            const toIndex = state.wheels.findIndex((wheel) => wheel.id === action.overWheelId);
+            return fromIndex === -1 || toIndex === -1 || fromIndex === toIndex
+                ? state
+                : { ...state, wheels: arrayMove(state.wheels, fromIndex, toIndex) };
+        }
         case "setActiveWheel":
             return { ...state, activeWheelId: action.wheelId };
         case "startSpin":

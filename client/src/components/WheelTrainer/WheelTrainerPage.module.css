@@ -396,8 +396,10 @@
     align-items: start;
 }
 
+/* Не ниже экрана: страницу всегда можно прокрутить так, чтобы шапка и настройки ушли вверх, а рулетки заняли весь экран. */
 .studioLayoutSpin {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    min-height: 100vh;
 }
 
 .wheelsColumn {
@@ -406,7 +408,7 @@
 }
 
 .wheelsColumnSpin {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 18px;
     padding: 22px;
     border: 1px solid rgba(255, 255, 255, 0.72);
@@ -442,6 +444,22 @@
     border-color: color-mix(in srgb, var(--wheel-color-1) 22%, transparent);
     background: transparent;
     box-shadow: none;
+}
+
+.wheelCardDragging {
+    position: relative;
+    z-index: 5;
+    opacity: 0.92;
+    box-shadow: 0 24px 48px rgba(31, 38, 28, 0.22);
+}
+
+.dragHandle {
+    cursor: grab;
+    touch-action: none;
+}
+
+.wheelCardDragging .dragHandle {
+    cursor: grabbing;
 }
 
 .wheelCardHeader,
@@ -651,9 +669,18 @@
 .wheelPointerRight {
     position: absolute;
     top: 50%;
-    left: calc(50% + 156px);
+    left: 306px;
     margin: 0;
     transform: translate(0, -50%);
+}
+
+/* Диск 300px + стрелка справа; масштабируется целиком (WHEEL_STAGE_WIDTH/HEIGHT в wheelTrainerModel.ts). */
+.wheelStage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 362px;
+    height: 300px;
 }
 
 .wheelFrame {
@@ -670,7 +697,7 @@
 
 .wheelFrameSpin {
     width: 100%;
-    min-height: 320px;
+    min-height: 0;
     padding: 0;
     border-radius: 0;
     background: transparent;
@@ -818,6 +845,35 @@
     color: rgba(16, 33, 21, 0.96);
 }
 
+.alwaysKeepField {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    column-gap: 10px;
+    row-gap: 4px;
+    padding: 14px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.64);
+    color: rgba(16, 33, 21, 0.8);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.alwaysKeepField input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--wheel-accent);
+    cursor: pointer;
+}
+
+.alwaysKeepField small {
+    grid-column: 2;
+    color: rgba(16, 33, 21, 0.64);
+    font-size: 12px;
+    font-weight: 600;
+}
+
 .themeStrip {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -921,12 +977,15 @@
 .historyTag {
     display: inline-flex;
     align-items: center;
+    max-width: 100%;
     padding: 8px 10px;
-    border-radius: 999px;
+    border-radius: 16px;
     background: linear-gradient(135deg, var(--wheel-color-1), var(--wheel-color-3));
     color: var(--wheel-contrast);
     font-size: 12px;
     font-weight: 800;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
 .emptyState {
@@ -1024,6 +1083,7 @@
     align-items: flex-start;
     gap: 12px;
     max-height: min(56vh, 520px);
+    overflow-y: auto;
     padding-right: 6px;
 }
 
@@ -1074,9 +1134,8 @@
     font-weight: 900;
     color: rgba(16, 33, 21, 0.94);
     line-height: 1.08;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow-wrap: anywhere;
     text-align: center;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.34);
 }
@@ -1191,15 +1250,6 @@
 @media (max-width: 720px) {
     .pageInner {
         width: min(100%, calc(100% - 20px));
-    }
-
-    .wheelDisc {
-        width: 260px;
-        height: 260px;
-    }
-
-    .segmentLabel {
-        width: 92px;
     }
 
     .themeStrip,

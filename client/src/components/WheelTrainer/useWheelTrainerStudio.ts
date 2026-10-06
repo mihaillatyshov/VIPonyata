@@ -179,18 +179,25 @@ export const useWheelTrainerStudio = () => {
         startSpin(targets);
     };
 
-    /** «Удалить» в окне результата: выпавшие варианты убираются из рулеток. */
+    /** «Удалить» в окне результата: выпавшие варианты убираются из рулеток, кроме рулеток с «Всегда оставлять». */
     const applyResultRemoval = () => {
         if (resultDialog === null) {
             return;
         }
 
+        const removable = resultDialog.results.filter(
+            (result) => !wheels.find((wheel) => wheel.id === result.wheelId)?.alwaysKeep,
+        );
         dispatch({
             type: "removeOptions",
-            options: resultDialog.results.map((result) => ({ wheelId: result.wheelId, optionId: result.option.id })),
+            options: removable.map((result) => ({ wheelId: result.wheelId, optionId: result.option.id })),
         });
         setResultDialog(null);
-        showBanner("Выпавшие варианты удалены из текущей сессии.");
+        showBanner(
+            removable.length > 0
+                ? "Выпавшие варианты удалены из текущей сессии."
+                : "Варианты оставлены: у этих рулеток включено «Всегда оставлять».",
+        );
     };
 
     const addWheelAfter = (wheelId: string) => {

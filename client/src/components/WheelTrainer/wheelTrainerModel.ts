@@ -14,6 +14,8 @@ export interface WheelTrainerWheel {
     options: WheelTrainerOption[];
     optionsEditorText: string;
     isLocked: boolean;
+    /** «Всегда оставлять»: выпавший вариант не удаляется из рулетки кнопкой «Удалить» в окне результата. */
+    alwaysKeep: boolean;
     speed: number;
     durationMs: number;
     rotation: number;
@@ -60,7 +62,8 @@ export const WHEEL_TRAINER_TEMPLATE_STORAGE_KEY = "wheel-trainer-templates-v1";
 export const WHEEL_TRAINER_DRAFT_STORAGE_KEY = "wheel-trainer-draft-v1";
 export const WHEEL_TRAINER_ROUTE_STUDIO = "/teacher/wheel-trainer/new";
 export const WHEEL_TRAINER_ROUTE_TEMPLATES = "/teacher/wheel-trainer/templates";
-export const MAX_HISTORY_ENTRIES = 12;
+/** В панели «Последние результаты» показываются только последние кручения. */
+export const MAX_HISTORY_ENTRIES = 3;
 
 export const THEME_PRESETS: Record<WheelThemeKey, ThemePreset> = {
     pink: {
@@ -144,6 +147,7 @@ export const createWheel = (index: number): WheelTrainerWheel => {
         options,
         optionsEditorText: formatOptionsText(options),
         isLocked: false,
+        alwaysKeep: false,
         speed: 6,
         durationMs: 5200,
         rotation: 0,
@@ -200,6 +204,7 @@ export const sanitizeWheel = (value: unknown, index: number): WheelTrainerWheel 
                 : fallback.themeKey,
         options: options.length > 0 ? options : fallback.options,
         isLocked: Boolean(value.isLocked),
+        alwaysKeep: Boolean(value.alwaysKeep),
         speed: typeof value.speed === "number" ? clampNumber(value.speed, 1, 10) : fallback.speed,
         durationMs:
             typeof value.durationMs === "number" ? clampNumber(value.durationMs, 2000, 12000) : fallback.durationMs,
@@ -301,14 +306,19 @@ export const getWheelGradient = (wheel: WheelTrainerWheel) => {
         return `${palette.colors[index % palette.colors.length]} ${start}deg ${end}deg`;
     });
 
-    return `conic-gradient(from -90deg, ${segments.join(", ")})`;
+    // Углы секторов и подписей отсчитываются от 12 часов по часовой стрелке.
+    return `conic-gradient(from 0deg, ${segments.join(", ")})`;
 };
+
+/** Угол стрелки рулетки (стрелка справа — 3 часа), от 12 часов по часовой стрелке. */
+export const WHEEL_POINTER_ANGLE = 90;
 
 export const getWheelTargetRotation = (wheel: WheelTrainerWheel, winnerIndex: number) => {
     const angleSize = 360 / Math.max(wheel.options.length, 1);
     const centerAngle = winnerIndex * angleSize + angleSize / 2;
     const currentRotation = ((wheel.rotation % 360) + 360) % 360;
-    const targetRotation = (360 - centerAngle + 360) % 360;
+    // После поворота центр выпавшего сектора должен оказаться под стрелкой.
+    const targetRotation = (((WHEEL_POINTER_ANGLE - centerAngle) % 360) + 360) % 360;
     const delta = (targetRotation - currentRotation + 360) % 360;
     const extraTurns = Math.round((wheel.durationMs / 1000) * (wheel.speed * 0.9 + 4));
 
@@ -328,8 +338,15 @@ export const buildDefaultTemplateName = () => {
     return `Шаблон ${new Date().toLocaleDateString("ru-RU")}`;
 };
 
-export const WHEEL_DISC_RADIUS = 150;
+/** Внутренний радиус диска: 300px минус рамка 12px (box-sizing: border-box). */
+export const WHEEL_DISC_RADIUS = 138;
 export const WHEEL_CENTER_CAP_RADIUS = 47;
+/**
+ * Сцена «диск + стрелка» в базовом размере (диск 300px, стрелка 56px с отступом 6px справа от диска);
+ * целиком масштабируется под ширину карточки. Должна совпадать с `.wheelStage` в CSS.
+ */
+export const WHEEL_STAGE_WIDTH = 362;
+export const WHEEL_STAGE_HEIGHT = 300;
 export const WHEEL_LABEL_OUTER_PADDING = 18;
 export const WHEEL_LABEL_INNER_PADDING = 18;
 
