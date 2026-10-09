@@ -4,6 +4,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import Loading from "components/Common/Loading";
 import ShowMoreButton from "components/Common/ShowMoreButton";
 import ErrorPage from "components/ErrorPages/ErrorPage";
+import {
+    getQuizletTags,
+    splitDateTime,
+    TEACHER_ACTIVITY_TYPE_META,
+    TeacherActivityMetric,
+    TeacherActivityTypeMeta,
+} from "components/Notifications/teacherActivity";
+import TeacherActivityCard from "components/Notifications/TeacherActivityCard";
 import { formatDuration } from "components/Quizlet/quizletUtils";
 import { AjaxGet } from "libs/ServerAPI";
 import { LoadStatus } from "libs/Status";
@@ -20,221 +28,108 @@ import styles from "./TeacherHistoryPage.module.css";
 type HistoryTab = "all" | "students";
 const HISTORY_PAGE_SIZE = 20;
 
-const getHistoryItemKindClass = (kind: TTeacherHistoryEvent["training_kind"]) => {
-    switch (kind) {
-        case "quizlet":
-            return styles.historyItemQuizlet;
-        case "dictionary":
-            return styles.historyItemDictionary;
-        case "test":
-        case "practice":
-        default:
-            return styles.historyItemTest;
-    }
-};
-
-const isCompactDictionaryHistoryItem = (item: TTeacherHistoryEvent) => {
-    return item.training_kind === "dictionary";
-};
-
-const formatDateTime = (value?: string | null) => {
-    if (!value) {
-        return "-";
-    }
-
-    const parsed = new Date(value);
-    if (!Number.isNaN(parsed.getTime())) {
-        return parsed.toLocaleString("ru-RU", {
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-        });
-    }
-
-    return value.replace("T", " ").slice(0, 16);
-};
-
-const getDirectionLabel = (direction?: string) => {
-    return direction === "ru_to_jp" ? "ru-jp" : "jp-ru";
-};
-
-const getStudentTitleLabel = (student: TTeacherHistoryStudent) => {
+const getStudentLabel = (student: TTeacherHistoryStudent) => {
     const hiddenSuffix = student.is_hidden ? " [скрыт]" : "";
-    return `${student.name} (${student.nickname})${hiddenSuffix}`;
+    return `${student.nickname} (${student.name})${hiddenSuffix}`;
 };
 
-const lowerFirst = (value: string) => {
-    if (value.length === 0) {
-        return value;
+const getTypeMeta = (item: TTeacherHistoryEvent): TeacherActivityTypeMeta => {
+    if (item.training_kind === "quizlet" || item.training_kind === "dictionary") {
+        return TEACHER_ACTIVITY_TYPE_META[item.training_kind];
     }
 
-    return value[0].toLowerCase() + value.slice(1);
+    return (
+        TEACHER_ACTIVITY_TYPE_META[item.action_type as keyof typeof TEACHER_ACTIVITY_TYPE_META] ??
+        TEACHER_ACTIVITY_TYPE_META.assessment_try
+    );
 };
 
-const splitDictionaryTargetName = (targetName: string) => {
-    const [dictionaryTitle, ...topicParts] = targetName.split(" • ");
+/** Заголовок как в уведомлениях; у Quizlet — с числом выданных слов. */
+const getTitle = (item: TTeacherHistoryEvent) => {
+    if (item.training_kind !== "quizlet") {
+        return item.target_name;
+    }
 
-    return {
-        dictionaryTitle,
-        topicTitle: topicParts.join(" • "),
-    };
+    const title = item.is_assignment ? item.target_name : "Самостоятельная тренировка";
+    return item.total_words !== null && item.total_words !== undefined ? `${title} (${item.total_words})` : title;
 };
 
-const getHistoryCardTitle = (item: TTeacherHistoryEvent) => {
-    const studentLabel = getStudentTitleLabel(item.student);
-
-    if (item.training_kind === "test") {
-        return `${studentLabel} ・ тест ${item.target_name.toUpperCase()}`;
+const getDetails = (item: TTeacherHistoryEvent) => {
+    if (item.training_kind === "dictionary") {
+        return { iconClass: "bi-pencil", text: item.action_label };
     }
 
-    if (item.training_kind === "quizlet") {
-        if (item.quiz_type === "flashcards") {
-            return `${studentLabel} ・ ${getDirectionLabel(item.translation_direction)} (${item.total_words ?? "-"})`;
-        }
-
-        if (item.quiz_type === "pair") {
-            return `${studentLabel} ・ пары (${item.total_words ?? "-"})`;
-        }
-
-        return `${studentLabel} ・ quizlet`;
+    if (item.training_kind === "quizlet" && (item.topic_titles?.length ?? 0) > 0) {
+        return { iconClass: "bi-list-stars", text: item.topic_titles?.join(", ") ?? "" };
     }
+
+    return null;
+};
+
+/** Показатели в том же порядке, что в уведомлениях: когда и сколько длилось, затем результат. */
+const getMetrics = (item: TTeacherHistoryEvent): TeacherActivityMetric[] => {
+    const created = splitDateTime(item.created_at);
 
     if (item.training_kind === "dictionary") {
-        const { dictionaryTitle, topicTitle } = splitDictionaryTargetName(item.target_name);
-
-        if (item.action_type === "personal_dictionary_updated") {
-            return `${studentLabel}・изменил (${dictionaryTitle})`;
-        }
-
-        if (item.action_type === "personal_dictionary_topic_created") {
-            return `${studentLabel}・создал (${topicTitle || item.target_name})`;
-        }
-
-        return `${studentLabel} ${lowerFirst(item.action_label)} ${item.target_name}`;
+        return [
+            { iconClass: "bi-calendar3", label: "Дата", value: created.date },
+            { iconClass: "bi-clock", label: "Время", value: created.time },
+        ];
     }
 
-    return `${studentLabel} ${lowerFirst(item.action_label)} ${item.target_name}`;
-};
+    const started = splitDateTime(item.started_at);
+    const metrics: TeacherActivityMetric[] = [
+        { iconClass: "bi-calendar3", label: "Дата", value: splitDateTime(item.completed_at ?? item.created_at).date },
+        item.started_at
+            ? { iconClass: "bi-play-circle", label: "Начало", value: started.time }
+            : { iconClass: "bi-clock", label: "Время", value: created.time },
+    ];
 
-const getHistoryCardIconClass = (item: TTeacherHistoryEvent) => {
-    if (item.training_kind === "test") {
-        return "bi-ui-checks-grid";
+    const isHomework = item.action_type === "homework_try";
+    if (item.training_kind !== "quizlet" && !isHomework) {
+        metrics.push({ iconClass: "bi-exclamation-circle", label: "Ошибки", value: `${item.mistakes_count ?? "-"}` });
+        return metrics;
     }
+
+    metrics.push(
+        {
+            iconClass: "bi-stopwatch",
+            label: isHomework ? "Выполнение" : "Время",
+            value:
+                item.elapsed_seconds !== null && item.elapsed_seconds !== undefined
+                    ? formatDuration(item.elapsed_seconds)
+                    : "-",
+        },
+        { iconClass: "bi-exclamation-circle", label: "Ошибки", value: `${item.mistakes_count ?? "-"}` },
+        { iconClass: "bi-check-circle", label: "Верно", value: `${item.correct_answers ?? "-"}` },
+    );
 
     if (item.training_kind === "quizlet") {
-        if (item.quiz_type === "pair") {
-            return "bi-grid-3x2-gap";
-        }
-
-        if (item.quiz_type === "flashcards") {
-            return "bi-collection";
-        }
+        metrics.push({ iconClass: "bi-dash-circle", label: "Пропущено", value: `${item.skipped_words ?? "-"}` });
     }
 
-    return "bi-bookmark-star";
+    return metrics;
 };
 
-interface HistoryItemProps {
-    item: TTeacherHistoryEvent;
-}
-
-interface HistoryMetaItemProps {
-    iconClass: string;
-    value: string;
-    title: string;
-}
-
-const HistoryMetaItem = ({ iconClass, value, title }: HistoryMetaItemProps) => {
-    return (
-        <div className={styles.metaItem} title={title} aria-label={title}>
-            <span className={styles.metaIcon} aria-hidden="true">
-                <i className={`bi ${iconClass}`}></i>
-            </span>
-            <span className={styles.metaValue}>{value}</span>
-        </div>
-    );
-};
-
-const HistoryItem = ({ item }: HistoryItemProps) => {
+const HistoryItem = ({ item }: { item: TTeacherHistoryEvent }) => {
     const navigate = useNavigate();
-    const isCompactDictionaryItem = isCompactDictionaryHistoryItem(item);
-    const isTestHistoryItem = item.training_kind === "test";
-    const hasQuizletTopics = item.training_kind === "quizlet" && (item.topic_titles?.length ?? 0) > 0;
-
-    const titleContent = (
-        <>
-            <div className={styles.itemTitleRow}>
-                <i className={`bi ${getHistoryCardIconClass(item)}`} aria-hidden="true"></i>
-                <span className={styles.itemAction}>{getHistoryCardTitle(item)}</span>
-                {item.target_url && (
-                    <i className={`bi bi-arrow-up-right ${styles.itemTargetLinkIcon}`} aria-hidden="true"></i>
-                )}
-            </div>
-            {hasQuizletTopics && (
-                <div className={styles.itemTopicList}>
-                    <i className="bi bi-list-stars" aria-hidden="true"></i>
-                    <span>{item.topic_titles?.join(", ")}</span>
-                </div>
-            )}
-        </>
-    );
+    const targetUrl = item.target_url;
 
     return (
-        <article className={`${styles.historyItem} ${getHistoryItemKindClass(item.training_kind)}`}>
-            <div className={styles.itemHeader}>
-                {item.target_url ? (
-                    <button
-                        type="button"
-                        className={styles.itemHeadingButton}
-                        onClick={() => navigate(item.target_url as string)}
-                    >
-                        {titleContent}
-                    </button>
-                ) : (
-                    <div className={styles.itemHeadingStatic}>{titleContent}</div>
-                )}
-            </div>
-
-            {isCompactDictionaryItem ? (
-                <div className={styles.metaGridCompact}>
-                    <HistoryMetaItem iconClass="bi-calendar3" title="Дата" value={formatDateTime(item.created_at)} />
-                </div>
-            ) : (
-                <div className={styles.metaGrid}>
-                    <HistoryMetaItem
-                        iconClass="bi-box-arrow-right"
-                        title="Финиш"
-                        value={formatDateTime(item.completed_at)}
-                    />
-                    <HistoryMetaItem
-                        iconClass="bi-stopwatch"
-                        title="Время"
-                        value={
-                            item.elapsed_seconds !== null && item.elapsed_seconds !== undefined
-                                ? formatDuration(item.elapsed_seconds)
-                                : "-"
-                        }
-                    />
-                    <HistoryMetaItem
-                        iconClass="bi-exclamation-triangle"
-                        title="Ошибки"
-                        value={`${item.mistakes_count ?? "-"}`}
-                    />
-                    {!isTestHistoryItem && (
-                        <HistoryMetaItem iconClass="bi-check2" title="Верно" value={`${item.correct_answers ?? "-"}`} />
-                    )}
-                    {!isTestHistoryItem && (
-                        <HistoryMetaItem
-                            iconClass="bi-skip-forward"
-                            title="Пропуск"
-                            value={`${item.skipped_words ?? "-"}`}
-                        />
-                    )}
-                </div>
-            )}
-        </article>
+        <div className={styles.historyCard}>
+            <TeacherActivityCard
+                typeMeta={getTypeMeta(item)}
+                tags={
+                    item.training_kind === "quizlet" ? getQuizletTags(item.quiz_type, item.translation_direction) : []
+                }
+                state={item.training_kind === "quizlet" && !item.completed_at ? "Не завершено" : null}
+                title={getTitle(item)}
+                studentLabel={getStudentLabel(item.student)}
+                details={getDetails(item)}
+                metrics={getMetrics(item)}
+                onOpen={targetUrl ? () => navigate(targetUrl) : undefined}
+            />
+        </div>
     );
 };
 

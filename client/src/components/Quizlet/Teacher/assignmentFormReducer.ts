@@ -1,6 +1,8 @@
+import { TQuizletQuizType } from "models/TQuizlet";
+
 export interface AssignmentFormState {
     title: string;
-    quizType: "pair" | "flashcards";
+    quizType: TQuizletQuizType;
     showHints: boolean;
     direction: "jp_to_ru" | "ru_to_jp";
     subgroupIds: number[];

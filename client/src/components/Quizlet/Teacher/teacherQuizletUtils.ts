@@ -74,6 +74,10 @@ export const getAssignmentModeLabel = (item: TQuizletAssignment) => {
         return "Пары";
     }
 
+    if (item.quiz_type === "writing") {
+        return "Пишем (рус → хирагана)";
+    }
+
     const directionLabel = item.translation_direction === "ru_to_jp" ? "рус-яп" : "яп-рус";
     return `Карточки (${directionLabel})`;
 };

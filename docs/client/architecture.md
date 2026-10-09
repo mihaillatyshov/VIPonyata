@@ -15,7 +15,7 @@ components/
   Courses/, Lessons/     списки, карточки, страницы создания/редактирования
   Dictionary/            словарь ученика
   Quizlet/               тренировки слов: StudentQuizlet (→ Student/), TeacherQuizletManager (→ Teacher/), общие
-                         компоненты в shared/ (редактор таблицы слов, карточки, хлебные крошки), упражнения Matching/Flashcard
+                         компоненты в shared/ (редактор таблицы слов, карточки, хлебные крошки), упражнения Matching/Flashcard/Writing
   Tasks/                 банк заданий и домашние работы: TeacherTasksManager (→ Teacher/), StudentTasksPage
   Review/                повторение слов учителем: TeacherReview + страницы словарей, тренировка (useReviewTraining)
   Notifications/, History/, MainPage/, NavBar/, WheelTrainer/, ErrorPages/, Common/, Form/

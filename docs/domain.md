@@ -33,7 +33,7 @@ Course (курс)                     courses
 
 - Учительский каталог: **группа** (`quizlet_groups`, «урок») → **подгруппа** (`quizlet_subgroups`, «тема») → слова (`quizlet_dictionary` через `quizlet_subgroup_words`).
 - Персональный словарь ученика: `user_quizlet_lessons` → `user_quizlet_subgroups` → `user_quizlet_words`. Учитель может просматривать/редактировать и скрывать персональные словари учеников (`quizlet_hidden_students`).
-- **Сессия** (`quizlet_sessions`) — тренировка: `quiz_type` (`pair` — сопоставление, `flashcards` — карточки), направление перевода, очередь слов (`queue_state`, JSON), ошибочные слова, повтор ошибок/всех слов.
+- **Сессия** (`quizlet_sessions`) — тренировка: `quiz_type` (`pair` — сопоставление, `flashcards` — карточки, `writing` — «Пишем»: слово на русском, ученик вводит чтение хираганой, сервер сверяет с `word_jp` — катакана/хирагана и пробелы не важны, варианты через `/` или `、`; направление всегда `ru_to_jp`), направление перевода, очередь слов (`queue_state`, JSON), ошибочные слова, повтор ошибок/всех слов.
 - **Назначение** (`quizlet_assignments` → `quizlet_assignment_targets` → `quizlet_assignment_results`) — учитель назначает тренировку ученикам с дедлайном; результат попадает учителю в уведомления.
 
 ## Tasks (банк заданий и домашние работы)

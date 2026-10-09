@@ -5,6 +5,7 @@ import {
     TQuizletAssignmentTarget,
     TQuizletGroup,
     TQuizletLesson,
+    TQuizletQuizType,
     TQuizletSession,
     TQuizletSessionWord,
     TQuizletSubgroup,
@@ -74,7 +75,7 @@ export interface TQuizletAssignmentListItem {
 
 export interface TQuizletCreateAssignmentPayload {
     title: string;
-    quiz_type: "pair" | "flashcards";
+    quiz_type: TQuizletQuizType;
     subgroup_ids: number[];
     personal_targets: Array<{ student_id: number; subgroup_ids: number[] }>;
     show_hints: boolean;
@@ -241,6 +242,18 @@ export const submitQuizletFlashcardAnswer = (sessionId: number, sessionWordId: n
     AjaxPost({
         url: `/api/quizlet/sessions/${sessionId}/flashcard-answer`,
         body: { session_word_id: sessionWordId, recognized },
+    });
+
+export interface TQuizletWritingAnswerResult {
+    is_correct: boolean;
+    word_jp: string;
+    char_jp: string | null;
+}
+
+export const submitQuizletWritingAnswer = (sessionId: number, sessionWordId: number, answer: string) =>
+    AjaxPost<TQuizletWritingAnswerResult>({
+        url: `/api/quizlet/sessions/${sessionId}/writing-answer`,
+        body: { session_word_id: sessionWordId, answer },
     });
 
 export const markQuizletFlashcardViewed = (sessionId: number, sessionWordId: number) =>

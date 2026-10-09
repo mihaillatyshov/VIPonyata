@@ -1,10 +1,13 @@
 import { useLocation } from "react-router-dom";
 
+import { TQuizletQuizType } from "models/TQuizlet";
+
 export const studentQuizletPaths = {
     modeSelection: "/quizlet",
     setup: "/quizlet/setup",
     flashcards: "/quizlet/flashcards",
     pairs: "/quizlet/pairs",
+    writing: "/quizlet/writing",
     results: "/quizlet/results",
     view: "/quizlet/view",
     viewLesson: (lessonId: number) => `/quizlet/view/lessons/${lessonId}`,
@@ -14,11 +17,24 @@ export const studentQuizletPaths = {
     progress: "/quizlet/progress",
 } as const;
 
+/** Страница идущей тренировки по её режиму. */
+export const getExercisePath = (quizType: TQuizletQuizType) => {
+    switch (quizType) {
+        case "flashcards":
+            return studentQuizletPaths.flashcards;
+        case "writing":
+            return studentQuizletPaths.writing;
+        default:
+            return studentQuizletPaths.pairs;
+    }
+};
+
 export type StudentQuizletRoute =
     | { kind: "mode-selection" }
     | { kind: "setup" }
     | { kind: "flashcards" }
     | { kind: "pairs" }
+    | { kind: "writing" }
     | { kind: "results" }
     /** Словари учителя: список уроков, темы урока или слова темы. */
     | { kind: "view"; lessonId: number | null; topicId: number | null }
@@ -37,6 +53,8 @@ const parseStudentQuizletRoute = (pathname: string): StudentQuizletRoute => {
             return { kind: "flashcards" };
         case studentQuizletPaths.pairs:
             return { kind: "pairs" };
+        case studentQuizletPaths.writing:
+            return { kind: "writing" };
         case studentQuizletPaths.results:
             return { kind: "results" };
         case studentQuizletPaths.view:

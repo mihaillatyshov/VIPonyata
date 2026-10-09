@@ -12,6 +12,7 @@ import {
     startQuizletSession,
     submitQuizletFlashcardAnswer,
     submitQuizletPairAttempt,
+    submitQuizletWritingAnswer,
     TQuizletSessionDetails,
     TQuizletSessionWithQueue,
 } from "api/quizlet";
@@ -22,7 +23,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { type StartPayload } from "../QuizletQuizStart";
 import { parseQueue, shuffleArray } from "../quizletUtils";
-import { studentQuizletPaths } from "./studentQuizletRoutes";
+import { getExercisePath } from "./studentQuizletRoutes";
 
 const EMPTY_WORDS: TQuizletSessionWord[] = [];
 const PROGRESS_SAVE_INTERVAL_MS = 10_000;
@@ -284,7 +285,7 @@ export const useQuizletSession = (onHubChanged: () => void) => {
                 json.session.id,
                 payload.quiz_type === "flashcards" && auto_speak_after_flip,
             );
-            navigate(payload.quiz_type === "flashcards" ? studentQuizletPaths.flashcards : studentQuizletPaths.pairs);
+            navigate(getExercisePath(payload.quiz_type));
             await loadSession(json.session.id);
         } catch {
             return;
@@ -372,6 +373,36 @@ export const useQuizletSession = (onHubChanged: () => void) => {
         refreshSession(session.id);
     };
 
+    /**
+     * Ответ в режиме «Пишем». Сессия перезапрашивается в фоне, чтобы реакция была мгновенной.
+     * Сессия не завершается сама: результат последнего слова сначала показывается, затем вызывается finishWriting.
+     */
+    const submitWritingAnswer = async (wordId: number, answer: string) => {
+        if (session === null) {
+            return null;
+        }
+
+        const isLastWord = queue.length === 1 && queue[0] === wordId;
+        const result = await submitQuizletWritingAnswer(session.id, wordId, answer);
+        refreshSession(session.id);
+        return { ...result, isLastWord };
+    };
+
+    const finishWriting = async () => {
+        if (session === null || autoFinishSessionIdRef.current === session.id) {
+            return;
+        }
+
+        autoFinishSessionIdRef.current = session.id;
+        try {
+            await endQuizletSession(session.id, false);
+            onHubChanged();
+            await refreshSession(session.id);
+        } catch {
+            autoFinishSessionIdRef.current = null;
+        }
+    };
+
     const markFlashcardVisible = (wordId: number) => {
         if (session === null || viewedFlashcardIdsRef.current.has(wordId)) {
             return;
@@ -406,6 +437,8 @@ export const useQuizletSession = (onHubChanged: () => void) => {
         retryAll: () => retry(false),
         submitPairAttempt,
         submitFlashcard,
+        submitWritingAnswer,
+        finishWriting,
         markFlashcardVisible,
         closeSession,
     };

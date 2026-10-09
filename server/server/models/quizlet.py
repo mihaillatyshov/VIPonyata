@@ -2,6 +2,15 @@ from pydantic import BaseModel, model_validator
 
 from server.models.utils import StrExtraSpaceRemove
 
+QUIZLET_QUIZ_TYPES = ["pair", "flashcards", "writing"]
+
+
+def _apply_writing_defaults(model: "QuizletStartSessionReq | QuizletAssignmentCreateReq"):
+    # «Пишем»: всегда рус → яп (хираганой), чтения-подсказки выдали бы ответ.
+    if model.quiz_type == "writing":
+        model.translation_direction = "ru_to_jp"
+        model.show_hints = False
+
 
 class QuizletGroupCreateReq(BaseModel):
     title: StrExtraSpaceRemove
@@ -59,8 +68,9 @@ class QuizletStartSessionReq(BaseModel):
 
     @model_validator(mode="after")
     def validate_payload(self) -> "QuizletStartSessionReq":
-        if self.quiz_type not in ["pair", "flashcards"]:
+        if self.quiz_type not in QUIZLET_QUIZ_TYPES:
             raise ValueError("Unsupported quiz_type")
+        _apply_writing_defaults(self)
         if len(self.subgroup_ids) == 0 and len(self.user_subgroup_ids) == 0:
             raise ValueError("At least one subgroup must be selected")
         if self.max_words is not None and self.max_words > 100:
@@ -76,6 +86,11 @@ class QuizletPairAttemptReq(BaseModel):
 class QuizletFlashcardAnswerReq(BaseModel):
     session_word_id: int
     recognized: bool
+
+
+class QuizletWritingAnswerReq(BaseModel):
+    session_word_id: int
+    answer: StrExtraSpaceRemove
 
 
 class QuizletFlashcardViewedReq(BaseModel):
@@ -116,8 +131,9 @@ class QuizletAssignmentCreateReq(BaseModel):
 
     @model_validator(mode="after")
     def validate_payload(self) -> "QuizletAssignmentCreateReq":
-        if self.quiz_type not in ["pair", "flashcards"]:
+        if self.quiz_type not in QUIZLET_QUIZ_TYPES:
             raise ValueError("Unsupported quiz_type")
+        _apply_writing_defaults(self)
         if len(self.subgroup_ids) == 0 and len(self.personal_targets) == 0:
             raise ValueError("At least one subgroup must be selected")
         if len(self.student_ids) == 0:

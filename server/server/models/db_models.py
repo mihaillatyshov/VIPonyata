@@ -778,6 +778,7 @@ class QuizletSession(Base):
     class Type:
         PAIR = "pair"
         FLASHCARDS = "flashcards"
+        WRITING = "writing"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
 

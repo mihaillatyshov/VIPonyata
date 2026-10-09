@@ -2,6 +2,7 @@ import { TAssessmentTry } from "./Activity/Try/TAssessmentTry";
 import { TLexisTry } from "./Activity/Try/TLexisTry";
 import { TCourse } from "./TCourse";
 import { TLesson } from "./TLesson";
+import { TQuizletQuizType } from "./TQuizlet";
 import { TUserData } from "./TUser";
 
 type TNotificationAssessmentType = Pick<TAssessmentTry, "id" | "base_id" | "start_datetime" | "end_datetime"> & {
@@ -38,6 +39,10 @@ type TTeacherNotificationActivity = {
               correct_answers: number;
               skipped_words: number;
               elapsed_seconds: number;
+              // Необязательны: старый сервер их не присылает.
+              total_words?: number;
+              quiz_type?: TQuizletQuizType;
+              translation_direction?: "jp_to_ru" | "ru_to_jp";
           };
       }
     | {

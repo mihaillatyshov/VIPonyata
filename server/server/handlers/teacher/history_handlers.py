@@ -37,6 +37,8 @@ def _get_quizlet_mode_label(quiz_type: str) -> str:
         return "Парочки"
     if quiz_type == "flashcards":
         return "Флешкарточки"
+    if quiz_type == "writing":
+        return "Пишем"
     return quiz_type
 
 

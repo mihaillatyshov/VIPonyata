@@ -24,7 +24,7 @@ interface QuizTypeOptionProps {
 }
 
 const QuizTypeOption = ({ isSelected, icon, title, description, onSelect }: QuizTypeOptionProps) => (
-    <div className="col-12 col-md-6">
+    <div className="col-12 col-md-4">
         <button
             type="button"
             className={`w-100 text-start border rounded p-3 bg-white ${
@@ -272,6 +272,7 @@ const TeacherAssignmentCreatePage = ({ catalog }: { catalog: TQuizletCatalog }) 
     const queryClient = useQueryClient();
     const [form, dispatch] = useReducer(assignmentFormReducer, initialAssignmentFormState);
     const [error, setError] = useState<string | null>(null);
+    const isWriting = form.quizType === "writing";
 
     const optionsQuery = useQuery(quizletQueries.assignmentOptions());
     const students = optionsQuery.data?.students ?? [];
@@ -346,8 +347,8 @@ const TeacherAssignmentCreatePage = ({ catalog }: { catalog: TQuizletCatalog }) 
             quiz_type: form.quizType,
             subgroup_ids: form.subgroupIds,
             personal_targets: personalTargets,
-            show_hints: form.showHints,
-            translation_direction: form.direction,
+            show_hints: isWriting ? false : form.showHints,
+            translation_direction: isWriting ? "ru_to_jp" : form.direction,
             student_ids: form.studentIds,
         });
     };
@@ -381,34 +382,53 @@ const TeacherAssignmentCreatePage = ({ catalog }: { catalog: TQuizletCatalog }) 
                                 description="Соединяй совпадающие пары как можно быстрее."
                                 onSelect={() => dispatch({ type: "setQuizType", quizType: "pair" })}
                             />
+                            <QuizTypeOption
+                                isSelected={isWriting}
+                                icon="bi-keyboard"
+                                title="Пишем"
+                                description="Ученик пишет слово хираганой."
+                                onSelect={() => dispatch({ type: "setQuizType", quizType: "writing" })}
+                            />
                         </div>
                     </div>
 
-                    <div className="col-12 col-md-4">
-                        <select
-                            className="form-select"
-                            value={form.direction}
-                            onChange={(event) =>
-                                dispatch({
-                                    type: "setDirection",
-                                    direction: event.target.value as "jp_to_ru" | "ru_to_jp",
-                                })
-                            }
-                        >
-                            <option value="jp_to_ru">jp → ru</option>
-                            <option value="ru_to_jp">ru → jp</option>
-                        </select>
-                    </div>
+                    {isWriting ? (
+                        <div className="small text-muted">
+                            Перевод всегда ru → jp. Ответ принимается только хираганой (катакана для заимствованных слов
+                            тоже засчитывается), написание иероглифами считается неверным. Сверяется с полем «чтение»
+                            слова.
+                        </div>
+                    ) : (
+                        <>
+                            <div className="col-12 col-md-4">
+                                <select
+                                    className="form-select"
+                                    value={form.direction}
+                                    onChange={(event) =>
+                                        dispatch({
+                                            type: "setDirection",
+                                            direction: event.target.value as "jp_to_ru" | "ru_to_jp",
+                                        })
+                                    }
+                                >
+                                    <option value="jp_to_ru">jp → ru</option>
+                                    <option value="ru_to_jp">ru → jp</option>
+                                </select>
+                            </div>
 
-                    <label className="form-check d-inline-flex align-items-center gap-2 mb-0">
-                        <input
-                            className="form-check-input mt-0"
-                            type="checkbox"
-                            checked={form.showHints}
-                            onChange={(event) => dispatch({ type: "setShowHints", showHints: event.target.checked })}
-                        />
-                        <span className="form-check-label">Показывать чтения</span>
-                    </label>
+                            <label className="form-check d-inline-flex align-items-center gap-2 mb-0">
+                                <input
+                                    className="form-check-input mt-0"
+                                    type="checkbox"
+                                    checked={form.showHints}
+                                    onChange={(event) =>
+                                        dispatch({ type: "setShowHints", showHints: event.target.checked })
+                                    }
+                                />
+                                <span className="form-check-label">Показывать чтения</span>
+                            </label>
+                        </>
+                    )}
 
                     <CatalogDictionaryPicker
                         catalog={catalog}

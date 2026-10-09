@@ -1,4 +1,5 @@
 import json
+from datetime import timedelta
 from typing import Any, Sequence
 
 from flask import request
@@ -72,12 +73,16 @@ def _build_notifications(notifications: Sequence[NotificationStudentToTeacher]) 
             assignment_result, quizlet_assignment, student = quizlet_result
             item_data["activity_try"] = {
                 "id": assignment_result.id,
-                "start_datetime": assignment_result.completed_at,
+                # Время сессии = конец − начало, так что начало восстанавливается точно.
+                "start_datetime": assignment_result.completed_at - timedelta(seconds=assignment_result.elapsed_seconds),
                 "end_datetime": assignment_result.completed_at,
                 "mistakes_count": assignment_result.incorrect_answers,
                 "correct_answers": assignment_result.correct_answers,
                 "skipped_words": assignment_result.skipped_words,
                 "elapsed_seconds": assignment_result.elapsed_seconds,
+                "total_words": assignment_result.total_words,
+                "quiz_type": quizlet_assignment.quiz_type,
+                "translation_direction": quizlet_assignment.translation_direction,
             }
             item_data["activity_try_id"] = assignment_result.id
             item_data["lesson"] = {

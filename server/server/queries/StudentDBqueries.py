@@ -24,7 +24,9 @@ from server.models.assessment import AssessmentTaskName
 from server.models.dictionary import DictionaryAssociationReq, DictionaryImgReq
 from server.models.quizlet import (QuizletEndSessionReq, QuizletFlashcardAnswerReq, QuizletPersonalLessonCreateReq,
                                    QuizletRetryIncorrectReq, QuizletSaveProgressReq, QuizletStartSessionReq,
-                                   QuizletSubgroupCreateReq, QuizletWordCreateReq, QuizletWordUpdateReq)
+                                   QuizletSubgroupCreateReq, QuizletWordCreateReq, QuizletWordUpdateReq,
+                                   QuizletWritingAnswerReq)
+from server.quizlet_writing import is_writing_answer_correct
 
 QUIZLET_SESSION_MAX_WORDS = 100
 
@@ -1226,39 +1228,64 @@ def mark_quizlet_pair_attempt(user_id: int, session_id: int, left_word_id: int, 
         return is_correct
 
 
+def _get_quizlet_session_with_word(session, user_id: int, session_id: int,
+                                   session_word_id: int) -> tuple[QuizletSession, QuizletSessionWord]:
+    quiz_session = session.scalars(
+        select(QuizletSession).where(QuizletSession.id == session_id).where(
+            QuizletSession.user_id == user_id)).one_or_none()
+    if quiz_session is None:
+        raise InvalidAPIUsage("Quizlet session not found", 404)
+
+    word = session.scalars(
+        select(QuizletSessionWord).where(QuizletSessionWord.id == session_word_id).where(
+            QuizletSessionWord.session_id == session_id)).one_or_none()
+    if word is None:
+        raise InvalidAPIUsage("Session word not found", 404)
+
+    return quiz_session, word
+
+
+def _apply_quizlet_card_answer(session, quiz_session: QuizletSession, word: QuizletSessionWord, is_correct: bool):
+    """Ответ на карточку (флешкарточки, «Пишем»): слово уходит из очереди, ошибочное возвращается позже."""
+    queue = _load_queue(quiz_session.queue_state)
+    queue = [item for item in queue if item != word.id]
+
+    if is_correct:
+        word.correct_attempts = word.correct_attempts + 1
+        if not word.is_correct:
+            word.is_correct = True
+            quiz_session.correct_answers = quiz_session.correct_answers + 1
+    else:
+        word.incorrect_attempts = word.incorrect_attempts + 1
+        quiz_session.incorrect_answers = quiz_session.incorrect_answers + 1
+        _mark_incorrect_word(session, quiz_session.id, word.id)
+        # Only requeue if there are other words in the queue
+        # (if queue is empty, it's the last word and will be counted as error)
+        if queue:
+            _insert_word_later_in_queue(queue, word.id)
+
+    quiz_session.queue_state = _dump_queue(queue)
+    quiz_session.updated_at = datetime.now()
+
+
 def mark_quizlet_flashcard_answer(user_id: int, session_id: int, data: QuizletFlashcardAnswerReq):
     with DBsession.begin() as session:
-        quiz_session = session.scalars(
-            select(QuizletSession).where(QuizletSession.id == session_id).where(
-                QuizletSession.user_id == user_id)).one_or_none()
-        if quiz_session is None:
-            raise InvalidAPIUsage("Quizlet session not found", 404)
+        quiz_session, word = _get_quizlet_session_with_word(session, user_id, session_id, data.session_word_id)
+        _apply_quizlet_card_answer(session, quiz_session, word, data.recognized)
 
-        word = session.scalars(
-            select(QuizletSessionWord).where(QuizletSessionWord.id == data.session_word_id).where(
-                QuizletSessionWord.session_id == session_id)).one_or_none()
-        if word is None:
-            raise InvalidAPIUsage("Session word not found", 404)
 
-        queue = _load_queue(quiz_session.queue_state)
-        queue = [item for item in queue if item != word.id]
+def mark_quizlet_writing_answer(user_id: int, session_id: int, data: QuizletWritingAnswerReq) -> dict:
+    with DBsession.begin() as session:
+        quiz_session, word = _get_quizlet_session_with_word(session, user_id, session_id, data.session_word_id)
+        if quiz_session.quiz_type != QuizletSession.Type.WRITING:
+            raise InvalidAPIUsage("Сессия не в режиме «Пишем»", 400)
+        if quiz_session.is_finished:
+            raise InvalidAPIUsage("Тренировка уже завершена", 400)
 
-        if data.recognized:
-            word.correct_attempts = word.correct_attempts + 1
-            if not word.is_correct:
-                word.is_correct = True
-                quiz_session.correct_answers = quiz_session.correct_answers + 1
-        else:
-            word.incorrect_attempts = word.incorrect_attempts + 1
-            quiz_session.incorrect_answers = quiz_session.incorrect_answers + 1
-            _mark_incorrect_word(session, session_id, word.id)
-            # Only requeue if there are other words in the queue
-            # (if queue is empty, it's the last word and will be counted as error)
-            if queue:
-                _insert_word_later_in_queue(queue, word.id)
+        is_correct = is_writing_answer_correct(data.answer, word.word_jp)
+        _apply_quizlet_card_answer(session, quiz_session, word, is_correct)
 
-        quiz_session.queue_state = _dump_queue(queue)
-        quiz_session.updated_at = datetime.now()
+        return {"is_correct": is_correct, "word_jp": word.word_jp, "char_jp": word.char_jp}
 
 
 def mark_quizlet_flashcard_viewed(user_id: int, session_id: int, session_word_id: int):

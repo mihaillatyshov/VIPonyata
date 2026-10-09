@@ -1,8 +1,10 @@
-import type { KeyboardEventHandler } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { formatDuration } from "components/Quizlet/quizletUtils";
 import { TTeacherNotification, TTeacherNotificationWithActivity } from "models/TNotification";
+
+import { getQuizletTags, splitDateTime, TEACHER_ACTIVITY_TYPE_META, TeacherActivityMetric } from "./teacherActivity";
+import TeacherActivityCard from "./TeacherActivityCard";
 
 // const getTypeName = (item: TTeacherNotificationWithActivity) => {
 //     switch (item.type) {
@@ -16,16 +18,6 @@ import { TTeacherNotification, TTeacherNotificationWithActivity } from "models/T
 //             return "Финальный босс";
 //     }
 // };
-
-const splitDateTime = (datetime?: string | null) => {
-    if (!datetime) {
-        return { date: "-", time: "-" };
-    }
-
-    const [date = "-", time = "-"] = datetime.split(" ");
-
-    return { date, time };
-};
 
 const hasLink = (item: TTeacherNotificationWithActivity): boolean => {
     switch (item.type) {
@@ -109,54 +101,16 @@ const getStartDateTime = (item: TTeacherNotificationWithActivity) => {
     return splitDateTime(startDatetime);
 };
 
-const getNotificationTypeMeta = (item: TTeacherNotificationWithActivity) => {
-    switch (item.type) {
-        case "drilling_try":
-            return {
-                label: "Лексика",
-                iconClass: "bi-lightning-charge",
-                toneClass: "notification__item--practice",
-            };
-        case "hieroglyph_try":
-            return {
-                label: "Кандзи",
-                iconClass: "bi-pencil-square",
-                toneClass: "notification__item--glyph",
-            };
-        case "assessment_try":
-            return {
-                label: "Тест",
-                iconClass: "bi-ui-checks-grid",
-                toneClass: "notification__item--assessment",
-            };
-        case "final_boss_try":
-            return {
-                label: "Финальный босс",
-                iconClass: "bi-trophy",
-                toneClass: "notification__item--boss",
-            };
-        case "quizlet_assignment_result":
-            return {
-                label: "Quizlet",
-                iconClass: "bi-collection",
-                toneClass: "notification__item--quizlet",
-            };
-        case "homework_try":
-            return {
-                label: "Домашняя работа",
-                iconClass: "bi-journal-check",
-                toneClass: "notification__item--homework",
-            };
+/** Заголовок карточки; у задания Quizlet — с числом выданных слов: «Повторение N4 (24)». */
+const getNotificationTitle = (item: TTeacherNotificationWithActivity): string => {
+    if (item.type === "quizlet_assignment_result" && item.activity_try.total_words !== undefined) {
+        return `${item.lesson.name} (${item.activity_try.total_words})`;
     }
+
+    return item.lesson.name;
 };
 
-interface TeacherNotificationMetric {
-    iconClass: string;
-    label: string;
-    value: string;
-}
-
-const getNotificationMetrics = (item: TTeacherNotificationWithActivity): TeacherNotificationMetric[] => {
+const getNotificationMetrics = (item: TTeacherNotificationWithActivity): TeacherActivityMetric[] => {
     const { date, time } = splitDateTime(item.creation_datetime);
     const startDateTime = getStartDateTime(item);
     const mistakesCount = getMistakesCount(item);
@@ -164,7 +118,7 @@ const getNotificationMetrics = (item: TTeacherNotificationWithActivity): Teacher
     const skippedWordsCount = getSkippedWordsCount(item);
     const elapsedSeconds = getElapsedSeconds(item);
 
-    const metrics: TeacherNotificationMetric[] = [
+    const metrics: TeacherActivityMetric[] = [
         {
             iconClass: "bi-calendar3",
             label: "Дата",
@@ -186,8 +140,14 @@ const getNotificationMetrics = (item: TTeacherNotificationWithActivity): Teacher
         });
     }
 
+    // Первая строка — когда и сколько длилось, вторая — результат.
     if (item.type === "quizlet_assignment_result" || item.type === "homework_try") {
         metrics.push(
+            {
+                iconClass: "bi-stopwatch",
+                label: item.type === "homework_try" ? "Выполнение" : "Время",
+                value: elapsedSeconds !== null ? formatDuration(elapsedSeconds) : "-",
+            },
             {
                 iconClass: "bi-exclamation-circle",
                 label: "Ошибки",
@@ -207,12 +167,6 @@ const getNotificationMetrics = (item: TTeacherNotificationWithActivity): Teacher
                 value: `${skippedWordsCount ?? "-"}`,
             });
         }
-
-        metrics.push({
-            iconClass: "bi-stopwatch",
-            label: item.type === "homework_try" ? "Выполнение" : "Время",
-            value: elapsedSeconds !== null ? formatDuration(elapsedSeconds) : "-",
-        });
 
         return metrics;
     }
@@ -249,17 +203,6 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
 
     const isClickable = !isPlainMessage && hasLink(item);
     const { date, time } = splitDateTime(item.creation_datetime);
-
-    const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = (event) => {
-        if (!isClickable) {
-            return;
-        }
-
-        if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            handleClick();
-        }
-    };
 
     if (isPlainMessage) {
         return (
@@ -312,68 +255,24 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
     }
 
     const activityItem = item;
-
-    const typeMeta = getNotificationTypeMeta(activityItem);
-    const studentLabel = `${activityItem.user.nickname} (${activityItem.user.name})`;
-    const metrics = getNotificationMetrics(activityItem);
+    const typeMeta =
+        TEACHER_ACTIVITY_TYPE_META[activityItem.type === "quizlet_assignment_result" ? "quizlet" : activityItem.type];
+    const quizletTags =
+        activityItem.type === "quizlet_assignment_result"
+            ? getQuizletTags(activityItem.activity_try.quiz_type, activityItem.activity_try.translation_direction)
+            : [];
 
     return (
-        <div
-            className={`notification__item notification__item--teacher ${typeMeta.toneClass} ${item.viewed ? "viewed" : ""} ${isClickable ? "clickable" : ""}`}
-            onClick={handleClick}
-            onKeyDown={handleKeyDown}
-            role={isClickable ? "button" : undefined}
-            tabIndex={isClickable ? 0 : undefined}
-        >
-            <div className="notification__item-main">
-                <div className="notification__item-header">
-                    <div className="notification__item-title-group">
-                        <div className="notification__item-badge" title={typeMeta.label}>
-                            <i className={`bi ${typeMeta.iconClass}`} aria-hidden="true"></i>
-                            <span>{typeMeta.label}</span>
-                        </div>
-                        {!item.viewed ? <span className="notification__item-state">Новое</span> : null}
-                    </div>
-                    {isClickable ? (
-                        <div className="notification__item-link-hint">
-                            <span>Открыть</span>
-                            <i className="bi bi-arrow-up-right" aria-hidden="true"></i>
-                        </div>
-                    ) : null}
-                </div>
-
-                <div className="notification__item-title-row">
-                    <div className="notification__item-icon" aria-hidden="true">
-                        <i className={`bi ${typeMeta.iconClass}`}></i>
-                    </div>
-                    <div className="notification__item-title-block">
-                        <div className="notification__item-title">{activityItem.lesson.name}</div>
-                        <div className="notification__item-subtitle" title={studentLabel}>
-                            <i className="bi bi-person" aria-hidden="true"></i>
-                            <span>{studentLabel}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="notification__item-metrics">
-                    {metrics.map((metric) => (
-                        <div
-                            key={`${item.id}_${metric.label}`}
-                            className="notification__item-metric"
-                            title={metric.label}
-                        >
-                            <span className="notification__item-metric-icon" aria-hidden="true">
-                                <i className={`bi ${metric.iconClass}`}></i>
-                            </span>
-                            <div className="notification__item-metric-text">
-                                <span className="notification__item-metric-label">{metric.label}</span>
-                                <span className="notification__item-metric-value">{metric.value}</span>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
+        <TeacherActivityCard
+            typeMeta={typeMeta}
+            tags={quizletTags}
+            state={item.viewed ? null : "Новое"}
+            title={getNotificationTitle(activityItem)}
+            studentLabel={`${activityItem.user.nickname} (${activityItem.user.name})`}
+            metrics={getNotificationMetrics(activityItem)}
+            viewed={item.viewed}
+            onOpen={isClickable ? handleClick : undefined}
+        />
     );
 };
 

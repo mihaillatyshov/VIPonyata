@@ -1,12 +1,15 @@
 import { TQuizletSessionWithQueue } from "api/quizlet";
+import { TQuizletQuizType } from "models/TQuizlet";
 
 import FlashcardExercise from "../FlashcardExercise";
 import MatchingExercise from "../MatchingExercise";
 import QuizletSessionResults from "../QuizletSessionResults";
 import TrainingSessionHeader from "../TrainingSessionHeader";
+import WritingExercise from "../WritingExercise";
 import { QuizletSessionState } from "./useQuizletSession";
 
 const MATCHING_PAGE_SIZE = 12;
+const KNOWN_QUIZ_TYPES: TQuizletQuizType[] = ["pair", "flashcards", "writing"];
 
 interface QuizletTrainingSessionProps {
     session: TQuizletSessionWithQueue;
@@ -14,7 +17,7 @@ interface QuizletTrainingSessionProps {
     onFinish: () => void;
 }
 
-/** Идущая тренировка (карточки или пары) либо её результаты. */
+/** Идущая тренировка (карточки, пары или «Пишем») либо её результаты. */
 const QuizletTrainingSession = ({ session, state, onFinish }: QuizletTrainingSessionProps) => {
     const matchingTotalPages = Math.max(1, Math.ceil(session.total_words / MATCHING_PAGE_SIZE));
     const matchingCurrentPage = Math.min(
@@ -36,7 +39,7 @@ const QuizletTrainingSession = ({ session, state, onFinish }: QuizletTrainingSes
 
     return (
         <div className="quizlet-session-shell p-3 ">
-            {!session.is_finished && session.quiz_type !== "flashcards" && session.quiz_type !== "pair" && (
+            {!session.is_finished && !KNOWN_QUIZ_TYPES.includes(session.quiz_type) && (
                 <div className="mb-3">
                     <div className="training-session-header-shell">{header}</div>
                 </div>
@@ -68,6 +71,20 @@ const QuizletTrainingSession = ({ session, state, onFinish }: QuizletTrainingSes
                     onFinishTraining={state.endNow}
                     onWordVisible={state.markFlashcardVisible}
                     onAnswer={state.submitFlashcard}
+                />
+            )}
+
+            {!session.is_finished && session.quiz_type === "writing" && (
+                <WritingExercise
+                    words={state.orderedSessionWords}
+                    queue={state.queue}
+                    totalWords={session.total_words}
+                    unresolvedCount={state.unresolvedCount}
+                    incorrectAnswers={session.incorrect_answers}
+                    elapsedSeconds={state.liveElapsedSeconds}
+                    onFinishTraining={state.endNow}
+                    onAnswer={state.submitWritingAnswer}
+                    onComplete={state.finishWriting}
                 />
             )}
 

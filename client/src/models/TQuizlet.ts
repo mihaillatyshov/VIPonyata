@@ -37,9 +37,12 @@ export interface TQuizletLesson {
     created_at: string;
 }
 
+/** Режим тренировки: пары, карточки или «Пишем» (перевод с русского, ответ хираганой). */
+export type TQuizletQuizType = "pair" | "flashcards" | "writing";
+
 export interface TQuizletSession {
     id: number;
-    quiz_type: "pair" | "flashcards";
+    quiz_type: TQuizletQuizType;
     show_hints: boolean;
     translation_direction: "jp_to_ru" | "ru_to_jp";
     is_finished: boolean;
@@ -75,7 +78,7 @@ export interface TQuizletSessionWord {
 export interface TQuizletAssignment {
     id: number;
     title: string;
-    quiz_type: "pair" | "flashcards";
+    quiz_type: TQuizletQuizType;
     show_hints: boolean;
     translation_direction: "jp_to_ru" | "ru_to_jp";
     max_words: number;

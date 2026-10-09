@@ -8,10 +8,17 @@ import {
     TQuizletPersonalDictionary,
 } from "api/quizlet";
 import { useStudentHubQuery } from "components/Notifications/useNotificationsHub";
+import { TQuizletQuizType } from "models/TQuizlet";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import QuizletQuizStart, { type StartPayload } from "../QuizletQuizStart";
+
+const QUIZ_TYPE_LABELS: Record<TQuizletQuizType, string> = {
+    flashcards: "Карточки",
+    pair: "Пары",
+    writing: "Пишем",
+};
 
 const formatSessionStartDateTime = (value: string): string => {
     const date = new Date(value);
@@ -82,7 +89,7 @@ const QuizletTrainingSetup = ({ catalog, personal, onStart, onContinue, onHubCha
                     <div>
                         <div className="fw-semibold mb-1">Есть незавершенная тренировка</div>
                         <div className="small">
-                            Тип: {unfinishedSession.quiz_type === "flashcards" ? "Карточки" : "Пары"} • Прогресс:{" "}
+                            Тип: {QUIZ_TYPE_LABELS[unfinishedSession.quiz_type]} • Прогресс:{" "}
                             {unfinishedSession.correct_answers}/{unfinishedSession.total_words}
                         </div>
                         <div className="small">Начало: {formatSessionStartDateTime(unfinishedSession.started_at)}</div>

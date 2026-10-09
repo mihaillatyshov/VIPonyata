@@ -68,6 +68,10 @@ const formatAssignmentMode = (
         return "пары";
     }
 
+    if (quizType === "writing") {
+        return "пишем";
+    }
+
     if (value === "ru_to_jp") {
         return "rus-jp";
     }

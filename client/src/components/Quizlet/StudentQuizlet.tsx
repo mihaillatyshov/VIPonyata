@@ -14,7 +14,12 @@ import QuizletTrainingSession from "./Student/QuizletTrainingSession";
 import QuizletTrainingSetup from "./Student/QuizletTrainingSetup";
 import StudentQuizletModeSelection from "./Student/StudentQuizletModeSelection";
 import StudentQuizletProgress from "./Student/StudentQuizletProgress";
-import { studentQuizletPaths, StudentQuizletRoute, useStudentQuizletRoute } from "./Student/studentQuizletRoutes";
+import {
+    getExercisePath,
+    studentQuizletPaths,
+    StudentQuizletRoute,
+    useStudentQuizletRoute,
+} from "./Student/studentQuizletRoutes";
 import TeacherDictionariesView from "./Student/TeacherDictionariesView";
 import { useQuizletSession } from "./Student/useQuizletSession";
 
@@ -26,6 +31,7 @@ const PAGE_TITLES: Partial<Record<StudentQuizletRoute["kind"], string>> = {
     flashcards: "フラッシュカード",
     results: "スコア",
     pairs: "ペア",
+    writing: "書き取り",
 };
 
 const getPageBackUrl = (route: StudentQuizletRoute) => {
@@ -35,6 +41,7 @@ const getPageBackUrl = (route: StudentQuizletRoute) => {
             return studentQuizletPaths.modeSelection;
         case "flashcards":
         case "pairs":
+        case "writing":
         case "results":
             return undefined;
         default:
@@ -76,7 +83,7 @@ const StudentQuizlet = () => {
     const quizletSession = useQuizletSession(() => refreshHub());
     const { session, closeSession } = quizletSession;
 
-    // Страница тренировки соответствует состоянию сессии: идёт — карточки/пары, завершена — результаты.
+    // Страница тренировки соответствует состоянию сессии: идёт — карточки/пары/«Пишем», завершена — результаты.
     useEffect(() => {
         if (session !== null) {
             if (session.is_finished && route.kind === "mode-selection") {
@@ -84,11 +91,7 @@ const StudentQuizlet = () => {
                 return;
             }
 
-            const targetPath = session.is_finished
-                ? studentQuizletPaths.results
-                : session.quiz_type === "flashcards"
-                  ? studentQuizletPaths.flashcards
-                  : studentQuizletPaths.pairs;
+            const targetPath = session.is_finished ? studentQuizletPaths.results : getExercisePath(session.quiz_type);
 
             if (pathname !== targetPath) {
                 navigate(targetPath, { replace: true });
@@ -96,7 +99,12 @@ const StudentQuizlet = () => {
             return;
         }
 
-        if (route.kind === "flashcards" || route.kind === "pairs" || route.kind === "results") {
+        if (
+            route.kind === "flashcards" ||
+            route.kind === "pairs" ||
+            route.kind === "writing" ||
+            route.kind === "results"
+        ) {
             navigate(studentQuizletPaths.setup, { replace: true });
         }
     }, [session, pathname, route.kind, navigate, closeSession]);

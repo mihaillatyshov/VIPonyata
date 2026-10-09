@@ -1,0 +1,162 @@
+.writing-card {
+    width: 100%;
+    min-height: clamp(260px, 42vw, 340px);
+    position: relative;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 16px;
+    background: linear-gradient(165deg, #fefeff 0%, #f7f9fc 100%);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    animation: flashcard-card-enter 260ms cubic-bezier(0.2, 0.85, 0.3, 1);
+    transition:
+        background 180ms ease,
+        border-color 180ms ease;
+}
+
+.writing-card.is-correct {
+    border-color: rgba(57, 176, 117, 0.55);
+    background: linear-gradient(165deg, #f4fff8 0%, #e6f7ed 100%);
+    animation: writing-card-correct 360ms ease;
+}
+
+.writing-card.is-incorrect {
+    border-color: rgba(209, 86, 86, 0.55);
+    background: linear-gradient(165deg, #fff7f7 0%, #fbe9e9 100%);
+    animation: writing-card-incorrect 360ms ease;
+}
+
+.writing-card-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+    padding: clamp(64px, 10vw, 76px) 22px 22px;
+}
+
+.writing-card-ru {
+    font-size: clamp(1.6rem, 4.5vw, 2.3rem);
+    line-height: 1.2;
+    font-weight: 700;
+    color: #132033;
+}
+
+.writing-card-instruction {
+    font-size: clamp(0.9rem, 2vw, 1rem);
+    color: #55657a;
+}
+
+.writing-card-answer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.writing-card-verdict {
+    font-size: clamp(0.95rem, 2.2vw, 1.1rem);
+    font-weight: 600;
+}
+
+.writing-card.is-correct .writing-card-verdict {
+    color: #1c7a4f;
+}
+
+.writing-card.is-incorrect .writing-card-verdict {
+    color: #a73737;
+}
+
+.writing-card-kana {
+    font-size: clamp(2rem, 6vw, 3rem);
+    line-height: 1.2;
+    font-weight: 700;
+    color: #132033;
+}
+
+.writing-card-kanji {
+    font-size: clamp(1rem, 2.7vw, 1.35rem);
+    color: #55657a;
+}
+
+.writing-form {
+    display: flex;
+    gap: 8px;
+    width: min(100%, var(--flashcard-max-width));
+    margin: 4px auto 0;
+}
+
+.writing-input {
+    flex: 1;
+    min-width: 0;
+    font-size: clamp(1.1rem, 2.6vw, 1.3rem);
+    text-align: center;
+}
+
+.writing-input.is-correct,
+.writing-input.is-correct:focus {
+    border-color: #39b075;
+    background-color: #f4fff8;
+    color: #1c7a4f;
+    box-shadow: 0 0 0 0.2rem rgba(57, 176, 117, 0.2);
+}
+
+.writing-input.is-incorrect,
+.writing-input.is-incorrect:focus {
+    border-color: #d15656;
+    background-color: #fff7f7;
+    color: #a73737;
+    text-decoration: line-through;
+    box-shadow: 0 0 0 0.2rem rgba(209, 86, 86, 0.2);
+}
+
+.writing-submit-btn {
+    flex: 0 0 auto;
+    min-width: 120px;
+}
+
+.writing-footer {
+    width: min(100%, var(--flashcard-max-width));
+    margin: 0 auto;
+    min-height: 24px;
+    text-align: center;
+    font-size: clamp(0.86rem, 1.6vw, 0.95rem);
+}
+
+@keyframes writing-card-correct {
+    0% {
+        transform: scale(1);
+    }
+
+    40% {
+        transform: scale(1.025);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes writing-card-incorrect {
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    20%,
+    60% {
+        transform: translateX(-8px);
+    }
+
+    40%,
+    80% {
+        transform: translateX(8px);
+    }
+}
+
+@media (max-width: 576px) {
+    .writing-submit-btn {
+        min-width: 96px;
+    }
+}

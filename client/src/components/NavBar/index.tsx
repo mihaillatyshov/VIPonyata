@@ -12,7 +12,8 @@ const NavBar = () => {
     const [showNotifications, setShowNotifications] = useState<boolean>(false);
     const unreadCount = useUnreadNotificationsCount() ?? 0;
     const location = useLocation();
-    const isFlashcardExerciseRoute = location.pathname === "/quizlet/flashcards";
+    const isFlashcardExerciseRoute =
+        location.pathname === "/quizlet/flashcards" || location.pathname === "/quizlet/writing";
     const isTasksRoute = location.pathname.startsWith("/tasks");
     const isReviewRoute = location.pathname.startsWith("/review");
     const isWheelTrainerRoute = location.pathname.startsWith("/teacher/wheel-trainer");
