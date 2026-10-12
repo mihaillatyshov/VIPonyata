@@ -23,6 +23,14 @@ class TestQuizletWriting(unittest.TestCase):
         self.assertTrue(is_writing_answer_correct("コーヒー", "こーひー"))
         self.assertTrue(is_writing_answer_correct("ｺｰﾋｰ", "コーヒー"))
 
+    def test_katakana_only_in_char_jp(self):
+        self.assertTrue(is_writing_answer_correct("コーヒー", "", "コーヒー"))
+        self.assertTrue(is_writing_answer_correct("テレビ", "てれび", "テレビ"))
+        self.assertFalse(is_writing_answer_correct("テレビ", "", "コーヒー"))
+
+    def test_kanji_char_jp_is_not_answer(self):
+        self.assertFalse(is_writing_answer_correct("食べる", "たべる", "食べる"))
+
     def test_kanji_is_not_accepted(self):
         self.assertFalse(is_writing_answer_correct("食べる", "たべる"))
 

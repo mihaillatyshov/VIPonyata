@@ -20,10 +20,10 @@ type WritingFeedback = TQuizletWritingAnswerResult & {
 /** Подсказка, почему ответ не отправлен (не засчитывается как ошибка). */
 const getInputWarning = (answer: string): string | null => {
     if (KANJI_RE.test(answer)) {
-        return "Пиши хираганой — без иероглифов";
+        return "Пиши хираганой или катаканой — без иероглифов";
     }
     if (LATIN_RE.test(answer)) {
-        return "Включи японскую раскладку и напиши слово хираганой";
+        return "Включи японскую раскладку и напиши слово хираганой или катаканой";
     }
     return null;
 };
@@ -162,7 +162,7 @@ const WritingExercise = ({
                         <div className="writing-card-ru">{currentWord.ru}</div>
 
                         {feedback === null ? (
-                            <div className="writing-card-instruction">Напиши по-японски хираганой</div>
+                            <div className="writing-card-instruction">Напиши по-японски хираганой или катаканой</div>
                         ) : (
                             <div className="writing-card-answer">
                                 <div className="writing-card-verdict">
@@ -195,14 +195,14 @@ const WritingExercise = ({
                     }}
                     onKeyDown={handleKeyDown}
                     readOnly={feedback !== null || isSending}
-                    placeholder="ひらがなで…"
+                    placeholder="ひらがな・カタカナで…"
                     lang="ja"
                     autoComplete="off"
                     autoCorrect="off"
                     autoCapitalize="off"
                     spellCheck={false}
                     enterKeyHint={feedback === null ? "done" : "next"}
-                    aria-label="Ответ хираганой"
+                    aria-label="Ответ хираганой или катаканой"
                 />
                 <button
                     type="submit"

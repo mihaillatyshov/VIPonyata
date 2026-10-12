@@ -1282,7 +1282,7 @@ def mark_quizlet_writing_answer(user_id: int, session_id: int, data: QuizletWrit
         if quiz_session.is_finished:
             raise InvalidAPIUsage("Тренировка уже завершена", 400)
 
-        is_correct = is_writing_answer_correct(data.answer, word.word_jp)
+        is_correct = is_writing_answer_correct(data.answer, word.word_jp, word.char_jp)
         _apply_quizlet_card_answer(session, quiz_session, word, is_correct)
 
         return {"is_correct": is_correct, "word_jp": word.word_jp, "char_jp": word.char_jp}
