@@ -140,7 +140,7 @@ const LessonProcessingPage = ({ processingType }: LessonProcessingPageProps) => 
                 navigate(`/courses/${courseId}`);
             })
             .catch(() => {
-                setError("Необходимо удалить все задания в этом уроке (Или нет соединения)");
+                setError("Не удалось удалить урок");
             });
     };
 

@@ -72,6 +72,7 @@ def delete_lesson_by_id(lesson_id: int):
         raise LessonNotFoundException(lesson_id)
 
     DBQT.delete_lesson_by_id(lesson_id)
+    DBQT.clear_dictionary()
 
     return {"message": "Lesson deleted successfully"}
 

@@ -1,6 +1,6 @@
 from datetime import datetime
 import json
-from typing import Generic, Type, TypedDict
+from typing import Any, Generic, Type, TypedDict
 
 from sqlalchemy import Delete, Select, delete, select, update
 from sqlalchemy.orm import selectinload
@@ -149,6 +149,51 @@ def update_lesson(lesson_id: int, lesson_data: LessonCreateReq):
 
 def delete_lesson_by_id(lesson_id: int):
     with DBsession.begin() as session:
+        lexis_types: list[tuple[Any, Any, Any]] = [(Drilling, DrillingTry, DrillingCard),
+                                                   (Hieroglyph, HieroglyphTry, HieroglyphCard)]
+        assessment_types: list[tuple[Any, Any, Any]] = [
+            (Assessment, AssessmentTry, NotificationTeacherToStudent.assessment_try_id),
+            (FinalBoss, FinalBossTry, NotificationTeacherToStudent.final_boss_try_id)
+        ]
+
+        for activity_type, try_type, card_type in lexis_types:
+            activity_ids = select(activity_type.id).where(activity_type.lesson_id == lesson_id)
+            try_ids = select(try_type.id).where(try_type.base_id.in_(activity_ids))
+            session.execute(modify_delete_by_activity_try_type(try_type, delete(NotificationStudentToTeacher), try_ids))
+            session.execute(delete(try_type).where(try_type.base_id.in_(activity_ids)))
+            session.execute(delete(card_type).where(card_type.base_id.in_(activity_ids)))
+            session.execute(delete(activity_type).where(activity_type.lesson_id == lesson_id))
+
+        session.execute(delete(NotificationTeacherToStudent).where(NotificationTeacherToStudent.lesson_id == lesson_id))
+
+        assessment_ids = select(Assessment.id).where(Assessment.lesson_id == lesson_id)
+        # Задания банка, синхронизированные из теста урока и не изменённые вручную, удаляем вместе с уроком,
+        # остальные оставляем в банке без привязки к уроку. В ДЗ хранится копия задания, поэтому ссылку обнуляем.
+        bank_item_ids = session.scalars(
+            select(TaskBankItem.id).where(TaskBankItem.source_assessment_id.in_(assessment_ids)).where(
+                TaskBankItem.is_customized == False)).all()
+        if bank_item_ids:
+            session.execute(
+                update(HomeworkAssignmentTask).where(
+                    HomeworkAssignmentTask.task_bank_item_id.in_(bank_item_ids)).values(task_bank_item_id=None))
+            session.execute(delete(TaskBankItem).where(TaskBankItem.id.in_(bank_item_ids)))
+        session.execute(
+            update(TaskBankItem).where(TaskBankItem.source_assessment_id.in_(assessment_ids)).values(
+                source_assessment_id=None, source_task_index=None, source_block_index=None))
+        session.execute(update(TaskBankItem).where(TaskBankItem.lesson_id == lesson_id).values(lesson_id=None))
+        session.execute(
+            update(HomeworkAssignmentTask).where(HomeworkAssignmentTask.lesson_id == lesson_id).values(lesson_id=None))
+        session.execute(delete(TaskBankHiddenLesson).where(TaskBankHiddenLesson.lesson_id == lesson_id))
+
+        for activity_type, try_type, check_notification_try_id in assessment_types:
+            activity_ids = select(activity_type.id).where(activity_type.lesson_id == lesson_id)
+            try_ids = select(try_type.id).where(try_type.base_id.in_(activity_ids))
+            session.execute(modify_delete_by_activity_try_type(try_type, delete(NotificationStudentToTeacher), try_ids))
+            session.execute(delete(NotificationTeacherToStudent).where(check_notification_try_id.in_(try_ids)))
+            session.execute(delete(try_type).where(try_type.base_id.in_(activity_ids)))
+            session.execute(delete(activity_type).where(activity_type.lesson_id == lesson_id))
+
+        session.execute(a_users_lessons.delete().where(a_users_lessons.c.lesson_id == lesson_id))
         session.execute(delete(Lesson).where(Lesson.id == lesson_id))
 
 
