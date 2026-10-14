@@ -239,50 +239,62 @@ const TeacherHistoryPage = () => {
             return <div className={styles.emptyState}>Пока нет учеников.</div>;
         }
 
-        return (
-            <div className={styles.studentsCompactGrid}>
-                {sortedStudents.map((student) => {
-                    const isActive = student.id === selectedStudentId;
-                    const hasActions = student.actions_count > 0;
+        const visibleStudents = sortedStudents.filter((student) => !student.is_hidden);
+        const hiddenStudents = sortedStudents.filter((student) => student.is_hidden);
 
-                    return (
-                        <button
-                            key={student.id}
-                            type="button"
-                            className={`${styles.studentCardCompact} ${isActive ? styles.studentCardActive : ""} ${
-                                hasActions ? styles.studentCardHighlighted : ""
-                            }`}
-                            onClick={() => navigate(`/teacher/history/students/${student.id}`)}
-                        >
-                            <div className={styles.studentCardCompactTopRow}>
-                                <div
-                                    className={`${styles.studentNick} ${student.is_hidden ? styles.studentNickHidden : ""}`}
-                                >
-                                    {student.nickname}
-                                    {student.is_hidden && (
-                                        <span className={styles.studentHiddenBadge}>
-                                            <i className="bi bi-eye-slash" aria-hidden="true"></i>
-                                            скрыт
-                                        </span>
-                                    )}
-                                </div>
-                                <div
-                                    className={`${styles.studentActionsBadge} ${
-                                        hasActions ? styles.studentActionsBadgeActive : styles.studentActionsBadgeMuted
-                                    }`}
-                                >
-                                    {student.actions_count}
-                                </div>
-                            </div>
-                            <div
-                                className={`${styles.studentName} ${student.is_hidden ? styles.studentNameHidden : ""}`}
-                            >
-                                {student.name}
-                            </div>
-                        </button>
-                    );
-                })}
-            </div>
+        return (
+            <>
+                {visibleStudents.length > 0 && (
+                    <div className={styles.studentsCompactGrid}>{visibleStudents.map(renderStudentCard)}</div>
+                )}
+                {hiddenStudents.length > 0 && (
+                    <>
+                        <div className={styles.hiddenStudentsTitle}>
+                            <i className="bi bi-eye-slash" aria-hidden="true"></i>
+                            Скрытые ученики
+                        </div>
+                        <div className={styles.studentsCompactGrid}>{hiddenStudents.map(renderStudentCard)}</div>
+                    </>
+                )}
+            </>
+        );
+    };
+
+    const renderStudentCard = (student: TTeacherHistoryStudentWithCount) => {
+        const isActive = student.id === selectedStudentId;
+        const hasActions = student.actions_count > 0;
+
+        return (
+            <button
+                key={student.id}
+                type="button"
+                className={`${styles.studentCardCompact} ${isActive ? styles.studentCardActive : ""} ${
+                    hasActions ? styles.studentCardHighlighted : ""
+                }`}
+                onClick={() => navigate(`/teacher/history/students/${student.id}`)}
+            >
+                <div className={styles.studentCardCompactTopRow}>
+                    <div className={`${styles.studentNick} ${student.is_hidden ? styles.studentNickHidden : ""}`}>
+                        {student.nickname}
+                        {student.is_hidden && (
+                            <span className={styles.studentHiddenBadge}>
+                                <i className="bi bi-eye-slash" aria-hidden="true"></i>
+                                скрыт
+                            </span>
+                        )}
+                    </div>
+                    <div
+                        className={`${styles.studentActionsBadge} ${
+                            hasActions ? styles.studentActionsBadgeActive : styles.studentActionsBadgeMuted
+                        }`}
+                    >
+                        {student.actions_count}
+                    </div>
+                </div>
+                <div className={`${styles.studentName} ${student.is_hidden ? styles.studentNameHidden : ""}`}>
+                    {student.name}
+                </div>
+            </button>
         );
     };
 

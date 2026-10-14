@@ -415,6 +415,20 @@
     line-height: 1.2;
 }
 
+.hiddenStudentsTitle {
+    display: flex;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 910px;
+    margin: 28px auto 12px;
+    padding-left: 18px;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #6d7a84;
+}
+
 .studentNickHidden {
     color: #6d7a84;
 }
