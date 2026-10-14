@@ -12,6 +12,16 @@ type TNotificationAssessmentType = Pick<TAssessmentTry, "id" | "base_id" | "star
 
 type TNotificationLexisType = Pick<TLexisTry, "id" | "start_datetime" | "end_datetime">;
 
+type TNotificationQuizletType = TNotificationAssessmentType & {
+    correct_answers: number;
+    skipped_words: number;
+    elapsed_seconds: number;
+    // Необязательны: старый сервер их не присылает.
+    total_words?: number;
+    quiz_type?: TQuizletQuizType;
+    translation_direction?: "jp_to_ru" | "ru_to_jp";
+};
+
 export interface TNotificationBase {
     id: number;
     creation_datetime: string;
@@ -35,14 +45,13 @@ type TTeacherNotificationActivity = {
       }
     | {
           type: "quizlet_assignment_result";
-          activity_try: TNotificationAssessmentType & {
-              correct_answers: number;
-              skipped_words: number;
-              elapsed_seconds: number;
-              // Необязательны: старый сервер их не присылает.
-              total_words?: number;
-              quiz_type?: TQuizletQuizType;
-              translation_direction?: "jp_to_ru" | "ru_to_jp";
+          activity_try: TNotificationQuizletType;
+      }
+    | {
+          // Самостоятельная тренировка Quizlet или повтор уже выполненного задания.
+          type: "quizlet_session";
+          activity_try: TNotificationQuizletType & {
+              is_assignment_retry: boolean;
           };
       }
     | {

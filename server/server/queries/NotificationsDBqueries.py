@@ -201,6 +201,19 @@ def get_quizlet_assignment_results_details(
         return {result.id: (result, assignment, user) for result, assignment, user in rows}
 
 
+def get_quizlet_sessions_details(session_ids: set[int]) -> dict[int, tuple[QuizletSession, User]]:
+    if len(session_ids) == 0:
+        return {}
+
+    with DBsession.begin() as session:
+        rows = session.execute(
+            select(QuizletSession, User)                                                                                #
+            .options(defer(QuizletSession.queue_state))                                                                 #
+            .join(User, User.id == QuizletSession.user_id)                                                              #
+            .where(QuizletSession.id.in_(session_ids))).all()
+        return {quizlet_session.id: (quizlet_session, user) for quizlet_session, user in rows}
+
+
 def get_quizlet_assignment_titles(assignment_ids: set[int]) -> dict[int, str]:
     if len(assignment_ids) == 0:
         return {}

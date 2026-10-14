@@ -28,6 +28,8 @@
 
 Две таблицы: `notifications_student_to_teacher` (ученик завершил попытку/задание — видит учитель) и `notifications_teacher_to_student` (учитель открыл курс/урок, проверил работу, назначил задание).
 
+Что попадает учителю: каждая завершённая попытка активности урока (в том числе повторные), завершённая домашняя работа, первый результат задания Quizlet (`quizlet_assignment_result_id`) и любая другая завершённая сессия Quizlet хотя бы с одним ответом — самостоятельная тренировка или повтор задания (`quizlet_session_id`, тип `quizlet_session`). В истории учителя сессии Quizlet берутся из `quizlet_sessions` напрямую, поэтому уведомления `quizlet_session` туда не попадают.
+
 Эндпоинты (`handlers/{teacher,student}/notifications_handlers.py`, запросы — `queries/NotificationsDBqueries.py`):
 
 - `GET /api/notifications/unread_count` → `{count}` — единственное, что клиент опрашивает (раз в минуту, только в видимой вкладке; polling, без websocket).

@@ -489,6 +489,11 @@ class NotificationStudentToTeacher(Base):
     homework_try_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("homework_tries.id"))
     homework_try: Mapped[Optional["HomeworkTry"]] = relationship("HomeworkTry", uselist=False)
 
+    # Самостоятельная тренировка Quizlet или повтор уже выполненного задания Quizlet.
+    quizlet_session_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("quizlet_sessions.id", name="fk_notifications_student_to_teacher_quizlet_session_id"))
+    quizlet_session: Mapped[Optional["QuizletSession"]] = relationship("QuizletSession", uselist=False)
+
     creation_datetime: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)   # pylint: disable=not-callable
 
     __mapper_args__ = {'eager_defaults': True}
@@ -516,6 +521,10 @@ class NotificationStudentToTeacher(Base):
         if self.homework_try_id is not None:
             data["type"] = "homework_try"
             data["homework_try_id"] = self.homework_try_id
+
+        if self.quizlet_session_id is not None:
+            data["type"] = "quizlet_session"
+            data["quizlet_session_id"] = self.quizlet_session_id
 
         return data
 

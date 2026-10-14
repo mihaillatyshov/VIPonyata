@@ -1342,6 +1342,7 @@ def end_quizlet_session(user_id: int, session_id: int, _data: QuizletEndSessionR
             quiz_session.elapsed_seconds = int((quiz_session.ended_at - quiz_session.started_at).total_seconds())
 
             viewed_cards_count = quiz_session.correct_answers + quiz_session.incorrect_answers
+            is_assignment_first_result = False
 
             if quiz_session.assignment_id is not None and viewed_cards_count > 0:
                 assignment_id = quiz_session.assignment_id
@@ -1371,6 +1372,11 @@ def end_quizlet_session(user_id: int, session_id: int, _data: QuizletEndSessionR
 
                     session.add(
                         NotificationStudentToTeacher(quizlet_assignment_result_id=assignment_result.id, viewed=False))
+                    is_assignment_first_result = True
+
+            # Самостоятельная тренировка или повтор задания (первый результат задания уже уведомил учителя выше).
+            if viewed_cards_count > 0 and not is_assignment_first_result:
+                session.add(NotificationStudentToTeacher(quizlet_session_id=quiz_session.id, viewed=False))
 
         return quiz_session
 

@@ -56,7 +56,7 @@ class _HistoryItemsBuilder:
         self.students_by_id = students_by_id
 
         notifications = [row.data.__json__() for row in rows if row.kind == "notification"]
-        activity_try_ids, homework_try_ids, _ = _collect_notification_related_ids(notifications)
+        activity_try_ids, homework_try_ids, _, _ = _collect_notification_related_ids(notifications)
         self.notifications_by_id = {item["id"]: item for item in notifications}
         self.activity_tries = DBQN.get_activity_tries_details(activity_try_ids)
         self.homework_tries = DBQN.get_homework_tries_details(homework_try_ids)

@@ -19,11 +19,21 @@ import TeacherActivityCard from "./TeacherActivityCard";
 //     }
 // };
 
+type TQuizletNotification = Extract<
+    TTeacherNotificationWithActivity,
+    { type: "quizlet_assignment_result" | "quizlet_session" }
+>;
+
+const isQuizletNotification = (item: TTeacherNotificationWithActivity): item is TQuizletNotification => {
+    return item.type === "quizlet_assignment_result" || item.type === "quizlet_session";
+};
+
 const hasLink = (item: TTeacherNotificationWithActivity): boolean => {
     switch (item.type) {
         case "drilling_try":
         case "hieroglyph_try":
         case "quizlet_assignment_result":
+        case "quizlet_session":
             return false;
         case "homework_try":
             return true;
@@ -44,6 +54,7 @@ const getLinkByName = (item: TTeacherNotificationWithActivity) => {
         case "final_boss_try":
             return "final_boss/try";
         case "quizlet_assignment_result":
+        case "quizlet_session":
             return "";
         case "homework_try":
             return "tasks/tries";
@@ -65,7 +76,7 @@ const getMistakesCount = (item: TTeacherNotificationWithActivity): number | null
 };
 
 const getCorrectAnswersCount = (item: TTeacherNotificationWithActivity): number | null => {
-    if (item.type !== "quizlet_assignment_result" && item.type !== "homework_try") {
+    if (!isQuizletNotification(item) && item.type !== "homework_try") {
         return null;
     }
 
@@ -74,7 +85,7 @@ const getCorrectAnswersCount = (item: TTeacherNotificationWithActivity): number 
 };
 
 const getSkippedWordsCount = (item: TTeacherNotificationWithActivity): number | null => {
-    if (item.type !== "quizlet_assignment_result") {
+    if (!isQuizletNotification(item)) {
         return null;
     }
 
@@ -83,7 +94,7 @@ const getSkippedWordsCount = (item: TTeacherNotificationWithActivity): number | 
 };
 
 const getElapsedSeconds = (item: TTeacherNotificationWithActivity): number | null => {
-    if (item.type !== "quizlet_assignment_result" && item.type !== "homework_try") {
+    if (!isQuizletNotification(item) && item.type !== "homework_try") {
         return null;
     }
 
@@ -103,7 +114,7 @@ const getStartDateTime = (item: TTeacherNotificationWithActivity) => {
 
 /** Заголовок карточки; у задания Quizlet — с числом выданных слов: «Повторение N4 (24)». */
 const getNotificationTitle = (item: TTeacherNotificationWithActivity): string => {
-    if (item.type === "quizlet_assignment_result" && item.activity_try.total_words !== undefined) {
+    if (isQuizletNotification(item) && item.activity_try.total_words !== undefined) {
         return `${item.lesson.name} (${item.activity_try.total_words})`;
     }
 
@@ -141,7 +152,7 @@ const getNotificationMetrics = (item: TTeacherNotificationWithActivity): Teacher
     }
 
     // Первая строка — когда и сколько длилось, вторая — результат.
-    if (item.type === "quizlet_assignment_result" || item.type === "homework_try") {
+    if (isQuizletNotification(item) || item.type === "homework_try") {
         metrics.push(
             {
                 iconClass: "bi-stopwatch",
@@ -160,7 +171,7 @@ const getNotificationMetrics = (item: TTeacherNotificationWithActivity): Teacher
             },
         );
 
-        if (item.type === "quizlet_assignment_result") {
+        if (isQuizletNotification(item)) {
             metrics.push({
                 iconClass: "bi-dash-circle",
                 label: "Пропущено",
@@ -255,12 +266,13 @@ const ItemContent = ({ item, closeModal }: ItemContentProps) => {
     }
 
     const activityItem = item;
-    const typeMeta =
-        TEACHER_ACTIVITY_TYPE_META[activityItem.type === "quizlet_assignment_result" ? "quizlet" : activityItem.type];
-    const quizletTags =
-        activityItem.type === "quizlet_assignment_result"
-            ? getQuizletTags(activityItem.activity_try.quiz_type, activityItem.activity_try.translation_direction)
-            : [];
+    const typeMeta = TEACHER_ACTIVITY_TYPE_META[isQuizletNotification(activityItem) ? "quizlet" : activityItem.type];
+    const quizletTags = isQuizletNotification(activityItem)
+        ? getQuizletTags(activityItem.activity_try.quiz_type, activityItem.activity_try.translation_direction)
+        : [];
+    if (activityItem.type === "quizlet_session") {
+        quizletTags.unshift(activityItem.activity_try.is_assignment_retry ? "Повтор задания" : "Самостоятельно");
+    }
 
     return (
         <TeacherActivityCard

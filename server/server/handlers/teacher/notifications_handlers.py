@@ -7,7 +7,7 @@ from flask import request
 import server.queries.NotificationsDBqueries as DBQN
 import server.queries.TeacherDBqueries as DBQT
 from server.handlers.common.pagination import notification_cursor, paginate_by_cursor
-from server.models.db_models import NotificationStudentToTeacher
+from server.models.db_models import NotificationStudentToTeacher, QuizletSession
 from server.models.notifications import NotificationsMarkAsReadReq, NotificationsPageReq
 from server.models.utils import validate_query_args, validate_req
 
@@ -37,34 +37,84 @@ def _get_homework_try_metrics(homework_try) -> dict[str, int | None]:
     }
 
 
-def _collect_notification_related_ids(items: list[dict[str, Any]]) -> tuple[dict[str, set[int]], set[int], set[int]]:
-    """id попыток по типам активностей, id попыток домашних работ и id результатов Quizlet из уведомлений."""
+def _collect_notification_related_ids(
+        items: list[dict[str, Any]]) -> tuple[dict[str, set[int]], set[int], set[int], set[int]]:
+    """id попыток по типам активностей, id попыток домашних работ, id результатов заданий Quizlet
+    и id самостоятельных сессий Quizlet из уведомлений."""
     activity_try_ids: dict[str, set[int]] = {}
     homework_try_ids: set[int] = set()
     quizlet_result_ids: set[int] = set()
+    quizlet_session_ids: set[int] = set()
 
     for item in items:
         if item["type"] == "quizlet_assignment_result":
             quizlet_result_ids.add(item["assignment_result_id"])
+        elif item["type"] == "quizlet_session":
+            quizlet_session_ids.add(item["quizlet_session_id"])
         elif item["type"] == "homework_try":
             if isinstance(item.get("homework_try_id"), int):
                 homework_try_ids.add(item["homework_try_id"])
         elif item["type"] is not None:
             activity_try_ids.setdefault(item["type"], set()).add(item["activity_try_id"])
 
-    return activity_try_ids, homework_try_ids, quizlet_result_ids
+    return activity_try_ids, homework_try_ids, quizlet_result_ids, quizlet_session_ids
+
+
+def _get_quizlet_session_title(quizlet_session: QuizletSession, assignment_titles: dict[int, str],
+                               topic_titles: dict[int, list[str]]) -> str:
+    if quizlet_session.assignment_id is not None and quizlet_session.assignment_id in assignment_titles:
+        return assignment_titles[quizlet_session.assignment_id]
+
+    topics = topic_titles.get(quizlet_session.id, [])
+    return ", ".join(topics) if len(topics) > 0 else "Самостоятельная тренировка"
 
 
 def _build_notifications(notifications: Sequence[NotificationStudentToTeacher]) -> list[dict[str, Any]]:
     items = [notification.__json__() for notification in notifications]
 
-    activity_try_ids, homework_try_ids, quizlet_result_ids = _collect_notification_related_ids(items)
+    activity_try_ids, homework_try_ids, quizlet_result_ids, quizlet_session_ids = _collect_notification_related_ids(
+        items)
     activity_tries = DBQN.get_activity_tries_details(activity_try_ids)
     homework_tries = DBQN.get_homework_tries_details(homework_try_ids)
     quizlet_results = DBQN.get_quizlet_assignment_results_details(quizlet_result_ids)
+    quizlet_sessions = DBQN.get_quizlet_sessions_details(quizlet_session_ids)
+    quizlet_session_assignment_titles = DBQN.get_quizlet_assignment_titles({
+        quizlet_session.assignment_id
+        for quizlet_session, _ in quizlet_sessions.values()
+        if quizlet_session.assignment_id is not None
+    })
+    quizlet_session_topic_titles = DBQN.get_quizlet_sessions_topic_titles(
+        [quizlet_session for quizlet_session, _ in quizlet_sessions.values()])
 
     result: list[dict[str, Any]] = []
     for item_data in items:
+        if item_data["type"] == "quizlet_session":
+            quizlet_session_data = quizlet_sessions.get(item_data["quizlet_session_id"])
+            if quizlet_session_data is None:
+                continue
+
+            quizlet_session, student = quizlet_session_data
+            item_data["activity_try"] = {
+                "id": quizlet_session.id,
+                "start_datetime": quizlet_session.started_at,
+                "end_datetime": quizlet_session.ended_at,
+                "mistakes_count": quizlet_session.incorrect_answers,
+                "correct_answers": quizlet_session.correct_answers,
+                "skipped_words": quizlet_session.skipped_words,
+                "elapsed_seconds": quizlet_session.elapsed_seconds,
+                "total_words": quizlet_session.total_words,
+                "quiz_type": quizlet_session.quiz_type,
+                "translation_direction": quizlet_session.translation_direction,
+                "is_assignment_retry": quizlet_session.assignment_id is not None,
+            }
+            item_data["activity_try_id"] = quizlet_session.id
+            title = _get_quizlet_session_title(quizlet_session, quizlet_session_assignment_titles,
+                                               quizlet_session_topic_titles)
+            item_data["lesson"] = {"id": quizlet_session.assignment_id or quizlet_session.id, "name": title}
+            item_data["user"] = student.__json__()
+            result.append(item_data)
+            continue
+
         if item_data["type"] == "quizlet_assignment_result":
             quizlet_result = quizlet_results.get(item_data["assignment_result_id"])
             if quizlet_result is None:
